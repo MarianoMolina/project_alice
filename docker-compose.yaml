@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./alice_frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${FRONTEND_PORT}:3000"
+    depends_on:
+      - backend
+      - workflow
+    volumes:
+      - ./alice_frontend:/app:delegated
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "${BACKEND_PORT}:3000"
+    depends_on:
+      - mongo
+    volumes:
+      - ./.env:/app/.env
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "26017:27017" 
+    volumes:
+      - mongo_data:/data/db
+
+  workflow:
+    build:
+      context: ./workflow_logic
+    ports:
+      - "${WORKFLOW_PORT}:8000"
+    volumes:
+      - .:/app
+      - ${MODEL_FOLDER}:/models
+    depends_on:
+      - backend
+    environment:
+      - PYTHONPATH=/app
+      - MODEL_FOLDER=/models
+    extra_hosts:
+      - "localhost:host-gateway"
+      
+volumes:
+  mongo_data:

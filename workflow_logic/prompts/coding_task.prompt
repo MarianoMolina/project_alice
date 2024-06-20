@@ -1,0 +1,27 @@
+{% set retries = retries or 0 %}
+
+Task Prompt:
+{{ task_prompt }}
+
+Please generate a code block to solve the task. Ensure the code is efficient and follows best practices.
+
+- If you need to collect information, use the code to output the info you need.
+- When performing tasks with code, include the appropriate code block type (e.g., ```python for Python code, ```sh for shell scripts).
+- Solve the task step by step if needed, explaining your plan if a plan is not provided.
+
+Remember:
+- The user cannot provide feedback or modify your code.
+- Do not suggest incomplete code that requires modifications.
+- Use the 'print' function for the output when relevant.
+
+{% if retries > 0 %}You have attempted to solve this task already but encountered some issues. 
+Current number of attempts: {{ retries }}
+Last Code Iteration:
+```{{ script_type }}
+{{ previous_code }}
+Unit Test Feedback:
+{{ unit_test_feedback }}{% endif %}
+
+If the code execution is successful and the output is correct, close the task by replying "TERMINATE". If there is an error, fix it and output the code again.
+
+Reply "TERMINATE" when everything is done.

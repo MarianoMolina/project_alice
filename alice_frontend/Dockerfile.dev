@@ -1,0 +1,23 @@
+# Use the official Node.js image as a base image
+FROM node:16
+
+# Set the working directory
+WORKDIR /app
+
+# Copy package.json and package-lock.json
+COPY package*.json ./
+
+# Install dependencies with the --legacy-peer-deps flag
+RUN npm install --legacy-peer-deps
+
+# Add `/app/node_modules/.bin` to $PATH
+ENV PATH /app/node_modules/.bin:$PATH
+
+# Copy the rest of the application code
+COPY . .
+
+# Set the environment variable for development mode
+ENV NODE_ENV=development
+
+# Start the development server
+CMD ["npm", "start"]

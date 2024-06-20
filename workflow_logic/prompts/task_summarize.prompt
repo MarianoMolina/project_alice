@@ -1,0 +1,17 @@
+{%- if task_content is defined %}
+Assess the outcome of the task based on the content below:
+{{ task_content }}
+{% else %}
+Assess the outcome of the task based on the chat above. 
+{%- endif %}
+
+{%- if task_description is defined %}
+Task: 
+{{ task_description }}
+{%- endif %}
+
+{%- if task_instructions is defined %}
+Additional Instructions:
+{{ task_instructions }}
+{%- endif %}
+{% if result_code_map is defined %} To asses the result of this task, here are the result_code options: {{ result_code_map }}. {{ result_code_clarifications }}{% endif %}

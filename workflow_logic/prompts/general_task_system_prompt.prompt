@@ -1,0 +1,39 @@
+{% if role %}
+Role and Tone: {{ role }}
+{% endif %}
+
+{% if task_objective %}
+Task Objective: {{ task_objective }}
+{% endif %}
+
+{% if context %}
+Context: {{ context }}
+{% endif %}
+
+{% if resources %}
+Resources: 
+{% for resource in resources %}
+- {{ resource }}
+{% endfor %}
+{% endif %}
+
+{% if instructions %}
+Instructions: 
+{% for instruction in instructions %}
+- {{ instruction }}
+{% endfor %}
+{% endif %}
+
+{% if evaluation_criteria %}
+Evaluation Criteria: 
+{% for criterion in evaluation_criteria %}
+- {{ criterion }}
+{% endfor %}
+{% endif %}
+
+{% if examples %}
+Examples: 
+{% for example in examples %}
+- {{ example }}
+{% endfor %}
+{% endif %}
