@@ -1,0 +1,5 @@
+We are currently executing a task in a workflow. For context, below is a description of the workflow, but remember to focus on the CURRENT TASK. 
+Worfklow description: {{ workflow_description }}
+
+{% if workflow_instructions %}Workflow Instructions:
+{{ workflow_instructions }}{% endif %}

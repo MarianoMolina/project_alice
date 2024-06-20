@@ -1,0 +1,24 @@
+{% set retries = retries or 0 %}
+
+Task Prompt:
+{{ task_prompt }}
+
+Generated Code:
+```{{ script_type }}
+{{ generated_code }}
+
+Please generate a unit test to validate the functionality of the provided code. 
+- Use appropriate testing frameworks such as unittest or pytest for Python.
+- Ensure the unit test covers relevant edge cases and validates the correctness of the code.
+
+Remember:
+
+- Indicate the script type in the code block by using 'python' or 'sh'.
+- Do not suggest incomplete code that requires modifications.
+- Use the 'print' function for the output when relevant.
+
+{% if retries > 0 %}Current number of retries: {{ retries }}{% endif %}
+
+If the unit test passes, close the task by replying "TERMINATE". If there is an error, fix it and output the code again. If the unit test fails or assertions do not pass, provide feedback on the failing assertions and return the task.
+
+Reply "TERMINATE" when everything is done.

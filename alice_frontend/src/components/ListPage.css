@@ -1,0 +1,24 @@
+/* ListPage.css */
+
+.container {
+    margin-top: 64px;
+    margin-bottom: 16px;
+}
+
+.title-button-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.table-container {
+    margin-top: 16px;
+}
+
+.circular-progress-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
