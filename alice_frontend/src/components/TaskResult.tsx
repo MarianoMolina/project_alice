@@ -1,21 +1,6 @@
 import React from 'react';
 import { Box, Typography, Paper } from '@mui/material';
-
-interface TaskResponse {
-  task_name: string;
-  task_description: string;
-  status: 'pending' | 'complete' | 'failed';
-  result_code: number;
-  task_outputs?: Record<string, any>;
-  result_diagnostic?: string;
-  task_content?: Record<string, any>;
-  usage_metrics?: Record<string, any>;
-  execution_history?: Record<string, any>[];
-}
-
-interface TaskResultProps {
-  taskResponse: TaskResponse;
-}
+import { TaskResultProps } from '../utils/types';
 
 const TaskResult: React.FC<TaskResultProps> = ({ taskResponse }) => {
   return (
@@ -44,14 +29,6 @@ const TaskResult: React.FC<TaskResultProps> = ({ taskResponse }) => {
             Diagnostic:
           </Typography>
           <Typography variant="body2">{taskResponse.result_diagnostic}</Typography>
-        </Box>
-      )}
-      {taskResponse.task_content && (
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="body2" color="textSecondary">
-            Task Content:
-          </Typography>
-          <Typography variant="body2">{JSON.stringify(taskResponse.task_content)}</Typography>
         </Box>
       )}
       {taskResponse.usage_metrics && (

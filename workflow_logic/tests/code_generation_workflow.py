@@ -77,7 +77,7 @@ coding_tasks = [
 ]
 
 if __name__ == "__main__":
-    from workflow_logic.libraries import Libraries
+    from workflow_logic.api.libraries import Libraries
     from workflow_logic.util.utils import sanitize_and_limit_prompt, save_results_to_file
     libraries = Libraries()
     code_task = libraries.task_library.get_task("coding_workflow")

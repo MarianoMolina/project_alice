@@ -1,64 +1,72 @@
 const express = require('express');
 const router = express.Router();
 const Task = require('../models/Task');
+const auth = require('../middleware/auth');
 
 // Create a new Task
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
-    const task = new Task(req.body);
+    const task = new Task({
+      ...req.body,
+      created_by: req.user.userId,
+      updated_by: req.user.userId
+    });
     await task.save();
-    res.status(201).send(task);
+    res.status(201).json(task);
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).json({ message: error.message });
   }
 });
 
 // Get all Tasks
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
     const tasks = await Task.find();
-    res.send(tasks);
+    res.status(200).json(tasks);
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).json({ message: error.message });
   }
 });
 
-// Get an Task by ID
-router.get('/:id', async (req, res) => {
+// Get a Task by ID
+router.get('/:id', auth, async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);
     if (!task) {
-      return res.status(404).send();
+      return res.status(404).json({ message: 'Task not found' });
     }
-    res.send(task);
+    res.status(200).json(task);
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).json({ message: error.message });
   }
 });
 
-// Update an Task by ID
-router.patch('/:id', async (req, res) => {
+// Update a Task by ID
+router.patch('/:id', auth, async (req, res) => {
   try {
-    const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const task = await Task.findById(req.params.id);
     if (!task) {
-      return res.status(404).send();
+      return res.status(404).json({ message: 'Task not found' });
     }
-    res.send(task);
+    Object.assign(task, req.body, { updated_by: req.user.userId });
+    await task.save();
+    await task;
+    res.status(200).json(task);
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).json({ message: error.message });
   }
 });
 
-// Delete an Task by ID
-router.delete('/:id', async (req, res) => {
+// Delete a Task by ID
+router.delete('/:id', auth, async (req, res) => {
   try {
     const task = await Task.findByIdAndDelete(req.params.id);
     if (!task) {
-      return res.status(404).send();
+      return res.status(404).json({ message: 'Task not found' });
     }
-    res.send(task);
+    res.status(200).json({ message: 'Task deleted successfully' });
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).json({ message: error.message });
   }
 });
 

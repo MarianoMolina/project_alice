@@ -1,5 +1,4 @@
-from .libraries import Libraries, DBLibraries
 from .api import api_app
-from .db import BackendAPI, available_task_types
+from .db import BackendAPI, available_task_types, ContainerAPI
 
-__all__ = ['Libraries', 'DBLibraries', 'api_app', 'BackendAPI', 'available_task_types']
+__all__ = ['api_app', 'BackendAPI', 'available_task_types', 'ContainerAPI']

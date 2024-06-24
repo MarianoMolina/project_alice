@@ -1,31 +1,34 @@
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, KeyboardEvent } from 'react';
 import { Box, Button, TextField } from '@mui/material';
-
-interface MessageType {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  created_by: 'user' | 'llm';
-  step?: string;
-  assistant_name?: string;
-  context?: Record<string, any>;
-  type?: 'text' | 'image' | 'video' | 'audio' | 'file';
-  request_type?: string;
-}
+import { MessageType } from '../utils/types';
 
 interface ChatInputProps {
   newMessage: string;
   setNewMessage: (message: string) => void;
-  handleSendMessage: () => void;
+  handleSendMessage: (message: string) => void;  // Update the type to accept a message
   lastMessage?: MessageType;
+  chatSelected: boolean;  // Add this prop
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ newMessage, setNewMessage, handleSendMessage, lastMessage }) => {
+const ChatInput: React.FC<ChatInputProps> = ({ newMessage, setNewMessage, handleSendMessage, lastMessage, chatSelected }) => {
   const handleAddFile = () => {
     alert('Add file button clicked');
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
+  };
+
+  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && chatSelected) {
+      handleSendMessage(newMessage);
+      setNewMessage(''); // Clear the input box
+    }
+  };
+
+  const handleClickSend = () => {
+    handleSendMessage(newMessage);
+    setNewMessage(''); // Clear the input box
   };
 
   return (
@@ -36,13 +39,15 @@ const ChatInput: React.FC<ChatInputProps> = ({ newMessage, setNewMessage, handle
           fullWidth
           value={newMessage}
           onChange={handleChange}
+          onKeyPress={handleKeyPress}
+          disabled={!chatSelected}  // Disable input if no chat is selected
         />
-        <Button variant="contained" sx={{ ml: 2 }} onClick={handleSendMessage}>
+        <Button variant="contained" sx={{ ml: 2 }} onClick={handleClickSend} disabled={!chatSelected}>
           Send
         </Button>
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Button variant="outlined" onClick={handleAddFile}>
+        <Button variant="outlined" onClick={handleAddFile} disabled={!chatSelected}>
           Add File
         </Button>
         {lastMessage && lastMessage.request_type === 'approval' && (

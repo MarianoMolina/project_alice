@@ -15,9 +15,10 @@ COPY . .
 
 ENV PYTHONPATH=/app
 
+RUN apt-get update && apt-get install -y iputils-ping
+
 # Make port 80 available to the world outside this container
 EXPOSE 8000
 
 # Command to run the Python app
 CMD ["python", "workflow_logic/main.py"]
-# CMD ["uvicorn", "app/api:api_app", "--host", "0.0.0.0", "--port", "8000"]

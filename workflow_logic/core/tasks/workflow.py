@@ -29,6 +29,7 @@ class Workflow(AliceTask):
         attempts = 1
         diagnostic = "Workflow completed successfully"
         status = "complete"
+        task_inputs = kwargs.copy()
         while current_task_name:
             if current_task_name not in self.tasks:
                 raise ValueError(f"Task {current_task_name} not found in the workflow.")
@@ -39,10 +40,6 @@ class Workflow(AliceTask):
 
             # Flatten outputs and messages into kwargs
             kwargs[f'outputs_{current_task_name}'] = str(task_result.task_outputs.__str__()) if task_result.task_outputs else None
-            messages = task_result.task_content.content if task_result.task_content else []
-            if not isinstance(messages, list):
-                messages = [messages]
-            kwargs[f'messages_{current_task_name}'] = messages
 
             current_task_name, try_bool = self.select_next_task(task_result, tasks_performed)
             if try_bool:
@@ -60,8 +57,8 @@ class Workflow(AliceTask):
             status=status,
             result_code=1 if status == "failed" else 0,
             task_outputs=WorkflowOutput(content=tasks_performed),
+            task_inputs=task_inputs,
             result_diagnostic=diagnostic,
-            task_content=WorkflowOutput(content=tasks_performed),
             execution_history=kwargs.get("execution_history", [])
         )
     

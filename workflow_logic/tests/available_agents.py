@@ -8,16 +8,6 @@ hr_drafter_agent = {
     "system_message": "hr_drafter_agent",
     "autogen_class": "ConversableAgent",
 }
-# hr_chat_manager_agent = {
-#     "name": "hr_chat_manager_agent",
-#     "system_message": "chat_summarizer",
-#     "autogen_class": "GroupChatManager",
-#     "agents_in_group": ["hr_drafter_agent", "hr_reviewer_agent", "user_proxy_agent"],
-#     "speaker_selection": {
-#         "speaker_sequence": ["hr_drafter_agent", "hr_reviewer_agent"],
-#         "termination_condition": lambda x: "no further improvements" in x.lower() or "TERMINATE" in x
-#     }
-# }
 coding_planner_agent = {
     "name": "coding_planner_agent",
     "system_message": "coding_planner_agent",
@@ -35,7 +25,6 @@ coding_agent = {
     #         "api_key": "lm-studio", 
     #         "base_url": "http://localhost:1234/v1",
     #     }],
-    #     "cache_seed": False,
     #     "temperature": 0.3,
     #     "timeout": 120,
     # }

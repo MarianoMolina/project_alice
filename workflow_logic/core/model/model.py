@@ -4,8 +4,8 @@ from typing import Dict, List, Literal, Optional
 from pydantic import BaseModel, Field, model_validator, ConfigDict, ValidationError
 from guidance.models import LlamaCpp, OpenAI, Anthropic, Model as GuidanceModel
 from guidance.chat import ChatTemplate
-from workflow_logic.util.const import const_model_definitions, model_formats, active_vision_models, active_models, LOCAL_LLM_API_URL
-from workflow_logic.util.utils import autogen_default_llm_config, model_path_from_file
+from workflow_logic.util.const import const_model_definitions, model_formats, active_vision_models, active_models, LOCAL_LLM_API_URL, HOST
+from workflow_logic.util.utils import autogen_default_llm_config, model_path_from_file, LLMConfig
 
 class AliceModel(BaseModel):
     short_name: str = Field(..., title="Short Name", description="The short name of the model.")
@@ -71,7 +71,7 @@ class AliceModel(BaseModel):
             return self.get_autogen_model_config_remote()
         
     @property
-    def autogen_llm_config(self) -> dict:
+    def autogen_llm_config(self) -> LLMConfig:
         return autogen_default_llm_config(self.autogen_model_config)
     
     @property
@@ -139,7 +139,7 @@ class AliceModel(BaseModel):
         return [
             {
                 "model": self.model_file,
-                "base_url": f"http://localhost:{self.port}/v1",
+                "base_url": f"http://{HOST}:{self.port}/v1",
                 "api_key": self.api_key
             }
         ]

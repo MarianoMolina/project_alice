@@ -11,16 +11,17 @@ from workflow_logic.core.tasks.task import AliceTask
 
 class APITask(AliceTask):
     def run(self, **kwargs) -> TaskResponse:
+        task_inputs = kwargs.copy()
         try:
-            task_outputs, detailed_results = self.generate_api_response(**kwargs)
+            task_outputs = self.generate_api_response(**kwargs)
             return TaskResponse(
                 task_name=self.task_name,
                 task_description=self.task_description,
                 status="complete",
                 result_code=0,
                 task_outputs=task_outputs,
+                task_inputs=task_inputs,
                 result_diagnostic="",
-                task_content=detailed_results,
                 execution_history=kwargs.get("execution_history", [])
             )
         except Exception as e:
@@ -28,13 +29,14 @@ class APITask(AliceTask):
                 task_name=self.task_name,
                 task_description=self.task_description,
                 status="failed",
+                task_inputs=task_inputs,
                 result_code=1,
                 result_diagnostic=str(e),
                 execution_history=kwargs.get("execution_history", [])
             )
         
     @abstractmethod
-    def generate_api_response(self, **kwargs) -> Tuple[SearchOutput, SearchOutput]:
+    def generate_api_response(self, **kwargs) -> SearchOutput:
         """Generates the API response for the task, in a tuple of the output and the content."""
         ...
 
@@ -91,7 +93,7 @@ class RedditSearchTask(APITask):
     task_description: str = "Performs a Reddit search and retrieves results"
     input_variables: FunctionParameters = Field(reddit_search_parameters, description="This task requires a prompt input, and optional inputs such as sort, time_filter, subreddit, and limit. Default is 'hot', 'week', 'all', and 10.")
       
-    def generate_api_response(self, prompt: str, sort: str = "hot", time_filter: str = "week", subreddit: str = "all", limit: int = 10, **kwargs) -> Tuple[SearchOutput, SearchOutput]:
+    def generate_api_response(self, prompt: str, sort: str = "hot", time_filter: str = "week", subreddit: str = "all", limit: int = 10, **kwargs) -> SearchOutput:
         user_agent = "Alice_Assistant"
         reddit = praw.Reddit(
             client_id=REDDIT_CLIENT_ID,
@@ -109,7 +111,7 @@ class RedditSearchTask(APITask):
             metadata={key: getattr(submission, key) for key in vars(submission) if key not in {"title", "url", "selftext"}}
         ) for submission in submissions]
         task_outputs = SearchOutput(content=search_result_list)
-        return task_outputs, task_outputs
+        return task_outputs
         
 class APISearchTask(APITask):
     input_variables: FunctionParameters = Field(search_task_parameters, description="This task requires a prompt input and optionally a max_results int for the number of results to return, default is 10.")
@@ -118,7 +120,7 @@ class WikipediaSearchTask(APISearchTask):
     task_name: str = "wikipedia_search"
     task_description: str = "Performs a Wikipedia search and retrieves results"
     
-    def generate_api_response(self, prompt: str, max_results: int = 10, **kwargs) -> Tuple[SearchOutput, SearchOutput]:
+    def generate_api_response(self, prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
         search_results = wikipedia.search(prompt, results=max_results)
         detailed_results = [wikipedia.page(title=result, auto_suggest=False) for result in search_results]
         task_outputs = SearchOutput(content=[
@@ -129,19 +131,19 @@ class WikipediaSearchTask(APISearchTask):
                 metadata={key: value for key, value in result.__dict__.items() if key not in {"title", "url", "summary"}}
             ) for result in detailed_results
         ])
-        return task_outputs, task_outputs
+        return task_outputs
 
 class GoogleSearchTask(APISearchTask):
     task_name: str = "google_search"
     task_description: str = "Performs a Google search and retrieves results"
 
-    def generate_api_response(self, prompt: str, max_results: int = 10, **kwargs) -> Tuple[SearchOutput, SearchOutput]:
+    def generate_api_response(self, prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
         api_key = GOOGLE_API_KEY
         cse_id = GOOGLE_CSE_ID
         service = build("customsearch", "v1", developerKey=api_key)
         res = service.cse().list(q=prompt, cx=cse_id, num=max_results).execute()
         results = res.get('items', [])
-        task_content = SearchOutput(content=[
+        task_outputs = SearchOutput(content=[
             SearchResult(
                 title=result['title'],
                 url=result['link'],
@@ -149,13 +151,13 @@ class GoogleSearchTask(APISearchTask):
                 metadata={key: value for key, value in result.items() if key not in {"title", "link", "snippet"}}
             ) for result in results
         ])
-        return task_content, task_content
+        return task_outputs
 
 class ExaSearchTask(APISearchTask):
     task_name: str = "exa_search"
     task_description: str = "Performs an Exa search and retrieves results"
         
-    def generate_api_response(self, prompt: str, max_results: int = 10, **kwargs) -> Tuple[SearchOutput, SearchOutput]:
+    def generate_api_response(self, prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
         exa_api = Exa(api_key=EXA_API_KEY)
         exa_search = exa_api.search(query=prompt, num_results=max_results)
         task_outputs = SearchOutput(content=[
@@ -166,13 +168,13 @@ class ExaSearchTask(APISearchTask):
                 metadata={key: value for key, value in result.items() if key not in {"title", "url", "snippet"}}
             ) for result in exa_search.results
         ])
-        return task_outputs, task_outputs
+        return task_outputs
     
 class ArxivSearchTask(APISearchTask):
     task_name: str = "arxiv_search"
     task_description: str = "Performs an Arxiv search and retrieves results"
 
-    def generate_api_response(self, prompt: str, max_results: int = 10, **kwargs) -> Tuple[SearchOutput, SearchOutput]:
+    def generate_api_response(self, prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
         client = arxiv.Client(page_size=20)
         search = arxiv.Search(
             query=prompt, 
@@ -187,4 +189,4 @@ class ArxivSearchTask(APISearchTask):
                 metadata={key: getattr(result, key) for key in vars(result) if key not in {"title", "pdf_url", "summary"}}
             ) for result in results
         ])
-        return task_outputs, task_outputs
+        return task_outputs

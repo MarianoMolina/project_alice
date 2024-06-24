@@ -6,7 +6,7 @@ services:
       context: ./alice_frontend
       dockerfile: Dockerfile.dev
     ports:
-      - "${FRONTEND_PORT}:3000"
+      - "${FRONTEND_PORT}:${FRONTEND_PORT_DOCKER}"
     depends_on:
       - backend
       - workflow
@@ -22,7 +22,7 @@ services:
     build:
       context: ./backend
     ports:
-      - "${BACKEND_PORT}:3000"
+      - "${BACKEND_PORT}:${BACKEND_PORT_DOCKER}"
     depends_on:
       - mongo
     volumes:
@@ -39,7 +39,7 @@ services:
     build:
       context: ./workflow_logic
     ports:
-      - "${WORKFLOW_PORT}:8000"
+      - "${WORKFLOW_PORT}:${WORKFLOW_PORT_DOCKER}"
     volumes:
       - .:/app
       - ${MODEL_FOLDER}:/models
@@ -48,8 +48,8 @@ services:
     environment:
       - PYTHONPATH=/app
       - MODEL_FOLDER=/models
+      - HOST=host.docker.internal
     extra_hosts:
-      - "localhost:host-gateway"
-      
+      - "host.docker.internal:host-gateway"
 volumes:
   mongo_data:

@@ -10,7 +10,8 @@ const UserRoutes = require('./routes/users');
 const collectionsRoutes = require('./routes/collections'); 
 const promptRoutes = require('./routes/prompts');
 const taskResultRouter = require('./routes/taskResult');
-const cors = require('cors');
+const chatRoutes = require('./routes/chats');
+const corsMiddlewares = require('./middleware/corsConfig');
 
 const app = express();
 const port = process.env.BACKEND_PORT || 3000;
@@ -25,26 +26,36 @@ mongoose.connect(process.env.MONGODB_URI || "mongodb://mongo/alice_database", {
 }).catch(err => {
   console.error('Failed to connect to MongoDB', err);
 });
+mongoose.set('debug', true);
 
-// Make sure CORS is properly configured
-const corsOptions = {
-  origin: `http://localhost:${process.env.FRONTEND_PORT}`, // Adjust this to match your frontend URL
-  optionsSuccessStatus: 200,
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  allowedHeaders: ['Content-Type', 'Authorization']
-};
+// // Logging middleware
+// app.use((req, res, next) => {
+//   console.log(`Incoming request: ${req.method} ${req.url}`);
+//   // console.log('Request headers:', req.headers);
+//   res.on('finish', () => {
+//     console.log(`Response status: ${res.statusCode}`);
+//     // console.log('Response headers:', res.getHeaders());
+//   });
+//   next();
+// });
 
-app.use(cors(corsOptions));
+// Apply the CORS middlewares
+app.use(corsMiddlewares);
+
+// Explicitly handle preflight requests
+app.options('*', corsMiddlewares);
 
 app.use(bodyParser.json());
 
-app.use('/api/models', ModelRoutes);
 app.use('/api/agents', AgentRoutes);
+app.use('/api/chats', chatRoutes);
+app.use('/api/collections', collectionsRoutes); 
+app.use('/api/models', ModelRoutes);
+app.use('/api/prompts', promptRoutes);
+app.use('/api/taskresults', taskResultRouter);
 app.use('/api/tasks', TaskRoutes);
 app.use('/api/users', UserRoutes);
-app.use('/api/collections', collectionsRoutes); 
-app.use('/api/prompts', promptRoutes);
-app.use('/api/taskResults', taskResultRouter);
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

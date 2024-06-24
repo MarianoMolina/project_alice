@@ -1,11 +1,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import Message from './Message';
-import { MessageType } from '../utils/types';
-
-interface ChatProps {
-  messages: MessageType[];
-}
+import { ChatProps } from '../utils/types';
 
 const Chat: React.FC<ChatProps> = ({ messages }) => {
   return (
@@ -19,7 +15,9 @@ const Chat: React.FC<ChatProps> = ({ messages }) => {
       }}
     >
       {messages.map((message, index) => (
-        <Message key={index} message={message} />
+        message && message.content ? 
+          <Message key={index} message={message} /> : 
+          null
       ))}
     </Box>
   );

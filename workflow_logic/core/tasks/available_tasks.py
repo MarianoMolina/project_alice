@@ -69,113 +69,113 @@ cv_cv_generation_parameters.properties["outputs_cv_cover_letter_task"] = Paramet
 cv_cv_generation_parameters.required.append("outputs_cv_cover_letter_task")
 
 
-cv_clarifications_task = CVGenerationTask(
-    task_name="cv_clarifications_task",
-    task_description="Generate clarifying questions for the CV generation task.",
-    input_variables=cv_clarifications_parameters,
-    prompts_to_add={
-        "task_description": """## CURRENT TASK: Look at all the available data and take some time to analyze it. Create a list of (up to 5) clarifying questions to ask the user in order to ensure we can create an amazing CV for them.""",
-    }
-)
-user_clarifications_task = PromptAgentTask(
-    task_name="user_clarifications_task",
-    task_description="Asks the user to provide clarifications based on the agent's questions.",
-    input_variables=user_clarifications_parameters,
-    agent_name="user_input_agent",
-    templates={"task_template": "user_clarifications"},
-    human_input=True,
-)
-cv_brainstorming_task = CVGenerationTask(
-    task_name="cv_brainstorming_task",
-    task_description="Brainstorm ideas for the CV generation task.",
-    input_variables=cv_brainstorming_parameters,
-    prompts_to_add={
-        "task_description": """## CURRENT TASK: Look at all the available data and take some time to analyze it. Look at the job description and the work profile of the user, and consider what areas should be focused, reinforced, and even removed to ensure they have the best chance to get an interview. DO NOT WRITE THE CV YET, just brainstorm ideas.""",
-    }
-)
-cv_cover_letter_task = CVGenerationTask(
-    task_name="cv_cover_letter_task",
-    task_description="Generate a cover letter based on the user's history and the job description.",
-    input_variables=cv_cover_letter_parameters,
-    prompts_to_add={
-        "task_description": """## CURRENT TASK: Based on the job description and the user's history, write a cover letter that highlights the user's strengths and experiences. Remember to make it tailored to the job description and user's history.""",
-    }
-)
-cv_cv_generation_task = CVGenerationTask(
-    task_name="cv_cv_generation_task",
-    task_description="Generate a CV based on the user's history and the job description.",
-    input_variables=cv_cv_generation_parameters,
-    prompts_to_add={
-        "task_description": """## CURRENT TASK: Based on all the information available, write a CV that highlights the user's strengths and experiences. Remember to make it tailored to the job description and user's history.""",
-    }
-)
-cv_generation_workflow = Workflow(
-    task_name="cv_generation_workflow",
-    task_description="Generate a CV and cover letter based on the job description and user history.",
-    input_variables=cv_clarifications_parameters,
-    tasks={
-        "cv_clarifications_task": cv_clarifications_task,
-        "user_clarifications_task": user_clarifications_task,
-        "cv_brainstorming_task": cv_brainstorming_task,
-        "cv_cover_letter_task": cv_cover_letter_task,
-        "cv_cv_generation_task": cv_cv_generation_task,
-    },
-    start_task="cv_clarifications_task",
-    tasks_end_code_routing={
-        "cv_clarifications_task": {
-            0: ("user_clarifications_task", False),
-            1: ("cv_generation_task", True),
-        },
-        "user_clarifications_task": {
-            0: ("cv_brainstorming_task", False),
-            1: ("cv_brainstorming_task", False),
-        },
-        "cv_brainstorming_task": {
-            0: ("cv_cover_letter_task", False),
-            1: ("cv_brainstorming_task", False),
-        },
-        "cv_cover_letter_task": {
-            0: ("cv_cv_generation_task", True),
-            1: ("cv_cover_letter_task", False),
-        },
-        "cv_cv_generation_task": {
-            0: (None, True),
-            1: ("cv_cv_generation_task", False),
-        },
-    },
-    max_attempts=3,
-    recursive=False
-)
-code_generation_parameters = FunctionParameters(
-    type="object",
-    properties={
-        "outputs_plan_workflow": ParameterDefinition(
-            type="string",
-            description="The task plan that describes the code requirements for the task",
-            default=None
-        ),
-        "outputs_generate_code": ParameterDefinition(
-            type="string",
-            description="The code that was generated, passed in case of a recursive call",
-            default=None
-        ),
-        "outputs_execute_code": ParameterDefinition(
-            type="string",
-            description="The code execution output that was generated, passed in case of a recursive call",
-            default=None
-        ),
-        "outputs_generate_unit_tests": ParameterDefinition(
-            type="string",
-            description="The unit test code that was generated, passed in case of a recursive call",
-            default=None
-        ),
-        "outputs_execute_unit_tests": ParameterDefinition(
-            type="string",
-            description="The output of the unit test execution, passed in case of a recursive call",
-            default=None
-        )},
-    required=["outputs_plan_workflow"]
-)
+# cv_clarifications_task = CVGenerationTask(
+#     task_name="cv_clarifications_task",
+#     task_description="Generate clarifying questions for the CV generation task.",
+#     input_variables=cv_clarifications_parameters,
+#     prompts_to_add={
+#         "task_description": """## CURRENT TASK: Look at all the available data and take some time to analyze it. Create a list of (up to 5) clarifying questions to ask the user in order to ensure we can create an amazing CV for them.""",
+#     }
+# )
+# user_clarifications_task = PromptAgentTask(
+#     task_name="user_clarifications_task",
+#     task_description="Asks the user to provide clarifications based on the agent's questions.",
+#     input_variables=user_clarifications_parameters,
+#     agent_name="user_input_agent",
+#     templates={"task_template": "user_clarifications"},
+#     human_input=True,
+# )
+# cv_brainstorming_task = CVGenerationTask(
+#     task_name="cv_brainstorming_task",
+#     task_description="Brainstorm ideas for the CV generation task.",
+#     input_variables=cv_brainstorming_parameters,
+#     prompts_to_add={
+#         "task_description": """## CURRENT TASK: Look at all the available data and take some time to analyze it. Look at the job description and the work profile of the user, and consider what areas should be focused, reinforced, and even removed to ensure they have the best chance to get an interview. DO NOT WRITE THE CV YET, just brainstorm ideas.""",
+#     }
+# )
+# cv_cover_letter_task = CVGenerationTask(
+#     task_name="cv_cover_letter_task",
+#     task_description="Generate a cover letter based on the user's history and the job description.",
+#     input_variables=cv_cover_letter_parameters,
+#     prompts_to_add={
+#         "task_description": """## CURRENT TASK: Based on the job description and the user's history, write a cover letter that highlights the user's strengths and experiences. Remember to make it tailored to the job description and user's history.""",
+#     }
+# )
+# cv_cv_generation_task = CVGenerationTask(
+#     task_name="cv_cv_generation_task",
+#     task_description="Generate a CV based on the user's history and the job description.",
+#     input_variables=cv_cv_generation_parameters,
+#     prompts_to_add={
+#         "task_description": """## CURRENT TASK: Based on all the information available, write a CV that highlights the user's strengths and experiences. Remember to make it tailored to the job description and user's history.""",
+#     }
+# )
+# cv_generation_workflow = Workflow(
+#     task_name="cv_generation_workflow",
+#     task_description="Generate a CV and cover letter based on the job description and user history.",
+#     input_variables=cv_clarifications_parameters,
+#     tasks={
+#         "cv_clarifications_task": cv_clarifications_task,
+#         "user_clarifications_task": user_clarifications_task,
+#         "cv_brainstorming_task": cv_brainstorming_task,
+#         "cv_cover_letter_task": cv_cover_letter_task,
+#         "cv_cv_generation_task": cv_cv_generation_task,
+#     },
+#     start_task="cv_clarifications_task",
+#     tasks_end_code_routing={
+#         "cv_clarifications_task": {
+#             0: ("user_clarifications_task", False),
+#             1: ("cv_generation_task", True),
+#         },
+#         "user_clarifications_task": {
+#             0: ("cv_brainstorming_task", False),
+#             1: ("cv_brainstorming_task", False),
+#         },
+#         "cv_brainstorming_task": {
+#             0: ("cv_cover_letter_task", False),
+#             1: ("cv_brainstorming_task", False),
+#         },
+#         "cv_cover_letter_task": {
+#             0: ("cv_cv_generation_task", True),
+#             1: ("cv_cover_letter_task", False),
+#         },
+#         "cv_cv_generation_task": {
+#             0: (None, True),
+#             1: ("cv_cv_generation_task", False),
+#         },
+#     },
+#     max_attempts=3,
+#     recursive=False
+# )
+# code_generation_parameters = FunctionParameters(
+#     type="object",
+#     properties={
+#         "outputs_plan_workflow": ParameterDefinition(
+#             type="string",
+#             description="The task plan that describes the code requirements for the task",
+#             default=None
+#         ),
+#         "outputs_generate_code": ParameterDefinition(
+#             type="string",
+#             description="The code that was generated, passed in case of a recursive call",
+#             default=None
+#         ),
+#         "outputs_execute_code": ParameterDefinition(
+#             type="string",
+#             description="The code execution output that was generated, passed in case of a recursive call",
+#             default=None
+#         ),
+#         "outputs_generate_unit_tests": ParameterDefinition(
+#             type="string",
+#             description="The unit test code that was generated, passed in case of a recursive call",
+#             default=None
+#         ),
+#         "outputs_execute_unit_tests": ParameterDefinition(
+#             type="string",
+#             description="The output of the unit test execution, passed in case of a recursive call",
+#             default=None
+#         )},
+#     required=["outputs_plan_workflow"]
+# )
 code_execution_parameters = FunctionParameters(
     type="object",
     properties={
@@ -251,93 +251,93 @@ unit_test_execution_check_parameters = FunctionParameters(
         )},
     required=["outputs_generate_code", "outputs_generate_unit_tests", "outputs_execute_unit_tests"]
 )
-plan_workflow = PromptAgentTask(
-    task_name="plan_workflow",
-    task_description="Takes a simple prompt and develops it into a full task prompt",
-    agent_name="coding_planner_agent",
-)
-generate_code = CodeGenerationLLMTask(
-    task_description="Generates code based on the provided plan_workflow output",
-    input_variables=code_generation_parameters,
-    templates={"task_template": "code_generation_task"}
-)
-execute_code = CodeExecutionLLMTask(
-    task_description="Executes the code available in a list of message dicts",
-    input_variables=code_execution_parameters,
-    templates={"task_template": "code_execution_task"}
-)
-generate_unit_tests = CodeGenerationLLMTask(
-    task_name="generate_unit_tests",
-    task_description="Generates unit tests for the prompt provided. Ensure the code and task are available in the prompt",
-    agent_name="unit_tester_agent",
-    input_variables=unit_test_generation_parameters,
-    templates={"task_template": "unit_test_generation_task"}
-)
-execute_unit_tests = CodeExecutionLLMTask(
-    task_name="execute_unit_tests",
-    task_description="Executes the code available in a list of message dicts",
-    agent_name="executor_agent",
-    input_variables=unit_test_execution_parameters,
-    templates={"task_template": "unit_test_execution_task"}
-)
-check_unit_test_results = CheckTask(
-    agent_name="unit_test_execution_checker_agent",
-    task_name="check_unit_test_results",
-    task_description="Checks the results of the unit tests",
-    input_variables=unit_test_execution_check_parameters,
-    exit_code_response_map={"FAILED": 2, "TEST PASSED": 0, "TEST CODE ERROR": 3},
-    exit_codes={0: "Test Passed", 1: "Response generation failed", 2: "Test Failed"},
-    templates={"task_template": "unit_test_execution_check_task"}
-)
-coding_workflow = Workflow(
-    task_name="coding_workflow",
-    task_description="Executes a coding workflow based on the provided prompt",
-    tasks={
-        "plan_workflow": plan_workflow,
-        "generate_code": generate_code,
-        "execute_code": execute_code,
-        "generate_unit_tests": generate_unit_tests,
-        "execute_unit_tests": execute_unit_tests,
-        "check_unit_test_results": check_unit_test_results
-    },
-    start_task="plan_workflow",
-    tasks_end_code_routing={
-        "plan_workflow": {
-            0: ("generate_code", False),
-            1: ("plan_workflow", True),
-        },
-        "generate_code": {
-            0: ("execute_code", False),
-            1: ("generate_code", True),
-            2: ("generate_code", True)
-        },
-        "execute_code": {
-            0: ("generate_unit_tests", False),
-            1: ("generate_code", True),
-            2: ("generate_code", True),
-            3: ("execute_code", True)
-        },
-        "generate_unit_tests": {
-            0: ("execute_unit_tests", False),
-            1: ("generate_unit_tests", True),
-            2: ("generate_unit_tests", True)
-        },
-        "execute_unit_tests": {
-            0: ("check_unit_test_results", False),
-            1: ("generate_unit_tests", True),
-            2: ("generate_unit_tests", True),
-            3: ("execute_unit_tests", True)
-        },
-        "check_unit_test_results": {
-            0: (None, False),
-            1: ("check_unit_test_results", True),
-            2: ("generate_code", True),
-            3: ("generate_unit_tests", True)
-        }
-    },
-    max_attempts=5,
-    recursive=False
-)
+# plan_workflow = PromptAgentTask(
+#     task_name="plan_workflow",
+#     task_description="Takes a simple prompt and develops it into a full task prompt",
+#     agent_name="coding_planner_agent",
+# )
+# generate_code = CodeGenerationLLMTask(
+#     task_description="Generates code based on the provided plan_workflow output",
+#     input_variables=code_generation_parameters,
+#     templates={"task_template": "code_generation_task"}
+# )
+# execute_code = CodeExecutionLLMTask(
+#     task_description="Executes the code available in a list of message dicts",
+#     input_variables=code_execution_parameters,
+#     templates={"task_template": "code_execution_task"}
+# )
+# generate_unit_tests = CodeGenerationLLMTask(
+#     task_name="generate_unit_tests",
+#     task_description="Generates unit tests for the prompt provided. Ensure the code and task are available in the prompt",
+#     agent_name="unit_tester_agent",
+#     input_variables=unit_test_generation_parameters,
+#     templates={"task_template": "unit_test_generation_task"}
+# )
+# execute_unit_tests = CodeExecutionLLMTask(
+#     task_name="execute_unit_tests",
+#     task_description="Executes the code available in a list of message dicts",
+#     agent_name="executor_agent",
+#     input_variables=unit_test_execution_parameters,
+#     templates={"task_template": "unit_test_execution_task"}
+# )
+# check_unit_test_results = CheckTask(
+#     agent_name="unit_test_execution_checker_agent",
+#     task_name="check_unit_test_results",
+#     task_description="Checks the results of the unit tests",
+#     input_variables=unit_test_execution_check_parameters,
+#     exit_code_response_map={"FAILED": 2, "TEST PASSED": 0, "TEST CODE ERROR": 3},
+#     exit_codes={0: "Test Passed", 1: "Response generation failed", 2: "Test Failed"},
+#     templates={"task_template": "unit_test_execution_check_task"}
+# )
+# coding_workflow = Workflow(
+#     task_name="coding_workflow",
+#     task_description="Executes a coding workflow based on the provided prompt",
+#     tasks={
+#         "plan_workflow": plan_workflow,
+#         "generate_code": generate_code,
+#         "execute_code": execute_code,
+#         "generate_unit_tests": generate_unit_tests,
+#         "execute_unit_tests": execute_unit_tests,
+#         "check_unit_test_results": check_unit_test_results
+#     },
+#     start_task="plan_workflow",
+#     tasks_end_code_routing={
+#         "plan_workflow": {
+#             0: ("generate_code", False),
+#             1: ("plan_workflow", True),
+#         },
+#         "generate_code": {
+#             0: ("execute_code", False),
+#             1: ("generate_code", True),
+#             2: ("generate_code", True)
+#         },
+#         "execute_code": {
+#             0: ("generate_unit_tests", False),
+#             1: ("generate_code", True),
+#             2: ("generate_code", True),
+#             3: ("execute_code", True)
+#         },
+#         "generate_unit_tests": {
+#             0: ("execute_unit_tests", False),
+#             1: ("generate_unit_tests", True),
+#             2: ("generate_unit_tests", True)
+#         },
+#         "execute_unit_tests": {
+#             0: ("check_unit_test_results", False),
+#             1: ("generate_unit_tests", True),
+#             2: ("generate_unit_tests", True),
+#             3: ("execute_unit_tests", True)
+#         },
+#         "check_unit_test_results": {
+#             0: (None, False),
+#             1: ("check_unit_test_results", True),
+#             2: ("generate_code", True),
+#             3: ("generate_unit_tests", True)
+#         }
+#     },
+#     max_attempts=5,
+#     recursive=False
+# )
 
 search_hub = AgentWithFunctions(
     task_name="search_hub",
@@ -430,19 +430,19 @@ search_hub = AgentWithFunctions(
 # }
 
 available_tasks = [
-    cv_clarifications_task,
-    user_clarifications_task,
-    cv_brainstorming_task,
-    cv_cover_letter_task,
-    cv_cv_generation_task,
-    cv_generation_workflow,
-    plan_workflow,
-    generate_code,
-    execute_code,
-    generate_unit_tests,
-    execute_unit_tests,
-    check_unit_test_results,
-    coding_workflow, 
+    # cv_clarifications_task,
+    # user_clarifications_task,
+    # cv_brainstorming_task,
+    # cv_cover_letter_task,
+    # cv_cv_generation_task,
+    # cv_generation_workflow,
+    # plan_workflow,
+    # generate_code,
+    # execute_code,
+    # generate_unit_tests,
+    # execute_unit_tests,
+    # check_unit_test_results,
+    # coding_workflow, 
     RedditSearchTask(), 
     ExaSearchTask(),
     WikipediaSearchTask(),

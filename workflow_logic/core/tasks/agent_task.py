@@ -7,8 +7,8 @@ from autogen.code_utils import extract_code
 from workflow_logic.util.utils import get_language_matching, json_to_python_type_mapping
 from workflow_logic.util.task_utils import StringOutput, LLMChatOutput, ParameterDefinition, FunctionParameters, TaskResponse, MessageDict
 from workflow_logic.core.agent.agent import AgentLibrary
-from workflow_logic.core.template import LocalTemplateLibrary, TemplateLibrary
 from workflow_logic.core.tasks.task import AliceTask, prompt_function_parameters
+from workflow_logic.core.prompt import Prompt, TemplatedPrompt
 
 # Define the default FunctionParameters for the default classes
 messages_function_parameters = FunctionParameters(
@@ -25,7 +25,7 @@ messages_function_parameters = FunctionParameters(
 class BasicAgentTask(AliceTask):
     agent_name: str = Field("default_agent", description="The name of the agent to use for the task")
     agent_library: AgentLibrary = Field(None, description="A library of agents available for task execution. It is usually added by the TaskLibrary on initialization")
-    input_variables: FunctionParameters = Field(default=messages_function_parameters, description="Inputs that the agent will require in a workflow. Default is a list of MessageDicts.")
+    input_variables: FunctionParameters = Field(default=messages_function_parameters, description="Inputs that the agent will require in a workflow. Default is 'messages', a list of MessageDicts.")
     exit_codes: dict[int, str] = Field(default={0: "Success", 1: "Generation failed."}, description="A dictionary of exit codes for the task")
     human_input: Optional[bool] = Field(default=False, description="Whether the task requires human input")
 
@@ -47,10 +47,11 @@ class BasicAgentTask(AliceTask):
             )
         self.update_agent_human_input()
         logging.info(f'Executing task: {self.task_name}')
+        task_inputs = messages.copy()
         result, exitcode = self.generate_agent_response(messages=messages, max_rounds=1, **kwargs)
         logging.info(f"Task {self.task_name} executed with exit code: {exitcode}. Response: {result}")
         task_outputs = StringOutput(content=[result]) if isinstance(result, str) else LLMChatOutput(content=result)
-        messages.append(MessageDict(content=result, role="assistant", created_by="llm", step=self.task_name, assistant_name=self.agent_name))
+        messages.append(MessageDict(content=result, role="assistant", generated_by="llm", step=self.task_name, assistant_name=self.agent_name))
 
         if exitcode in self.exit_codes:
             return TaskResponse(
@@ -59,8 +60,8 @@ class BasicAgentTask(AliceTask):
                 status="complete",
                 result_code=exitcode,
                 task_outputs=task_outputs,
+                task_inputs=task_inputs,
                 result_diagnostic="Task executed.",
-                task_content=LLMChatOutput(content=messages),
                 execution_history=kwargs.get("execution_history", [])
             )
         return TaskResponse(
@@ -69,8 +70,8 @@ class BasicAgentTask(AliceTask):
             status="failed",
             result_code=exitcode,
             task_outputs=task_outputs,
+            task_inputs=task_inputs,
             result_diagnostic=f"Exit code not found.",
-            task_content=LLMChatOutput(content=messages),
             execution_history=kwargs.get("execution_history", [])
         )
     
@@ -92,33 +93,25 @@ class BasicAgentTask(AliceTask):
         return "", 1
     
 class TemplatedTask(BaseModel):
-    templates: Dict[str, str] = Field({}, description="A dictionary of template names and their file names")
-    template_library: TemplateLibrary = Field(LocalTemplateLibrary(), description="The template library object")
+    templates: Dict[str, Prompt] = Field({}, description="A dictionary of template names and their file names")
 
-    def add_template(self, template_name: str, file_name: str):
-        self.templates[template_name] = file_name
-        # Add check to see if the template is valid
-        if self.get_template(template_name):
-            return True
+    def add_template(self, template_name: str, prompt: Prompt):
+        self.templates[template_name] = prompt
 
-    def get_template(self, template_name: str) -> Template:
+    def get_prompt_template(self, template_name: str) -> Prompt:
         if template_name not in self.templates or not self.templates[template_name]:
             raise ValueError(f"Template {template_name} not found in the task templates dictionary.")
-        try:
-            return self.template_library.get_template_by_name(self.templates[template_name])
-        except Exception as e:
-            print(self.template_library.template_names)
-            raise ValueError(f"Error loading template {self.templates[template_name]}: {e}")
+        return self.templates[template_name]
         
     def render_template(self, template_name: str, inputs: Dict[str, Any]) -> str:
-        template = self.get_template(template_name)
+        template = self.get_prompt_template(template_name)
         if not template:
             raise ValueError(f"Template {template_name} not retrieved correctly.")
-        return template.render(inputs)
+        return template.format_prompt(inputs)
 
 class PromptAgentTask(BasicAgentTask, TemplatedTask):
     input_variables: FunctionParameters = Field(default=prompt_function_parameters, description="Inputs that the agent will require in a workflow. Default is a 'prompt' str. It should be consistent with the template")
-    templates: Dict[str, str] = Field({"task_template": "basic_prompt"}, description="A dictionary of template names and their file names. By default this task uses the 'task_template' template to structure the inputs, and the basic_prompt passes the prompt input")
+    templates: Dict[str, Prompt] = Field({"task_template": TemplatedPrompt(name="basic_prompt", content="{{prompt}}", parameters=prompt_function_parameters)}, description="A dictionary of template names and their string prompt. By default this task uses the 'task_template' template to structure the inputs, and the basic_prompt passes the prompt input")
     prompts_to_add: Optional[Dict[str, str]] = Field(None, description="An optional dictionary of prompts to add to the task")
     
     def run(self, **kwargs) -> TaskResponse:
@@ -126,12 +119,12 @@ class PromptAgentTask(BasicAgentTask, TemplatedTask):
         return super().run(messages=messages, **kwargs)
     
     def create_message_list(self, **kwargs) -> List[MessageDict]:
-        template = self.get_template("task_template")
+        template = self.get_prompt_template("task_template")
         sanitized_inputs = self.update_inputs(**kwargs)
         prompts = self.prompts_to_add if self.prompts_to_add else {}
         final_inputs = {**prompts, **sanitized_inputs}
         input_string = template.render(final_inputs)
-        messages = [MessageDict(content=input_string, role="assistant", created_by="user", step=self.task_name)] if input_string else []
+        messages = [MessageDict(content=input_string, role="assistant", generated_by="user", step=self.task_name)] if input_string else []
         return messages
     
     def update_inputs(self, **kwargs) -> Dict[str, Any]:
@@ -139,7 +132,6 @@ class PromptAgentTask(BasicAgentTask, TemplatedTask):
         Validates and sanitizes the input parameters based on the defined input_variables.
         """
         sanitized_input = {}
-        kwargs_available = set(kwargs.keys())
         # Validate and sanitize required parameters
         for param in self.input_variables.required:
             if param not in kwargs:
@@ -288,6 +280,41 @@ class AgentWithFunctions(PromptAgentTask):
             return chat_result.summary, 0
         return "", 1
 
+cv_workflow_string_template = """The user has requested the creation of a custom {% if inputs.request_cover_letter %}CV and Cover Letter{% else %}CV{% endif %}. 
+Here's the available data for context, but remember to focus on tackling the CURRENT TASK:
+# Job description: this is the role the user wants to apply to
+{{ inputs_job_description }}
+# User's history: this is all the information we have about the user's professional background
+{{ inputs_user_history }}
+{% if inputs_additional_details %}
+# Additional details: provided by the user
+{{ inputs_additional_details }}
+{% endif %}
+{% if outputs %}
+{% if outputs_user_clarifications_task and outputs_cv_clarifications_task %}
+Based on the provided data we came up with a set of clarifying questions:
+{{ outputs_cv_clarifications_task }}
+Here is the user input regarding our questions:
+{{ outputs_user_clarifications_task }} 
+{% endif %}
+{% if outputs_cv_brainstorming_task %}
+We spent some time brainstorming how to succeed on this task, and these are the recommendations we came up with:
+{{ outputs_cv_brainstorming_task }}
+{% endif %}
+{% if outputs_cover_letter %}
+Here is the approved cover letter we prepared:
+{{ outputs_cover_letter }}
+{% endif %}
+{% if outputs_cv_draft %}
+Here is the approved CV draft we prepared:
+{{ outputs_cv_draft }}
+{% endif %}
+{% endif %}
+{% if task_description %}
+## CURRENT TASK: 
+{{ task_description }}
+{% endif %}"""
+
 class CVGenerationTask(PromptAgentTask):
-    templates: Dict[str, str] = Field({"task_template": "cv_workflow_template"}, description="A dictionary of template names and their file names. By default this task uses the 'task_template' template to structure the inputs.")
+    templates: Dict[str, Prompt] = Field({"task_template": TemplatedPrompt(name="cv_workflow_template", content=cv_workflow_string_template)}, description="A dictionary of template names and their file names. By default this task uses the 'task_template' template to structure the inputs.")
     agent_name: str = Field("hr_drafter_agent", description="The name of the agent that will be used to execute the task.")

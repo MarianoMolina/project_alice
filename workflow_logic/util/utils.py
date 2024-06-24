@@ -5,13 +5,10 @@ from openai import OpenAI as OriginalOpenAI
 from jinja2 import Environment, FileSystemLoader, meta, Template
 from typing_extensions import  Literal
 from pydantic import BaseModel, Field
-from workflow_logic.util.const import MODEL_FOLDER, PROMPT_PATH
+from workflow_logic.util.const import MODEL_FOLDER, PROMPT_PATH, HOST
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-class Prompt(BaseModel):
-    name: str = Field(..., description="The name of the prompt.")
-    content: str = Field(..., description="The content of the prompt.")
 
 class ModelDefinition(TypedDict):
     short_name: str
@@ -42,7 +39,19 @@ class TestResult(BaseModel):
     def __init__(self, **data):
         super().__init__(**data)
         self.tokens_per_second = self.tokens_generated / self.generation_time if self.generation_time > 0 else 0.0
-        
+      
+class ModelConfig(TypedDict):
+    model: str
+    api_key: Optional[str]
+    base_url: Optional[str]
+    api_type: Optional[str]
+    model_client_cls: Optional[str]
+
+class LLMConfig(TypedDict):
+    config_list: List[ModelConfig]
+    temperature: Optional[float] = 0.9
+    timeout: Optional[int] = 300
+
 def json_to_python_type_mapping(json_type: str) -> Type | Tuple[Type, ...] | None:
     type_mapping = {
         "string": str,
@@ -101,15 +110,10 @@ def get_json_from_json_block(json_block: str) -> Dict:
         json_block = ""
     return json.loads(json_block)
 
-def autogen_default_llm_config(model_list: List[dict]) -> Dict:
+def autogen_default_llm_config(model_list: List[dict]) -> LLMConfig:
     if isinstance(model_list, dict):
         model_list = [model_list]
-    return {
-        "cache_seed": False,
-        "temperature": 0.3,
-        "config_list": model_list,
-        "timeout": 120,
-    }
+    return LLMConfig(temperature=0.3, config_list=model_list, timeout=120)
 
 def model_path_from_file(model_file: str, model_folder: str = MODEL_FOLDER) -> str:
     # Normalize the model folder path
@@ -121,7 +125,7 @@ def model_name_from_file(model_file: str) -> str:
     model_name = '/'.join(path_parts[:-1])
     return model_name
 
-default_client = OriginalOpenAI(base_url="http://localhost:1234/v1", api_key="lm-studio")
+default_client = OriginalOpenAI(base_url=f"http://{HOST}:1234/v1", api_key="lm-studio")
 
 def get_embedding(text: str, model_name: str, client: OriginalOpenAI = default_client):
    text = text.replace("\n", " ")

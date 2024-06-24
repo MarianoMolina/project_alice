@@ -9,6 +9,8 @@ const modelMapping = {
   tasks: 'Task',
   users: 'User',
   prompts: 'Prompt',
+  taskresults: 'TaskResult',
+  chats: 'AliceChat'
 };
 
 // Get all collections in the database
@@ -27,9 +29,9 @@ router.get('/:collectionName/schema', async (req, res) => {
   const { collectionName } = req.params;
   const sanitizedCollectionName = collectionName.toLowerCase();
   try {
-    console.log(`Fetching schema for collection: ${sanitizedCollectionName}`);
     const modelName = modelMapping[sanitizedCollectionName];
     if (!modelName) {
+      console.log(`Models available: ${Object.keys(modelMapping)}`)
       console.error(`Model not found for collection: ${sanitizedCollectionName}`);
       return res.status(400).json({ error: `Model not found for collection: ${sanitizedCollectionName}` });
     }

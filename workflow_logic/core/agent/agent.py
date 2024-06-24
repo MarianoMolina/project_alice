@@ -2,16 +2,14 @@ from typing import Dict, Optional, List, Callable, Literal, Union
 from pydantic import BaseModel, Field, ConfigDict
 from autogen.agentchat import Agent, AssistantAgent, ConversableAgent, GroupChat, GroupChatManager, UserProxyAgent
 from autogen.agentchat.contrib.llava_agent import LLaVAAgent
+from workflow_logic.util.utils import LLMConfig
 from workflow_logic.util.task_utils import FunctionConfig
 from workflow_logic.core.model import ModelManager
-from workflow_logic.core.template import TemplateLibrary
-from workflow_logic.core.agent.available_agents import agents as available_agents
-from jinja2 import Template
+from workflow_logic.core.prompt import Prompt
 
 class AliceAgent(BaseModel):
     name: str = Field(..., description="The name of the agent")
-    system_message: str = Field(default="default_agent", description="The name of the prompt to use for system_message")
-    recommended_model: Optional[str] = Field(default=None, description="An optional recommended model for the agent")
+    system_message: Prompt = Field(default="default_agent", description="The name of the prompt to use for system_message")
     functions: List[FunctionConfig] = Field(default_factory=list, description="A list of functions that the agent can execute")
     functions_map: Dict[str, Callable] = Field(default_factory=dict, description="A mapping of function names to callable functions")
     agents_in_group: Optional[List[str]] = Field(default=None, description="A list of agent names in the group chat")
@@ -21,16 +19,16 @@ class AliceAgent(BaseModel):
     human_input_mode: Literal["ALWAYS", "TERMINATE", "NEVER"] = Field(default="NEVER", description="The mode for human input")
     speaker_selection: dict = Field(default=dict, description="The speaker selection logic for the group chat")
     agent_library: Optional["AgentLibrary"] = Field(default=None, description="The agent library object")
-    model_manager_object: Optional[ModelManager] = Field(default=None, description="The model manager object")
+    model_manager_object: Optional[ModelManager] = Field(default=None, description="The model manager object. Required if the agent uses a model and no llm_config is passed")
     default_auto_reply: Optional[str] = Field(default="", description="The default auto reply for the agent")
-    llm_config: Optional[dict] = Field(default=None, description="The LLM configuration for the agent")
+    llm_config: Optional[LLMConfig] = Field(default=None, description="The LLM configuration for the agent")
     model_config = ConfigDict(protected_namespaces=())
 
     @property
     def system_message_str(self) -> str:
-        return self.agent_library.template_library.get_template_by_name(self.system_message)
+        return self.system_message.format_prompt()
 
-    def get_autogen_agent(self, *, llm_config: Optional[dict] = None) -> ConversableAgent:
+    def get_autogen_agent(self, *, llm_config: Optional[LLMConfig] = None) -> ConversableAgent:
         if not self.autogen_class:
             raise ValueError(f"The agent class must be specified. {self.name}")
         if self.code_execution_config:
@@ -58,10 +56,6 @@ class AliceAgent(BaseModel):
         if not llm_config:
             if not self.llm_config:
                 llm_config = self.model_manager_object.default_model.autogen_llm_config
-                if self.recommended_model:
-                    model = self.model_manager_object.get_model_obj_from_name(self.recommended_model)
-                    if model:
-                        llm_config = model.autogen_llm_config
             else:
                 llm_config = self.llm_config
         if self.functions:
@@ -119,7 +113,10 @@ class AliceAgent(BaseModel):
             )
         else:
             raise ValueError(f"Invalid agent class: {self.autogen_class}. Expected 'ConversableAgent', 'AssistantAgent' or 'UserProxyAgent'.")
-    
+        
+    def generate_response(self, messages: List[dict]) -> dict:
+        return self.get_autogen_agent().generate_reply(messages)
+        
     @staticmethod
     def create_speaker_selection_method(speaker_selection_logic: dict) -> Callable[[ConversableAgent, GroupChat], Optional[Agent]]:
         def speaker_selection(last_speaker: ConversableAgent, groupchat: GroupChat) -> Optional[Agent]:
@@ -140,7 +137,6 @@ class AliceAgent(BaseModel):
     
 class AgentLibrary(BaseModel):
     agents: Dict[str, AliceAgent] = Field({}, description="A dictionary of agents with their names as keys")
-    template_library: TemplateLibrary = Field(description="The template library object")
     model_manager_object: ModelManager = Field(description="The model manager object")
     model_config = ConfigDict(protected_namespaces=())
 
@@ -149,47 +145,9 @@ class AgentLibrary(BaseModel):
             raise ValueError(f"Agent {agent_name} not found in the agent library.")
         return self.agents[agent_name]
 
-    def add_agent(self, agent_config: AliceAgent) -> bool:
-        if agent_config.name in self.agents:
-            print(f"Agent {agent_config.name} already exists in the library. Overwriting.")
-        agent_config.agent_library = self
-        self.agents[agent_config.name] = agent_config
-        return True
-    
-    def add_agent_from_dict(self, agent_definition: dict) -> bool:
-        agent_definition["agent_library"] = self
-        if "system_message" in agent_definition:
-            if isinstance(agent_definition["system_message"], Template):
-                agent_definition["system_message"] = agent_definition["system_message"].render()
-            elif isinstance(agent_definition["system_message"], str) and agent_definition["system_message"] in self.template_library.template_names:
-                agent_definition["system_message"] = self.template_library.get_template_by_name(agent_definition["system_message"]).render()
-        agent_definition["model_manager_object"] = self.model_manager_object
-        agent = AliceAgent.model_validate(agent_definition)
+    def add_agent(self, agent: AliceAgent) -> bool:
+        if agent.name in self.agents:
+            print(f"Agent {agent.name} already exists in the library. Overwriting.")
+        agent.agent_library = self
         self.agents[agent.name] = agent
         return True
-    
-    def add_agents_from_dict_in_batch(self, agent_definitions: Union[dict[str, dict], List[dict]]) -> bool:
-        if isinstance(agent_definitions, dict):
-            for agent_name, agent_definition in agent_definitions.items():
-                if agent_definition["autogen_class"] != "GroupChatManager":
-                    self.add_agent_from_dict(agent_definition)
-            for agent_name, agent_definition in agent_definitions.items():
-                if agent_definition["autogen_class"] == "GroupChatManager":
-                    self.add_agent_from_dict(agent_definition)
-            return True
-        elif isinstance(agent_definitions, list):
-            for agent_definition in agent_definitions:
-                if agent_definition["autogen_class"] != "GroupChatManager":
-                    self.add_agent_from_dict(agent_definition)
-            for agent_definition in agent_definitions:
-                if agent_definition["autogen_class"] == "GroupChatManager":
-                    self.add_agent_from_dict(agent_definition)
-            return True
-
-class AgentLibraryDefaults(AgentLibrary):
-    default_agents_dict: List[Dict] = Field(default=available_agents, description="A list of default agents dictionary to be added to the agent library")
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for agent_definition in self.default_agents_dict:
-            self.add_agent_from_dict(agent_definition)

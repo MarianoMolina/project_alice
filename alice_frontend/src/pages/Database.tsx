@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Container, Box, Button, Typography } from '@mui/material';
+import { Container, Box, Button } from '@mui/material';
 import ListPage from '../components/ListPage';
 
-const collections = ['Tasks', 'Agents', 'Models', 'Users', 'Collections', 'Prompts'];
+const collections = ['Tasks', 'Agents', 'Models', 'Users', 'Collections', 'Prompts', 'TaskResults'];
 
 const Database: React.FC = () => {
   const [selectedCollection, setSelectedCollection] = useState('Tasks');

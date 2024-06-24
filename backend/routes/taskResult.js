@@ -1,64 +1,71 @@
 const express = require('express');
 const router = express.Router();
 const TaskResult = require('../models/TaskResult');
+const auth = require('../middleware/auth');
 
 // Create a new TaskResult
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
-    const taskResult = new TaskResult(req.body);
+    const taskResult = new TaskResult({
+      ...req.body,
+      created_by: req.user.userId,
+      updated_by: req.user.userId
+    });
     await taskResult.save();
-    res.status(201).send(taskResult);
+    res.status(201).json(taskResult);
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).json({ message: error.message });
   }
 });
 
 // Get all TaskResults
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
     const taskResults = await TaskResult.find();
-    res.send(taskResults);
+    res.status(200).json(taskResults);
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).json({ message: error.message });
   }
 });
 
 // Get a TaskResult by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', auth, async (req, res) => {
   try {
     const taskResult = await TaskResult.findById(req.params.id);
     if (!taskResult) {
-      return res.status(404).send();
+      return res.status(404).json({ message: 'TaskResult not found' });
     }
-    res.send(taskResult);
+    res.status(200).json(taskResult);
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).json({ message: error.message });
   }
 });
 
 // Update a TaskResult by ID
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', auth, async (req, res) => {
   try {
-    const taskResult = await TaskResult.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const taskResult = await TaskResult.findById(req.params.id);
     if (!taskResult) {
-      return res.status(404).send();
+      return res.status(404).json({ message: 'TaskResult not found' });
     }
-    res.send(taskResult);
+    Object.assign(taskResult, req.body, { updated_by: req.user.userId });
+    await taskResult.save();
+    res.status(200).json(taskResult);
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).json({ message: error.message });
   }
 });
 
 // Delete a TaskResult by ID
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
   try {
     const taskResult = await TaskResult.findByIdAndDelete(req.params.id);
     if (!taskResult) {
-      return res.status(404).send();
+      return res.status(404).json({ message: 'TaskResult not found' });
     }
-    res.send(taskResult);
+    res.status(200).json({ message: 'TaskResult deleted successfully' });
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).json({ message: error.message });
   }
 });
 

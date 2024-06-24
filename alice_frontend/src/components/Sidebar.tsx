@@ -1,39 +1,36 @@
 import React from 'react';
-import { Drawer, List, ListItem, ListItemText, Typography, Box } from '@mui/material';
-
-interface Chat {
-  id: number;
-  name: string;
-}
+import { Box, List, ListItem, ListItemText, Typography, Button } from '@mui/material';
+import { AliceChat, AliceAgent } from '../utils/types';
 
 interface SidebarProps {
-  pastChats: Chat[];
-  handleSelectChat: (chat: Chat) => void;
+  pastChats: AliceChat[];
+  handleSelectChat: (chat: AliceChat | null) => Promise<void>;
+  agents: AliceAgent[];
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ pastChats, handleSelectChat }) => {
+const Sidebar: React.FC<SidebarProps> = ({ pastChats, handleSelectChat, agents }) => {
   return (
-    <Drawer
-      variant="permanent"
-      sx={{
-        width: 240,
-        flexShrink: 0,
-        [`& .MuiDrawer-paper`]: { width: 240, boxSizing: 'border-box', top: 64 },
-      }}
-    >
-      <Box sx={{ mt: 8 }}>
-        <Typography variant="h6" sx={{ p: 2 }}>
-          Past Chats
-        </Typography>
-        <List>
-          {pastChats.map((chat) => (
-            <ListItem button key={chat.id} onClick={() => handleSelectChat(chat)}>
-              <ListItemText primary={chat.name} />
-            </ListItem>
-          ))}
-        </List>
-      </Box>
-    </Drawer>
+    <Box sx={{ width: 240, bgcolor: 'background.paper', height: '100%', overflowY: 'auto' }}>
+      <Typography variant="h6" sx={{ p: 2 }}>Chats</Typography>
+      <List>
+        <Button variant="contained" onClick={() => handleSelectChat(null)}>
+          <ListItemText primary="New Chat" />
+        </Button>
+        {pastChats.map((chat) => (
+          <ListItem button key={chat._id} onClick={() => handleSelectChat(chat)}>
+            <ListItemText primary={chat.createdAt} />
+          </ListItem>
+        ))}
+      </List>
+      <Typography variant="h6" sx={{ p: 2 }}>Agents</Typography>
+      <List>
+        {agents.map((agent, index) => (
+          <ListItem key={index}>
+            <ListItemText primary={agent.name} />
+          </ListItem>
+        ))}
+      </List>
+    </Box>
   );
 };
 

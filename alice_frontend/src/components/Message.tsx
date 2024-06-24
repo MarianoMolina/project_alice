@@ -1,18 +1,17 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-
-interface MessageProps {
-  message: {
-    role: 'user' | 'assistant' | 'system';
-    content: string;
-    created_by: 'user' | 'llm';
-    step?: string;
-    assistant_name?: string;
-    context?: Record<string, any>;
-  };
-}
+import { MessageProps } from '../utils/types';
 
 const Message: React.FC<MessageProps> = ({ message }) => {
+  // Function to safely get the creator's name
+  const getCreatorName = (createdBy: any) => {
+    if (typeof createdBy === 'string') return createdBy;
+    if (createdBy && typeof createdBy === 'object' && 'name' in createdBy) {
+      return createdBy.name;
+    }
+    return 'Unknown';
+  };
+
   return (
     <Box
       sx={{
@@ -34,7 +33,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
       )}
       <Typography variant="body1">{message.content}</Typography>
       <Typography variant="body2" color="textSecondary">
-        {message.created_by}
+        {getCreatorName(message.created_by)}
       </Typography>
       {message.step && (
         <Typography variant="caption" color="textSecondary">
