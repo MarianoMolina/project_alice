@@ -28,13 +28,14 @@ mongoose.connect(process.env.MONGODB_URI || "mongodb://mongo/alice_database", {
 });
 mongoose.set('debug', true);
 
-// // Logging middleware
+// // // Logging middleware
 // app.use((req, res, next) => {
 //   console.log(`Incoming request: ${req.method} ${req.url}`);
-//   // console.log('Request headers:', req.headers);
+//   console.log('Request headers:', req.headers);
+//   console.log('Request body:', req.body);
 //   res.on('finish', () => {
 //     console.log(`Response status: ${res.statusCode}`);
-//     // console.log('Response headers:', res.getHeaders());
+//     console.log('Response headers:', res.getHeaders());
 //   });
 //   next();
 // });
@@ -46,6 +47,13 @@ app.use(corsMiddlewares);
 app.options('*', corsMiddlewares);
 
 app.use(bodyParser.json());
+
+// app.use((req, res, next) => {
+//   if (req.body) {
+//     console.log('Parsed body:', JSON.stringify(req.body));
+//   }
+//   next();
+// });
 
 app.use('/api/agents', AgentRoutes);
 app.use('/api/chats', chatRoutes);

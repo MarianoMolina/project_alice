@@ -5,7 +5,9 @@
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
+    "@mui/icons-material": "^5.15.20",
     "@mui/material": "^5.15.20",
+    "@mui/styles": "^5.15.20",
     "@rjsf/core": "^5.18.4",
     "@rjsf/mui": "^5.18.4",
     "@rjsf/utils": "^5.18.4",
@@ -20,6 +22,7 @@
     "axios": "^1.7.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-markdown": "^8.0.7",
     "react-router-dom": "^6.23.1",
     "react-scripts": "^5.0.1",
     "typescript": "^5.4.5",

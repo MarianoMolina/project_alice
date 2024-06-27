@@ -26,7 +26,7 @@ ADMIN_TOKEN = os.getenv("ADMIN_TOKEN")
 
 active_models = ["Llama3_8B_Instruct"]
 active_vision_models = ["Llava_vision"]
-LOCAL_LLM_API_URL = os.getenv("LOCAL_LLM_API_URL")
+LM_STUDIO_PORT = os.getenv("LM_STUDIO_PORT")
 
 const_model_definitions = [
     {

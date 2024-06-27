@@ -3,6 +3,7 @@ from workflow_logic.core.tasks.task import AliceTask
 from workflow_logic.core.tasks.agent_task import PromptAgentTask, CodeGenerationLLMTask, CodeExecutionLLMTask, CheckTask, AgentWithFunctions, BasicAgentTask, CVGenerationTask
 from workflow_logic.core.tasks.workflow import Workflow
 from workflow_logic.core.tasks.api_task import RedditSearchTask, ExaSearchTask, WikipediaSearchTask, GoogleSearchTask, ArxivSearchTask, APITask
+from typing import List
 
 ## Parameters for the CV Generation Workflow
 cv_clarifications_parameters = FunctionParameters(
@@ -339,18 +340,18 @@ unit_test_execution_check_parameters = FunctionParameters(
 #     recursive=False
 # )
 
-search_hub = AgentWithFunctions(
-    task_name="search_hub",
-    task_description="Searches multiple sources and returns the results",
-    agent_name="research_agent",
-    functions=[
-        RedditSearchTask(),
-        ExaSearchTask(),
-        WikipediaSearchTask(),
-        GoogleSearchTask(),
-        ArxivSearchTask()
-    ]
-)
+# search_hub = AgentWithFunctions(
+#     task_name="search_hub",
+#     task_description="Searches multiple sources and returns the results",
+#     agent_name="research_agent",
+#     functions={
+#         "reddit_search": RedditSearchTask(),
+#         "exa_search": ExaSearchTask(),
+#         "wikipedia_search": WikipediaSearchTask(),
+#         "google_search": GoogleSearchTask(),
+#         "arxiv_search": ArxivSearchTask()
+#     }
+# )
 
 # search_hub = {
 #     "task_type": "AgentWithFunctions", 
@@ -429,7 +430,7 @@ search_hub = AgentWithFunctions(
 #     "recursive": False
 # }
 
-available_tasks = [
+available_tasks: List[AliceTask] = [
     # cv_clarifications_task,
     # user_clarifications_task,
     # cv_brainstorming_task,
@@ -448,5 +449,5 @@ available_tasks = [
     WikipediaSearchTask(),
     GoogleSearchTask(),
     ArxivSearchTask(),
-    search_hub
+    # search_hub
 ]

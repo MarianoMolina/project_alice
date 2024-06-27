@@ -4,7 +4,7 @@ from typing import Dict, List, Literal, Optional
 from pydantic import BaseModel, Field, model_validator, ConfigDict, ValidationError
 from guidance.models import LlamaCpp, OpenAI, Anthropic, Model as GuidanceModel
 from guidance.chat import ChatTemplate
-from workflow_logic.util.const import const_model_definitions, model_formats, active_vision_models, active_models, LOCAL_LLM_API_URL, HOST
+from workflow_logic.util.const import const_model_definitions, model_formats, active_vision_models, active_models, LM_STUDIO_PORT, HOST
 from workflow_logic.util.utils import autogen_default_llm_config, model_path_from_file, LLMConfig
 
 class AliceModel(BaseModel):
@@ -16,9 +16,9 @@ class AliceModel(BaseModel):
     deployment: Literal["local", "remote"] = Field(..., title="Model Deployment", description="The deployment of the model.")
     model_file: Optional[str] = Field(None, title="Model File", description="Optional. The file of the model if it is local.")
     api_key: str = Field(default="lm-studio", title="API Key", description="Optional. The API key for the model.")
-    port: int = Field(default=1234, title="Port", description="Optional. The port for the model for local models deployed through API-like endpoints.")
+    port: int = Field(default=LM_STUDIO_PORT, title="Port", description="Optional. The port for the model for local models deployed through API-like endpoints.")
     api_type: str = Field(default="openai", title="API Type", description="Optional. The API type for the model.", examples=["openai", "azure", "anthropic"])
-    base_url: str = Field(default=LOCAL_LLM_API_URL, title="Base URL", description="Optional. The base URL for the model. Necessary for remote models.")
+    base_url: str = Field(default=f"http://{HOST}:{LM_STUDIO_PORT}/v1", title="Base URL", description="Optional. The base URL for the model. Necessary for remote models.")
     autogen_model_client_cls: Optional[str] = Field(None, title="Autogen Model Client Class", description="Optional. The class for the autogen model client if it is a custom client.")
     model_config = ConfigDict(protected_namespaces=())
 

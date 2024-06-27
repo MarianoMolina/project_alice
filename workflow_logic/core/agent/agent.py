@@ -2,12 +2,14 @@ from typing import Dict, Optional, List, Callable, Literal, Union
 from pydantic import BaseModel, Field, ConfigDict
 from autogen.agentchat import Agent, AssistantAgent, ConversableAgent, GroupChat, GroupChatManager, UserProxyAgent
 from autogen.agentchat.contrib.llava_agent import LLaVAAgent
-from workflow_logic.util.utils import LLMConfig
+from workflow_logic.util.utils import LLMConfig, replace_localhost
 from workflow_logic.util.task_utils import FunctionConfig
 from workflow_logic.core.model import ModelManager
 from workflow_logic.core.prompt import Prompt
+from workflow_logic.util.const import LM_STUDIO_PORT, HOST
 
 class AliceAgent(BaseModel):
+    id: str = Field(None, description="The ID of the agent", alias="_id")
     name: str = Field(..., description="The name of the agent")
     system_message: Prompt = Field(default="default_agent", description="The name of the prompt to use for system_message")
     functions: List[FunctionConfig] = Field(default_factory=list, description="A list of functions that the agent can execute")
@@ -22,15 +24,20 @@ class AliceAgent(BaseModel):
     model_manager_object: Optional[ModelManager] = Field(default=None, description="The model manager object. Required if the agent uses a model and no llm_config is passed")
     default_auto_reply: Optional[str] = Field(default="", description="The default auto reply for the agent")
     llm_config: Optional[LLMConfig] = Field(default=None, description="The LLM configuration for the agent")
-    model_config = ConfigDict(protected_namespaces=())
+
+    class Config:
+        protected_namespaces=()
 
     @property
     def system_message_str(self) -> str:
         return self.system_message.format_prompt()
 
     def get_autogen_agent(self, *, llm_config: Optional[LLMConfig] = None) -> ConversableAgent:
+
         if not self.autogen_class:
             raise ValueError(f"The agent class must be specified. {self.name}")
+        
+        # Code execution config
         if self.code_execution_config:
             if isinstance(self.code_execution_config, bool):
                 import tempfile
@@ -53,13 +60,26 @@ class AliceAgent(BaseModel):
         else:
             code_exec_config = False
         
+        # LLMConfig
         if not llm_config:
             if not self.llm_config:
-                llm_config = self.model_manager_object.default_model.autogen_llm_config
+                if self.model_manager_object:
+                    llm_config = self.model_manager_object.default_model.autogen_llm_config
             else:
                 llm_config = self.llm_config
-        if self.functions:
-            llm_config["functions"] = self.functions
+        if llm_config:
+            if isinstance(llm_config, dict):
+                llm_config = LLMConfig(**llm_config)
+            if not llm_config.config_list:
+                raise ValueError("LLM Config must have a 'config_list' attribute with at least one config.")
+            if llm_config.config_list[0].model_client_cls in [None, '']:
+                del llm_config.config_list[0].__dict__['model_client_cls']
+            llm_config = replace_localhost(llm_config=llm_config).model_dump()
+            if self.functions:
+                llm_config["functions"] = self.functions
+        print(f'LLM Config: {llm_config}')
+
+        # Agent creation
         if self.autogen_class == "AssistantAgent":
             return AssistantAgent(
                 name=self.name,
@@ -114,6 +134,7 @@ class AliceAgent(BaseModel):
         else:
             raise ValueError(f"Invalid agent class: {self.autogen_class}. Expected 'ConversableAgent', 'AssistantAgent' or 'UserProxyAgent'.")
         
+    
     def generate_response(self, messages: List[dict]) -> dict:
         return self.get_autogen_agent().generate_reply(messages)
         
@@ -151,3 +172,9 @@ class AgentLibrary(BaseModel):
         agent.agent_library = self
         self.agents[agent.name] = agent
         return True
+
+    def get_agent_by_id(self, agent_id: str) -> AliceAgent:
+        for agent in self.agents.values():
+            if agent_id == agent.id:
+                return agent
+        raise ValueError(f"Agent with ID {agent_id} not found in the agent library.")

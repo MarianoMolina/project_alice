@@ -5,9 +5,9 @@ import { MessageType } from '../utils/types';
 interface ChatInputProps {
   newMessage: string;
   setNewMessage: (message: string) => void;
-  handleSendMessage: (message: string) => void;  // Update the type to accept a message
+  handleSendMessage: (message: string) => void;
   lastMessage?: MessageType;
-  chatSelected: boolean;  // Add this prop
+  chatSelected: boolean;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({ newMessage, setNewMessage, handleSendMessage, lastMessage, chatSelected }) => {
@@ -15,20 +15,21 @@ const ChatInput: React.FC<ChatInputProps> = ({ newMessage, setNewMessage, handle
     alert('Add file button clicked');
   };
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setNewMessage(e.target.value);
   };
 
-  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && chatSelected) {
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey && chatSelected) {
+      e.preventDefault();
       handleSendMessage(newMessage);
-      setNewMessage(''); // Clear the input box
+      setNewMessage('');
     }
   };
 
   const handleClickSend = () => {
     handleSendMessage(newMessage);
-    setNewMessage(''); // Clear the input box
+    setNewMessage('');
   };
 
   return (
@@ -37,12 +38,21 @@ const ChatInput: React.FC<ChatInputProps> = ({ newMessage, setNewMessage, handle
         <TextField
           variant="outlined"
           fullWidth
+          multiline
+          minRows={1}
+          maxRows={4}
           value={newMessage}
           onChange={handleChange}
-          onKeyPress={handleKeyPress}
-          disabled={!chatSelected}  // Disable input if no chat is selected
+          onKeyDown={handleKeyDown}
+          disabled={!chatSelected}
+          sx={{ flexGrow: 1 }}
         />
-        <Button variant="contained" sx={{ ml: 2 }} onClick={handleClickSend} disabled={!chatSelected}>
+        <Button 
+          variant="contained" 
+          sx={{ ml: 2, alignSelf: 'flex-end' }} 
+          onClick={handleClickSend} 
+          disabled={!chatSelected || !newMessage.trim()}
+        >
           Send
         </Button>
       </Box>

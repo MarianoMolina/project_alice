@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field
 from workflow_logic.util.task_utils import FunctionParameters, TaskResponse, ParameterDefinition
 from workflow_logic.core.prompt import Prompt
+from workflow_logic.core.agent import AliceAgent
 
 prompt_function_parameters = FunctionParameters(
     type="object",
@@ -28,16 +29,19 @@ class AliceTask(BaseModel, ABC):
     exit_codes: Dict[int, str] = Field(default={0: "Success", 1: "Failed"}, description="A dictionary of exit codes for the task, consistent with the TaskResponse structure", example={0: "Success", 1: "Failed"})
     recursive: bool = Field(True, description="Whether the task can be executed recursively")
     templates: Dict[str, str] = Field(default={}, description="A dictionary of templates for the task")
-    tasks: Dict[str, "AliceTask"] = Field(default={}, description="A dictionary of tasks for the task")
+    tasks: Dict[str, "AliceTask"] = Field(default={}, description="A dictionary of task_id: task")
     valid_languages: List[str] = Field([], description="A list of valid languages for the task")
     timeout: Optional[int] = Field(None, description="The timeout for the task in seconds")
     prompts_to_add: Optional[Dict[str, Prompt]] = Field(None, description="A dictionary of prompts to add to the task")
-    exit_code_response_map: Optional[Dict[int, int]] = Field(None, description="A dictionary mapping exit codes to responses")
+    exit_code_response_map: Optional[Dict[str, int]] = Field(None, description="A dictionary mapping exit codes to responses")
     start_task: Optional[str] = Field(None, description="The name of the starting task")
     task_selection_method: Optional[Callable[[TaskResponse, List[Dict[str, Any]]], Optional[str]]] = Field(None, description="A method to select the next task based on the current task's response")
     tasks_end_code_routing: Optional[Dict[str, Dict[int, tuple[Union[str, None], bool]]]] = Field(None, description="A dictionary of tasks -> exit codes and the task to route to given each exit code and a bool to determine if the outcome represents an extra 'try' at the task")
     max_attempts: int = Field(3, description="The maximum number of failed task attempts before the workflow is considered failed. Default is 3.")
     recursive: bool = Field(False, description="Whether the workflow can be executed recursively. By default, tasks are recursive but workflows are not, unless one is expected to be used within another workflow")
+    agent_id: Optional[AliceAgent] = Field(None, description="The agent that the task is associated with")
+    execution_agent_id: Optional[AliceAgent] = Field(None, description="The agent that the task is executed by")
+    human_input: Optional[bool] = Field(default=False, description="Whether the task requires human input")
 
     @abstractmethod
     def run(self, **kwargs) -> TaskResponse:
@@ -46,6 +50,7 @@ class AliceTask(BaseModel, ABC):
 
     def execute(self, **kwargs) -> TaskResponse:
         # Generate a new task ID for this execution
+        print(f'Executing task {self.task_name}')
         task_id = str(uuid.uuid4())
         
         # Retrieve or initialize execution history
@@ -54,7 +59,8 @@ class AliceTask(BaseModel, ABC):
         # Check for recursion
         if not self.recursive:
             if any(task["task_name"] == self.task_name for task in execution_history):
-                raise RecursionError(f"Task {self.task_name} is already in the execution history, preventing recursion.")
+                # raise RecursionError(f"Task {self.task_name} is already in the execution history, preventing recursion.")
+                print(f'Error: Task {self.task_name} is already in the execution history. Execution history: {execution_history}')
         
         # Add current task to execution history
         execution_history.append({

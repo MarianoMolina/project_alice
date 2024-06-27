@@ -31,11 +31,13 @@ messageSchema.virtual('apiRepresentation').get(function() {
 });
 
 const aliceChatSchema = new Schema({
+  name: { type: String, default: "New Chat", description: "Name of the chat" },
   messages: [{ type: messageSchema, required: true, default: [], description: "List of messages in the chat conversation" }],
   alice_agent: { type: Schema.Types.ObjectId, ref: 'Agent', required: true, description: "The Alice agent object" },
   functions: [{ type: Schema.Types.ObjectId, ref: 'Task', default: [], description: "List of functions to be registered with the agent" }],
   executor: { type: Schema.Types.ObjectId, ref: 'Agent', required: true, description: "The executor agent object" },
   llm_config: { type: Schema.Types.Mixed, description: "The configuration for the LLM agent", default: {} },
+  task_responses: [{ type: Schema.Types.ObjectId, ref: 'TaskResponse', default: [], description: "List of task responses executed by the chat"}],
   created_by: { type: Schema.Types.ObjectId, ref: 'User' },
   updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
@@ -112,7 +114,7 @@ function ensureObjectIdForUpdate(next) {
 
 // Automatically populate references when finding documents
 function autoPopulate() {
-  this.populate('messages.created_by alice_agent executor created_by updated_by functions');
+  this.populate('alice_agent executor created_by updated_by functions messages.created_by');
 }
 
 aliceChatSchema.pre('save', ensureObjectIdForSave);

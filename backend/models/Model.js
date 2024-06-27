@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-const LOCAL_LLM_API_URL = process.env.LOCAL_LLM_API_URL || 'https://localhost:1234/v1';
+const LOCAL_LLM_API_URL = process.env.LOCAL_LLM_API_URL || 'http://localhost:1234/v1';
 
 const modelSchema = new Schema({
   short_name: { type: String, required: true, unique: true },

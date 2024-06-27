@@ -137,8 +137,12 @@ async def chat_response(chat_id: str) -> List[MessageDict]:
         raise HTTPException(status_code=404, detail="Chat not found")
     
     logging.info(f'Chat_data: {chat_data}')
-    responses = chat_data[chat_id].generate_response()
+    responses, task_results = chat_data[chat_id].generate_response()
+    logging.info(f'Responses: {responses}')
     if responses:
         for response in responses:
             libraries.store_chat_message(chat_id, response)
+    if task_results:
+        for result in task_results:
+            libraries.store_task_response_on_chat(result, chat_id)
     return responses

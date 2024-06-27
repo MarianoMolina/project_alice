@@ -23,7 +23,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <AppBar position="fixed">
+    <AppBar position="static">
       <Toolbar>
         <Tooltip title="Home">
           <IconButton edge="start" color="inherit" onClick={() => handleNavigation('/')}>

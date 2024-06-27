@@ -6,7 +6,7 @@ from autogen.agentchat import ConversableAgent
 from autogen.code_utils import extract_code
 from workflow_logic.util.utils import get_language_matching, json_to_python_type_mapping
 from workflow_logic.util.task_utils import StringOutput, LLMChatOutput, ParameterDefinition, FunctionParameters, TaskResponse, MessageDict
-from workflow_logic.core.agent.agent import AgentLibrary
+from workflow_logic.core.agent.agent import AgentLibrary, AliceAgent
 from workflow_logic.core.tasks.task import AliceTask, prompt_function_parameters
 from workflow_logic.core.prompt import Prompt, TemplatedPrompt
 
@@ -23,7 +23,7 @@ messages_function_parameters = FunctionParameters(
     required=["messages"]
 )
 class BasicAgentTask(AliceTask):
-    agent_name: str = Field("default_agent", description="The name of the agent to use for the task")
+    agent_id: AliceAgent = Field(..., description="The agent to use for the task")
     agent_library: AgentLibrary = Field(None, description="A library of agents available for task execution. It is usually added by the TaskLibrary on initialization")
     input_variables: FunctionParameters = Field(default=messages_function_parameters, description="Inputs that the agent will require in a workflow. Default is 'messages', a list of MessageDicts.")
     exit_codes: dict[int, str] = Field(default={0: "Success", 1: "Generation failed."}, description="A dictionary of exit codes for the task")
@@ -32,8 +32,8 @@ class BasicAgentTask(AliceTask):
     @property
     def agent(self) -> ConversableAgent:
         if not self.agent_library:
-            raise ValueError("Agent library not found.")
-        return self.agent_library.get_agent_by_name(self.agent_name).get_autogen_agent()
+            print(f'Agent library not found.')
+        return self.agent_id.get_autogen_agent()
     
     def run(self, messages: List[MessageDict],  **kwargs) -> TaskResponse:
         if not messages:
@@ -51,7 +51,7 @@ class BasicAgentTask(AliceTask):
         result, exitcode = self.generate_agent_response(messages=messages, max_rounds=1, **kwargs)
         logging.info(f"Task {self.task_name} executed with exit code: {exitcode}. Response: {result}")
         task_outputs = StringOutput(content=[result]) if isinstance(result, str) else LLMChatOutput(content=result)
-        messages.append(MessageDict(content=result, role="assistant", generated_by="llm", step=self.task_name, assistant_name=self.agent_name))
+        messages.append(MessageDict(content=result, role="assistant", generated_by="llm", step=self.task_name, assistant_name=self.agent_id.name))
 
         if exitcode in self.exit_codes:
             return TaskResponse(
@@ -82,7 +82,7 @@ class BasicAgentTask(AliceTask):
             self.agent.human_input_mode = "NEVER"
     
     def generate_agent_response(self, messages: List[dict], max_rounds: int = 1, **kwargs) -> Tuple[str, int]:
-        logging.info(f"Generating response by {self.agent.name} from messages: {messages}")  
+        logging.info(f"Generating response by {self.agent_id.name} from messages: {messages}")  
         self.agent.update_max_consecutive_auto_reply(max_rounds)
         result = self.agent.generate_reply(messages)
         if result:
@@ -123,7 +123,7 @@ class PromptAgentTask(BasicAgentTask, TemplatedTask):
         sanitized_inputs = self.update_inputs(**kwargs)
         prompts = self.prompts_to_add if self.prompts_to_add else {}
         final_inputs = {**prompts, **sanitized_inputs}
-        input_string = template.render(final_inputs)
+        input_string = template.format_prompt(**final_inputs)
         messages = [MessageDict(content=input_string, role="assistant", generated_by="user", step=self.task_name)] if input_string else []
         return messages
     
@@ -159,12 +159,12 @@ class PromptAgentTask(BasicAgentTask, TemplatedTask):
 
 class CheckTask(PromptAgentTask):
     """ A type of task where you can check if the generated output includes certain strings, and return a specific exit_code depending on it"""
-    agent_name: str = Field("default_checker_agent", description="The name of the agent to use for the task")
+    agent_id: AliceAgent = Field(..., description="The agent to use for the task")
     task_name: str = Field("check_output", description="The name of the task")
     exit_code_response_map: dict[str, int] = Field({"APPROVED": 0, "FAILED": 1}, description="A dictionary of exit codes mapped to string responses for the task. These strings should be present in the system prompt of the checking agent", examples=[{"TESTS PASSED": 0, "TESTS FAILED": 1}])
 
     def generate_agent_response(self, messages: List[Dict], max_rounds: int = 1, **kwargs) -> Tuple[str | int]:
-        logging.info(f"Checking task by {self.agent.name} from messages: {messages}")
+        logging.info(f"Checking task by {self.agent_id.name} from messages: {messages}")
         response = super().generate_agent_response(messages, max_rounds)
         for key, value in self.exit_code_response_map.items():
             if key in response[0]:
@@ -173,12 +173,12 @@ class CheckTask(PromptAgentTask):
     
 class CodeGenerationLLMTask(PromptAgentTask):
     """ A task that generates code from a prompt"""
-    agent_name: str = Field("coding_agent", description="The name of the agent to use for the task")
+    agent_id: AliceAgent = Field(..., description="The agent to use for the task")
     task_name: str = Field("generate_code", description="The name of the task")
     exit_codes: dict[int, str] = Field({0: "Success", 1: "Generation failed.", 2: "No code blocks in response"}, description="A dictionary of exit codes for the task")
 
     def generate_agent_response(self, messages: List[Dict], max_rounds: int = 1, **kwargs) -> Tuple[str | int]:
-        logging.info(f"Generating code by {self.agent.name} from messages: {messages}")
+        logging.info(f"Generating code by {self.agent_id.name} from messages: {messages}")
         result = self.agent.generate_reply(messages, max_turns=max_rounds)
         if not result:
             return self.exit_codes[1], 1
@@ -192,7 +192,7 @@ class CodeGenerationLLMTask(PromptAgentTask):
         
 class CodeExecutionLLMTask(PromptAgentTask):
     """ A task that executes code extracted from a prompt, outputs or messages"""
-    agent_name: str = Field("executor_agent", description="The name of the agent to use for the task")
+    agent_id: AliceAgent = Field(..., description="The agent to use for the task")
     task_name: str = Field("execute_code", description="The name of the task")
     exit_codes: dict[int, str] = Field({0: "Success", 1: "Execution failed.", 2: "No code blocks in messages", 3: "Execution timed out"}, description="A dictionary of exit codes for the task")
     valid_languages: list[str] = Field(["python", "shell"], description="A list of valid languages for code execution")
@@ -247,22 +247,22 @@ class CodeExecutionLLMTask(PromptAgentTask):
         code_blocks, exitcode = self.retrieve_code_blocks(messages=messages)
         if exitcode != 0:
             return code_blocks, exitcode
-        logging.info(f"Executing by {self.agent.name} code blocks: {code_blocks}")
+        logging.info(f"Executing by {self.agent_id.name} code blocks: {code_blocks}")
 
         exitcode, logs = self.agent.execute_code_blocks(code_blocks)
         exitcode2str = "execution succeeded" if exitcode == 0 else "execution failed"
         return f"exitcode: {exitcode} ({exitcode2str})\nCode output: {logs}", exitcode
 
 class AgentWithFunctions(PromptAgentTask):
-    agent_name: str = Field(default="research_agent", description="The name of the agent to use for the task")
-    functions: List[AliceTask] = Field(default={}, description="A dictionary of tasks available for the agent")
-    execution_agent_name: str = Field(default="executor_agent", description="The name of the agent to use for the task execution")
+    agent_id: AliceAgent = Field(..., description="The agent to use for the task")
+    tasks: dict[str, AliceTask] = Field(..., description="A dictionary of tasks available for the agent")
+    execution_agent_id: AliceAgent = Field(..., description="The agent to use for the task execution")
 
     @property
     def execution_agent(self) -> ConversableAgent:
         if not self.agent_library:
-            raise ValueError("Agent library not found.")
-        return self.agent_library.get_agent_by_name(self.execution_agent_name).get_autogen_agent()
+            print("Agent library not found.")
+        return self.execution_agent_id.get_autogen_agent()
     
     def register_functions(self, functions: List[AliceTask], llm_agent: ConversableAgent, executor: ConversableAgent, execution_history: List = []) -> Tuple[ConversableAgent, ConversableAgent]:
         for task in functions:
@@ -274,7 +274,7 @@ class AgentWithFunctions(PromptAgentTask):
     def generate_agent_response(self, messages: List[dict], max_rounds: int = 10, **kwargs) -> Tuple[str, int]:
         execution_history = kwargs.pop("execution_history", [])
         self.agent.update_max_consecutive_auto_reply(max_rounds)
-        agent, execution_agent = self.register_functions(self.functions, self.agent, self.execution_agent, execution_history=execution_history)
+        agent, execution_agent = self.register_functions(list(self.tasks.values()), self.agent, self.execution_agent, execution_history=execution_history)
         chat_result = execution_agent.initiate_chat(agent, message=messages[-1], clear_history=True, max_turns=10)
         if chat_result:
             return chat_result.summary, 0
@@ -314,7 +314,34 @@ Here is the approved CV draft we prepared:
 ## CURRENT TASK: 
 {{ task_description }}
 {% endif %}"""
+## Parameters for the CV Generation Workflow
+cv_clarifications_parameters = FunctionParameters(
+    type="object",
+    properties={
+        "inputs_job_description": ParameterDefinition(
+            type="string",
+            description="The job description for which the CV is being created.",
+            default=None
+            ),
+        "inputs_user_history": ParameterDefinition(
+            type="string",
+            description="The user's history and experience.",
+            default=None
+            ),
+        "inputs_additional_details": ParameterDefinition(
+            type="string",
+            description="Additional context or details provided by the user.",
+            default=None
+            ),
+        "inputs_request_cover_letter": ParameterDefinition(
+            type="boolean",
+            description="Whether a cover letter is requested.",
+            default=False
+            ),
+    },
+    required=["inputs_job_description", "inputs_user_history", "inputs_additional_details", "inputs_request_cover_letter"]
+)
 
 class CVGenerationTask(PromptAgentTask):
-    templates: Dict[str, Prompt] = Field({"task_template": TemplatedPrompt(name="cv_workflow_template", content=cv_workflow_string_template)}, description="A dictionary of template names and their file names. By default this task uses the 'task_template' template to structure the inputs.")
-    agent_name: str = Field("hr_drafter_agent", description="The name of the agent that will be used to execute the task.")
+    templates: Dict[str, Prompt] = Field({"task_template": TemplatedPrompt(name="cv_workflow_template", content=cv_workflow_string_template, parameters=cv_clarifications_parameters)}, description="A dictionary of template names and their file names. By default this task uses the 'task_template' template to structure the inputs.")
+    agent_id: AliceAgent = Field(..., description="The agent to use for the task")

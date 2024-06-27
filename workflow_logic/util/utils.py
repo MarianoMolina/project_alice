@@ -5,7 +5,7 @@ from openai import OpenAI as OriginalOpenAI
 from jinja2 import Environment, FileSystemLoader, meta, Template
 from typing_extensions import  Literal
 from pydantic import BaseModel, Field
-from workflow_logic.util.const import MODEL_FOLDER, PROMPT_PATH, HOST
+from workflow_logic.util.const import MODEL_FOLDER, PROMPT_PATH, HOST, LM_STUDIO_PORT
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -40,14 +40,14 @@ class TestResult(BaseModel):
         super().__init__(**data)
         self.tokens_per_second = self.tokens_generated / self.generation_time if self.generation_time > 0 else 0.0
       
-class ModelConfig(TypedDict):
+class ModelConfig(BaseModel):
     model: str
     api_key: Optional[str]
-    base_url: Optional[str]
-    api_type: Optional[str]
-    model_client_cls: Optional[str]
+    base_url: Optional[str] = f"http://{HOST}:{LM_STUDIO_PORT}/v1"
+    api_type: Optional[str] = "openai"
+    model_client_cls: Optional[str] = None
 
-class LLMConfig(TypedDict):
+class LLMConfig(BaseModel):
     config_list: List[ModelConfig]
     temperature: Optional[float] = 0.9
     timeout: Optional[int] = 300
@@ -125,7 +125,7 @@ def model_name_from_file(model_file: str) -> str:
     model_name = '/'.join(path_parts[:-1])
     return model_name
 
-default_client = OriginalOpenAI(base_url=f"http://{HOST}:1234/v1", api_key="lm-studio")
+default_client = OriginalOpenAI(base_url=f"http://{HOST}:{LM_STUDIO_PORT}/v1", api_key="lm-studio")
 
 def get_embedding(text: str, model_name: str, client: OriginalOpenAI = default_client):
    text = text.replace("\n", " ")
@@ -280,3 +280,9 @@ def sanitize_and_limit_prompt(prompt: str, limit: int = 50) -> str:
     # Limit to the first n characters
     limited_sanitized_prompt = sanitized_prompt[:limit]
     return limited_sanitized_prompt
+
+def replace_localhost(llm_config: LLMConfig) -> LLMConfig:
+    for config in llm_config.config_list:
+        if "localhost" in config.base_url:
+            config.base_url = config.base_url.replace("localhost", HOST)
+    return llm_config

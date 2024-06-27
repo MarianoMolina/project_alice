@@ -15,10 +15,12 @@ const auth = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Decoded token:', decoded); // Debugging line
     req.user = {
       userId: decoded.userId,
       role: decoded.role // Ensure the role is attached to req.user
     };
+    console.log('User role:', req.user.role); // Debugging line
     next();
   } catch (err) {
     res.status(401).send({ error: 'Invalid token' });

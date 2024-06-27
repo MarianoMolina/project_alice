@@ -85,6 +85,7 @@ export const fetchItem = async (collectionName: string, itemId: string | null = 
 export const createItem = async (collectionName: string, itemData: any): Promise<any> => {
   try {
     const url = `/${collectionName}`;
+    console.log('Creating item with data:', JSON.stringify(itemData)); // Log payload
     const response: CollectionResponse = await dbAxiosInstance.post(url, itemData);
     return response.data;
   } catch (error) {
@@ -148,18 +149,6 @@ export const generateChatResponse = async (chatId: string): Promise<any> => {
     return response.data;
   } catch (error) {
     console.error('Error generating chat response:', error);
-    throw error;
-  }
-};
-// Create a new chat
-export const createChat = async (chatData: { name: string, alice_agent: string, executor: string }): Promise<any> => {
-  try {
-    console.log('Creating chat with data:', chatData); 
-    const response: CollectionResponse = await dbAxiosInstance.post('/chats', chatData);
-    console.log('Chat created with response:', response.data); 
-    return response.data;
-  } catch (error) {
-    console.error('Error creating chat:', error);
     throw error;
   }
 };

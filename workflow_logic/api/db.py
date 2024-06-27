@@ -39,13 +39,16 @@ class BackendAPI(BaseModel):
     template_library: PromptLibrary = Field(None, description="The template library object.")
     agent_library: AgentLibrary = Field(None, description="The agent library object.")
     task_library: TaskLibrary = Field(None, description="The task library object.")
-
     class Config:
         arbitrary_types_allowed = True
 
     def __init__(self, **data):
         super().__init__(**data)
         self.initialize_libraries()
+
+    @property
+    def task_types(self) -> Dict[str, AliceTask]:
+        return {task.__name__: task for task in self.available_task_types}
 
     def initialize_libraries(self):
         # Initialize ModelManager
@@ -72,10 +75,11 @@ class BackendAPI(BaseModel):
         self.agent_library = AgentLibrary(agents=agent_map, model_manager_object=self.model_manager)
 
         # Initialize TaskLibrary
+        logging.info(f'Available Task Types: {self.task_types}')
         db_tasks = self.get_tasks()
         logging.info(f'Retrieved: Tasks -> {db_tasks}')
-        if not db_tasks:
-            raise ValueError("No tasks found in the database.")
+        # if not db_tasks:
+        #     raise ValueError("No tasks found in the database.")
         self.task_library = TaskLibrary(agent_library=self.agent_library, available_tasks=list(db_tasks.values()))
 
     def _get_headers(self):
@@ -147,6 +151,14 @@ class BackendAPI(BaseModel):
         except requests.exceptions.RequestException as e:
             print(f"Error retrieving agents: {e}")
             return {}
+        
+    def task_initializer(self, task: dict) -> AliceTask:
+        if not task["task_type"] in self.task_types:
+            raise ValueError(f"Task type {task['task_type']} not found in available task types.")
+        if "tasks" in task and isinstance(task["tasks"], dict):
+            print(f'TASKS: {task["tasks"]}')
+            task["tasks"] = {subtask["_id"]: self.task_initializer(subtask) for subtask in task["tasks"].values()}
+        return self.task_types[task["task_type"]](**task)
 
     def get_tasks(self, task_id: Optional[str] = None) -> Dict[str, AliceTask]:
         if task_id is None:
@@ -162,11 +174,10 @@ class BackendAPI(BaseModel):
             task_type_map = {task_type.__name__: task_type for task_type in self.available_task_types}
             if isinstance(tasks, list):
                 tasks = [self.preprocess_data(task) for task in tasks]
-                return {
-                    task["_id"]: task_type_map[task["task_type"]](**task)
-                    for task in tasks
-                    if task["task_type"] in task_type_map
-                }
+                task_dict = {}
+                for task in tasks:
+                    task_dict[task["_id"]] = self.task_initializer(task)
+                return task_dict
             else:
                 tasks = self.preprocess_data(tasks)
                 if tasks["task_type"] in task_type_map:
@@ -221,11 +232,32 @@ class BackendAPI(BaseModel):
             return {}
         
     def populate_chat(self, chat: dict) -> AliceChat:
-        chat_obj = AliceChat.model_validate(chat)
-        if not chat_obj:
-            raise ValueError(f"Invalid chat object. {chat}")
-        chat_obj.alice_agent.model_manager_object = self.model_manager
-        return chat_obj
+        print(f'Chat: {chat}')
+        
+        if 'functions' in chat and chat['functions']:
+            processed_functions = []
+            for function_id in chat['functions']:
+                try:
+                    task = self.task_initializer(function_id)
+                    if not isinstance(task, AliceTask):
+                        print(f"Warning: task_initializer returned non-AliceTask object for ID {function_id}")
+                        continue
+                    processed_functions.append(task)
+                except Exception as e:
+                    print(f"Error processing function {function_id}: {str(e)}")
+            
+            chat['functions'] = processed_functions
+
+        try:
+            chat_obj = AliceChat.model_validate(chat)
+            if not chat_obj:
+                raise ValueError(f"Invalid chat object after processing functions. {chat}")
+            
+            chat_obj.alice_agent.model_manager_object = self.model_manager
+            return chat_obj
+        except Exception as e:
+            print(f"Error validating chat object: {str(e)}")
+            raise ValueError(f"Failed to validate chat object: {str(e)}")
     
     def store_chat_message(self, chat_id: str, message: MessageDict) -> bool:
         url = f"{self.base_url}/chats/{chat_id}/add_message"
@@ -239,6 +271,30 @@ class BackendAPI(BaseModel):
         except requests.exceptions.RequestException as e:
             print(f"Error storing messages: {e}")
             return None
+        
+    async def store_task_response(self, task_response: TaskResponse) -> str:
+        url = f"{self.base_url}/taskresults"
+        headers = self._get_headers()
+        data = task_response.model_dump()
+        try:
+            response = requests.post(url, json=data, headers=headers)
+            response.raise_for_status()
+            print(f"TaskResponse stored successfully with ID: {response.json()['_id']}")
+            return response.json()['_id']
+        except requests.exceptions.RequestException as e:
+            print(f"Error storing TaskResponse: {e}")
+
+    async def store_task_response_on_chat(self, task_response: TaskResponse, chat_id: str) -> str:
+        url = f"{self.base_url}/chats/{chat_id}/add_task_response"
+        headers = self._get_headers()
+        try:
+            id = await self.store_task_response(task_response)
+            response = requests.patch(url, json=id, headers=headers)
+            response.raise_for_status()
+            print(f"TaskResponse stored successfully with ID: {response.json()['_id']}")
+            return f'TaskResponse stored successfully with ID: {response.json()["_id"]}'
+        except requests.exceptions.RequestException as e:
+            print(f"Error storing TaskResponse: {e}")
         
     def validate_token(self, token: str) -> dict:
         url = f"{self.base_url}/users/validate"

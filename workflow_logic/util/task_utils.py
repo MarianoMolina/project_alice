@@ -65,7 +65,20 @@ class SearchOutput(OutputInterface):
 class ParameterDefinition(BaseModel):
     type: Annotated[str, Field(description="Type of the parameter")]
     description: Annotated[str, Field(description="Description of the parameter")]
-    default: Annotated[Optional[Any], Field(description="Default value of the parameter")]
+    default: Annotated[Optional[Any], Field(default=None, description="Default value of the parameter")]
+
+    def model_dump(self, **kwargs):
+        data = super().model_dump(**kwargs)
+        if data['default'] is None:
+            del data['default']
+        return data
+
+    @classmethod
+    def model_validate(cls, obj: Any):
+        if isinstance(obj, dict) and 'default' not in obj:
+            obj = obj.copy()
+            obj['default'] = None
+        return super().model_validate(obj)
 
 class FunctionParameters(BaseModel):
     """Parameters of a function as defined by the OpenAI API"""
