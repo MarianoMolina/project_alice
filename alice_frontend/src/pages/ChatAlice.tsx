@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
-import Chat from '../components/Chat';
-import Sidebar from '../components/Sidebar';
-import ChatInput from '../components/ChatInput';
-import NewChat from '../components/NewChat';
+import Chat from '../components/chat/Chat';
+import Sidebar from '../components/chat/Sidebar';
+import ChatInput from '../components/chat/ChatInput';
+import NewChat from '../components/db_elements/NewChat';
 import { useChat } from '../context/ChatContext';
-import useStyles from './ChatAliceStyles';
+import useStyles from '../styles/ChatAliceStyles';
 import { CreateAliceChat } from '../utils/types';
 
 const ChatAlice: React.FC = () => {

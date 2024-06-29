@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, TextField, Button, Typography } from '@mui/material';
-import { fetchItem, createItem, updateItem } from '../services/api';
-import { Prompt } from '../utils/types';
+import { fetchItem, createItem, updateItem } from '../../services/api';
+import { Prompt } from '../../utils/types';
 
 interface PromptProps {
   promptId?: string;

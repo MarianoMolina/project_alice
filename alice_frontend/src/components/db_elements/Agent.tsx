@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Box, TextField, Button, MenuItem, Typography, Select, FormControl, InputLabel, Dialog } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material/Select';
-import { fetchItem, createItem, updateItem } from '../services/api';
-import { AliceAgent, Prompt, User } from '../utils/types';
+import { fetchItem, createItem, updateItem } from '../../services/api';
+import { AliceAgent, Prompt, User } from '../../utils/types';
 import PromptComponent from './PromptComponent';
-import useStyles from './AgentStyles';
+import useStyles from '../../styles/AgentStyles';
 
 interface AgentProps {
   agentId?: string;

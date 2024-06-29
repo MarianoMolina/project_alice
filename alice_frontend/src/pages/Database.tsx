@@ -1,29 +1,33 @@
 import React, { useState } from 'react';
-import { Container, Box, Button } from '@mui/material';
-import ListPage from '../components/ListPage';
+import { Box, Button } from '@mui/material';
+import ListPage from '../components/db_dashboard_old/ListPage';
+import useStyles from '../styles/DatabaseStyles';
 
 const collections = ['Tasks', 'Agents', 'Models', 'Users', 'Collections', 'Prompts', 'TaskResults'];
 
 const Database: React.FC = () => {
+  const classes = useStyles();
   const [selectedCollection, setSelectedCollection] = useState('Tasks');
 
   return (
-    <Container>
-      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2, mt: 2}}>
+    <Box className={classes.container}>
+      <Box className={classes.buttonGroup}>
         {collections.map((collection) => (
           <Button
             key={collection}
             variant={selectedCollection === collection ? 'contained' : 'outlined'}
             color="primary"
             onClick={() => setSelectedCollection(collection)}
-            sx={{ mx: 1 }}
+            className={classes.button}
           >
             {collection}
           </Button>
         ))}
       </Box>
-      <ListPage collectionName={selectedCollection} />
-    </Container>
+      <Box className={classes.listPageContainer}>
+        <ListPage collectionName={selectedCollection} />
+      </Box>
+    </Box>
   );
 };
 

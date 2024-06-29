@@ -39,30 +39,15 @@ export const fetchSchema = async (collectionName: string): Promise<any> => {
   }
 };
 
-// Execute a task by name
-export const executeTask = async (taskName: string, inputs: any): Promise<any> => {
+export const executeTask = async (taskId: string, inputs: any): Promise<any> => {
   try {
     const response: TaskResponse = await taskAxiosInstance.post('/execute_task', {
-      task_name: taskName,
-      inputs: inputs,
+      taskId,
+      inputs
     });
     return response.data;
   } catch (error) {
     console.error('Error executing task:', error);
-    throw error;
-  }
-};
-
-// Execute a task from definition
-export const executeTaskFromDefinition = async (taskKwargs: any, inputKwargs: any): Promise<any> => {
-  try {
-    const response: TaskResponse = await taskAxiosInstance.post('/execute_task_from_definition', {
-      task_kwargs: taskKwargs,
-      input_kwargs: inputKwargs,
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error executing task from definition:', error);
     throw error;
   }
 };

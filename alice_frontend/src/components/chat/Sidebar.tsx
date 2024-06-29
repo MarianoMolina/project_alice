@@ -12,12 +12,12 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from '@mui/material';
-import { AliceChat, AliceAgent, TaskResponse, AliceTask } from '../utils/types';
+import { AliceChat, AliceAgent, TaskResponse, AliceTask } from '../../utils/types';
 import { Terminal, SupportAgent, Functions, Summarize, ExpandMore } from '@mui/icons-material';
-import Agent from './Agent';
-import Function from './Function';
-import TaskResult from './TaskResult';
-import useStyles from './SidebarStyles';
+import Agent from '../db_elements/Agent';
+import Function from '../db_elements/Function';
+import TaskResult from '../db_elements/TaskResult';
+import useStyles from '../../styles/SidebarStyles';
 
 interface SidebarProps {
   pastChats: AliceChat[];
@@ -98,6 +98,11 @@ const Sidebar: React.FC<SidebarProps> = ({
     setExpandedAccordion(isExpanded ? panel : false);
   };
 
+  const handleSelectChatActivate = (chat_id: string) => {
+    handleSelectChat(chat_id);
+    setExpandedAccordion('currentChat');
+  }
+
   return (
     <Box className={classes.sidebar}>
       <Box className={classes.accordionsContainer}>
@@ -114,7 +119,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               {pastChats.map((chat) => (
                 <ListItemButton
                   key={chat._id}
-                  onClick={() => handleSelectChat(chat._id)}
+                  onClick={() => handleSelectChatActivate(chat._id)}
                   selected={chat._id === currentChatId}
                 >
                   <ListItemText

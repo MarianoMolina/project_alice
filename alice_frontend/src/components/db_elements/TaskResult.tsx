@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography, Paper } from '@mui/material';
-import { TaskResultProps } from '../utils/types';
+import { TaskResultProps } from '../../utils/types';
 
 const TaskResult: React.FC<TaskResultProps> = ({ taskResponse }) => {
   return (

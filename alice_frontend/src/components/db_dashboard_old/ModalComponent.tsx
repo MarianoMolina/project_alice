@@ -1,10 +1,10 @@
 import React from 'react';
-import { Modal, IconButton } from '@mui/material';
+import { Modal, IconButton, Typography, Box } from '@mui/material';
 import Form from '@rjsf/mui';
 import { IChangeEvent } from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
 import CloseIcon from '@mui/icons-material/Close';
-import './ModalComponent.css';
+import useStyles from '../../styles/ModalComponentStyles';
 
 interface ModalComponentProps {
   open: boolean;
@@ -25,10 +25,13 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
   collectionName,
   schema,
 }) => {
+  const classes = useStyles();
+
   if (!data || !schema) {
     console.error('Data or schema is null:', data, schema);
-    return null; // Do not render the component if data or schema is null
+    return null;
   }
+
   console.log('Modal mode:', mode, 'Data:', data, 'Schema:', schema);
 
   const onSubmit = ({ formData }: IChangeEvent<any>) => {
@@ -46,14 +49,16 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
 
   return (
     <Modal open={open} onClose={handleClose}>
-      <div className="modal-content">
-        <div className="modal-header">
-          <h2>{mode === 'new' ? `Add New ${collectionName}` : `Viewing ${collectionName} element ${data.name || data._id}`}</h2>
-          <IconButton onClick={handleClose} style={{ marginLeft: 'auto' }}>
+      <Box className={classes.modalContent}>
+        <Box className={classes.modalHeader}>
+          <Typography variant="h6">
+            {mode === 'new' ? `Add New ${collectionName}` : `Viewing ${collectionName} element ${data.name || data._id}`}
+          </Typography>
+          <IconButton onClick={handleClose} className={classes.closeButton}>
             <CloseIcon />
           </IconButton>
-        </div>
-        <div className="modal-body">
+        </Box>
+        <Box className={classes.modalBody}>
           <Form
             schema={schema}
             validator={validator}
@@ -61,9 +66,10 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
             disabled={mode === 'view'}
             onSubmit={mode === 'view' ? undefined : onSubmit}
             uiSchema={uiSchema}
+            className={classes.form}
           />
-        </div>
-      </div>
+        </Box>
+      </Box>
     </Modal>
   );
 };

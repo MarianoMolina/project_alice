@@ -1,4 +1,4 @@
-from workflow_logic.util.task_utils import TaskResponse
+from workflow_logic.util.task_utils import TaskResponse, DatabaseTaskResponse
 from workflow_logic.core.tasks import APITask, CVGenerationTask, AliceTask, RedditSearchTask, Workflow, WikipediaSearchTask, GoogleSearchTask, ExaSearchTask, ArxivSearchTask, BasicAgentTask, PromptAgentTask, CheckTask, CodeGenerationLLMTask, CodeExecutionLLMTask, AgentWithFunctions
 from workflow_logic.core.agent import AliceAgent
 from workflow_logic.core.prompt import Prompt, TemplatedPrompt, PromptLibrary
@@ -10,8 +10,8 @@ from workflow_logic.core.agent.agent import AgentLibrary
 from workflow_logic.util.task_utils import MessageDict
 from workflow_logic.util.const import BACKEND_PORT, HOST, ADMIN_TOKEN, BACKEND_PORT_DOCKER, BACKEND_HOST
 from pydantic import BaseModel, Field
-from typing import Literal, Optional, Dict
-import requests, logging
+from typing import Literal, Optional, Dict, Any
+import requests, logging, aiohttp, asyncio
 
 available_task_types: list[AliceTask] = [
     Workflow,
@@ -34,7 +34,6 @@ class BackendAPI(BaseModel):
     base_url: Literal[f"http://{HOST}:{BACKEND_PORT}/api"] = Field(f"http://{HOST}:{BACKEND_PORT}/api", description="The base URL of the backend API", frozen=True)
     available_task_types: list[AliceTask] = Field(available_task_types, frozen=True, description="The available task types")
     admin_token: str = Field(ADMIN_TOKEN, description="The admin token for the backend API")
-
     model_manager: ModelManager = Field(None, description="The model manager object.")
     template_library: PromptLibrary = Field(None, description="The template library object.")
     agent_library: AgentLibrary = Field(None, description="The agent library object.")
@@ -42,45 +41,45 @@ class BackendAPI(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    def __init__(self, **data):
-        super().__init__(**data)
-        self.initialize_libraries()
-
     @property
     def task_types(self) -> Dict[str, AliceTask]:
         return {task.__name__: task for task in self.available_task_types}
+    
+    async def initialize_libraries(self):
+        try:
+            # Initialize ModelManager
+            available_models = await self.get_models()
+            logging.info(f'Retrieved: Models -> {available_models}')
+            if not available_models:
+                raise ValueError("No models found in the database.")
+            self.model_manager = ModelManager(model_definitions=list(available_models.values()))
 
-    def initialize_libraries(self):
-        # Initialize ModelManager
-        available_models = self.get_models()
-        logging.info(f'Retrieved: Models -> {available_models}')
-        if not available_models:
-            raise ValueError("No models found in the database.")
-        self.model_manager = ModelManager(model_definitions=list(available_models.values()))
+            # Initialize StoredPromptLibrary
+            prompts = await self.get_prompts()
+            logging.info(f'Retrieved: Prompts -> {prompts}')
+            if not prompts:
+                raise ValueError("No prompts found in the database.")
+            template_map_dict = {prompt.name: prompt for prompt in prompts.values()}
+            self.template_library = PromptLibrary(template_map=template_map_dict)
 
-        # Initialize StoredPromptLibrary
-        prompts = self.get_prompts()
-        logging.info(f'Retrieved: Prompts -> {prompts}')
-        if not prompts:
-            raise ValueError("No prompts found in the database.")
-        template_map_dict = {prompt.name: prompt for prompt in prompts.values()}
-        self.template_library = PromptLibrary(template_map=template_map_dict)
+            # Initialize AgentLibrary
+            agents = await self.get_agents()
+            logging.info(f'Retrieved: Agents -> {agents}')
+            if not agents:
+                raise ValueError("No agents found in the database.")
+            agent_map = {agent.name: agent for agent in agents.values()}
+            self.agent_library = AgentLibrary(agents=agent_map, model_manager_object=self.model_manager)
 
-        # Initialize AgentLibrary
-        agents = self.get_agents()
-        logging.info(f'Retrieved: Agents -> {agents}')
-        if not agents:
-            raise ValueError("No agents found in the database.")
-        agent_map = {agent.name: agent for agent in agents.values()}
-        self.agent_library = AgentLibrary(agents=agent_map, model_manager_object=self.model_manager)
-
-        # Initialize TaskLibrary
-        logging.info(f'Available Task Types: {self.task_types}')
-        db_tasks = self.get_tasks()
-        logging.info(f'Retrieved: Tasks -> {db_tasks}')
-        # if not db_tasks:
-        #     raise ValueError("No tasks found in the database.")
-        self.task_library = TaskLibrary(agent_library=self.agent_library, available_tasks=list(db_tasks.values()))
+            # Initialize TaskLibrary
+            logging.info(f'Available Task Types: {self.task_types}')
+            db_tasks = await self.get_tasks()
+            logging.info(f'Retrieved: Tasks -> {db_tasks}')
+            # if not db_tasks:
+            #     raise ValueError("No tasks found in the database.")
+            self.task_library = TaskLibrary(agent_library=self.agent_library, available_tasks=list(db_tasks.values()))
+        except Exception as e:
+            logging.error(f"Error in initialize_libraries: {e}")
+            raise
 
     def _get_headers(self):
         return {
@@ -89,212 +88,325 @@ class BackendAPI(BaseModel):
         }    
     
     # Function to preprocess the data
-    def preprocess_data(self, data):
+    async def preprocess_data(self, data):
         if isinstance(data, dict):
-            return {k: self.preprocess_data(v) for k, v in data.items() if v or v == 0}
+            return {k: await self.preprocess_data(v) for k, v in data.items() if v or v == 0}
         elif isinstance(data, list):
-            return [self.preprocess_data(item) for item in data if item or item == 0]
+            return [await self.preprocess_data(item) for item in data if item or item == 0]
         else:
             return data if data or data == 0 else None
-
-    def store_task_response(self, task_response: TaskResponse) -> str:
-        url = f"{self.base_url}/taskResults"
-        headers = self._get_headers()
-        data = task_response.model_dump()
-        try:
-            response = requests.post(url, json=data, headers=headers)
-            response.raise_for_status()
-            print(f"TaskResponse stored successfully with ID: {response.json()['_id']}")
-            return f"TaskResponse stored successfully with ID: {response.json()['_id']}"
-        except requests.exceptions.RequestException as e:
-            print(f"Error storing TaskResponse: {e}")
-            return None
-
-    def get_prompts(self, prompt_id: Optional[str] = None) -> Dict[str, Prompt]:
+        
+    async def get_prompts(self, prompt_id: Optional[str] = None) -> Dict[str, Prompt]:
         if prompt_id is None:
             url = f"{self.base_url}/prompts"
         else:
             url = f"{self.base_url}/prompts/{prompt_id}"
-
         headers = self._get_headers()
-        try:
-            response = requests.get(url, headers=headers)
-            response.raise_for_status()
-            prompts = response.json()
-            if isinstance(prompts, list):
-                prompts = [self.preprocess_data(prompt) for prompt in prompts]
-                return {prompt["_id"]: TemplatedPrompt(**prompt) if "is_templated" in prompt and prompt["is_templated"] else Prompt(**prompt) for prompt in prompts}
-            else:
-                prompts = self.preprocess_data(prompts)
-                return {prompts["_id"]: TemplatedPrompt(**prompts) if "is_templated" in prompts and prompts["is_templated"] else Prompt(**prompts)}
-        except requests.exceptions.RequestException as e:
-            print(f"Error retrieving prompts: {e}")
-            return {}
 
-    def get_agents(self, agent_id: Optional[str] = None) -> Dict[str, AliceAgent]:
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(url, headers=headers) as response:
+                    if response is None:
+                        raise ValueError(f"Failed to get a response from {url}")
+                    print(f'RESPONSE :{response}')
+                    response.raise_for_status()
+                    prompts = await response.json()
+
+                    if isinstance(prompts, list):
+                        prompts = [await self.preprocess_data(prompt) for prompt in prompts]
+                        return {prompt["_id"]: TemplatedPrompt(**prompt) if "is_templated" in prompt and prompt["is_templated"] else Prompt(**prompt) for prompt in prompts}
+                    else:
+                        prompts = await self.preprocess_data(prompts)
+                        return {prompts["_id"]: TemplatedPrompt(**prompts) if "is_templated" in prompts and prompts["is_templated"] else Prompt(**prompts)}
+            except aiohttp.ClientError as e:
+                logging.error(f"Error retrieving prompts: {e}")
+                return {}
+            except Exception as e:
+                logging.error(f"Unexpected error retrieving prompts: {e}")
+                return {}
+
+    async def get_agents(self, agent_id: Optional[str] = None) -> Dict[str, AliceAgent]:
         if agent_id is None:
             url = f"{self.base_url}/agents"
         else:
             url = f"{self.base_url}/agents/{agent_id}"
-
         headers = self._get_headers()
-        try:
-            response = requests.get(url, headers=headers)
-            response.raise_for_status()
-            agents = response.json()
-            if isinstance(agents, list):
-                preprocessed_agents = [self.preprocess_data(agent) for agent in agents]
-                return {agent["_id"]: AliceAgent(**agent) for agent in preprocessed_agents}
-            else:
-                preprocessed_agent = self.preprocess_data(agents)
-                return {agents["_id"]: AliceAgent(**preprocessed_agent)}
-        except requests.exceptions.RequestException as e:
-            print(f"Error retrieving agents: {e}")
-            return {}
         
-    def task_initializer(self, task: dict) -> AliceTask:
-        if not task["task_type"] in self.task_types:
-            raise ValueError(f"Task type {task['task_type']} not found in available task types.")
-        if "tasks" in task and isinstance(task["tasks"], dict):
-            print(f'TASKS: {task["tasks"]}')
-            task["tasks"] = {subtask["_id"]: self.task_initializer(subtask) for subtask in task["tasks"].values()}
-        return self.task_types[task["task_type"]](**task)
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(url, headers=headers) as response:
+                    if response is None:
+                        raise ValueError(f"Failed to get a response from {url}")
+                    print(f'RESPONSE :{response}')
+                    response.raise_for_status()
+                    agents = await response.json()
+                    
+                    if isinstance(agents, list):
+                        preprocessed_agents = [await self.preprocess_data(agent) for agent in agents]
+                        return {agent["_id"]: AliceAgent(**agent) for agent in preprocessed_agents}
+                    else:
+                        preprocessed_agent = await self.preprocess_data(agents)
+                        return {agents["_id"]: AliceAgent(**preprocessed_agent)}
+            except aiohttp.ClientError as e:
+                print(f"Error retrieving agents: {e}")
+                return {}
 
-    def get_tasks(self, task_id: Optional[str] = None) -> Dict[str, AliceTask]:
+    async def get_tasks(self, task_id: Optional[str] = None) -> Dict[str, AliceTask]:
         if task_id is None:
             url = f"{self.base_url}/tasks"
         else:
             url = f"{self.base_url}/tasks/{task_id}"
-
         headers = self._get_headers()
-        try:
-            response = requests.get(url, headers=headers)
-            response.raise_for_status()
-            tasks = response.json()
-            task_type_map = {task_type.__name__: task_type for task_type in self.available_task_types}
-            if isinstance(tasks, list):
-                tasks = [self.preprocess_data(task) for task in tasks]
-                task_dict = {}
-                for task in tasks:
-                    task_dict[task["_id"]] = self.task_initializer(task)
-                return task_dict
-            else:
-                tasks = self.preprocess_data(tasks)
-                if tasks["task_type"] in task_type_map:
-                    return {tasks["_id"]: task_type_map[tasks["task_type"]](**tasks)}
-                else:
-                    return {}
-        except requests.exceptions.RequestException as e:
-            print(f"Error retrieving tasks: {e}")
-            return {}
-    
-    def get_models(self, model_id: Optional[str] = None) -> Dict[str, AliceModel]:
+        
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(url, headers=headers) as response:
+                    if response is None:
+                        raise ValueError(f"Failed to get a response from {url}")
+                    print(f'RESPONSE :{response}')
+                    response.raise_for_status()
+                    tasks = await response.json()
+                    
+                    if isinstance(tasks, list):
+                        tasks = [await self.preprocess_data(task) for task in tasks]
+                        return {task["_id"]: await self.task_initializer(task) for task in tasks}
+                    else:
+                        tasks = await self.preprocess_data(tasks)
+                        return {tasks["_id"]: await self.task_initializer(tasks)}
+            except aiohttp.ClientError as e:
+                print(f"Error retrieving tasks: {e}")
+                return {}
+
+    async def get_models(self, model_id: Optional[str] = None) -> Dict[str, AliceModel]:
         if model_id is None:
             url = f"{self.base_url}/models"
         else:
             url = f"{self.base_url}/models/{model_id}"
-
         headers = self._get_headers()
-        try:
-            response = requests.get(url, headers=headers)
-            response.raise_for_status()
-            models = response.json()
-            if isinstance(models, list):
-                models = [self.preprocess_data(model) for model in models]
-                return {model['_id']: AliceModel(**model) for model in models}
-            else:
-                models = self.preprocess_data(models)
-                return {models['_id']: AliceModel(**models)}
-        except requests.exceptions.RequestException as e:
-            print(f"Error retrieving models: {e}")
-            return {}
+        
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(url, headers=headers) as response:
+                    if response is None:
+                        raise ValueError(f"Failed to get a response from {url}")
+                    response.raise_for_status()
+                    models = await response.json()
+                    
+                    if isinstance(models, list):
+                        models = [await self.preprocess_data(model) for model in models]
+                        return {model['_id']: AliceModel(**model) for model in models}
+                    else:
+                        models = await self.preprocess_data(models)
+                        return {models['_id']: AliceModel(**models)}
+            except aiohttp.ClientError as e:
+                print(f"Error retrieving models: {e}")
+                return {}
+            
+    async def task_initializer(self, task: dict) -> AliceTask:
+        if not task["task_type"] in self.task_types:
+            raise ValueError(f"Task type {task['task_type']} not found in available task types.")
+        
+        if "tasks" in task and isinstance(task["tasks"], dict):
+            print(f'TASKS: {task["tasks"]}')
+            # Use asyncio.gather to initialize subtasks concurrently
+            subtasks = await asyncio.gather(*[
+                self.task_initializer(subtask) 
+                for subtask in task["tasks"].values()
+            ])
+            task["tasks"] = {
+                subtask["_id"]: initialized_subtask 
+                for subtask, initialized_subtask in zip(task["tasks"].values(), subtasks)
+            }
     
-    def get_chats(self, chat_id: Optional[str] = None) -> Dict[str, AliceChat]:
+        # Assuming the task_types constructors are not async
+        return self.task_types[task["task_type"]](**task)
+    
+    async def get_chats(self, chat_id: Optional[str] = None) -> Dict[str, AliceChat]:
         if chat_id is None:
             url = f"{self.base_url}/chats"
         else:
             url = f"{self.base_url}/chats/{chat_id}"
-
         headers = self._get_headers()
-        try:
-            response = requests.get(url, headers=headers)
-            response.raise_for_status()
-            print(f'Chats response: {response.json()}')
-            chats = response.json()
-            if isinstance(chats, list):
-                chats = [self.preprocess_data(chat) for chat in chats]
-                return {chat["_id"]: self.populate_chat(chat) for chat in chats}
-            else:
-                chats = self.preprocess_data(chats)
-                return {chats['_id']: self.populate_chat(chats)}
-        except requests.exceptions.RequestException as e:
-            print(f"Error retrieving chats: {e}")
-            return {}
         
-    def populate_chat(self, chat: dict) -> AliceChat:
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(url, headers=headers) as response:
+                    response.raise_for_status()
+                    chats = await response.json()
+                    print(f'Chats response: {chats}')
+                    
+                    if isinstance(chats, list):
+                        chats = [await self.preprocess_data(chat) for chat in chats]
+                        return {chat["_id"]: await self.populate_chat(chat) for chat in chats}
+                    else:
+                        chats = await self.preprocess_data(chats)
+                        return {chats['_id']: await self.populate_chat(chats)}
+            except aiohttp.ClientError as e:
+                print(f"Error retrieving chats: {e}")
+                return {}
+        
+    async def populate_chat(self, chat: dict) -> AliceChat:
         print(f'Chat: {chat}')
-        
+    
         if 'functions' in chat and chat['functions']:
             processed_functions = []
-            for function_id in chat['functions']:
+            for function in chat['functions']:
                 try:
-                    task = self.task_initializer(function_id)
+                    task = await self.task_initializer(function)
                     if not isinstance(task, AliceTask):
-                        print(f"Warning: task_initializer returned non-AliceTask object for ID {function_id}")
+                        print(f"Warning: task_initializer returned non-AliceTask object for function {function.get('task_name', 'Unknown')}")
                         continue
                     processed_functions.append(task)
                 except Exception as e:
-                    print(f"Error processing function {function_id}: {str(e)}")
-            
+                    print(f"Error processing function {function.get('task_name', 'Unknown')}: {str(e)}")
+        
             chat['functions'] = processed_functions
 
-        try:
-            chat_obj = AliceChat.model_validate(chat)
-            if not chat_obj:
-                raise ValueError(f"Invalid chat object after processing functions. {chat}")
-            
-            chat_obj.alice_agent.model_manager_object = self.model_manager
-            return chat_obj
-        except Exception as e:
-            print(f"Error validating chat object: {str(e)}")
-            raise ValueError(f"Failed to validate chat object: {str(e)}")
+        return AliceChat(**chat)
     
-    def store_chat_message(self, chat_id: str, message: MessageDict) -> bool:
+    async def store_chat_message(self, chat_id: str, message: MessageDict) -> MessageDict:
         url = f"{self.base_url}/chats/{chat_id}/add_message"
         headers = self._get_headers()
         data = {"message": message}  # Wrap the message in a "message" key
         try:
-            response = requests.patch(url, json=data, headers=headers)
-            response.raise_for_status()
-            print(f"Messages stored successfully for chat {chat_id}")
-            return f"Messages stored successfully for chat {chat_id}"
-        except requests.exceptions.RequestException as e:
+            async with aiohttp.ClientSession() as session:
+                async with session.patch(url, json=data, headers=headers) as response:
+                    response.raise_for_status()
+                    result = await response.json()
+                    print(f"Message stored successfully for chat {chat_id}")
+                    return MessageDict(**result)
+        except aiohttp.ClientError as e:
             print(f"Error storing messages: {e}")
             return None
-        
-    async def store_task_response(self, task_response: TaskResponse) -> str:
-        url = f"{self.base_url}/taskresults"
-        headers = self._get_headers()
-        data = task_response.model_dump()
-        try:
-            response = requests.post(url, json=data, headers=headers)
-            response.raise_for_status()
-            print(f"TaskResponse stored successfully with ID: {response.json()['_id']}")
-            return response.json()['_id']
-        except requests.exceptions.RequestException as e:
-            print(f"Error storing TaskResponse: {e}")
 
-    async def store_task_response_on_chat(self, task_response: TaskResponse, chat_id: str) -> str:
+    # async def store_task_response(self, task_response: TaskResponse) -> TaskResponse:
+    #     url = f"{self.base_url}/taskResults"
+    #     headers = self._get_headers()
+    #     data = task_response.model_dump()
+    #     try:
+    #         async with aiohttp.ClientSession() as session:
+    #             async with session.post(url, json=data, headers=headers) as response:
+    #                 response.raise_for_status()
+    #                 result = await response.json()
+    #                 print(f"TaskResponse stored successfully with ID: {result['_id']}")
+    #                 return TaskResponse(**result)
+    #     except aiohttp.ClientError as e:
+    #         print(f"Error storing TaskResponse: {e}")
+    #         raise
+
+    async def store_task_response(self, task_response: TaskResponse) -> DatabaseTaskResponse:
+        url = f"{self.base_url}/taskResults"
+        headers = self._get_headers()
+        
+        print(f'Original task_response: {task_response}')
+        print(f'task_response type: {type(task_response)}')
+        
+        # Convert TaskResponse to DatabaseTaskResponse
+        if isinstance(task_response, TaskResponse) and not isinstance(task_response, DatabaseTaskResponse):
+            db_task_response = DatabaseTaskResponse(
+                task_id=task_response.task_id,
+                task_name=task_response.task_name,
+                task_description=task_response.task_description,
+                status=task_response.status,
+                result_code=task_response.result_code,
+                task_outputs=str(task_response.task_outputs) if task_response.task_outputs else None,
+                task_content=task_response.task_outputs.model_dump() if task_response.task_outputs else None,
+                result_diagnostic=task_response.result_diagnostic,
+                task_inputs=task_response.task_inputs,
+                usage_metrics=task_response.usage_metrics,
+                execution_history=task_response.execution_history
+            )
+        else:
+            db_task_response = task_response
+        
+        print(f'Converted db_task_response: {db_task_response}')
+        print(f'db_task_response type: {type(db_task_response)}')
+        
+        try:
+            data = db_task_response.model_dump()
+            print(f'Serialized data: {data}')
+        except Exception as e:
+            print(f'Error serializing db_task_response: {e}')
+            # Try manual serialization
+            data = {
+                "task_id": db_task_response.task_id,
+                "task_name": db_task_response.task_name,
+                "task_description": db_task_response.task_description,
+                "status": db_task_response.status,
+                "result_code": db_task_response.result_code,
+                "task_outputs": db_task_response.task_outputs,
+                "task_content": db_task_response.task_content,
+                "result_diagnostic": db_task_response.result_diagnostic,
+                "task_inputs": db_task_response.task_inputs,
+                "usage_metrics": db_task_response.usage_metrics,
+                "execution_history": db_task_response.execution_history
+            }
+        
+        print(f"Storing DatabaseTaskResponse with data: {data}")
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(url, json=data, headers=headers) as response:
+                    try:
+                        response.raise_for_status()
+                    except aiohttp.ClientResponseError as e:
+                        print(f"Response status: {response.status}")
+                        response_text = await response.text()
+                        print(f"Response content: {response_text}")
+                        raise
+
+                    result = await response.json()
+                    print(f"DatabaseTaskResponse stored successfully with ID: {result['_id']}")
+                    return DatabaseTaskResponse(**result)
+        except aiohttp.ClientError as e:
+            print(f"Error storing DatabaseTaskResponse: {e}")
+            raise
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            raise
+
+    # async def store_task_response(self, task_response: DatabaseTaskResponse) -> DatabaseTaskResponse:
+    #     url = f"{self.base_url}/taskResults"
+    #     headers = self._get_headers()
+    #     data = task_response.model_dump()
+        
+    #     print(f"Storing DatabaseTaskResponse with data: {data}")
+
+    #     try:
+    #         async with aiohttp.ClientSession() as session:
+    #             async with session.post(url, json=data, headers=headers) as response:
+    #                 try:
+    #                     response.raise_for_status()
+    #                 except aiohttp.ClientResponseError as e:
+    #                     print(f"Response status: {response.status}")
+    #                     response_text = await response.text()
+    #                     print(f"Response content: {response_text}")
+    #                     raise
+
+    #                 result = await response.json()
+    #                 print(f"DatabaseTaskResponse stored successfully with ID: {result['_id']}")
+    #                 return DatabaseTaskResponse(**result)
+    #     except aiohttp.ClientError as e:
+    #         print(f"Error storing DatabaseTaskResponse: {e}")
+    #         raise
+    #     except Exception as e:
+    #         print(f"Unexpected error: {e}")
+    #         raise
+        
+    async def store_task_response_on_chat(self, task_response: DatabaseTaskResponse, chat_id: str) -> Dict[str, Any]:
         url = f"{self.base_url}/chats/{chat_id}/add_task_response"
         headers = self._get_headers()
         try:
-            id = await self.store_task_response(task_response)
-            response = requests.patch(url, json=id, headers=headers)
-            response.raise_for_status()
-            print(f"TaskResponse stored successfully with ID: {response.json()['_id']}")
-            return f'TaskResponse stored successfully with ID: {response.json()["_id"]}'
-        except requests.exceptions.RequestException as e:
-            print(f"Error storing TaskResponse: {e}")
+            result = await self.store_task_response(task_response)
+            async with aiohttp.ClientSession() as session:
+                async with session.patch(url, json={"task_response_id": result.id}, headers=headers) as response:
+                    response.raise_for_status()
+                    chat_result = await response.json()
+                    print(f"DatabaseTaskResponse added to chat successfully: {chat_result}")
+                    return chat_result
+        except aiohttp.ClientError as e:
+            print(f"Error storing DatabaseTaskResponse on chat: {e}")
+            raise
         
     def validate_token(self, token: str) -> dict:
         url = f"{self.base_url}/users/validate"

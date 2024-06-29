@@ -5,7 +5,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 
 const container = document.getElementById('root');
-const root = createRoot(container!); // Create a root.
+const root = createRoot(container!);
 
 root.render(
   <React.StrictMode>

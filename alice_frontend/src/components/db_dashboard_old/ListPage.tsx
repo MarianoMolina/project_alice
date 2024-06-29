@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress, Button, Snackbar, TableSortLabel, Box } from '@mui/material';
+import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress, Button, Snackbar, TableSortLabel, Box } from '@mui/material';
 import ModalComponent from './ModalComponent';
-import { createItem, updateItem, fetchItem, fetchSchema } from '../services/api';
+import { createItem, updateItem, fetchItem, fetchSchema } from '../../services/api';
 import AddIcon from '@mui/icons-material/Add';
-import './ListPage.css';
+import useStyles from '../../styles/ListPageStyles';
 
 interface ListPageProps {
   collectionName: string;
 }
 
 const ListPage: React.FC<ListPageProps> = ({ collectionName }) => {
+  const classes = useStyles();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -111,9 +112,9 @@ const ListPage: React.FC<ListPageProps> = ({ collectionName }) => {
   if (loading) {
     console.log(`Loading data for ${collectionName}`);
     return (
-      <Container component="main" className="circular-progress-container" maxWidth="sm">
+      <Box className={classes.circularProgressContainer}>
         <CircularProgress />
-      </Container>
+      </Box>
     );
   }
 
@@ -127,8 +128,8 @@ const ListPage: React.FC<ListPageProps> = ({ collectionName }) => {
   };
 
   return (
-    <Container component="main" className="container" maxWidth="lg">
-      <Box className="title-button-container">
+    <Box className={classes.container}>
+      <Box className={classes.titleButtonContainer}>
         <Typography variant="h4" component="h1">
           {collectionName}
         </Typography>
@@ -136,8 +137,8 @@ const ListPage: React.FC<ListPageProps> = ({ collectionName }) => {
           New
         </Button>
       </Box>
-      <TableContainer component={Paper} className="table-container">
-        <Table>
+      <TableContainer component={Paper} className={classes.tableContainer}>
+        <Table stickyHeader>
           <TableHead>
             <TableRow>
               {data.length > 0 &&
@@ -187,7 +188,7 @@ const ListPage: React.FC<ListPageProps> = ({ collectionName }) => {
           </Button>
         }
       />
-    </Container>
+    </Box>
   );
 };
 

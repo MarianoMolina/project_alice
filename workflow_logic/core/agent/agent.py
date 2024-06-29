@@ -72,8 +72,6 @@ class AliceAgent(BaseModel):
                 llm_config = LLMConfig(**llm_config)
             if not llm_config.config_list:
                 raise ValueError("LLM Config must have a 'config_list' attribute with at least one config.")
-            if llm_config.config_list[0].model_client_cls in [None, '']:
-                del llm_config.config_list[0].__dict__['model_client_cls']
             llm_config = replace_localhost(llm_config=llm_config).model_dump()
             if self.functions:
                 llm_config["functions"] = self.functions

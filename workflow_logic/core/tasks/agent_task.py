@@ -271,11 +271,11 @@ class AgentWithFunctions(PromptAgentTask):
             executor.register_function(task_function["function_map"])
         return llm_agent, executor
 
-    def generate_agent_response(self, messages: List[dict], max_rounds: int = 10, **kwargs) -> Tuple[str, int]:
+    def generate_agent_response(self, messages: List[dict], max_rounds: int = 5, **kwargs) -> Tuple[str, int]:
         execution_history = kwargs.pop("execution_history", [])
         self.agent.update_max_consecutive_auto_reply(max_rounds)
         agent, execution_agent = self.register_functions(list(self.tasks.values()), self.agent, self.execution_agent, execution_history=execution_history)
-        chat_result = execution_agent.initiate_chat(agent, message=messages[-1], clear_history=True, max_turns=10)
+        chat_result = execution_agent.initiate_chat(agent, message=messages[-1], clear_history=True, max_turns=5)
         if chat_result:
             return chat_result.summary, 0
         return "", 1

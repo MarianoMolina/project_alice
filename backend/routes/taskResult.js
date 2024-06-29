@@ -3,9 +3,25 @@ const router = express.Router();
 const TaskResult = require('../models/TaskResult');
 const auth = require('../middleware/auth');
 
+// // Create a new TaskResult
+// router.post('/', auth, async (req, res) => {
+//   try {
+//     console.log("Creating TaskResult: ", req.body)
+//     const taskResult = new TaskResult({
+//       ...req.body,
+//       created_by: req.user.userId,
+//       updated_by: req.user.userId
+//     });
+//     await taskResult.save();
+//     res.status(201).json(taskResult);
+//   } catch (error) {
+//     res.status(400).json({ message: error.message });
+//   }
+// });
 // Create a new TaskResult
 router.post('/', auth, async (req, res) => {
   try {
+    console.log("Creating TaskResult: ", req.body);
     const taskResult = new TaskResult({
       ...req.body,
       created_by: req.user.userId,
@@ -14,6 +30,7 @@ router.post('/', auth, async (req, res) => {
     await taskResult.save();
     res.status(201).json(taskResult);
   } catch (error) {
+    console.error("Error creating TaskResult: ", error);
     res.status(400).json({ message: error.message });
   }
 });

@@ -21,12 +21,12 @@ import {
 } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material/Select';
 import { SupportAgent, PrecisionManufacturing, Functions, Visibility, Edit, Add } from '@mui/icons-material';
-import { fetchItem } from '../services/api';
-import { AliceAgent, AliceTask, AliceModel, LLMConfig, CreateAliceChat } from '../utils/types';
+import { fetchItem } from '../../services/api';
+import { AliceAgent, AliceTask, AliceModel, LLMConfig, CreateAliceChat } from '../../utils/types';
 import Agent from './Agent';
 import Model from './Model';
 import Function from './Function';
-import useStyles from './NewChatStyles';
+import useStyles from '../../styles/NewChatStyles';
 
 interface NewChatProps {
   open: boolean;

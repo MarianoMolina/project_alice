@@ -1,8 +1,8 @@
 import React from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import Message from './Message';
-import { ChatProps } from '../utils/types';
-import useStyles from './ChatStyles';
+import { ChatProps } from '../../utils/types';
+import useStyles from '../../styles/ChatStyles';
 
 interface ExtendedChatProps extends ChatProps {
   isGenerating: boolean;

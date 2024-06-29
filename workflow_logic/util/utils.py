@@ -45,7 +45,7 @@ class ModelConfig(BaseModel):
     api_key: Optional[str]
     base_url: Optional[str] = f"http://{HOST}:{LM_STUDIO_PORT}/v1"
     api_type: Optional[str] = "openai"
-    model_client_cls: Optional[str] = None
+    # model_client_cls: Optional[str] = None
 
 class LLMConfig(BaseModel):
     config_list: List[ModelConfig]

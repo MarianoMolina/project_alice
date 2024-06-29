@@ -56,6 +56,8 @@ export interface TaskResponse {
   execution_history?: Record<string, any>[];
   created_by?: string;
   updated_by?: string;
+  createdAt?: string;
+  updatedAt?: string;
   _id?: string;
 }
 export interface AliceAgent {

@@ -15,9 +15,9 @@ import {
   Dialog,
 } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material/Select';
-import { createItem, updateItem, fetchItem } from '../services/api';
-import { AliceTask, AliceAgent, Prompt, FunctionParameters } from '../utils/types';
-import useStyles from './FunctionStyles';
+import { createItem, updateItem, fetchItem } from '../../services/api';
+import { AliceTask, AliceAgent, Prompt, FunctionParameters } from '../../utils/types';
+import useStyles from '../../styles/FunctionStyles';
 
 interface FunctionProps {
   functionId?: string;

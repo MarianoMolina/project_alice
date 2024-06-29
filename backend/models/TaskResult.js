@@ -7,11 +7,12 @@ const taskResultSchema = new Schema({
   task_description: { type: String, required: true },
   status: { type: String, enum: ["pending", "complete", "failed"], required: true },
   result_code: { type: Number, required: true },
-  task_outputs: { type: Map, of: String, default: null, allowNull: true },
-  task_inputs: { type: Map, of: String, default: null, allowNull: true},
+  task_outputs: { type: String, default: null, allowNull: true },
+  task_inputs: { type: Map, of: Schema.Types.Mixed, default: null, allowNull: true},
   result_diagnostic: { type: String, default: null, allowNull: true },
   usage_metrics: { type: Map, of: String, default: null, allowNull: true },
-  execution_history: [{ type: Map, of: String, default: null, allowNull: true }],
+  execution_history: [{ type: Map, of: Schema.Types.Mixed, default: null, allowNull: true }],
+  task_content: { type: Map, of: Schema.Types.Mixed, default: null, allowNull: true},
   created_by: { type: Schema.Types.ObjectId, ref: 'User' },
   updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
@@ -29,6 +30,7 @@ taskResultSchema.virtual('apiRepresentation').get(function() {
     result_diagnostic: this.result_diagnostic || null,
     usage_metrics: this.usage_metrics || null,
     execution_history: this.execution_history || [],
+    task_content: this.task_content || null,
     created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
     updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,
     created_at: this.createdAt || null,

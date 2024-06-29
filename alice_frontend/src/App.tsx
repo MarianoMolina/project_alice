@@ -11,16 +11,14 @@ import CreateWorkflow from './pages/StartTask';
 import Database from './pages/Database';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import { AuthProvider } from './context/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute from './layouts/ProtectedRoute';
 import { ChatProvider } from './context/ChatContext';
 import './assets/fonts/fonts.css';
 
 const App: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline /> {/* This normalizes styles across browsers */}
-      <AuthProvider>
+      <CssBaseline />
         <MainLayout>
           <Routes>
             <Route path="/" element={<HomePage />} />
@@ -36,7 +34,6 @@ const App: React.FC = () => {
             <Route path="/database" element={<ProtectedRoute element={<Database />} />} />
           </Routes>
         </MainLayout>
-      </AuthProvider>
     </ThemeProvider>
   );
 };

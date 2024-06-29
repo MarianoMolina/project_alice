@@ -1,15 +1,9 @@
 import logging
 from typing import Dict, Any, Optional, List, Callable, Union
 from pydantic import BaseModel, Field
-from workflow_logic.util.task_utils import TaskResponse, OutputInterface, WorkflowOutput
+from workflow_logic.util.task_utils import TaskResponse, WorkflowOutput
 from workflow_logic.core.agent.agent import AgentLibrary
 from workflow_logic.core.tasks.task import AliceTask
-
-class WorkflowOutput(OutputInterface):
-    content: List[TaskResponse] = Field([], description="The task responses performed by the workflow.")
-
-    def __str__(self) -> str:
-        return "\n".join([f"{task.task_name}: {task.task_description}\nTask Output:{str(task.task_outputs)}" for task in self.content])
 
 class Workflow(AliceTask):
     """
@@ -94,10 +88,18 @@ class TaskLibrary(BaseModel):
             self.add_tasks_in_batch(self.available_tasks)
 
     def add_task(self, task: AliceTask) -> bool:
-        if task and "task_name" in task.model_dump():
-            self.tasks[task.task_name] = task
-            return True
-        return False
+        if not isinstance(task, AliceTask):
+            logging.warning(f"Task {task} is not an instance of AliceTask. Skipping.")
+            return False
+        if not task.task_name:
+            logging.warning(f"Task {task} does not have a task_name attribute. Skipping.")
+            return False
+        if task.task_name in self.tasks:
+            logging.warning(f"Task {task.task_name} already exists in the task library. Skipping.")
+            return False
+        task.agent_library = self.agent_library
+        self.tasks[task.task_name] = task     
+        return True
 
     def get_task(self, task_name: str) -> AliceTask:
         if task_name not in self.tasks:
@@ -113,14 +115,5 @@ class TaskLibrary(BaseModel):
     def add_tasks_in_batch(self, tasks: List[AliceTask]) -> bool:
         # This is bad -> workflows that have workflows inside them will not work
         for task in tasks:
-            if "task_name" in task.model_dump():
-                if task.task_name in self.tasks:
-                    logging.warning(f"Task {task.task_name} already exists in the task library. Skipping.")
-                else:
-                    if 'agent_library' in task.model_dump():
-                        task.agent_library = self.agent_library
-                    self.tasks[task.task_name] = task
-            else:
-                logging.warning(f"Task {task} does not have a task_name attribute. Skipping.")
-                
+            self.add_task(task)               
         return True

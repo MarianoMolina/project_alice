@@ -152,8 +152,8 @@ class AliceModel(BaseModel):
             "api_type": self.api_type
         }
 
-        if self.autogen_model_client_cls is not None:
-            config["model_client_cls"] = self.autogen_model_client_cls
+        # if self.autogen_model_client_cls is not None:
+        #     config["model_client_cls"] = self.autogen_model_client_cls
 
         return [config]
 

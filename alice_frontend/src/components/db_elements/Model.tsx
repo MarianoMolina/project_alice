@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Box, TextField, Button, Select, MenuItem, FormControl, InputLabel, Typography } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material/Select';
-import { createItem, updateItem, fetchItem } from '../services/api';
-import { AliceModel } from '../utils/types';
-import useStyles from './ModelStyles';
+import { createItem, updateItem, fetchItem } from '../../services/api';
+import { AliceModel } from '../../utils/types';
+import useStyles from '../../styles/ModelStyles';
 
 interface ModelProps {
     modelId?: string;

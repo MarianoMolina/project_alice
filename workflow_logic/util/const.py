@@ -24,7 +24,7 @@ FRONTEND_HOST = os.getenv("FRONTEND_HOST", "frontend")
 BACKEND_HOST = os.getenv("BACKEND_HOST", "backend")
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN")
 
-active_models = ["Llama3_8B_Instruct"]
+active_models = ["GPT4o"]
 active_vision_models = ["Llava_vision"]
 LM_STUDIO_PORT = os.getenv("LM_STUDIO_PORT")
 

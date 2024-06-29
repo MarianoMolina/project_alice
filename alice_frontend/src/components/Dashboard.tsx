@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import StorageIcon from '@mui/icons-material/Storage';
 import ChatIcon from '@mui/icons-material/Chat';
-import BuildIcon from '@mui/icons-material/Build';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -46,14 +45,14 @@ const Dashboard: React.FC = () => {
         >
           Database
         </Button>
-        <Button
+        {/* <Button
           variant="contained"
           fullWidth
           onClick={() => handleNavigation('/alice-tools')}
           startIcon={<BuildIcon />}
         >
           Configure Alice Tools
-        </Button>
+        </Button> */}
       </Box>
     </Container>
   );

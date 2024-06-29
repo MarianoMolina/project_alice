@@ -26,7 +26,7 @@ mongoose.connect(process.env.MONGODB_URI || "mongodb://mongo/alice_database", {
 }).catch(err => {
   console.error('Failed to connect to MongoDB', err);
 });
-mongoose.set('debug', true);
+// mongoose.set('debug', true);
 
 // // // Logging middleware
 // app.use((req, res, next) => {
@@ -47,13 +47,6 @@ app.use(corsMiddlewares);
 app.options('*', corsMiddlewares);
 
 app.use(bodyParser.json());
-
-// app.use((req, res, next) => {
-//   if (req.body) {
-//     console.log('Parsed body:', JSON.stringify(req.body));
-//   }
-//   next();
-// });
 
 app.use('/api/agents', AgentRoutes);
 app.use('/api/chats', chatRoutes);

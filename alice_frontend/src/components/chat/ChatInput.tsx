@@ -1,6 +1,6 @@
 import React, { ChangeEvent, KeyboardEvent } from 'react';
 import { Box, Button, TextField } from '@mui/material';
-import { MessageType } from '../utils/types';
+import { MessageType } from '../../utils/types';
 
 interface ChatInputProps {
   newMessage: string;

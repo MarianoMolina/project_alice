@@ -24,7 +24,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     padding: theme.spacing(1),
     display: 'flex',
     flexDirection: 'column',
-    maxHeight: 'calc(100vh - 250px)', // Adjust this value as needed
     overflowY: 'auto',
   },
   chatsList: {
