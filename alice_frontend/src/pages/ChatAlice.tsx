@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box } from '@mui/material';
 import Chat from '../components/chat/Chat';
 import Sidebar from '../components/chat/Sidebar';
 import ChatInput from '../components/chat/ChatInput';
-import NewChat from '../components/db_elements/NewChat';
 import { useChat } from '../context/ChatContext';
 import useStyles from '../styles/ChatAliceStyles';
-import { CreateAliceChat } from '../utils/types';
+import { CreateAliceChat, AliceTask, TaskResponse } from '../utils/types';
 
 const ChatAlice: React.FC = () => {
   const classes = useStyles();
@@ -23,21 +22,31 @@ const ChatAlice: React.FC = () => {
     generateResponse,
     handleRegenerateResponse,
     createNewChat,
-    currentChat
+    currentChat,
+    addTasksToChat,
+    addTaskResultsToChat,
+    isTaskInChat,
+    isTaskResultInChat,
+    fetchAvailableTasks,
+    fetchAvailableTaskResults
   } = useChat();
 
-  const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false);
+  const [availableTasks, setAvailableTasks] = useState<AliceTask[]>([]);
+  const [availableTaskResults, setAvailableTaskResults] = useState<TaskResponse[]>([]);
 
-  const lastMessage = messages[messages.length - 1];
-
-  const handleNewChatClick = () => {
-    setIsNewChatModalOpen(true);
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      const tasks = await fetchAvailableTasks();
+      const taskResults = await fetchAvailableTaskResults();
+      setAvailableTasks(tasks);
+      setAvailableTaskResults(taskResults);
+    };
+    fetchData();
+  }, [fetchAvailableTasks, fetchAvailableTaskResults]);
 
   const handleNewChatCreated = async (chat: Partial<CreateAliceChat>) => {
     try {
-      createNewChat(chat);
-      setIsNewChatModalOpen(false);
+      return await createNewChat(chat);
     } catch (error) {
       console.error('Error creating new chat:', error);
     }
@@ -49,10 +58,16 @@ const ChatAlice: React.FC = () => {
         <Sidebar
           pastChats={pastChats}
           handleSelectChat={handleSelectChat}
-          handleNewChatClick={handleNewChatClick}
+          handleNewChatCreated={handleNewChatCreated}
           agents={agents}
           currentChatId={currentChatId}
           currentChat={currentChat}
+          tasks={availableTasks}
+          taskResults={availableTaskResults}
+          onAddTasksToChat={addTasksToChat}
+          onAddTaskResultsToChat={addTaskResultsToChat}
+          isTaskInChat={isTaskInChat}
+          isTaskResultInChat={isTaskResultInChat}
         />
       </Box>
       <Box className={classes.chatAliceMain}>
@@ -70,16 +85,11 @@ const ChatAlice: React.FC = () => {
             newMessage={newMessage}
             setNewMessage={setNewMessage}
             handleSendMessage={handleSendMessage}
-            lastMessage={lastMessage}
+            lastMessage={messages[messages.length - 1]}
             chatSelected={!!currentChatId}
           />
         </Box>
       </Box>
-      <NewChat
-        open={isNewChatModalOpen}
-        onClose={() => setIsNewChatModalOpen(false)}
-        onChatCreated={handleNewChatCreated}
-      />
     </Box>
   );
 };

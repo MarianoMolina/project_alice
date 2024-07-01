@@ -1,6 +1,8 @@
 import React from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import Message from './Message';
+import Skeleton from '@mui/material/Skeleton';
+import Stack from '@mui/material/Stack';
 import { ChatProps } from '../../utils/types';
 import useStyles from '../../styles/ChatStyles';
 
@@ -36,14 +38,22 @@ const Chat: React.FC<ExtendedChatProps> = ({
 
   return (
     <Box className={classes.chatContainer}>
-      {messages.map((message, index) => (
-        message && message.content ?
-          <Message key={index} message={message} /> :
-          null
-      ))}
-      {!chatSelected && (
-        <Typography variant="h6">Please select a chat to start chatting with Alice.</Typography>
-      )}
+      <Box className={classes.messagesContainer}>
+        {messages.map((message, index) => (
+          message && message.content ?
+            <Message key={index} message={message} /> :
+            null
+        ))}
+        {!chatSelected && (
+          <Stack spacing={1}>
+            <Typography variant="h6">Please select a chat to start chatting with Alice.</Typography>
+            <Skeleton variant="circular" width={40} height={40} />
+            <Skeleton variant="rectangular" height={80} />
+            <Skeleton variant="circular" className={classes.right_circle} width={40} height={40}/>
+            <Skeleton variant="rounded" height={90} />
+          </Stack>
+        )}
+      </Box>
       <Box className={classes.actionButtonContainer}>
         {renderActionButton()}
       </Box>

@@ -35,13 +35,16 @@ export interface AliceModel {
 export interface MessageType {
   role: 'user' | 'assistant' | 'system' | 'tool';
   content: string;
-  created_by: 'user' | 'llm' | 'tool';
+  generated_by: 'user' | 'llm' | 'tool';
   step?: string;
   assistant_name?: string;
   context?: Record<string, any>;
-  type?: 'text' | 'image' | 'video' | 'audio' | 'file';
+  type?: 'text' | 'image' | 'video' | 'audio' | 'file' | 'TaskResponse';
   request_type?: string | null;  // Allow null for request_type
-  timestamp?: string;
+  created_by?: string | User | null;
+  updated_by?: string | User | null;
+  createdAt?: string;
+  updatedAt?: string;
   _id?: string;
 }
 
@@ -126,11 +129,11 @@ export interface CreateAliceChat {
   llm_config?: LLMConfig;
   functions?: string[];
 }
-
+export type TaskType = "CVGenerationTask" | "RedditSearchTask" | "APITask" | "WikipediaSearchTask" | "GoogleSearchTask" | "ExaSearchTask" | "ArxivSearchTask" | "BasicAgentTask" | "PromptAgentTask" | "CheckTask" | "CodeGenerationLLMTask" | "CodeExecutionLLMTask" | "AgentWithFunctions" | "Workflow";
 export interface AliceTask {
   task_name: string;
   task_description: string;
-  task_type: "CVGenerationTask" | "RedditSearchTask" | "APITask" | "WikipediaSearchTask" | "GoogleSearchTask" | "ExaSearchTask" | "ArxivSearchTask" | "BasicAgentTask" | "PromptAgentTask" | "CheckTask" | "CodeGenerationLLMTask" | "CodeExecutionLLMTask" | "AgentWithFunctions";
+  task_type: TaskType;
   input_variables: FunctionParameters | null;
   exit_codes: Map<string, string>;
   recursive: boolean;
@@ -176,4 +179,43 @@ export interface Prompt {
   version?: number;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface PromptAgentTaskForm {
+  task_name: string;
+  task_description: string;
+  agent_id: string;
+  human_input: boolean;
+  input_variables: string;
+  templates: { [key: string]: string };
+  prompts_to_add: { [key: string]: string };
+}
+
+export interface AgentWithFunctionsForm extends PromptAgentTaskForm {
+  tasks: { [key: string]: string };
+  execution_agent_id: string;
+}
+
+export interface CheckTaskForm extends PromptAgentTaskForm {
+  exit_code_response_map: { [key: string]: number };
+}
+
+export interface CodeExecutionLLMTaskForm extends PromptAgentTaskForm {
+  exit_codes: { [key: number]: string };
+  valid_languages: string[];
+  timeout: number;
+}
+
+export interface CodeGenerationLLMTaskForm extends PromptAgentTaskForm {
+  exit_codes: { [key: number]: string };
+}
+
+export interface WorkflowForm {
+  task_name: string;
+  task_description: string;
+  input_variables: string;
+  tasks: { [key: string]: string };
+  start_task: string | null;
+  max_attempts: number;
+  recursive: boolean;
 }

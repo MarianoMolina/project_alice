@@ -2,16 +2,17 @@ import { Theme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
 
 const useStyles = makeStyles((theme: Theme) => ({
-  sidebar: {
-    display: 'flex',
-    height: '100%',
+  taskResultList: {
+    width: '100%',
+    maxWidth: 360,
     backgroundColor: theme.palette.background.paper,
-    transition: 'width 0.3s ease',
   },
-  content: {
-    flexGrow: 1,
-    overflowY: 'auto',
-    overflowX: 'hidden',
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
+  },
+  addButton: {
+    margin: theme.spacing(2),
   },
 }));
 

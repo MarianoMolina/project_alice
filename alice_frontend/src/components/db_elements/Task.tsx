@@ -24,10 +24,12 @@ import { AliceTask, FunctionParameters, Prompt, AliceAgent } from '../../utils/t
 import PromptComponent from './PromptComponent';
 import AgentComponent from './Agent';
 import useStyles from '../../styles/TaskStyles';
+import { useTask } from '../../context/TaskContext';
 
 interface TaskProps {
   taskId?: string;
   onClose: () => void;
+  viewOnly?: boolean
 }
 
 const taskTypes = [
@@ -37,7 +39,7 @@ const taskTypes = [
   "AgentWithFunctions"
 ];
 
-const Task: React.FC<TaskProps> = ({ taskId, onClose }) => {
+const Task: React.FC<TaskProps> = ({ taskId, onClose, viewOnly }) => {
   const classes = useStyles();
   const [task, setTask] = useState<Partial<AliceTask>>({});
   const [newExitCode, setNewExitCode] = useState<{ code: string; message: string }>({ code: '', message: '' });
@@ -45,7 +47,10 @@ const Task: React.FC<TaskProps> = ({ taskId, onClose }) => {
   const [promptDialogOpen, setPromptDialogOpen] = useState(false);
   const [agentDialogOpen, setAgentDialogOpen] = useState(false);
   const [selectedPromptType, setSelectedPromptType] = useState<'template' | 'prompt_to_add' | null>(null);
-
+  const viewOnlyMode = viewOnly || false;
+  const {
+    createNewTask,
+  } = useTask();
   const isNewTask = !taskId;
 
   useEffect(() => {
@@ -123,11 +128,7 @@ const Task: React.FC<TaskProps> = ({ taskId, onClose }) => {
 
   const handleSave = async () => {
     try {
-      if (isNewTask) {
-        await createItem('tasks', task);
-      } else {
-        await updateItem('tasks', taskId!, task);
-      }
+      await createNewTask(task);
       onClose();
     } catch (error) {
       console.error('Error saving task:', error);

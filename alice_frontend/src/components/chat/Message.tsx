@@ -3,16 +3,28 @@ import { Box, Typography } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import { MessageProps } from '../../utils/types';
 import useStyles from '../../styles/MessageStyles';
+import { MessageType } from '../../utils/types';
 
 const Message: React.FC<MessageProps> = ({ message }) => {
   const classes = useStyles();
 
-  const getCreatorName = (createdBy: any) => {
-    if (typeof createdBy === 'string') return createdBy;
-    if (createdBy && typeof createdBy === 'object' && 'name' in createdBy) {
-      return createdBy.name;
+  const getCreatorName = (message: MessageType) => {
+    const createdBy = message.created_by;
+    const asisstantName = message.assistant_name;
+    const role = message.role;
+    const typeMsg = message.type;
+    if (typeMsg === 'TaskResponse') return 'Task Response';
+    if (role === 'assistant') {
+      if (asisstantName) return asisstantName;
+      return "Assistant"
     }
-    return 'Unknown';
+    if (role === 'user') {
+      if (createdBy) {
+        if (typeof createdBy === 'string') return "User";
+        if (createdBy && typeof createdBy === 'object' && 'name' in createdBy) return createdBy.name;
+      }
+      return "User"
+    }
   };
 
   const getMessageClass = () => {
@@ -29,7 +41,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
   return (
     <Box className={`${classes.message} ${getMessageClass()}`}>
       <Typography variant="caption" className={classes.assistantName}>
-        {message.assistant_name || getCreatorName(message.created_by)}
+        {message.assistant_name || getCreatorName(message)}
       </Typography>
       <ReactMarkdown className={classes.markdownText}>{message.content}</ReactMarkdown>
       {message.step && (
@@ -45,7 +57,4 @@ const Message: React.FC<MessageProps> = ({ message }) => {
     </Box>
   );
 };
-      {/* <Typography variant="body2" className={classes.creator}>
-        {getCreatorName(message.created_by)}
-      </Typography> */}
 export default Message;

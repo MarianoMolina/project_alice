@@ -2,24 +2,19 @@ import { Theme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
 
 const useStyles = makeStyles((theme: Theme) => ({
-  chatContainer: {
+  verticalMenu: {
     display: 'flex',
     flexDirection: 'column',
+    borderRight: `1px solid ${theme.palette.divider}`,
     height: '100%',
-    padding: theme.spacing(2),
+    '& > *': {
+      marginBottom: theme.spacing(1),
+    },
   },
-  messagesContainer: {
-    flexGrow: 1,
-    overflowY: 'auto',
+  expandButton: {
+    marginTop: 'auto',
     marginBottom: theme.spacing(2),
   },
-  actionButtonContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-  },
-  right_circle: {
-    marginLeft: 'auto !important',
-  }
 }));
 
 export default useStyles;

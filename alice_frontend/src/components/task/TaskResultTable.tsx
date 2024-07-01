@@ -17,7 +17,7 @@ interface TaskResultTableProps {
     setSelectedResult: (result: TaskResponse) => void;
 }
 
-type SortColumn = 'task_name' | 'status' | 'result_code' | 'createdAt';
+type SortColumn = 'task_name' | 'result_code' | 'createdAt';
 
 const TaskResultTable: React.FC<TaskResultTableProps> = ({ taskResults, setSelectedResult }) => {
     const classes = useStyles();
@@ -63,15 +63,6 @@ const TaskResultTable: React.FC<TaskResultTableProps> = ({ taskResults, setSelec
                         </TableCell>
                         <TableCell>
                             <TableSortLabel
-                                active={orderBy === 'status'}
-                                direction={orderBy === 'status' ? order : 'asc'}
-                                onClick={() => handleRequestSort('status')}
-                            >
-                                Status
-                            </TableSortLabel>
-                        </TableCell>
-                        <TableCell>
-                            <TableSortLabel
                                 active={orderBy === 'result_code'}
                                 direction={orderBy === 'result_code' ? order : 'asc'}
                                 onClick={() => handleRequestSort('result_code')}
@@ -98,7 +89,6 @@ const TaskResultTable: React.FC<TaskResultTableProps> = ({ taskResults, setSelec
                             className={classes.tableRow}
                         >
                             <TableCell>{result.task_name}</TableCell>
-                            <TableCell>{result.status}</TableCell>
                             <TableCell>{result.result_code}</TableCell>
                             <TableCell>{result.createdAt ? new Date(result.createdAt).toLocaleString() : 'N/A'}</TableCell>
                         </TableRow>

@@ -2,14 +2,16 @@ import { Theme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
 
 const useStyles = makeStyles((theme: Theme) => ({
-  dialogContent: {
+  container: {
     display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing(2),
+    padding: theme.spacing(2),
+    height: '100%',
+    overflowY: 'auto',
   },
   formControl: {
-    flexGrow: 1,
-    marginRight: theme.spacing(1),
+    width: '100%',
   },
   inlineContainer: {
     display: 'flex',
@@ -17,8 +19,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     justifyContent: 'space-between',
   },
   addButton: {
-    marginTop: 'auto',
-    marginBottom: 'auto',
+    marginLeft: theme.spacing(1),
   },
   slider: {
     marginTop: theme.spacing(1),
@@ -35,6 +36,9 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   viewButton: {
     marginLeft: theme.spacing(1),
+  },
+  createButton: {
+    marginTop: theme.spacing(2),
   },
 }));
 

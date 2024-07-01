@@ -2,7 +2,7 @@ import React from 'react';
 import { AppBar, Toolbar, IconButton, Box, Tooltip, Button, Typography } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
-import AddIcon from '@mui/icons-material/Add';
+import TaskIcon from '@mui/icons-material/Task';
 import StorageIcon from '@mui/icons-material/Storage';
 import ChatIcon from '@mui/icons-material/Chat';
 import { useAuth } from '../context/AuthContext';
@@ -51,7 +51,7 @@ const Header: React.FC = () => {
                 onClick={() => handleNavigation('/start-task')}
                 className={isActive('/start-task') ? classes.activeButton : ''}
               >
-                <AddIcon />
+                <TaskIcon />
               </IconButton>
             </Tooltip>
             <Tooltip title="Chat with Alice">

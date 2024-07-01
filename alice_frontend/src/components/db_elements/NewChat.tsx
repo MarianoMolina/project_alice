@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TextField,
   Button,
   Select,
@@ -18,6 +14,7 @@ import {
   ListItemText,
   IconButton,
   Tooltip,
+  Dialog,
 } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material/Select';
 import { SupportAgent, PrecisionManufacturing, Functions, Visibility, Edit, Add } from '@mui/icons-material';
@@ -29,13 +26,12 @@ import Function from './Function';
 import useStyles from '../../styles/NewChatStyles';
 
 interface NewChatProps {
-  open: boolean;
-  onClose: () => void;
   onChatCreated: (chat: CreateAliceChat) => void;
 }
 
-const NewChat: React.FC<NewChatProps> = ({ open, onClose, onChatCreated }) => {
+const NewChat: React.FC<NewChatProps> = ({ onChatCreated }) => {
   const classes = useStyles();
+
   const [chatName, setChatName] = useState('New Chat');
   const [selectedAgent, setSelectedAgent] = useState<string>('');
   const [selectedExecutor, setSelectedExecutor] = useState('6678997432793b02d478efdb');
@@ -101,7 +97,6 @@ const NewChat: React.FC<NewChatProps> = ({ open, onClose, onChatCreated }) => {
 
     try {
       onChatCreated(newChat);
-      onClose();
     } catch (error) {
       console.error('Error creating chat:', error);
       alert('Failed to create chat. Please try again.');
@@ -135,132 +130,135 @@ const NewChat: React.FC<NewChatProps> = ({ open, onClose, onChatCreated }) => {
     setViewingFunction(func || null);
     setOpenFunctionDialog(true);
   };
+  
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Create New Chat</DialogTitle>
-      <DialogContent className={classes.dialogContent}>
-        <TextField
-          fullWidth
-          label="Chat Name"
-          value={chatName}
-          onChange={(e) => setChatName(e.target.value)}
-        />
-        <Box className={classes.inlineContainer}>
-          <FormControl fullWidth className={classes.formControl}>
-            <InputLabel>Agent</InputLabel>
-            <Select
-              value={selectedAgent}
-              onChange={handleAgentChange}
-            >
-              {agents.map((agent) => (
-                <MenuItem key={agent._id} value={agent._id}>
-                  <SupportAgent />
-                  <ListItemText primary={agent.name} />
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <Tooltip title="Create New Agent">
-            <IconButton onClick={() => setOpenAgentDialog(true)} className={classes.addButton}>
-              <Add />
-            </IconButton>
-          </Tooltip>
+    <Box className={classes.container}>
+      <Typography variant="h6" gutterBottom>Create New Chat</Typography>
+      <TextField
+        fullWidth
+        label="Chat Name"
+        value={chatName}
+        onChange={(e) => setChatName(e.target.value)}
+        className={classes.formControl}
+      />
+      <Box className={classes.inlineContainer}>
+        <FormControl fullWidth className={classes.formControl}>
+          <InputLabel>Agent</InputLabel>
+          <Select
+            value={selectedAgent}
+            onChange={handleAgentChange}
+          >
+            {agents.map((agent) => (
+              <MenuItem key={agent._id} value={agent._id}>
+                <SupportAgent />
+                <ListItemText primary={agent.name} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <Tooltip title="Create New Agent">
+          <IconButton onClick={() => setOpenAgentDialog(true)} className={classes.addButton}>
+            <Add />
+          </IconButton>
+        </Tooltip>
+      </Box>
+      {viewingAgent && (
+        <Box>
+          <Typography variant="subtitle2">Selected Agent: {viewingAgent.name}</Typography>
+          <Button 
+            startIcon={<Edit />} 
+            onClick={() => setOpenAgentDialog(true)}
+            className={classes.viewButton}
+          >
+            Edit
+          </Button>
         </Box>
-        {viewingAgent && (
-          <Box>
-            <Typography variant="subtitle2">Selected Agent: {viewingAgent.name}</Typography>
-            <Button 
-              startIcon={<Edit />} 
-              onClick={() => setOpenAgentDialog(true)}
-              className={classes.viewButton}
-            >
-              Edit
-            </Button>
-          </Box>
-        )}
+      )}
 
-        <Box className={classes.inlineContainer}>
-          <FormControl fullWidth className={classes.formControl}>
-            <InputLabel>Model</InputLabel>
-            <Select
-              value={selectedModel}
-              onChange={handleModelChange}
-            >
-              {models.map((model) => (
-                <MenuItem key={model._id} value={model._id}>
-                  <PrecisionManufacturing />
-                  <ListItemText primary={model.short_name} />
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <Tooltip title="Create New Model">
-            <IconButton onClick={() => setOpenModelDialog(true)} className={classes.addButton}>
-              <Add />
-            </IconButton>
-          </Tooltip>
+      <Box className={classes.inlineContainer}>
+        <FormControl fullWidth className={classes.formControl}>
+          <InputLabel>Model</InputLabel>
+          <Select
+            value={selectedModel}
+            onChange={handleModelChange}
+          >
+            {models.map((model) => (
+              <MenuItem key={model._id} value={model._id}>
+                <PrecisionManufacturing />
+                <ListItemText primary={model.short_name} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <Tooltip title="Create New Model">
+          <IconButton onClick={() => setOpenModelDialog(true)} className={classes.addButton}>
+            <Add />
+          </IconButton>
+        </Tooltip>
+      </Box>
+      {viewingModel && (
+        <Box>
+          <Typography variant="subtitle2">Selected Model: {viewingModel.short_name}</Typography>
+          <Button 
+            startIcon={<Edit />} 
+            onClick={() => setOpenModelDialog(true)}
+            className={classes.viewButton}
+          >
+            Edit
+          </Button>
         </Box>
-        {viewingModel && (
-          <Box>
-            <Typography variant="subtitle2">Selected Model: {viewingModel.short_name}</Typography>
-            <Button 
-              startIcon={<Edit />} 
-              onClick={() => setOpenModelDialog(true)}
-              className={classes.viewButton}
-            >
-              Edit
-            </Button>
-          </Box>
-        )}
+      )}
 
-        <Typography gutterBottom>Temperature: {temperature}</Typography>
-        <Slider
-          value={temperature}
-          onChange={(_, newValue) => setTemperature(newValue as number)}
-          min={0}
-          max={1}
-          step={0.1}
-          className={classes.slider}
-        />
-        <Typography gutterBottom>Timeout (seconds): {timeout}</Typography>
-        <Slider
-          value={timeout}
-          onChange={(_, newValue) => setTimeout(newValue as number)}
-          min={30}
-          max={600}
-          step={30}
-          className={classes.slider}
-        />
-        <Box className={classes.inlineContainer}>
-          <Typography variant="subtitle1" className={classes.functionsSection}>
-            Functions
-          </Typography>
-          <Tooltip title="Create New Function">
-            <IconButton onClick={() => setOpenFunctionDialog(true)} className={classes.addButton}>
-              <Add />
-            </IconButton>
-          </Tooltip>
-        </Box>
-        <Box className={classes.chipContainer}>
-          {tasks.map((task) => (
-            <Chip
-              key={task._id}
-              icon={<Functions />}
-              label={task.task_name}
-              onClick={() => task._id && handleFunctionToggle(task._id)}
-              onDelete={() => task._id && handleFunctionView(task._id)}
-              deleteIcon={<Visibility />}
-              color={task._id && selectedFunctions.includes(task._id) ? "primary" : "default"}
-            />
-          ))}
-        </Box>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleCreateChat} variant="contained" color="primary">
-          Create Chat
-        </Button>
-      </DialogActions>
+      <Typography gutterBottom>Temperature: {temperature}</Typography>
+      <Slider
+        value={temperature}
+        onChange={(_, newValue) => setTemperature(newValue as number)}
+        min={0}
+        max={1}
+        step={0.1}
+        className={classes.slider}
+      />
+      <Typography gutterBottom>Timeout (seconds): {timeout}</Typography>
+      <Slider
+        value={timeout}
+        onChange={(_, newValue) => setTimeout(newValue as number)}
+        min={30}
+        max={600}
+        step={30}
+        className={classes.slider}
+      />
+      <Box className={classes.inlineContainer}>
+        <Typography variant="subtitle1" className={classes.functionsSection}>
+          Functions
+        </Typography>
+        <Tooltip title="Create New Function">
+          <IconButton onClick={() => setOpenFunctionDialog(true)} className={classes.addButton}>
+            <Add />
+          </IconButton>
+        </Tooltip>
+      </Box>
+      <Box className={classes.chipContainer}>
+        {tasks.map((task) => (
+          <Chip
+            key={task._id}
+            icon={<Functions />}
+            label={task.task_name}
+            onClick={() => task._id && handleFunctionToggle(task._id)}
+            onDelete={() => task._id && handleFunctionView(task._id)}
+            deleteIcon={<Visibility />}
+            color={task._id && selectedFunctions.includes(task._id) ? "primary" : "default"}
+          />
+        ))}
+      </Box>
+      <Button 
+        onClick={handleCreateChat} 
+        variant="contained" 
+        color="primary"
+        fullWidth
+        className={classes.createButton}
+      >
+        Create Chat
+      </Button>
 
       <Dialog open={openAgentDialog} onClose={() => setOpenAgentDialog(false)}>
         <Agent agentId={viewingAgent?._id} onClose={() => setOpenAgentDialog(false)} />
@@ -273,7 +271,7 @@ const NewChat: React.FC<NewChatProps> = ({ open, onClose, onChatCreated }) => {
       <Dialog open={openFunctionDialog} onClose={() => setOpenFunctionDialog(false)}>
         <Function functionId={viewingFunction?._id} onClose={() => setOpenFunctionDialog(false)} />
       </Dialog>
-    </Dialog>
+    </Box>
   );
 };
 

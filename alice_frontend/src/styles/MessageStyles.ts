@@ -17,7 +17,8 @@ const useStyles = makeStyles((theme: Theme) => ({
     color: theme.palette.secondary.contrastText,
   },
   otherMessage: {
-    backgroundColor: theme.palette.grey[300],
+    backgroundColor: theme.palette.secondary.dark,
+    color: theme.palette.primary.dark,
   },
   assistantName: {
     color: theme.palette.text.primary,

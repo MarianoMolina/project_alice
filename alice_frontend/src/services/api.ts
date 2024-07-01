@@ -83,7 +83,7 @@ export const createItem = async (collectionName: string, itemData: any): Promise
 export const updateItem = async (collectionName: string, itemId: string, itemData: any): Promise<any> => {
   try {
     const url = `/${collectionName}/${itemId}`;
-    const response: CollectionResponse = await dbAxiosInstance.put(url, itemData);
+    const response: CollectionResponse = await dbAxiosInstance.patch(url, itemData);
     return response.data;
   } catch (error) {
     console.error(`Error updating item in ${collectionName}:`, error);
