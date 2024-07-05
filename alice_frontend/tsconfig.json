@@ -17,6 +17,6 @@
     "jsx": "react-jsx",
     "plugins": [{ "name": "typescript-plugin-css-modules" }]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/components/ui/background-gradient-animation.txs"],
   "exclude": ["node_modules", "build"]
 }

@@ -4,7 +4,7 @@ import Form from '@rjsf/mui';
 import { IChangeEvent } from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
 import CloseIcon from '@mui/icons-material/Close';
-import useStyles from '../../styles/ModalComponentStyles';
+import useStyles from './ModalComponentStyles';
 
 interface ModalComponentProps {
   open: boolean;

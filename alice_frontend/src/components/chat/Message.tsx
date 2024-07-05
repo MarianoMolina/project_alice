@@ -1,9 +1,8 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
-import { MessageProps } from '../../utils/types';
-import useStyles from '../../styles/MessageStyles';
-import { MessageType } from '../../utils/types';
+import useStyles from './MessageStyles';
+import { MessageType, MessageProps } from '../../utils/ChatTypes';
 
 const Message: React.FC<MessageProps> = ({ message }) => {
   const classes = useStyles();

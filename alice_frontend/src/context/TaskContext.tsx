@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import { AliceTask, TaskResponse } from '../utils/types';
-import { fetchItem, executeTask, createItem, updateItem } from '../services/api';
+import { TaskResponse } from '../utils/TaskResponseTypes';
+import { useApi } from './ApiContext';
+import { AliceTask } from '../utils/TaskTypes';
 
 interface TaskContextType {
   tasks: AliceTask[];
@@ -13,15 +14,18 @@ interface TaskContextType {
   fetchTaskResults: () => Promise<void>;
   handleSelectTask: (task: AliceTask) => void;
   handleInputChange: (key: string, value: any) => void;
+  setInputValues: (values: { [key: string]: any }) => void;
   handleExecuteTask: () => Promise<void>;
   setSelectedResult: (result: TaskResponse | null) => void;
   createNewTask: (task: Partial<AliceTask>) => Promise<Partial<AliceTask> | undefined>;
   updateTask: (taskId: string, task: Partial<AliceTask>) => Promise<Partial<AliceTask> | undefined>;
+  setSelectedTask: (task: AliceTask | null) => void;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { fetchItem, createItem, updateItem, executeTask } = useApi();
   const [tasks, setTasks] = useState<AliceTask[]>([]);
   const [selectedTask, setSelectedTask] = useState<AliceTask | null>(null);
   const [taskResults, setTaskResults] = useState<TaskResponse[]>([]);
@@ -32,7 +36,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const fetchTasks = async () => {
     try {
       const fetchedTasks = await fetchItem('tasks');
-      setTasks(fetchedTasks);
+      setTasks(fetchedTasks as AliceTask[]);
     } catch (error) {
       console.error('Error fetching tasks:', error);
     }
@@ -41,7 +45,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const fetchTaskResults = async () => {
     try {
       const fetchedResults = await fetchItem('taskresults');
-      setTaskResults(fetchedResults);
+      setTaskResults(fetchedResults as TaskResponse[]);
     } catch (error) {
       console.error('Error fetching task results:', error);
     }
@@ -54,6 +58,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const handleSelectTask = (task: AliceTask) => {
     setSelectedTask(task);
+    console.log('Selected task in context:', task);
     setInputValues({});
     setExecutionStatus('idle');
   };
@@ -64,7 +69,6 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const handleExecuteTask = async () => {
     if (!selectedTask || !selectedTask._id) return;
-
     try {
       console.log('Executing task:', selectedTask._id, inputValues);
       setExecutionStatus('progress');
@@ -81,11 +85,10 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const createNewTask = async (task: Partial<AliceTask>) => {
     try {
       if (!task._id) {
-        task = await createItem('tasks', task);
+        return await createItem('tasks', task);
       } else {
-        task = await updateItem('tasks', task._id!, task);
+        return await updateItem('tasks', task._id, task);
       }
-      return task;
     } catch (error) {
       console.error('Error saving task:', error);
     }
@@ -99,7 +102,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }
 
-  const value = {
+  const value: TaskContextType = {
     tasks,
     selectedTask,
     taskResults,
@@ -110,10 +113,12 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     fetchTaskResults,
     handleSelectTask,
     handleInputChange,
+    setInputValues,
     handleExecuteTask,
     setSelectedResult,
     createNewTask,
     updateTask,
+    setSelectedTask,
   };
 
   return <TaskContext.Provider value={value}>{children}</TaskContext.Provider>;

@@ -1,16 +1,15 @@
 import React, { ChangeEvent, KeyboardEvent } from 'react';
 import { Box, Button, TextField } from '@mui/material';
-import { MessageType } from '../../utils/types';
+import { MessageType } from '../../utils/ChatTypes';
 
 interface ChatInputProps {
-  newMessage: string;
-  setNewMessage: (message: string) => void;
   handleSendMessage: (message: string) => void;
   lastMessage?: MessageType;
   chatSelected: boolean;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ newMessage, setNewMessage, handleSendMessage, lastMessage, chatSelected }) => {
+const ChatInput: React.FC<ChatInputProps> = ({ handleSendMessage, lastMessage, chatSelected }) => {
+  const [newMessage, setNewMessage] = React.useState('');
   const handleAddFile = () => {
     alert('Add file button clicked');
   };

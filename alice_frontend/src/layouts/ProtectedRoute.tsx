@@ -2,6 +2,10 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { CircularProgress, Box } from '@mui/material';
+import { ApiProvider } from '../context/ApiContext';
+import { TaskProvider } from '../context/TaskContext';
+import { ChatProvider } from '../context/ChatContext';
+import { ConfigProvider } from '../context/ConfigContext';
 
 interface ProtectedRouteProps {
   element: React.ReactNode;
@@ -20,7 +24,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
   }
 
   return isAuthenticated ? (
-    <>{element}</>
+
+    <ApiProvider>
+      <TaskProvider>
+        <ChatProvider>
+          <ConfigProvider>
+          {element}
+          </ConfigProvider>
+        </ChatProvider>
+      </TaskProvider>
+    </ApiProvider>
   ) : (
     <Navigate to="/login" replace state={{ from: location }} />
   );

@@ -3,7 +3,7 @@ import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, Tab
 import ModalComponent from './ModalComponent';
 import { createItem, updateItem, fetchItem, fetchSchema } from '../../services/api';
 import AddIcon from '@mui/icons-material/Add';
-import useStyles from '../../styles/ListPageStyles';
+import useStyles from './ListPageStyles';
 
 interface ListPageProps {
   collectionName: string;

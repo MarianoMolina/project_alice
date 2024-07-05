@@ -1,13 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { MessageType, AliceChat, AliceAgent, CreateAliceChat, AliceTask, TaskResponse } from '../utils/types';
-import { fetchUserChats, fetchChatById, sendMessage, generateChatResponse, createItem, updateItem, fetchItem } from '../services/api';
+import { TaskResponse } from '../utils/TaskResponseTypes';
+import { AliceAgent } from '../utils/AgentTypes';
+import { AliceTask } from '../utils/TaskTypes';
+import { MessageType, AliceChat } from '../utils/ChatTypes';
 import { useAuth } from '../context/AuthContext';
+import { useApi } from './ApiContext';
 
 interface ChatContextType {
     messages: MessageType[];
     setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>;
-    newMessage: string;
-    setNewMessage: React.Dispatch<React.SetStateAction<string>>;
     pastChats: AliceChat[];
     setPastChats: React.Dispatch<React.SetStateAction<AliceChat[]>>;
     currentChatId: string | null;
@@ -21,7 +22,6 @@ interface ChatContextType {
     generateResponse: () => Promise<void>;
     handleRegenerateResponse: () => Promise<void>;
     fetchChats: () => Promise<void>;
-    createNewChat: (chatData: Partial<CreateAliceChat>) => Promise<string>;
     currentChat: AliceChat | null;
     addTasksToChat: (taskIds: string[]) => Promise<void>;
     addTaskResultsToChat: (taskResultIds: string[]) => Promise<void>;
@@ -38,8 +38,8 @@ interface ChatProviderProps {
 }
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
+    const { fetchItem, updateItem, fetchUserChats, fetchChatById, sendMessage, generateChatResponse } = useApi();
     const [messages, setMessages] = useState<MessageType[]>([]);
-    const [newMessage, setNewMessage] = useState<string>('');
     const [pastChats, setPastChats] = useState<AliceChat[]>([]);
     const [currentChatId, setCurrentChatId] = useState<string | null>(null);
     const [agents, setAgents] = useState<AliceAgent[]>([]);
@@ -64,27 +64,17 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
     const handleSelectChat = async (chatId: string) => {
         try {
-            const chatData = await fetchChatById(chatId);
-            setCurrentChat(chatData);
-            setMessages(chatData.messages);
-            setCurrentChatId(chatId);
-            setAgents([chatData.alice_agent]);
+          console.log('Fetching chat with id:', chatId);
+          const chatData = await fetchChatById(chatId);
+          console.log('Fetched chat data:', chatData);
+          setCurrentChat(chatData);
+          setMessages(chatData.messages);
+          setCurrentChatId(chatId);
+          setAgents([chatData.alice_agent]);
         } catch (error) {
-            console.error('Error fetching chat:', error);
+          console.error('Error fetching chat:', error);
         }
-    };
-
-    const createNewChat = async (chatData: Partial<CreateAliceChat>): Promise<string> => {
-        try {
-            const newChat = await createItem("chats", chatData);
-            await fetchChats(); // Re-fetch all chats
-            handleSelectChat(newChat._id); // Set the new chat as active
-            return newChat._id;
-        } catch (error) {
-            console.error('Error creating new chat:', error);
-            throw error;
-        }
-    };
+      };
 
     const handleSendMessage = async (messageContent: string) => {
         if (!currentChatId) {
@@ -139,7 +129,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             const tasks = await Promise.all(taskIds.map(id => fetchItem("tasks", id)));
             const updatedFunctions = [...(currentChat.functions || []), ...tasks];
             await updateItem("chats", currentChatId, { functions: updatedFunctions });
-            await handleSelectChat(currentChatId); // Re-fetch chat data
+            await handleSelectChat(currentChatId);
         } catch (error) {
             console.error('Error adding tasks to chat:', error);
         }
@@ -164,7 +154,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
                 task_responses: updatedTaskResponses,
                 messages: updatedMessages
             });
-            await handleSelectChat(currentChatId); // Re-fetch chat data
+            await handleSelectChat(currentChatId);
         } catch (error) {
             console.error('Error adding task results to chat:', error);
         }
@@ -180,7 +170,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
     const fetchAvailableTasks = async (): Promise<AliceTask[]> => {
         try {
-            return await fetchItem("tasks");
+            return await fetchItem("tasks") as AliceTask[];
         } catch (error) {
             console.error('Error fetching available tasks:', error);
             return [];
@@ -189,7 +179,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
     const fetchAvailableTaskResults = async (): Promise<TaskResponse[]> => {
         try {
-            return await fetchItem("taskresults");
+            return await fetchItem("taskresults") as TaskResponse[];
         } catch (error) {
             console.error('Error fetching available task results:', error);
             return [];
@@ -199,8 +189,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     const value: ChatContextType = {
         messages,
         setMessages,
-        newMessage,
-        setNewMessage,
         pastChats,
         setPastChats,
         currentChatId,
@@ -214,7 +202,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         generateResponse,
         handleRegenerateResponse,
         fetchChats,
-        createNewChat,
         currentChat,
         addTasksToChat,
         addTaskResultsToChat,
