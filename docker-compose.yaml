@@ -21,12 +21,17 @@ services:
   backend:
     build:
       context: ./backend
+      dockerfile: Dockerfile.dev
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT_DOCKER}"
     depends_on:
       - mongo
     volumes:
       - ./.env:/app/.env
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
 
   mongo:
     image: mongo:latest

@@ -1,8 +1,8 @@
 from workflow_logic.util.task_utils import FunctionParameters, ParameterDefinition
 from workflow_logic.core.tasks.task import AliceTask
-from workflow_logic.core.tasks.agent_task import PromptAgentTask, CodeGenerationLLMTask, CodeExecutionLLMTask, CheckTask, AgentWithFunctions, BasicAgentTask, CVGenerationTask
+from workflow_logic.core.tasks.agent_tasks import PromptAgentTask, CodeGenerationLLMTask, CodeExecutionLLMTask, CheckTask, AgentWithFunctions, BasicAgentTask
 from workflow_logic.core.tasks.workflow import Workflow
-from workflow_logic.core.tasks.api_task import RedditSearchTask, ExaSearchTask, WikipediaSearchTask, GoogleSearchTask, ArxivSearchTask, APITask
+from workflow_logic.core.tasks.api_tasks import RedditSearchTask, ExaSearchTask, WikipediaSearchTask, GoogleSearchTask, ArxivSearchTask, APITask
 from typing import List
 
 ## Parameters for the CV Generation Workflow
@@ -429,6 +429,72 @@ unit_test_execution_check_parameters = FunctionParameters(
 #     "max_attempts": 3,
 #     "recursive": False
 # }
+
+cv_workflow_string_template = """The user has requested the creation of a custom {% if inputs.request_cover_letter %}CV and Cover Letter{% else %}CV{% endif %}. 
+Here's the available data for context, but remember to focus on tackling the CURRENT TASK:
+# Job description: this is the role the user wants to apply to
+{{ inputs_job_description }}
+# User's history: this is all the information we have about the user's professional background
+{{ inputs_user_history }}
+{% if inputs_additional_details %}
+# Additional details: provided by the user
+{{ inputs_additional_details }}
+{% endif %}
+{% if outputs %}
+{% if outputs_user_clarifications_task and outputs_cv_clarifications_task %}
+Based on the provided data we came up with a set of clarifying questions:
+{{ outputs_cv_clarifications_task }}
+Here is the user input regarding our questions:
+{{ outputs_user_clarifications_task }} 
+{% endif %}
+{% if outputs_cv_brainstorming_task %}
+We spent some time brainstorming how to succeed on this task, and these are the recommendations we came up with:
+{{ outputs_cv_brainstorming_task }}
+{% endif %}
+{% if outputs_cover_letter %}
+Here is the approved cover letter we prepared:
+{{ outputs_cover_letter }}
+{% endif %}
+{% if outputs_cv_draft %}
+Here is the approved CV draft we prepared:
+{{ outputs_cv_draft }}
+{% endif %}
+{% endif %}
+{% if task_description %}
+## CURRENT TASK: 
+{{ task_description }}
+{% endif %}"""
+# ## Parameters for the CV Generation Workflow
+# cv_clarifications_parameters = FunctionParameters(
+#     type="object",
+#     properties={
+#         "inputs_job_description": ParameterDefinition(
+#             type="string",
+#             description="The job description for which the CV is being created.",
+#             default=None
+#             ),
+#         "inputs_user_history": ParameterDefinition(
+#             type="string",
+#             description="The user's history and experience.",
+#             default=None
+#             ),
+#         "inputs_additional_details": ParameterDefinition(
+#             type="string",
+#             description="Additional context or details provided by the user.",
+#             default=None
+#             ),
+#         "inputs_request_cover_letter": ParameterDefinition(
+#             type="boolean",
+#             description="Whether a cover letter is requested.",
+#             default=False
+#             ),
+#     },
+#     required=["inputs_job_description", "inputs_user_history", "inputs_additional_details", "inputs_request_cover_letter"]
+# )
+
+# class CVGenerationTask(PromptAgentTask):
+#     templates: Dict[str, Prompt] = Field({"task_template": TemplatedPrompt(name="cv_workflow_template", content=cv_workflow_string_template, parameters=cv_clarifications_parameters)}, description="A dictionary of template names and their file names. By default this task uses the 'task_template' template to structure the inputs.")
+#     agent_id: AliceAgent = Field(..., description="The agent to use for the task")
 
 available_tasks: List[AliceTask] = [
     # cv_clarifications_task,

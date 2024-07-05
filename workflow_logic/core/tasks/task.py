@@ -3,8 +3,8 @@ from typing import Dict, Any, Optional, List, Callable, Union
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field
 from workflow_logic.core.prompt import Prompt
-from workflow_logic.core.agent import AliceAgent, AgentLibrary
-from workflow_logic.util.task_utils import OutputInterface, SearchOutput, StringOutput, LLMChatOutput, WorkflowOutput, FunctionParameters, TaskResponse, ParameterDefinition, DatabaseTaskResponse
+from workflow_logic.core.agent import AliceAgent
+from workflow_logic.util.task_utils import OutputInterface, FunctionParameters, TaskResponse, ParameterDefinition, DatabaseTaskResponse
 
 prompt_function_parameters = FunctionParameters(
     type="object",
@@ -43,7 +43,6 @@ class AliceTask(BaseModel, ABC):
     agent_id: Optional[AliceAgent] = Field(None, description="The agent that the task is associated with")
     execution_agent_id: Optional[AliceAgent] = Field(None, description="The agent that the task is executed by")
     human_input: Optional[bool] = Field(default=False, description="Whether the task requires human input")
-    agent_library: Optional[AgentLibrary] = Field(None, description="The agent library that the task is associated with")
 
     @abstractmethod
     def run(self, **kwargs) -> TaskResponse:

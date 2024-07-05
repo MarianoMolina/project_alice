@@ -43,6 +43,7 @@ const AgentWithFunctions: React.FC<TaskFormProps<AgentWithFunctionsForm>> = ({
       console.log('[6-LOG] No tasks selected');
       return [];
     }
+    console.log('[7-LOG] Selected tasks:', form.tasks);
     const selectedIds = Object.values(form.tasks).map(task => task._id || '');
     console.log('[7-LOG] Selected task IDs:', selectedIds);
     return selectedIds;

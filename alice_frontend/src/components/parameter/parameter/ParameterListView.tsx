@@ -4,12 +4,9 @@ import {
     ListItem,
     ListItemText,
     Typography,
-    Box,
-    IconButton,
-    Tooltip
 } from '@mui/material';
-import { Visibility } from '@mui/icons-material';
 import { ParameterDefinition, ParameterComponentProps } from '../../../utils/ParameterTypes';
+import useStyles from '../ParameterStyles';
 
 const ParameterListView: React.FC<ParameterComponentProps> = ({
     items,
@@ -17,10 +14,11 @@ const ParameterListView: React.FC<ParameterComponentProps> = ({
     onInteraction,
 }) => {
     if (!items) return null;
+    const classes = useStyles();
     return (
         <List>
             {items.map((parameter: ParameterDefinition) => (
-                <ListItem key={parameter._id}>
+                <ListItem key={parameter._id} onClick={() => onInteraction && onInteraction(parameter)} className={isInteractable ? classes.interactable : ''}>
                     <ListItemText
                         primary={parameter.description}
                         secondary={
@@ -35,15 +33,6 @@ const ParameterListView: React.FC<ParameterComponentProps> = ({
                             </>
                         }
                     />
-                    <Box>
-                        {isInteractable && onInteraction && (
-                            <Tooltip title="View Agent">
-                                <IconButton edge="end" onClick={() => onInteraction(parameter)}>
-                                    <Visibility />
-                                </IconButton>
-                            </Tooltip>
-                        )}
-                    </Box>
                 </ListItem>
             ))}
         </List>

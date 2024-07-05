@@ -75,8 +75,12 @@ export const updateItem = async <T extends CollectionName>(
 ): Promise<CollectionType[T]> => {
   try {
     const url = `/${collectionName}/${itemId}`;
+    console.log("Updating item with data:", JSON.stringify(itemData), collectionName, itemId);
     const response = await dbAxiosInstance.patch(url, itemData);
-    return converters[collectionName](response.data) as CollectionType[T];
+    console.log("TRYING: ", response)
+    const data = converters[collectionName](response.data) as CollectionType[T];
+    console.log("Updated item:", data)
+    return data;
   } catch (error) {
     console.error(`Error updating item in ${collectionName}:`, error);
     throw error;

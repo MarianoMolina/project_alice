@@ -4,9 +4,8 @@ from autogen.agentchat import Agent, AssistantAgent, ConversableAgent, GroupChat
 from autogen.agentchat.contrib.llava_agent import LLaVAAgent
 from workflow_logic.util.utils import LLMConfig, replace_localhost
 from workflow_logic.util.task_utils import FunctionConfig
-from workflow_logic.core.model import ModelManager
+from workflow_logic.core.model import ModelManager, AliceModel
 from workflow_logic.core.prompt import Prompt
-from workflow_logic.util.const import LM_STUDIO_PORT, HOST
 
 class AliceAgent(BaseModel):
     id: str = Field(None, description="The ID of the agent", alias="_id")
@@ -24,6 +23,7 @@ class AliceAgent(BaseModel):
     model_manager_object: Optional[ModelManager] = Field(default=None, description="The model manager object. Required if the agent uses a model and no llm_config is passed")
     default_auto_reply: Optional[str] = Field(default="", description="The default auto reply for the agent")
     llm_config: Optional[LLMConfig] = Field(default=None, description="The LLM configuration for the agent")
+    model: Optional[AliceModel] = Field(default=None, description="The model object for the agent")
 
     class Config:
         protected_namespaces=()
@@ -31,6 +31,13 @@ class AliceAgent(BaseModel):
     @property
     def system_message_str(self) -> str:
         return self.system_message.format_prompt()
+    
+    @property
+    def _llm_config(self) -> LLMConfig:
+        if self.model:
+            model = self.model.autogen_model_config
+            self.llm_config.config_list = [model]
+        return LLMConfig(**self.llm_config)
 
     def get_autogen_agent(self, *, llm_config: Optional[LLMConfig] = None) -> ConversableAgent:
 

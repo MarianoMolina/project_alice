@@ -1,10 +1,10 @@
-from workflow_logic.util.task_utils import TaskResponse, DatabaseTaskResponse
-from workflow_logic.core.tasks import APITask, CVGenerationTask, AliceTask, RedditSearchTask, Workflow, WikipediaSearchTask, GoogleSearchTask, ExaSearchTask, ArxivSearchTask, BasicAgentTask, PromptAgentTask, CheckTask, CodeGenerationLLMTask, CodeExecutionLLMTask, AgentWithFunctions
+from workflow_logic.util.task_utils import DatabaseTaskResponse
+from workflow_logic.core.tasks import APITask, AliceTask, RedditSearchTask, Workflow, WikipediaSearchTask, GoogleSearchTask, ExaSearchTask, ArxivSearchTask, BasicAgentTask, PromptAgentTask, CheckTask, CodeGenerationLLMTask, CodeExecutionLLMTask, AgentWithFunctions
 from workflow_logic.core.agent import AliceAgent
 from workflow_logic.core.prompt import Prompt, TemplatedPrompt, PromptLibrary
 from workflow_logic.core.model import AliceModel
 from workflow_logic.core.chat import AliceChat
-from workflow_logic.core.tasks.workflow import TaskLibrary
+from workflow_logic.core.tasks.task_library import TaskLibrary
 from workflow_logic.core.model import ModelManager
 from workflow_logic.core.agent.agent import AgentLibrary
 from workflow_logic.util.task_utils import MessageDict
@@ -26,8 +26,7 @@ available_task_types: list[AliceTask] = [
     WikipediaSearchTask,
     GoogleSearchTask,
     ArxivSearchTask,
-    APITask,
-    CVGenerationTask
+    APITask
 ]
 
 class BackendAPI(BaseModel):
@@ -40,6 +39,7 @@ class BackendAPI(BaseModel):
     task_library: TaskLibrary = Field(None, description="The task library object.")
     class Config:
         arbitrary_types_allowed = True
+        protected_namespaces = ()
 
     @property
     def task_types(self) -> Dict[str, AliceTask]:
@@ -113,6 +113,7 @@ class BackendAPI(BaseModel):
                     prompts = await response.json()
 
                     if isinstance(prompts, list):
+                        print(f'PROMPTS: {prompts}')
                         prompts = [await self.preprocess_data(prompt) for prompt in prompts]
                         return {prompt["_id"]: TemplatedPrompt(**prompt) if "is_templated" in prompt and prompt["is_templated"] else Prompt(**prompt) for prompt in prompts}
                     else:
@@ -247,7 +248,7 @@ class BackendAPI(BaseModel):
         
     async def populate_chat(self, chat: dict) -> AliceChat:
         print(f'Chat: {chat}')
-    
+
         if 'functions' in chat and chat['functions']:
             processed_functions = []
             for function in chat['functions']:
@@ -259,12 +260,24 @@ class BackendAPI(BaseModel):
                     processed_functions.append(task)
                 except Exception as e:
                     print(f"Error processing function {function.get('task_name', 'Unknown')}: {str(e)}")
-        
+    
             chat['functions'] = processed_functions
 
-        return AliceChat(**chat)
+        # Ensure all required fields are present in messages
+        for message in chat.get('messages', []):
+            if 'task_responses' not in message:
+                message['task_responses'] = []
+
+        print(f'Messages: {chat["messages"]}')
+        
+        try:
+            return AliceChat(**chat)
+        except Exception as e:
+            print(f"Error creating AliceChat object: {str(e)}")
+            # You might want to add more detailed error handling here
+            raise
     
-    async def store_chat_message(self, chat_id: str, message: MessageDict) -> MessageDict:
+    async def store_chat_message(self, chat_id: str, message: MessageDict) -> AliceChat:
         url = f"{self.base_url}/chats/{chat_id}/add_message"
         headers = self._get_headers()
         data = {"message": message}  # Wrap the message in a "message" key
@@ -273,74 +286,15 @@ class BackendAPI(BaseModel):
                 async with session.patch(url, json=data, headers=headers) as response:
                     response.raise_for_status()
                     result = await response.json()
-                    print(f"Message stored successfully for chat {chat_id}")
-                    return MessageDict(**result)
+                    return self.populate_chat(result["chat"])
         except aiohttp.ClientError as e:
             print(f"Error storing messages: {e}")
             return None
 
-    # async def store_task_response(self, task_response: TaskResponse) -> TaskResponse:
-    #     url = f"{self.base_url}/taskResults"
-    #     headers = self._get_headers()
-    #     data = task_response.model_dump()
-    #     try:
-    #         async with aiohttp.ClientSession() as session:
-    #             async with session.post(url, json=data, headers=headers) as response:
-    #                 response.raise_for_status()
-    #                 result = await response.json()
-    #                 print(f"TaskResponse stored successfully with ID: {result['_id']}")
-    #                 return TaskResponse(**result)
-    #     except aiohttp.ClientError as e:
-    #         print(f"Error storing TaskResponse: {e}")
-    #         raise
-
-    async def store_task_response(self, task_response: TaskResponse) -> DatabaseTaskResponse:
+    async def store_task_response(self, task_response: DatabaseTaskResponse) -> DatabaseTaskResponse:
         url = f"{self.base_url}/taskResults"
         headers = self._get_headers()
-        
-        print(f'Original task_response: {task_response}')
-        print(f'task_response type: {type(task_response)}')
-        
-        # Convert TaskResponse to DatabaseTaskResponse
-        if isinstance(task_response, TaskResponse) and not isinstance(task_response, DatabaseTaskResponse):
-            db_task_response = DatabaseTaskResponse(
-                task_id=task_response.task_id,
-                task_name=task_response.task_name,
-                task_description=task_response.task_description,
-                status=task_response.status,
-                result_code=task_response.result_code,
-                task_outputs=str(task_response.task_outputs) if task_response.task_outputs else None,
-                task_content=task_response.task_outputs.model_dump() if task_response.task_outputs else None,
-                result_diagnostic=task_response.result_diagnostic,
-                task_inputs=task_response.task_inputs,
-                usage_metrics=task_response.usage_metrics,
-                execution_history=task_response.execution_history
-            )
-        else:
-            db_task_response = task_response
-        
-        print(f'Converted db_task_response: {db_task_response}')
-        print(f'db_task_response type: {type(db_task_response)}')
-        
-        try:
-            data = db_task_response.model_dump()
-            print(f'Serialized data: {data}')
-        except Exception as e:
-            print(f'Error serializing db_task_response: {e}')
-            # Try manual serialization
-            data = {
-                "task_id": db_task_response.task_id,
-                "task_name": db_task_response.task_name,
-                "task_description": db_task_response.task_description,
-                "status": db_task_response.status,
-                "result_code": db_task_response.result_code,
-                "task_outputs": db_task_response.task_outputs,
-                "task_content": db_task_response.task_content,
-                "result_diagnostic": db_task_response.result_diagnostic,
-                "task_inputs": db_task_response.task_inputs,
-                "usage_metrics": db_task_response.usage_metrics,
-                "execution_history": db_task_response.execution_history
-            }
+        data = task_response.model_dump()
         
         print(f"Storing DatabaseTaskResponse with data: {data}")
 
@@ -364,34 +318,6 @@ class BackendAPI(BaseModel):
         except Exception as e:
             print(f"Unexpected error: {e}")
             raise
-
-    # async def store_task_response(self, task_response: DatabaseTaskResponse) -> DatabaseTaskResponse:
-    #     url = f"{self.base_url}/taskResults"
-    #     headers = self._get_headers()
-    #     data = task_response.model_dump()
-        
-    #     print(f"Storing DatabaseTaskResponse with data: {data}")
-
-    #     try:
-    #         async with aiohttp.ClientSession() as session:
-    #             async with session.post(url, json=data, headers=headers) as response:
-    #                 try:
-    #                     response.raise_for_status()
-    #                 except aiohttp.ClientResponseError as e:
-    #                     print(f"Response status: {response.status}")
-    #                     response_text = await response.text()
-    #                     print(f"Response content: {response_text}")
-    #                     raise
-
-    #                 result = await response.json()
-    #                 print(f"DatabaseTaskResponse stored successfully with ID: {result['_id']}")
-    #                 return DatabaseTaskResponse(**result)
-    #     except aiohttp.ClientError as e:
-    #         print(f"Error storing DatabaseTaskResponse: {e}")
-    #         raise
-    #     except Exception as e:
-    #         print(f"Unexpected error: {e}")
-    #         raise
         
     async def store_task_response_on_chat(self, task_response: DatabaseTaskResponse, chat_id: str) -> Dict[str, Any]:
         url = f"{self.base_url}/chats/{chat_id}/add_task_response"

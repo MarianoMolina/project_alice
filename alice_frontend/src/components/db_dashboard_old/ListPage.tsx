@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress, Button, Snackbar, TableSortLabel, Box } from '@mui/material';
 import ModalComponent from './ModalComponent';
-import { createItem, updateItem, fetchItem, fetchSchema } from '../../services/api';
+import { createItem, updateItem, fetchItem, fetchSchema, CollectionName } from '../../services/api';
 import AddIcon from '@mui/icons-material/Add';
 import useStyles from './ListPageStyles';
 
@@ -28,7 +28,7 @@ const ListPage: React.FC<ListPageProps> = ({ collectionName }) => {
     const fetchData = async () => {
       try {
         console.log(`Fetching data for ${collectionName}`);
-        const result = await fetchItem(collectionName);
+        const result = await fetchItem(collectionName as CollectionName);
         console.log(`Data fetched for ${collectionName}:`, result);
         setData(result);
       } catch (error) {

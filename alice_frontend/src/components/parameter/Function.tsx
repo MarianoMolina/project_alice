@@ -45,14 +45,15 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
   }, []);
 
   const initialActiveParameters = useMemo(() => {
-    console.log('Initializing active parameters');
+    console.log('INITIAL PARAMETERS', initialParameters);
+    console.log('PARAMETERS', parameters)
     const initialActiveParams: ActiveParameter[] = parameters.map(param => ({
       ...param,
       isActive: false,
       name: '',
       isRequired: false
     }));
-
+    console.log('INITIAL ACTIVE PARAMETERS', initialActiveParams);
     if (initialParameters) {
       const propertiesObj = ensurePropertiesObject(initialParameters);
       Object.entries(propertiesObj).forEach(([key, value]) => {
@@ -68,7 +69,7 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
         }
       });
     }
-    console.log('initialActiveParams:', initialActiveParams);
+    console.log('FINAL ACTIVE PARAMETERS', initialActiveParams);
     return initialActiveParams;
   }, [parameters, initialParameters, ensurePropertiesObject]);
 
@@ -83,7 +84,8 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
         properties[param.name] = {
           type: param.type,
           description: param.description,
-          default: param.default
+          default: param.default,
+          _id: param._id
         };
         if (param.isRequired) {
           required.push(param.name);
@@ -164,6 +166,7 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
               <EnhancedParameter
                 mode="list"
                 fetchAll={true}
+                isInteractable={true}
                 onInteraction={(param: ParameterDefinition) => {
                   handleParameterToggle(param._id!);
                 }}

@@ -41,7 +41,7 @@ export const convertToAliceTask = (data: any): AliceTask => {
     recursive: data?.recursive || false,
     templates: data?.templates || {},
     tasks: typeof data?.tasks === 'object' && data?.tasks !== null
-      ? Object.fromEntries(Object.entries(data.tasks).map(([key, value]: [string, any]) => [key, value._id || value]))
+      ? Object.fromEntries(Object.entries(data.tasks).map(([key, value]: [string, any]) => [key, value || value]))
       : {},
     valid_languages: data?.valid_languages || [],
     timeout: data?.timeout || null,

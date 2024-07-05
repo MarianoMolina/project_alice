@@ -32,7 +32,7 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
         return <Typography>No agent data available.</Typography>;
     }
     const isEditMode = mode === 'edit' || mode === 'create';
-
+    console.log('item', item);
     return (
         <Box>
             <TextField
@@ -46,8 +46,8 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             <FormControl fullWidth margin="normal">
                 <InputLabel>System Message</InputLabel>
                 <Select
-                    value={item?.system_message}
-                    onChange={(e) => onChange({ system_message: e.target.value as Prompt })}
+                    value={item?.system_message._id}
+                    onChange={(e) => onChange({ system_message: prompts.find(prompt => prompt._id === e.target.value)})}
                     disabled={!isEditMode}
                 >
                     {prompts.map((prompt: Prompt) => (
@@ -68,8 +68,8 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             <FormControl fullWidth margin="normal">
                 <InputLabel>Model</InputLabel>
                 <Select
-                    value={item?.model}
-                    onChange={(e) => onChange({ model: e.target.value as AliceModel })}
+                    value={item?.model?._id || ''}
+                    onChange={(e) => onChange({ model: models.find(model => model._id === e.target.value)})}
                     disabled={!isEditMode}
                 >
                     {models.map((model: AliceModel) => (

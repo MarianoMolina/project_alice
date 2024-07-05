@@ -1,9 +1,10 @@
 from .task import AliceTask
-from .workflow import Workflow, TaskLibrary
-from .agent_task import BasicAgentTask, PromptAgentTask, CheckTask, CodeExecutionLLMTask, CodeGenerationLLMTask, TemplatedTask, AgentWithFunctions, CVGenerationTask
+from .workflow import Workflow
+from .task_library import TaskLibrary
+from .agent_tasks import BasicAgentTask, PromptAgentTask, CheckTask, CodeExecutionLLMTask, CodeGenerationLLMTask, TemplatedTask, AgentWithFunctions
 from .available_tasks import available_tasks
-from .api_task import RedditSearchTask, GoogleSearchTask, WikipediaSearchTask, ExaSearchTask, APISearchTask, SearchOutput, SearchResult, ArxivSearchTask, APITask
+from .api_tasks import APITask, RedditSearchTask, GoogleSearchTask, WikipediaSearchTask, ExaSearchTask, APISearchTask, ArxivSearchTask
 
-__all__ = ['AliceTask', 'Workflow', 'AliceAgent', 'AgentLibrary','BasicAgentTask', 'PromptAgentTask', 'APITask', 'TemplatedTask', 'TaskLibrary', 'RedditSearchTask', 
-           'GoogleSearchTask', 'WikipediaSearchTask', 'ExaSearchTask', 'APISearchTask', 'SearchOutput', 'SearchResult', 'available_tasks', 'ArxivSearchTask', 
-           'CheckTask', 'CodeExecutionLLMTask', 'CodeGenerationLLMTask', 'AgentWithFunctions', 'CVGenerationTask']
+__all__ = ['AliceTask', 'Workflow', 'TaskLibrary','BasicAgentTask', 'PromptAgentTask', 'APITask', 'TemplatedTask', 'TaskLibrary', 'RedditSearchTask', 
+           'GoogleSearchTask', 'WikipediaSearchTask', 'ExaSearchTask', 'APISearchTask', 'available_tasks', 'ArxivSearchTask', 
+           'CheckTask', 'CodeExecutionLLMTask', 'CodeGenerationLLMTask', 'AgentWithFunctions']
