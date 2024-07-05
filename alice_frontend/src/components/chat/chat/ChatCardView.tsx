@@ -10,7 +10,7 @@ import {
 import { SupportAgent, Terminal, Functions, Summarize } from '@mui/icons-material';
 import { ChatComponentProps } from '../../../utils/ChatTypes';
 import EnhancedTask from '../../task/Task';
-import EnhancedTaskResult from '../../task_response/TaskResponse';
+import EnhancedTaskResponse from '../../task_response/task_response/EnhancedTaskResponse';
 import useStyles from '../ChatStyles';
 
 const ChatCardView: React.FC<ChatComponentProps> = ({
@@ -78,7 +78,7 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
       </Dialog>
       <Dialog open={openTaskResultDialog} onClose={() => setOpenTaskResultDialog(false)}>
         {selectedTaskResultId && (
-          <EnhancedTaskResult
+          <EnhancedTaskResponse
             itemId={selectedTaskResultId}
             mode="card"
             fetchAll={false}

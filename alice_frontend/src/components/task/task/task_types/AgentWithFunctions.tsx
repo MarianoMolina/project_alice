@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
 import { Box, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, Chip } from '@mui/material';
 import PromptAgentTask from './PromptAgentTask';
-import { AgentWithFunctionsForm, TaskFormProps } from '../../../../utils/TaskTypes';
-import { getFieldId } from '../../../../utils/DBUtils';
+import { AgentWithFunctionsForm, TaskFormProps, AliceTask, PromptAgentTaskForm } from '../../../../utils/TaskTypes';
 
 const AgentWithFunctions: React.FC<TaskFormProps<AgentWithFunctionsForm>> = ({
   form,
@@ -16,24 +15,27 @@ const AgentWithFunctions: React.FC<TaskFormProps<AgentWithFunctionsForm>> = ({
     console.log('[1-LOG] Initial form state:', form);
   }, []);
 
+  const handleBaseFormChange = (newBaseForm: PromptAgentTaskForm) => {
+    setForm({ ...form, ...newBaseForm });
+  };
+
   const handleTasksChange = (event: SelectChangeEvent<string[]>) => {
     const selectedTaskIds = event.target.value as string[];
-    const newTasks: Map<string, string> = new Map();
-
+    const newTasks: { [key: string]: AliceTask } = {};
     selectedTaskIds.forEach(taskId => {
       const task = availableTasks.find(t => t._id === taskId);
       if (task) {
-        newTasks.set(task.task_name, taskId);
+        newTasks[task.task_name] = task;
       }
     });
-
     setForm({ ...form, tasks: newTasks });
   };
 
   const handleExecutionAgentChange = (event: SelectChangeEvent<string>) => {
     const newExecutionAgentId = event.target.value;
     console.log('[5-LOG] New execution agent ID:', newExecutionAgentId);
-    setForm({ ...form, execution_agent_id: newExecutionAgentId });
+    const newExecutionAgent = agents.find(agent => agent._id === newExecutionAgentId) || null;
+    setForm({ ...form, execution_agent_id: newExecutionAgent });
   };
 
   const getSelectedTaskIds = () => {
@@ -41,7 +43,7 @@ const AgentWithFunctions: React.FC<TaskFormProps<AgentWithFunctionsForm>> = ({
       console.log('[6-LOG] No tasks selected');
       return [];
     }
-    const selectedIds = Array.from(form.tasks.values());
+    const selectedIds = Object.values(form.tasks).map(task => task._id || '');
     console.log('[7-LOG] Selected task IDs:', selectedIds);
     return selectedIds;
   };
@@ -54,7 +56,7 @@ const AgentWithFunctions: React.FC<TaskFormProps<AgentWithFunctionsForm>> = ({
     <Box>
       <PromptAgentTask
         form={form}
-        setForm={setForm}
+        setForm={handleBaseFormChange}
         agents={agents}
         prompts={prompts}
         availableTasks={availableTasks}
@@ -87,7 +89,7 @@ const AgentWithFunctions: React.FC<TaskFormProps<AgentWithFunctionsForm>> = ({
       <FormControl fullWidth margin="normal" disabled={viewOnly}>
         <InputLabel>Execution Agent</InputLabel>
         <Select
-          value={getFieldId(form.execution_agent_id) || ''}
+          value={form.execution_agent_id?._id || ''}
           onChange={handleExecutionAgentChange}
         >
           {agents.map((agent) => (

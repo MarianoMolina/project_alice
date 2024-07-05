@@ -1,9 +1,20 @@
 import React from 'react';
 import { Box, TextField, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
 import PromptAgentTask from './PromptAgentTask';
-import { CodeExecutionLLMTaskForm, TaskFormProps } from '../../../../utils/TaskTypes';
+import { CodeExecutionLLMTaskForm, TaskFormProps, PromptAgentTaskForm } from '../../../../utils/TaskTypes';
 
-const CodeExecutionLLMTask: React.FC<TaskFormProps<CodeExecutionLLMTaskForm>> = ({ form, setForm, agents, prompts, availableTasks, viewOnly }) => {
+const CodeExecutionLLMTask: React.FC<TaskFormProps<CodeExecutionLLMTaskForm>> = ({ 
+  form, 
+  setForm, 
+  agents, 
+  prompts, 
+  availableTasks, 
+  viewOnly 
+}) => {
+  const handleBaseFormChange = (newBaseForm: PromptAgentTaskForm) => {
+    setForm({ ...form, ...newBaseForm });
+  };
+
   const handleValidLanguagesChange = (event: SelectChangeEvent<string[]>) => {
     const {
       target: { value },
@@ -23,7 +34,14 @@ const CodeExecutionLLMTask: React.FC<TaskFormProps<CodeExecutionLLMTaskForm>> = 
 
   return (
     <Box>
-      <PromptAgentTask form={form} setForm={setForm} agents={agents} prompts={prompts}  availableTasks={availableTasks} viewOnly={viewOnly}  />
+      <PromptAgentTask 
+        form={form} 
+        setForm={handleBaseFormChange} 
+        agents={agents} 
+        prompts={prompts}  
+        availableTasks={availableTasks} 
+        viewOnly={viewOnly}  
+      />
      
       <FormControl fullWidth margin="normal">
         <InputLabel>Valid Languages</InputLabel>
@@ -35,13 +53,6 @@ const CodeExecutionLLMTask: React.FC<TaskFormProps<CodeExecutionLLMTaskForm>> = 
           <MenuItem value="python">Python</MenuItem>
           <MenuItem value="shell">Shell</MenuItem>
           <MenuItem value="javascript">JavaScript</MenuItem>
-          <MenuItem value="ruby">Ruby</MenuItem>
-          <MenuItem value="java">Java</MenuItem>
-          <MenuItem value="cpp">C++</MenuItem>
-          <MenuItem value="csharp">C#</MenuItem>
-          <MenuItem value="go">Go</MenuItem>
-          <MenuItem value="rust">Rust</MenuItem>
-          <MenuItem value="php">PHP</MenuItem>
         </Select>
       </FormControl>
       <TextField

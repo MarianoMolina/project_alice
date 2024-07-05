@@ -8,8 +8,7 @@ import {
     MenuItem,
     Button
 } from '@mui/material';
-import { AliceTask, TaskComponentProps } from '../../../utils/TaskTypes';
-import { TaskType } from '../../../utils/TaskTypes';
+import { AliceTask, TaskComponentProps, TaskType, PromptAgentTaskForm, CheckTaskForm, CodeExecutionLLMTaskForm, CodeGenerationLLMTaskForm, WorkflowForm, AgentWithFunctionsForm, AnyTaskForm } from '../../../utils/TaskTypes';
 import { SelectChangeEvent } from '@mui/material';
 import { useConfig } from '../../../context/ConfigContext';
 import BasicAgentTask from './task_types/BasicAgentTask';
@@ -19,6 +18,7 @@ import CodeGenerationLLMTask from './task_types/CodeGenerationLLMTask';
 import CodeExecutionLLMTask from './task_types/CodeExecutionLLMTask';
 import AgentWithFunctions from './task_types/AgentWithFunctions';
 import Workflow from './task_types/Workflow';
+import { BaseTaskForm } from '../../../utils/TaskTypes';
 
 const taskTypes: TaskType[] = [
     "BasicAgentTask",
@@ -56,6 +56,36 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
         onChange({ task_type: newType });
     };
 
+    function assertTaskForm<T extends AnyTaskForm>(item: Partial<AliceTask>, taskType: TaskType): T {
+        const baseForm: BaseTaskForm = {
+            task_name: item.task_name || '',
+            task_description: item.task_description || '',
+            task_type: taskType,
+            agent_id: item.agent_id || null,
+            human_input: item.human_input || false,
+            input_variables: item.input_variables || null,
+            templates: item.templates || {},
+            prompts_to_add: item.prompts_to_add || null,
+        };
+
+        switch(taskType) {
+            case 'PromptAgentTask':
+            case 'BasicAgentTask':
+                return baseForm as T;
+            case 'CheckTask':
+                return { ...baseForm, exit_code_response_map: item.exit_code_response_map || null } as T;
+            case 'CodeGenerationLLMTask':
+            case 'CodeExecutionLLMTask':
+                return { ...baseForm, exit_codes: item.exit_codes || {}, valid_languages: item.valid_languages || [], timeout: item.timeout || null } as T;
+            case 'AgentWithFunctions':
+                return { ...baseForm, tasks: item.tasks || {}, execution_agent_id: item.execution_agent_id || null } as T;
+            case 'Workflow':
+                return { ...baseForm, tasks: item.tasks || {}, start_task: item.start_task || null, max_attempts: item.max_attempts || 1, recursive: item.recursive || false } as T;
+            default:
+                return baseForm as T;
+        }
+    }
+
     const renderTaskForm = () => {
         const commonProps = {
             agents: agents,
@@ -64,12 +94,12 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             viewOnly: !isEditMode,
         };
 
-        const getTaskComponent = <T extends Partial<AliceTask>>(
+        const getTaskComponent = <T extends AnyTaskForm>(
             Component: React.ComponentType<{ form: T; setForm: (newForm: T) => void } & typeof commonProps>
         ) => {
             return (
                 <Component
-                    form={item as T || {} as T}
+                    form={assertTaskForm<T>(item, taskType)}
                     setForm={(newForm: T) => onChange(newForm)}
                     {...commonProps}
                 />
@@ -78,21 +108,21 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
 
         switch (taskType) {
             case 'BasicAgentTask':
-                return getTaskComponent(BasicAgentTask);
+                return getTaskComponent<PromptAgentTaskForm>(BasicAgentTask);
             case 'PromptAgentTask':
-                return getTaskComponent(PromptAgentTask);
+                return getTaskComponent<PromptAgentTaskForm>(PromptAgentTask);
             case 'CheckTask':
-                return getTaskComponent(CheckTask);
+                return getTaskComponent<CheckTaskForm>(CheckTask);
             case 'CodeGenerationLLMTask':
-                return getTaskComponent(CodeGenerationLLMTask);
+                return getTaskComponent<CodeGenerationLLMTaskForm>(CodeGenerationLLMTask);
             case 'CodeExecutionLLMTask':
-                return getTaskComponent(CodeExecutionLLMTask);
+                return getTaskComponent<CodeExecutionLLMTaskForm>(CodeExecutionLLMTask);
             case 'AgentWithFunctions':
-                return getTaskComponent(AgentWithFunctions);
+                return getTaskComponent<AgentWithFunctionsForm>(AgentWithFunctions);
             case 'Workflow':
-                return getTaskComponent(Workflow);
+                return getTaskComponent<WorkflowForm>(Workflow);
             default:
-                return getTaskComponent(BasicAgentTask);
+                return getTaskComponent<PromptAgentTaskForm>(BasicAgentTask);
         }
     };
 

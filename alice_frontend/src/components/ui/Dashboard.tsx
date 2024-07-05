@@ -5,8 +5,6 @@ import AddIcon from '@mui/icons-material/Add';
 import StorageIcon from '@mui/icons-material/Storage';
 import ChatIcon from '@mui/icons-material/Chat';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { BackgroundGradientAnimation } from './background-gradient-animation';
-import { BackgroundGradient } from './background-gradient';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Dialog } from '@mui/material';
 import { Card, CardContent, Typography, Skeleton, Stack } from '@mui/material';
-import EnhancedTaskResult from '../components/task_response/TaskResponse';
+import EnhancedTaskResponse from '../components/task_response/task_response/EnhancedTaskResponse';
 import { useTask } from '../context/TaskContext';
 import useStyles from '../styles/StartTaskStyles';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
@@ -56,7 +56,7 @@ const StartTask: React.FC = () => {
   const renderSidebarContent = () => {
     switch (activeTab) {
       case 'Task Results':
-        return <EnhancedTaskResult onInteraction={handleOpenTaskResult} mode={'list'} fetchAll={true} />;
+        return <EnhancedTaskResponse onInteraction={handleOpenTaskResult} mode={'list'} fetchAll={true} />;
       case 'All Tasks':
         return <EnhancedTask mode={'list'} fetchAll={true} onInteraction={handleTaskClick} onAddTask={handleTabWhenTaskSelect} />;
       case 'Active Task':
@@ -99,7 +99,7 @@ const StartTask: React.FC = () => {
         {selectedTask ? taskExecute() : taskPlaceholder()}
       </Box>
       <Dialog open={isTaskResultDialogOpen} onClose={handleCloseTaskResult} fullWidth maxWidth="md">
-        {selectedResult && <EnhancedTaskResult itemId={selectedResult._id} fetchAll={false} mode={'card'} />}
+        {selectedResult && <EnhancedTaskResponse itemId={selectedResult._id} fetchAll={false} mode={'card'} />}
       </Dialog>
       <Dialog open={openTaskDialog} onClose={() => setOpenTaskDialog(false)}>
         {selectedTaskId && (

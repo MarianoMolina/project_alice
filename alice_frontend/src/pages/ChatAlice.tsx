@@ -9,8 +9,8 @@ import { useChat } from '../context/ChatContext';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
 import EnhancedChat from '../components/chat/chat/EnhancedChat';
 import EnhancedTask from '../components/task/Task';
-import EnhancedTaskResult from '../components/task_response/TaskResponse';
-import EnhancedAgent from '../components/agent/Agent';
+import EnhancedTaskResponse from '../components/task_response/task_response/EnhancedTaskResponse';
+import EnhancedAgent from '../components/agent/agent/EnhancedAgent';
 import ChatInput from '../components/chat/ChatInput';
 import useStyles from '../styles/ChatAliceStyles';
 
@@ -127,7 +127,7 @@ const ChatAlice: React.FC = () => {
         );
       case 'addTaskResults':
         return (
-          <EnhancedTaskResult mode={'list'} fetchAll={true} onInteraction={triggerTaskResultDialog}/>
+          <EnhancedTaskResponse mode={'list'} fetchAll={true} onInteraction={triggerTaskResultDialog}/>
         );
       default:
         return null;
@@ -174,7 +174,7 @@ const ChatAlice: React.FC = () => {
           {selectedTaskId && <EnhancedTask itemId={selectedTaskId} mode={'card'} fetchAll={false} />}
         </Dialog>
         <Dialog open={isTaskResultDialogOpen} onClose={handleCloseTaskResult} fullWidth maxWidth="md">
-          {selectedResult && <EnhancedTaskResult itemId={selectedResult._id} fetchAll={false} mode={'card'} />}
+          {selectedResult && <EnhancedTaskResponse itemId={selectedResult._id} fetchAll={false} mode={'card'} />}
         </Dialog>
         <Dialog open={openAgentDialog} onClose={() => setOpenAgentDialog(false)}>
           {selectedAgentId && <EnhancedAgent itemId={selectedAgentId} mode={'card'} fetchAll={false} />}

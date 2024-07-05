@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, TextField, Button, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel, SelectChangeEvent } from '@mui/material';
-import { TaskFormProps, WorkflowForm } from '../../../../utils/TaskTypes';
+import { TaskFormProps, WorkflowForm, AliceTask } from '../../../../utils/TaskTypes';
 
 const Workflow: React.FC<TaskFormProps<WorkflowForm>> = ({ form, setForm, availableTasks, viewOnly }) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -10,20 +10,21 @@ const Workflow: React.FC<TaskFormProps<WorkflowForm>> = ({ form, setForm, availa
 
   const handleTasksChange = (event: SelectChangeEvent<string[]>) => {
     const selectedTaskIds = event.target.value as string[];
-    const newTasks: Map<string, string> = new Map();
-
+    const newTasks: { [key: string]: AliceTask } = {};
     selectedTaskIds.forEach(taskId => {
       const task = availableTasks.find(t => t._id === taskId);
       if (task) {
-        newTasks.set(task.task_name, taskId);
+        newTasks[task.task_name] = task;
       }
     });
-
     setForm({ ...form, tasks: newTasks });
   };
 
   const handleStartTaskChange = (event: SelectChangeEvent<string>) => {
-    setForm({ ...form, start_task: event.target.value });
+    const startTaskId = event.target.value;
+    const startTask = availableTasks.find(task => task._id === startTaskId) || null;
+    if (!startTask) return;
+    setForm({ ...form, start_task: startTask.task_name });
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,8 +61,8 @@ const Workflow: React.FC<TaskFormProps<WorkflowForm>> = ({ form, setForm, availa
         margin="normal"
         name="input_variables"
         label="Input Variables (JSON)"
-        value={form.input_variables || ''}
-        onChange={handleInputChange}
+        value={JSON.stringify(form.input_variables) || ''}
+        onChange={(e) => setForm({ ...form, input_variables: JSON.parse(e.target.value) })}
         multiline
         rows={4}
         disabled={viewOnly}
@@ -70,7 +71,7 @@ const Workflow: React.FC<TaskFormProps<WorkflowForm>> = ({ form, setForm, availa
         <InputLabel>Tasks</InputLabel>
         <Select
           multiple
-          value={form.tasks ? Array.from(form.tasks.values()) : []}
+          value={form.tasks ? Object.values(form.tasks).map(task => task._id || '') : []}
           onChange={handleTasksChange}
           required
         >
@@ -90,9 +91,9 @@ const Workflow: React.FC<TaskFormProps<WorkflowForm>> = ({ form, setForm, availa
           <MenuItem value="">
             <em>None</em>
           </MenuItem>
-          {form.tasks && Array.from(form.tasks.entries()).map(([taskName, taskId]) => (
-            <MenuItem key={taskId} value={taskId}>
-              {taskName}
+          {form.tasks && Object.values(form.tasks).map((task) => (
+            <MenuItem key={task._id} value={task._id || ''}>
+              {task.task_name}
             </MenuItem>
           ))}
         </Select>

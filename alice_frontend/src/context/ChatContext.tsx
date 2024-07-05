@@ -122,12 +122,21 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             console.error('Error regenerating response:', error);
         }
     };
+    const isTaskInChat = (taskId: string): boolean => {
+        return currentChat?.functions?.some(task => task._id === taskId) || false;
+    };
 
+    const isTaskResultInChat = (taskResultId: string): boolean => {
+        return currentChat?.task_responses?.some(result => result._id === taskResultId) || false;
+    };
     const addTasksToChat = async (taskIds: string[]) => {
         if (!currentChatId || !currentChat) return;
         try {
             const tasks = await Promise.all(taskIds.map(id => fetchItem("tasks", id)));
-            const updatedFunctions = [...(currentChat.functions || []), ...tasks];
+            const updatedFunctions = [
+                ...(currentChat.functions || []),
+                ...tasks.flatMap(task => Array.isArray(task) ? task : [task])
+            ];
             await updateItem("chats", currentChatId, { functions: updatedFunctions });
             await handleSelectChat(currentChatId);
         } catch (error) {
@@ -139,17 +148,32 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         if (!currentChatId || !currentChat) return console.log('No chat selected');
         try {
             const taskResults = await Promise.all(taskResultIds.map(id => fetchItem("taskresults", id)));
-            console.log('Task results:', taskResults)
-            const updatedTaskResponses = [...(currentChat.task_responses || []), ...taskResults];
-            const newMessages: MessageType[] = taskResults.map(result => ({
-                role: 'assistant',
-                content: JSON.stringify(result.task_outputs),
-                generated_by: 'tool',
-                type: 'TaskResponse',
-                step: result.task_name,
-            }));
+            console.log('Task results:', taskResults);
+            const updatedTaskResponses = [
+                ...(currentChat.task_responses || []),
+                ...taskResults.flatMap(result => Array.isArray(result) ? result : [result])
+            ];
+            const newMessages: MessageType[] = taskResults.flatMap(result => {
+                if (Array.isArray(result)) {
+                    return result.map(r => ({
+                        role: 'assistant',
+                        content: JSON.stringify(r.task_outputs),
+                        generated_by: 'tool',
+                        type: 'TaskResponse',
+                        step: r.task_name,
+                    }));
+                } else {
+                    return [{
+                        role: 'assistant',
+                        content: JSON.stringify(result.task_outputs),
+                        generated_by: 'tool',
+                        type: 'TaskResponse',
+                        step: result.task_name,
+                    }];
+                }
+            });
             const updatedMessages = [...messages, ...newMessages];
-            console.log('Adding task results to chat:', updatedTaskResponses, updatedMessages)
+            console.log('Adding task results to chat:', updatedTaskResponses, updatedMessages);
             await updateItem("chats", currentChatId, { 
                 task_responses: updatedTaskResponses,
                 messages: updatedMessages
@@ -160,17 +184,10 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         }
     };
 
-    const isTaskInChat = (taskId: string): boolean => {
-        return currentChat?.functions?.some(task => task._id === taskId) || false;
-    };
-
-    const isTaskResultInChat = (taskResultId: string): boolean => {
-        return currentChat?.task_responses?.some(result => result._id === taskResultId) || false;
-    };
-
     const fetchAvailableTasks = async (): Promise<AliceTask[]> => {
         try {
-            return await fetchItem("tasks") as AliceTask[];
+            const tasks = await fetchItem("tasks") as AliceTask | AliceTask[];
+            return Array.isArray(tasks) ? tasks : [tasks];
         } catch (error) {
             console.error('Error fetching available tasks:', error);
             return [];
@@ -179,7 +196,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
     const fetchAvailableTaskResults = async (): Promise<TaskResponse[]> => {
         try {
-            return await fetchItem("taskresults") as TaskResponse[];
+            const taskResults = await fetchItem("taskresults") as TaskResponse | TaskResponse[];
+            return Array.isArray(taskResults) ? taskResults : [taskResults];
         } catch (error) {
             console.error('Error fetching available task results:', error);
             return [];

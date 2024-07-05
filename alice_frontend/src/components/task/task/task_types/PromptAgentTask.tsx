@@ -16,7 +16,6 @@ import { TaskFormProps, PromptAgentTaskForm } from '../../../../utils/TaskTypes'
 import FunctionDefinitionBuilder from '../../../parameter/Function';
 import { FunctionParameters } from '../../../../utils/ParameterTypes';
 import PromptAdder from '../../../prompt/PromptAdder';
-import { getFieldId } from '../../../../utils/DBUtils';
 
 const PromptAgentTask: React.FC<TaskFormProps<PromptAgentTaskForm>> = ({ 
   form, 
@@ -36,13 +35,18 @@ const PromptAgentTask: React.FC<TaskFormProps<PromptAgentTaskForm>> = ({
   };
 
   const handleAgentChange = (e: SelectChangeEvent<string>) => {
-    setForm({ ...form, agent_id: e.target.value });
+    const newAgentId = e.target.value;
+    const newAgent = agents.find(agent => agent._id === newAgentId) || null;
+    setForm({ ...form, agent_id: newAgent });
   };
 
   const handleTemplateChange = (e: SelectChangeEvent<string>) => {
+    const newTemplateId = e.target.value;
+    const newTemplate = prompts.find(prompt => prompt._id === newTemplateId);
+    if (!newTemplate) return;
     setForm({
       ...form,
-      templates: new Map(form.templates || new Map()).set('task_template', e.target.value),
+      templates: { ...form.templates, task_template: newTemplate },
     });
   };
 
@@ -52,15 +56,18 @@ const PromptAgentTask: React.FC<TaskFormProps<PromptAgentTaskForm>> = ({
   }
 
   const handlePromptAdd = (name: string, promptId: string) => {
-    setForm({
-      ...form,
-      prompts_to_add: new Map(form.prompts_to_add || new Map()).set(name, promptId)
-    });
+    const newPrompt = prompts.find(prompt => prompt._id === promptId);
+    if (newPrompt) {
+      setForm({
+        ...form,
+        prompts_to_add: { ...form.prompts_to_add, [name]: newPrompt }
+      });
+    }
   };
 
   const handlePromptRemove = (name: string) => {
-    const newPromptsToAdd = new Map(form.prompts_to_add || new Map());
-    newPromptsToAdd.delete(name);
+    const newPromptsToAdd = { ...form.prompts_to_add };
+    delete newPromptsToAdd[name];
     setForm({ ...form, prompts_to_add: newPromptsToAdd });
   };
 
@@ -91,7 +98,7 @@ const PromptAgentTask: React.FC<TaskFormProps<PromptAgentTaskForm>> = ({
       <FormControl fullWidth margin="normal" disabled={viewOnly}>
         <InputLabel>Agent</InputLabel>
         <Select 
-          value={getFieldId(form.agent_id) || ''} 
+          value={form.agent_id?._id || ''} 
           onChange={handleAgentChange} 
           required
         >
@@ -113,7 +120,7 @@ const PromptAgentTask: React.FC<TaskFormProps<PromptAgentTaskForm>> = ({
       <FormControl fullWidth margin="normal" disabled={viewOnly}>
         <InputLabel>Task Template</InputLabel>
         <Select
-          value={getFieldId(form.templates?.get('task_template')) || ''}
+          value={form.templates?.task_template?._id || ''}
           onChange={handleTemplateChange}
           required
         >
@@ -127,10 +134,10 @@ const PromptAgentTask: React.FC<TaskFormProps<PromptAgentTaskForm>> = ({
       <Box>
         <Typography gutterBottom>Prompts to Add</Typography>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-          {Array.from(form.prompts_to_add || new Map()).map(([name, promptId]) => (
+          {Object.entries(form.prompts_to_add || {}).map(([name, prompt]) => (
             <Chip
               key={name}
-              label={`${name}: ${prompts.find(p => p._id === getFieldId(promptId))?.name}`}
+              label={`${name}: ${prompt.name}`}
               onDelete={() => handlePromptRemove(name)}
               disabled={viewOnly}
             />

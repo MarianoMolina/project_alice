@@ -13,7 +13,7 @@ import {
   Grid
 } from '@mui/material';
 import { ParameterDefinition, FunctionParameters } from '../../utils/ParameterTypes';
-import EnhancedParameter from '../parameter/Parameter';
+import EnhancedParameter from './parameter/EnhancedParameter';
 import { useConfig } from '../../context/ConfigContext';
 import { IconButton, Tooltip } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -39,11 +39,9 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
   const classes = useStyles();
   const { parameters } = useConfig();
 
-
-  const ensurePropertiesMap = useCallback((params?: FunctionParameters): Map<string, ParameterDefinition> => {
-    if (!params || !params.properties) return new Map();
-    if (params.properties instanceof Map) return params.properties;
-    return new Map(Object.entries(params.properties));
+  const ensurePropertiesObject = useCallback((params?: FunctionParameters): { [key: string]: ParameterDefinition } => {
+    if (!params || !params.properties) return {};
+    return params.properties;
   }, []);
 
   const initialActiveParameters = useMemo(() => {
@@ -56,8 +54,8 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
     }));
 
     if (initialParameters) {
-      const propertiesMap = ensurePropertiesMap(initialParameters);
-      propertiesMap.forEach((value, key) => {
+      const propertiesObj = ensurePropertiesObject(initialParameters);
+      Object.entries(propertiesObj).forEach(([key, value]) => {
         const index = initialActiveParams.findIndex(p => p._id === value._id);
         if (index !== -1) {
           initialActiveParams[index] = {
@@ -72,21 +70,21 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
     }
     console.log('initialActiveParams:', initialActiveParams);
     return initialActiveParams;
-  }, [parameters, initialParameters, ensurePropertiesMap]);
+  }, [parameters, initialParameters, ensurePropertiesObject]);
 
   const [activeParameters, setActiveParameters] = useState<ActiveParameter[]>(initialActiveParameters);
   
   const buildFunctionDefinition = useCallback((params: ActiveParameter[]): FunctionParameters => {
-    const properties = new Map<string, ParameterDefinition>();
+    const properties: { [key: string]: ParameterDefinition } = {};
     const required: string[] = [];
 
     params.forEach(param => {
       if (param.isActive && param.name.trim() !== '') {
-        properties.set(param.name, {
+        properties[param.name] = {
           type: param.type,
           description: param.description,
           default: param.default
-        });
+        };
         if (param.isRequired) {
           required.push(param.name);
         }
@@ -133,7 +131,7 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
   useEffect(() => {
     const functionDefinition = buildFunctionDefinition(activeParameters);
     if (!onChange) return;
-    if (functionDefinition.properties.size > 0) {
+    if (Object.keys(functionDefinition.properties).length > 0) {
       onChange(functionDefinition);
     }
   }, [activeParameters, buildFunctionDefinition, onChange]);

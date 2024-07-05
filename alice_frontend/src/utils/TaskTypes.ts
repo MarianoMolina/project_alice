@@ -11,12 +11,11 @@ export interface AliceTask {
   input_variables: FunctionParameters | null;
   exit_codes: { [key: string]: string };
   recursive: boolean;
-  templates: { [key: string]: string };
-  tasks: { [key: string]: string };
-  agent_name: string | null;
+  templates: { [key: string]: Prompt };
+  tasks: { [key: string]: AliceTask };
   valid_languages: string[];
   timeout: number | null;
-  prompts_to_add: { [key: string]: string } | null;
+  prompts_to_add: { [key: string]: Prompt } | null;
   exit_code_response_map: { [key: string]: number } | null;
   start_task?: string | null;
   task_selection_method?: CallableFunction | null;
@@ -44,7 +43,6 @@ export const convertToAliceTask = (data: any): AliceTask => {
     tasks: typeof data?.tasks === 'object' && data?.tasks !== null
       ? Object.fromEntries(Object.entries(data.tasks).map(([key, value]: [string, any]) => [key, value._id || value]))
       : {},
-    agent_name: data?.agent_name || null,
     valid_languages: data?.valid_languages || [],
     timeout: data?.timeout || null,
     prompts_to_add: data?.prompts_to_add || null,
@@ -66,53 +64,55 @@ export const convertToAliceTask = (data: any): AliceTask => {
 
 export const DefaultAliceTask: AliceTask = convertToAliceTask({});
 
-export interface PromptAgentTaskForm {
+// Base interface for all task forms
+export interface BaseTaskForm {
   task_name: string;
   task_description: string;
   task_type: TaskType;
-  agent_id: string | null;
+  agent_id: AliceAgent | null;
   human_input: boolean;
   input_variables: FunctionParameters | null;
-  templates: { [key: string]: string };
-  prompts_to_add: Map<string, string> | null;
+  templates: { [key: string]: Prompt };
+  prompts_to_add: { [key: string]: Prompt } | null;
 }
 
-export interface AgentWithFunctionsForm extends PromptAgentTaskForm {
-  tasks: { [key: string]: string };
-  execution_agent_id: string | null;
+export interface PromptAgentTaskForm extends BaseTaskForm {}
+
+export interface AgentWithFunctionsForm extends BaseTaskForm {
+  tasks: { [key: string]: AliceTask };
+  execution_agent_id: AliceAgent | null;
 }
 
-export interface CheckTaskForm extends PromptAgentTaskForm {
-  exit_code_response_map: Map<string, number> | null;
+export interface CheckTaskForm extends BaseTaskForm {
+  exit_code_response_map: { [key: string]: number } | null;
 }
 
-export interface CodeExecutionLLMTaskForm extends PromptAgentTaskForm {
+export interface CodeExecutionLLMTaskForm extends BaseTaskForm {
   exit_codes: { [key: string]: string };
   valid_languages: string[];
   timeout: number | null;
 }
 
-export interface CodeGenerationLLMTaskForm extends PromptAgentTaskForm {
+export interface CodeGenerationLLMTaskForm extends BaseTaskForm {
   exit_codes: { [key: string]: string };
 }
 
-export interface WorkflowForm extends PromptAgentTaskForm {
-  tasks: { [key: string]: string };
+export interface WorkflowForm extends BaseTaskForm {
+  tasks: { [key: string]: AliceTask };
   start_task: string | null;
   max_attempts: number;
   recursive: boolean;
 }
 
-export interface CommonFormProps {
+export type AnyTaskForm = PromptAgentTaskForm | AgentWithFunctionsForm | CheckTaskForm | CodeExecutionLLMTaskForm | CodeGenerationLLMTaskForm | WorkflowForm;
+
+export type TaskFormProps<T extends AnyTaskForm> = {
+  form: T;
+  setForm: (newForm: T) => void;
   agents: AliceAgent[];
   prompts: Prompt[];
   availableTasks: AliceTask[];
   viewOnly: boolean;
-}
-
-export type TaskFormProps<T> = CommonFormProps & {
-  form: Partial<T>;
-  setForm: (newForm: Partial<T>) => void;
 };
 
 export interface TaskComponentProps {

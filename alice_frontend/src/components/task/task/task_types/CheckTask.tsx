@@ -1,25 +1,43 @@
 import React from 'react';
 import { Box, TextField, Button, Typography } from '@mui/material';
-import { CheckTaskForm, TaskFormProps } from '../../../../utils/TaskTypes';
+import { CheckTaskForm, TaskFormProps, PromptAgentTaskForm } from '../../../../utils/TaskTypes';
 import PromptAgentTask from './PromptAgentTask';
 
 const CheckTask: React.FC<TaskFormProps<CheckTaskForm>> = ({ form, setForm, agents, prompts, availableTasks, viewOnly }) => {
+  const handleBaseFormChange = (newBaseForm: PromptAgentTaskForm) => {
+    setForm({ ...form, ...newBaseForm });
+  };
+
   const handleExitCodeResponseMapChange = (key: string, value: string) => {
-    // Create a new Map from the existing one to maintain immutability
-    const newMap = new Map(form.exit_code_response_map);
-  
-    // Update the map with the new key-value pair
-    newMap.set(key, parseInt(value, 10));
-  
-    // Update the form state with the new map
+    const newExitCodeResponseMap = { ...form.exit_code_response_map };
+    
+    if (value === '') {
+      delete newExitCodeResponseMap[key];
+    } else {
+      newExitCodeResponseMap[key] = parseInt(value, 10);
+    }
+
     setForm({
       ...form,
-      exit_code_response_map: newMap,
+      exit_code_response_map: newExitCodeResponseMap,
     });
   };
+
+  const addNewResponse = () => {
+    const newKey = `NEW_RESPONSE_${Object.keys(form.exit_code_response_map || {}).length + 1}`;
+    handleExitCodeResponseMapChange(newKey, '0');
+  };
+
   return (
     <Box>
-      <PromptAgentTask form={form as CheckTaskForm} setForm={setForm} agents={agents} prompts={prompts}  availableTasks={availableTasks} viewOnly={viewOnly}  />
+      <PromptAgentTask 
+        form={form} 
+        setForm={handleBaseFormChange} 
+        agents={agents} 
+        prompts={prompts}  
+        availableTasks={availableTasks} 
+        viewOnly={viewOnly}
+      />
      
       <Box sx={{ mt: 2 }}>
         <Typography variant="h6">Exit Code Response Map</Typography>
@@ -28,7 +46,13 @@ const CheckTask: React.FC<TaskFormProps<CheckTaskForm>> = ({ form, setForm, agen
             <TextField
               label="Response"
               value={key}
-              onChange={(e) => handleExitCodeResponseMapChange(e.target.value, value.toString())}
+              onChange={(e) => {
+                const oldValue = form.exit_code_response_map?.[key];
+                handleExitCodeResponseMapChange(e.target.value, oldValue?.toString() || '0');
+                if (key !== e.target.value) {
+                  handleExitCodeResponseMapChange(key, '');
+                }
+              }}
               disabled={viewOnly}
             />
             <TextField
@@ -43,7 +67,7 @@ const CheckTask: React.FC<TaskFormProps<CheckTaskForm>> = ({ form, setForm, agen
         {!viewOnly && (
           <Button
             variant="outlined"
-            onClick={() => handleExitCodeResponseMapChange('NEW_RESPONSE', '0')}
+            onClick={addNewResponse}
             sx={{ mt: 1 }}
           >
             Add Response

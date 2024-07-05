@@ -12,12 +12,12 @@ import { TaskResponse } from '../utils/TaskResponseTypes';
 import { AliceAgent } from '../utils/AgentTypes';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
 import { Person, Mode, Settings, Description, Functions, Assignment, Chat } from '@mui/icons-material';
-import EnhancedAgent from '../components/agent/Agent';
-import EnhancedPrompt from '../components/prompt/Prompt';
-import EnhancedModel from '../components/model/Model';
-import EnhancedParameter from '../components/parameter/Parameter';
+import EnhancedAgent from '../components/agent/agent/EnhancedAgent';
+import EnhancedPrompt from '../components/prompt/prompt/EnhancedPrompt';
+import EnhancedModel from '../components/model/model/EnhancedModel';
+import EnhancedParameter from '../components/parameter/parameter/EnhancedParameter';
 import EnhancedTask from '../components/task/Task';
-import EnhancedTaskResult from '../components/task_response/TaskResponse';
+import EnhancedTaskResponse from '../components/task_response/task_response/EnhancedTaskResponse';
 import EnchancedChat from '../components/chat/chat/EnhancedChat';
 import { AliceChat } from '../utils/ChatTypes';
 
@@ -86,7 +86,7 @@ const Configure: React.FC = () => {
                         case 'Task':
                             return <EnhancedTask {...commonProps} />;
                         case 'Task Results':
-                            return <EnhancedTaskResult {...commonProps}/>;
+                            return <EnhancedTaskResponse {...commonProps}/>;
                         case 'Select Chat':
                             return <EnchancedChat {...commonProps} />;
                         default:
@@ -129,7 +129,7 @@ const Configure: React.FC = () => {
             case 'Task':
                 return <EnhancedTask {...commonProps} />;
             case 'Task Results':
-                return <EnhancedTaskResult {...commonProps} mode={'card'}/>;
+                return <EnhancedTaskResponse {...commonProps} mode={'card'}/>;
             case 'Select Chat':
                 return <EnchancedChat {...commonProps} mode={'full'} />;
             default:
