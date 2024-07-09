@@ -4,7 +4,8 @@ from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field
 from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.agent import AliceAgent
-from workflow_logic.util.task_utils import OutputInterface, FunctionParameters, TaskResponse, ParameterDefinition, DatabaseTaskResponse
+from workflow_logic.core.communication import TaskResponse, DatabaseTaskResponse
+from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 
 prompt_function_parameters = FunctionParameters(
     type="object",
@@ -64,7 +65,7 @@ class AliceTask(BaseModel, ABC):
     #     """Executes the task and returns a TaskResponse."""
     #     return await self.execute(**kwargs)
 
-    def execute(self, **kwargs) -> TaskResponse:
+    def execute(self, **kwargs) -> DatabaseTaskResponse:
         # Generate a new task ID for this execution
         print(f'Executing task {self.task_name}')
         task_id = self.id if self.id else str(uuid.uuid4())
@@ -89,12 +90,9 @@ class AliceTask(BaseModel, ABC):
         response = self.run(execution_history=execution_history, **kwargs)
         response.task_id = task_id
         db_response = response.model_dump()
-        if response.task_outputs and isinstance(response.task_outputs, OutputInterface):
-            db_response["task_content"] = response.task_outputs.model_dump()
-            db_response["task_outputs"] = str(response.task_outputs)
         return DatabaseTaskResponse(**db_response)
     
-    async def a_execute(self, **kwargs) -> TaskResponse:
+    async def a_execute(self, **kwargs) -> DatabaseTaskResponse:
         """Executes the task and returns a TaskResponse."""
         print(f'Executing task {self.task_name}')
         task_id = str(uuid.uuid4())
@@ -119,13 +117,13 @@ class AliceTask(BaseModel, ABC):
         response = await self.a_run(execution_history=execution_history, **kwargs)
         
         # Return the response
-        return response
+        return DatabaseTaskResponse(**response.model_dump())
     
     def get_function(self, execution_history: Optional[List]=[]) -> Dict[str, Any]:
         """
         Returns a dictionary representing the function typedict and the function callable.
         """
-        def function_callable(**kwargs) -> TaskResponse:
+        def function_callable(**kwargs) -> DatabaseTaskResponse:
             return self.execute(execution_history = execution_history, **kwargs)
         
         function_dict = {

@@ -27,7 +27,7 @@ const AgentListView: React.FC<AgentComponentProps> = ({
                         secondary={
                             <>
                                 <Typography component="span" variant="body2" color="textPrimary">
-                                    Model: {agent.model?.model_name || 'N/A'}
+                                    Model: {agent.model?.model || 'N/A'}
                                 </Typography>
                                 <br />
                                 <Typography component="span" variant="body2" color="textSecondary">

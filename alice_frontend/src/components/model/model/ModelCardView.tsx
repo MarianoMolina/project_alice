@@ -21,7 +21,7 @@ const ModelCardView: React.FC<ModelComponentProps> = ({
     return (
         <Card>
             <CardContent>
-                <Typography variant="h6">{item.model_name}</Typography>
+                <Typography variant="h6">{item.model}</Typography>
                 <Typography variant="body2">Deployment: {item.deployment}</Typography>
                 <Typography variant="body2">Context size: {item.ctx_size || ''}</Typography>
                 <Typography variant="caption">

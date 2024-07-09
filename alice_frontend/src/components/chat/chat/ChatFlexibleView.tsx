@@ -74,7 +74,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                             updateChatField('llm_config', {
                                 ...item.llm_config,
                                 config_list: [{
-                                    model: selectedModel.model_name,
+                                    model: selectedModel.model,
                                     api_key: selectedModel.api_key,
                                     base_url: selectedModel.base_url,
                                 }]

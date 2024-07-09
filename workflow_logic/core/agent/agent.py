@@ -1,11 +1,10 @@
 from typing import Dict, Optional, List, Callable, Literal, Union
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field
 from autogen.agentchat import Agent, AssistantAgent, ConversableAgent, GroupChat, GroupChatManager, UserProxyAgent
 from autogen.agentchat.contrib.llava_agent import LLaVAAgent
-from workflow_logic.util.utils import LLMConfig, replace_localhost
-from workflow_logic.util.task_utils import FunctionConfig
-from workflow_logic.core.model import ModelManager, AliceModel
+from workflow_logic.core.parameters import FunctionConfig
 from workflow_logic.core.prompt import Prompt
+from workflow_logic.core.model import ModelManager, AliceModel, LLMConfig
 
 class AliceAgent(BaseModel):
     id: str = Field(None, description="The ID of the agent", alias="_id")
@@ -13,13 +12,12 @@ class AliceAgent(BaseModel):
     system_message: Prompt = Field(default="default_agent", description="The name of the prompt to use for system_message")
     functions: List[FunctionConfig] = Field(default_factory=list, description="A list of functions that the agent can execute")
     functions_map: Dict[str, Callable] = Field(default_factory=dict, description="A mapping of function names to callable functions")
-    agents_in_group: Optional[List[str]] = Field(default=None, description="A list of agent names in the group chat")
+    agents_in_group: Optional[List['AliceAgent']] = Field(default=None, description="A list of agent names in the group chat")
     autogen_class: Literal["ConversableAgent", "AssistantAgent", "UserProxyAgent", "GroupChatManager", "LLaVAAgent"] = Field(default="ConversableAgent", description="The autogen class of the agent")
     code_execution_config: Union[dict, bool] = Field(default=False, description="Whether the agent can execute code")
     max_consecutive_auto_reply: int = Field(default=10, description="The maximum number of consecutive auto replies")
     human_input_mode: Literal["ALWAYS", "TERMINATE", "NEVER"] = Field(default="NEVER", description="The mode for human input")
     speaker_selection: dict = Field(default=dict, description="The speaker selection logic for the group chat")
-    agent_library: Optional["AgentLibrary"] = Field(default=None, description="The agent library object")
     model_manager_object: Optional[ModelManager] = Field(default=None, description="The model manager object. Required if the agent uses a model and no llm_config is passed")
     default_auto_reply: Optional[str] = Field(default="", description="The default auto reply for the agent")
     llm_config: Optional[LLMConfig] = Field(default=None, description="The LLM configuration for the agent")
@@ -79,7 +77,8 @@ class AliceAgent(BaseModel):
                 llm_config = LLMConfig(**llm_config)
             if not llm_config.config_list:
                 raise ValueError("LLM Config must have a 'config_list' attribute with at least one config.")
-            llm_config = replace_localhost(llm_config=llm_config).model_dump()
+            llm_config = LLMConfig(**llm_config.model_dump())
+            llm_config = llm_config.replace_localhost().model_dump()
             if self.functions:
                 llm_config["functions"] = self.functions
         print(f'LLM Config: {llm_config}')
@@ -124,9 +123,7 @@ class AliceAgent(BaseModel):
         elif self.autogen_class == "GroupChatManager":
             if not self.agents_in_group:
                 raise ValueError("GroupChatManager agent must have a list of agents in the group.")
-            if not self.agent_library:
-                raise ValueError("GroupChatManager agent must have a reference to the agent library.")
-            agents_in_group = [self.agent_library.get_agent_by_name(agent_name).get_autogen_agent() for agent_name in self.agents_in_group]
+            agents_in_group = [agent.get_autogen_agent() for agent in self.agents_in_group]
             if len(agents_in_group) != len(self.agents_in_group):
                 raise ValueError(f"One or more agents in the group not found in the agent library. {self.agents_in_group}")
             speaker_selection = self.create_speaker_selection_method(self.speaker_selection)
@@ -160,26 +157,3 @@ class AliceAgent(BaseModel):
                 return next(agent for agent in groupchat.agents if agent.name == speaker_selection_logic["speaker_sequence"][0])
             return None
         return speaker_selection
-    
-class AgentLibrary(BaseModel):
-    agents: Dict[str, AliceAgent] = Field({}, description="A dictionary of agents with their names as keys")
-    model_manager_object: ModelManager = Field(description="The model manager object")
-    model_config = ConfigDict(protected_namespaces=())
-
-    def get_agent_by_name(self, agent_name: str) -> AliceAgent:
-        if agent_name not in self.agents:
-            raise ValueError(f"Agent {agent_name} not found in the agent library.")
-        return self.agents[agent_name]
-
-    def add_agent(self, agent: AliceAgent) -> bool:
-        if agent.name in self.agents:
-            print(f"Agent {agent.name} already exists in the library. Overwriting.")
-        agent.agent_library = self
-        self.agents[agent.name] = agent
-        return True
-
-    def get_agent_by_id(self, agent_id: str) -> AliceAgent:
-        for agent in self.agents.values():
-            if agent_id == agent.id:
-                return agent
-        raise ValueError(f"Agent with ID {agent_id} not found in the agent library.")

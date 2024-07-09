@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, List
 from pydantic import BaseModel, Field
-from workflow_logic.core.agent.agent import AgentLibrary
+from workflow_logic.core.agent.agent_library import AgentLibrary
 from workflow_logic.core.tasks.task import AliceTask
 
 class TaskLibrary(BaseModel):

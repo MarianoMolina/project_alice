@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Box, Button } from '@mui/material';
-import ListPage from '../components/db_dashboard_old/ListPage';
 import useStyles from '../styles/DatabaseStyles';
 import EnhancedChat from '../components/chat/chat/EnhancedChat';
 
-const collections = ['Tasks', 'Agents', 'Models', 'Users', 'Collections', 'Prompts', 'TaskResults'];
+const collections = ['Tasks', 'Agents', 'Models', 'Users', 'Collections', 'Prompts', 'TaskResponses', 'Parameters'];
 
 const Database: React.FC = () => {
   const classes = useStyles();
@@ -30,9 +29,6 @@ const Database: React.FC = () => {
       fetchAll={true} 
       isInteractable={true}
       />
-      <Box className={classes.listPageContainer}>
-        <ListPage collectionName={selectedCollection} />
-      </Box>
     </Box>
   );
 };

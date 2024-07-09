@@ -4,8 +4,8 @@ from typing import Dict, Any, List
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from workflow_logic.util.task_utils import TaskResponse, MessageDict, DatabaseTaskResponse
-from workflow_logic.util.utils import LLMConfig
+from workflow_logic.core.communication import MessageDict, DatabaseTaskResponse, MessageDict
+from workflow_logic.core.model.model_config import LLMConfig
 from workflow_logic.core.tasks.task import  AliceTask
 from workflow_logic.api.db import available_task_types, token_validation_middleware, ContainerAPI
 from workflow_logic.util.const import BACKEND_PORT, FRONTEND_PORT, HOST, FRONTEND_PORT_DOCKER, BACKEND_PORT_DOCKER, FRONTEND_HOST, BACKEND_HOST

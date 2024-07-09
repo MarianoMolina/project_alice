@@ -2,9 +2,10 @@ import wikipedia, arxiv
 from exa_py import Exa
 from googleapiclient.discovery import build
 from pydantic import Field
-from workflow_logic.util.task_utils import FunctionParameters, SearchResult, SearchOutput, ParameterDefinition
+from workflow_logic.core.communication import SearchResult, SearchOutput
 from workflow_logic.util.const import  GOOGLE_API_KEY, GOOGLE_CSE_ID, EXA_API_KEY
 from workflow_logic.core.tasks.api_tasks.api_task import APITask
+from workflow_logic.core.parameters import ParameterDefinition, FunctionParameters
 
 search_task_parameters = FunctionParameters(
     type="object",

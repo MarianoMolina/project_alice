@@ -64,15 +64,6 @@ const Header: React.FC = () => {
                 <ChatIcon />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Database">
-              <IconButton
-                color="inherit"
-                onClick={() => handleNavigation('/database')}
-                className={isActive('/database') ? classes.activeButton : ''}
-              >
-                <StorageIcon />
-              </IconButton>
-            </Tooltip>
             <Tooltip title="Configure">
               <IconButton
                 color="inherit"

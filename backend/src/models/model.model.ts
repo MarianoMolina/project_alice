@@ -5,7 +5,7 @@ const LOCAL_LLM_API_URL = process.env.LOCAL_LLM_API_URL || 'http://localhost:123
 
 const modelSchema = new Schema<IModel>({
   short_name: { type: String, required: true, unique: true },
-  model_name: { type: String, required: true },
+  model: { type: String, required: true },
   model_format: { type: String, required: true },
   ctx_size: { type: Number, required: true },
   model_type: { type: String, enum: ['instruct', 'chat', 'vision'], required: true },
@@ -26,7 +26,7 @@ modelSchema.virtual('apiRepresentation').get(function(this: IModel) {
   return {
     id: this._id,
     short_name: this.short_name || null,
-    model_name: this.model_name || null,
+    model: this.model || null,
     model_format: this.model_format || null,
     ctx_size: this.ctx_size || null,
     model_type: this.model_type || null,

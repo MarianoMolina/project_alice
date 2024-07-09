@@ -1,13 +1,9 @@
-from workflow_logic.util.task_utils import DatabaseTaskResponse
-from workflow_logic.core.tasks import APITask, AliceTask, RedditSearchTask, Workflow, WikipediaSearchTask, GoogleSearchTask, ExaSearchTask, ArxivSearchTask, BasicAgentTask, PromptAgentTask, CheckTask, CodeGenerationLLMTask, CodeExecutionLLMTask, AgentWithFunctions
-from workflow_logic.core.agent import AliceAgent
+from workflow_logic.core.communication import DatabaseTaskResponse, MessageDict
+from workflow_logic.core.tasks import TaskLibrary, APITask, AliceTask, RedditSearchTask, Workflow, WikipediaSearchTask, GoogleSearchTask, ExaSearchTask, ArxivSearchTask, BasicAgentTask, PromptAgentTask, CheckTask, CodeGenerationLLMTask, CodeExecutionLLMTask, AgentWithFunctions
+from workflow_logic.core.agent import AliceAgent, AgentLibrary
 from workflow_logic.core.prompt import Prompt, TemplatedPrompt, PromptLibrary
-from workflow_logic.core.model import AliceModel
+from workflow_logic.core.model import AliceModel, ModelManager
 from workflow_logic.core.chat import AliceChat
-from workflow_logic.core.tasks.task_library import TaskLibrary
-from workflow_logic.core.model import ModelManager
-from workflow_logic.core.agent.agent import AgentLibrary
-from workflow_logic.util.task_utils import MessageDict
 from workflow_logic.util.const import BACKEND_PORT, HOST, ADMIN_TOKEN, BACKEND_PORT_DOCKER, BACKEND_HOST
 from pydantic import BaseModel, Field
 from typing import Literal, Optional, Dict, Any

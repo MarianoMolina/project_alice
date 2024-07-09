@@ -8,7 +8,7 @@ import {
     IconButton,
     Tooltip
 } from '@mui/material';
-import { Visibility, ChevronRight } from '@mui/icons-material';
+import { Visibility } from '@mui/icons-material';
 import { AliceModel, ModelComponentProps } from '../../../utils/ModelTypes';
 
 const ModelListView: React.FC<ModelComponentProps> = ({
@@ -22,7 +22,7 @@ const ModelListView: React.FC<ModelComponentProps> = ({
             {items.map((model: AliceModel) => (
                 <ListItem key={model._id}>
                     <ListItemText
-                        primary={model.model_name}
+                        primary={model.model}
                         secondary={
                             <>
                                 <Typography component="span" variant="body2" color="textPrimary">
@@ -37,7 +37,7 @@ const ModelListView: React.FC<ModelComponentProps> = ({
                     />
                     <Box>
                         {isInteractable && onInteraction && (
-                            <Tooltip title="View Agent">
+                            <Tooltip title="View Model">
                                 <IconButton edge="end" onClick={() => onInteraction(model)}>
                                     <Visibility />
                                 </IconButton>

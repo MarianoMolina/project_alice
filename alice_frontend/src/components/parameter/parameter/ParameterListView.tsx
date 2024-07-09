@@ -13,8 +13,8 @@ const ParameterListView: React.FC<ParameterComponentProps> = ({
     isInteractable = false,
     onInteraction,
 }) => {
-    if (!items) return null;
     const classes = useStyles();
+    if (!items) return null;
     return (
         <List>
             {items.map((parameter: ParameterDefinition) => (

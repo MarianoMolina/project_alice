@@ -2,7 +2,7 @@ import  { Document, Types } from 'mongoose';
 
 export interface IModel extends Document {
     short_name: string;
-    model_name: string;
+    model: string;
     model_format: string;
     ctx_size: number;
     model_type: 'instruct' | 'chat' | 'vision';

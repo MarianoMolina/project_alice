@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from workflow_logic.util.task_utils import SearchOutput, TaskResponse
+from workflow_logic.core.communication import SearchOutput, TaskResponse
 from workflow_logic.core.tasks.task import AliceTask
 
 class APITask(AliceTask):
@@ -12,7 +12,8 @@ class APITask(AliceTask):
                 task_description=self.task_description,
                 status="complete",
                 result_code=0,
-                task_outputs=task_outputs,
+                task_outputs=str(task_outputs),
+                task_content=task_outputs,
                 task_inputs=task_inputs,
                 result_diagnostic="",
                 execution_history=kwargs.get("execution_history", [])

@@ -37,7 +37,7 @@ const ModelTableView: React.FC<ModelComponentProps> = ({
         <TableBody>
           {items.map((model) => (
             <TableRow key={model._id}>
-              <TableCell>{model.model_name}</TableCell>
+              <TableCell>{model.model}</TableCell>
               <TableCell>{model.deployment || 'N/A'}</TableCell>
               <TableCell>{new Date(model.createdAt || '').toLocaleString()}</TableCell>
               <TableCell>

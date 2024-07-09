@@ -2,9 +2,10 @@ import logging
 from typing import Optional, List, Tuple
 from pydantic import Field
 from autogen.agentchat import ConversableAgent
-from workflow_logic.util.task_utils import StringOutput, LLMChatOutput, ParameterDefinition, FunctionParameters, TaskResponse, MessageDict
+from workflow_logic.core.communication import StringOutput, LLMChatOutput, MessageDict, TaskResponse
 from workflow_logic.core.agent.agent import AliceAgent
 from workflow_logic.core.tasks.task import AliceTask
+from workflow_logic.core.parameters import ParameterDefinition, FunctionParameters
 
 # Define the default FunctionParameters for the default classes
 messages_function_parameters = FunctionParameters(
@@ -53,7 +54,8 @@ class BasicAgentTask(AliceTask):
                 task_description=self.task_description,
                 status="complete",
                 result_code=exitcode,
-                task_outputs=task_outputs,
+                task_outputs=str(task_outputs),
+                task_content=task_outputs,
                 task_inputs=task_inputs,
                 result_diagnostic="Task executed.",
                 execution_history=kwargs.get("execution_history", [])
@@ -63,7 +65,8 @@ class BasicAgentTask(AliceTask):
             task_description=self.task_description,
             status="failed",
             result_code=exitcode,
-            task_outputs=task_outputs,
+            task_outputs=str(task_outputs),
+            task_content=task_outputs,
             task_inputs=task_inputs,
             result_diagnostic=f"Exit code not found.",
             execution_history=kwargs.get("execution_history", [])

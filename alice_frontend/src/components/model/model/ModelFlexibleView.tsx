@@ -7,15 +7,9 @@ import {
     InputLabel,
     Select,
     MenuItem,
-    Slider,
-    FormControlLabel,
     Button,
-    Switch
 } from '@mui/material';
 import { ModelComponentProps } from '../../../utils/ModelTypes';
-import { useConfig } from '../../../context/ConfigContext';
-import { Prompt } from '../../../utils/PromptTypes';
-import { AliceModel } from '../../../utils/ModelTypes';
 
 const ModelFlexibleView: React.FC<ModelComponentProps> = ({
     item,
@@ -42,8 +36,8 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
           <TextField
             fullWidth
             label="Model Name"
-            value={item?.model_name || ''}
-            onChange={(e) => onChange({ model_name: e.target.value })}
+            value={item?.model || ''}
+            onChange={(e) => onChange({ model: e.target.value })}
             margin="normal"
             disabled={!isEditMode}
           />

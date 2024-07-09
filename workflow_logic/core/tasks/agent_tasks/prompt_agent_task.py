@@ -3,7 +3,8 @@ from typing import Dict, Any, Optional, List, Tuple
 from pydantic import Field
 from autogen.code_utils import extract_code
 from workflow_logic.util.utils import get_language_matching, json_to_python_type_mapping
-from workflow_logic.util.task_utils import FunctionParameters, TaskResponse, MessageDict
+from workflow_logic.core.communication import MessageDict, TaskResponse
+from workflow_logic.core.parameters import FunctionParameters
 from workflow_logic.core.agent.agent import AliceAgent
 from workflow_logic.core.tasks.task import prompt_function_parameters
 from workflow_logic.core.prompt import Prompt, TemplatedPrompt

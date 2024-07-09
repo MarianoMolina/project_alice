@@ -3,7 +3,7 @@ from pydantic import Field
 from workflow_logic.core.agent.agent import AliceAgent
 from workflow_logic.core.tasks.task import AliceTask
 from workflow_logic.core.tasks.agent_tasks.prompt_agent_task import PromptAgentTask
-from workflow_logic.util.task_utils import MessageDict, TaskResponse, LLMChatOutput
+from workflow_logic.core.communication import MessageDict, TaskResponse, LLMChatOutput
 from workflow_logic.core.chat.chat_execution_functionality import ChatExecutionFunctionality
 
 class AgentWithFunctions(PromptAgentTask):
@@ -24,8 +24,8 @@ class AgentWithFunctions(PromptAgentTask):
                 execution_agent=execution_agent,
                 functions=functions,
                 code_execution_config=self.execution_agent_id.code_execution_config,
-                valid_languages=["python", "shell"],  # You may want to make this configurable
-                return_output_to_agent=True  # You may want to make this configurable
+                valid_languages=["python", "shell"], 
+                return_output_to_agent=True  # May want to make this configurable
             )
 
     def generate_agent_response(self, messages: List[Dict[str, Any]], max_rounds: int = 5, **kwargs) -> Tuple[List[MessageDict], bool]:
@@ -53,7 +53,8 @@ class AgentWithFunctions(PromptAgentTask):
             task_description=self.task_description,
             status="complete" if not is_terminated else "failed",
             result_code=0 if not is_terminated else 1,
-            task_outputs=chat_output,
+            task_outputs=str(chat_output),
+            task_content=chat_output,
             task_inputs=kwargs,
             result_diagnostic="Task executed successfully." if not is_terminated else "Task execution terminated.",
             execution_history=kwargs.get("execution_history", [])

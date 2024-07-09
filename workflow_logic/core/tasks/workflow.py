@@ -1,7 +1,6 @@
-import logging
 from typing import Dict, Any, Optional, List, Callable, Union
 from pydantic import Field
-from workflow_logic.util.task_utils import TaskResponse, WorkflowOutput
+from workflow_logic.core.communication import TaskResponse
 from workflow_logic.core.tasks.task import AliceTask
 
 class Workflow(AliceTask):
@@ -49,7 +48,8 @@ class Workflow(AliceTask):
             task_description=self.task_description,
             status=status,
             result_code=1 if status == "failed" else 0,
-            task_outputs=WorkflowOutput(content=tasks_performed),
+            task_outputs=str(WorkflowOutput(content=tasks_performed)),
+            task_content=WorkflowOutput(content=tasks_performed),
             task_inputs=task_inputs,
             result_diagnostic=diagnostic,
             execution_history=kwargs.get("execution_history", [])

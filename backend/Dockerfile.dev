@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm install --legacy-peer-deps --network-timeout=100000
 
 # Install TypeScript and nodemon globally
 RUN npm install -g typescript nodemon

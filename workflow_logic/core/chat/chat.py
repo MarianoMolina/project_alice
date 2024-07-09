@@ -1,11 +1,11 @@
 from pydantic import BaseModel, Field
-from typing import List, Tuple, Optional, Union
-from workflow_logic.util.utils import LLMConfig
-from workflow_logic.util.task_utils import MessageDict, TaskResponse, DatabaseTaskResponse
+from typing import List, Optional
+from workflow_logic.core.model.model_config import LLMConfig
+from workflow_logic.core.communication import MessageDict
 from workflow_logic.core.agent import AliceAgent
 from workflow_logic.core.tasks import AliceTask
 from autogen.agentchat import ConversableAgent
-from .chat_execution_functionality import ChatExecutionFunctionality
+from workflow_logic.core.chat.chat_execution_functionality import ChatExecutionFunctionality
 
 default_system_message = {
     "name": "alice_default",

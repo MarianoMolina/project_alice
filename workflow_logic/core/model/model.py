@@ -4,12 +4,13 @@ from typing import Dict, List, Literal, Optional
 from pydantic import BaseModel, Field, model_validator, ConfigDict, ValidationError
 from guidance.models import LlamaCpp, OpenAI, Anthropic, Model as GuidanceModel
 from guidance.chat import ChatTemplate
-from workflow_logic.util.const import const_model_definitions, model_formats, active_vision_models, active_models, LM_STUDIO_PORT, HOST
-from workflow_logic.util.utils import autogen_default_llm_config, model_path_from_file, LLMConfig
+from workflow_logic.util.const import model_formats, LM_STUDIO_PORT, HOST
+from workflow_logic.util.utils import model_path_from_file
+from workflow_logic.core.model.model_config import LLMConfig
 
 class AliceModel(BaseModel):
     short_name: str = Field(..., title="Short Name", description="The short name of the model.")
-    model_name: str = Field(..., title="Model Name", description="The complete name of the model. For file-based models, this is folder path.")
+    model: str = Field(..., title="Model Name", description="The complete name of the model. For file-based models, this is folder path.")
     model_format: str = Field(..., title="Model Format", description="The format of the model.")
     ctx_size: int = Field(..., title="Context Size", description="The context size of the model.")
     model_type: Literal["instruct", "chat", "vision"] = Field(..., title="Model Type", description="The type of the model.")
@@ -72,30 +73,35 @@ class AliceModel(BaseModel):
         
     @property
     def autogen_llm_config(self) -> LLMConfig:
-        return autogen_default_llm_config(self.autogen_model_config)
+        return self.autogen_default_llm_config(self.autogen_model_config)
     
-    @property
-    def guidance_model(self, verbose: bool = True) -> GuidanceModel:
-        model_kwargs = {}
-        guidance_class = self.get_formatted_guidance_class()
-        if self.deployment == "local":
-            model_kwargs = dict(n_ctx=self.ctx_size, 
-                                n_threads=32, 
-                                n_gpu_layers=-1, 
-                                verbose=verbose,
-                                offload_kqv=True, 
-                                n_threads_batch=32
-                                )
-            llm = guidance_class(model=self.model_path, api_key = self.api_key, **model_kwargs)
-        else:
-            if "gpt-4o" in self.model_path:
-                llm = guidance_class(model=self.model_path, api_key = self.api_key, tokenizer=tiktoken.get_encoding("cl100k_base"), **model_kwargs)
-            else:
-                llm = guidance_class(model=self.model_path, api_key = self.api_key, **model_kwargs)
-        if "echo" in llm.__dict__:
-            llm.echo = False
+    # @property
+    # def guidance_model(self, verbose: bool = True) -> GuidanceModel:
+    #     model_kwargs = {}
+    #     guidance_class = self.get_formatted_guidance_class()
+    #     if self.deployment == "local":
+    #         model_kwargs = dict(n_ctx=self.ctx_size, 
+    #                             n_threads=32, 
+    #                             n_gpu_layers=-1, 
+    #                             verbose=verbose,
+    #                             offload_kqv=True, 
+    #                             n_threads_batch=32
+    #                             )
+    #         llm = guidance_class(model=self.model_path, api_key = self.api_key, **model_kwargs)
+    #     else:
+    #         if "gpt-4o" in self.model_path:
+    #             llm = guidance_class(model=self.model_path, api_key = self.api_key, tokenizer=tiktoken.get_encoding("cl100k_base"), **model_kwargs)
+    #         else:
+    #             llm = guidance_class(model=self.model_path, api_key = self.api_key, **model_kwargs)
+    #     if "echo" in llm.__dict__:
+    #         llm.echo = False
 
-        return llm
+    #     return llm
+    
+    def autogen_default_llm_config(self, model_list: List[dict]) -> LLMConfig:
+        if isinstance(model_list, dict):
+            model_list = [model_list]
+        return LLMConfig(temperature=0.3, config_list=model_list, timeout=120)
     
     def get_model_format_dict(self) -> dict:
         if self.model_format not in model_formats:
@@ -119,21 +125,21 @@ class AliceModel(BaseModel):
         else:
             return ""
         
-    def get_formatted_guidance_class(self) -> GuidanceModel:
-        if self.deployment == "remote":
-            if self.api_type == "openai": 
-                return OpenAI
-            elif self.api_type == "anthropic":
-                return Anthropic
-            else: 
-                raise Exception(f"API type {self.api_type} not found.")
-        else:
-            class ModelFormatInterface(LlamaCpp, ChatTemplate):
-                def get_role_start(cls, role_name, **kwargs):
-                    return self.get_role_start(role_name, **kwargs)
-                def get_role_end(cls, role_name=None):
-                    return self.get_role_end(role_name)
-            return ModelFormatInterface
+    # def get_formatted_guidance_class(self) -> GuidanceModel:
+    #     if self.deployment == "remote":
+    #         if self.api_type == "openai": 
+    #             return OpenAI
+    #         elif self.api_type == "anthropic":
+    #             return Anthropic
+    #         else: 
+    #             raise Exception(f"API type {self.api_type} not found.")
+    #     else:
+    #         class ModelFormatInterface(LlamaCpp, ChatTemplate):
+    #             def get_role_start(cls, role_name, **kwargs):
+    #                 return self.get_role_start(role_name, **kwargs)
+    #             def get_role_end(cls, role_name=None):
+    #                 return self.get_role_end(role_name)
+    #         return ModelFormatInterface
     
     def get_autogen_model_config_local(self) -> List[dict]:
         return [
@@ -146,7 +152,7 @@ class AliceModel(BaseModel):
     
     def get_autogen_model_config_remote(self) -> List[dict]:
         config = {
-            "model": self.model_name,
+            "model": self.model,
             "api_key": self.api_key,
             "base_url": self.base_url,
             "api_type": self.api_type
@@ -156,57 +162,3 @@ class AliceModel(BaseModel):
         #     config["model_client_cls"] = self.autogen_model_client_cls
 
         return [config]
-
-class ModelManager(BaseModel):
-    model_definitions: List[dict | AliceModel] = Field(const_model_definitions, title="Model Definitions", description="The model definitions. Can be passes as dict or AliceModel objects, after init they will be converted to AliceModel objects.")
-    active_models: List[str] = Field(active_models, title="Active Models", description="The short_name of the models that are available for use. Place first the default model.")
-    active_vision_models: List[str] = Field(active_vision_models, title="Vision Models", description="The short_name of the vision models that are available for use. Place first the default vision model.")
-    model_config = ConfigDict(protected_namespaces=())
-
-    @model_validator(mode="after")
-    def validate_model_definitions(self):
-        for model in self.model_definitions:
-            if not isinstance(model, AliceModel):
-                try:
-                    model = AliceModel.model_validate(model)
-                except ValidationError as e:
-                    raise ValidationError(
-                        f"Validation error in AliceModel: {str(e)}",
-                        model=model,
-                    )
-        return self
-
-    @property
-    def available_models(self) -> List[str]:
-        return [model.short_name for model in self.model_definitions]
-    
-    @property
-    def default_model(self) -> AliceModel:
-        model_def = self.get_model_obj_from_short_name(self.active_models[0])
-        if not model_def:
-            raise ValueError(f"Model {self.active_models[0]} not found.")
-        return model_def
-    
-    @property
-    def default_vision_model(self) -> AliceModel:
-        model_def = self.get_model_obj_from_short_name(self.active_vision_models[0])
-        if not model_def:
-            raise ValueError(f"Model {self.active_vision_models[0]} not found.")
-        return model_def
-       
-    def get_model_obj_from_short_name(self, short_name: str) -> AliceModel | None:
-        matched_models = [model for model in self.model_definitions if model.short_name == short_name]
-        if matched_models:
-            return matched_models[0]
-        else:
-            return None
-    
-    def get_model_obj_from_name(self, name: str) -> AliceModel | None:
-        matched_models = [model for model in self.model_definitions if model.short_name == name]
-        if not matched_models:
-            matched_models = [model for model in self.model_definitions if model.model_name == name]
-        if not matched_models:
-            matched_models = [model for model in self.model_definitions if model.model_file == name]
-        if not matched_models:
-            return None
-        return matched_models[0]

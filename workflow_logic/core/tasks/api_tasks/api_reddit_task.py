@@ -2,9 +2,10 @@ import praw
 from praw.models import Submission
 from typing import List
 from pydantic import Field
-from workflow_logic.util.task_utils import FunctionParameters, ParameterDefinition, SearchResult, SearchOutput
+from workflow_logic.core.communication import SearchResult, SearchOutput
 from workflow_logic.util.const import REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET
 from workflow_logic.core.tasks.api_tasks.api_task import APITask
+from workflow_logic.core.parameters import ParameterDefinition, FunctionParameters
 
 reddit_search_parameters = FunctionParameters(
     type="object",

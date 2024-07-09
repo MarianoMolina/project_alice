@@ -2,9 +2,9 @@ import logging
 from typing import List, Tuple, Optional, Union
 from pydantic import BaseModel, Field, ConfigDict
 from autogen.code_utils import extract_code
-from autogen.agentchat import ConversableAgent, UserProxyAgent
+from autogen.agentchat import ConversableAgent
+from workflow_logic.core.communication import DatabaseTaskResponse, MessageDict
 from workflow_logic.util.utils import get_language_matching
-from workflow_logic.util.task_utils import MessageDict, DatabaseTaskResponse
 
 class ChatExecutionFunctionality(BaseModel):
     llm_agent: ConversableAgent = Field(..., description="The LLM agent")
