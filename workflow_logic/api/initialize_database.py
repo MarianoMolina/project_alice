@@ -4,20 +4,14 @@ from dotenv import load_dotenv, find_dotenv, set_key
 from typing import get_type_hints, get_origin, get_args, Dict, Any, Optional, Union, Tuple
 from pydantic import BaseModel, Field
 from tqdm import tqdm
-from workflow_logic.core.agent import AliceAgent
-from workflow_logic.core.chat import AliceChat
-from workflow_logic.core.prompt import Prompt
-from workflow_logic.core.model import AliceModel
-from workflow_logic.core.tasks import AliceTask
-from workflow_logic.core.communication import DatabaseTaskResponse
-from workflow_logic.core.parameters import ParameterDefinition, FunctionParameters
+from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, DatabaseTaskResponse, ParameterDefinition, FunctionParameters
 from workflow_logic.util import User
 from workflow_logic.api.api_utils import create_task_from_json, EntityType
 from workflow_logic.api.db import BackendAPI
 from workflow_logic.api.initialization_data import DBStructure, DB_STRUCTURE
 
 class InitializationBackendAPI(BackendAPI):
-    id_map: Dict[EntityType, Dict[str, str]] = Field(default_factory=lambda: {
+    entity_key_map: Dict[EntityType, Dict[str, Dict[str, any]]] = Field(default_factory=lambda: {
         "users": {}, 
         "models": {}, 
         "prompts": {}, 
@@ -26,7 +20,7 @@ class InitializationBackendAPI(BackendAPI):
         "chats": {}, 
         "parameters": {}, 
         "task_responses": {}
-    })
+    }, description="Map of entity keys to entity objects")
     collection_map: Dict[EntityType, str] = Field(default_factory=lambda: {
         "users": "users",
         "models": "models",
@@ -36,7 +30,7 @@ class InitializationBackendAPI(BackendAPI):
         "chats": "chats", 
         "parameters": "parameters",
         "task_responses": "taskresults"
-    })
+    }, description="Map of entity types to collection names")
     entity_class_map: Dict[str, BaseModel] = Field(default_factory=lambda: {
         "agents": AliceAgent,
         "chats": AliceChat,
@@ -46,18 +40,18 @@ class InitializationBackendAPI(BackendAPI):
         "users": User,
         "parameters": ParameterDefinition, 
         "task_responses": DatabaseTaskResponse
-    })
-    existing_admin: Optional[User] = Field(default=None)
-    admin_data: Optional[User] = Field(default=None)
-    admin_password: Optional[str] = Field(default=None)
-    use_existing_admin: bool = Field(default=False)
+    }, description="Map of entity types to Pydantic model classes")
+    existing_admin: Optional[User] = Field(default=None, description="Existing admin user data")
+    admin_data: Optional[User] = Field(default=None, description="Active admin user data")
+    admin_password: Optional[str] = Field(default=None, description="Active admin user password")
+    use_existing_admin: bool = Field(default=False, description="Flag to use existing admin user")
 
     async def create_admin_user(self, admin_data: User) -> str:
         url = f"{self.base_url}/users/register"
         headers = {"Content-Type": "application/json"}
 
         async with aiohttp.ClientSession() as session:
-            async with session.post(url, json=admin_data, headers=headers) as response:
+            async with session.post(url, json=admin_data.model_dump(), headers=headers) as response:
                 response.raise_for_status()
                 result = await response.json()
                 admin_data.id = result['_id']
@@ -116,6 +110,7 @@ class InitializationBackendAPI(BackendAPI):
             return entity_instance
         except Exception as e:
             print(f"Error creating entity instance for {entity_type}: {entity_data}")
+            print_traceback()
             raise e
 
     async def create_entity(self, entity_type: EntityType, entity_data: dict) -> str:
@@ -123,39 +118,39 @@ class InitializationBackendAPI(BackendAPI):
         # Resolve references in the data before creating the instance
         resolved_data = await self.resolve_references_in_data(entity_type, entity_data)
         
-        entity_instance = self._get_entity_instance(entity_type, resolved_data)
+        # entity_instance = self._get_entity_instance(entity_type, resolved_data)
+        # entity_dict = entity_instance.model_dump(by_alias=True, exclude_unset=True)
+        # # Ensure 'id' is mapped to '_id' for MongoDB
+        # if 'id' in entity_dict:
+        #     entity_dict['_id'] = entity_dict.pop('id')
 
         collection_name = self.collection_map[entity_type]
         url = f"{self.base_url}/{collection_name}"
         headers = self._get_headers()
 
-        entity_dict = entity_instance.model_dump(by_alias=True, exclude_unset=True)
-        
-        # Ensure 'id' is mapped to '_id' for MongoDB
-        if 'id' in entity_dict:
-            entity_dict['_id'] = entity_dict.pop('id')
-
         async with aiohttp.ClientSession() as session:
             try:
-                async with session.post(url, json=entity_dict, headers=headers) as response:
+                async with session.post(url, json=resolved_data, headers=headers) as response:
                     if response.status == 400:
                         error_data = await response.json()
                         print(f"Error creating entity: {error_data}")
+                        print_traceback()
                         raise ValueError(f"Bad request when creating {entity_type}: {error_data}")
                     
                     response.raise_for_status()
                     result = await response.json()
                     print(f'Created {entity_type[:-1]}: {entity_data.get("key", entity_data.get("name", entity_data.get("email")))}')
-                    entity_id = result['_id']
-                    self.id_map[entity_type][entity_data.get('key') or entity_data.get('name')] = entity_id
-                    return entity_id
+                    self.entity_key_map[entity_type][entity_data.get('key') or entity_data.get('name')] = result
+                    return result
             except aiohttp.ClientResponseError as e:
                 print(f"HTTP error during entity creation: {e.status} - {e.message}")
-                print(f"Entity data: {entity_dict}")
+                print(f"Entity data: {resolved_data}")
+                print_traceback()
                 raise
             except Exception as e:
                 print(f"Unexpected error during entity creation: {str(e)}")
-                print(f"Entity data: {entity_dict}")
+                print(f"Entity data: {resolved_data}")
+                print_traceback()
                 raise
 
     async def resolve_references_in_data(self, entity_type: EntityType, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -247,23 +242,10 @@ class InitializationBackendAPI(BackendAPI):
         return resolved
 
     async def get_entity_by_key(self, entity_type: EntityType, key: str) -> Dict[str, Any]:
-        entity_id = self.id_map[entity_type].get(key)
-        if not entity_id:
+        entity = self.entity_key_map[entity_type].get(key)
+        if not entity:
             raise ValueError(f"Unable to find entity ID: {entity_type} with key {key}")
-
-        collection_name = self.collection_map[entity_type]
-        url = f"{self.base_url}/{collection_name}/{entity_id}"
-        headers = self._get_headers()
-        
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=headers) as response:
-                response.raise_for_status()
-                entity = await response.json()
-                
-                if not entity:
-                    raise ValueError(f"Unable to find entity: {entity_type} with ID {entity_id}")
-                
-                return entity
+        return entity
 
     async def check_existing_data(self, max_retries=3, retry_delay=1) -> bool:
         for attempt in range(max_retries):
@@ -288,7 +270,7 @@ class InitializationBackendAPI(BackendAPI):
     async def initialize_database(self, db_structure: DBStructure) -> bool:
         try:
             # Login as admin and get JWT
-            admin_token = await self.login_admin_user(self.admin_data['email'], self.admin_password)
+            admin_token = await self.login_admin_user(self.admin_data.email, self.admin_password)
             
             # Store the admin token
             await self.store_admin_token(admin_token)
@@ -304,31 +286,33 @@ class InitializationBackendAPI(BackendAPI):
             
             with tqdm(total=total_entities, desc="Initializing database") as pbar:
                 for entity_type in entity_types:
-                    entities = getattr(db_structure, entity_type, [])
-                    for entity_data in entities:
-                        try:
-                            await self.create_entity(entity_type, entity_data)
-                        except aiohttp.ClientResponseError as e:
-                            if e.status == 409:  # Assuming 409 is used for conflicts/duplicates
-                                print(f"Entity already exists: {entity_type} - {entity_data.get('name', entity_data.get('email'))}")
-                            else:
-                                print(f"Error creating entity {entity_type}: {str(e)}")
-                                print(f"Entity data: {entity_data}")
-                                # Optionally, you can choose to continue with the next entity instead of raising
-                                # If you want to stop the entire process on any error, uncomment the next line
-                                # raise
-                        except Exception as e:
-                            print(f"Unexpected error creating entity {entity_type}: {str(e)}")
-                            print(f"Entity data: {entity_data}")
-                            # Optionally, you can choose to continue with the next entity instead of raising
-                            # If you want to stop the entire process on any error, uncomment the next line
-                            # raise
-                        pbar.update(1)
-            
+                    await self.create_entities_by_type(entity_type, db_structure, pbar)
             return True
         except Exception as e:
             print(f"Error in initialize_database: {str(e)}")
-            return False
+            print_traceback()   
+        
+    async def create_entities_by_type(self, entity_type: EntityType, db_structure: DBStructure, pbar: tqdm) -> bool:
+        entities = getattr(db_structure, entity_type, [])
+        for entity_data in entities:
+            try:
+                await self.create_entity(entity_type, entity_data)
+            except aiohttp.ClientResponseError as e:
+                if e.status == 409:
+                    print(f"Entity already exists: {entity_type} - {entity_data.get('name', entity_data.get('email'))}")
+                else:
+                    print(f"Error creating entity {entity_type}: {str(e)}")
+                    print(f"Entity data: {entity_data}")
+                    print_traceback()
+                    # If you want to stop the entire process on any error, uncomment the next line
+                    # raise
+            except Exception as e:
+                print(f"Unexpected error creating entity {entity_type}: {str(e)}")
+                print(f"Entity data: {entity_data}")
+                print_traceback()
+                # If you want to stop the entire process on any error, uncomment the next line
+                # raise
+            pbar.update(1)
         
     async def get_admin_user(self) -> Optional[User]:
         url = f"{self.base_url}/users?role=admin"
@@ -467,9 +451,12 @@ async def main():
         print("An error occurred during initialization:")
         print(f"Error type: {type(e).__name__}")
         print(f"Error message: {str(e)}")
-        print("Traceback:")
-        import traceback
-        traceback.print_exc()
+        print_traceback()
+
+def print_traceback():
+    print("Traceback:")
+    import traceback
+    traceback.print_exc()
 
 if __name__ == "__main__":
     asyncio.run(main())

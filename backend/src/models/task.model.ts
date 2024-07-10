@@ -1,21 +1,18 @@
 import mongoose, { Schema, Model, Types } from 'mongoose';
-import { functionParametersSchema } from '../utils/schemas';
+import { functionParametersSchema, ensureObjectIdForProperties } from '../utils/schemas';
 import { ITaskDocument } from '../interfaces/task.interface';
+import { ensureObjectIdHelper } from '../utils/utils';
 
 const taskSchema = new Schema<ITaskDocument>({
     task_name: { type: String, required: true, unique: true },
     task_description: { type: String, required: true },
     task_type: { type: String, enum: ["CVGenerationTask", "RedditSearchTask", "APITask", "WikipediaSearchTask", "GoogleSearchTask", "ExaSearchTask", "ArxivSearchTask", "BasicAgentTask", "PromptAgentTask", "CheckTask", "CodeGenerationLLMTask", "CodeExecutionLLMTask", "AgentWithFunctions"], required: true },
-    input_variables: {
-        type: functionParametersSchema,
-        default: null,
-        set: (v: any) => (v === undefined ? null : v)
-    },
+    input_variables: { type: functionParametersSchema },
     exit_codes: {
         type: Map,
         of: String,
         default: () => new Map([['0', 'Success'], ['1', 'Failed']])
-      },
+    },
     recursive: { type: Boolean, default: true },
     templates: { type: Map, of: Schema.Types.ObjectId, ref: 'Prompt', default: null },
     tasks: { type: Map, of: Schema.Types.ObjectId, ref: 'Task', default: null },
@@ -66,86 +63,58 @@ taskSchema.methods.apiRepresentation = function (this: ITaskDocument) {
 };
 
 function ensureObjectIdForSave(this: ITaskDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {
+    this.agent = ensureObjectIdHelper(this.agent);
+    this.execution_agent = ensureObjectIdHelper(this.execution_agent);
+    this.created_by = ensureObjectIdHelper(this.created_by);
+    this.updated_by = ensureObjectIdHelper(this.updated_by);
+
     if (this.templates) {
         for (const [key, value] of this.templates.entries()) {
-            if (value && (value as any)._id) {
-                this.templates.set(key, (value as any)._id);
-            }
+            this.templates.set(key, ensureObjectIdHelper(value));
         }
     }
     if (this.tasks) {
         for (const [key, value] of this.tasks.entries()) {
-            if (value && (value as any)._id) {
-                this.tasks.set(key, (value as any)._id);
-            }
+            this.tasks.set(key, ensureObjectIdHelper(value));
         }
     }
     if (this.prompts_to_add) {
         for (const [key, value] of this.prompts_to_add.entries()) {
-            if (value && (value as any)._id) {
-                this.prompts_to_add.set(key, (value as any)._id);
-            }
+            this.prompts_to_add.set(key, ensureObjectIdHelper(value));
         }
     }
-    if (this.agent && (this.agent as any)._id) {
-        this.agent = (this.agent as any)._id;
-    }
-    if (this.execution_agent && (this.execution_agent as any)._id) {
-        this.execution_agent = (this.execution_agent as any)._id;
-    }
-    if (this.created_by && (this.created_by as any)._id) {
-        this.created_by = (this.created_by as any)._id;
-    }
-    if (this.updated_by && (this.updated_by as any)._id) {
-        this.updated_by = (this.updated_by as any)._id;
-    }
-    if (this.input_variables && this.input_variables.properties) {
-        for (const key in this.input_variables.properties) {
-            if (this.input_variables.properties[key]._id) {
-                this.input_variables.properties[key] = this.input_variables.properties[key]._id;
-            }
-        }
-    }
+    ensureObjectIdForProperties(this.input_variables.properties); 
     next();
 }
 
 function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
     const update = this.getUpdate() as any;
-    
-    const ensureObjectId = (value: any): Types.ObjectId | any => {
-      if (value && typeof value === 'object' && '_id' in value) {
-        return value._id;
-      }
-      return value;
-    };
-  
+
     if (update.templates) {
-      update.templates = Object.fromEntries(
-        Object.entries(update.templates).map(([key, value]) => [key, ensureObjectId(value)])
-      );
+        update.templates = Object.fromEntries(
+            Object.entries(update.templates).map(([key, value]) => [key, ensureObjectIdHelper(value)])
+        );
     }
     if (update.tasks) {
-      update.tasks = Object.fromEntries(
-        Object.entries(update.tasks).map(([key, value]) => [key, ensureObjectId(value)])
-      );
+        update.tasks = Object.fromEntries(
+            Object.entries(update.tasks).map(([key, value]) => [key, ensureObjectIdHelper(value)])
+        );
     }
     if (update.prompts_to_add) {
-      update.prompts_to_add = Object.fromEntries(
-        Object.entries(update.prompts_to_add).map(([key, value]) => [key, ensureObjectId(value)])
-      );
+        update.prompts_to_add = Object.fromEntries(
+            Object.entries(update.prompts_to_add).map(([key, value]) => [key, ensureObjectIdHelper(value)])
+        );
     }
-    update.agent = ensureObjectId(update.agent);
-    update.execution_agent = ensureObjectId(update.execution_agent);
-    update.created_by = ensureObjectId(update.created_by);
-    update.updated_by = ensureObjectId(update.updated_by);
-  
-    if (update.input_variables && update.input_variables.properties) {
-      update.input_variables.properties = Object.fromEntries(
-        Object.entries(update.input_variables.properties).map(([key, value]) => [key, ensureObjectId(value)])
-      );
-    }
+    update.agent = ensureObjectIdHelper(update.agent);
+    update.execution_agent = ensureObjectIdHelper(update.execution_agent);
+    update.created_by = ensureObjectIdHelper(update.created_by);
+    update.updated_by = ensureObjectIdHelper(update.updated_by);
+
+    if (update && update.input_variables && update.input_variables.properties) {
+        ensureObjectIdForProperties(update.input_variables.properties);
+      }
     next();
-  }
+}
 
 function autoPopulate(this: mongoose.Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
     this.populate('created_by')
@@ -165,10 +134,7 @@ function autoPopulate(this: mongoose.Query<any, any>, next: mongoose.CallbackWit
         path: 'prompts_to_add',
         options: { strictPopulate: false }
     });
-    this.populate({
-        path: 'input_variables.properties',
-        populate: { path: '$*', model: 'ParameterDefinition' }
-    });
+    this.populate('input_variables.properties')
     next();
 }
 

@@ -65,9 +65,24 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                 </Select>
             </FormControl>
             <FormControl fullWidth className={classes.formControl}>
+                <InputLabel>Executor agent</InputLabel>
+                <Select
+                    value={item.executor?._id || ''}
+                    onChange={(e) => {
+                        const selectedAgent = agents.find(executor => executor._id === e.target.value);
+                        updateChatField('executor', selectedAgent || item.executor);
+                    }}
+                    disabled={mode === 'view'}
+                >
+                    {agents.map((agent) => (
+                        <MenuItem key={agent._id} value={agent._id}>{agent.name}</MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+            <FormControl fullWidth className={classes.formControl}>
                 <InputLabel>Model</InputLabel>
                 <Select
-                    value={item.model_id || ''}
+                    value={item.model_id?._id || ''}
                     onChange={(e) => {
                         const selectedModel = models.find(model_id => model_id._id === e.target.value);
                         console.log('selectedModel', selectedModel)

@@ -31,7 +31,7 @@ class AliceAgent(BaseModel):
     @property
     def _llm_config(self) -> LLMConfig | None:
         if self.model_id:
-            return self.model_id.autogen_default_llm_config()
+            return self.model_id.autogen_default_llm_config(self.model_id.autogen_model_config)
         return None
 
     def get_autogen_agent(self, *, llm_config: Optional[LLMConfig] = None) -> ConversableAgent:
@@ -65,7 +65,7 @@ class AliceAgent(BaseModel):
         # LLMConfig
         if not llm_config:
             if not self._llm_config:
-                raise ValueError("LLM Config must be provided if no model manager object is provided.")
+                raise ValueError(f"LLM Config must be provided if no model manager object is provided. {self.model_id}")
             else:
                 llm_config = self._llm_config
         if isinstance(llm_config, dict):

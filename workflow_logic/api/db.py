@@ -1,7 +1,7 @@
 from workflow_logic.core.communication import DatabaseTaskResponse, MessageDict
 from workflow_logic.core.tasks import TaskLibrary, AliceTask
 from workflow_logic.core.agent import AliceAgent, AgentLibrary
-from workflow_logic.core.prompt import Prompt, TemplatedPrompt, PromptLibrary
+from workflow_logic.core.prompt import Prompt, PromptLibrary
 from workflow_logic.core.model import AliceModel, ModelManager
 from workflow_logic.core.chat import AliceChat
 from workflow_logic.api.api_utils import available_task_types
@@ -96,10 +96,10 @@ class BackendAPI(BaseModel):
                     if isinstance(prompts, list):
                         print(f'PROMPTS: {prompts}')
                         prompts = [await self.preprocess_data(prompt) for prompt in prompts]
-                        return {prompt["_id"]: TemplatedPrompt(**prompt) if "is_templated" in prompt and prompt["is_templated"] else Prompt(**prompt) for prompt in prompts}
+                        return {prompt["_id"]: Prompt(**prompt) for prompt in prompts}
                     else:
                         prompts = await self.preprocess_data(prompts)
-                        return {prompts["_id"]: TemplatedPrompt(**prompts) if "is_templated" in prompts and prompts["is_templated"] else Prompt(**prompts)}
+                        return {prompts["_id"]: Prompt(**prompts)}
             except aiohttp.ClientError as e:
                 logging.error(f"Error retrieving prompts: {e}")
                 return {}
@@ -318,6 +318,8 @@ class BackendAPI(BaseModel):
     def validate_token(self, token: str) -> dict:
         url = f"{self.base_url}/users/validate"
         headers = {"Authorization": f"Bearer {token}"}
+        print(f"Attempting to validate token at URL: {url}")
+        print(f"Headers: {headers}")
         try:
             response = requests.get(url, headers=headers)
             print(f"Token validation response: {response}")

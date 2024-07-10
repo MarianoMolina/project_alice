@@ -30,7 +30,7 @@ def create_task_from_json(task_dict: dict) -> AliceTask:
     for task in available_task_types:
         if task_type == task.__name__:
             logging.info(f"Creating task of type {task_type}")
-            return task.model_validate(task_dict)
+            return task(**task_dict)
     raise ValueError(f"Task type {task_type} not found in available task types.")
 
 class TaskExecutionRequest(BaseModel):

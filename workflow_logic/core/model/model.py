@@ -153,7 +153,7 @@ class AliceModel(BaseModel):
     
     def get_autogen_model_config_remote(self) -> List[dict]:
         config = {
-            "model": self.model,
+            "model": self.model_name,
             "api_key": self.api_key,
             "base_url": self.base_url,
             "api_type": self.api_type

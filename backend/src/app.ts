@@ -13,10 +13,10 @@ import PromptRoutes from './routes/prompt.route';
 import TaskResultRouter from './routes/taskresult.route';
 import ChatRoutes from './routes/chat.route';
 import ParametersRoutes from './routes/parameter.route';
+import HealthRoutes from './routes/health.route';
 
 import corsConfigMiddleware from './middleware/corsConfig.middleware';
 import loggingMiddleware from './middleware/logging.middleware'; 
-
 
 dotenv.config();
 
@@ -32,8 +32,8 @@ mongoose.connect(process.env.MONGODB_URI || "mongodb://mongo/alice_database")
         console.error('Failed to connect to MongoDB', err);
     });
     
-// Apply the logging middleware
-app.use(loggingMiddleware);
+// // Apply the logging middleware
+// app.use(loggingMiddleware);
 
 // Apply the CORS middlewares
 app.use(corsConfigMiddleware);
@@ -52,5 +52,6 @@ app.use('/api/taskresults', TaskResultRouter);
 app.use('/api/tasks', TaskRoutes);
 app.use('/api/users', UserRoutes);
 app.use('/api/parameters', ParametersRoutes);
+app.use('/api/health', HealthRoutes);
 
 export default app;

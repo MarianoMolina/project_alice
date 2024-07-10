@@ -43,3 +43,10 @@ export const messagesEqual = (msg1: IMessage, msg2: IMessage): boolean => {
     return msg1[key] === msg2[key];
   });
 };
+
+export function ensureObjectIdHelper(value: any): Types.ObjectId | any {
+  if (value && typeof value === 'object' && '_id' in value) {
+    return value._id;
+  }
+  return value;
+}

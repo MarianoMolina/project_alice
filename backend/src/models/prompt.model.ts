@@ -1,5 +1,6 @@
-import mongoose, { Schema, Model, Document, Types } from 'mongoose';
-import { functionParametersSchema } from '../utils/schemas';
+import mongoose, { Schema, Model, CallbackWithoutResultAndOptionalError, Query } from 'mongoose';
+import { functionParametersSchema, ensureObjectIdForProperties } from '../utils/schemas';
+import { ensureObjectIdHelper } from '../utils/utils';
 import { IPromptDocument } from '../interfaces/prompt.interface';
 
 const promptSchema = new Schema<IPromptDocument>({
@@ -29,54 +30,27 @@ promptSchema.methods.apiRepresentation = function(this: IPromptDocument) {
   };
 };
 
-function ensureObjectIdHelper(value: any): Types.ObjectId | any {
-  if (value && typeof value === 'object' && '_id' in value) {
-    return value._id;
-  }
-  return value;
-}
-
-function ensureObjectId(this: IPromptDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {
+function ensureObjectId(this: IPromptDocument, next: CallbackWithoutResultAndOptionalError) {
   this.created_by = ensureObjectIdHelper(this.created_by);
   this.updated_by = ensureObjectIdHelper(this.updated_by);
-
-  if (this.parameters && this.parameters.properties) {
-    for (const [key, value] of Object.entries(this.parameters.properties)) {
-      if (value && typeof value === 'object' && 'type' in value) {
-        (value as any).type = ensureObjectIdHelper((value as any).type);
-      }
-    }
-  }
+  ensureObjectIdForProperties(this.parameters.properties);  
   next();
 }
 
 promptSchema.pre('save', ensureObjectId);
 
-promptSchema.pre('findOneAndUpdate', function(this: mongoose.Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
+promptSchema.pre('findOneAndUpdate', function(next: CallbackWithoutResultAndOptionalError) {
   const update = this.getUpdate() as any;
-
-  update.created_by = ensureObjectIdHelper(update.created_by);
-  update.updated_by = ensureObjectIdHelper(update.updated_by);
-
-  if (update.parameters && update.parameters.properties) {
-    update.parameters.properties = Object.fromEntries(
-      Object.entries(update.parameters.properties).map(([key, value]) => {
-        if (typeof value === 'object' && value !== null && 'type' in value) {
-          return [key, { ...value, type: ensureObjectIdHelper((value as any).type) }];
-        }
-        return [key, value];
-      })
-    );
+  if (update && update.parameters && update.parameters.properties) {
+    ensureObjectIdForProperties(update.parameters.properties);
   }
- 
   next();
 });
 
-function autoPopulate(this: mongoose.Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
-  this.populate('created_by updated_by');
+function autoPopulate(this: Query<any, any>, next: CallbackWithoutResultAndOptionalError) {
+  this.populate('created_by updated_by parameters.properties');
   next();
 }
-
 promptSchema.pre('find', autoPopulate);
 promptSchema.pre('findOne', autoPopulate);
 

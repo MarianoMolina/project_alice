@@ -2,7 +2,7 @@ import mongoose, { Schema, Model } from 'mongoose';
 import { IParameterDefinitionDocument } from '../interfaces/parameter.interface';
 
 const parameterDefinitionSchema = new Schema<IParameterDefinitionDocument>({
-  type: { type: String, required: true, description: "Type of the parameter" },
+  type: { type: String, required: true, description: "Type of the parameter, like string or integer" },
   description: { type: String, required: true, description: "Description of the parameter" },
   default: { type: Schema.Types.Mixed, default: null, description: "Default value of the parameter" },
   created_by: { type: Schema.Types.ObjectId, ref: 'User', required: true },

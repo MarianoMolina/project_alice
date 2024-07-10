@@ -21,7 +21,7 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
         return <Typography>No Prompt data available.</Typography>;
     }
     const isEditMode = mode === 'edit' || mode === 'create';
-
+    console.log('PromptFlexibleView item:', item)
     return (
         <Box>
           <TextField

@@ -493,7 +493,7 @@ Here is the approved CV draft we prepared:
 # )
 
 # class CVGenerationTask(PromptAgentTask):
-#     templates: Dict[str, Prompt] = Field({"task_template": TemplatedPrompt(name="cv_workflow_template", content=cv_workflow_string_template, parameters=cv_clarifications_parameters)}, description="A dictionary of template names and their file names. By default this task uses the 'task_template' template to structure the inputs.")
+#     templates: Dict[str, Prompt] = Field({"task_template": Prompt(is_templated=True, name="cv_workflow_template", content=cv_workflow_string_template, parameters=cv_clarifications_parameters)}, description="A dictionary of template names and their file names. By default this task uses the 'task_template' template to structure the inputs.")
 #     agent: AliceAgent = Field(..., description="The agent to use for the task")
 
 available_tasks: List[AliceTask] = [

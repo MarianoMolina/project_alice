@@ -7,13 +7,13 @@ from workflow_logic.core.communication import MessageDict, TaskResponse
 from workflow_logic.core.parameters import FunctionParameters
 from workflow_logic.core.agent.agent import AliceAgent
 from workflow_logic.core.tasks.task import prompt_function_parameters
-from workflow_logic.core.prompt import Prompt, TemplatedPrompt
+from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.tasks.templated_task import TemplatedTask
 from workflow_logic.core.tasks.agent_tasks.agent_task import BasicAgentTask
 
 class PromptAgentTask(BasicAgentTask, TemplatedTask):
     input_variables: FunctionParameters = Field(default=prompt_function_parameters, description="Inputs that the agent will require in a workflow. Default is a 'prompt' str. It should be consistent with the template")
-    templates: Dict[str, Prompt] = Field({"task_template": TemplatedPrompt(name="basic_prompt", content="{{prompt}}", parameters=prompt_function_parameters)}, description="A dictionary of template names and their string prompt. By default this task uses the 'task_template' template to structure the inputs, and the basic_prompt passes the prompt input")
+    templates: Dict[str, Prompt] = Field({"task_template": Prompt(name="basic_prompt", content="{{prompt}}", parameters=prompt_function_parameters, is_templated=True)}, description="A dictionary of template names and their string prompt. By default this task uses the 'task_template' template to structure the inputs, and the basic_prompt passes the prompt input")
     prompts_to_add: Optional[Dict[str, str]] = Field(None, description="An optional dictionary of prompts to add to the task")
     
     def run(self, **kwargs) -> TaskResponse:

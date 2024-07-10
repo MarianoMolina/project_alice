@@ -80,7 +80,7 @@ function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.
 }
 
 function autoPopulate(this: mongoose.Query<any, any>) {
-  this.populate('system_message updated_by created_by modelId');
+  this.populate('system_message updated_by created_by model_id');
 }
 
 agentSchema.pre('save', ensureObjectIdForSave);

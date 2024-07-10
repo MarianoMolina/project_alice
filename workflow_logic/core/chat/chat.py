@@ -62,7 +62,7 @@ class AliceChat(BaseModel):
         return new_messages
 
     def get_autogen_agent(self) -> ConversableAgent:
-        llm_config = self.model.autogen_llm_config() if self.model else None
+        llm_config = self.model_id.autogen_llm_config() if self.model_id else None
         return self.alice_agent.get_autogen_agent(llm_config=llm_config)
     
     def get_default_executor(self) -> ConversableAgent:

@@ -30,6 +30,12 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${BACKEND_PORT_DOCKER}/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   mongo:
     image: mongo:latest
@@ -47,7 +53,8 @@ services:
       - .:/app
       - ${MODEL_FOLDER}:/models
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     environment:
       - PYTHONPATH=/app
       - MODEL_FOLDER=/models
