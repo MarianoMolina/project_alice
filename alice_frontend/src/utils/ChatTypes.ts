@@ -1,7 +1,8 @@
-import { LLMConfig, User } from './Types';
+import { User } from './Types';
 import { AliceTask, convertToAliceTask } from './TaskTypes';
 import { AliceAgent, convertToAliceAgent } from './AgentTypes';
 import { TaskResponse } from './TaskResponseTypes';
+import { AliceModel } from './ModelTypes';
 export interface AliceChat {
     _id: string;
     name: string;
@@ -9,7 +10,7 @@ export interface AliceChat {
     alice_agent: AliceAgent;
     functions?: AliceTask[];
     executor: AliceAgent;
-    llm_config?: LLMConfig;
+    model_id?: AliceModel;
     task_responses?: TaskResponse[];
     created_by?: User;
     updated_by?: User;
@@ -59,7 +60,7 @@ export const convertToAliceChat = (data: any): AliceChat => {
         alice_agent: convertToAliceAgent(data?.alice_agent),
         functions: (data?.functions || []).map(convertToAliceTask),
         executor: convertToAliceAgent(data?.executor),
-        llm_config: data?.llm_config || undefined,
+        model_id: data?.model_id || undefined,
         task_responses: (data?.task_responses || []).map((response: any) => ({
             ...response,
             createdAt: response.createdAt ? new Date(response.createdAt) : undefined,
@@ -80,8 +81,8 @@ export interface CreateAliceChat {
     name: string;
     alice_agent: string | AliceAgent;
     executor: string | AliceAgent;
-    llm_config?: LLMConfig;
-    functions?: string[];
+    model_id?: string | AliceModel;
+    functions?: string[] | AliceTask[];
 }
 
 export interface ChatComponentProps {

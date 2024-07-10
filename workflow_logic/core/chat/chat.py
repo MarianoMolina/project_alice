@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from workflow_logic.core.model.model_config import LLMConfig
 from workflow_logic.core.communication import MessageDict
+from workflow_logic.core.model import AliceModel
 from workflow_logic.core.agent import AliceAgent
 from workflow_logic.core.tasks import AliceTask
 from autogen.agentchat import ConversableAgent
@@ -30,7 +31,7 @@ class AliceChat(BaseModel):
                              code_execution_config=True, 
                              default_auto_reply=""),
         description="The executor agent object. Default is base Alice Agent.")
-    llm_config: Optional[LLMConfig] = Field(None, description="The configuration for the LLM agent")
+    model_id: AliceModel = Field(None, description="The model object for the chat conversation")
     chat_execution: Optional[ChatExecutionFunctionality] = Field(None, description="Chat execution functionality")
 
     def setup_chat_execution(self):
@@ -61,12 +62,14 @@ class AliceChat(BaseModel):
         return new_messages
 
     def get_autogen_agent(self) -> ConversableAgent:
-        return self.alice_agent.get_autogen_agent(llm_config=self.llm_config.model_dump() if self.llm_config else None)
+        llm_config = self.model.autogen_llm_config() if self.model else None
+        return self.alice_agent.get_autogen_agent(llm_config=llm_config)
     
     def get_default_executor(self) -> ConversableAgent:
         return self.executor.get_autogen_agent()
     
     def inject_llm_config(self, task: AliceTask) -> AliceTask:
-        if task.agent_id and not task.agent_id.llm_config:
-            task.agent_id.llm_config = self.llm_config.model_dump() if self.llm_config else None
+        llm_config = self.llm_config.model_dump() if self.llm_config else None
+        if task.agent and not task.agent.llm_config:
+            task.agent.llm_config = llm_config
         return task

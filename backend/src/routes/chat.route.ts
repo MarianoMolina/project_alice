@@ -13,7 +13,7 @@ const router: Router = express.Router();
 // POST / - Create a new chat
 router.post('/', auth, async (req: AuthRequest, res: Response) => {
     try {
-        const { name = "New chat", messages = [], alice_agent, functions = [], executor, llm_config = {} } = req.body;
+        const { name = "New chat", messages = [], alice_agent, functions = [], executor, model = {} } = req.body;
         const user_id = req.user?.userId;
 
         console.log("Creating chat: ", req.body);
@@ -30,7 +30,7 @@ router.post('/', auth, async (req: AuthRequest, res: Response) => {
             alice_agent,
             functions,
             executor,
-            llm_config,
+            model,
             created_by: user_id ? new Types.ObjectId(user_id) : undefined,
             updated_by: user_id ? new Types.ObjectId(user_id) : undefined,
         });
@@ -114,10 +114,10 @@ router.patch('/:id', auth, async (req: AuthRequest, res: Response) => {
       checkAndUpdateChanges(chat, updatedChat, changeHistoryData, 'executor');
       checkArrayChangesAndUpdate(chat, updatedChat, changeHistoryData, 'functions');
   
-      if (req.body.llm_config && JSON.stringify(req.body.llm_config) !== JSON.stringify(chat.llm_config)) {
-        changeHistoryData.previous_llm_config = chat.llm_config;
-        changeHistoryData.updated_llm_config = req.body.llm_config;
-        chat.llm_config = req.body.llm_config;
+      if (req.body.model && JSON.stringify(req.body.model) !== JSON.stringify(chat.model)) {
+        changeHistoryData.previous_model = chat.model;
+        changeHistoryData.updated_model = req.body.model;
+        chat.model = req.body.model;
       }
   
       if (req.body.messages && Array.isArray(req.body.messages)) {

@@ -67,19 +67,11 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             <FormControl fullWidth className={classes.formControl}>
                 <InputLabel>Model</InputLabel>
                 <Select
-                    value={item.llm_config?.config_list[0]?.model || ''}
+                    value={item.model_id || ''}
                     onChange={(e) => {
-                        const selectedModel = models.find(model => model._id === e.target.value);
-                        if (selectedModel) {
-                            updateChatField('llm_config', {
-                                ...item.llm_config,
-                                config_list: [{
-                                    model: selectedModel.model,
-                                    api_key: selectedModel.api_key,
-                                    base_url: selectedModel.base_url,
-                                }]
-                            });
-                        }
+                        const selectedModel = models.find(model_id => model_id._id === e.target.value);
+                        console.log('selectedModel', selectedModel)
+                        updateChatField('model_id', selectedModel || item.model_id);
                     }}
                     disabled={mode === 'view'}
                 >
@@ -88,32 +80,6 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                     ))}
                 </Select>
             </FormControl>
-            <Typography gutterBottom>Temperature: {item.llm_config?.temperature || 0.7}</Typography>
-            <Slider
-                value={item.llm_config?.temperature || 0.7}
-                onChange={(_, newValue) => updateChatField('llm_config', {
-                    ...item.llm_config,
-                    temperature: newValue as number
-                })}
-                min={0}
-                max={1}
-                step={0.1}
-                className={classes.slider}
-                disabled={mode === 'view'}
-            />
-            <Typography gutterBottom>Timeout (seconds): {item.llm_config?.timeout || 300}</Typography>
-            <Slider
-                value={item.llm_config?.timeout || 300}
-                onChange={(_, newValue) => updateChatField('llm_config', {
-                    ...item.llm_config,
-                    timeout: newValue as number
-                })}
-                min={30}
-                max={600}
-                step={30}
-                className={classes.slider}
-                disabled={mode === 'view'}
-            />
             <Typography variant="subtitle1">Functions</Typography>
             <Box className={classes.chipContainer}>
                 {tasks.map((task) => (

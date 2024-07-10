@@ -17,8 +17,8 @@ export interface ITask {
     task_selection_method: any | null;
     tasks_end_code_routing: Map<string, Map<string, any>> | null;
     max_attempts: number;
-    agent_id: Types.ObjectId | null;
-    execution_agent_id: Types.ObjectId | null;
+    agent: Types.ObjectId | null;
+    execution_agent: Types.ObjectId | null;
     human_input: boolean;
     created_by: Types.ObjectId;
     updated_by: Types.ObjectId;

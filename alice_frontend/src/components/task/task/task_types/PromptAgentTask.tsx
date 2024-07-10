@@ -37,7 +37,7 @@ const PromptAgentTask: React.FC<TaskFormProps<PromptAgentTaskForm>> = ({
   const handleAgentChange = (e: SelectChangeEvent<string>) => {
     const newAgentId = e.target.value;
     const newAgent = agents.find(agent => agent._id === newAgentId) || null;
-    setForm({ ...form, agent_id: newAgent });
+    setForm({ ...form, agent: newAgent });
   };
 
   const handleTemplateChange = (e: SelectChangeEvent<string>) => {
@@ -98,7 +98,7 @@ const PromptAgentTask: React.FC<TaskFormProps<PromptAgentTaskForm>> = ({
       <FormControl fullWidth margin="normal" disabled={viewOnly}>
         <InputLabel>Agent</InputLabel>
         <Select 
-          value={form.agent_id?._id || ''} 
+          value={form.agent?._id || ''} 
           onChange={handleAgentChange} 
           required
         >

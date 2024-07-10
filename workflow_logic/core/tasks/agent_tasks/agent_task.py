@@ -21,14 +21,14 @@ messages_function_parameters = FunctionParameters(
 )
 
 class BasicAgentTask(AliceTask):
-    agent_id: AliceAgent = Field(..., description="The agent to use for the task")
+    agent: AliceAgent = Field(..., description="The agent to use for the task")
     input_variables: FunctionParameters = Field(default=messages_function_parameters, description="Inputs that the agent will require in a workflow. Default is 'messages', a list of MessageDicts.")
     exit_codes: dict[int, str] = Field(default={0: "Success", 1: "Generation failed."}, description="A dictionary of exit codes for the task")
     human_input: Optional[bool] = Field(default=False, description="Whether the task requires human input")
 
     @property
     def agent(self) -> ConversableAgent:
-        return self.agent_id.get_autogen_agent()
+        return self.agent.get_autogen_agent()
     
     def run(self, messages: List[MessageDict],  **kwargs) -> TaskResponse:
         if not messages:
@@ -46,7 +46,7 @@ class BasicAgentTask(AliceTask):
         result, exitcode = self.generate_agent_response(messages=messages, max_rounds=1, **kwargs)
         logging.info(f"Task {self.task_name} executed with exit code: {exitcode}. Response: {result}")
         task_outputs = StringOutput(content=[result]) if isinstance(result, str) else LLMChatOutput(content=result)
-        messages.append(MessageDict(content=result, role="assistant", generated_by="llm", step=self.task_name, assistant_name=self.agent_id.name))
+        messages.append(MessageDict(content=result, role="assistant", generated_by="llm", step=self.task_name, assistant_name=self.agent.name))
 
         if exitcode in self.exit_codes:
             return TaskResponse(
@@ -79,7 +79,7 @@ class BasicAgentTask(AliceTask):
             self.agent.human_input_mode = "NEVER"
     
     def generate_agent_response(self, messages: List[dict], max_rounds: int = 1, **kwargs) -> Tuple[str, int]:
-        logging.info(f"Generating response by {self.agent_id.name} from messages: {messages}")  
+        logging.info(f"Generating response by {self.agent.name} from messages: {messages}")  
         self.agent.update_max_consecutive_auto_reply(max_rounds)
         result = self.agent.generate_reply(messages)
         if result:

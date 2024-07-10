@@ -18,10 +18,8 @@ class AliceAgent(BaseModel):
     max_consecutive_auto_reply: int = Field(default=10, description="The maximum number of consecutive auto replies")
     human_input_mode: Literal["ALWAYS", "TERMINATE", "NEVER"] = Field(default="NEVER", description="The mode for human input")
     speaker_selection: dict = Field(default=dict, description="The speaker selection logic for the group chat")
-    model_manager_object: Optional[ModelManager] = Field(default=None, description="The model manager object. Required if the agent uses a model and no llm_config is passed")
     default_auto_reply: Optional[str] = Field(default="", description="The default auto reply for the agent")
-    llm_config: Optional[LLMConfig] = Field(default=None, description="The LLM configuration for the agent")
-    model: Optional[AliceModel] = Field(default=None, description="The model object for the agent")
+    model_id: Optional[AliceModel] = Field(default=None, description="The model object for the agent")
 
     class Config:
         protected_namespaces=()
@@ -31,11 +29,10 @@ class AliceAgent(BaseModel):
         return self.system_message.format_prompt()
     
     @property
-    def _llm_config(self) -> LLMConfig:
-        if self.model:
-            model = self.model.autogen_model_config
-            self.llm_config.config_list = [model]
-        return LLMConfig(**self.llm_config)
+    def _llm_config(self) -> LLMConfig | None:
+        if self.model_id:
+            return self.model_id.autogen_default_llm_config()
+        return None
 
     def get_autogen_agent(self, *, llm_config: Optional[LLMConfig] = None) -> ConversableAgent:
 
@@ -67,20 +64,17 @@ class AliceAgent(BaseModel):
         
         # LLMConfig
         if not llm_config:
-            if not self.llm_config:
-                if self.model_manager_object:
-                    llm_config = self.model_manager_object.default_model.autogen_llm_config
+            if not self._llm_config:
+                raise ValueError("LLM Config must be provided if no model manager object is provided.")
             else:
-                llm_config = self.llm_config
-        if llm_config:
-            if isinstance(llm_config, dict):
-                llm_config = LLMConfig(**llm_config)
-            if not llm_config.config_list:
-                raise ValueError("LLM Config must have a 'config_list' attribute with at least one config.")
-            llm_config = LLMConfig(**llm_config.model_dump())
-            llm_config = llm_config.replace_localhost().model_dump()
-            if self.functions:
-                llm_config["functions"] = self.functions
+                llm_config = self._llm_config
+        if isinstance(llm_config, dict):
+            llm_config = LLMConfig(**llm_config)
+        if not llm_config.config_list:
+            raise ValueError("LLM Config must have a 'config_list' attribute with at least one config.")
+        llm_config = llm_config.replace_localhost().model_dump()
+        if self.functions:
+            llm_config["functions"] = self.functions
         print(f'LLM Config: {llm_config}')
 
         # Agent creation

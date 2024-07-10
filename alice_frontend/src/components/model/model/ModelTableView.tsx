@@ -10,7 +10,7 @@ import {
   IconButton,
   Tooltip
 } from '@mui/material';
-import { Visibility, ChevronRight } from '@mui/icons-material';
+import { Visibility } from '@mui/icons-material';
 import { ModelComponentProps } from '../../../utils/ModelTypes';
 
 const ModelTableView: React.FC<ModelComponentProps> = ({
@@ -37,7 +37,7 @@ const ModelTableView: React.FC<ModelComponentProps> = ({
         <TableBody>
           {items.map((model) => (
             <TableRow key={model._id}>
-              <TableCell>{model.model}</TableCell>
+              <TableCell>{model.model_name}</TableCell>
               <TableCell>{model.deployment || 'N/A'}</TableCell>
               <TableCell>{new Date(model.createdAt || '').toLocaleString()}</TableCell>
               <TableCell>

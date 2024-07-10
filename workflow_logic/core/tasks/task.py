@@ -41,10 +41,19 @@ class AliceTask(BaseModel, ABC):
     tasks_end_code_routing: Optional[Dict[str, Dict[int, tuple[Union[str, None], bool]]]] = Field(None, description="A dictionary of tasks -> exit codes and the task to route to given each exit code and a bool to determine if the outcome represents an extra 'try' at the task")
     max_attempts: int = Field(3, description="The maximum number of failed task attempts before the workflow is considered failed. Default is 3.")
     recursive: bool = Field(False, description="Whether the workflow can be executed recursively. By default, tasks are recursive but workflows are not, unless one is expected to be used within another workflow")
-    agent_id: Optional[AliceAgent] = Field(None, description="The agent that the task is associated with")
-    execution_agent_id: Optional[AliceAgent] = Field(None, description="The agent that the task is executed by")
+    agent: Optional[AliceAgent] = Field(None, description="The agent that the task is associated with")
+    execution_agent: Optional[AliceAgent] = Field(None, description="The agent that the task is executed by")
     human_input: Optional[bool] = Field(default=False, description="Whether the task requires human input")
 
+    @property
+    def task_type(self) -> str:
+        return self.__class__.__name__
+    
+    def model_dump(self, *args, **kwargs):
+        data = super().model_dump(*args, **kwargs)
+        data['task_type'] = self.task_type
+        return data
+    
     @abstractmethod
     def run(self, **kwargs) -> TaskResponse:
         """Runs the task and returns a TaskResponse."""

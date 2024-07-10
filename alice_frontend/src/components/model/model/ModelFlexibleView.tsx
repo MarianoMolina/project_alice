@@ -36,8 +36,8 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
           <TextField
             fullWidth
             label="Model Name"
-            value={item?.model || ''}
-            onChange={(e) => onChange({ model: e.target.value })}
+            value={item?.model_name || ''}
+            onChange={(e) => onChange({ model_name: e.target.value })}
             margin="normal"
             disabled={!isEditMode}
           />

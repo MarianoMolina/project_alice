@@ -13,7 +13,7 @@ export interface IAgent {
     speaker_selection: Map<string, string>;
     default_auto_reply: string | null;
     llm_config: Map<string, string>;
-    modelId: Types.ObjectId | null;
+    model_id: Types.ObjectId | null;
     created_by: Types.ObjectId;
     updated_by: Types.ObjectId;
 }

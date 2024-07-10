@@ -40,15 +40,6 @@ const Dashboard: React.FC = () => {
         <Button
           variant="contained"
           fullWidth
-          sx={{ mb: 2 }}
-          onClick={() => handleNavigation('/database')}
-          startIcon={<StorageIcon />}
-        >
-          Database
-        </Button>
-        <Button
-          variant="contained"
-          fullWidth
           onClick={() => handleNavigation('/configure')}
           startIcon={<SettingsIcon />}
         >

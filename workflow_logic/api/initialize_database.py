@@ -1,8 +1,7 @@
-import aiohttp
-import asyncio
-import getpass
+import aiohttp, asyncio, getpass
+from aiohttp import ClientError
 from dotenv import load_dotenv, find_dotenv, set_key
-from typing import get_type_hints, get_origin, get_args, Dict, Any, Literal, Optional
+from typing import get_type_hints, get_origin, get_args, Dict, Any, Optional, Union, Tuple
 from pydantic import BaseModel, Field
 from tqdm import tqdm
 from workflow_logic.core.agent import AliceAgent
@@ -11,16 +10,22 @@ from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.model import AliceModel
 from workflow_logic.core.tasks import AliceTask
 from workflow_logic.core.communication import DatabaseTaskResponse
-from workflow_logic.core.parameters import ParameterDefinition
+from workflow_logic.core.parameters import ParameterDefinition, FunctionParameters
 from workflow_logic.util import User
+from workflow_logic.api.api_utils import create_task_from_json, EntityType
 from workflow_logic.api.db import BackendAPI
-from workflow_logic.api.initialization_data import DBStructure, DB_STRUCTURE, create_task_from_json
-
-EntityType = Literal["users", "models", "prompts", "agents", "tasks", "chats", "parameters", "task_responses"]
+from workflow_logic.api.initialization_data import DBStructure, DB_STRUCTURE
 
 class InitializationBackendAPI(BackendAPI):
     id_map: Dict[EntityType, Dict[str, str]] = Field(default_factory=lambda: {
-        "users": {}, "models": {}, "prompts": {}, "agents": {}, "tasks": {}, "chats": {}, "parameters": {}, "task_responses": {}
+        "users": {}, 
+        "models": {}, 
+        "prompts": {}, 
+        "agents": {}, 
+        "tasks": {}, 
+        "chats": {}, 
+        "parameters": {}, 
+        "task_responses": {}
     })
     collection_map: Dict[EntityType, str] = Field(default_factory=lambda: {
         "users": "users",
@@ -32,7 +37,7 @@ class InitializationBackendAPI(BackendAPI):
         "parameters": "parameters",
         "task_responses": "taskresults"
     })
-    entity_class_map: Dict[str, Any] = Field(default_factory=lambda: {
+    entity_class_map: Dict[str, BaseModel] = Field(default_factory=lambda: {
         "agents": AliceAgent,
         "chats": AliceChat,
         "prompts": Prompt,
@@ -42,12 +47,12 @@ class InitializationBackendAPI(BackendAPI):
         "parameters": ParameterDefinition, 
         "task_responses": DatabaseTaskResponse
     })
-    existing_admin: Optional[Dict[str, Any]] = Field(default=None)
-    admin_data: Optional[Dict[str, Any]] = Field(default=None)
+    existing_admin: Optional[User] = Field(default=None)
+    admin_data: Optional[User] = Field(default=None)
     admin_password: Optional[str] = Field(default=None)
     use_existing_admin: bool = Field(default=False)
 
-    async def create_admin_user(self, admin_data: dict) -> str:
+    async def create_admin_user(self, admin_data: User) -> str:
         url = f"{self.base_url}/users/register"
         headers = {"Content-Type": "application/json"}
 
@@ -55,9 +60,8 @@ class InitializationBackendAPI(BackendAPI):
             async with session.post(url, json=admin_data, headers=headers) as response:
                 response.raise_for_status()
                 result = await response.json()
-                admin_id = result['_id']
-                self.id_map["users"][admin_data['email']] = admin_id  # Use email as the key
-                return admin_id
+                admin_data.id = result['_id']
+                return admin_data
 
     async def login_admin_user(self, email: str, password: str) -> str:
         url = f"{self.base_url}/users/login"
@@ -90,7 +94,7 @@ class InitializationBackendAPI(BackendAPI):
                 print(f"Unexpected error during login: {str(e)}")
                 raise
 
-    async def store_admin_token(self, token: str):
+    async def store_admin_token(self, token: str) -> None:
         dotenv_path = find_dotenv()
         if not dotenv_path:
             raise FileNotFoundError(".env file not found")
@@ -98,29 +102,38 @@ class InitializationBackendAPI(BackendAPI):
         load_dotenv(dotenv_path, override=True)
         print("Admin token has been updated in the .env file")
 
-    def get_entity_class(self, entity_type: EntityType):
+    def get_entity_class(self, entity_type: EntityType) -> BaseModel:
         return self.entity_class_map.get(entity_type)
+    
+    def _get_entity_instance(self, entity_type: EntityType, entity_data: dict) -> BaseModel:
+        EntityClass = self.get_entity_class(entity_type)
+        try:
+            if entity_type == "tasks":
+                entity_data.pop("key", None)
+                entity_instance = create_task_from_json(entity_data)
+            else:
+                entity_instance = EntityClass(**entity_data)
+            return entity_instance
+        except Exception as e:
+            print(f"Error creating entity instance for {entity_type}: {entity_data}")
+            raise e
 
     async def create_entity(self, entity_type: EntityType, entity_data: dict) -> str:
-        EntityClass = self.get_entity_class(entity_type)
         
         # Resolve references in the data before creating the instance
         resolved_data = await self.resolve_references_in_data(entity_type, entity_data)
         
-        if entity_type == "tasks":
-            entity_instance = create_task_from_json(resolved_data)
-        else:
-            entity_instance = EntityClass(**resolved_data)
+        entity_instance = self._get_entity_instance(entity_type, resolved_data)
 
         collection_name = self.collection_map[entity_type]
         url = f"{self.base_url}/{collection_name}"
         headers = self._get_headers()
 
-        entity_dict = entity_instance.dict(by_alias=True, exclude_unset=True)
+        entity_dict = entity_instance.model_dump(by_alias=True, exclude_unset=True)
         
-        # Remove the 'key' field if it exists
-        entity_dict.pop('key', None)
-
+        # Ensure 'id' is mapped to '_id' for MongoDB
+        if 'id' in entity_dict:
+            entity_dict['_id'] = entity_dict.pop('id')
 
         async with aiohttp.ClientSession() as session:
             try:
@@ -132,9 +145,9 @@ class InitializationBackendAPI(BackendAPI):
                     
                     response.raise_for_status()
                     result = await response.json()
-                    print(f'Created {entity_type[:-1]}: {entity_data.get("name", entity_data.get("email"))}')
+                    print(f'Created {entity_type[:-1]}: {entity_data.get("key", entity_data.get("name", entity_data.get("email")))}')
                     entity_id = result['_id']
-                    self.id_map[entity_type][entity_data.get('key') or entity_data.get('email')] = entity_id
+                    self.id_map[entity_type][entity_data.get('key') or entity_data.get('name')] = entity_id
                     return entity_id
             except aiohttp.ClientResponseError as e:
                 print(f"HTTP error during entity creation: {e.status} - {e.message}")
@@ -152,58 +165,125 @@ class InitializationBackendAPI(BackendAPI):
         for field, field_type in get_type_hints(EntityClass).items():
             if field in resolved_data:
                 value = resolved_data[field]
-                if isinstance(value, str):
+                origin = get_origin(field_type)
+                args = get_args(field_type)
+
+                # Handle Optional types
+                if origin is Union and type(None) in args:
+                    field_type = next(arg for arg in args if arg is not type(None))
                     origin = get_origin(field_type)
-                    if origin is None and issubclass(field_type, BaseModel):
-                        # This is a reference to another entity
-                        referenced_entity_type = field_type.__name__.lower() + 's'
-                        resolved_value = await self.resolve_reference(referenced_entity_type, value)
-                        resolved_data[field] = resolved_value
-                elif isinstance(value, list):
                     args = get_args(field_type)
-                    if args and issubclass(args[0], BaseModel):
-                        resolved_list = []
-                        for item in value:
-                            if isinstance(item, str):
-                                referenced_entity_type = args[0].__name__.lower() + 's'
-                                resolved_item = await self.resolve_reference(referenced_entity_type, item)
-                                resolved_list.append(resolved_item)
-                            elif isinstance(item, dict) and 'key' in item:
-                                referenced_entity_type = args[0].__name__.lower() + 's'
-                                resolved_item = await self.resolve_reference(referenced_entity_type, item['key'])
-                                resolved_list.append(resolved_item)
-                            else:
-                                resolved_list.append(item)
-                        resolved_data[field] = resolved_list
+
+                if isinstance(value, str):
+                    if isinstance(field_type, type) and issubclass(field_type, BaseModel):
+                        referenced_entity_type = next((et for et, cls in self.entity_class_map.items() if cls == field_type), None)
+                        if referenced_entity_type:
+                            resolved_value = await self.get_entity_by_key(referenced_entity_type, value)
+                            resolved_data[field] = resolved_value
+                elif isinstance(value, list):
+                    if args and isinstance(args[0], type) and issubclass(args[0], BaseModel):
+                        referenced_entity_type = next((et for et, cls in self.entity_class_map.items() if cls == args[0]), None)
+                        if referenced_entity_type:
+                            resolved_list = []
+                            for item in value:
+                                if isinstance(item, str):
+                                    resolved_item = await self.get_entity_by_key(referenced_entity_type, item)
+                                    resolved_list.append(resolved_item)
+                                elif isinstance(item, dict) and 'key' in item:
+                                    resolved_item = await self.get_entity_by_key(referenced_entity_type, item['key'])
+                                    resolved_list.append(resolved_item)
+                                else:
+                                    resolved_list.append(item)
+                            resolved_data[field] = resolved_list
                 elif isinstance(value, dict):
-                    if 'key' in value:
-                        # This is a nested reference
-                        referenced_entity_type = field_type.__name__.lower() + 's'
-                        resolved_value = await self.resolve_reference(referenced_entity_type, value['key'])
-                        resolved_data[field] = resolved_value
+                    if isinstance(field_type, type) and issubclass(field_type, FunctionParameters):
+                        # Special handling for FunctionParameters
+                        resolved_data[field] = await self.resolve_function_parameters(value)
+                    elif isinstance(field_type, type) and issubclass(field_type, BaseModel):
+                        referenced_entity_type = next((et for et, cls in self.entity_class_map.items() if cls == field_type), None)
+                        if referenced_entity_type:
+                            if 'key' in value:
+                                resolved_value = await self.get_entity_by_key(referenced_entity_type, value['key'])
+                                resolved_data[field] = resolved_value
+                            else:
+                                resolved_data[field] = await self.resolve_references_in_data(referenced_entity_type, value)
                     else:
-                        # This is a nested object, recursively resolve its references
-                        resolved_data[field] = await self.resolve_references_in_data(field_type.__name__.lower() + 's', value)
-        
+                        # New handling for dictionaries of references
+                        resolved_dict = {}
+                        for key, item in value.items():
+                            if isinstance(item, str):
+                                # Attempt to resolve the reference
+                                for ref_type in self.entity_class_map.keys():
+                                    try:
+                                        resolved_item = await self.get_entity_by_key(ref_type, item)
+                                        resolved_dict[key] = resolved_item
+                                        break
+                                    except ValueError:
+                                        continue
+                                else:
+                                    # If no resolution was successful, keep the original string
+                                    resolved_dict[key] = item
+                            elif isinstance(item, dict):
+                                # Recursively resolve nested dictionaries
+                                resolved_dict[key] = await self.resolve_references_in_data(entity_type, item)
+                            else:
+                                resolved_dict[key] = item
+                        resolved_data[field] = resolved_dict
+
         return resolved_data
 
-    async def resolve_reference(self, entity_type: EntityType, key: str) -> str:
-        resolved_id = self.id_map[entity_type].get(key)
-        if resolved_id is None:
-            raise ValueError(f"Unable to resolve reference: {entity_type} with key {key}")
-        return resolved_id
+    async def resolve_function_parameters(self, func_params: Dict[str, Any]) -> Dict[str, Any]:
+        resolved = func_params.copy()
+        if 'properties' in resolved:
+            for key, value in resolved['properties'].items():
+                if isinstance(value, str):
+                    # Assume this is a parameter reference
+                    try:
+                        parameter = await self.get_entity_by_key('parameters', value)
+                        resolved['properties'][key] = parameter
+                    except ValueError:
+                        # If not found, leave as is
+                        pass
+        return resolved
 
-    async def check_existing_data(self) -> bool:
-        for collection in self.collection_map.values():
-            url = f"{self.base_url}/{collection}"
-            headers = self._get_headers()
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url, headers=headers) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        if data:
-                            return True
-        return False
+    async def get_entity_by_key(self, entity_type: EntityType, key: str) -> Dict[str, Any]:
+        entity_id = self.id_map[entity_type].get(key)
+        if not entity_id:
+            raise ValueError(f"Unable to find entity ID: {entity_type} with key {key}")
+
+        collection_name = self.collection_map[entity_type]
+        url = f"{self.base_url}/{collection_name}/{entity_id}"
+        headers = self._get_headers()
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=headers) as response:
+                response.raise_for_status()
+                entity = await response.json()
+                
+                if not entity:
+                    raise ValueError(f"Unable to find entity: {entity_type} with ID {entity_id}")
+                
+                return entity
+
+    async def check_existing_data(self, max_retries=3, retry_delay=1) -> bool:
+        for attempt in range(max_retries):
+            try:
+                for collection in self.collection_map.values():
+                    url = f"{self.base_url}/{collection}"
+                    headers = self._get_headers()
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(url, headers=headers, timeout=30) as response:
+                            if response.status == 200:
+                                data = await response.json()
+                                if data:
+                                    return True
+                return False
+            except (ClientError, asyncio.TimeoutError) as e:
+                if attempt == max_retries - 1:
+                    print(f"Failed to check existing data after {max_retries} attempts: {str(e)}")
+                    raise
+                print(f"Attempt {attempt + 1} failed, retrying in {retry_delay} seconds...")
+                await asyncio.sleep(retry_delay)
 
     async def initialize_database(self, db_structure: DBStructure) -> bool:
         try:
@@ -225,8 +305,6 @@ class InitializationBackendAPI(BackendAPI):
             with tqdm(total=total_entities, desc="Initializing database") as pbar:
                 for entity_type in entity_types:
                     entities = getattr(db_structure, entity_type, [])
-                    if entity_type == "users" and self.existing_admin and self.use_existing_admin:
-                        entities = entities[1:]  # Skip admin user if using existing
                     for entity_data in entities:
                         try:
                             await self.create_entity(entity_type, entity_data)
@@ -252,14 +330,14 @@ class InitializationBackendAPI(BackendAPI):
             print(f"Error in initialize_database: {str(e)}")
             return False
         
-    async def get_admin_user(self):
+    async def get_admin_user(self) -> Optional[User]:
         url = f"{self.base_url}/users?role=admin"
         headers = self._get_headers()
         async with aiohttp.ClientSession() as session:
             async with session.get(url, headers=headers) as response:
                 if response.status == 200:
                     users = await response.json()
-                    return users[0] if users else None
+                    return User(**users[0]) if users else None
                 return None
 
     async def handle_admin_user(self, db_structure: DBStructure):
@@ -277,9 +355,9 @@ class InitializationBackendAPI(BackendAPI):
             self.admin_data, self.admin_password = self.get_new_admin_data()
 
         if not self.existing_admin or not self.use_existing_admin:
-            await self.create_admin_user(self.admin_data)
+            self.admin_data = await self.create_admin_user(self.admin_data)
 
-    def get_new_admin_data(self):
+    def get_new_admin_data(self) -> Tuple[User, str]:
         print("Please enter details for the new admin user:")
         admin_name = input("Admin name: ")
         admin_email = input("Admin email: ")
@@ -292,7 +370,7 @@ class InitializationBackendAPI(BackendAPI):
             "role": "admin",
         }
         
-        return admin_data, admin_password
+        return User(**admin_data), admin_password
     
     async def validate_initialization(self) -> bool:
         try:
@@ -310,9 +388,9 @@ class InitializationBackendAPI(BackendAPI):
                         if entity_type == "users":
                             # For users, we need to account for the possibility of an existing admin
                             expected_count = len(structure_entities)
-                            if self.existing_admin and self.use_existing_admin:
-                                expected_count -= 1  # Subtract 1 if we're using an existing admin
-                            
+                            if not self.existing_admin and not self.use_existing_admin:
+                                expected_count += 1  # Add 1 if we're creating an admin
+
                             if len(db_entities) != expected_count:
                                 print(f"Mismatch in {entity_type} count. Expected: {expected_count}, Found: {len(db_entities)}")
                                 return False
@@ -323,8 +401,6 @@ class InitializationBackendAPI(BackendAPI):
                         
                         # Check for the presence of each entity by name or email
                         for entity in structure_entities:
-                            if entity_type == "users" and self.existing_admin and self.use_existing_admin and entity == structure_entities[0]:
-                                continue  # Skip the first user if we're using an existing admin
                             
                             identifier = entity.get('name') or entity.get('email')
                             if not any(db_entity.get('name') == identifier or db_entity.get('email') == identifier for db_entity in db_entities):
@@ -359,10 +435,6 @@ async def main():
 
     try:
         await api.handle_admin_user(DB_STRUCTURE)
-        
-        # Update the DB_STRUCTURE with the new admin user details if a new admin was created
-        if not api.existing_admin or not api.use_existing_admin:
-            DB_STRUCTURE.users[0] = api.admin_data
         
         success = await api.initialize_database(DB_STRUCTURE)
         if success:

@@ -68,8 +68,8 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             <FormControl fullWidth margin="normal">
                 <InputLabel>Model</InputLabel>
                 <Select
-                    value={item?.model?._id || ''}
-                    onChange={(e) => onChange({ model: models.find(model => model._id === e.target.value)})}
+                    value={item?.model_id?._id || ''}
+                    onChange={(e) => onChange({ model_id: models.find(model => model._id === e.target.value)})}
                     disabled={!isEditMode}
                 >
                     {models.map((model: AliceModel) => (

@@ -10,10 +10,10 @@ import {
 } from '@mui/material';
 import { Category } from '@mui/icons-material';
 import { ModelComponentProps } from '../../../utils/ModelTypes';
-
+import { AliceModel } from '../../../utils/ModelTypes';
 const ModelCardView: React.FC<ModelComponentProps> = ({
     item,
-}) => {
+}: { item: AliceModel }) => {
     if (!item) {
         return <Typography>No chat data available.</Typography>;
     }
@@ -21,7 +21,7 @@ const ModelCardView: React.FC<ModelComponentProps> = ({
     return (
         <Card>
             <CardContent>
-                <Typography variant="h6">{item.model}</Typography>
+                <Typography variant="h6">{item.model_name}</Typography>
                 <Typography variant="body2">Deployment: {item.deployment}</Typography>
                 <Typography variant="body2">Context size: {item.ctx_size || ''}</Typography>
                 <Typography variant="caption">

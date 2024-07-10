@@ -21,8 +21,8 @@ export interface AliceTask {
   task_selection_method?: CallableFunction | null;
   tasks_end_code_routing?: { [key: string]: { [key: number]: any } } | null;
   max_attempts?: number;
-  agent_id?: AliceAgent | null;
-  execution_agent_id?: AliceAgent | null;
+  agent?: AliceAgent | null;
+  execution_agent?: AliceAgent | null;
   human_input?: boolean;
   created_by?: string;
   updated_by?: string;
@@ -51,8 +51,8 @@ export const convertToAliceTask = (data: any): AliceTask => {
     task_selection_method: data?.task_selection_method || null,
     tasks_end_code_routing: data?.tasks_end_code_routing || null,
     max_attempts: data?.max_attempts || undefined,
-    agent_id: data?.agent_id || null,
-    execution_agent_id: data?.execution_agent_id || null,
+    agent: data?.agent || null,
+    execution_agent: data?.execution_agent || null,
     human_input: data?.human_input || false,
     created_by: data?.created_by || '',
     updated_by: data?.updated_by || '',
@@ -69,7 +69,7 @@ export interface BaseTaskForm {
   task_name: string;
   task_description: string;
   task_type: TaskType;
-  agent_id: AliceAgent | null;
+  agent: AliceAgent | null;
   human_input: boolean;
   input_variables: FunctionParameters | null;
   templates: { [key: string]: Prompt };
@@ -80,7 +80,7 @@ export interface PromptAgentTaskForm extends BaseTaskForm {}
 
 export interface AgentWithFunctionsForm extends BaseTaskForm {
   tasks: { [key: string]: AliceTask };
-  execution_agent_id: AliceAgent | null;
+  execution_agent: AliceAgent | null;
 }
 
 export interface CheckTaskForm extends BaseTaskForm {

@@ -20,8 +20,8 @@ class AgentLibrary(BaseModel):
         self.agents[agent.name] = agent
         return True
 
-    def get_agent_by_id(self, agent_id: str) -> AliceAgent:
+    def get_agent_by_id(self, agent: str) -> AliceAgent:
         for agent in self.agents.values():
-            if agent_id == agent.id:
+            if agent == agent.id:
                 return agent
-        raise ValueError(f"Agent with ID {agent_id} not found in the agent library.")
+        raise ValueError(f"Agent with ID {agent} not found in the agent library.")

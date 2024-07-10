@@ -9,8 +9,9 @@ from workflow_logic.util.utils import model_path_from_file
 from workflow_logic.core.model.model_config import LLMConfig
 
 class AliceModel(BaseModel):
+    id: str = Field(None, title="Model ID", description="The ID of the model.", alias="_id")
     short_name: str = Field(..., title="Short Name", description="The short name of the model.")
-    model: str = Field(..., title="Model Name", description="The complete name of the model. For file-based models, this is folder path.")
+    model_name: str = Field(..., title="Model Name", description="The complete name of the model. For file-based models, this is folder path.")
     model_format: str = Field(..., title="Model Format", description="The format of the model.")
     ctx_size: int = Field(..., title="Context Size", description="The context size of the model.")
     model_type: Literal["instruct", "chat", "vision"] = Field(..., title="Model Type", description="The type of the model.")

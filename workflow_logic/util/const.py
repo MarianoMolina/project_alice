@@ -27,7 +27,7 @@ LM_STUDIO_PORT = os.getenv("LM_STUDIO_PORT")
 const_model_definitions = [
     {
         "short_name": "Mistral7B_Instruct",
-        "model": "TheBloke/Mistral-7B-Instruct-v0.2-GGUF",
+        "model_name": "TheBloke/Mistral-7B-Instruct-v0.2-GGUF",
         "model_file": "TheBloke/Mistral-7B-Instruct-v0.2-GGUF/mistral-7b-instruct-v0.2.Q6_K.gguf",
         "model_format": "Mistral_Instruct",
         "ctx_size": 32768,
@@ -36,7 +36,7 @@ const_model_definitions = [
     },
     {  
         "short_name": "Starling7B_Chat",
-        "model": "LoneStriker/Starling-LM-7B-beta-GGUF",
+        "model_name": "LoneStriker/Starling-LM-7B-beta-GGUF",
         "model_file": "LoneStriker/Starling-LM-7B-beta-GGUF/Starling-LM-7B-beta-Q8_0.gguf",
         "model_format": "OpenChat",
         "ctx_size": 8192,
@@ -45,7 +45,7 @@ const_model_definitions = [
     },
     {
         "short_name": "Llama8B_Chat",
-        "model": "bartowski/llama-3-neural-chat-v2.2-8B-GGUF",
+        "model_name": "bartowski/llama-3-neural-chat-v2.2-8B-GGUF",
         "model_format": "Llama3Neural",
         "model_file": "bartowski/llama-3-neural-chat-v2.2-8B-GGUF/llama-3-neural-chat-v2.2-8B-Q6_K.gguf",
         "ctx_size": 8192,
@@ -54,7 +54,7 @@ const_model_definitions = [
     },
     {
         "short_name": "StarCoder2_15B",
-        "model": "second-state/StarCoder2-15B-GGUF",
+        "model_name": "second-state/StarCoder2-15B-GGUF",
         "model_format": "Starcoder2",
         "model_file": "second-state/StarCoder2-15B-GGUF/starcoder2-15b-Q6_K.gguf",
         "ctx_size": 16384,
@@ -63,7 +63,7 @@ const_model_definitions = [
     },
     {
         "short_name": "Llama3_Medichat",
-        "model": "mradermacher/Medichat-V2-Llama3-8B-GGUF",
+        "model_name": "mradermacher/Medichat-V2-Llama3-8B-GGUF",
         "model_format": "Llama3",
         "model_file": "mradermacher/Medichat-V2-Llama3-8B-GGUF/Medichat-V2-Llama3-8B.Q8_0.gguf",
         "ctx_size": 32768,
@@ -72,7 +72,7 @@ const_model_definitions = [
     },
     {
         "short_name": "Llama3_8B_Instruct_v2",
-        "model": "bartowski/Llama-3-8B-Instruct-Gradient-1048k-GGUF",
+        "model_name": "bartowski/Llama-3-8B-Instruct-Gradient-1048k-GGUF",
         "model_format": "Llama3",
         "model_file": "bartowski/Llama-3-8B-Instruct-Gradient-1048k-GGUF/Llama-3-8B-Instruct-Gradient-1048k-Q8_0.gguf",
         "ctx_size": 64000,
@@ -81,7 +81,7 @@ const_model_definitions = [
     },
     {
         "short_name": "Llama3_8B_Instruct",
-        "model": "nisten/llama3-8b-instruct-32k-gguf",
+        "model_name": "nisten/llama3-8b-instruct-32k-gguf",
         "model_format": "Llama3",
         "model_file": "nisten/llama3-8b-instruct-32k-gguf/llama3ins-8b-32k-q6.gguf",
         "ctx_size": 32768,
@@ -90,7 +90,7 @@ const_model_definitions = [
     },
     {
         "short_name": "Llava_vision",
-        "model": "xtuner/llava-llama-3-8b-v1_1-gguf",
+        "model_name": "xtuner/llava-llama-3-8b-v1_1-gguf",
         "model_format": "Obsidian_Vision",
         "model_file": "xtuner/llava-llama-3-8b-v1_1-gguf/llava-llama-3-8b-v1_1-f16.gguf",
         "ctx_size": 4096,
@@ -100,7 +100,7 @@ const_model_definitions = [
     {
         "short_name": "GPT3.5",
         "model_format": "OpenChat",
-        "model": "gpt-3.5-turbo-0125",
+        "model_name": "gpt-3.5-turbo-0125",
         "ctx_size": 16385,
         "model_type": "chat",
         "deployment": "remote",
@@ -111,7 +111,7 @@ const_model_definitions = [
     {
         "short_name": "GPT4",
         "model_format": "OpenChat",
-        "model": "gpt-4-turbo-2024-04-09",
+        "model_name": "gpt-4-turbo-2024-04-09",
         "ctx_size": 128000,
         "model_type": "chat",
         "deployment": "remote",
@@ -122,7 +122,7 @@ const_model_definitions = [
     {
         "short_name": "Claude3",
         "model_format": "OpenChat",
-        "model": "claude-3-opus-20240229",
+        "model_name": "claude-3-opus-20240229",
         "ctx_size": 200000,
         "model_type": "chat",
         "deployment": "remote",
@@ -134,7 +134,7 @@ const_model_definitions = [
     {
         "short_name": "GPT4o",
         "model_format": "OpenChat",
-        "model": "gpt-4o-2024-05-13",
+        "model_name": "gpt-4o-2024-05-13",
         "ctx_size": 128000,
         "model_type": "chat",
         "deployment": "remote",

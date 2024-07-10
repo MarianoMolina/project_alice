@@ -1,29 +1,14 @@
 from workflow_logic.core.communication import DatabaseTaskResponse, MessageDict
-from workflow_logic.core.tasks import TaskLibrary, APITask, AliceTask, RedditSearchTask, Workflow, WikipediaSearchTask, GoogleSearchTask, ExaSearchTask, ArxivSearchTask, BasicAgentTask, PromptAgentTask, CheckTask, CodeGenerationLLMTask, CodeExecutionLLMTask, AgentWithFunctions
+from workflow_logic.core.tasks import TaskLibrary, AliceTask
 from workflow_logic.core.agent import AliceAgent, AgentLibrary
 from workflow_logic.core.prompt import Prompt, TemplatedPrompt, PromptLibrary
 from workflow_logic.core.model import AliceModel, ModelManager
 from workflow_logic.core.chat import AliceChat
+from workflow_logic.api.api_utils import available_task_types
 from workflow_logic.util.const import BACKEND_PORT, HOST, ADMIN_TOKEN, BACKEND_PORT_DOCKER, BACKEND_HOST
 from pydantic import BaseModel, Field
 from typing import Literal, Optional, Dict, Any
 import requests, logging, aiohttp, asyncio
-
-available_task_types: list[AliceTask] = [
-    Workflow,
-    AgentWithFunctions,
-    PromptAgentTask,
-    CodeGenerationLLMTask,
-    CodeExecutionLLMTask,
-    CheckTask,
-    BasicAgentTask,
-    RedditSearchTask,
-    ExaSearchTask,
-    WikipediaSearchTask,
-    GoogleSearchTask,
-    ArxivSearchTask,
-    APITask
-]
 
 class BackendAPI(BaseModel):
     base_url: Literal[f"http://{HOST}:{BACKEND_PORT}/api"] = Field(f"http://{HOST}:{BACKEND_PORT}/api", description="The base URL of the backend API", frozen=True)
@@ -122,11 +107,11 @@ class BackendAPI(BaseModel):
                 logging.error(f"Unexpected error retrieving prompts: {e}")
                 return {}
 
-    async def get_agents(self, agent_id: Optional[str] = None) -> Dict[str, AliceAgent]:
-        if agent_id is None:
+    async def get_agents(self, agent: Optional[str] = None) -> Dict[str, AliceAgent]:
+        if agent is None:
             url = f"{self.base_url}/agents"
         else:
-            url = f"{self.base_url}/agents/{agent_id}"
+            url = f"{self.base_url}/agents/{agent}"
         headers = self._get_headers()
         
         async with aiohttp.ClientSession() as session:

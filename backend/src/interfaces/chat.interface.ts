@@ -10,8 +10,8 @@ export interface IChangeHistory {
     updated_functions: Types.ObjectId[];
     previous_task_responses: Types.ObjectId[];
     updated_task_responses: Types.ObjectId[];
-    previous_llm_config: any;
-    updated_llm_config: any;
+    previous_model_id: any;
+    updated_model_id: any;
     changed_by: Types.ObjectId;
     timestamp: Date;
 }
@@ -49,7 +49,7 @@ export interface IAliceChat {
     alice_agent: Types.ObjectId;
     functions: Types.ObjectId[];
     executor: Types.ObjectId;
-    llm_config: any;
+    model_id: any;
     created_by: Types.ObjectId;
     updated_by: Types.ObjectId;
 }

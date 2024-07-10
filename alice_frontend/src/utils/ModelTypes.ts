@@ -3,7 +3,7 @@ import { User, convertToUser } from "./Types";
 export interface AliceModel {
     _id?: string;
     short_name: string;
-    model: string;
+    model_name: string;
     model_format?: string;
     ctx_size?: number;
     model_type: 'instruct' | 'chat' | 'vision';
@@ -24,7 +24,7 @@ export const convertToAliceModel = (data: any): AliceModel => {
     return {
         _id: data?._id || undefined,
         short_name: data?.short_name || '',
-        model: data?.model || '',
+        model_name: data?.model_name || '',
         model_format: data?.model_format || undefined,
         ctx_size: data?.ctx_size || undefined,
         model_type: data?.model_type || 'chat',

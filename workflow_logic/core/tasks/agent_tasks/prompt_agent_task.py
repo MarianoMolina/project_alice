@@ -61,12 +61,12 @@ class PromptAgentTask(BasicAgentTask, TemplatedTask):
 
 class CheckTask(PromptAgentTask):
     """ A type of task where you can check if the generated output includes certain strings, and return a specific exit_code depending on it"""
-    agent_id: AliceAgent = Field(..., description="The agent to use for the task")
+    agent: AliceAgent = Field(..., description="The agent to use for the task")
     task_name: str = Field("check_output", description="The name of the task")
     exit_code_response_map: dict[str, int] = Field({"APPROVED": 0, "FAILED": 1}, description="A dictionary of exit codes mapped to string responses for the task. These strings should be present in the system prompt of the checking agent", examples=[{"TESTS PASSED": 0, "TESTS FAILED": 1}])
 
     def generate_agent_response(self, messages: List[Dict], max_rounds: int = 1, **kwargs) -> Tuple[str | int]:
-        logging.info(f"Checking task by {self.agent_id.name} from messages: {messages}")
+        logging.info(f"Checking task by {self.agent.name} from messages: {messages}")
         response = super().generate_agent_response(messages, max_rounds)
         for key, value in self.exit_code_response_map.items():
             if key in response[0]:
@@ -75,12 +75,12 @@ class CheckTask(PromptAgentTask):
     
 class CodeGenerationLLMTask(PromptAgentTask):
     """ A task that generates code from a prompt"""
-    agent_id: AliceAgent = Field(..., description="The agent to use for the task")
+    agent: AliceAgent = Field(..., description="The agent to use for the task")
     task_name: str = Field("generate_code", description="The name of the task")
     exit_codes: dict[int, str] = Field({0: "Success", 1: "Generation failed.", 2: "No code blocks in response"}, description="A dictionary of exit codes for the task")
 
     def generate_agent_response(self, messages: List[Dict], max_rounds: int = 1, **kwargs) -> Tuple[str | int]:
-        logging.info(f"Generating code by {self.agent_id.name} from messages: {messages}")
+        logging.info(f"Generating code by {self.agent.name} from messages: {messages}")
         result = self.agent.generate_reply(messages, max_turns=max_rounds)
         if not result:
             return self.exit_codes[1], 1
@@ -94,7 +94,7 @@ class CodeGenerationLLMTask(PromptAgentTask):
         
 class CodeExecutionLLMTask(PromptAgentTask):
     """ A task that executes code extracted from a prompt, outputs or messages"""
-    agent_id: AliceAgent = Field(..., description="The agent to use for the task")
+    agent: AliceAgent = Field(..., description="The agent to use for the task")
     task_name: str = Field("execute_code", description="The name of the task")
     exit_codes: dict[int, str] = Field({0: "Success", 1: "Execution failed.", 2: "No code blocks in messages", 3: "Execution timed out"}, description="A dictionary of exit codes for the task")
     valid_languages: list[str] = Field(["python", "shell"], description="A list of valid languages for code execution")
@@ -149,7 +149,7 @@ class CodeExecutionLLMTask(PromptAgentTask):
         code_blocks, exitcode = self.retrieve_code_blocks(messages=messages)
         if exitcode != 0:
             return code_blocks, exitcode
-        logging.info(f"Executing by {self.agent_id.name} code blocks: {code_blocks}")
+        logging.info(f"Executing by {self.agent.name} code blocks: {code_blocks}")
 
         exitcode, logs = self.agent.execute_code_blocks(code_blocks)
         exitcode2str = "execution succeeded" if exitcode == 0 else "execution failed"

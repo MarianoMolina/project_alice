@@ -18,7 +18,7 @@ interface EnhancedModelProps extends Omit<ModelComponentProps, 'items' | 'item' 
   onSave?: (savedItem: AliceModel) => void;
 }
 
-const EnhancedModel: React.FC<EnhancedModelProps> = (props) => {
+const EnhancedModel: React.FC<EnhancedModelProps> = (props: EnhancedModelProps) => {
   const renderContent = (
     items: AliceModel[] | null,
     item: AliceModel | null,

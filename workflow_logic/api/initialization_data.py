@@ -8,17 +8,11 @@ class DBStructure(BaseModel):
     prompts: List[Dict[str, Any]] = Field(..., description="List of prompts to create")
     agents: List[Dict[str, Any]] = Field(..., description="List of agents to create")
     tasks: List[Dict[str, Any]] = Field(..., description="List of tasks to create")
+    parameters: List[Dict[str, Any]] = Field(..., description="List of parameters to create")
     chats: List[Dict[str, Any]] = Field(..., description="List of chats to create")
 
 DB_STRUCTURE = DBStructure(
     users=[
-        {
-            "key": "admin_user",
-            "name": "Admin User",
-            "email": "admin@example.com",
-            "password": "admin_password",
-            "role": "admin"
-        },
         {
             "key": "test_user",
             "name": "Test User",
@@ -32,7 +26,7 @@ DB_STRUCTURE = DBStructure(
             "key": "GPT4o",
             "short_name": "GPT4o",
             "model_format": "OpenChat",
-            "model": "gpt-4o-2024-05-13",
+            "model_name": "gpt-4o-2024-05-13",
             "ctx_size": 128000,
             "model_type": "chat",
             "deployment": "remote",
@@ -43,7 +37,7 @@ DB_STRUCTURE = DBStructure(
         # {
         #     "key": "Llama3_8B_Instruct",
         #     "short_name": "Llama3_8B_Instruct",
-        #     "model": "nisten/llama3-8b-instruct-32k-gguf",
+        #     "model_name": "nisten/llama3-8b-instruct-32k-gguf",
         #     "model_format": "Llama3",
         #     "model_file": "nisten/llama3-8b-instruct-32k-gguf/llama3ins-8b-32k-q6.gguf",
         #     "ctx_size": 32768,
@@ -54,7 +48,7 @@ DB_STRUCTURE = DBStructure(
             "key": "Claude3.5",
             "short_name": "Claude3.5",
             "model_format": "OpenChat",
-            "model": "claude-3-5-sonnet-20240620",
+            "model_name": "claude-3-5-sonnet-20240620",
             "ctx_size": 200000,
             "model_type": "chat",
             "deployment": "remote",
@@ -70,6 +64,30 @@ DB_STRUCTURE = DBStructure(
             "type": "string",
             "description": "The input prompt for the task",
             "default": None
+        },
+        {
+            "key": "max_results_parameter",
+            "type": "integer",
+            "description": "The maximum number of results to return",
+            "default": 10
+        },
+        {
+            "key": "sort_parameter",
+            "type": "string",
+            "description": "The sort method for the search",
+            "default": "hot"
+        },
+        {
+            "key": "time_filter_parameter",
+            "type": "string",
+            "description": "The time period to filter by",
+            "default": "week"
+        },
+        {
+            "key": "subreddit_parameter",
+            "type": "string",
+            "description": "The subreddit to search",
+            "default": "all"
         },
     ],
     prompts=[
@@ -112,7 +130,7 @@ Once you believe the task is complete, create a summary with references for the 
             "name": "Default Assistant",
             "system_message": "default_system_message",  # Reference to prompt key
             "autogen_class": "AssistantAgent",
-            "model": "GPT4o",  # Reference to model key
+            "model_id": "GPT4o",  # Reference to model key
             "code_execution_config": False,
             "max_consecutive_auto_reply": 10,
             "human_input_mode": "NEVER",
@@ -123,7 +141,7 @@ Once you believe the task is complete, create a summary with references for the 
             "name": "research_agent",
             "system_message": "research_agent", # Reference
             "autogen_class": "ConversableAgent",
-            "model": "GPT4o", # Reference
+            "model_id": "GPT4o", # Reference
             "code_execution_config": False,
             "max_consecutive_auto_reply": 10,
             "human_input_mode": "NEVER",
@@ -142,41 +160,100 @@ Once you believe the task is complete, create a summary with references for the 
         {
             "key": "reddit_search",
             "task_type": "RedditSearchTask",
-            "task_name": "reddit_search"
+            "task_name": "reddit_search",
+            "task_description": "Searches Reddit for information",
+            "input_variables": {
+                "type": "object",
+                "properties": {
+                    "prompt": "prompt_parameter", # Parameter references
+                    "sort": "sort_parameter",
+                    "time_filter": "time_filter_parameter",
+                    "subreddit": "subreddit_parameter",
+                    "limit": "max_results_parameter"
+                },
+                "required": ["prompt"]
+            }
         },
         {
             "key": "exa_search",
             "task_type": "ExaSearchTask",
             "task_name": "exa_search",
+            "task_description": "Searches Exa for information",
+            "input_variables": {
+                "type": "object",
+                "properties": {
+                    "prompt": "prompt_parameter",
+                    "limit": "max_results_parameter"
+                },
+                "required": ["prompt"]
+            }
         },
         {
             "key": "wikipedia_search",
             "task_type": "WikipediaSearchTask",
             "task_name": "wikipedia_search",
+            "task_description": "Searches Wikipedia for information",
+            "input_variables": {
+                "type": "object",
+                "properties": {
+                    "prompt": "prompt_parameter",
+                    "limit": "max_results_parameter"
+                },
+                "required": ["prompt"]
+            }
         },
         {
             "key": "google_search",
             "task_type": "GoogleSearchTask",
             "task_name": "google_search",
+            "task_description": "Searches Google for information",
+            "input_variables": {
+                "type": "object",
+                "properties": {
+                    "prompt": "prompt_parameter",
+                    "limit": "max_results_parameter"
+                },
+                "required": ["prompt"]
+            }
         },
         {
             "key": "arxiv_search",
             "task_type": "ArxivSearchTask",
             "task_name": "arxiv_search",
+            "task_description": "Searches arXiv for papers",
+            "input_variables": {
+                "type": "object",
+                "properties": {
+                    "prompt": "prompt_parameter",
+                    "limit": "max_results_parameter"
+                },
+                "required": ["prompt"]
+            }
         },
         {   
             "key": "search_hub",
             "task_type": "AgentWithFunctions", 
             "task_name": "search_hub",
             "task_description": "Searches multiple sources and returns the results",
-            "agent_id": "research_agent",
+            "agent": "research_agent", # Reference
+            "template": {
+                "task_template": "basic_prompt"
+            },
+            "execution_agent": "executor_agent", # Reference
             "tasks":{
                 "reddit_search": "reddit_search", # Reference
-                "exa_search": "exa_search",# Reference
-                "wikipedia_search": "wikipedia_search",# Reference
-                "google_search": "google_search",# Reference
-                "arxiv_search": "arxiv_search",# Reference
+                "exa_search": "exa_search", # Reference
+                "wikipedia_search": "wikipedia_search", # Reference
+                "google_search": "google_search", # Reference
+                "arxiv_search": "arxiv_search", # Reference
             },
+            "input_variables": {
+                "type": "object",
+                "properties": {
+                    "prompt": "prompt_parameter",
+                },
+                "required": ["prompt"]
+            }
         }
     ],
     chats=[
@@ -186,11 +263,7 @@ Once you believe the task is complete, create a summary with references for the 
             "messages": [],
             "alice_agent": "default_alice",  # Reference to agent key
             "executor": "executor_agent", # Reference
-            "llm_config": {
-                "config_list": ["GPT4o"],
-                "temperature": 0.9,
-                "timeout": 300
-            }
+            "model_id": "GPT4o", # Reference
         }
     ]
 )

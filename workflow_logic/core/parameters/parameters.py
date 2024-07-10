@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Annotated, Optional, Any, Literal, Dict,List
     
 class ParameterDefinition(BaseModel):
+    id: Optional[str] = Field(None, description="The parameter ID", alias="_id")
     type: Annotated[str, Field(description="Type of the parameter")]
     description: Annotated[str, Field(description="Description of the parameter")]
     default: Annotated[Optional[Any], Field(default=None, description="Default value of the parameter")]

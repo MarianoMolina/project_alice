@@ -27,8 +27,8 @@ const taskSchema = new Schema<ITaskDocument>({
     task_selection_method: { type: Schema.Types.Mixed, default: null },
     tasks_end_code_routing: { type: Map, of: Map, default: null },
     max_attempts: { type: Number, default: 3 },
-    agent_id: { type: Schema.Types.ObjectId, ref: 'Agent', default: null },
-    execution_agent_id: { type: Schema.Types.ObjectId, ref: 'Agent', default: null },
+    agent: { type: Schema.Types.ObjectId, ref: 'Agent', default: null },
+    execution_agent: { type: Schema.Types.ObjectId, ref: 'Agent', default: null },
     human_input: { type: Boolean, default: false },
     created_by: { type: Schema.Types.ObjectId, ref: 'User' },
     updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
@@ -55,8 +55,8 @@ taskSchema.methods.apiRepresentation = function (this: ITaskDocument) {
             Array.from(this.tasks_end_code_routing.entries()).map(([key, value]) => [key, Object.fromEntries(value)])
         ) : null,
         max_attempts: this.max_attempts || 3,
-        agent_id: this.agent_id ? (this.agent_id._id || this.agent_id) : null,
-        execution_agent_id: this.execution_agent_id ? (this.execution_agent_id._id || this.execution_agent_id) : null,
+        agent: this.agent ? (this.agent._id || this.agent) : null,
+        execution_agent: this.execution_agent ? (this.execution_agent._id || this.execution_agent) : null,
         human_input: this.human_input || false,
         created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
         updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,
@@ -87,11 +87,11 @@ function ensureObjectIdForSave(this: ITaskDocument, next: mongoose.CallbackWitho
             }
         }
     }
-    if (this.agent_id && (this.agent_id as any)._id) {
-        this.agent_id = (this.agent_id as any)._id;
+    if (this.agent && (this.agent as any)._id) {
+        this.agent = (this.agent as any)._id;
     }
-    if (this.execution_agent_id && (this.execution_agent_id as any)._id) {
-        this.execution_agent_id = (this.execution_agent_id as any)._id;
+    if (this.execution_agent && (this.execution_agent as any)._id) {
+        this.execution_agent = (this.execution_agent as any)._id;
     }
     if (this.created_by && (this.created_by as any)._id) {
         this.created_by = (this.created_by as any)._id;
@@ -134,8 +134,8 @@ function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.
         Object.entries(update.prompts_to_add).map(([key, value]) => [key, ensureObjectId(value)])
       );
     }
-    update.agent_id = ensureObjectId(update.agent_id);
-    update.execution_agent_id = ensureObjectId(update.execution_agent_id);
+    update.agent = ensureObjectId(update.agent);
+    update.execution_agent = ensureObjectId(update.execution_agent);
     update.created_by = ensureObjectId(update.created_by);
     update.updated_by = ensureObjectId(update.updated_by);
   
@@ -150,8 +150,8 @@ function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.
 function autoPopulate(this: mongoose.Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
     this.populate('created_by')
         .populate('updated_by')
-        .populate('agent_id')
-        .populate('execution_agent_id');
+        .populate('agent')
+        .populate('execution_agent');
 
     this.populate({
         path: 'templates',

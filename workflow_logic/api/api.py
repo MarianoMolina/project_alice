@@ -1,31 +1,16 @@
 import logging, asyncio, functools
-from pydantic import BaseModel
-from typing import Dict, Any, List
+from typing import List
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from workflow_logic.core.communication import MessageDict, DatabaseTaskResponse, MessageDict
-from workflow_logic.core.model.model_config import LLMConfig
-from workflow_logic.core.tasks.task import  AliceTask
 from workflow_logic.api.db import available_task_types, token_validation_middleware, ContainerAPI
 from workflow_logic.util.const import BACKEND_PORT, FRONTEND_PORT, HOST, FRONTEND_PORT_DOCKER, BACKEND_PORT_DOCKER, FRONTEND_HOST, BACKEND_HOST
 from concurrent.futures import ThreadPoolExecutor
+from workflow_logic.api.api_utils import TaskExecutionRequest, inject_llm_config_in_task
 
 libraries = None
 thread_pool = None
-
-# Local util
-def create_task_from_json(task_dict: dict) -> AliceTask:
-    logging.info(f"Creating task from JSON: {task_dict}")
-    logging.info(f"Available task types: {available_task_types}")
-    task_type = task_dict.pop("task_type", "")
-    if not task_type:
-        raise ValueError("Task type not specified in task definition.")
-    for task in available_task_types:
-        if task_type == task.__name__:
-            logging.info(f"Creating task of type {task_type}")
-            return task.model_validate(**task_dict)
-    raise ValueError(f"Task type {task_type} not found in available task types.")
 
 # Initialize libraries
 @asynccontextmanager
@@ -71,18 +56,6 @@ async def auth_middleware(request: Request, call_next):
     response = await call_next(request)
     return response
 
-class TaskExecutionRequest(BaseModel):
-    taskId: str
-    inputs: Dict[str, Any]
-
-def inject_llm_config(task: AliceTask, llm_config: LLMConfig):
-    if task.agent_id and not task.agent_id.llm_config:
-        task.agent_id.llm_config = llm_config
-    if task.tasks:
-        for subtask in task.tasks.values():
-            subtask = inject_llm_config(subtask, llm_config)
-    return task
-
 @api_app.post("/execute_task", response_model=DatabaseTaskResponse)
 async def execute_task_endpoint(request: TaskExecutionRequest) -> dict:
     print(f'execute_task_endpoint: {request}')
@@ -95,7 +68,7 @@ async def execute_task_endpoint(request: TaskExecutionRequest) -> dict:
             raise ValueError(f"Task with ID {taskId} not found")
         task = task[taskId]
         llm_config = libraries.model_manager.default_model.autogen_llm_config
-        task = inject_llm_config(task, llm_config)
+        task = inject_llm_config_in_task(task, llm_config)
         print(f'task: {task}')
         print(f'task type: {type(task)}')
         # Run the synchronous task in a thread pool

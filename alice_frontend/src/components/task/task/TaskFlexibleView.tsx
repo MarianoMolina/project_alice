@@ -61,7 +61,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             task_name: item.task_name || '',
             task_description: item.task_description || '',
             task_type: taskType,
-            agent_id: item.agent_id || null,
+            agent: item.agent || null,
             human_input: item.human_input || false,
             input_variables: item.input_variables || null,
             templates: item.templates || {},
@@ -78,7 +78,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             case 'CodeExecutionLLMTask':
                 return { ...baseForm, exit_codes: item.exit_codes || {}, valid_languages: item.valid_languages || [], timeout: item.timeout || null } as T;
             case 'AgentWithFunctions':
-                return { ...baseForm, tasks: item.tasks || {}, execution_agent_id: item.execution_agent_id || null } as T;
+                return { ...baseForm, tasks: item.tasks || {}, execution_agent: item.execution_agent || null } as T;
             case 'Workflow':
                 return { ...baseForm, tasks: item.tasks || {}, start_task: item.start_task || null, max_attempts: item.max_attempts || 1, recursive: item.recursive || false } as T;
             default:

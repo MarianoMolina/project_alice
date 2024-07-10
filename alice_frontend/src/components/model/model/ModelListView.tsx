@@ -22,7 +22,7 @@ const ModelListView: React.FC<ModelComponentProps> = ({
             {items.map((model: AliceModel) => (
                 <ListItem key={model._id}>
                     <ListItemText
-                        primary={model.model}
+                        primary={model.model_name}
                         secondary={
                             <>
                                 <Typography component="span" variant="body2" color="textPrimary">

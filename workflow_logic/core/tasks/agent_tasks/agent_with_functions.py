@@ -7,15 +7,15 @@ from workflow_logic.core.communication import MessageDict, TaskResponse, LLMChat
 from workflow_logic.core.chat.chat_execution_functionality import ChatExecutionFunctionality
 
 class AgentWithFunctions(PromptAgentTask):
-    agent_id: AliceAgent = Field(..., description="The agent to use for the task")
+    agent: AliceAgent = Field(..., description="The agent to use for the task")
     tasks: Dict[str, AliceTask] = Field(..., description="A dictionary of tasks available for the agent")
-    execution_agent_id: AliceAgent = Field(..., description="The agent to use for the task execution")
+    execution_agent: AliceAgent = Field(..., description="The agent to use for the task execution")
     chat_execution: ChatExecutionFunctionality = Field(None, description="Chat execution functionality")
 
     def setup_chat_execution(self):
         if self.chat_execution is None:
-            llm_agent = self.agent_id.get_autogen_agent()
-            execution_agent = self.execution_agent_id.get_autogen_agent()
+            llm_agent = self.agent.get_autogen_agent()
+            execution_agent = self.execution_agent.get_autogen_agent()
             
             functions = [task.get_function()["tool_dict"] for task in self.tasks.values()]
             
@@ -23,7 +23,7 @@ class AgentWithFunctions(PromptAgentTask):
                 llm_agent=llm_agent,
                 execution_agent=execution_agent,
                 functions=functions,
-                code_execution_config=self.execution_agent_id.code_execution_config,
+                code_execution_config=self.execution_agent.code_execution_config,
                 valid_languages=["python", "shell"], 
                 return_output_to_agent=True  # May want to make this configurable
             )

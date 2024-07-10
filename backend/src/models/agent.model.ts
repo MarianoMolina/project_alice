@@ -14,7 +14,7 @@ const agentSchema = new Schema<IAgent, AgentModel>({
   speaker_selection: { type: Map, of: String, default: {} },
   default_auto_reply: { type: String, default: null },
   llm_config: { type: Map, of: String, default: {} },
-  modelId: { type: Schema.Types.ObjectId, ref: 'Model', default: null },
+  model_id: { type: Schema.Types.ObjectId, ref: 'Model', default: null },
   created_by: { type: Schema.Types.ObjectId, ref: 'User' },
   updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
 }, {
@@ -36,7 +36,7 @@ agentSchema.methods.apiRepresentation = function(this: IAgent & Document) {
     speaker_selection: this.speaker_selection || {},
     default_auto_reply: this.default_auto_reply || null,
     llm_config: this.llm_config || {},
-    modelId: this.modelId || null,
+    model_id: this.model_id || null,
     created_by: this.created_by || null,
     updated_by: this.updated_by || null,
     created_at: (this as any).createdAt || null,
@@ -55,8 +55,8 @@ function ensureObjectIdForSave(this: IAgent & Document, next: mongoose.CallbackW
   if (this.updated_by && (this.updated_by as any)._id) {
     this.updated_by = (this.updated_by as any)._id;
   }
-  if (this.modelId && (this.modelId as any)._id) {
-    this.modelId = (this.modelId as any)._id;
+  if (this.model_id && (this.model_id as any)._id) {
+    this.model_id = (this.model_id as any)._id;
   }
   next();
 }
@@ -73,8 +73,8 @@ function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.
   if (update.updated_by && update.updated_by._id) {
     update.updated_by = update.updated_by._id;
   }
-  if (update.modelId && update.modelId._id) {
-    update.modelId = update.modelId._id;
+  if (update.model_id && update.model_id._id) {
+    update.model_id = update.model_id._id;
   }
   next();
 }

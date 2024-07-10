@@ -35,7 +35,7 @@ const AgentWithFunctions: React.FC<TaskFormProps<AgentWithFunctionsForm>> = ({
     const newExecutionAgentId = event.target.value;
     console.log('[5-LOG] New execution agent ID:', newExecutionAgentId);
     const newExecutionAgent = agents.find(agent => agent._id === newExecutionAgentId) || null;
-    setForm({ ...form, execution_agent_id: newExecutionAgent });
+    setForm({ ...form, execution_agent: newExecutionAgent });
   };
 
   const getSelectedTaskIds = () => {
@@ -90,7 +90,7 @@ const AgentWithFunctions: React.FC<TaskFormProps<AgentWithFunctionsForm>> = ({
       <FormControl fullWidth margin="normal" disabled={viewOnly}>
         <InputLabel>Execution Agent</InputLabel>
         <Select
-          value={form.execution_agent_id?._id || ''}
+          value={form.execution_agent?._id || ''}
           onChange={handleExecutionAgentChange}
         >
           {agents.map((agent) => (

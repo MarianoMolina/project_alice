@@ -15,7 +15,7 @@ export interface AliceAgent {
   speaker_selection?: { [key: string]: string };
   default_auto_reply?: string | null;
   llm_config?: { [key: string]: any };
-  model?: AliceModel | null;
+  model_id?: AliceModel | null;
   created_by?: User;
   updated_by?: User;
   createdAt?: Date;
@@ -36,7 +36,7 @@ export const convertToAliceAgent = (data: any): AliceAgent => {
     speaker_selection: data?.speaker_selection || {},
     default_auto_reply: data?.default_auto_reply || null,
     llm_config: data?.llm_config || {},
-    model: data?.model || null,
+    model_id: data?.model_id || null,
     created_by: data?.created_by || undefined,
     updated_by: data?.updated_by || undefined,
     createdAt: data?.createdAt ? new Date(data.createdAt) : undefined,
