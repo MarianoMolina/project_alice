@@ -165,8 +165,9 @@ Contributions are welcome! Please follow these steps:
 
 ## License
 
-[Specify the license under which the project is released]
+This source code is licensed under the BSD-style license found in the
+LICENSE file in the root directory of this source tree. 
 
 ## Contact
 
-For support or inquiries, please [provide contact information or links].
+For support or inquiries, please contact mampy3000@gmail.com
