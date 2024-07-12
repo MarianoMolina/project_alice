@@ -41,7 +41,7 @@ const TaskResponseTableView: React.FC<TaskResponseComponentProps> = ({
               <TableCell>{taskResponse.status || 'N/A'}</TableCell>
               <TableCell>{new Date(taskResponse.createdAt || '').toLocaleString()}</TableCell>
               <TableCell>
-                {isInteractable && onInteraction && (
+                {onInteraction && (
                   <Tooltip title="View Task">
                     <IconButton onClick={() => onInteraction(taskResponse)}>
                       <Visibility />

@@ -22,7 +22,7 @@ const AgentCardView: React.FC<AgentComponentProps> = ({
         <Card>
             <CardContent>
                 <Typography variant="h6">{item.name}</Typography>
-                <Typography variant="body2">Model: {item.model?.model}</Typography>
+                <Typography variant="body2">Model: {item.model_id?.model_name}</Typography>
                 <Typography variant="body2">Execute Code: {item.code_execution_config ? 'Yes' : 'No'}</Typography>
                 <Typography variant="caption">
                     Agent ID: {item._id}

@@ -4,7 +4,11 @@ import {
     ListItem,
     ListItemText,
     Typography,
+    Box,
+    IconButton,
+    Tooltip
 } from '@mui/material';
+import { Visibility } from '@mui/icons-material';
 import { ParameterDefinition, ParameterComponentProps } from '../../../utils/ParameterTypes';
 import useStyles from '../ParameterStyles';
 
@@ -33,6 +37,15 @@ const ParameterListView: React.FC<ParameterComponentProps> = ({
                             </>
                         }
                     />
+                    <Box>
+                        {onInteraction && (
+                            <Tooltip title="View Parameter">
+                                <IconButton edge="end" onClick={() => onInteraction(parameter)}>
+                                    <Visibility />
+                                </IconButton>
+                            </Tooltip>
+                        )}
+                    </Box>
                 </ListItem>
             ))}
         </List>

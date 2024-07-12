@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 from workflow_logic.core.model.model_config import LLMConfig
 from workflow_logic.core.communication import MessageDict
@@ -33,6 +33,7 @@ class AliceChat(BaseModel):
         description="The executor agent object. Default is base Alice Agent.")
     model_id: AliceModel = Field(None, description="The model object for the chat conversation")
     chat_execution: Optional[ChatExecutionFunctionality] = Field(None, description="Chat execution functionality")
+    model_config = ConfigDict(protected_namespaces=())
 
     def setup_chat_execution(self):
         if self.chat_execution is None:

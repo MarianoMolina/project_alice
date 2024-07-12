@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Box, Skeleton, Stack, Typography, Dialog } from '@mui/material';
 import { Add, Chat, Info, Functions, Assignment } from '@mui/icons-material';
 import { TaskResponse } from '../utils/TaskResponseTypes';
@@ -8,7 +8,7 @@ import { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
 import { useChat } from '../context/ChatContext';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
 import EnhancedChat from '../components/chat/chat/EnhancedChat';
-import EnhancedTask from '../components/task/Task';
+import EnhancedTask from '../components/task/task/EnhancedTask';
 import EnhancedTaskResponse from '../components/task_response/task_response/EnhancedTaskResponse';
 import EnhancedAgent from '../components/agent/agent/EnhancedAgent';
 import ChatInput from '../components/chat/ChatInput';
@@ -41,6 +41,9 @@ const ChatAlice: React.FC = () => {
   const lastMessage = messages[messages.length - 1];
 
   const [activeTab, setActiveTab] = useState('selectChat');
+
+  // Create a memoized key that changes when messages change
+  const chatKey = useMemo(() => JSON.stringify(messages), [messages]);
 
   const handleNewChatCreated = async (chat: AliceChat) => {
     fetchChats();
@@ -148,6 +151,7 @@ const ChatAlice: React.FC = () => {
         <Box className={classes.chatAliceMessages}>
           {currentChat ? (
             <EnhancedChat
+              key={chatKey}  // Add this line
               itemId={currentChat._id}
               mode="full"
               fetchAll={false}

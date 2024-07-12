@@ -28,11 +28,11 @@ const EnhancedTaskResponse: React.FC<EnhancedTaskResponseProps> = (props) => {
     const commonProps: TaskResponseComponentProps = {
       items,
       item,
-      onChange,
       mode,
+      onChange,
       handleSave,
-      isInteractable: props.isInteractable,
       onInteraction: props.onInteraction,
+      isInteractable: props.isInteractable,
       showHeaders: props.showHeaders,
     };
 

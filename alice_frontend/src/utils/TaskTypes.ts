@@ -76,7 +76,7 @@ export interface BaseTaskForm {
   prompts_to_add: { [key: string]: Prompt } | null;
 }
 
-export interface PromptAgentTaskForm extends BaseTaskForm {}
+export interface PromptAgentTaskForm extends BaseTaskForm { }
 
 export interface AgentWithFunctionsForm extends BaseTaskForm {
   tasks: { [key: string]: AliceTask };
@@ -118,11 +118,11 @@ export type TaskFormProps<T extends AnyTaskForm> = {
 export interface TaskComponentProps {
   items: AliceTask[] | null;
   item: AliceTask | null;
-  onChange: (newItem: Partial<AliceTask>) => void;
   mode: 'create' | 'view' | 'edit';
+  onChange: (newItem: Partial<AliceTask>) => void;
   handleSave: () => Promise<void>;
-  isInteractable?: boolean;
   onInteraction?: (task: AliceTask) => void;
   onAddTask?: (task: AliceTask) => void;
+  isInteractable?: boolean;
   showHeaders?: boolean;
 }

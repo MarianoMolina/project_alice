@@ -1,6 +1,6 @@
 import React from 'react';
 import { AliceChat } from '../../../utils/ChatTypes';
-import { AliceTask, TaskType } from '../../../utils/TaskTypes';
+import { AliceTask } from '../../../utils/TaskTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../BaseDbElement';
 import { TaskComponentProps } from '../../../utils/TaskTypes';
 import TaskFlexibleView from './TaskFlexibleView';
@@ -30,12 +30,12 @@ const EnhancedTask: React.FC<EnhancedTaskProps> = (props) => {
         const commonProps: TaskComponentProps = {
             items,
             item,
-            onChange,
             mode,
+            onChange,
             handleSave,
-            isInteractable: props.isInteractable,
             onInteraction: props.onInteraction,
             onAddTask: props.onAddTask,
+            isInteractable: props.isInteractable,
         };
         switch (props.mode) {
             case 'create':

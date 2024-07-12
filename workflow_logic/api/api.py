@@ -43,10 +43,15 @@ api_app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@api_app.get("/health")
+async def health_check() -> dict:
+    return {"status": "OK", "message": "NEW HEALTH CHECK - Workflow service is healthy"}
+
 @api_app.middleware("http")
 async def auth_middleware(request: Request, call_next):
-    # Skip authorization for OPTIONS requests
-    if request.method == "OPTIONS":
+    # Skip authorization for OPTIONS requests and health check
+    if request.method == "OPTIONS" or request.url.path == "/health":
         response = await call_next(request)
         return response
 

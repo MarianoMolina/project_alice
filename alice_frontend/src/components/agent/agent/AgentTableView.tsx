@@ -39,10 +39,10 @@ const AgentTableView: React.FC<AgentComponentProps> = ({
           {items.map((agent) => (
             <TableRow key={agent._id}>
               <TableCell>{agent.name}</TableCell>
-              <TableCell>{agent.model?.model || 'N/A'}</TableCell>
+              <TableCell>{agent.model_id?.model_name || 'N/A'}</TableCell>
               <TableCell>{new Date(agent.createdAt || '').toLocaleString()}</TableCell>
               <TableCell>
-                {isInteractable && onInteraction && (
+                {onInteraction && (
                   <Tooltip title="View Task">
                     <IconButton onClick={() => onInteraction(agent)}>
                       <Visibility />

@@ -3,7 +3,6 @@ import { AppBar, Toolbar, IconButton, Box, Tooltip, Button, Typography } from '@
 import { useNavigate, useLocation } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
 import TaskIcon from '@mui/icons-material/Task';
-import StorageIcon from '@mui/icons-material/Storage';
 import ChatIcon from '@mui/icons-material/Chat';
 import SettingsIcon  from '@mui/icons-material/Settings';
 import { useAuth } from '../../../context/AuthContext';

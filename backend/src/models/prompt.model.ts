@@ -1,5 +1,5 @@
 import mongoose, { Schema, Model, CallbackWithoutResultAndOptionalError, Query } from 'mongoose';
-import { functionParametersSchema, ensureObjectIdForProperties } from '../utils/schemas';
+import { functionParametersSchema, ensureObjectIdForProperties, IFunctionParameters } from '../utils/schemas';
 import { ensureObjectIdHelper } from '../utils/utils';
 import { IPromptDocument } from '../interfaces/prompt.interface';
 
@@ -9,7 +9,25 @@ const promptSchema = new Schema<IPromptDocument>({
   created_by: { type: Schema.Types.ObjectId, ref: 'User' },
   updated_by: { type: Schema.Types.ObjectId, ref: 'User' },
   is_templated: { type: Boolean, default: false },
-  parameters: { type: functionParametersSchema },
+  parameters: {
+    type: functionParametersSchema,
+    required: false,
+    validate: {
+      validator: function(this: IPromptDocument, v: IFunctionParameters | null | undefined) {
+        if (this.is_templated) {
+          // If is_templated is true, parameters must be present and correctly defined
+          return v !== null && v !== undefined &&
+                 v.type === 'object' && 
+                 v.properties instanceof Map && 
+                 Array.isArray(v.required);
+        } else {
+          // If is_templated is false, parameters must be null
+          return v === null;
+        }
+      },
+      message: 'Parameters must be correctly defined when is_templated is true, and null when is_templated is false'
+    }
+  },
   partial_variables: { type: Map, of: Schema.Types.Mixed },
   version: { type: Number, default: 1 }
 }, { timestamps: true });
@@ -33,15 +51,26 @@ promptSchema.methods.apiRepresentation = function(this: IPromptDocument) {
 function ensureObjectId(this: IPromptDocument, next: CallbackWithoutResultAndOptionalError) {
   this.created_by = ensureObjectIdHelper(this.created_by);
   this.updated_by = ensureObjectIdHelper(this.updated_by);
-  ensureObjectIdForProperties(this.parameters.properties);  
+  if (this.is_templated && this.parameters?.properties) {
+    ensureObjectIdForProperties(this.parameters.properties);
+  }
   next();
 }
+
+
+// Add a pre-validate hook to ensure parameters is set to null when is_templated is false
+promptSchema.pre('validate', function(this: IPromptDocument, next: CallbackWithoutResultAndOptionalError) {
+  if (!this.is_templated) {
+    this.parameters = null;
+  }
+  next();
+});
 
 promptSchema.pre('save', ensureObjectId);
 
 promptSchema.pre('findOneAndUpdate', function(next: CallbackWithoutResultAndOptionalError) {
   const update = this.getUpdate() as any;
-  if (update && update.parameters && update.parameters.properties) {
+  if (update && update.parameters?.properties) {
     ensureObjectIdForProperties(update.parameters.properties);
   }
   next();

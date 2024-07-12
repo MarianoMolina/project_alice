@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 import 'mongoose-schema-jsonschema';
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
-
 import ModelRoutes from './routes/model.route';
 import AgentRoutes from './routes/agent.route';
 import TaskRoutes from './routes/task.route';
@@ -14,9 +13,8 @@ import TaskResultRouter from './routes/taskresult.route';
 import ChatRoutes from './routes/chat.route';
 import ParametersRoutes from './routes/parameter.route';
 import HealthRoutes from './routes/health.route';
-
 import corsConfigMiddleware from './middleware/corsConfig.middleware';
-import loggingMiddleware from './middleware/logging.middleware'; 
+import loggingMiddleware from './middleware/logging.middleware';
 
 dotenv.config();
 
@@ -31,7 +29,7 @@ mongoose.connect(process.env.MONGODB_URI || "mongodb://mongo/alice_database")
     .catch(err => {
         console.error('Failed to connect to MongoDB', err);
     });
-    
+
 // // Apply the logging middleware
 // app.use(loggingMiddleware);
 
@@ -43,6 +41,9 @@ app.options('*', corsConfigMiddleware);
 
 app.use(bodyParser.json());
 
+// Health route should be registered before other routes
+app.use('/api/health', HealthRoutes);
+
 app.use('/api/agents', AgentRoutes);
 app.use('/api/chats', ChatRoutes);
 app.use('/api/collections', CollectionsRoutes);
@@ -52,6 +53,5 @@ app.use('/api/taskresults', TaskResultRouter);
 app.use('/api/tasks', TaskRoutes);
 app.use('/api/users', UserRoutes);
 app.use('/api/parameters', ParametersRoutes);
-app.use('/api/health', HealthRoutes);
 
 export default app;

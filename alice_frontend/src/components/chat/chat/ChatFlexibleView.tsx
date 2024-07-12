@@ -7,7 +7,6 @@ import {
     InputLabel,
     Select,
     MenuItem,
-    Slider,
     Chip,
     Button
 } from '@mui/material';

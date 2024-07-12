@@ -42,7 +42,7 @@ const ChatTableView: React.FC<ChatComponentProps> = ({
               <TableCell>{chat.alice_agent?.name || 'N/A'}</TableCell>
               <TableCell>{new Date(chat.createdAt || '').toLocaleString()}</TableCell>
               <TableCell>
-                {isInteractable && onInteraction && (
+                {onInteraction && (
                   <Tooltip title="View Chat">
                     <IconButton onClick={() => onInteraction(chat)}>
                       <Visibility />

@@ -2,7 +2,6 @@ import React from 'react';
 import { Container, Box, Button, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
-import StorageIcon from '@mui/icons-material/Storage';
 import ChatIcon from '@mui/icons-material/Chat';
 import SettingsIcon from '@mui/icons-material/Settings';
 

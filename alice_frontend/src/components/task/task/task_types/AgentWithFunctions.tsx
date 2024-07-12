@@ -13,7 +13,7 @@ const AgentWithFunctions: React.FC<TaskFormProps<AgentWithFunctionsForm>> = ({
 }) => {
   useEffect(() => {
     console.log('[1-LOG] Initial form state:', form);
-  }, []);
+  }, [form]);
 
   const handleBaseFormChange = (newBaseForm: PromptAgentTaskForm) => {
     setForm({ ...form, ...newBaseForm });

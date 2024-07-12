@@ -37,7 +37,7 @@ const TaskListView: React.FC<TaskComponentProps> = ({
                         }
                     />
                     <Box>
-                        {isInteractable && onInteraction && (
+                        {onInteraction && (
                             <Tooltip title="View Task">
                                 <IconButton edge="end" onClick={() => onInteraction(task)}>
                                     <Visibility />

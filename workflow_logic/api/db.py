@@ -30,14 +30,14 @@ class BackendAPI(BaseModel):
         try:
             # Initialize ModelManager
             available_models = await self.get_models()
-            logging.info(f'Retrieved: Models -> {available_models}')
+            # logging.info(f'Retrieved: Models -> {available_models}')
             if not available_models:
                 raise ValueError("No models found in the database.")
             self.model_manager = ModelManager(model_definitions=list(available_models.values()))
 
             # Initialize StoredPromptLibrary
             prompts = await self.get_prompts()
-            logging.info(f'Retrieved: Prompts -> {prompts}')
+            # logging.info(f'Retrieved: Prompts -> {prompts}')
             if not prompts:
                 raise ValueError("No prompts found in the database.")
             template_map_dict = {prompt.name: prompt for prompt in prompts.values()}
@@ -45,16 +45,16 @@ class BackendAPI(BaseModel):
 
             # Initialize AgentLibrary
             agents = await self.get_agents()
-            logging.info(f'Retrieved: Agents -> {agents}')
+            # logging.info(f'Retrieved: Agents -> {agents}')
             if not agents:
                 raise ValueError("No agents found in the database.")
             agent_map = {agent.name: agent for agent in agents.values()}
             self.agent_library = AgentLibrary(agents=agent_map, model_manager_object=self.model_manager)
 
             # Initialize TaskLibrary
-            logging.info(f'Available Task Types: {self.task_types}')
+            # logging.info(f'Available Task Types: {self.task_types}')
             db_tasks = await self.get_tasks()
-            logging.info(f'Retrieved: Tasks -> {db_tasks}')
+            # logging.info(f'Retrieved: Tasks -> {db_tasks}')
             # if not db_tasks:
             #     raise ValueError("No tasks found in the database.")
             self.task_library = TaskLibrary(agent_library=self.agent_library, available_tasks=list(db_tasks.values()))
@@ -189,7 +189,6 @@ class BackendAPI(BaseModel):
             raise ValueError(f"Task type {task['task_type']} not found in available task types.")
         
         if "tasks" in task and isinstance(task["tasks"], dict):
-            print(f'TASKS: {task["tasks"]}')
             # Use asyncio.gather to initialize subtasks concurrently
             subtasks = await asyncio.gather(*[
                 self.task_initializer(subtask) 
@@ -267,7 +266,7 @@ class BackendAPI(BaseModel):
                 async with session.patch(url, json=data, headers=headers) as response:
                     response.raise_for_status()
                     result = await response.json()
-                    return self.populate_chat(result["chat"])
+                    return await self.populate_chat(result["chat"])
         except aiohttp.ClientError as e:
             print(f"Error storing messages: {e}")
             return None

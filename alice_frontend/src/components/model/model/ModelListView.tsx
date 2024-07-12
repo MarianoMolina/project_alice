@@ -36,7 +36,7 @@ const ModelListView: React.FC<ModelComponentProps> = ({
                         }
                     />
                     <Box>
-                        {isInteractable && onInteraction && (
+                        {onInteraction && (
                             <Tooltip title="View Model">
                                 <IconButton edge="end" onClick={() => onInteraction(model)}>
                                     <Visibility />

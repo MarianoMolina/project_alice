@@ -40,15 +40,16 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     const isEditMode = mode === 'edit' || mode === 'create';
     const [taskType, setTaskType] = useState<TaskType>(item?.task_type || "BasicAgentTask");
 
-    if (!item) {
-        return <Typography>No task data available.</Typography>;
-    }   
-
     const {
         agents,
         prompts,
         tasks,
     } = useConfig();
+    
+    if (!item) {
+        return <Typography>No task data available.</Typography>;
+    }   
+
 
     const handleTaskTypeChange = (event: SelectChangeEvent<TaskType>) => {
         const newType = event.target.value as TaskType;

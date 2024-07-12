@@ -10,11 +10,8 @@ COPY package*.json ./
 # Install dependencies
 RUN npm install --legacy-peer-deps --network-timeout=100000
 
-# Install TypeScript, nodemon, and wait-for-it globally
+# Install TypeScript and nodemon globally
 RUN npm install -g typescript nodemon
-RUN apt-get update && apt-get install -y wget
-RUN wget -O /usr/local/bin/wait-for-it.sh https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh
-RUN chmod +x /usr/local/bin/wait-for-it.sh
 
 # Copy the rest of the application code
 COPY . .
@@ -23,8 +20,8 @@ COPY . .
 EXPOSE 3000
 
 # Health check to indicate when the service is ready
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=20 \
   CMD curl -f http://localhost:3000/api/health || exit 1
 
-# Start the server with nodemon, watching for changes in the src directory
-CMD ["sh", "-c", "wait-for-it.sh mongo:27017 -- nodemon --watch src --exec 'tsc && echo TypeScript compiled successfully && node dist/index.js'"]
+# Start the server with nodemon for development
+CMD ["sh", "-c", "npm run build && nodemon --watch src --ext ts --exec 'npm run build && node dist/index.js'"]

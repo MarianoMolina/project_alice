@@ -8,7 +8,8 @@ export interface TaskResponse {
     task_description: string;
     status: 'pending' | 'complete' | 'failed';
     result_code: number;
-    task_outputs?: { [key: string]: any };
+    task_outputs: string;
+    task_content?: { [key: string]: any };
     result_diagnostic?: string;
     usage_metrics?: { [key: string]: any };
     execution_history?: { [key: string]: any }[];
@@ -40,10 +41,10 @@ export const convertToTaskResponse = (data: any): TaskResponse => {
 export interface TaskResponseComponentProps {
     items: TaskResponse[] | null;
     item: TaskResponse | null;
-    onChange: (newItem: Partial<TaskResponse>) => void;
     mode: 'create' | 'view' | 'edit';
+    onChange: (newItem: Partial<TaskResponse>) => void;
     handleSave: () => Promise<void>;
-    isInteractable?: boolean;
     onInteraction?: (taskResponse: TaskResponse) => void;
+    isInteractable?: boolean;
     showHeaders?: boolean;
 }

@@ -37,7 +37,7 @@ const ChatListView: React.FC<ChatComponentProps> = ({
                         }
                     />
                     <Box>
-                        {isInteractable && onInteraction && (
+                        {onInteraction && (
                             <Tooltip title="View Chat">
                                 <IconButton edge="end" onClick={() => onInteraction(chat)}>
                                     <Visibility />

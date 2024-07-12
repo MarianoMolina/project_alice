@@ -41,7 +41,7 @@ const ParameterTableView: React.FC<ParameterComponentProps> = ({
               <TableCell>{parameter.type || 'N/A'}</TableCell>
               <TableCell>{new Date(parameter.createdAt || '').toLocaleString()}</TableCell>
               <TableCell>
-                {isInteractable && onInteraction && (
+                {onInteraction && (
                   <Tooltip title="View Task">
                     <IconButton onClick={() => onInteraction(parameter)}>
                       <Visibility />

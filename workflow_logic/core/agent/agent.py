@@ -32,6 +32,7 @@ class AliceAgent(BaseModel):
     def _llm_config(self) -> LLMConfig | None:
         if self.model_id:
             return self.model_id.autogen_default_llm_config(self.model_id.autogen_model_config)
+        print(f"Model ID not found for agent {self.name} {self.model_id}")
         return None
 
     def get_autogen_agent(self, *, llm_config: Optional[LLMConfig] = None) -> ConversableAgent:
@@ -63,19 +64,20 @@ class AliceAgent(BaseModel):
             code_exec_config = False
         
         # LLMConfig
-        if not llm_config:
-            if not self._llm_config:
-                raise ValueError(f"LLM Config must be provided if no model manager object is provided. {self.model_id}")
-            else:
-                llm_config = self._llm_config
-        if isinstance(llm_config, dict):
-            llm_config = LLMConfig(**llm_config)
-        if not llm_config.config_list:
-            raise ValueError("LLM Config must have a 'config_list' attribute with at least one config.")
-        llm_config = llm_config.replace_localhost().model_dump()
-        if self.functions:
-            llm_config["functions"] = self.functions
-        print(f'LLM Config: {llm_config}')
+        if self.autogen_class != "UserProxyAgent":
+            if not llm_config:
+                if not self._llm_config:
+                    raise ValueError(f"LLM Config must be provided if no model manager object is provided. {self.model_id}")
+                else:
+                    llm_config = self._llm_config
+            if isinstance(llm_config, dict):
+                llm_config = LLMConfig(**llm_config)
+            if not llm_config.config_list:
+                raise ValueError("LLM Config must have a 'config_list' attribute with at least one config.")
+            llm_config = llm_config.replace_localhost().model_dump()
+            if self.functions:
+                llm_config["functions"] = self.functions
+            print(f'LLM Config: {llm_config}')
 
         # Agent creation
         if self.autogen_class == "AssistantAgent":

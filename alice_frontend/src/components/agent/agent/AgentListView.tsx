@@ -27,7 +27,7 @@ const AgentListView: React.FC<AgentComponentProps> = ({
                         secondary={
                             <>
                                 <Typography component="span" variant="body2" color="textPrimary">
-                                    Model: {agent.model?.model || 'N/A'}
+                                    Model: {agent.model_id?.model_name || 'N/A'}
                                 </Typography>
                                 <br />
                                 <Typography component="span" variant="body2" color="textSecondary">
@@ -37,7 +37,7 @@ const AgentListView: React.FC<AgentComponentProps> = ({
                         }
                     />
                     <Box>
-                        {isInteractable && onInteraction && (
+                        {onInteraction && (
                             <Tooltip title="View Agent">
                                 <IconButton edge="end" onClick={() => onInteraction(agent)}>
                                     <Visibility />

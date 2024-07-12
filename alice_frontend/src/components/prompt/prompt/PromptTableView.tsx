@@ -41,7 +41,7 @@ const PromptTableView: React.FC<PromptComponentProps> = ({
               <TableCell>{prompt.is_templated}</TableCell>
               <TableCell>{new Date(prompt.createdAt || '').toLocaleString()}</TableCell>
               <TableCell>
-                {isInteractable && onInteraction && (
+                {onInteraction && (
                   <Tooltip title="View Task">
                     <IconButton onClick={() => onInteraction(prompt)}>
                       <Visibility />

@@ -65,7 +65,6 @@ const Configure: React.FC = () => {
             mode: 'list' as const,
             fetchAll: true,
             onInteraction: handleItemSelect,
-            isInteractable: true,
         };
 
         return (

@@ -29,7 +29,7 @@ const functionParametersSchema = new Schema<IFunctionParameters>({
 }, { _id: false });
 
 function ensureObjectIdForProperties(properties: Map<string, Types.ObjectId>) {
-  if (properties) {
+  if (properties instanceof Map) {
     for (const [key, value] of properties.entries()) {
       properties.set(key, ensureObjectIdHelper(value));
     }

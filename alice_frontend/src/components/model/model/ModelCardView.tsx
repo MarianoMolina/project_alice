@@ -13,7 +13,7 @@ import { ModelComponentProps } from '../../../utils/ModelTypes';
 import { AliceModel } from '../../../utils/ModelTypes';
 const ModelCardView: React.FC<ModelComponentProps> = ({
     item,
-}: { item: AliceModel }) => {
+}: { item: AliceModel | null }) => {
     if (!item) {
         return <Typography>No chat data available.</Typography>;
     }

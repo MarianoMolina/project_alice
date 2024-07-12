@@ -133,7 +133,6 @@ class InitializationBackendAPI(BackendAPI):
                 async with session.post(url, json=resolved_data, headers=headers) as response:
                     if response.status == 400:
                         error_data = await response.json()
-                        print(f"Error creating entity: {error_data}")
                         print_traceback()
                         raise ValueError(f"Bad request when creating {entity_type}: {error_data}")
                     
@@ -327,11 +326,11 @@ class InitializationBackendAPI(BackendAPI):
     async def handle_admin_user(self, db_structure: DBStructure):
         self.existing_admin = await self.get_admin_user()
         if self.existing_admin:
-            print(f"Existing admin user found: {self.existing_admin['email']}")
+            print(f"Existing admin user found: {self.existing_admin.email}")
             self.use_existing_admin = input("Use existing admin? (y/n): ").lower() == 'y'
             if self.use_existing_admin:
                 self.admin_data = self.existing_admin
-                self.admin_password = getpass.getpass(f"Enter password for existing admin with email {self.existing_admin['email']}: ")
+                self.admin_password = getpass.getpass(f"Enter password for existing admin with email {self.existing_admin.email}: ")
             else:
                 self.admin_data, self.admin_password = self.get_new_admin_data()
         else:

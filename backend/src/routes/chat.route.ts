@@ -200,8 +200,9 @@ router.patch('/:chatId/add_message', auth, async (req: AuthRequest, res: Respons
     chat.messages.push(newMessage);
     if (userId) chat.updated_by = new Types.ObjectId(userId);
     await chat.save();
-    console.log('Chat updated successfully');
-    res.status(200).json({ message: 'Message added successfully', chat });
+    console.log('Chat updated successfully', chat);
+    const chat_updated = await AliceChat.findById(chatId);
+    res.status(200).json({ message: 'Message added successfully', chat: chat_updated });
   } catch (error) {
     console.error('Error in add_message route:', error);
     res.status(500).json({ message: (error as Error).message, stack: (error as Error).stack });
