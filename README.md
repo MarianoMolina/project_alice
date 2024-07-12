@@ -1,77 +1,172 @@
-# Project Alice
+# Alice: Advanced Language Intelligence and Cognitive Engine
 
-## Overview
+Alice is a sophisticated AI assistant framework that integrates task execution and intelligent chat capabilities. It provides a flexible environment for creating, managing, and deploying AI agents for various purposes, leveraging a microservices architecture with MongoDB for data persistence.
 
-Project Alice is a sophisticated workflow manager that leverages AI-driven agents to streamline and optimize complex tasks. By integrating various AI models and tools, Project Alice aims to create an intelligent and adaptive system capable of handling a wide range of tasks, from simple automation to intricate problem-solving.
+## Project Structure
 
-## Scope
+The project consists of three main components:
 
-The core of Project Alice revolves around the concept of agentic workflows, where specialized agents are orchestrated to execute tasks in a coordinated manner. The project incorporates several key components:
+1. Backend API (Node.js with Express)
+2. Workflow Service (Python)
+3. Frontend (React)
 
-1. **Agentic Workflows**: Task decomposition and execution through specialized agents.
-2. **Hubs and Specialists**: Domain-specific hubs (e.g., Search Hub, Coding Hub, Communications Hub) managing specialized tools and agents.
-3. **Technical Stack**:
-   - **Backend**: Python for task execution, accessible via API.
-   - **Database**: MongoDB for storing agents, prompts, tasks, workflows, models, and task results.
-   - **Frontend**: React for user interaction with the database and task deployment.
-4. **Interface Agents**: Facilitating user interactions through Chat, Task Management, and Configuration Tools.
-5. **Integration with Various Tools**: Incorporating APIs and models from Anthropic, OpenAI, and others to enhance functionality.
+## Features
 
-## Goal
+### 1. Task Execution
+- Create and execute custom tasks using predefined classes or by creating new ones in the Workflow module
+- Define new parameters, prompts/templates, and agents for task deployment
+- Execute tasks with custom parameters directly
+- Supported task types include:
+  - BasicAgentTask
+  - PromptAgentTask
+  - CheckTask
+  - CodeGenerationLLMTask
+  - CodeExecutionLLMTask
+  - AgentWithFunctions
+  - Workflow
+  - API tasks (Reddit, Wikipedia, Google, Exa, Arxiv search)
 
-The primary goal of Project Alice is to create a robust and flexible platform that can:
-- Automate and optimize workflows across various domains.
-- Facilitate seamless communication and task management.
-- Adapt and scale with the evolving needs of users.
+### 2. Intelligent Chat
+- Create and manage chat conversations with AI agents
+- Add task results from the database to ongoing conversations
+- Integrate new tasks as tools for the active agent during chat
+- Support for various message types (text, image, video, audio, file)
 
-### Specific Objectives
+### 3. Extensible Framework
+- Modular architecture allowing easy addition of new components
+- Flexible integration of external APIs and models
+- Support for multiple AI models, including local and remote deployments
 
-- **Task Automation**: Enable the creation and execution of complex tasks through a series of coordinated agents.
-- **User Interaction**: Develop intuitive interfaces for users to interact with agents and workflows.
-- **Scalability**: Ensure the platform can scale to handle increasing complexity and volume of tasks.
-- **Integration**: Integrate with a wide range of tools and APIs to enhance functionality and provide comprehensive solutions.
+### 4. User Management
+- User authentication and authorization
+- Role-based access control (user and admin roles)
 
-# Status
+## Setup and Installation
 
-## Backend
-* **Workflows**: Basic workflows operational, including CV creation, search hub, and coding + unit testing.
-* **Agents**: Classes for agents, models, templates/prompts, and task results are defined and functional.
-* **Database**: MongoDB is deployed and functional, with structures for agents, tasks, workflows, etc.
-* **API**: Task execution timeouts addressed, improved task saving/retrieval, and result tracking.
-* **Chat**: Added Chat model and routes for enhanced communication capabilities.
-* **Data Consistency**: Improved consistency by populating documents and creating virtualizations.
+1. Clone the repository:
+   ```
+   git clone [repository_url]
+   ```
 
-## Frontend
-* **Components**: Core components such as HomePage, Header, Chat, Sidebar, and TaskResult are implemented.
-* **Integration**: Frontend integrated with backend services for data fetching and task execution.
-* **UI Enhancements**: User-friendly UI with icons, tooltips, and consistent navigation.
-* **TypeScript Migration**: Transition to TypeScript for type safety and better maintainability.
-* **Authentication**: Implemented login logic for secure user access.
-* **Workflow Access**: Added functionality to access the workflow endpoint.
+2. Set up environment variables:
+   Create a `.env` file in the root directory and add the following variables:
+   ```
+   MONGODB_URI=mongodb://mongo/alice_database
+   JWT_SECRET=[your_jwt_secret]
+   BACKEND_PORT=3000
+   FRONTEND_PORT=4000
+   WORKFLOW_PORT=8000
+   HOST=localhost
+   ```
 
-## Current Progress
-* **Python**: Enhancements to Alice with RAG memory, flexible context structures, and society of mind processes.
-* **React Frontend**: Display and interaction with tasks and workflows, chat system for iterative feedback.
-* **MongoDB**: User management and privacy controls, adapting database structure to evolving needs.
-* **Workflow**: Created BackendAPI class to handle interactions with the backend and initialize libraries.
-* **Prompt Management**: Improved Prompt class for better templating and management.
+3. Install dependencies:
+   ```
+   npm install
+   ```
 
-## Pending Tasks
-* **Backend**:
-   * Further integration and testing of various tools/functions for task execution.
-   * Enhancements to Alice's agent logic and interaction capabilities.
-   * Refining and expanding chat functionality for seamless agent communication.
-* **Frontend**:
-   * Completing the Database page with collection selection and item management.
-   * Refining user interfaces for better usability and functionality.
-   * Developing a comprehensive chat interface for agent, prompt, and task creation.
-* **Overall**:
-   * Ensuring data serialization for easy tracking/retrieval.
-   * Continuous improvements based on user feedback and evolving requirements.
-   * Integrating the chat system with agent creation, prompt management, and task execution workflows.
+4. Initialize the database:
+   ```
+   npm run init-db
+   ```
 
-## Short-term Challenges
-* Designing and implementing an intuitive chat interface that facilitates easy creation and management of agents, prompts, and tasks.
-* Ensuring seamless integration between the chat system and the existing workflow and task execution processes.
-* Balancing flexibility and user-friendliness in the agent and task creation process through the chat interface.
-* Optimizing the performance and responsiveness of the chat system, especially when handling complex agent interactions and task executions.
+5. Start the services:
+   ```
+   docker-compose up
+   ```
+
+## Usage
+
+### API Endpoints
+
+The backend provides RESTful API endpoints for managing various entities:
+
+- `/api/agents`: CRUD operations for AI agents
+- `/api/chats`: Manage chat conversations
+- `/api/models`: Manage AI models
+- `/api/prompts`: Manage prompts and templates
+- `/api/tasks`: Manage tasks
+- `/api/taskresults`: Manage task execution results
+- `/api/users`: User management
+- `/api/parameters`: Manage task parameters
+
+### Creating a Task
+
+To create a new task, send a POST request to `/api/tasks` with the task details:
+
+```json
+{
+  "task_name": "Example Task",
+  "task_description": "This is an example task",
+  "task_type": "BasicAgentTask",
+  "input_variables": {
+    "type": "object",
+    "properties": {
+      "prompt": {
+        "type": "string",
+        "description": "The input prompt for the task"
+      }
+    },
+    "required": ["prompt"]
+  },
+  "agent": "[agent_id]"
+}
+```
+
+### Starting a Chat
+
+To start a new chat, send a POST request to `/api/chats`:
+
+```json
+{
+  "name": "New Chat",
+  "alice_agent": "[agent_id]",
+  "executor": "[executor_agent_id]",
+  "model_id": "[model_id]"
+}
+```
+
+### Executing a Task
+
+To execute a task, use the Workflow service API. Send a POST request to `/execute_task` with the task ID and inputs:
+
+```json
+{
+  "taskId": "[task_id]",
+  "inputs": {
+    "prompt": "Example prompt for the task"
+  }
+}
+```
+
+## Development
+
+### Adding New Task Types
+
+1. Create a new task class in the Workflow module, extending the `AliceTask` base class.
+2. Implement the `run` method to define the task's behavior.
+3. Add the new task type to the `task_type` enum in the `task.model.ts` file.
+4. Update the task creation logic in the frontend to include the new task type.
+
+### Adding New Models
+
+1. Add the model configuration to the `const_model_definitions` in `const.py`.
+2. Update the `ModelManager` class in the Workflow module if necessary.
+3. Add the model to the database using the `/api/models` endpoint.
+
+## Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a new branch: `git checkout -b feature-branch-name`
+3. Make your changes and commit them: `git commit -m 'Add some feature'`
+4. Push to the branch: `git push origin feature-branch-name`
+5. Submit a pull request
+
+## License
+
+[Specify the license under which the project is released]
+
+## Contact
+
+For support or inquiries, please [provide contact information or links].
