@@ -7,8 +7,9 @@ import { Prompt, convertToPrompt } from '../utils/PromptTypes';
 import { TaskResponse, convertToTaskResponse } from '../utils/TaskResponseTypes';
 import { ParameterDefinition, convertToParameterDefinition } from '../utils/ParameterTypes';
 import { User, convertToUser } from '../utils/Types';
+import { API, convertToAPI } from '../utils/ApiTypes';
 
-export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters';
+export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis';
 
 export type CollectionType = {
   agents: AliceAgent;
@@ -19,6 +20,7 @@ export type CollectionType = {
   taskresults: TaskResponse;
   users: User;
   parameters: ParameterDefinition;
+  apis: API;
 };
 
 const converters: { [K in CollectionName]: (data: any) => CollectionType[K] } = {
@@ -29,7 +31,8 @@ const converters: { [K in CollectionName]: (data: any) => CollectionType[K] } = 
   prompts: convertToPrompt,
   taskresults: convertToTaskResponse,
   users: convertToUser,
-  parameters: convertToParameterDefinition
+  parameters: convertToParameterDefinition,
+  apis: convertToAPI,
 };
 
 export const fetchItem = async <T extends CollectionName>(
@@ -133,6 +136,7 @@ export const generateChatResponse = async (chatId: string): Promise<any[]> => {
 export const executeTask = async (taskId: string, inputs: any): Promise<TaskResponse> => {
   try {
     const response = await taskAxiosInstance.post('/execute_task', { taskId, inputs });
+    console.log('Task executed:', response.data);
     return convertToTaskResponse(response.data);
   } catch (error) {
     console.error('Error executing task:', error);

@@ -7,6 +7,7 @@ import { AliceAgent } from '../utils/AgentTypes';
 import { AliceTask } from '../utils/TaskTypes';
 import { useApi } from './ApiContext';
 import { AliceChat } from '../utils/ChatTypes';
+import { API } from '../utils/ApiTypes';
 
 export type ConfigItemType = 'Agent' | 'Model' | 'Parameter' | 'Prompt';
 
@@ -16,9 +17,10 @@ interface ConfigContextType {
   parameters: ParameterDefinition[];
   prompts: Prompt[];
   tasks: AliceTask[];
-  selectedItem: AliceAgent | AliceModel | ParameterDefinition | Prompt | AliceTask | TaskResponse | AliceChat | null;
+  apis: API[];
+  selectedItem: AliceAgent | AliceModel | ParameterDefinition | Prompt | AliceTask | TaskResponse | AliceChat | API | null;
   selectedItemType: ConfigItemType | null;
-  setSelectedItem: (item: AliceAgent | AliceModel | ParameterDefinition | Prompt | AliceTask | TaskResponse | AliceChat | null) => void;
+  setSelectedItem: (item: AliceAgent | AliceModel | ParameterDefinition | Prompt | AliceTask | TaskResponse | AliceChat | API | null) => void;
   setSelectedItemType: (type: ConfigItemType | null) => void; // Updated to allow null
   refreshItems: () => Promise<void>;
 }
@@ -40,7 +42,8 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [parameters, setParameters] = useState<ParameterDefinition[]>([]);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [tasks, setTasks] = useState<AliceTask[]>([]);
-  const [selectedItem, setSelectedItem] = useState<AliceAgent | AliceModel | ParameterDefinition | Prompt | AliceTask | TaskResponse | AliceChat | null>(null);
+  const [apis, setApis] = useState<API[]>([]);
+  const [selectedItem, setSelectedItem] = useState<AliceAgent | AliceModel | ParameterDefinition | Prompt | AliceTask | TaskResponse | AliceChat | API | null>(null);
   const [selectedItemType, setSelectedItemType] = useState<ConfigItemType | null>("Agent"); // Updated to allow null
 
   const refreshItems = async () => {
@@ -49,11 +52,13 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     const fetchedParameters = await fetchItem('parameters');
     const fetchedPrompts = await fetchItem('prompts');
     const fetchedTasks = await fetchItem('tasks');
+    const fetchedApis = await fetchItem('apis');
     setAgents(fetchedAgents as AliceAgent[]);
     setModels(fetchedModels as AliceModel[]);
     setParameters(fetchedParameters as ParameterDefinition[]);
     setPrompts(fetchedPrompts as Prompt[]);
     setTasks(fetchedTasks as AliceTask[]);
+    setApis(fetchedApis as API[]);
   };
 
   useEffect(() => {
@@ -71,6 +76,7 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setSelectedItem,
     setSelectedItemType,
     refreshItems,
+    apis,
   };
 
   return <ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>;

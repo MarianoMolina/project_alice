@@ -16,7 +16,6 @@ interface EnhancedAgentProps extends Omit<AgentComponentProps, 'items' | 'item' 
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: AliceAgent) => void;
-  onAddAgent?: () => void;
 }
 
 const EnhancedAgent: React.FC<EnhancedAgentProps> = (props) => {
@@ -36,6 +35,7 @@ const EnhancedAgent: React.FC<EnhancedAgentProps> = (props) => {
       isInteractable: props.isInteractable,
       onInteraction: props.onInteraction,
       showHeaders: props.showHeaders,
+      onView: props.onView,
     };
 
     switch (props.mode) {

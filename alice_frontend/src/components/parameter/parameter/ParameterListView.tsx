@@ -16,6 +16,7 @@ const ParameterListView: React.FC<ParameterComponentProps> = ({
     items,
     isInteractable = false,
     onInteraction,
+    onView,
 }) => {
     const classes = useStyles();
     if (!items) return null;
@@ -38,9 +39,9 @@ const ParameterListView: React.FC<ParameterComponentProps> = ({
                         }
                     />
                     <Box>
-                        {onInteraction && (
+                        {onView && (
                             <Tooltip title="View Parameter">
-                                <IconButton edge="end" onClick={() => onInteraction(parameter)}>
+                                <IconButton edge="end" onClick={() => onView(parameter)}>
                                     <Visibility />
                                 </IconButton>
                             </Tooltip>

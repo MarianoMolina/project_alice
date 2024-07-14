@@ -1,3 +1,5 @@
+import { API, convertToAPI } from "./ApiTypes";
+
 export type ComponentMode = 'create' | 'edit' | 'view' | 'list' | 'shortList' | 'table';
 export type FullComponentMode = 'card' | 'full' | 'create' | 'edit' | 'view' | 'list' | 'shortList' | 'table';
 
@@ -20,6 +22,8 @@ export interface User {
   name: string;
   email: string;
   role?: 'user' | 'admin';
+  apis?: API[];
+  default_llm_api?: API;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -30,6 +34,8 @@ export const convertToUser = (data: any): User => {
     name: data?.name || '',
     email: data?.email || '',
     role: data?.role || 'user',
+    apis: data?.apis?.map(convertToAPI) || [],
+    default_llm_api: convertToAPI(data?.default_llm_api) || undefined,
     createdAt: data?.createdAt ? new Date(data.createdAt) : undefined,
     updatedAt: data?.updatedAt ? new Date(data.updatedAt) : undefined,
   };

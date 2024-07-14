@@ -17,7 +17,7 @@ const ChatTableView: React.FC<ChatComponentProps> = ({
   items,
   isInteractable = false,
   onInteraction,
-  onAddChat,
+  onView,
   showHeaders = true,
 }) => {
   if (!items) return null;
@@ -42,16 +42,16 @@ const ChatTableView: React.FC<ChatComponentProps> = ({
               <TableCell>{chat.alice_agent?.name || 'N/A'}</TableCell>
               <TableCell>{new Date(chat.createdAt || '').toLocaleString()}</TableCell>
               <TableCell>
-                {onInteraction && (
+                {onView && (
                   <Tooltip title="View Chat">
-                    <IconButton onClick={() => onInteraction(chat)}>
+                    <IconButton onClick={() => onView(chat)}>
                       <Visibility />
                     </IconButton>
                   </Tooltip>
                 )}
-                {onAddChat && (
+                {onInteraction && (
                   <Tooltip title="Add Chat">
-                    <IconButton onClick={() => onAddChat(chat)}>
+                    <IconButton onClick={() => onInteraction(chat)}>
                       <ChevronRight />
                     </IconButton>
                   </Tooltip>

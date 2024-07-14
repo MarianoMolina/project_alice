@@ -1,10 +1,12 @@
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export interface IUser {
     name: string;
     email: string;
     password: string;
     role: 'user' | 'admin';
+    apis: Types.ObjectId[];
+    default_llm_api: Types.ObjectId;
 }
 
 export interface IUserDocument extends IUser, Document {

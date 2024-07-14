@@ -122,7 +122,7 @@ export interface TaskComponentProps {
   onChange: (newItem: Partial<AliceTask>) => void;
   handleSave: () => Promise<void>;
   onInteraction?: (task: AliceTask) => void;
-  onAddTask?: (task: AliceTask) => void;
+  onView?: (task: AliceTask) => void;
   isInteractable?: boolean;
   showHeaders?: boolean;
 }

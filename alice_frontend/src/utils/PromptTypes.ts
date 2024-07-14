@@ -37,6 +37,7 @@ export interface PromptComponentProps {
     mode: 'create' | 'view' | 'edit';
     handleSave: () => Promise<void>;
     isInteractable?: boolean;
+    onView?: (prompt: Prompt) => void;
     onInteraction?: (prompt: Prompt) => void;
     showHeaders?: boolean;
 }

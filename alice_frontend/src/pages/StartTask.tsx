@@ -1,22 +1,33 @@
 import React, { useState } from 'react';
-import { Box, Dialog } from '@mui/material';
-import { Card, CardContent, Typography, Skeleton, Stack } from '@mui/material';
-import EnhancedTaskResponse from '../components/task_response/task_response/EnhancedTaskResponse';
-import { useTask } from '../context/TaskContext';
-import useStyles from '../styles/StartTaskStyles';
-import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
+import { Box, Dialog, Typography, List } from '@mui/material';
 import { Add, Functions, PlayArrow, Assignment } from '@mui/icons-material';
+import { Card, CardContent, Skeleton, Stack } from '@mui/material';
+import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
 import { TaskResponse } from '../utils/TaskResponseTypes';
 import { AliceTask } from '../utils/TaskTypes';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
-import EnhancedTask from '../components/task/Task';
+import EnhancedTaskResponse from '../components/task_response/task_response/EnhancedTaskResponse';
+import EnhancedTask from '../components/task/task/EnhancedTask';
+import { RecentExecution, useTask } from '../context/TaskContext';
+import useStyles from '../styles/StartTaskStyles';
 
 const StartTask: React.FC = () => {
   const classes = useStyles();
   const {
     selectedTask,
     handleSelectTask,
+    recentExecutions,
+    handleExecuteTask,
+    setInputValues,
+    setTaskById,
   } = useTask();
+
+  const executeTask = async (execution: RecentExecution) => {
+    setTaskById(execution.taskId);
+    setInputValues(execution.inputs);
+    await handleExecuteTask();
+    return selectedResult;
+  };
 
   const [activeTab, setActiveTab] = useState('All Tasks');
   const [selectedResult, setSelectedResult] = useState<TaskResponse | null>(null);
@@ -56,9 +67,9 @@ const StartTask: React.FC = () => {
   const renderSidebarContent = () => {
     switch (activeTab) {
       case 'Task Results':
-        return <EnhancedTaskResponse onInteraction={handleOpenTaskResult} mode={'list'} fetchAll={true} />;
+        return <EnhancedTaskResponse onView={handleOpenTaskResult} mode={'list'} fetchAll={true} />;
       case 'All Tasks':
-        return <EnhancedTask mode={'list'} fetchAll={true} onInteraction={handleTaskClick} onAddTask={handleTabWhenTaskSelect} />;
+        return <EnhancedTask mode={'list'} fetchAll={true} onView={handleTaskClick} onInteraction={handleTabWhenTaskSelect} />;
       case 'Active Task':
         return selectedTask ? <EnhancedTask mode={'card'} itemId={selectedTask._id} fetchAll={false} /> : null;
       case 'Create Task':
@@ -66,24 +77,25 @@ const StartTask: React.FC = () => {
     }
   };
 
-
   const taskPlaceholder = () => {
-    return <Card className={classes.taskCard}>
-      <CardContent>
-        <Stack spacing={1}>
-          <Typography variant="h6">No task selected</Typography>
-          <Typography>Please select a task from the sidebar to execute.</Typography>
-          <Skeleton variant="rectangular" height={80} />
-          <Skeleton variant="rounded" height={90} />
-        </Stack>
-      </CardContent>
-    </Card>
-  }
+    return (
+      <Card>
+        <CardContent>
+          <Stack spacing={1}>
+            <Typography variant="h6">No task selected</Typography>
+            <Typography>Please select a task from the sidebar to execute.</Typography>
+            <Skeleton variant="rectangular" height={80} />
+            <Skeleton variant="rounded" height={90} />
+          </Stack>
+        </CardContent>
+      </Card>
+    );
+  };
 
   const taskExecute = () => {
     if (!selectedTask) return taskPlaceholder();
     return <EnhancedTask mode={'execute'} itemId={selectedTask._id} fetchAll={false} />;
-  }
+  };
 
   return (
     <Box className={classes.container}>
@@ -95,9 +107,33 @@ const StartTask: React.FC = () => {
         expandedWidth={TASK_SIDEBAR_WIDTH}
         collapsedWidth={SIDEBAR_COLLAPSED_WIDTH}
       />
-      <Box className={classes.mainContent}>
-        {selectedTask ? taskExecute() : taskPlaceholder()}
+      <Box className={classes.mainContentContainer}>
+        <Box className={classes.mainContent}>
+          {taskExecute()}
+        </Box>
+        <Box className={classes.recentExecutionsContainer}>
+          <Typography variant="h6">Recent Executions</Typography>
+          {recentExecutions.length > 0 && (
+            <List>
+              {recentExecutions.map((execution, index) => (
+                <EnhancedTaskResponse
+                  key={index}
+                  itemId={execution.result._id}
+                  mode={'list'}
+                  fetchAll={false}
+                  onView={() => handleOpenTaskResult(execution.result)}
+                  onInteraction={
+                    selectedTask && execution.taskId === selectedTask._id
+                      ? () => executeTask(execution)
+                      : undefined
+                  }
+                />
+              ))}
+            </List>
+          )}
+        </Box>
       </Box>
+
       <Dialog open={isTaskResultDialogOpen} onClose={handleCloseTaskResult} fullWidth maxWidth="md">
         {selectedResult && <EnhancedTaskResponse itemId={selectedResult._id} fetchAll={false} mode={'card'} />}
       </Dialog>

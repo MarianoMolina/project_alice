@@ -49,6 +49,7 @@ export interface ModelComponentProps {
   mode: 'create' | 'view' | 'edit';
   handleSave: () => Promise<void>;
   isInteractable?: boolean;
+  onView?: (model: AliceModel) => void;
   onInteraction?: (model: AliceModel) => void;
   showHeaders?: boolean;
 }

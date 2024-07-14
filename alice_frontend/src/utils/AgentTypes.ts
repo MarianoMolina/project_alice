@@ -52,6 +52,6 @@ export interface AgentComponentProps {
   handleSave: () => Promise<void>;
   isInteractable?: boolean;
   onInteraction?: (agent: AliceAgent) => void;
-  onAddAgent?: (agent: AliceAgent) => void;
+  onView?: (agent: AliceAgent) => void;
   showHeaders?: boolean;
 }

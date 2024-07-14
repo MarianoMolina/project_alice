@@ -13,6 +13,7 @@ import TaskResultRouter from './routes/taskresult.route';
 import ChatRoutes from './routes/chat.route';
 import ParametersRoutes from './routes/parameter.route';
 import HealthRoutes from './routes/health.route';
+import APIRoutes from './routes/api.route';
 import corsConfigMiddleware from './middleware/corsConfig.middleware';
 import loggingMiddleware from './middleware/logging.middleware';
 
@@ -43,7 +44,7 @@ app.use(bodyParser.json());
 
 // Health route should be registered before other routes
 app.use('/api/health', HealthRoutes);
-
+app.use('/api/apis', APIRoutes);
 app.use('/api/agents', AgentRoutes);
 app.use('/api/chats', ChatRoutes);
 app.use('/api/collections', CollectionsRoutes);

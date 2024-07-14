@@ -8,14 +8,14 @@ import {
     IconButton,
     Tooltip
 } from '@mui/material';
-import { Visibility, ChevronRight } from '@mui/icons-material';
+import { Visibility, PlayArrow } from '@mui/icons-material';
 import { AliceChat, ChatComponentProps } from '../../../utils/ChatTypes';
 
 const ChatListView: React.FC<ChatComponentProps> = ({
     items,
     isInteractable = false,
     onInteraction,
-    onAddChat,
+    onView,
 }) => {
     if (!items) return null;
     return (
@@ -37,17 +37,17 @@ const ChatListView: React.FC<ChatComponentProps> = ({
                         }
                     />
                     <Box>
-                        {onInteraction && (
+                        {onView && (
                             <Tooltip title="View Chat">
-                                <IconButton edge="end" onClick={() => onInteraction(chat)}>
+                                <IconButton edge="end" onClick={() => onView(chat)}>
                                     <Visibility />
                                 </IconButton>
                             </Tooltip>
                         )}
-                        {onAddChat && (
+                        {onInteraction && (
                             <Tooltip title="Add Chat">
-                                <IconButton edge="end" onClick={() => onAddChat(chat)}>
-                                    <ChevronRight />
+                                <IconButton edge="end" onClick={() => onInteraction(chat)}>
+                                    <PlayArrow />
                                 </IconButton>
                             </Tooltip>
                         )}

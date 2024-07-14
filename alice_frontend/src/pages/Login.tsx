@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { login as loginUser } from '../services/authService';
+import { loginUser } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 import { TextField, Button, Container, Typography, Box, Alert, Link } from '@mui/material';
 
@@ -17,9 +17,8 @@ const Login: React.FC = () => {
     setError(null);
 
     try {
-      const { token, user } = await loginUser(email, password); // Expecting user info in response
-      login(token, user);
-      navigate('/chat-alice'); // Redirect to a default protected page after successful login
+      await login(email, password);
+      navigate('/chat-alice');
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         console.error('Login failed:', error.response?.data);

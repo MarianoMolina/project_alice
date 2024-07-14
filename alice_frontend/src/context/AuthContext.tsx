@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login as loginUser, register as registerUser } from '../services/authService';
+import { loginUser, registerUser, LoginResponse } from '../services/authService';
+import { User } from '../utils/Types';
 
 interface AuthContextProps {
   isAuthenticated: boolean;
-  user: { id: string; email: string } | null;
+  user: User | null;
   loading: boolean;
-  login: (token: string, user: { id: string; email: string }) => void;
+  login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
 }
@@ -19,7 +20,7 @@ const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [user, setUser] = useState<{ id: string; email: string } | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
@@ -39,27 +40,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const login = (token: string, user: { id: string; email: string }) => {
+  const saveUserData = (userData: LoginResponse) => {
     try {
-      const userData = JSON.stringify(user);
-      console.log('Saving user data:', userData);
-      localStorage.setItem('user', userData);
-      localStorage.setItem('token', token);
-      setUser(user);
+      localStorage.setItem('user', JSON.stringify(userData.user));
+      localStorage.setItem('token', userData.token);
+      setUser(userData.user);
       setIsAuthenticated(true);
-      navigate('/');
     } catch (error) {
       console.error('Error saving user data:', error);
+    }
+  };
+
+  const login = async (email: string, password: string) => {
+    try {
+      const userData = await loginUser(email, password);
+      saveUserData(userData);
+      navigate('/');
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
     }
   };
 
   const register = async (name: string, email: string, password: string) => {
     try {
       await registerUser(name, email, password);
-      const { token, user } = await loginUser(email, password);
-      login(token, user);
+      await login(email, password);
     } catch (error) {
       console.error('Registration failed:', error);
+      throw error;
     }
   };
 

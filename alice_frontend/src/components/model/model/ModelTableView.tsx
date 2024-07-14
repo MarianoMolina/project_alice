@@ -17,6 +17,7 @@ const ModelTableView: React.FC<ModelComponentProps> = ({
   items,
   isInteractable = false,
   onInteraction,
+  onView,
   showHeaders = true,
 }) => {
   if (!items) return null;
@@ -41,9 +42,9 @@ const ModelTableView: React.FC<ModelComponentProps> = ({
               <TableCell>{model.deployment || 'N/A'}</TableCell>
               <TableCell>{new Date(model.createdAt || '').toLocaleString()}</TableCell>
               <TableCell>
-                {onInteraction && (
+                {onView && (
                   <Tooltip title="View Task">
-                    <IconButton onClick={() => onInteraction(model)}>
+                    <IconButton onClick={() => onView(model)}>
                       <Visibility />
                     </IconButton>
                   </Tooltip>

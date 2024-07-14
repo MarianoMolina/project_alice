@@ -7,9 +7,10 @@ import TaskFlexibleView from './TaskFlexibleView';
 import TaskCardView from './TaskCardView';
 import TaskListView from './TaskListView';
 import TaskTableView from './TaskTableView';
+import TaskExecuteView from './TaskExecuteView';
 
 type BaseTaskMode = BaseDbElementProps<AliceChat>['mode'];
-type ExtendedTaskMode = 'list' | 'shortList' | 'card' | 'table';
+type ExtendedTaskMode = 'list' | 'shortList' | 'card' | 'table' | 'execute';
 type EnhancedTaskMode = BaseTaskMode | ExtendedTaskMode;
 
 interface EnhancedTaskProps extends Omit<TaskComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
@@ -34,7 +35,7 @@ const EnhancedTask: React.FC<EnhancedTaskProps> = (props) => {
             onChange,
             handleSave,
             onInteraction: props.onInteraction,
-            onAddTask: props.onAddTask,
+            onView: props.onView,
             isInteractable: props.isInteractable,
         };
         switch (props.mode) {
@@ -49,6 +50,8 @@ const EnhancedTask: React.FC<EnhancedTaskProps> = (props) => {
                 return <TaskTableView {...commonProps} />;
             case 'card':
                 return <TaskCardView {...commonProps} />;
+            case 'execute':
+                return <TaskExecuteView {...commonProps} />;
             default:
                 return null;
         }

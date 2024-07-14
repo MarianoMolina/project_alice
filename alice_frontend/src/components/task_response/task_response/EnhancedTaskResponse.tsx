@@ -15,6 +15,8 @@ interface EnhancedTaskResponseProps extends Omit<TaskResponseComponentProps, 'it
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: TaskResponse) => void;
+  onInteraction?: (selectedItem: TaskResponse) => void;
+  onView?: (viewItem: TaskResponse) => void;
 }
 
 const EnhancedTaskResponse: React.FC<EnhancedTaskResponseProps> = (props) => {
@@ -32,20 +34,21 @@ const EnhancedTaskResponse: React.FC<EnhancedTaskResponseProps> = (props) => {
       onChange,
       handleSave,
       onInteraction: props.onInteraction,
-      isInteractable: props.isInteractable,
+      isInteractable: false,
+      onView: props.onView,
       showHeaders: props.showHeaders,
     };
 
     switch (props.mode) {
-      case 'create':
-      case 'edit':
-      case 'view':
       case 'list':
       case 'shortList':
-        return <TaskResponseListView {...commonProps}/>;
+        return <TaskResponseListView {...commonProps} />;
       case 'table':
         return <TaskResponseTableView {...commonProps} />;
       case 'card':
+      case 'view':
+      case 'create':
+      case 'edit':
         return <TaskResponseCardView {...commonProps} />;
       default:
         return null;
@@ -54,7 +57,7 @@ const EnhancedTaskResponse: React.FC<EnhancedTaskResponseProps> = (props) => {
 
   const baseDbMode: BaseDbElementProps<TaskResponse>['mode'] =
     props.mode === 'create' ? 'create' :
-    props.mode === 'edit' ? 'edit' : 'view';
+      props.mode === 'edit' ? 'edit' : 'view';
 
   return (
     <BaseDbElement<TaskResponse>

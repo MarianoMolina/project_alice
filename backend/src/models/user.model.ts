@@ -6,6 +6,8 @@ const userSchema = new Schema<IUserDocument>({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ["user", "admin"], default: "user" },
+  apis: [{ type: Schema.Types.ObjectId, ref: 'API' }],
+  default_llm_api: { type: Schema.Types.ObjectId, ref: 'API' },
 }, {
   timestamps: true,
   toJSON: {

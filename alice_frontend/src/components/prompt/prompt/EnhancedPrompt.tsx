@@ -33,6 +33,7 @@ const EnhancedPrompt: React.FC<EnhancedPromptProps> = (props) => {
       mode,
       handleSave,
       isInteractable: props.isInteractable,
+      onView: props.onView,
       onInteraction: props.onInteraction,
       showHeaders: props.showHeaders,
     };

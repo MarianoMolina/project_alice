@@ -34,13 +34,12 @@ const useStyles = makeStyles((theme: Theme) => ({
     marginBottom: theme.spacing(2),
   },
   taskId: {
-    
+    // You can add specific styles for taskId if needed
   },
   title: {
-
+    // You can add specific styles for title if needed
   },
   taskCard: {
-    marginBottom: theme.spacing(3),
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
@@ -77,6 +76,38 @@ const useStyles = makeStyles((theme: Theme) => ({
     justifyContent: 'center',
     height: '100%',
   },
+  // New styles for added components
+  resultContainer: {
+    marginTop: theme.spacing(3),
+    padding: theme.spacing(2),
+    backgroundColor: theme.palette.background.paper,
+    borderRadius: theme.shape.borderRadius,
+    boxShadow: theme.shadows[1],
+  },
+  recentExecutionsContainer: {
+    marginTop: theme.spacing(3),
+  },
+  accordionDetails: {
+    flexDirection: 'column',
+  },
+  taskDetailItem: {
+    marginBottom: theme.spacing(1),
+  },
+  preWrapper: {
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-word',
+    maxHeight: '200px',
+    overflowY: 'auto',
+    backgroundColor: theme.palette.grey[100],
+    padding: theme.spacing(1),
+    borderRadius: theme.shape.borderRadius,
+  },
+  recentExecutionItem: {
+    marginBottom: theme.spacing(1),
+  },
+  reRunButton: {
+    marginLeft: theme.spacing(1),
+  },  
 }));
 
 export default useStyles;

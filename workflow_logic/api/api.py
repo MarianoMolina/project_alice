@@ -75,15 +75,17 @@ async def execute_task_endpoint(request: TaskExecutionRequest) -> dict:
         llm_config = libraries.model_manager.default_model.autogen_llm_config
         task = inject_llm_config_in_task(task, llm_config)
         print(f'task: {task}')
+        print(f'task_inputs: {inputs}')
         print(f'task type: {type(task)}')
         # Run the synchronous task in a thread pool
         loop = asyncio.get_running_loop()
         func = functools.partial(task.execute, **inputs)
         result = await loop.run_in_executor(thread_pool, func)
-        print(f'task_result: {result}')
+        print(f'task_result: {result.model_dump()}')
         print(f'type: {type(result)}')
         db_result = await libraries.store_task_response(result)
-        return db_result.model_dump()
+        print(f'db_result: {db_result.model_dump()}')
+        return db_result.model_dump(by_alias=True, exclude_unset=True)
     except Exception as e:
         import traceback
         result = DatabaseTaskResponse(
@@ -99,7 +101,7 @@ async def execute_task_endpoint(request: TaskExecutionRequest) -> dict:
             execution_history=None
         )
         db_result = await libraries.store_task_response(result)
-        return db_result.model_dump()
+        return db_result.model_dump(by_alias=True, exclude_unset=True)
     
 @api_app.post("/validate-token")
 def validate_token(request: Request) -> dict[str, bool]:

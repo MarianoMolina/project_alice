@@ -15,7 +15,7 @@ const AgentListView: React.FC<AgentComponentProps> = ({
     items,
     isInteractable = false,
     onInteraction,
-    onAddAgent,
+    onView,
 }) => {
     if (!items) return null;
     return (
@@ -37,16 +37,16 @@ const AgentListView: React.FC<AgentComponentProps> = ({
                         }
                     />
                     <Box>
-                        {onInteraction && (
+                        {onView && (
                             <Tooltip title="View Agent">
-                                <IconButton edge="end" onClick={() => onInteraction(agent)}>
+                                <IconButton edge="end" onClick={() => onView(agent)}>
                                     <Visibility />
                                 </IconButton>
                             </Tooltip>
                         )}
-                        {onAddAgent && (
+                        {onInteraction && (
                             <Tooltip title="Add Agent">
-                                <IconButton edge="end" onClick={() => onAddAgent(agent)}>
+                                <IconButton edge="end" onClick={() => onInteraction(agent)}>
                                     <ChevronRight />
                                 </IconButton>
                             </Tooltip>

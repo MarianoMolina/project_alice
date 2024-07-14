@@ -15,6 +15,7 @@ const PromptListView: React.FC<PromptComponentProps> = ({
     items,
     isInteractable = false,
     onInteraction,
+    onView, 
 }) => {
     if (!items) return null;
     return (
@@ -36,9 +37,9 @@ const PromptListView: React.FC<PromptComponentProps> = ({
                         }
                     />
                     <Box>
-                        {onInteraction && (
+                        {onView && (
                             <Tooltip title="View Agent">
-                                <IconButton edge="end" onClick={() => onInteraction(prompt)}>
+                                <IconButton edge="end" onClick={() => onView(prompt)}>
                                     <Visibility />
                                 </IconButton>
                             </Tooltip>

@@ -35,7 +35,7 @@ const EnhancedChat: React.FC<EnhancedChatProps> = (props) => {
       handleSave,
       isInteractable: props.isInteractable,
       onInteraction: props.onInteraction,
-      onAddChat: props.onAddChat,
+      onView: props.onView,
       showRegenerate: props.showRegenerate,
       handleTaskClick: props.handleTaskClick,
       handleTaskResultClick: props.handleTaskResultClick,

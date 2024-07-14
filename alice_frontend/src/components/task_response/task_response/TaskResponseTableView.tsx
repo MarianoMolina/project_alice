@@ -17,6 +17,7 @@ const TaskResponseTableView: React.FC<TaskResponseComponentProps> = ({
   items,
   isInteractable = false,
   onInteraction,
+  onView,
   showHeaders = true,
 }) => {
   if (!items) return null;
@@ -41,9 +42,9 @@ const TaskResponseTableView: React.FC<TaskResponseComponentProps> = ({
               <TableCell>{taskResponse.status || 'N/A'}</TableCell>
               <TableCell>{new Date(taskResponse.createdAt || '').toLocaleString()}</TableCell>
               <TableCell>
-                {onInteraction && (
+                {onView && (
                   <Tooltip title="View Task">
-                    <IconButton onClick={() => onInteraction(taskResponse)}>
+                    <IconButton onClick={() => onView(taskResponse)}>
                       <Visibility />
                     </IconButton>
                   </Tooltip>

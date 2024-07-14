@@ -17,7 +17,7 @@ const AgentTableView: React.FC<AgentComponentProps> = ({
   items,
   isInteractable = false,
   onInteraction,
-  onAddAgent,
+  onView,
   showHeaders = true,
 }) => {
   if (!items) return null;
@@ -42,16 +42,16 @@ const AgentTableView: React.FC<AgentComponentProps> = ({
               <TableCell>{agent.model_id?.model_name || 'N/A'}</TableCell>
               <TableCell>{new Date(agent.createdAt || '').toLocaleString()}</TableCell>
               <TableCell>
-                {onInteraction && (
+                {onView && (
                   <Tooltip title="View Task">
-                    <IconButton onClick={() => onInteraction(agent)}>
+                    <IconButton onClick={() => onView(agent)}>
                       <Visibility />
                     </IconButton>
                   </Tooltip>
                 )}
-                {onAddAgent && (
+                {onInteraction && (
                   <Tooltip title="Add Task">
-                    <IconButton onClick={() => onAddAgent(agent)}>
+                    <IconButton onClick={() => onInteraction(agent)}>
                       <ChevronRight />
                     </IconButton>
                   </Tooltip>

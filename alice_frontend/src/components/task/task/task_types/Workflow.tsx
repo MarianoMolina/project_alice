@@ -1,6 +1,8 @@
 import React from 'react';
-import { Box, TextField, Button, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel, SelectChangeEvent } from '@mui/material';
+import { Box, TextField, FormControl, InputLabel, Chip, MenuItem, Checkbox, FormControlLabel, SelectChangeEvent, Typography, Select } from '@mui/material';
+import FunctionDefinitionBuilder from '../../../parameter/Function';
 import { TaskFormProps, WorkflowForm, AliceTask } from '../../../../utils/TaskTypes';
+import { FunctionParameters } from '../../../../utils/ParameterTypes';
 
 const Workflow: React.FC<TaskFormProps<WorkflowForm>> = ({ form, setForm, availableTasks, viewOnly }) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -20,17 +22,26 @@ const Workflow: React.FC<TaskFormProps<WorkflowForm>> = ({ form, setForm, availa
     setForm({ ...form, tasks: newTasks });
   };
 
+  const getSelectedTaskIds = () => {
+    if (!form.tasks) {
+      return [];
+    }
+    const selectedIds = Object.values(form.tasks).map(task => task._id || '');
+    return selectedIds;
+  };
+
   const handleStartTaskChange = (event: SelectChangeEvent<string>) => {
-    const startTaskId = event.target.value;
-    const startTask = availableTasks.find(task => task._id === startTaskId) || null;
-    if (!startTask) return;
-    setForm({ ...form, start_task: startTask.task_name });
+    const startTaskName = event.target.value;
+    setForm({ ...form, start_task: startTaskName });
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     setForm({ ...form, [name]: checked });
   };
+  const handleInputVariablesChange = (functionDefinition: FunctionParameters) => {
+    setForm({ ...form, input_variables: functionDefinition });
+  }
 
   return (
     <Box>
@@ -56,24 +67,30 @@ const Workflow: React.FC<TaskFormProps<WorkflowForm>> = ({ form, setForm, availa
         required
         disabled={viewOnly}
       />
-      <TextField
-        fullWidth
-        margin="normal"
-        name="input_variables"
-        label="Input Variables (JSON)"
-        value={JSON.stringify(form.input_variables) || ''}
-        onChange={(e) => setForm({ ...form, input_variables: JSON.parse(e.target.value) })}
-        multiline
-        rows={4}
-        disabled={viewOnly}
-      />
+      <Box>
+        <Typography gutterBottom>Input Variables</Typography>
+        <FunctionDefinitionBuilder
+          initialParameters={form.input_variables || undefined}
+          onChange={handleInputVariablesChange}
+          isViewOnly={viewOnly}
+        />
+      </Box>
+      
       <FormControl fullWidth margin="normal" disabled={viewOnly}>
         <InputLabel>Tasks</InputLabel>
         <Select
           multiple
-          value={form.tasks ? Object.values(form.tasks).map(task => task._id || '') : []}
+          value={getSelectedTaskIds()}
           onChange={handleTasksChange}
-          required
+          renderValue={(selected) => (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {selected.map((value) => {
+                const task = availableTasks.find(t => t._id === value);
+                console.log('[9-LOG] Rendering chip for task:', task?.task_name);
+                return <Chip key={value} label={task ? task.task_name : value} />;
+              })}
+            </Box>
+          )}
         >
           {availableTasks.map((task) => (
             <MenuItem key={task._id} value={task._id || ''}>
@@ -92,7 +109,7 @@ const Workflow: React.FC<TaskFormProps<WorkflowForm>> = ({ form, setForm, availa
             <em>None</em>
           </MenuItem>
           {form.tasks && Object.values(form.tasks).map((task) => (
-            <MenuItem key={task._id} value={task._id || ''}>
+            <MenuItem key={task._id} value={task.task_name || ''}>
               {task.task_name}
             </MenuItem>
           ))}
@@ -120,16 +137,6 @@ const Workflow: React.FC<TaskFormProps<WorkflowForm>> = ({ form, setForm, availa
         }
         label="Recursive"
       />
-      {!viewOnly && (
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => console.log('Creating Workflow:', form)}
-          sx={{ mt: 2 }}
-        >
-          Create Workflow
-        </Button>
-      )}
     </Box>
   );
 };

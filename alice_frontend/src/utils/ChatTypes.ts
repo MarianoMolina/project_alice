@@ -93,7 +93,7 @@ export interface ChatComponentProps {
     handleSave: () => Promise<void>;
     isInteractable?: boolean;
     onInteraction?: (chat: AliceChat) => void;
-    onAddChat?: (chat: AliceChat) => void;
+    onView?: (chat: AliceChat) => void;
     showRegenerate?: boolean;
     handleTaskClick?: (taskId: string) => void;
     handleTaskResultClick?: (taskResultId: string) => void;

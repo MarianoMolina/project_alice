@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model, Types } from 'mongoose';
+import mongoose, { Schema, Model } from 'mongoose';
 import { ITaskResultDocument } from '../interfaces/taskeresult.interface';
 
 const taskResultSchema = new Schema<ITaskResultDocument>({

@@ -25,7 +25,9 @@ const ChatAlice: React.FC = () => {
     currentChat,
     setCurrentChatId,
     addTasksToChat,
+    addTaskResultsToChat, 
     isTaskInChat,
+    isTaskResultInChat,
   } = useChat();
   const [openTaskDialog, setOpenTaskDialog] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>(undefined);
@@ -65,9 +67,14 @@ const ChatAlice: React.FC = () => {
     { name: 'addTaskResults', icon: Assignment, disabled: !currentChatId },
   ];
 
-  const checkAndSave = (task: AliceTask) => {
+  const checkAndAddTask = (task: AliceTask) => {
     if (task._id && !isTaskInChat(task._id)) {
       addTasksToChat([task._id]);
+    }
+  }
+  const checkAndAddTaskResult = (taskResult: TaskResponse) => {
+    if (taskResult._id && !isTaskResultInChat(taskResult._id)) {
+      addTaskResultsToChat([taskResult._id]);
     }
   }
   const triggerTaskDialog = (task: AliceTask) => {
@@ -109,8 +116,8 @@ const ChatAlice: React.FC = () => {
       case 'selectChat':
         return <EnhancedChat
           mode="shortList"
-          onInteraction={triggerChatDialog}
-          onAddChat={selectChatId}
+          onView={triggerChatDialog}
+          onInteraction={selectChatId}
           fetchAll={true}
           isInteractable={true}
         />;
@@ -126,11 +133,11 @@ const ChatAlice: React.FC = () => {
         );
       case 'addFunctions':
         return (
-          <EnhancedTask mode={'list'} fetchAll={true} onAddTask={checkAndSave} onInteraction={triggerTaskDialog} />
+          <EnhancedTask mode={'list'} fetchAll={true} onInteraction={checkAndAddTask} onView={triggerTaskDialog} />
         );
       case 'addTaskResults':
         return (
-          <EnhancedTaskResponse mode={'list'} fetchAll={true} onInteraction={triggerTaskResultDialog}/>
+          <EnhancedTaskResponse mode={'list'} fetchAll={true} onView={triggerTaskResultDialog} onInteraction={checkAndAddTaskResult}/>
         );
       default:
         return null;

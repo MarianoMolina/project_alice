@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { SupportAgent, Terminal, Functions, Summarize } from '@mui/icons-material';
 import { ChatComponentProps } from '../../../utils/ChatTypes';
-import EnhancedTask from '../../task/Task';
+import EnhancedTask from '../../task/task/EnhancedTask';
 import EnhancedTaskResponse from '../../task_response/task_response/EnhancedTaskResponse';
 import useStyles from '../ChatStyles';
 

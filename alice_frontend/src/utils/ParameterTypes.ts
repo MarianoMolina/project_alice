@@ -35,6 +35,7 @@ export interface ParameterComponentProps {
     mode: 'create' | 'view' | 'edit';
     handleSave: () => Promise<void>;
     isInteractable?: boolean;
+    onView?: (parameter: ParameterDefinition) => void;
     onInteraction?: (parameter: ParameterDefinition) => void;
     showHeaders?: boolean;
 }

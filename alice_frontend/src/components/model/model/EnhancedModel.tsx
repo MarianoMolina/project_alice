@@ -32,6 +32,7 @@ const EnhancedModel: React.FC<EnhancedModelProps> = (props: EnhancedModelProps) 
       onChange,
       mode,
       handleSave,
+      onView: props.onView,
       isInteractable: props.isInteractable,
       onInteraction: props.onInteraction,
       showHeaders: props.showHeaders,

@@ -10,7 +10,8 @@ import CreateWorkflow from './pages/StartTask';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ProtectedRoute from './layouts/ProtectedRoute';
-import Configure from './pages/Configure';
+import Database from './pages/Database';
+import UserSettings from './pages/UserSettings';
 import './assets/fonts/fonts.css';
 
 const App: React.FC = () => {
@@ -24,7 +25,8 @@ const App: React.FC = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/chat-alice" element={<ProtectedRoute element={<ChatAlice />} />} />
           <Route path="/start-task" element={<ProtectedRoute element={<CreateWorkflow />} />} />
-          <Route path="/configure" element={<ProtectedRoute element={<Configure />} />} />
+          <Route path="/database" element={<ProtectedRoute element={<Database />} />} />
+          <Route path="/user-settings" element={<ProtectedRoute element={<UserSettings />} />} />
         </Routes>
       </MainLayout>
     </ThemeProvider>

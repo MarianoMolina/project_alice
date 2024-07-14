@@ -1,10 +1,7 @@
 import React from 'react';
 import { AppBar, Toolbar, IconButton, Box, Tooltip, Button, Typography } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import HomeIcon from '@mui/icons-material/Home';
-import TaskIcon from '@mui/icons-material/Task';
-import ChatIcon from '@mui/icons-material/Chat';
-import SettingsIcon  from '@mui/icons-material/Settings';
+import { SettingsApplications, Storage, Chat, Task, Home} from '@mui/icons-material';
 import { useAuth } from '../../../context/AuthContext';
 import useStyles from './HeaderStyles';
 
@@ -38,7 +35,7 @@ const Header: React.FC = () => {
               onClick={() => handleNavigation('/')}
               className={isActive('/') ? classes.activeButton : ''}
             >
-              <HomeIcon />
+              <Home />
             </IconButton>
           </Tooltip>
         </Box>
@@ -51,7 +48,7 @@ const Header: React.FC = () => {
                 onClick={() => handleNavigation('/start-task')}
                 className={isActive('/start-task') ? classes.activeButton : ''}
               >
-                <TaskIcon />
+                <Task />
               </IconButton>
             </Tooltip>
             <Tooltip title="Chat with Alice">
@@ -60,16 +57,25 @@ const Header: React.FC = () => {
                 onClick={() => handleNavigation('/chat-alice')}
                 className={isActive('/chat-alice') ? classes.activeButton : ''}
               >
-                <ChatIcon />
+                <Chat />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Configure">
+            <Tooltip title="View Database">
               <IconButton
                 color="inherit"
-                onClick={() => handleNavigation('/configure')}
+                onClick={() => handleNavigation('/database')}
                 className={isActive('/configure') ? classes.activeButton : ''}
               >
-                <SettingsIcon />
+                <Storage />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="User Settings">
+              <IconButton
+                color="inherit"
+                onClick={() => handleNavigation('/user-settings')}
+                className={isActive('/user-settings') ? classes.activeButton : ''}
+              >
+                <SettingsApplications />
               </IconButton>
             </Tooltip>
           </Box>

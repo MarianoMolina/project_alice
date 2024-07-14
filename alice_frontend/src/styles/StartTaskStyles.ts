@@ -17,17 +17,21 @@ const useStyles = makeStyles((theme: Theme) => ({
     overflowY: 'auto',
     overflowX: 'hidden',
   },
-  mainContent: {
+  mainContentContainer: {
+    display: 'flex',
     flexGrow: 1,
+  },
+  mainContent: {
+    flexBasis: '66.66%',
     padding: theme.spacing(3),
     overflowY: 'auto',
   },
-  taskCard: {
-    marginBottom: theme.spacing(3),
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-  },
+  recentExecutionsContainer: {
+    flexBasis: '33.33%',
+    padding: theme.spacing(3),
+    overflowY: 'auto',
+    backgroundColor: theme.palette.background.default,
+  }
 }));
 
 export default useStyles;

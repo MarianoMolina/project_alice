@@ -32,6 +32,7 @@ const EnhancedParameter: React.FC<EnhancedParameterProps> = (props) => {
       onChange,
       mode,
       handleSave,
+      onView: props.onView,
       isInteractable: props.isInteractable,
       onInteraction: props.onInteraction,
       showHeaders: props.showHeaders,

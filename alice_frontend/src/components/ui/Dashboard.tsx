@@ -1,9 +1,7 @@
 import React from 'react';
 import { Container, Box, Button, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import AddIcon from '@mui/icons-material/Add';
-import ChatIcon from '@mui/icons-material/Chat';
-import SettingsIcon from '@mui/icons-material/Settings';
+import { SettingsApplications, Storage, Chat, Task} from '@mui/icons-material';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -23,7 +21,7 @@ const Dashboard: React.FC = () => {
           fullWidth
           sx={{ mb: 2 }}
           onClick={() => handleNavigation('/start-task')}
-          startIcon={<AddIcon />}
+          startIcon={<Task />}
         >
           Execute Task
         </Button>
@@ -32,17 +30,26 @@ const Dashboard: React.FC = () => {
           fullWidth
           sx={{ mb: 2 }}
           onClick={() => handleNavigation('/chat-alice')}
-          startIcon={<ChatIcon />}
+          startIcon={<Chat />}
         >
           Chat with Alice
         </Button>
         <Button
           variant="contained"
           fullWidth
-          onClick={() => handleNavigation('/configure')}
-          startIcon={<SettingsIcon />}
+          onClick={() => handleNavigation('/database')}
+          startIcon={<Storage />}
         >
-          Configure Alice Tools
+          View Database
+        </Button>
+        <Button
+          variant="contained"
+          fullWidth
+          sx={{ mt: 2 }}
+          onClick={() => handleNavigation('/user-settings')}
+          startIcon={<SettingsApplications />}
+        >
+          User Settings
         </Button>
       </Box>
     </Container>

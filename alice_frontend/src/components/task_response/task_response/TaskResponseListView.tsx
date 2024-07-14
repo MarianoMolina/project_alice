@@ -6,46 +6,71 @@ import {
     Typography,
     Box,
     IconButton,
-    Tooltip
+    Tooltip,
+    Chip
 } from '@mui/material';
-import { Visibility } from '@mui/icons-material';
+import { Visibility, PlayArrow } from '@mui/icons-material';
 import { TaskResponse, TaskResponseComponentProps } from '../../../utils/TaskResponseTypes';
 
 const TaskResponseListView: React.FC<TaskResponseComponentProps> = ({
     items,
-    isInteractable = false,
+    item,
     onInteraction,
+    onView,
 }) => {
-    if (!items) return null;
+    const renderTaskResponse = (taskResponse: TaskResponse) => (
+        <ListItem key={taskResponse._id} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <ListItemText
+                primary={
+                    <Typography variant="subtitle1" component="div">
+                        {taskResponse.task_name}
+                        <Chip
+                            label={taskResponse.status}
+                            color={taskResponse.status === 'complete' ? 'success' : taskResponse.status === 'failed' ? 'error' : 'default'}
+                            size="small"
+                            sx={{ ml: 1 }}
+                        />
+                    </Typography>
+                }
+                secondary={
+                    <>
+                        <Typography component="span" variant="body2" color="text.primary">
+                            {taskResponse.task_description}
+                        </Typography>
+                        <Typography component="div" variant="caption" color="text.secondary">
+                            Created: {new Date(taskResponse.createdAt || '').toLocaleString()}
+                        </Typography>
+                    </>
+                }
+            />
+            <Box>
+                {onInteraction && (
+                    <Tooltip title="Execute Task">
+                        <IconButton edge="end" onClick={() => onInteraction(taskResponse)}>
+                            <PlayArrow />
+                        </IconButton>
+                    </Tooltip>
+                )}
+                {onView && (
+                    <Tooltip title="View Task Response">
+                        <IconButton edge="end" onClick={() => onView(taskResponse)}>
+                            <Visibility />
+                        </IconButton>
+                    </Tooltip>
+                )}
+            </Box>
+        </ListItem>
+    );
+
+    if (item) {
+        return <List>{renderTaskResponse(item)}</List>;
+    }
+
+    if (!items || items.length === 0) return null;
+
     return (
         <List>
-            {items.map((taskResponse: TaskResponse) => (
-                <ListItem key={taskResponse._id}>
-                    <ListItemText
-                        primary={taskResponse.task_name}
-                        secondary={
-                            <>
-                                <Typography component="span" variant="body2" color="textPrimary">
-                                    Status: {taskResponse.status || 'N/A'}
-                                </Typography>
-                                <br />
-                                <Typography component="span" variant="body2" color="textSecondary">
-                                    Created: {new Date(taskResponse.createdAt || '').toLocaleString()}
-                                </Typography>
-                            </>
-                        }
-                    />
-                    <Box>
-                        {onInteraction && (
-                            <Tooltip title="View Task Response">
-                                <IconButton edge="end" onClick={() => onInteraction(taskResponse)}>
-                                    <Visibility />
-                                </IconButton>
-                            </Tooltip>
-                        )}
-                    </Box>
-                </ListItem>
-            ))}
+            {items.map(renderTaskResponse)}
         </List>
     );
 };

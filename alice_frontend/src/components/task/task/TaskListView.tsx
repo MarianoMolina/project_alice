@@ -8,16 +8,18 @@ import {
     IconButton,
     Tooltip
 } from '@mui/material';
-import { Visibility, ChevronRight } from '@mui/icons-material';
+import { Visibility, PlayArrow } from '@mui/icons-material';
 import { AliceTask, TaskComponentProps } from '../../../utils/TaskTypes';
 
 const TaskListView: React.FC<TaskComponentProps> = ({
     items,
     isInteractable = false,
     onInteraction,
-    onAddTask,
+    onView,
 }) => {
     if (!items) return null;
+    console.log('onInteraction', onInteraction);
+    console.log('onView', onView);
     return (
         <List>
             {items.map((task: AliceTask) => (
@@ -37,17 +39,17 @@ const TaskListView: React.FC<TaskComponentProps> = ({
                         }
                     />
                     <Box>
-                        {onInteraction && (
+                        {onView && (
                             <Tooltip title="View Task">
-                                <IconButton edge="end" onClick={() => onInteraction(task)}>
+                                <IconButton edge="end" onClick={() => onView(task)}>
                                     <Visibility />
                                 </IconButton>
                             </Tooltip>
                         )}
-                        {onAddTask && (
+                        {onInteraction && (
                             <Tooltip title="Add Task">
-                                <IconButton edge="end" onClick={() => onAddTask(task)}>
-                                    <ChevronRight />
+                                <IconButton edge="end" onClick={() => onInteraction(task)}>
+                                    <PlayArrow />
                                 </IconButton>
                             </Tooltip>
                         )}

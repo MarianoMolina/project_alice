@@ -16,6 +16,7 @@ import { ParameterComponentProps } from '../../../utils/ParameterTypes';
 const ParameterTableView: React.FC<ParameterComponentProps> = ({
   items,
   isInteractable = false,
+  onView,
   onInteraction,
   showHeaders = true,
 }) => {
@@ -41,9 +42,9 @@ const ParameterTableView: React.FC<ParameterComponentProps> = ({
               <TableCell>{parameter.type || 'N/A'}</TableCell>
               <TableCell>{new Date(parameter.createdAt || '').toLocaleString()}</TableCell>
               <TableCell>
-                {onInteraction && (
+                {onView && (
                   <Tooltip title="View Task">
-                    <IconButton onClick={() => onInteraction(parameter)}>
+                    <IconButton onClick={() => onView(parameter)}>
                       <Visibility />
                     </IconButton>
                   </Tooltip>
