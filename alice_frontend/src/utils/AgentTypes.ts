@@ -1,6 +1,7 @@
-import { User } from "./Types";
+import { User } from "./UserTypes";
 import { AliceModel } from "./ModelTypes";
 import { Prompt } from "./PromptTypes";
+
 export interface AliceAgent {
   _id?: string;
   name: string;
@@ -21,6 +22,7 @@ export interface AliceAgent {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
 export const convertToAliceAgent = (data: any): AliceAgent => {
   return {
     _id: data?._id || undefined,

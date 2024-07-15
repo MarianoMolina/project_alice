@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loginUser, registerUser, LoginResponse } from '../services/authService';
-import { User } from '../utils/Types';
+import { loginUser, registerUser, LoginResponse, initializeUserDatabase } from '../services/authService';
+import { User } from '../utils/UserTypes';
 
 interface AuthContextProps {
   isAuthenticated: boolean;
@@ -66,6 +66,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       await registerUser(name, email, password);
       await login(email, password);
+      await initializeUserDatabase();
     } catch (error) {
       console.error('Registration failed:', error);
       throw error;

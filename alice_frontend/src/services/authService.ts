@@ -1,6 +1,6 @@
-import { dbAxiosInstance } from './axiosInstance';
+import { dbAxiosInstance, taskAxiosInstance } from './axiosInstance';
 import axios from 'axios';
-import { User } from '../utils/Types';
+import { User } from '../utils/UserTypes';
 
 export interface LoginResponse {
   token: string;
@@ -37,3 +37,18 @@ export const registerUser = async (name: string, email: string, password: string
     throw error;
   }
 };
+
+export const initializeUserDatabase = async (): Promise<void> => {
+  try {
+    const response = await taskAxiosInstance.post(`/initialize_user_database`);
+    console.log('User database initialized:', response.data);
+    return;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error('Initialization error:', error.response?.data);
+    } else {
+      console.error('Unexpected error:', error);
+    }
+    throw error;
+  }
+}

@@ -1,5 +1,6 @@
-import { User, convertToUser } from './Types';
+import { User, convertToUser } from './UserTypes';
 import { FunctionParameters } from './ParameterTypes';
+
 export interface Prompt {
     _id?: string;
     name: string;

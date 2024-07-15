@@ -19,15 +19,18 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
+    zIndex: 1,
   },
   mainLayoutHeader: {
     flexShrink: 0,
+    zIndex: 2,
   },
   mainLayoutContent: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
+    zIndex: 1,
   },
 }));
 

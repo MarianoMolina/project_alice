@@ -22,7 +22,7 @@
     "@types/react-dom": "^18.3.0",
     "axios": "^1.7.2",
     "clsx": "^2.1.1",
-    "framer-motion": "^11.2.12",
+    "framer-motion": "^11.3.2",
     "react": "^18.3.1",
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.3.1",
@@ -30,7 +30,8 @@
     "react-router-dom": "^6.23.1",
     "react-scripts": "^5.0.1",
     "react-syntax-highlighter": "^15.5.0",
-    "tailwind-merge": "^2.3.0",
+    "simplex-noise": "^4.0.2",
+    "tailwind-merge": "^2.4.0",
     "typescript": "^5.4.5",
     "web-vitals": "^2.1.4"
   },

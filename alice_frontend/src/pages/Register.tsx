@@ -8,12 +8,15 @@ import ApiSetup from '../components/registration/ApiSetup';
 import RegistrationComplete from '../components/registration/RegistrationComplete';
 import { API } from '../utils/ApiTypes';
 import { createItem } from '../services/api';
+import { registerUser } from '../services/authService';
+import useStyles from '../styles/RegisterStyles';
+import { WavyBackground } from '../components/ui/WavyBackground';
 
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { register, user } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
 
@@ -21,13 +24,15 @@ const Register = () => {
   const [userIntent, setUserIntent] = useState('');
   const [suggestedApis, setSuggestedApis] = useState<API[]>([]);
   const [configuredApis, setConfiguredApis] = useState<API[]>([]);
+  const classes = useStyles();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     try {
-      await register(name, email, password);
+      // Use registerUser service directly to perform registration
+      await registerUser(name, email, password);
       setStep(1); // Move to the next step after successful registration
     } catch (error) {
       setError('Registration failed. Please check your details and try again.');
@@ -35,10 +40,8 @@ const Register = () => {
   };
 
   const handleApiSuggestions = (apis: API[]) => {
-    if (user) {
-      const apisWithUser = apis.map(api => ({ ...api, user: user }));
-      setSuggestedApis(apisWithUser);
-    }
+    const apisWithUser = apis.map(api => ({ ...api, user: { name, email } }));
+    setSuggestedApis(apisWithUser);
     setStep(3);
   };
 
@@ -55,8 +58,14 @@ const Register = () => {
     }
   };
 
-  const handleComplete = () => {
-    navigate('/chat-alice'); // Navigate to the chat page after completion
+  const handleComplete = async () => {
+    try {
+      // Call the login function after all steps are complete
+      await login(email, password);
+      navigate('/chat-alice'); // Navigate to the chat page after completion
+    } catch (error) {
+      setError('Failed to log in after registration. Please try again.');
+    }
   };
 
   const steps = [
@@ -121,7 +130,8 @@ const Register = () => {
   ];
 
   return (
-    <Container maxWidth="sm">
+    <WavyBackground>
+    <Container maxWidth="sm" className={classes.registerContainer}>
       <Box mt={5}>
         <Typography variant="h4" component="h1" gutterBottom>
           Register
@@ -138,6 +148,7 @@ const Register = () => {
         </Stepper>
       </Box>
     </Container>
+    </WavyBackground>
   );
 };
 

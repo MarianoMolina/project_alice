@@ -1,4 +1,4 @@
-import { User, convertToUser } from "./Types";
+import { User, convertToUser } from "./UserTypes";
 
 export interface AliceModel {
     _id?: string;

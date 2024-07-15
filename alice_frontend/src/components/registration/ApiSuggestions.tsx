@@ -19,7 +19,6 @@ const ApiSuggestions: React.FC<ApiSuggestionsProps> = ({ intent, onSuggest }) =>
       is_active: false,
       health_status: 'unknown',
       api_config: {},
-      user: {} as any, // This should be set properly when the user is created
     });
 
     // Always suggest LLM API

@@ -64,7 +64,7 @@ const Header: React.FC = () => {
               <IconButton
                 color="inherit"
                 onClick={() => handleNavigation('/database')}
-                className={isActive('/configure') ? classes.activeButton : ''}
+                className={isActive('/database') ? classes.activeButton : ''}
               >
                 <Storage />
               </IconButton>

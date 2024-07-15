@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { loginUser } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 import { TextField, Button, Container, Typography, Box, Alert, Link } from '@mui/material';
+import { WavyBackground } from '../components/ui/WavyBackground';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -18,7 +19,7 @@ const Login: React.FC = () => {
 
     try {
       await login(email, password);
-      navigate('/chat-alice');
+      navigate('/');
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         console.error('Login failed:', error.response?.data);
@@ -31,47 +32,49 @@ const Login: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="xs">
-      <Box mt={5}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Login
-        </Typography>
-        <form onSubmit={handleSubmit}>
-          <TextField
-            label="Email"
-            type="email"
-            fullWidth
-            margin="normal"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <TextField
-            label="Password"
-            type="password"
-            fullWidth
-            margin="normal"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          {error && (
-            <Alert severity="error" style={{ marginBottom: '16px' }}>
-              {error}
-            </Alert>
-          )}
-          <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mb: 2 }}>
+    <WavyBackground>
+      <Container maxWidth="xs">
+        <Box mt={5}>
+          <Typography variant="h4" component="h1" gutterBottom>
             Login
-          </Button>
-        </form>
-        <Typography variant="body2" align="center">
-          Don't have an account?{' '}
-          <Link href="/register" underline="hover">
-            Register
-          </Link>
-        </Typography>
-      </Box>
-    </Container>
+          </Typography>
+          <form onSubmit={handleSubmit}>
+            <TextField
+              label="Email"
+              type="email"
+              fullWidth
+              margin="normal"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <TextField
+              label="Password"
+              type="password"
+              fullWidth
+              margin="normal"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            {error && (
+              <Alert severity="error" style={{ marginBottom: '16px' }}>
+                {error}
+              </Alert>
+            )}
+            <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mb: 2 }}>
+              Login
+            </Button>
+          </form>
+          <Typography variant="body2" align="center">
+            Don't have an account?{' '}
+            <Link href="/register" underline="hover">
+              Register
+            </Link>
+          </Typography>
+        </Box>
+      </Container>
+    </WavyBackground>
   );
 };
 

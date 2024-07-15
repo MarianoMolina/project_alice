@@ -3,7 +3,7 @@ import { Box, Button, Stack, Typography, Skeleton } from '@mui/material';
 import { Person, Mode, Settings, Description, Functions, Assignment, Chat, Api } from '@mui/icons-material';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
-import { ComponentMode, } from '../utils/Types';
+import { ComponentMode } from '../utils/LLMConfigTypes';
 import { AliceModel } from '../utils/ModelTypes';
 import { Prompt } from '../utils/PromptTypes';
 import { ParameterDefinition } from '../utils/ParameterTypes';

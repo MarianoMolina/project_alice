@@ -1,4 +1,5 @@
-import { User, convertToUser } from "./Types";
+import { User, convertToUser } from "./UserTypes";
+
 export interface FunctionParameters {
     type: "object";
     properties: { [key: string]: ParameterDefinition };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -12,24 +12,51 @@ import Register from './pages/Register';
 import ProtectedRoute from './layouts/ProtectedRoute';
 import Database from './pages/Database';
 import UserSettings from './pages/UserSettings';
+import NavigationGuard from './components/navigation/NavigationGuard';
+import { AuthProvider } from './context/AuthContext';
 import './assets/fonts/fonts.css';
 
 const App: React.FC = () => {
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  const handleConfirmNavigation = useCallback(() => {
+    setHasUnsavedChanges(false);
+  }, []);
+
+  const handleSetHasUnsavedChanges = useCallback((value: boolean) => {
+    setHasUnsavedChanges(value);
+  }, []);
+
+
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <MainLayout>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/chat-alice" element={<ProtectedRoute element={<ChatAlice />} />} />
-          <Route path="/start-task" element={<ProtectedRoute element={<CreateWorkflow />} />} />
-          <Route path="/database" element={<ProtectedRoute element={<Database />} />} />
-          <Route path="/user-settings" element={<ProtectedRoute element={<UserSettings />} />} />
-        </Routes>
-      </MainLayout>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <NavigationGuard
+          hasUnsavedChanges={hasUnsavedChanges}
+          onConfirmNavigation={handleConfirmNavigation}
+        >
+          <MainLayout>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/chat-alice" element={<ProtectedRoute element={<ChatAlice />} />} />
+              <Route path="/start-task" element={<ProtectedRoute element={<CreateWorkflow />} />} />
+              <Route path="/database" element={<ProtectedRoute element={<Database />} />} />
+              <Route
+                path="/user-settings"
+                element={
+                  <ProtectedRoute
+                    element={<UserSettings setHasUnsavedChanges={handleSetHasUnsavedChanges} />}
+                  />
+                }
+              />
+            </Routes>
+          </MainLayout>
+        </NavigationGuard>
+      </ThemeProvider>
+    </AuthProvider>
   );
 };
 

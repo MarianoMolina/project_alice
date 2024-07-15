@@ -1,6 +1,5 @@
 import { AliceModel, convertToAliceModel } from "./ModelTypes";
-import { convertToUser } from "./Types";
-import { User } from "./Types";
+import { convertToUser, User } from "./UserTypes";
 
 export enum ApiType {
     LLM_API = 'llm_api',
@@ -12,13 +11,14 @@ export enum ApiType {
 }
 export interface API {
     _id?: string;
-    user: User;
     api_type: ApiType;
     name: string;
     is_active: boolean;
     health_status: 'healthy' | 'unhealthy' | 'unknown';
     default_model?: AliceModel;
     api_config: { [key: string]: string };
+    created_by?: User;
+    updated_by?: User;
     created_at?: Date;
     updated_at?: Date;
 }
@@ -31,19 +31,22 @@ export interface LLMAPI {
     health_status: 'healthy' | 'unhealthy' | 'unknown';
     default_model?: AliceModel;
     api_config: { api_key: string, base_url: string  };
+    created_by?: User;
+    updated_by?: User;
     created_at?: Date;
     updated_at?: Date;
 }
 export const convertToAPI = (data: any): API => {
     return {
         _id: data?._id || undefined,
-        user: data?.map(convertToUser) || undefined,
         api_type: data?.api_type || ApiType.LLM_API,
         name: data?.name || '',
         is_active: data?.is_active || false,
         health_status: data?.health_status || 'unknown',
-        default_model: convertToAliceModel(data?.default_model) || undefined,
-        api_config: data?.additional_config || {},
+        default_model: (data?.default_model && Object.keys(data.default_model).length > 0) ? convertToAliceModel(data.default_model) : undefined,
+        api_config: data?.api_config || {},
+        created_by: data?.created_by ? convertToUser(data.created_by) : undefined,
+        updated_by: data?.updated_by ? convertToUser(data.updated_by) : undefined,
         created_at: data?.created_at ? new Date(data.created_at) : undefined,
         updated_at: data?.updated_at ? new Date(data.updated_at) : undefined,
     };

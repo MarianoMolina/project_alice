@@ -1,8 +1,9 @@
-import { User } from './Types';
+import { User } from './UserTypes';
 import { AliceTask, convertToAliceTask } from './TaskTypes';
 import { AliceAgent, convertToAliceAgent } from './AgentTypes';
 import { TaskResponse } from './TaskResponseTypes';
 import { AliceModel } from './ModelTypes';
+
 export interface AliceChat {
     _id: string;
     name: string;
@@ -17,7 +18,9 @@ export interface AliceChat {
     createdAt?: Date;
     updatedAt?: Date;
 }
+
 export type RoleType = 'user' | 'assistant' | 'system' | 'tool';
+export type MessageTypeType = 'text' | 'image' | 'video' | 'audio' | 'file' | 'TaskResponse';
 
 export interface MessageType {
     role: RoleType;
@@ -26,7 +29,7 @@ export interface MessageType {
     step?: string;
     assistant_name?: string;
     context?: Record<string, any>;
-    type?: 'text' | 'image' | 'video' | 'audio' | 'file' | 'TaskResponse';
+    type?: MessageTypeType;
     request_type?: string | null;
     created_by?: User | null;
     updated_by?: User | null;

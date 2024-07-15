@@ -42,7 +42,7 @@ const ChatAlice: React.FC = () => {
   
   const lastMessage = messages[messages.length - 1];
 
-  const [activeTab, setActiveTab] = useState('selectChat');
+  const [activeTab, setActiveTab] = useState('Select Chat');
 
   // Create a memoized key that changes when messages change
   const chatKey = useMemo(() => JSON.stringify(messages), [messages]);
@@ -50,21 +50,21 @@ const ChatAlice: React.FC = () => {
   const handleNewChatCreated = async (chat: AliceChat) => {
     fetchChats();
     setCurrentChatId(chat?._id);
-    setActiveTab('currentChat');
+    setActiveTab('Current Chat');
   };
 
   const selectChatId = async (chat: AliceChat) => {
     console.log('Selected chat:', chat);
     await handleSelectChat(chat._id);
-    setActiveTab('currentChat');
+    setActiveTab('Current Chat');
   };
 
   const tabs = [
-    { name: 'newChat', icon: Add },
-    { name: 'selectChat', icon: Chat },
-    { name: 'currentChat', icon: Info, disabled: !currentChatId },
-    { name: 'addFunctions', icon: Functions, disabled: !currentChatId },
-    { name: 'addTaskResults', icon: Assignment, disabled: !currentChatId },
+    { name: 'New Chat', icon: Add },
+    { name: 'Select Chat', icon: Chat },
+    { name: 'Current Chat', icon: Info, disabled: !currentChatId },
+    { name: 'Add Functions', icon: Functions, disabled: !currentChatId },
+    { name: 'Add TaskResults', icon: Assignment, disabled: !currentChatId },
   ];
 
   const checkAndAddTask = (task: AliceTask) => {
@@ -107,13 +107,13 @@ const ChatAlice: React.FC = () => {
 
   const renderSidebarContent = (tabName: string) => {
     switch (tabName) {
-      case 'newChat':
+      case 'New Chat':
         return <EnhancedChat
           mode="create"
           fetchAll={false}
           onSave={handleNewChatCreated}
         />;
-      case 'selectChat':
+      case 'Select Chat':
         return <EnhancedChat
           mode="shortList"
           onView={triggerChatDialog}
@@ -121,7 +121,7 @@ const ChatAlice: React.FC = () => {
           fetchAll={true}
           isInteractable={true}
         />;
-      case 'currentChat':
+      case 'Current Chat':
         return (
           <EnhancedChat
             itemId={currentChat?._id}
@@ -131,11 +131,11 @@ const ChatAlice: React.FC = () => {
             handleAgentClick={triggerAgentDialogId}
           />
         );
-      case 'addFunctions':
+      case 'Add Functions':
         return (
           <EnhancedTask mode={'list'} fetchAll={true} onInteraction={checkAndAddTask} onView={triggerTaskDialog} />
         );
-      case 'addTaskResults':
+      case 'Add TaskResults':
         return (
           <EnhancedTaskResponse mode={'list'} fetchAll={true} onView={triggerTaskResultDialog} onInteraction={checkAndAddTaskResult}/>
         );
@@ -158,7 +158,7 @@ const ChatAlice: React.FC = () => {
         <Box className={classes.chatAliceMessages}>
           {currentChat ? (
             <EnhancedChat
-              key={chatKey}  // Add this line
+              key={chatKey} 
               itemId={currentChat._id}
               mode="full"
               fetchAll={false}

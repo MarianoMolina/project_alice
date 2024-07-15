@@ -6,7 +6,7 @@ import { AliceTask, convertToAliceTask } from '../utils/TaskTypes';
 import { Prompt, convertToPrompt } from '../utils/PromptTypes';
 import { TaskResponse, convertToTaskResponse } from '../utils/TaskResponseTypes';
 import { ParameterDefinition, convertToParameterDefinition } from '../utils/ParameterTypes';
-import { User, convertToUser } from '../utils/Types';
+import { User, convertToUser } from '../utils/UserTypes';
 import { API, convertToAPI } from '../utils/ApiTypes';
 
 export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis';

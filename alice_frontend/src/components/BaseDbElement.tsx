@@ -106,7 +106,8 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
   useEffect(() => {
     if (fetchAll) {
       fetchAllItems();
-    } else if (itemId && mode !== 'create') {
+    }
+    if (itemId && mode !== 'create') {
       fetchSingleItem();
     } else if (mode === 'create') {
       setItem({} as T);

@@ -12,10 +12,12 @@ import {
   Select,
   MenuItem,
   IconButton,
+  Tooltip
 } from '@mui/material';
 import { Save, Cancel, Edit } from '@mui/icons-material';
 import { API, ApiType } from '../../../utils/ApiTypes';
 import { ApiComponentProps } from '../../../utils/ApiTypes';
+import useStyles from '../ApiStyles';
 
 const ApiFullListView: React.FC<ApiComponentProps> = ({
   items,
@@ -25,6 +27,7 @@ const ApiFullListView: React.FC<ApiComponentProps> = ({
   onInteraction,
 }) => {
   const [editingApiId, setEditingApiId] = useState<string | null>(null);
+  const classes = useStyles();
 
   const handleApiUpdate = (api: API, updatedFields: Partial<API>) => {
     onChange({ ...api, ...updatedFields });
@@ -61,22 +64,28 @@ const ApiFullListView: React.FC<ApiComponentProps> = ({
     <Box>
       <List>
         {items.map((api) => (
-          <ListItem key={api._id} style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-            <Box display="flex" width="100%" justifyContent="space-between" alignItems="center">
+          <ListItem key={api._id} className={classes.fullListItem}>
+            <Box className={classes.fullListBox}>
               <Typography variant="h6">{api.name}</Typography>
               {editingApiId === api._id ? (
                 <Box>
+                <Tooltip title="Save changes">
                   <IconButton onClick={() => handleSaveApi(api)}>
                     <Save />
                   </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Cancel changes">
                   <IconButton onClick={handleCancel}>
                     <Cancel />
                   </IconButton>
+                  </Tooltip>
                 </Box>
               ) : (
-                <IconButton onClick={() => handleEdit(api)}>
-                  <Edit />
-                </IconButton>
+                <Tooltip title="Edit API">
+                  <IconButton onClick={() => handleEdit(api)}>
+                    <Edit />
+                  </IconButton>
+                </Tooltip>
               )}
             </Box>
             {editingApiId === api._id ? (
