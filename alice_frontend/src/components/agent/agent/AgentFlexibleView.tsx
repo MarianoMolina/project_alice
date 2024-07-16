@@ -7,7 +7,6 @@ import {
     InputLabel,
     Select,
     MenuItem,
-    Slider,
     FormControlLabel,
     Button,
     Switch
@@ -33,6 +32,7 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     }
     const isEditMode = mode === 'edit' || mode === 'create';
     console.log('item', item);
+
     return (
         <Box>
             <TextField
@@ -46,12 +46,30 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             <FormControl fullWidth margin="normal">
                 <InputLabel>System Message</InputLabel>
                 <Select
-                    value={item?.system_message._id}
+                    value={item?.system_message?._id}
                     onChange={(e) => onChange({ system_message: prompts.find(prompt => prompt._id === e.target.value)})}
                     disabled={!isEditMode}
                 >
                     {prompts.map((prompt: Prompt) => (
                         <MenuItem key={prompt._id} value={prompt._id}>{prompt.name}</MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+            <FormControl fullWidth margin="normal">
+                <InputLabel>Model</InputLabel>
+                <Select
+                    value={item?.model_id?._id || ''}
+                    onChange={(e) => {
+                        const selectedModel = models.find(model => model._id === e.target.value);
+                        onChange({ model_id: selectedModel || null });
+                    }}
+                    disabled={!isEditMode}
+                >
+                    <MenuItem value="">
+                        <em>None</em>
+                    </MenuItem>
+                    {models.map((model: AliceModel) => (
+                        <MenuItem key={model._id} value={model._id}>{model.short_name}</MenuItem>
                     ))}
                 </Select>
             </FormControl>
@@ -65,10 +83,8 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
                 }
                 label="Execute Code"
             />
-            <Typography gutterBottom>Temperature</Typography>
-
             {isEditMode && (
-                <Button variant="contained" color="primary" onClick={handleSave}>
+                <Button variant="contained" color="primary" onClick={handleSave} sx={{ mt: 2 }}>
                     {item?._id ? 'Update Agent' : 'Create Agent'}
                 </Button>
             )}

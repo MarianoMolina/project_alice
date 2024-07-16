@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any
-from workflow_logic.util.const import ANTHROPIC_API, OPENAI_API_KEY
 
 class DBStructure(BaseModel):
     users: List[Dict[str, Any]] = Field(..., description="List of users to create")

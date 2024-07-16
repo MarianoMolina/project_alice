@@ -6,10 +6,6 @@ from typing import get_args, Dict, Any, Optional, Literal
 from pydantic import BaseModel, Field
 from tqdm import tqdm
 from workflow_logic.core.communication import DatabaseTaskResponse, MessageDict
-from workflow_logic.core.tasks import TaskLibrary
-from workflow_logic.core.agent import AgentLibrary
-from workflow_logic.core.prompt import PromptLibrary
-from workflow_logic.core.model import ModelManager
 from workflow_logic.api.api_utils import available_task_types
 from workflow_logic.util.const import BACKEND_PORT, HOST, ADMIN_TOKEN, BACKEND_PORT_DOCKER, BACKEND_HOST
 from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, DatabaseTaskResponse
@@ -45,9 +41,8 @@ class BackendAPI(BaseModel):
     def task_types(self) -> Dict[str, AliceTask]:
         return {task.__name__: task for task in self.available_task_types}
     
-    async def initialize_libraries(self):
+    async def initialize_db_app(self):
         try:
-            # Initialize ModelManager
             if self.user_token:
                 validate = self.validate_token(self.user_token)
                 if validate.get("valid"):

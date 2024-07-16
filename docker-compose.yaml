@@ -55,13 +55,11 @@ services:
       - "${WORKFLOW_PORT}:${WORKFLOW_PORT_DOCKER}"
     volumes:
       - .:/app
-      - ${MODEL_FOLDER}:/models
     depends_on:
       backend:
         condition: service_healthy
     environment:
       - PYTHONPATH=/app
-      - MODEL_FOLDER=/models
       - HOST=host.docker.internal
     extra_hosts:
       - "host.docker.internal:host-gateway"

@@ -30,7 +30,7 @@ const ModelCardView: React.FC<ModelComponentProps> = ({
                 <List>
                     <ListItemButton>
                         <ListItemIcon><Category /></ListItemIcon>
-                        <ListItemText primary="Base url" secondary={item.base_url} />
+                        <ListItemText primary="API" secondary={item.api_name} />
                     </ListItemButton>
                 </List>
             </CardContent>

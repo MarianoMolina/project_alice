@@ -1,5 +1,5 @@
 from typing import get_type_hints, get_origin, get_args, Dict, Any, Union
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, DatabaseTaskResponse, ParameterDefinition, FunctionParameters
 from workflow_logic.util import User
 from workflow_logic.core.api import API
@@ -28,6 +28,7 @@ class DBInitManager(BaseModel):
         "task_responses": DatabaseTaskResponse,
         "apis": API
     }, description="Map of entity types to Pydantic model classes")
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def get_entity_class(self, entity_type: EntityType) -> BaseModel:
         return self.entity_class_map.get(entity_type)

@@ -1,19 +1,19 @@
 pyautogen
-langchain
-langchain_openai
-langchain-community
-langgraph
-pytz
-stackapi
+# langchain
+# langchain_openai
+# langchain-community
+# langgraph
+# pytz
+# stackapi
 exa_py
+aiohttp
 praw
-xmltodict
+# xmltodict
 arxiv
 wikipedia
 replicate
-whisper
-tiktoken
-guidance
+# whisper
+# tiktoken
 openai
 pymongo
 jinja2

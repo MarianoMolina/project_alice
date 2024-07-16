@@ -1,4 +1,3 @@
 from .prompt import Prompt
-from .prompt_library import PromptLibrary
 
-__all__ = ['PromptLibrary', 'Prompt']
+__all__ = ['Prompt']

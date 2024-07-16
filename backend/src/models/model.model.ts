@@ -1,8 +1,6 @@
 import mongoose, { Schema, Model as MongooseModel } from 'mongoose';
 import { IModel } from '../interfaces/model.interface';
 
-const LOCAL_LLM_API_URL = process.env.LOCAL_LLM_API_URL || 'http://localhost:1234/v1';
-
 const modelSchema = new Schema<IModel>({
   short_name: { type: String, required: true, unique: true },
   model_name: { type: String, required: true },

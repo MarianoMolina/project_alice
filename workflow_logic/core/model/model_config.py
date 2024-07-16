@@ -1,12 +1,12 @@
-from workflow_logic.util.const import HOST, LM_STUDIO_PORT
+from workflow_logic.util.const import HOST
 from pydantic import BaseModel
 from typing import Optional, List
 
 class ModelConfig(BaseModel):
     model: str
     api_key: Optional[str]
-    base_url: Optional[str] = f"http://{HOST}:{LM_STUDIO_PORT}/v1"
-    api_type: Optional[str] = "openai"
+    base_url: Optional[str] 
+    api_type: Optional[str] 
     # model_client_cls: Optional[str] = None
 
 class LLMConfig(BaseModel):

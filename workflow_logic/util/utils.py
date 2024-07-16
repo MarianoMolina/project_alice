@@ -3,7 +3,7 @@ from typing import  Dict, List, Optional, Any, Union, Type, Tuple
 from openai import OpenAI as OriginalOpenAI
 from pydantic import BaseModel, Field
 from enum import Enum
-from workflow_logic.util.const import MODEL_FOLDER, HOST, LM_STUDIO_PORT
+from workflow_logic.util.const import HOST
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
         
@@ -21,12 +21,7 @@ def json_to_python_type_mapping(json_type: str) -> Type | Tuple[Type, ...] | Non
     logging.error(f"Invalid JSON type: {json_type}")
     return None
 
-def model_path_from_file(model_file: str, model_folder: str = MODEL_FOLDER) -> str:
-    # Normalize the model folder path
-    normalized_model_folder = os.path.normpath(model_folder)
-    return os.path.join(normalized_model_folder, model_file)
-
-default_client = OriginalOpenAI(base_url=f"http://{HOST}:{LM_STUDIO_PORT}/v1", api_key="lm-studio")
+default_client = OriginalOpenAI(base_url=f"http://{HOST}:1234/v1", api_key="lm-studio")
 
 def get_embedding(text: str, model_name: str, client: OriginalOpenAI = default_client):
    text = text.replace("\n", " ")

@@ -57,7 +57,7 @@ class API(BaseModel):
     updated_at: Optional[str] = None
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         json_encoders = {ObjectId: str}
 
 class APIManager(BaseModel):

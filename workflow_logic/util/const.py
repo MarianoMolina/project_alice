@@ -1,14 +1,6 @@
 import os
 from dotenv import load_dotenv
 load_dotenv()
-MODEL_FOLDER = os.getenv("MODEL_FOLDER")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-ANTHROPIC_API = os.getenv("ANTHROPIC_API")
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
-REDDIT_CLIENT_ID = os.getenv("REDDIT_CLIENT_ID")
-REDDIT_CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET")
-EXA_API_KEY = os.getenv("EXA_API_KEY")
 
 BACKEND_PORT = os.getenv("BACKEND_PORT", 3000)
 FRONTEND_PORT = os.getenv("FRONTEND_PORT", 4000)
@@ -22,7 +14,6 @@ ADMIN_TOKEN = os.getenv("ADMIN_TOKEN")
 
 active_models = ["GPT4o"]
 active_vision_models = ["Llava_vision"]
-LM_STUDIO_PORT = os.getenv("LM_STUDIO_PORT")
 
 const_model_definitions = [
     {
@@ -105,7 +96,7 @@ const_model_definitions = [
         "model_type": "chat",
         "deployment": "remote",
         "api_type": "openai",
-        "api_key": OPENAI_API_KEY,
+        "api_key": '',
         "base_url": "https://api.openai.com/v1"
     },
     {
@@ -116,7 +107,7 @@ const_model_definitions = [
         "model_type": "chat",
         "deployment": "remote",
         "api_type": "openai",
-        "api_key":OPENAI_API_KEY,
+        "api_key":'',
         "base_url": "https://api.openai.com/v1"
     },
     {
@@ -127,7 +118,7 @@ const_model_definitions = [
         "model_type": "chat",
         "deployment": "remote",
         "api_type": "anthropic",
-        "api_key": ANTHROPIC_API,
+        "api_key": '',
         "base_url": "https://api.anthropic.com",
         "model_client_cls": "AnthropicClient"
     },
@@ -139,7 +130,7 @@ const_model_definitions = [
         "model_type": "chat",
         "deployment": "remote",
         "api_type": "openai",
-        "api_key": OPENAI_API_KEY,
+        "api_key": '',
         "base_url": "https://api.openai.com/v1"
     }
 ]
