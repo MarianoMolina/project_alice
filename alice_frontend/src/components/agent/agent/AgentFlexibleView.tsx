@@ -66,23 +66,7 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
                 label="Execute Code"
             />
             <Typography gutterBottom>Temperature</Typography>
-            <Slider
-                value={parseFloat(item?.llm_config?.temperature as string) || 0.7}
-                onChange={(_, newValue) => onChange({ llm_config: { ...item?.llm_config, temperature: newValue.toString() } })}
-                min={0}
-                max={1}
-                step={0.1}
-                disabled={!isEditMode}
-            />
-            <Typography gutterBottom>Timeout (seconds)</Typography>
-            <Slider
-                value={parseInt(item?.llm_config?.timeout as string) || 300}
-                onChange={(_, newValue) => onChange({ llm_config: { ...item?.llm_config, timeout: newValue.toString() } })}
-                min={30}
-                max={600}
-                step={30}
-                disabled={!isEditMode}
-            />
+
             {isEditMode && (
                 <Button variant="contained" color="primary" onClick={handleSave}>
                     {item?._id ? 'Update Agent' : 'Create Agent'}

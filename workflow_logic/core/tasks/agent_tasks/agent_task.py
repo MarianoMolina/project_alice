@@ -1,7 +1,7 @@
 import logging
 from typing import Optional, List, Tuple
 from pydantic import Field
-from autogen.agentchat import ConversableAgent
+from workflow_logic.core.api.api import APIManager
 from workflow_logic.core.communication import StringOutput, LLMChatOutput, MessageDict, TaskResponse
 from workflow_logic.core.agent.agent import AliceAgent
 from workflow_logic.core.tasks.task import AliceTask
@@ -25,31 +25,24 @@ class BasicAgentTask(AliceTask):
     input_variables: FunctionParameters = Field(default=messages_function_parameters, description="Inputs that the agent will require in a workflow. Default is 'messages', a list of MessageDicts.")
     exit_codes: dict[int, str] = Field(default={0: "Success", 1: "Generation failed."}, description="A dictionary of exit codes for the task")
     human_input: Optional[bool] = Field(default=False, description="Whether the task requires human input")
-
-    @property
-    def agent(self) -> ConversableAgent:
-        return self.agent.get_autogen_agent()
-    
-    def run(self, messages: List[MessageDict],  **kwargs) -> TaskResponse:
+  
+    def run(self, messages: List[MessageDict], api_manager: APIManager, **kwargs) -> TaskResponse:
         if not messages:
-            return TaskResponse(
-                task_name=self.task_name,
-                task_description=self.task_description,
-                status="failed",
-                result_code=1,
-                result_diagnostic="Failed to initialize messages.",
-                execution_history=kwargs.get("execution_history", [])
-            )
-        self.update_agent_human_input()
+            # There's a conceit here that a task has to have messages to run. 
+            # This is not strictly true, but it's a better default than allowing a system message to function as a task prompt. 
+            diagnostics = "Failed to initialize messages."
+            return self.get_failed_task_response(diagnostics=diagnostics, **kwargs)
+
         logging.info(f'Executing task: {self.task_name}')
         task_inputs = messages.copy()
-        result, exitcode = self.generate_agent_response(messages=messages, max_rounds=1, **kwargs)
+        result, exitcode = self.generate_agent_response(messages=messages, max_rounds=1, api_manager=api_manager, **kwargs)
         logging.info(f"Task {self.task_name} executed with exit code: {exitcode}. Response: {result}")
         task_outputs = StringOutput(content=[result]) if isinstance(result, str) else LLMChatOutput(content=result)
         messages.append(MessageDict(content=result, role="assistant", generated_by="llm", step=self.task_name, assistant_name=self.agent.name))
 
         if exitcode in self.exit_codes:
             return TaskResponse(
+                task_id=self.id if self.id else '',
                 task_name=self.task_name,
                 task_description=self.task_description,
                 status="complete",
@@ -61,6 +54,7 @@ class BasicAgentTask(AliceTask):
                 execution_history=kwargs.get("execution_history", [])
             )
         return TaskResponse(
+            task_id=self.id if self.id else '',
             task_name=self.task_name,
             task_description=self.task_description,
             status="failed",
@@ -71,6 +65,11 @@ class BasicAgentTask(AliceTask):
             result_diagnostic=f"Exit code not found.",
             execution_history=kwargs.get("execution_history", [])
         )
+
+    def update_agent(self, max_rounds=None):
+        if max_rounds:
+            self.agent.update_max_consecutive_auto_reply(max_rounds)
+        self.update_agent_human_input()
     
     def update_agent_human_input(self) -> None:
         if self.human_input:
@@ -78,10 +77,10 @@ class BasicAgentTask(AliceTask):
         else:
             self.agent.human_input_mode = "NEVER"
     
-    def generate_agent_response(self, messages: List[dict], max_rounds: int = 1, **kwargs) -> Tuple[str, int]:
+    def generate_agent_response(self, messages: List[dict], api_manager, max_rounds: int = 1, **kwargs) -> Tuple[str, int]:
         logging.info(f"Generating response by {self.agent.name} from messages: {messages}")  
-        self.agent.update_max_consecutive_auto_reply(max_rounds)
-        result = self.agent.generate_reply(messages)
+        self.update_agent(max_rounds)
+        result = self.agent.get_autogen_agent(api_manager=api_manager).generate_reply(messages)
         if result:
             if isinstance(result, str):
                 return result, 0

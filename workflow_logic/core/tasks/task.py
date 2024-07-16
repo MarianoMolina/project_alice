@@ -2,10 +2,11 @@ import uuid
 from typing import Dict, Any, Optional, List, Callable, Union
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field
+from workflow_logic.core.api.api import APIManager
 from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.agent import AliceAgent
 from workflow_logic.core.communication import TaskResponse, DatabaseTaskResponse
-from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
+from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition, FunctionConfig, ToolFunction
 
 prompt_function_parameters = FunctionParameters(
     type="object",
@@ -37,6 +38,7 @@ class AliceTask(BaseModel, ABC):
     prompts_to_add: Optional[Dict[str, Prompt]] = Field(None, description="A dictionary of prompts to add to the task")
     exit_code_response_map: Optional[Dict[str, int]] = Field(None, description="A dictionary mapping exit codes to responses")
     start_task: Optional[str] = Field(None, description="The name of the starting task")
+    required_apis: List[str] = Field([], description="A list of required APIs for the task")
     task_selection_method: Optional[Callable[[TaskResponse, List[Dict[str, Any]]], Optional[str]]] = Field(None, description="A method to select the next task based on the current task's response")
     tasks_end_code_routing: Optional[Dict[str, Dict[int, tuple[Union[str, None], bool]]]] = Field(None, description="A dictionary of tasks -> exit codes and the task to route to given each exit code and a bool to determine if the outcome represents an extra 'try' at the task")
     max_attempts: int = Field(3, description="The maximum number of failed task attempts before the workflow is considered failed. Default is 3.")
@@ -81,7 +83,8 @@ class AliceTask(BaseModel, ABC):
         
         # Retrieve or initialize execution history
         execution_history: List[Dict] = kwargs.pop("execution_history", [])
-        
+        if self.required_apis and not self.validate_required_apis(kwargs.get("api_manager")):
+            raise ValueError("Required APIs are not active or healthy.")
         # Check for recursion
         if not self.recursive:
             if any(task["task_name"] == self.task_name for task in execution_history):
@@ -97,10 +100,39 @@ class AliceTask(BaseModel, ABC):
         
         # Run the task
         response = self.run(execution_history=execution_history, **kwargs)
-        response.task_id = task_id
-        db_response = response.model_dump()
-        return DatabaseTaskResponse(**db_response)
+        return DatabaseTaskResponse(**response.model_dump())
     
+    def validate_required_apis(self, api_manager: APIManager) -> bool:
+        for api_name in self.required_apis:
+            api = api_manager.get_api(api_name)
+            if not api or not api.is_active:
+                raise ValueError(f"Required API {api_name} is not active or not found.")
+            if api.health_status != "healthy":
+                raise ValueError(f"Required API {api_name} is not healthy.")
+        return True
+    
+    def deep_validate_required_apis(self, api_manager: APIManager) -> Dict[str, Any]:
+        result = {
+            "task_name": self.task_name,
+            "status": "valid",
+            "warnings": [],
+            "child_tasks": []
+        }
+
+        try:
+            self.validate_required_apis(api_manager)
+        except ValueError as e:
+            result["status"] = "warning"
+            result["warnings"].append(str(e))
+
+        for child_task_name, child_task in self.tasks.items():
+            child_result = child_task.deep_validate_required_apis(api_manager)
+            result["child_tasks"].append(child_result)
+            if child_result["status"] == "warning":
+                result["status"] = "warning"
+                result["warnings"].append(f"Warning in child task '{child_task_name}': {', '.join(child_result['warnings'])}")
+
+        return result
     async def a_execute(self, **kwargs) -> DatabaseTaskResponse:
         """Executes the task and returns a TaskResponse."""
         print(f'Executing task {self.task_name}')
@@ -108,6 +140,8 @@ class AliceTask(BaseModel, ABC):
         
         # Retrieve or initialize execution history
         execution_history: List[Dict] = kwargs.pop("execution_history", [])
+        if self.required_apis and not self.validate_required_apis(kwargs.get("api_manager")):
+            raise ValueError("Required APIs are not active or healthy.")
         
         # Check for recursion
         if not self.recursive:
@@ -135,22 +169,36 @@ class AliceTask(BaseModel, ABC):
         def function_callable(**kwargs) -> DatabaseTaskResponse:
             return self.execute(execution_history = execution_history, **kwargs)
         
-        function_dict = {
-            "name": self.task_name,
-            "description": self.task_description,
-            "parameters": self.input_variables.model_dump()
-        }
-
-        tool_dict = {
-            "type": "function",
-            "function": function_dict
-        }
+        function_dict = FunctionConfig(
+            name=self.task_name, 
+            description=self.task_description, 
+            parameters=self.input_variables.model_dump()
+        )
+        tool_function = ToolFunction(
+            type="function",
+            function=function_dict
+        )
         
         return {
-            "tool_dict": tool_dict,
+            "tool_function": tool_function,
             "function_map": {self.task_name: function_callable}
         }
     
+    def get_failed_task_response(self, diagnostics: str = None, **kwargs) -> DatabaseTaskResponse:
+        """
+        Returns a failed task response with the given diagnostics.
+        """
+        return TaskResponse(
+            task_id = self.id if self.id else '',
+            task_name=self.task_name,
+            task_description=self.task_description,
+            status="failed",
+            result_code=1,
+            task_outputs=None,
+            task_inputs=kwargs,
+            result_diagnostic=diagnostics,
+            execution_history=kwargs.get("execution_history", [])
+        )
     # def update_input(self, **kwargs) -> list[Any]:
     #     """Executes the task and returns a TaskResponse."""
     #     ...

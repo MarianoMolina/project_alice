@@ -1,4 +1,5 @@
 import re
+from bson import ObjectId
 from jinja2 import Template
 from typing import Optional, List, Any, Dict
 from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
@@ -11,7 +12,7 @@ class Prompt(BaseModel):
     is_templated: bool = Field(default=False, description="Whether the prompt is templated or not.")
     parameters: Optional[FunctionParameters] = Field(None, description="The parameters that the prompt expects if it's templated.")
     partial_variables: Dict[str, Any] = Field(default_factory=dict, description="A dictionary of the partial variables the prompt template carries.")
-    model_config = ConfigDict(protected_namespaces=())
+    model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str})
 
     @model_validator(mode='after')
     def validate_templated_prompt(self):

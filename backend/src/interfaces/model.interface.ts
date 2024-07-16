@@ -7,12 +7,10 @@ export interface IModel extends Document {
     ctx_size: number;
     model_type: 'instruct' | 'chat' | 'vision';
     deployment: 'local' | 'remote';
-    model_file: string | null;
-    api_key: string;
-    port: number;
-    api_type: 'openai' | 'azure' | 'anthropic';
-    base_url: string;
-    autogen_model_client_cls: string | null;
+    api_name: 'openai' | 'azure' | 'anthropic';
+    temperature: number;
+    seed: number | null;
+    use_cache: boolean;
     created_by: Types.ObjectId;
     updated_by: Types.ObjectId;
     createdAt: Date;

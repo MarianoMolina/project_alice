@@ -8,6 +8,7 @@ export interface ITask {
     exit_codes: Map<string, string>;
     recursive: boolean;
     templates: Map<string, Types.ObjectId> | null;
+    required_apis: Array<string> | null;
     tasks: Map<string, Types.ObjectId> | null;
     valid_languages: string[];
     timeout: number | null;
@@ -16,6 +17,7 @@ export interface ITask {
     start_task: string | null;
     task_selection_method: any | null;
     tasks_end_code_routing: Map<string, Map<string, any>> | null;
+    model_id: Types.ObjectId | null;
     max_attempts: number;
     agent: Types.ObjectId | null;
     execution_agent: Types.ObjectId | null;

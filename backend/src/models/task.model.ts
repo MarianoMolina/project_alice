@@ -24,7 +24,9 @@ const taskSchema = new Schema<ITaskDocument>({
     task_selection_method: { type: Schema.Types.Mixed, default: null },
     tasks_end_code_routing: { type: Map, of: Map, default: null },
     max_attempts: { type: Number, default: 3 },
+    required_apis: { type: [String], default: null },
     agent: { type: Schema.Types.ObjectId, ref: 'Agent', default: null },
+    model_id: { type: Schema.Types.ObjectId, ref: 'Model', default: null },
     execution_agent: { type: Schema.Types.ObjectId, ref: 'Agent', default: null },
     human_input: { type: Boolean, default: false },
     created_by: { type: Schema.Types.ObjectId, ref: 'User' },
@@ -52,6 +54,7 @@ taskSchema.methods.apiRepresentation = function (this: ITaskDocument) {
             Array.from(this.tasks_end_code_routing.entries()).map(([key, value]) => [key, Object.fromEntries(value)])
         ) : null,
         max_attempts: this.max_attempts || 3,
+        model_id: this.model_id ? (this.model_id._id || this.model_id) : null,
         agent: this.agent ? (this.agent._id || this.agent) : null,
         execution_agent: this.execution_agent ? (this.execution_agent._id || this.execution_agent) : null,
         human_input: this.human_input || false,

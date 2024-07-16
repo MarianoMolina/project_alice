@@ -1,26 +1,45 @@
+import requests, logging, aiohttp, asyncio
+import aiohttp, asyncio
+from bson import ObjectId
+from aiohttp import ClientError
+from typing import get_args, Dict, Any, Optional, Literal
+from pydantic import BaseModel, Field
+from tqdm import tqdm
 from workflow_logic.core.communication import DatabaseTaskResponse, MessageDict
-from workflow_logic.core.tasks import TaskLibrary, AliceTask
-from workflow_logic.core.agent import AliceAgent, AgentLibrary
-from workflow_logic.core.prompt import Prompt, PromptLibrary
-from workflow_logic.core.model import AliceModel, ModelManager
-from workflow_logic.core.chat import AliceChat
+from workflow_logic.core.tasks import TaskLibrary
+from workflow_logic.core.agent import AgentLibrary
+from workflow_logic.core.prompt import PromptLibrary
+from workflow_logic.core.model import ModelManager
 from workflow_logic.api.api_utils import available_task_types
 from workflow_logic.util.const import BACKEND_PORT, HOST, ADMIN_TOKEN, BACKEND_PORT_DOCKER, BACKEND_HOST
-from pydantic import BaseModel, Field
-from typing import Literal, Optional, Dict, Any
-import requests, logging, aiohttp, asyncio
+from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, DatabaseTaskResponse
+from workflow_logic.core.api import API, APIManager
+from workflow_logic.util import User
+from workflow_logic.api.api_utils import  EntityType
+from workflow_logic.api.initialization_data import DBStructure
+from workflow_logic.api.init_db import DBInitManager
 
 class BackendAPI(BaseModel):
     base_url: Literal[f"http://{HOST}:{BACKEND_PORT}/api"] = Field(f"http://{HOST}:{BACKEND_PORT}/api", description="The base URL of the backend API", frozen=True)
     available_task_types: list[AliceTask] = Field(available_task_types, frozen=True, description="The available task types")
-    admin_token: str = Field(ADMIN_TOKEN, description="The admin token for the backend API")
-    model_manager: ModelManager = Field(None, description="The model manager object.")
-    template_library: PromptLibrary = Field(None, description="The template library object.")
-    agent_library: AgentLibrary = Field(None, description="The agent library object.")
-    task_library: TaskLibrary = Field(None, description="The task library object.")
+    user_token: str = Field(ADMIN_TOKEN, description="The admin token for the backend API")
+    collection_map: Dict[EntityType, str] = Field(default_factory=lambda: {
+        "users": "users",
+        "models": "models",
+        "prompts": "prompts",
+        "agents": "agents",
+        "tasks": "tasks",
+        "chats": "chats", 
+        "parameters": "parameters",
+        "task_responses": "taskresults",
+        "apis": "apis"
+    }, description="Map of entity types to collection names")
+    temp_db_instance: Optional[DBInitManager] = Field(DBInitManager(), description="Temporary database instance for initialization")
+
     class Config:
         arbitrary_types_allowed = True
         protected_namespaces = ()
+        json_encoders = {ObjectId: str}
 
     @property
     def task_types(self) -> Dict[str, AliceTask]:
@@ -29,35 +48,10 @@ class BackendAPI(BaseModel):
     async def initialize_libraries(self):
         try:
             # Initialize ModelManager
-            available_models = await self.get_models()
-            # logging.info(f'Retrieved: Models -> {available_models}')
-            if not available_models:
-                raise ValueError("No models found in the database.")
-            self.model_manager = ModelManager(model_definitions=list(available_models.values()))
-
-            # Initialize StoredPromptLibrary
-            prompts = await self.get_prompts()
-            # logging.info(f'Retrieved: Prompts -> {prompts}')
-            if not prompts:
-                raise ValueError("No prompts found in the database.")
-            template_map_dict = {prompt.name: prompt for prompt in prompts.values()}
-            self.template_library = PromptLibrary(template_map=template_map_dict)
-
-            # Initialize AgentLibrary
-            agents = await self.get_agents()
-            # logging.info(f'Retrieved: Agents -> {agents}')
-            if not agents:
-                raise ValueError("No agents found in the database.")
-            agent_map = {agent.name: agent for agent in agents.values()}
-            self.agent_library = AgentLibrary(agents=agent_map, model_manager_object=self.model_manager)
-
-            # Initialize TaskLibrary
-            # logging.info(f'Available Task Types: {self.task_types}')
-            db_tasks = await self.get_tasks()
-            # logging.info(f'Retrieved: Tasks -> {db_tasks}')
-            # if not db_tasks:
-            #     raise ValueError("No tasks found in the database.")
-            self.task_library = TaskLibrary(agent_library=self.agent_library, available_tasks=list(db_tasks.values()))
+            if self.user_token:
+                validate = self.validate_token(self.user_token)
+                if validate.get("valid"):
+                    return True
         except Exception as e:
             logging.error(f"Error in initialize_libraries: {e}")
             raise
@@ -65,7 +59,7 @@ class BackendAPI(BaseModel):
     def _get_headers(self):
         return {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.admin_token}"
+            "Authorization": f"Bearer {self.user_token}"
         }    
     
     # Function to preprocess the data
@@ -105,6 +99,29 @@ class BackendAPI(BaseModel):
                 return {}
             except Exception as e:
                 logging.error(f"Unexpected error retrieving prompts: {e}")
+                return {}
+            
+    async def get_users(self, user_id: Optional[str] = None) -> Dict[str, User]:
+        if user_id is None:
+            url = f"{self.base_url}/users"
+        else:
+            url = f"{self.base_url}/users/{user_id}"
+        headers = self._get_headers()
+        
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(url, headers=headers) as response:
+                    response.raise_for_status()
+                    users = await response.json()
+                    
+                    if isinstance(users, list):
+                        users = [await self.preprocess_data(user) for user in users]
+                        return {user["_id"]: User(**user) for user in users}
+                    else:
+                        users = await self.preprocess_data(users)
+                        return {users["_id"]: User(**users)}
+            except aiohttp.ClientError as e:
+                print(f"Error retrieving users: {e}")
                 return {}
 
     async def get_agents(self, agent: Optional[str] = None) -> Dict[str, AliceAgent]:
@@ -182,6 +199,29 @@ class BackendAPI(BaseModel):
                         return {models['_id']: AliceModel(**models)}
             except aiohttp.ClientError as e:
                 print(f"Error retrieving models: {e}")
+                return {}
+            
+    async def get_apis(self, api_id: Optional[str] = None) -> Dict[str, API]:
+        if api_id is None:
+            url = f"{self.base_url}/apis"
+        else:
+            url = f"{self.base_url}/apis/{api_id}"
+        headers = self._get_headers()
+        
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(url, headers=headers) as response:
+                    response.raise_for_status()
+                    apis = await response.json()
+                    
+                    if isinstance(apis, list):
+                        apis = [await self.preprocess_data(api) for api in apis]
+                        return {api["_id"]: API(**api) for api in apis}
+                    else:
+                        apis = await self.preprocess_data(apis)
+                        return {apis["_id"]: API(**apis)}
+            except aiohttp.ClientError as e:
+                print(f"Error retrieving APIs: {e}")
                 return {}
             
     async def task_initializer(self, task: dict) -> AliceTask:
@@ -328,6 +368,143 @@ class BackendAPI(BaseModel):
             print(f"Error validating token: {e}")
             return {"valid": False, "message": str(e)}
         
+    async def initialize_database(self, db_structure: DBStructure) -> bool:
+        try:
+            db_structure_copy = db_structure.model_dump()
+            self.temp_db_instance = DBInitManager()
+            # Get the list of entity types from EntityType
+            entity_types = list(get_args(EntityType))
+            
+            # Create other entities
+            total_entities = sum(len(getattr(db_structure, et, [])) for et in entity_types)
+            
+            with tqdm(total=total_entities, desc="Initializing database") as pbar:
+                for entity_type in entity_types:
+                    await self.create_entities_by_type(entity_type, db_structure, pbar)
+            
+            return self.validate_initialization(DBStructure(**db_structure_copy))
+        except Exception as e:
+            print(f"Error in initialize_database: {str(e)}")
+
+    async def create_entities_by_type(self, entity_type: EntityType, db_structure: DBStructure, pbar: tqdm) -> bool:
+        entities = getattr(db_structure, entity_type, [])
+        for entity_data in entities:
+            try:
+                await self.create_entity(entity_type, entity_data)
+            except aiohttp.ClientResponseError as e:
+                if e.status == 409:
+                    print(f"Entity already exists: {entity_type} - {entity_data.get('name', entity_data.get('email'))}")
+                else:
+                    print(f"Error creating entity {entity_type}: {str(e)}")
+                    print(f"Entity data: {entity_data}")
+                    # If you want to stop the entire process on any error, uncomment the next line
+                    # raise
+            except Exception as e:
+                print(f"Unexpected error creating entity {entity_type}: {str(e)}")
+                print(f"Entity data: {entity_data}")
+                # If you want to stop the entire process on any error, uncomment the next line
+                # raise
+            pbar.update(1)
+
+    async def create_entity(self, entity_type: EntityType, entity_data: dict) -> str:
+    
+        # Resolve references in the data before creating the instance
+        resolved_data = await self.temp_db_instance.resolve_references_in_data(entity_type, entity_data)
+
+        collection_name = self.collection_map[entity_type]
+        url = f"{self.base_url}/{collection_name}"
+        headers = self._get_headers()
+
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.post(url, json=resolved_data, headers=headers) as response:
+                    if response.status == 400:
+                        error_data = await response.json()
+                        raise ValueError(f"Bad request when creating {entity_type}: {error_data}")
+                    
+                    response.raise_for_status()
+                    result = await response.json()
+                    print(f'Created {entity_type[:-1]}: {entity_data.get("key", entity_data.get("name", entity_data.get("email")))}')
+                    self.temp_db_instance.entity_key_map[entity_type][entity_data.get('key') or entity_data.get('name')] = result
+                    return result
+            except aiohttp.ClientResponseError as e:
+                print(f"HTTP error during entity creation: {e.status} - {e.message}")
+                print(f"Entity data: {resolved_data}")
+                raise
+            except Exception as e:
+                print(f"Unexpected error during entity creation: {str(e)}")
+                print(f"Entity data: {resolved_data}")
+                raise
+
+    async def check_existing_data(self, max_retries=3, retry_delay=1) -> bool:
+        for attempt in range(max_retries):
+            try:
+                for collection in self.collection_map.values():
+                    if collection == "users":
+                        continue
+                    url = f"{self.base_url}/{collection}"
+                    headers = self._get_headers()
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(url, headers=headers, timeout=30) as response:
+                            if response.status == 200:
+                                data = await response.json()
+                                if data:
+                                    return True
+                return False
+            except (ClientError, asyncio.TimeoutError) as e:
+                if attempt == max_retries - 1:
+                    print(f"Failed to check existing data after {max_retries} attempts: {str(e)}")
+                    raise
+                print(f"Attempt {attempt + 1} failed, retrying in {retry_delay} seconds...")
+                await asyncio.sleep(retry_delay)
+
+    async def validate_initialization(self, db_structure: DBStructure) -> bool:
+        try:
+            for entity_type in get_args(EntityType):
+                url = f"{self.base_url}/{self.collection_map[entity_type]}"
+                headers = self._get_headers()
+                
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(url, headers=headers) as response:
+                        response.raise_for_status()
+                        db_entities = await response.json()
+                        
+                        structure_entities = getattr(db_structure, entity_type, [])
+                        
+                        if entity_type == "users":
+                            # For users, we need to account for the possibility of an existing admin
+                            expected_count = len(structure_entities) + 1
+
+                            if len(db_entities) != expected_count:
+                                print(f"Mismatch in {entity_type} count. Expected: {expected_count}, Found: {len(db_entities)}")
+                                return False
+                        else:
+                            if len(db_entities) != len(structure_entities):
+                                print(f"Mismatch in {entity_type} count. Expected: {len(structure_entities)}, Found: {len(db_entities)}")
+                                return False
+                        
+                        # Check for the presence of each entity by name or email
+                        for entity in structure_entities:
+                            
+                            identifier = entity.get('name') or entity.get('email')
+                            if not any(db_entity.get('name') == identifier or db_entity.get('email') == identifier for db_entity in db_entities):
+                                print(f"Entity not found in database: {entity_type} - {identifier}")
+                                return False
+            
+            print("All entities validated successfully")
+            return True
+        
+        except Exception as e:
+            print(f"Error during validation: {str(e)}")
+            return False
+        
+    async def api_setter(self) -> APIManager:
+        api_manager = APIManager()
+        apis = await self.get_apis()
+        for api in apis.values():
+            api_manager.add_api(api)
+        return api_manager
+    
 class ContainerAPI(BackendAPI):
     base_url: Literal[f"http://{BACKEND_HOST}:{BACKEND_PORT_DOCKER}/api"] = Field(f"http://{BACKEND_HOST}:{BACKEND_PORT_DOCKER}/api", description="The base URL of the backend API", frozen=True)
         

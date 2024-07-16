@@ -19,6 +19,7 @@ export interface AliceTask {
   prompts_to_add: { [key: string]: Prompt } | null;
   exit_code_response_map: { [key: string]: number } | null;
   start_task?: string | null;
+  required_apis?: string[] | null;
   model_id: AliceModel | null;
   task_selection_method?: CallableFunction | null;
   tasks_end_code_routing?: { [key: string]: { [key: number]: any } } | null;
@@ -50,6 +51,7 @@ export const convertToAliceTask = (data: any): AliceTask => {
     prompts_to_add: data?.prompts_to_add || null,
     exit_code_response_map: data?.exit_code_response_map || null,
     start_task: data?.start_task || null,
+    required_apis: data?.required_apis || null,
     task_selection_method: data?.task_selection_method || null,
     tasks_end_code_routing: data?.tasks_end_code_routing || null,
     max_attempts: data?.max_attempts || undefined,

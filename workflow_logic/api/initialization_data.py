@@ -13,13 +13,6 @@ class DBStructure(BaseModel):
 
 DB_STRUCTURE = DBStructure(
     users=[
-        {
-            "key": "test_user",
-            "name": "Test User",
-            "email": "testuser@example.com",
-            "password": "testpassword123",
-            "role": "user"
-        }
     ],
     models=[
         {
@@ -30,16 +23,16 @@ DB_STRUCTURE = DBStructure(
             "ctx_size": 128000,
             "model_type": "chat",
             "deployment": "remote",
-            "api_type": "openai",
-            "api_key": OPENAI_API_KEY,
-            "base_url": "https://api.openai.com/v1"
+            "temperature": 0.7,
+            # "api_name": "openai",
+            # "api_key": OPENAI_API_KEY,
+            # "base_url": "https://api.openai.com/v1"
         },
         # {
         #     "key": "Llama3_8B_Instruct",
         #     "short_name": "Llama3_8B_Instruct",
-        #     "model_name": "nisten/llama3-8b-instruct-32k-gguf",
+        #     "model_name": "nisten/llama3-8b-instruct-32k-gguf", # nisten/llama3-8b-instruct-32k-gguf/llama3ins-8b-32k-q6.gguf ?
         #     "model_format": "Llama3",
-        #     "model_file": "nisten/llama3-8b-instruct-32k-gguf/llama3ins-8b-32k-q6.gguf",
         #     "ctx_size": 32768,
         #     "model_type": "instruct",
         #     "deployment": "local",
@@ -52,10 +45,11 @@ DB_STRUCTURE = DBStructure(
             "ctx_size": 200000,
             "model_type": "chat",
             "deployment": "remote",
-            "api_type": "anthropic",
-            "api_key": ANTHROPIC_API,
-            "base_url": "https://api.anthropic.com",
-            "model_client_cls": "AnthropicClient"
+            "temperature": 0.7,
+            # "api_name": "anthropic",
+            # "api_key": ANTHROPIC_API,
+            # "base_url": "https://api.anthropic.com",
+            # "model_client_cls": "AnthropicClient"
         }
     ],
     parameters=[
@@ -129,7 +123,7 @@ Once you believe the task is complete, create a summary with references for the 
             "key": "default_alice",
             "name": "Default Assistant",
             "system_message": "default_system_message",  # Reference to prompt key
-            "autogen_class": "AssistantAgent",
+            "autogen_class": "ConversableAgent",
             "model_id": "GPT4o",  # Reference to model key
             "code_execution_config": False,
             "max_consecutive_auto_reply": 10,
@@ -172,7 +166,8 @@ Once you believe the task is complete, create a summary with references for the 
                     "limit": "max_results_parameter"
                 },
                 "required": ["prompt"]
-            }
+            },
+            "required_apis": ["reddit_search"]
         },
         {
             "key": "exa_search",
@@ -186,7 +181,8 @@ Once you believe the task is complete, create a summary with references for the 
                     "limit": "max_results_parameter"
                 },
                 "required": ["prompt"]
-            }
+            },
+            "required_apis": ["exa_search"]
         },
         {
             "key": "wikipedia_search",
@@ -200,7 +196,8 @@ Once you believe the task is complete, create a summary with references for the 
                     "limit": "max_results_parameter"
                 },
                 "required": ["prompt"]
-            }
+            },
+            "required_apis": ["wikipedia_search"]
         },
         {
             "key": "google_search",
@@ -214,7 +211,8 @@ Once you believe the task is complete, create a summary with references for the 
                     "limit": "max_results_parameter"
                 },
                 "required": ["prompt"]
-            }
+            },
+            "required_apis": ["google_search"]
         },
         {
             "key": "arxiv_search",
@@ -228,7 +226,8 @@ Once you believe the task is complete, create a summary with references for the 
                     "limit": "max_results_parameter"
                 },
                 "required": ["prompt"]
-            }
+            },
+            "required_apis": ["arxiv_search"]
         },
         {   
             "key": "search_hub",
@@ -253,8 +252,9 @@ Once you believe the task is complete, create a summary with references for the 
                     "prompt": "prompt_parameter",
                 },
                 "required": ["prompt"]
-            }
-        }
+            },
+            "required_apis": ["llm_api"]
+        },
     ],
     chats=[
         {

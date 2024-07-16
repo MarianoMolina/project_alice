@@ -17,7 +17,7 @@ coding_planner_agent = {
 coding_agent = {
     "name": "coding_agent",
     "system_message": "coding_agent",
-    "autogen_class": "AssistantAgent",
+    "autogen_class": "ConversableAgent",
     "human_input_mode": "NEVER",
     # "llm_config": {
     #     "config_list": [{
@@ -32,7 +32,7 @@ coding_agent = {
 unit_tester_agent = {
     "name": "unit_tester_agent",
     "system_message": "unit_tester_agent",
-    "autogen_class": "AssistantAgent"
+    "autogen_class": "ConversableAgent"
 }
 unit_test_execution_checker_agent = {
     "name": "unit_test_execution_checker_agent",

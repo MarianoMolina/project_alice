@@ -5,8 +5,6 @@ export interface IUser {
     email: string;
     password: string;
     role: 'user' | 'admin';
-    apis: Types.ObjectId[];
-    default_llm_api: Types.ObjectId;
 }
 
 export interface IUserDocument extends IUser, Document {

@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 
 export enum ApiType {
-  LLM_MODEL = 'llm_model',
+  LLM_MODEL = 'llm_api',
   GOOGLE_SEARCH = 'google_search',
   REDDIT_SEARCH = 'reddit_search',
   WIKIPEDIA_SEARCH = 'wikipedia_search',
@@ -10,14 +10,14 @@ export enum ApiType {
 }
 
 export interface IAPI {
-  user: Types.ObjectId;
   api_type: ApiType;
   name: string; // e.g., "OpenAI", "Anthropic", "Google"
   is_active: boolean;
   health_status: 'healthy' | 'unhealthy' | 'unknown';
-  api_key?: string;
   default_model?: Types.ObjectId; // Reference to the default model for LLM APIs
   api_config?: Map<string, any>;
+  created_by?: Types.ObjectId;
+  updated_by?: Types.ObjectId;
   created_at: Date;
   updated_at: Date;
 }

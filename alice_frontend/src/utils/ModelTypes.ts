@@ -9,6 +9,9 @@ export interface AliceModel {
     model_type: 'instruct' | 'chat' | 'vision';
     deployment: 'local' | 'remote';
     api_name: 'openai' | 'azure' | 'anthropic';
+    temperature?: number;
+    seed?: number | null;
+    use_cache?: boolean;
     created_by?: User;
     updated_by?: User;
     createdAt?: Date;
@@ -25,6 +28,9 @@ export const convertToAliceModel = (data: any): AliceModel => {
         model_type: data?.model_type || 'chat',
         deployment: data?.deployment || 'local',
         api_name: data?.api_name || 'openai',
+        temperature: data?.temperature || undefined,
+        seed: data?.seed || null,
+        use_cache: data?.use_cache || false,
         created_by: data?.created_by ? convertToUser(data.created_by) : undefined,
         updated_by: data?.updated_by ? convertToUser(data.updated_by) : undefined,
         createdAt: data?.createdAt ? new Date(data.createdAt) : undefined,
