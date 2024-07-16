@@ -65,18 +65,6 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
                 }
                 label="Execute Code"
             />
-            <FormControl fullWidth margin="normal">
-                <InputLabel>Model</InputLabel>
-                <Select
-                    value={item?.model_id?._id || ''}
-                    onChange={(e) => onChange({ model_id: models.find(model => model._id === e.target.value)})}
-                    disabled={!isEditMode}
-                >
-                    {models.map((model: AliceModel) => (
-                        <MenuItem key={model._id} value={model._id}>{model.short_name}</MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
             <Typography gutterBottom>Temperature</Typography>
             <Slider
                 value={parseFloat(item?.llm_config?.temperature as string) || 0.7}

@@ -67,24 +67,6 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
           {item?.deployment === 'local' && (
             <TextField
               fullWidth
-              label="File Name"
-              value={item?.model_file || ''}
-              onChange={(e) => onChange({ model_file: e.target.value })}
-              margin="normal"
-              disabled={!isEditMode}
-            />
-          )}
-          <TextField
-            fullWidth
-            label="API Key"
-            value={item?.api_key || ''}
-            onChange={(e) => onChange({ api_key: e.target.value })}
-            margin="normal"
-            disabled={!isEditMode}
-          />
-          {item?.deployment === 'local' && (
-            <TextField
-              fullWidth
               label="Port"
               type="number"
               value={item?.port || 1234}
@@ -96,8 +78,8 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
           <FormControl fullWidth margin="normal">
             <InputLabel>API Type</InputLabel>
             <Select
-              value={item?.api_type || 'openai'}
-              onChange={(e) => onChange({ api_type: e.target.value as 'openai' | 'azure' | 'anthropic' })}
+              value={item?.api_name || 'openai'}
+              onChange={(e) => onChange({ api_name: e.target.value as 'openai' | 'azure' | 'anthropic' })}
               disabled={!isEditMode}
             >
               <MenuItem value="openai">OpenAI</MenuItem>

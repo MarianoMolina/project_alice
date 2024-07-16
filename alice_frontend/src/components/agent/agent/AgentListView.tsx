@@ -26,10 +26,6 @@ const AgentListView: React.FC<AgentComponentProps> = ({
                         primary={agent.name}
                         secondary={
                             <>
-                                <Typography component="span" variant="body2" color="textPrimary">
-                                    Model: {agent.model_id?.model_name || 'N/A'}
-                                </Typography>
-                                <br />
                                 <Typography component="span" variant="body2" color="textSecondary">
                                     Created: {new Date(agent.createdAt || '').toLocaleString()}
                                 </Typography>

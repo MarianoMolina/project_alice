@@ -1,6 +1,7 @@
 import { AliceAgent } from './AgentTypes';
 import { Prompt } from "./PromptTypes";
 import { FunctionParameters } from "./ParameterTypes";
+import { AliceModel } from './ModelTypes';
 
 export type TaskType = "CVGenerationTask" | "RedditSearchTask" | "APITask" | "WikipediaSearchTask" | "GoogleSearchTask" | "ExaSearchTask" | "ArxivSearchTask" | "BasicAgentTask" | "PromptAgentTask" | "CheckTask" | "CodeGenerationLLMTask" | "CodeExecutionLLMTask" | "AgentWithFunctions" | "Workflow";
 
@@ -18,6 +19,7 @@ export interface AliceTask {
   prompts_to_add: { [key: string]: Prompt } | null;
   exit_code_response_map: { [key: string]: number } | null;
   start_task?: string | null;
+  model_id: AliceModel | null;
   task_selection_method?: CallableFunction | null;
   tasks_end_code_routing?: { [key: string]: { [key: number]: any } } | null;
   max_attempts?: number;
@@ -51,6 +53,7 @@ export const convertToAliceTask = (data: any): AliceTask => {
     task_selection_method: data?.task_selection_method || null,
     tasks_end_code_routing: data?.tasks_end_code_routing || null,
     max_attempts: data?.max_attempts || undefined,
+    model_id: data?.model_id || null,
     agent: data?.agent || null,
     execution_agent: data?.execution_agent || null,
     human_input: data?.human_input || false,
