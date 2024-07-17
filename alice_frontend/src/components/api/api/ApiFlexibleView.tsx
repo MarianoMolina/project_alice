@@ -23,8 +23,8 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
     onChange,
     mode,
     handleSave,
+    apiType,
 }) => {
-    console.log('ApiFlexibleView render start', { items, item, mode });
 
     const classes = useStyles();
     const { user } = useAuth();
@@ -35,23 +35,21 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
 
     const defaultItem: API = useMemo(() => {
         console.log('Creating default item');
+        apiType = apiType || ApiType.LLM_API;
+        const config = API_TYPE_CONFIGS[apiType];
         return {
-            name: '',
-            api_type: ApiType.LLM_API,
+            name: config.name,
+            api_type: apiType,
             is_active: false,
             health_status: 'unknown',
-            api_config: {
-                api_key: '',
-                base_url: '',
-            },
+            api_config: config.apiConfig,
         };
     }, []);
 
     useEffect(() => {
         console.log('useEffect [items]', { items });
         if (items) {
-            const types = getAvailableApiTypes(items);
-            setAvailableApiTypes(types);
+            setAvailableApiTypes(getAvailableApiTypes(items));
         }
     }, [items]);
 

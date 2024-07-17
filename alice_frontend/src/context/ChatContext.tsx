@@ -38,7 +38,7 @@ interface ChatProviderProps {
 }
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
-    const { fetchItem, updateItem, fetchUserChats, fetchChatById, sendMessage, generateChatResponse } = useApi();
+    const { fetchItem, updateItem, fetchChatById, sendMessage, generateChatResponse } = useApi();
     const [messages, setMessages] = useState<MessageType[]>([]);
     const [pastChats, setPastChats] = useState<AliceChat[]>([]);
     const [currentChatId, setCurrentChatId] = useState<string | null>(null);
@@ -49,7 +49,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
     const fetchChats = async () => {
         try {
-            const chats = await fetchUserChats();
+            const chats = await fetchItem('chats') as AliceChat[];
             setPastChats(chats);
         } catch (error) {
             console.error('Error fetching chats:', error);

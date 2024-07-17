@@ -6,14 +6,14 @@ from typing import get_args, Dict, Any, Optional, Literal
 from pydantic import BaseModel, Field
 from tqdm import tqdm
 from workflow_logic.core.communication import DatabaseTaskResponse, MessageDict
-from workflow_logic.api.api_utils import available_task_types
+from workflow_logic.api.api_util.api_utils import available_task_types
 from workflow_logic.util.const import BACKEND_PORT, HOST, ADMIN_TOKEN, BACKEND_PORT_DOCKER, BACKEND_HOST
 from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, DatabaseTaskResponse
 from workflow_logic.core.api import API, APIManager
 from workflow_logic.util import User
-from workflow_logic.api.api_utils import  EntityType
-from workflow_logic.api.initialization_data import DBStructure
-from workflow_logic.api.init_db import DBInitManager
+from workflow_logic.api.api_util.api_utils import  EntityType
+from workflow_logic.api.db_app.initialization_data import DBStructure
+from workflow_logic.api.db_app.init_db import DBInitManager
 
 class BackendAPI(BaseModel):
     base_url: Literal[f"http://{HOST}:{BACKEND_PORT}/api"] = Field(f"http://{HOST}:{BACKEND_PORT}/api", description="The base URL of the backend API", frozen=True)
@@ -55,8 +55,8 @@ class BackendAPI(BaseModel):
         return {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.user_token}"
-        }    
-    
+        }
+
     # Function to preprocess the data
     async def preprocess_data(self, data):
         if isinstance(data, dict):
@@ -376,8 +376,7 @@ class BackendAPI(BaseModel):
             with tqdm(total=total_entities, desc="Initializing database") as pbar:
                 for entity_type in entity_types:
                     await self.create_entities_by_type(entity_type, db_structure, pbar)
-            
-            return self.validate_initialization(DBStructure(**db_structure_copy))
+            return await self.validate_initialization(DBStructure(**db_structure_copy))
         except Exception as e:
             print(f"Error in initialize_database: {str(e)}")
 
@@ -456,6 +455,8 @@ class BackendAPI(BaseModel):
     async def validate_initialization(self, db_structure: DBStructure) -> bool:
         try:
             for entity_type in get_args(EntityType):
+                if entity_type == 'users':
+                    continue
                 url = f"{self.base_url}/{self.collection_map[entity_type]}"
                 headers = self._get_headers()
                 
@@ -466,17 +467,10 @@ class BackendAPI(BaseModel):
                         
                         structure_entities = getattr(db_structure, entity_type, [])
                         
-                        if entity_type == "users":
-                            # For users, we need to account for the possibility of an existing admin
-                            expected_count = len(structure_entities) + 1
-
-                            if len(db_entities) != expected_count:
-                                print(f"Mismatch in {entity_type} count. Expected: {expected_count}, Found: {len(db_entities)}")
-                                return False
-                        else:
-                            if len(db_entities) != len(structure_entities):
-                                print(f"Mismatch in {entity_type} count. Expected: {len(structure_entities)}, Found: {len(db_entities)}")
-                                return False
+                        
+                        if len(db_entities) != len(structure_entities):
+                            print(f"Mismatch in {entity_type} count. Expected: {len(structure_entities)}, Found: {len(db_entities)}")
+                            return False
                         
                         # Check for the presence of each entity by name or email
                         for entity in structure_entities:
@@ -513,7 +507,7 @@ def token_validation_middleware(api: BackendAPI):
         validation_response = api.validate_token(token)
         if not validation_response.get("valid"):
             return {"valid": False, "message": validation_response.get("message", "Invalid token")}
-
-        request.state.user_id = validation_response["user"]["_id"]
+        print('validation_response', validation_response)
+        request.state.user_id = validation_response["user"]["id"]
         return {"valid": True}
     return middleware

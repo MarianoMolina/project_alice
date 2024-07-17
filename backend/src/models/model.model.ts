@@ -1,8 +1,8 @@
-import mongoose, { Schema, Model as MongooseModel } from 'mongoose';
-import { IModel } from '../interfaces/model.interface';
+import mongoose, { Schema } from 'mongoose';
+import { IModelDocument, IModelModel } from '../interfaces/model.interface';
 
-const modelSchema = new Schema<IModel>({
-  short_name: { type: String, required: true, unique: true },
+const modelSchema = new Schema<IModelDocument, IModelModel>({
+  short_name: { type: String, required: true },
   model_name: { type: String, required: true },
   model_format: { type: String, required: true },
   ctx_size: { type: Number, required: true },
@@ -18,7 +18,7 @@ const modelSchema = new Schema<IModel>({
   timestamps: true
 });
 
-modelSchema.virtual('apiRepresentation').get(function(this: IModel) {
+modelSchema.virtual('apiRepresentation').get(function(this: IModelDocument) {
   return {
     id: this._id,
     short_name: this.short_name || null,
@@ -38,7 +38,7 @@ modelSchema.virtual('apiRepresentation').get(function(this: IModel) {
   };
 });
 
-function ensureObjectIdForSave(this: IModel, next: mongoose.CallbackWithoutResultAndOptionalError) {
+function ensureObjectIdForSave(this: IModelDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {
   if (this.created_by && (this.created_by as any)._id) {
     this.created_by = (this.created_by as any)._id;
   }
@@ -68,6 +68,6 @@ modelSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
 modelSchema.pre('find', autoPopulate);
 modelSchema.pre('findOne', autoPopulate);
 
-const Model: MongooseModel<IModel> = mongoose.model<IModel>('Model', modelSchema);
+const Model = mongoose.model<IModelDocument, IModelModel>('Model', modelSchema);
 
 export default Model;

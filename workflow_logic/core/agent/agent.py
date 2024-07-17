@@ -48,7 +48,7 @@ class AliceAgent(BaseModel):
         if not llm_config:
             if not api_manager:
                 raise ValueError("Either llm_config or api_manager must be provided.")
-            llm_config = api_manager.retrieve_api_data(ApiType.LLM_MODEL, self.model)
+            llm_config = api_manager.retrieve_api_data(ApiType.LLM_MODEL, self.model_id)
         if not self.autogen_class:
             raise ValueError(f"The agent class must be specified. {self.name}")
         

@@ -1,5 +1,5 @@
 export interface User {
-    _id?: string;
+    id?: string;
     name: string;
     email: string;
     role?: 'user' | 'admin';
@@ -9,7 +9,7 @@ export interface User {
 
 export const convertToUser = (data: any): User => {
     return {
-        _id: data?._id || undefined,
+        id: data?.id || undefined,
         name: data?.name || '',
         email: data?.email || '',
         role: data?.role || 'user',

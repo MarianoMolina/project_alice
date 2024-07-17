@@ -6,9 +6,6 @@ import { CodeExecutionLLMTaskForm, TaskFormProps, PromptAgentTaskForm } from '..
 const CodeExecutionLLMTask: React.FC<TaskFormProps<CodeExecutionLLMTaskForm>> = ({ 
   form, 
   setForm, 
-  agents, 
-  prompts, 
-  availableTasks, 
   viewOnly 
 }) => {
   const handleBaseFormChange = (newBaseForm: PromptAgentTaskForm) => {
@@ -37,9 +34,6 @@ const CodeExecutionLLMTask: React.FC<TaskFormProps<CodeExecutionLLMTaskForm>> = 
       <PromptAgentTask 
         form={form} 
         setForm={handleBaseFormChange} 
-        agents={agents} 
-        prompts={prompts}  
-        availableTasks={availableTasks} 
         viewOnly={viewOnly}  
       />
      

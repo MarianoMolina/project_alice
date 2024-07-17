@@ -1,4 +1,4 @@
-import { Document, Types } from 'mongoose';
+import { Document, Types, Model } from 'mongoose';
 
 export interface ITaskResult {
     task_name: string;
@@ -16,8 +16,15 @@ export interface ITaskResult {
     updated_by: Types.ObjectId;
 }
 
-export interface ITaskResultDocument extends ITaskResult, Document {
+export interface ITaskResultMethods {
+    apiRepresentation(): any;
+}
+
+export interface ITaskResultDocument extends ITaskResult, Document, ITaskResultMethods {
     createdAt: Date;
     updatedAt: Date;
-    apiRepresentation: () => any;
+}
+
+export interface ITaskResultModel extends Model<ITaskResultDocument> {
+    // Add any static methods here if needed
 }

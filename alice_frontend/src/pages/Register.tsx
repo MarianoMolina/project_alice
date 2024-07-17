@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box, Alert, Stepper, Step, StepLabel, StepContent } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import IntentSelection from '../components/registration/IntentSelection';
-import ApiSuggestions from '../components/registration/ApiSuggestions';
-import ApiSetup from '../components/registration/ApiSetup';
-import RegistrationComplete from '../components/registration/RegistrationComplete';
+import IntentSelection from '../components/ui/registration/IntentSelection';
+import ApiSuggestions from '../components/ui/registration/ApiSuggestions';
+import ApiSetup from '../components/ui/registration/ApiSetup';
+import RegistrationComplete from '../components/ui/registration/RegistrationComplete';
 import { API } from '../utils/ApiTypes';
 import { createItem } from '../services/api';
-import { registerUser } from '../services/authService';
 import useStyles from '../styles/RegisterStyles';
 import { WavyBackground } from '../components/ui/WavyBackground';
 
@@ -16,7 +15,7 @@ const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +31,7 @@ const Register = () => {
 
     try {
       // Use registerUser service directly to perform registration
-      await registerUser(name, email, password);
+      await register(name, email, password);
       setStep(1); // Move to the next step after successful registration
     } catch (error) {
       setError('Registration failed. Please check your details and try again.');
@@ -49,7 +48,7 @@ const Register = () => {
     setConfiguredApis(apis);
     try {
       // Create each API individually
-      for (const api of apis) {
+      for (const api of configuredApis) {
         await createItem('apis', api);
       }
       setStep(4); // Move to the final step
@@ -61,7 +60,7 @@ const Register = () => {
   const handleComplete = async () => {
     try {
       // Call the login function after all steps are complete
-      await login(email, password);
+      console.log('Completing registration...');
       navigate('/chat-alice'); // Navigate to the chat page after completion
     } catch (error) {
       setError('Failed to log in after registration. Please try again.');

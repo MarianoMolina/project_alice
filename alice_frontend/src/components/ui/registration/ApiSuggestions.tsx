@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Box, Typography, List, ListItem, ListItemText } from '@mui/material';
-import { ApiType, API } from '../../utils/ApiTypes';
-import { getAvailableApiTypes } from '../../utils/ApiUtils';
+import { ApiType, API } from '../../../utils/ApiTypes';
+import { getAvailableApiTypes } from '../../../utils/ApiUtils';
 
 interface ApiSuggestionsProps {
   intent: string;
@@ -53,7 +53,7 @@ const ApiSuggestions: React.FC<ApiSuggestionsProps> = ({ intent, onSuggest }) =>
         Suggested APIs for Your Use Case
       </Typography>
       <List>
-        {getAvailableApiTypes([]).map((apiType) => (
+        {getAvailableApiTypes([]).map((apiType: ApiType) => (
           <ListItem key={apiType}>
             <ListItemText primary={apiType} />
           </ListItem>

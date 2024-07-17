@@ -1,4 +1,4 @@
-import { Document, Types } from 'mongoose';
+import { Model, Types, Document } from 'mongoose';
 
 // ChangeHistory interfaces
 export interface IChangeHistory {
@@ -54,8 +54,15 @@ export interface IAliceChat {
     updated_by: Types.ObjectId;
 }
 
-export interface IAliceChatDocument extends IAliceChat, Document {
+export interface IAliceChatMethods {
+    apiRepresentation(): any;
+}
+
+export interface IAliceChatDocument extends IAliceChat, Document, IAliceChatMethods {
     createdAt: Date;
     updatedAt: Date;
-    apiRepresentation: () => any;
+}
+
+export interface IAliceChatModel extends Model<IAliceChatDocument> {
+    // Add any static methods here if needed
 }

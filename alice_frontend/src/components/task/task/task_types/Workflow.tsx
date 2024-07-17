@@ -1,44 +1,39 @@
 import React from 'react';
-import { Box, TextField, FormControl, InputLabel, Chip, MenuItem, Checkbox, FormControlLabel, SelectChangeEvent, Typography, Select } from '@mui/material';
+import { Box, TextField, FormControl, Checkbox, FormControlLabel, Typography } from '@mui/material';
 import FunctionDefinitionBuilder from '../../../parameter/Function';
 import { TaskFormProps, WorkflowForm, AliceTask } from '../../../../utils/TaskTypes';
 import { FunctionParameters } from '../../../../utils/ParameterTypes';
+import EnhancedTask from '../EnhancedTask';
 
-const Workflow: React.FC<TaskFormProps<WorkflowForm>> = ({ form, setForm, availableTasks, viewOnly }) => {
+const Workflow: React.FC<TaskFormProps<WorkflowForm>> = ({ form, setForm, viewOnly }) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
   };
 
-  const handleTasksChange = (event: SelectChangeEvent<string[]>) => {
-    const selectedTaskIds = event.target.value as string[];
-    const newTasks: { [key: string]: AliceTask } = {};
-    selectedTaskIds.forEach(taskId => {
-      const task = availableTasks.find(t => t._id === taskId);
-      if (task) {
-        newTasks[task.task_name] = task;
+  const handleTasksChange = (selectedTask: Partial<AliceTask>) => {
+    if (selectedTask._id && selectedTask.task_name) {
+      const newTasks = { ...form.tasks };
+      if (selectedTask._id in newTasks) {
+        delete newTasks[selectedTask._id];
+      } else {
+        newTasks[selectedTask._id] = selectedTask as AliceTask;
       }
-    });
-    setForm({ ...form, tasks: newTasks });
-  };
-
-  const getSelectedTaskIds = () => {
-    if (!form.tasks) {
-      return [];
+      setForm({ ...form, tasks: newTasks });
     }
-    const selectedIds = Object.values(form.tasks).map(task => task._id || '');
-    return selectedIds;
   };
 
-  const handleStartTaskChange = (event: SelectChangeEvent<string>) => {
-    const startTaskName = event.target.value;
-    setForm({ ...form, start_task: startTaskName });
+  const handleStartTaskChange = (selectedTask: Partial<AliceTask>) => {
+    if (selectedTask.task_name) {
+      setForm({ ...form, start_task: selectedTask.task_name });
+    }
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     setForm({ ...form, [name]: checked });
   };
+
   const handleInputVariablesChange = (functionDefinition: FunctionParameters) => {
     setForm({ ...form, input_variables: functionDefinition });
   }
@@ -77,43 +72,23 @@ const Workflow: React.FC<TaskFormProps<WorkflowForm>> = ({ form, setForm, availa
       </Box>
       
       <FormControl fullWidth margin="normal" disabled={viewOnly}>
-        <InputLabel>Tasks</InputLabel>
-        <Select
-          multiple
-          value={getSelectedTaskIds()}
-          onChange={handleTasksChange}
-          renderValue={(selected) => (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {selected.map((value) => {
-                const task = availableTasks.find(t => t._id === value);
-                console.log('[9-LOG] Rendering chip for task:', task?.task_name);
-                return <Chip key={value} label={task ? task.task_name : value} />;
-              })}
-            </Box>
-          )}
-        >
-          {availableTasks.map((task) => (
-            <MenuItem key={task._id} value={task._id || ''}>
-              {task.task_name}
-            </MenuItem>
-          ))}
-        </Select>
+        <Typography gutterBottom>Tasks</Typography>
+        <EnhancedTask
+          mode="list"
+          fetchAll={true}
+          onInteraction={handleTasksChange}
+          isInteractable={!viewOnly}
+        />
       </FormControl>
       <FormControl fullWidth margin="normal" disabled={viewOnly}>
-        <InputLabel>Start Task</InputLabel>
-        <Select
-          value={form.start_task || ''}
-          onChange={handleStartTaskChange}
-        >
-          <MenuItem value="">
-            <em>None</em>
-          </MenuItem>
-          {form.tasks && Object.values(form.tasks).map((task) => (
-            <MenuItem key={task._id} value={task.task_name || ''}>
-              {task.task_name}
-            </MenuItem>
-          ))}
-        </Select>
+        <Typography gutterBottom>Start Task</Typography>
+        <EnhancedTask
+          mode="list"
+          fetchAll={false}
+          itemId={form.start_task ? Object.keys(form.tasks).find(key => form.tasks[key].task_name === form.start_task) : undefined}
+          onInteraction={handleStartTaskChange}
+          isInteractable={!viewOnly}
+        />
       </FormControl>
       <TextField
         fullWidth

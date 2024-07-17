@@ -51,7 +51,7 @@ export const fetchItem = async <T extends CollectionName>(
       return converter(response.data) as CollectionType[T];
     }
   } catch (error) {
-    console.error(`Error fetching items from ${collectionName}:`, error);
+    console.error(`Error fetching items from ${collectionName}:`, error, itemId);
     throw error;
   }
 };
@@ -86,17 +86,6 @@ export const updateItem = async <T extends CollectionName>(
     return data;
   } catch (error) {
     console.error(`Error updating item in ${collectionName}:`, error);
-    throw error;
-  }
-};
-
-// The rest of the functions remain the same
-export const fetchUserChats = async (): Promise<AliceChat[]> => {
-  try {
-    const response = await dbAxiosInstance.get(`/chats/user_auth`);
-    return response.data.map(convertToAliceChat);
-  } catch (error) {
-    console.error('Error fetching chats:', error);
     throw error;
   }
 };

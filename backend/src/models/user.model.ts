@@ -1,7 +1,7 @@
-import mongoose, { Schema, Model } from 'mongoose';
-import { IUserDocument } from '../interfaces/user.interface';
+import mongoose, { Schema } from 'mongoose';
+import { IUserDocument, IUserModel } from '../interfaces/user.interface';
 
-const userSchema = new Schema<IUserDocument>({
+const userSchema = new Schema<IUserDocument, IUserModel>({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -27,6 +27,6 @@ userSchema.methods.apiRepresentation = function(this: IUserDocument) {
   };
 };
 
-const User = mongoose.model<IUserDocument, Model<IUserDocument>>('User', userSchema);
+const User = mongoose.model<IUserDocument, IUserModel>('User', userSchema);
 
 export default User;

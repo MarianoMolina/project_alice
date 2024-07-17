@@ -1,16 +1,13 @@
 import axios from 'axios';
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { loginUser } from '../services/authService';
-import { useNavigate } from 'react-router-dom';
 import { TextField, Button, Container, Typography, Box, Alert, Link } from '@mui/material';
 import { WavyBackground } from '../components/ui/WavyBackground';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const { loginAndNavigate } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -18,8 +15,7 @@ const Login: React.FC = () => {
     setError(null);
 
     try {
-      await login(email, password);
-      navigate('/');
+      await loginAndNavigate(email, password);
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         console.error('Login failed:', error.response?.data);

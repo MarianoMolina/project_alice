@@ -26,7 +26,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
         const loadUser = async () => {
             try {
                 if (user) {
-                    const userData = await fetchItem('users', user._id) as User;
+                    const userData = await fetchItem('users', user.id) as User;
                     console.log('User data:', userData);
                     setUserObject(userData);
                     setOriginalUserObject(userData);
@@ -60,9 +60,9 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
     }, []);
 
     const handleSaveChanges = useCallback(async () => {
-        if (userObject && userObject._id) {
+        if (userObject && userObject.id) {
             try {
-                const updated = await updateItem('users', userObject._id, userObject);
+                const updated = await updateItem('users', userObject.id, userObject);
                 setUserObject(updated as User);
                 setOriginalUserObject(updated as User);
                 setHasUnsavedChanges(false);
@@ -78,10 +78,10 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
     }, []);
 
     const handleAPIUpdate = useCallback(async (updatedAPI: API) => {
-        if (userObject && userObject._id) {
+        if (userObject && userObject.id) {
             try {
                 await updateItem('apis', updatedAPI._id!, updatedAPI);
-                const updatedUser = await fetchItem('users', userObject._id);
+                const updatedUser = await fetchItem('users', userObject.id);
                 setUserObject(updatedUser as User);
                 setOriginalUserObject(updatedUser as User);
                 setApiUpdateTrigger(prev => prev + 1);

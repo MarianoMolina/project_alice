@@ -1,4 +1,4 @@
-import { Document, Types } from 'mongoose';
+import { Document, Types, Model } from 'mongoose';
 import { IFunctionParameters } from '../utils/schemas';
 
 export interface IPrompt {
@@ -12,8 +12,15 @@ export interface IPrompt {
     version: number;
 }
 
-export interface IPromptDocument extends IPrompt, Document {
-    createdAt: Date;
-    updatedAt: Date;
-    apiRepresentation: () => any;
+export interface IPromptMethods {
+  apiRepresentation(): any;
+}
+
+export interface IPromptDocument extends IPrompt, Document, IPromptMethods {
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IPromptModel extends Model<IPromptDocument> {
+  // Add any static methods here if needed
 }

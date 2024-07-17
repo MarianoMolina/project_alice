@@ -62,4 +62,5 @@ export interface ApiComponentProps {
     onView?: (api: API) => void;
     onInteraction?: (api: API) => void;
     showHeaders?: boolean;
+    apiType?: ApiType;
 }

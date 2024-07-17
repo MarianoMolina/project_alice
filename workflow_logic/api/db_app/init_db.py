@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, DatabaseTaskResponse, ParameterDefinition, FunctionParameters
 from workflow_logic.util import User
 from workflow_logic.core.api import API
-from workflow_logic.api.api_utils import create_task_from_json, EntityType
+from workflow_logic.api.api_util.api_utils import create_task_from_json, EntityType
 
 class DBInitManager(BaseModel):
     entity_key_map: Dict[EntityType, Dict[str, Dict[str, any]]] = Field(default_factory=lambda: {

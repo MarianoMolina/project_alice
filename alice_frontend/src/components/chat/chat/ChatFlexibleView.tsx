@@ -5,14 +5,16 @@ import {
     TextField,
     FormControl,
     InputLabel,
-    Select,
-    MenuItem,
-    Chip,
     Button
 } from '@mui/material';
 import useStyles from '../ChatStyles';
 import { ChatComponentProps } from '../../../utils/ChatTypes';
-import { useConfig } from '../../../context/ConfigContext';
+import EnhancedModel from '../../model/model/EnhancedModel';
+import EnhancedAgent from '../../agent/agent/EnhancedAgent';
+import EnhancedTask from '../../task/task/EnhancedTask';
+import { AliceAgent } from '../../../utils/AgentTypes';
+import { AliceModel } from '../../../utils/ModelTypes';
+import { AliceTask } from '../../../utils/TaskTypes';
 
 const ChatFlexibleView: React.FC<ChatComponentProps> = ({ 
     item,
@@ -21,11 +23,6 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     handleSave
 }) => {
     const classes = useStyles();
-    const {
-        agents,
-        models,
-        tasks,
-    } = useConfig();
 
     if (!item) {
         return <Typography>No chat data available.</Typography>;
@@ -33,6 +30,27 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
 
     const updateChatField = (field: keyof typeof item, value: any) => {
         onChange({ ...item, [field]: value });
+    };
+
+    const handleModelChange = (selectedModel: Partial<AliceModel>) => {
+        updateChatField('model_id', selectedModel);
+    };
+
+    const handleAgentChange = (selectedAgent: Partial<AliceAgent>) => {
+        updateChatField('alice_agent', selectedAgent);
+    };
+
+    const handleExecutorChange = (selectedAgent: Partial<AliceAgent>) => {
+        updateChatField('executor', selectedAgent);
+    };
+
+    const handleTaskChange = (selectedTask: Partial<AliceTask>) => {
+        const updatedFunctions = item.functions 
+            ? item.functions.some(f => f._id === selectedTask._id)
+                ? item.functions.filter(f => f._id !== selectedTask._id)
+                : [...item.functions, selectedTask as AliceTask]
+            : [selectedTask as AliceTask];
+        updateChatField('functions', updatedFunctions);
     };
 
     return (
@@ -50,52 +68,39 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             />
             <FormControl fullWidth className={classes.formControl}>
                 <InputLabel>Agent</InputLabel>
-                <Select
-                    value={item.alice_agent?._id || ''}
-                    onChange={(e) => {
-                        const selectedAgent = agents.find(agent => agent._id === e.target.value);
-                        updateChatField('alice_agent', selectedAgent || item.alice_agent);
-                    }}
-                    disabled={mode === 'view'}
-                >
-                    {agents.map((agent) => (
-                        <MenuItem key={agent._id} value={agent._id}>{agent.name}</MenuItem>
-                    ))}
-                </Select>
+                <EnhancedAgent
+                    mode="list"
+                    fetchAll={true}
+                    onInteraction={handleAgentChange}
+                    isInteractable={mode !== 'view'}
+                />
             </FormControl>
             <FormControl fullWidth className={classes.formControl}>
                 <InputLabel>Executor agent</InputLabel>
-                <Select
-                    value={item.executor?._id || ''}
-                    onChange={(e) => {
-                        const selectedAgent = agents.find(executor => executor._id === e.target.value);
-                        updateChatField('executor', selectedAgent || item.executor);
-                    }}
-                    disabled={mode === 'view'}
-                >
-                    {agents.map((agent) => (
-                        <MenuItem key={agent._id} value={agent._id}>{agent.name}</MenuItem>
-                    ))}
-                </Select>
+                <EnhancedAgent
+                    mode="list"
+                    fetchAll={true}
+                    onInteraction={handleExecutorChange}
+                    isInteractable={mode !== 'view'}
+                />
+            </FormControl>
+            <FormControl fullWidth className={classes.formControl}>
+                <InputLabel>Model</InputLabel>
+                <EnhancedModel
+                    mode="list"
+                    fetchAll={true}
+                    onInteraction={handleModelChange}
+                    isInteractable={mode !== 'view'}
+                />
             </FormControl>
             <Typography variant="subtitle1">Functions</Typography>
             <Box className={classes.chipContainer}>
-                {tasks.map((task) => (
-                    <Chip
-                        key={task._id}
-                        label={task.task_name}
-                        onClick={() => {
-                            if (mode !== 'view') {
-                                const updatedFunctions = item.functions?.includes(task)
-                                    ? item.functions.filter(f => f._id !== task._id)
-                                    : [...(item.functions || []), task];
-                                updateChatField('functions', updatedFunctions);
-                            }
-                        }}
-                        color={item.functions?.some(f => f._id === task._id) ? "primary" : "default"}
-                        disabled={mode === 'view'}
-                    />
-                ))}
+                <EnhancedTask
+                    mode="list"
+                    fetchAll={true}
+                    onInteraction={handleTaskChange}
+                    isInteractable={mode !== 'view'}
+                />
             </Box>
             {mode !== 'view' && (
                 <Button

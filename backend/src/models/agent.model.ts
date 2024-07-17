@@ -1,7 +1,7 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { IAgent, AgentModel } from '../interfaces/agent.interface';
+import mongoose, { Schema } from 'mongoose';
+import { IAgentDocument, IAgentModel } from '../interfaces/agent.interface';
 
-const agentSchema = new Schema<IAgent, AgentModel>({
+const agentSchema = new Schema<IAgentDocument, IAgentModel>({
   name: { type: String, required: true },
   system_message: { type: Schema.Types.ObjectId, ref: 'Prompt', default: '66732c3eba1560b00ad0a641' },
   agents_in_group: [Schema.Types.Mixed],
@@ -18,7 +18,7 @@ const agentSchema = new Schema<IAgent, AgentModel>({
   timestamps: true
 });
 
-agentSchema.methods.apiRepresentation = function(this: IAgent & Document) {
+agentSchema.methods.apiRepresentation = function(this: IAgentDocument) {
   return {
     id: this._id,
     name: this.name || null,
@@ -38,7 +38,7 @@ agentSchema.methods.apiRepresentation = function(this: IAgent & Document) {
   };
 };
 
-function ensureObjectIdForSave(this: IAgent & Document, next: mongoose.CallbackWithoutResultAndOptionalError) {
+function ensureObjectIdForSave(this: IAgentDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {
   console.log('ensureObjectIdForSave called');
   if (this.system_message && (this.system_message as any)._id) {
     this.system_message = (this.system_message as any)._id;
@@ -82,6 +82,6 @@ agentSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
 agentSchema.pre('find', autoPopulate);
 agentSchema.pre('findOne', autoPopulate);
 
-const Agent = mongoose.model<IAgent, AgentModel>('Agent', agentSchema);
+const Agent = mongoose.model<IAgentDocument, IAgentModel>('Agent', agentSchema);
 
 export default Agent;

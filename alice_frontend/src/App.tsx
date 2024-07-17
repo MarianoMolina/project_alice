@@ -15,6 +15,7 @@ import UserSettings from './pages/UserSettings';
 import NavigationGuard from './components/navigation/NavigationGuard';
 import { AuthProvider } from './context/AuthContext';
 import './assets/fonts/fonts.css';
+import { ApiProvider } from './context/ApiContext';
 
 const App: React.FC = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -40,7 +41,11 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
+              <Route path="/register" element={
+                <ApiProvider>
+                  <Register />
+                </ApiProvider>
+              } />
               <Route path="/chat-alice" element={<ProtectedRoute element={<ChatAlice />} />} />
               <Route path="/start-task" element={<ProtectedRoute element={<CreateWorkflow />} />} />
               <Route path="/database" element={<ProtectedRoute element={<Database />} />} />

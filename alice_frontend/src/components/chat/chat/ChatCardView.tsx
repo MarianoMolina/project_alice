@@ -1,16 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Typography,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Dialog,
 } from '@mui/material';
 import { SupportAgent, Terminal, Functions, Summarize } from '@mui/icons-material';
 import { ChatComponentProps } from '../../../utils/ChatTypes';
-import EnhancedTask from '../../task/task/EnhancedTask';
-import EnhancedTaskResponse from '../../task_response/task_response/EnhancedTaskResponse';
 import useStyles from '../ChatStyles';
 
 const ChatCardView: React.FC<ChatComponentProps> = ({
@@ -20,10 +17,6 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
   handleTaskResultClick,
 }) => {
   const classes = useStyles();
-  const [openTaskDialog, setOpenTaskDialog] = useState(false);
-  const [openTaskResultDialog, setOpenTaskResultDialog] = useState(false);
-  const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>(undefined);
-  const [selectedTaskResultId, setSelectedTaskResultId] = useState<string | undefined>(undefined);
 
   if (!item) {
     return <Typography>No chat data available.</Typography>;
@@ -71,20 +64,6 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
           <Typography variant="body2">No task responses yet</Typography>
         )}
       </List>
-      <Dialog open={openTaskDialog} onClose={() => setOpenTaskDialog(false)}>
-        {selectedTaskId && (
-          <EnhancedTask itemId={selectedTaskId} mode="view" fetchAll={false} isInteractable={false} onInteraction={() => setOpenTaskDialog(false)} />
-        )}
-      </Dialog>
-      <Dialog open={openTaskResultDialog} onClose={() => setOpenTaskResultDialog(false)}>
-        {selectedTaskResultId && (
-          <EnhancedTaskResponse
-            itemId={selectedTaskResultId}
-            mode="card"
-            fetchAll={false}
-          />
-        )}
-      </Dialog>
     </div>
   );
 };

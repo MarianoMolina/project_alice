@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { SettingsApplications, Storage, Chat, Task, PlayArrow } from '@mui/icons-material';
 import useStyles from './DashboardStyles';
 import { WavyBackground } from './WavyBackground';
-import { EvervaultCard, Icon } from './EvervaultCard';
+import { EvervaultCard } from './EvervaultCard';
 
 const Dashboard: React.FC = () => {
   const classes = useStyles();

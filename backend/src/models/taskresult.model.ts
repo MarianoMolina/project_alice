@@ -1,7 +1,7 @@
-import mongoose, { Schema, Model } from 'mongoose';
-import { ITaskResultDocument } from '../interfaces/taskeresult.interface';
+import mongoose, { Schema } from 'mongoose';
+import { ITaskResultDocument, ITaskResultModel } from '../interfaces/taskeresult.interface';
 
-const taskResultSchema = new Schema<ITaskResultDocument>({
+const taskResultSchema = new Schema<ITaskResultDocument, ITaskResultModel>({
   task_name: { type: String, required: true },
   task_id: { type: Schema.Types.ObjectId, ref: 'Task', required: true },
   task_description: { type: String, required: true },
@@ -68,6 +68,6 @@ taskResultSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
 taskResultSchema.pre('find', autoPopulate);
 taskResultSchema.pre('findOne', autoPopulate);
 
-const TaskResult = mongoose.model<ITaskResultDocument, Model<ITaskResultDocument>>('TaskResult', taskResultSchema);
+const TaskResult = mongoose.model<ITaskResultDocument, ITaskResultModel>('TaskResult', taskResultSchema);
 
 export default TaskResult;

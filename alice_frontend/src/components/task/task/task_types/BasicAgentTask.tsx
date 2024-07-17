@@ -1,8 +1,10 @@
 import React from 'react';
-import { Box, TextField, FormControlLabel, Checkbox, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
+import { Box, TextField, FormControlLabel, Checkbox, FormControl, InputLabel } from '@mui/material';
 import { TaskFormProps, PromptAgentTaskForm } from '../../../../utils/TaskTypes';
+import EnhancedAgent from '../../../agent/agent/EnhancedAgent';
+import { AliceAgent } from '../../../../utils/AgentTypes';
 
-const BasicAgentTask: React.FC<TaskFormProps<PromptAgentTaskForm>> = ({ form, setForm, agents, prompts, availableTasks, viewOnly }) => {
+const BasicAgentTask: React.FC<TaskFormProps<PromptAgentTaskForm>> = ({ form, setForm, viewOnly }) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
@@ -13,10 +15,8 @@ const BasicAgentTask: React.FC<TaskFormProps<PromptAgentTaskForm>> = ({ form, se
     setForm({ ...form, [name]: checked });
   };
 
-  const handleAgentChange = (e: SelectChangeEvent<string>) => {
-    const selectedAgentId = e.target.value;
-    const selectedAgent = agents.find(agent => agent._id === selectedAgentId) || null;
-    setForm({ ...form, agent: selectedAgent });
+  const handleAgentChange = (selectedAgent: Partial<AliceAgent>) => {
+    setForm({ ...form, agent: selectedAgent as AliceAgent });
   };
 
   return (
@@ -45,17 +45,12 @@ const BasicAgentTask: React.FC<TaskFormProps<PromptAgentTaskForm>> = ({ form, se
       />
       <FormControl fullWidth margin="normal" disabled={viewOnly}>
         <InputLabel>Agent</InputLabel>
-        <Select 
-          value={form.agent?._id || ''} 
-          onChange={handleAgentChange} 
-          required
-        >
-          {agents.map((agent) => (
-            <MenuItem key={agent._id} value={agent._id || ''}>
-              {agent.name}
-            </MenuItem>
-          ))}
-        </Select>
+        <EnhancedAgent
+          mode="list"
+          fetchAll={true}
+          onInteraction={handleAgentChange}
+          isInteractable={!viewOnly}
+        />
       </FormControl>
       <FormControlLabel
         control={

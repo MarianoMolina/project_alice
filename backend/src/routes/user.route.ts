@@ -2,10 +2,16 @@ import express, { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import auth from '../middleware/auth.middleware';
+import adminOnly from '../middleware/admin.middleware';
 import User from '../models/user.model';
 import { AuthRequest } from '../interfaces/auth.interface';
 
 const router: Router = express.Router();
+
+const handleErrors = (res: Response, error: any) => {
+  console.error('Error in user route:', error);
+  res.status(500).json({ error: 'An error occurred while processing the request' });
+};
 
 // Register a new user
 router.post('/register', async (req: Request, res: Response) => {
@@ -18,9 +24,9 @@ router.post('/register', async (req: Request, res: Response) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ name, email, password: hashedPassword, role: role || 'user' });
     await user.save();
-    res.status(201).json(user);
+    res.status(201).json(user.apiRepresentation());
   } catch (error) {
-    res.status(500).json({ error: (error as Error).message });
+    handleErrors(res, error);
   }
 });
 
@@ -37,79 +43,79 @@ router.post('/login', async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
     const payload = { userId: user._id, role: user.role };
-    console.log('Token payload:', payload); // Debugging line
     const token = jwt.sign(
       payload,
       process.env.JWT_SECRET as string,
       { expiresIn: '30d' }
     );
-    res.status(200).json({ token, user: user});
+    res.status(200).json({ token, user: user.apiRepresentation() });
   } catch (error) {
-    res.status(500).json({ error: (error as Error).message });
+    handleErrors(res, error);
   }
 });
 
 // Validate user
 router.get('/validate', auth, async (req: AuthRequest, res: Response) => {
   try {
-    const user = await User.findById(req.user?.userId).select('-password');
+    const user = await User.findById(req.user?.userId);
     if (!user) {
       return res.status(404).json({ valid: false, message: 'User not found' });
     }
-    res.status(200).json({ valid: true, message: 'User is valid', user });
+    res.status(200).json({ valid: true, message: 'User is valid', user: user.apiRepresentation() });
   } catch (error) {
-    res.status(500).json({ valid: false, message: (error as Error).message });
+    handleErrors(res, error);
   }
 });
 
-// Create a new user
-router.post('/', async (req: Request, res: Response) => {
+// Get a specific user by ID (authenticated users can get their own info)
+router.get('/:id', auth, async (req: AuthRequest, res: Response) => {
   try {
-    const user = new User(req.body);
-    await user.save();
-    res.status(201).json(user);
-  } catch (error) {
-    res.status(400).json({ message: (error as Error).message });
-  }
-});
-
-// Get all users
-router.get('/', async (_req: Request, res: Response) => {
-  try {
-    const users = await User.find();
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ message: (error as Error).message });
-  }
-});
-
-// Get a specific user by ID
-router.get('/:id', async (req: Request, res: Response) => {
-  try {
+    if (req.user?.userId !== req.params.id && req.user?.role !== 'admin') {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    res.json(user);
+    res.json(user.apiRepresentation());
   } catch (error) {
-    res.status(500).json({ message: (error as Error).message });
+    handleErrors(res, error);
   }
 });
 
-// Update a user by ID
-router.put('/:id', async (req: Request, res: Response) => {
+// Update a user by ID (authenticated users can update their own info)
+router.put('/:id', auth, async (req: AuthRequest, res: Response) => {
   try {
+    if (req.user?.userId !== req.params.id && req.user?.role !== 'admin') {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+    if (req.body.password) {
+      req.body.password = await bcrypt.hash(req.body.password, 10);
+    }
     const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    res.json(user);
+    res.json(user.apiRepresentation());
   } catch (error) {
-    res.status(400).json({ message: (error as Error).message });
+    handleErrors(res, error);
   }
 });
 
-// Delete a user by ID
+// Admin-only routes
+router.use(adminOnly);
+
+// Get all users (admin only)
+router.get('/', async (_req: Request, res: Response) => {
+  try {
+    const users = await User.find();
+    res.json(users.map(user => user.apiRepresentation()));
+  } catch (error) {
+    handleErrors(res, error);
+  }
+});
+
+// Delete a user by ID (admin only)
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
@@ -118,7 +124,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     }
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: (error as Error).message });
+    handleErrors(res, error);
   }
 });
 

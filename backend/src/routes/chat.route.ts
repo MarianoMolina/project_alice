@@ -1,5 +1,5 @@
-import express, { Response, Router } from 'express';
-import { IAliceChat } from '../interfaces/chat.interface';
+import { Response, Router } from 'express';
+import { IAliceChatDocument } from '../interfaces/chat.interface';
 import AliceChat from '../models/chat.model';
 import mongoose, { Types } from 'mongoose';
 import TaskResult from '../models/taskresult.model';
@@ -7,13 +7,17 @@ import { IMessage, IMessageDocument } from '../interfaces/chat.interface';
 import auth from '../middleware/auth.middleware';
 import { AuthRequest } from '../interfaces/auth.interface';
 import { checkAndUpdateChanges, checkArrayChangesAndUpdate, messagesEqual } from '../utils/utils';
+import { createRoutes } from '../utils/routeGenerator';
 
-const router: Router = express.Router();
+// Create a router using routeGenerator for common CRUD routes
+const generatedRouter = createRoutes<IAliceChatDocument, 'AliceChat'>(AliceChat, 'AliceChat');
 
-// POST / - Create a new chat
-router.post('/', auth, async (req: AuthRequest, res: Response) => {
+// Custom route definitions
+const customRouter = Router();
+
+customRouter.post('/', async (req: AuthRequest, res: Response) => {
   try {
-    const { name = "New chat", messages = [], alice_agent, functions = [], executor, model = {} } = req.body;
+    const { messages = [] } = req.body;
     const user_id = req.user?.userId;
 
     console.log("Creating chat: ", req.body);
@@ -25,12 +29,8 @@ router.post('/', auth, async (req: AuthRequest, res: Response) => {
     }));
 
     const newChat = new AliceChat({
-      name,
+      ...req.body,
       messages: updatedMessages,
-      alice_agent,
-      functions,
-      executor,
-      model,
       created_by: user_id ? new Types.ObjectId(user_id) : undefined,
       updated_by: user_id ? new Types.ObjectId(user_id) : undefined,
     });
@@ -43,58 +43,7 @@ router.post('/', auth, async (req: AuthRequest, res: Response) => {
   }
 });
 
-// GET /user_auth - Get chats for authenticated user
-router.get('/user_auth', auth, async (req: AuthRequest, res: Response) => {
-  try {
-    const user_id = req.user?.userId;
-    const chats = await AliceChat.find({ created_by: user_id });
-    res.status(200).json(chats);
-  } catch (error) {
-    res.status(500).json({ message: (error as Error).message });
-  }
-});
-
-// GET / - Get all chats (admin only)
-router.get('/', auth, async (req: AuthRequest, res: Response) => {
-  const user_role = req.user?.role;
-  console.log('User role:', user_role)
-  console.log('User ID:', req.user?.userId)
-  try {
-    if (user_role === 'admin') {
-      const chats = await AliceChat.find();
-      res.status(200).json(chats);
-    } else {
-      res.status(403).json({ message: 'Unauthorized to view all chats' });
-    }
-  }
-  catch (error) {
-    res.status(500).json({ message: (error as Error).message });
-  }
-});
-
-// GET /:id - Get a chat by ID
-router.get('/:id', auth, async (req: AuthRequest, res: Response) => {
-  const { id } = req.params;
-  const user_id = req.user?.userId;
-  const user_role = req.user?.role;
-  try {
-    let chat: IAliceChat | null;
-    if (user_role === 'admin') {
-      chat = await AliceChat.findById(id);
-    } else {
-      chat = await AliceChat.findOne({ _id: id, created_by: user_id });
-    }
-    if (!chat) {
-      return res.status(404).json({ message: 'Chat not found or unauthorized' });
-    }
-
-    res.status(200).json(chat);
-  } catch (error) {
-    res.status(500).json({ message: (error as Error).message });
-  }
-});
-
-router.patch('/:id', auth, async (req: AuthRequest, res: Response) => {
+customRouter.patch('/:id', async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   const user_id = req.user?.userId;
   const user_role = req.user?.role;
@@ -106,8 +55,8 @@ router.patch('/:id', auth, async (req: AuthRequest, res: Response) => {
     if (chat.created_by.toString() !== user_id && user_role !== 'admin') {
       return res.status(403).json({ message: 'Unauthorized to update this chat' });
     }
-    console.log('Updating chat:', req.body)
-    console.log('Chat:', chat)
+    console.log('Updating chat:', req.body);
+    console.log('Chat:', chat);
     const updatedChat = { ...req.body, updated_by: user_id ? new Types.ObjectId(user_id) : undefined };
     const changeHistoryData: any = { changed_by: user_id ? new Types.ObjectId(user_id) : undefined };
 
@@ -163,27 +112,7 @@ router.patch('/:id', auth, async (req: AuthRequest, res: Response) => {
   }
 });
 
-async function handleTaskResponses(taskResponses: any[]): Promise<Types.ObjectId[]> {
-  const processedTaskResponses: Types.ObjectId[] = [];
-  for (const tr of taskResponses) {
-    if (typeof tr === 'string') {
-      processedTaskResponses.push(new Types.ObjectId(tr));
-    } else if (typeof tr === 'object' && tr !== null) {
-      if (tr._id) {
-        await TaskResult.findByIdAndUpdate(tr._id, tr);
-        processedTaskResponses.push(new Types.ObjectId(tr._id));
-      } else {
-        const newTaskResult = new TaskResult(tr);
-        const savedTaskResult = await newTaskResult.save();
-        processedTaskResponses.push(savedTaskResult._id as Types.ObjectId);
-      }
-    }
-  }
-  return processedTaskResponses;
-}
-
-// PATCH /:chatId/add_message - Add a message to the chat
-router.patch('/:chatId/add_message', auth, async (req: AuthRequest, res: Response) => {
+customRouter.patch('/:chatId/add_message', async (req: AuthRequest, res: Response) => {
   const { chatId } = req.params;
   const { message } = req.body;
   const userId = req.user?.userId;
@@ -209,7 +138,7 @@ router.patch('/:chatId/add_message', auth, async (req: AuthRequest, res: Respons
   }
 });
 
-router.patch('/:chatId/add_task_response', auth, async (req: AuthRequest, res: Response) => {
+customRouter.patch('/:chatId/add_task_response', async (req: AuthRequest, res: Response) => {
   const { chatId } = req.params;
   const { messageId, taskResultId } = req.body;
   const userId = req.user?.userId;
@@ -237,26 +166,29 @@ router.patch('/:chatId/add_task_response', auth, async (req: AuthRequest, res: R
   }
 });
 
-// DELETE /:chatId - Delete a chat
-router.delete('/:chatId', auth, async (req: AuthRequest, res: Response) => {
-  const { chatId } = req.params;
-  const userId = req.user?.userId;
-  const userRole = req.user?.role;
-
-  try {
-    const chat = await AliceChat.findById(chatId);
-    if (!chat) {
-      return res.status(404).json({ message: 'Chat not found' });
+async function handleTaskResponses(taskResponses: any[]): Promise<Types.ObjectId[]> {
+  const processedTaskResponses: Types.ObjectId[] = [];
+  for (const tr of taskResponses) {
+    if (typeof tr === 'string') {
+      processedTaskResponses.push(new Types.ObjectId(tr));
+    } else if (typeof tr === 'object' && tr !== null) {
+      if (tr._id) {
+        await TaskResult.findByIdAndUpdate(tr._id, tr);
+        processedTaskResponses.push(new Types.ObjectId(tr._id));
+      } else {
+        const newTaskResult = new TaskResult(tr);
+        const savedTaskResult = await newTaskResult.save();
+        processedTaskResponses.push(savedTaskResult._id as Types.ObjectId);
+      }
     }
-    if (chat.created_by.toString() !== userId && userRole !== 'admin') {
-      return res.status(403).json({ message: 'Unauthorized to delete this chat' });
-    } else {
-      await AliceChat.findByIdAndDelete(chatId);
-      res.status(200).json({ message: 'Chat deleted successfully' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: (error as Error).message });
   }
-});
+  return processedTaskResponses;
+}
 
-export default router;
+// Combine generated and custom routes
+const combinedRouter = Router();
+combinedRouter.use(auth); // Apply auth middleware to all routes
+combinedRouter.use('/', generatedRouter);
+combinedRouter.use('/', customRouter);
+
+export default combinedRouter;

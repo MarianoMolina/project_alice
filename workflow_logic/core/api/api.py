@@ -24,6 +24,7 @@ class ApiNameMeta(EnumMeta):
         classdict['OPENAI'] = 'openai'
         classdict['AZURE'] = 'azure'
         classdict['ANTHROPIC'] = 'anthropic'
+        classdict['CUSTOM'] = 'custom'
         
         return super().__new__(metacls, cls, bases, classdict)
 

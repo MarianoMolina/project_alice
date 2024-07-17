@@ -1,7 +1,7 @@
-import mongoose, { Schema, Model } from 'mongoose';
-import { IParameterDefinitionDocument } from '../interfaces/parameter.interface';
+import mongoose, { Schema } from 'mongoose';
+import { IParameterDefinitionDocument, IParameterDefinitionModel } from '../interfaces/parameter.interface';
 
-const parameterDefinitionSchema = new Schema<IParameterDefinitionDocument>({
+const parameterDefinitionSchema = new Schema<IParameterDefinitionDocument, IParameterDefinitionModel>({
   type: { type: String, required: true, description: "Type of the parameter, like string or integer" },
   description: { type: String, required: true, description: "Description of the parameter" },
   default: { type: Schema.Types.Mixed, default: null, description: "Default value of the parameter" },
@@ -38,6 +38,6 @@ function autoPopulate(this: mongoose.Query<any, any>) {
 parameterDefinitionSchema.pre('find', autoPopulate);
 parameterDefinitionSchema.pre('findOne', autoPopulate);
 
-const ParameterDefinition = mongoose.model<IParameterDefinitionDocument, Model<IParameterDefinitionDocument>>('ParameterDefinition', parameterDefinitionSchema);
+const ParameterDefinition = mongoose.model<IParameterDefinitionDocument, IParameterDefinitionModel>('ParameterDefinition', parameterDefinitionSchema);
 
 export default ParameterDefinition;

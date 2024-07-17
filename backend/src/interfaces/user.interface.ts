@@ -1,4 +1,4 @@
-import { Document, Types } from 'mongoose';
+import { Document, Model } from 'mongoose';
 
 export interface IUser {
     name: string;
@@ -7,8 +7,15 @@ export interface IUser {
     role: 'user' | 'admin';
 }
 
-export interface IUserDocument extends IUser, Document {
+export interface IUserMethods {
+    apiRepresentation(): any;
+}
+
+export interface IUserDocument extends IUser, Document, IUserMethods {
     createdAt: Date;
     updatedAt: Date;
-    apiRepresentation: () => any;
+}
+
+export interface IUserModel extends Model<IUserDocument> {
+    // Add any static methods here if needed
 }

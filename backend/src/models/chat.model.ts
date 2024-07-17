@@ -1,5 +1,5 @@
-import mongoose, { Schema, Model } from 'mongoose';
-import { IChangeHistoryDocument, IMessageDocument, IAliceChatDocument } from '../interfaces/chat.interface';
+import mongoose, { Schema } from 'mongoose';
+import { IChangeHistoryDocument, IMessageDocument, IAliceChatDocument, IAliceChatModel } from '../interfaces/chat.interface';
 import { ensureObjectIdHelper } from '../utils/utils';
 
 // ChangeHistory schema
@@ -69,7 +69,7 @@ messageSchema.methods.apiRepresentation = function (this: IMessageDocument) {
 };
 
 // AliceChat schema
-const aliceChatSchema = new Schema<IAliceChatDocument>({
+const aliceChatSchema = new Schema<IAliceChatDocument, IAliceChatModel>({
   name: { type: String, default: "New Chat", description: "Name of the chat" },
   messages: [{ type: messageSchema, required: true, default: [], description: "List of messages in the chat conversation" }],
   changeHistory: [{ type: changeHistorySchema, default: [], description: "List of changes in the chat conversation" }],
@@ -139,6 +139,6 @@ aliceChatSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
 aliceChatSchema.pre('find', autoPopulate);
 aliceChatSchema.pre('findOne', autoPopulate);
 
-const AliceChat = mongoose.model<IAliceChatDocument, Model<IAliceChatDocument>>('AliceChat', aliceChatSchema);
+const AliceChat = mongoose.model<IAliceChatDocument, IAliceChatModel>('AliceChat', aliceChatSchema);
 
 export default AliceChat;

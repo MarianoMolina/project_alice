@@ -9,7 +9,7 @@ import { useApi } from './ApiContext';
 import { AliceChat } from '../utils/ChatTypes';
 import { API } from '../utils/ApiTypes';
 
-export type ConfigItemType = 'Agent' | 'Model' | 'Parameter' | 'Prompt';
+export type ConfigItemType = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API'; 
 
 interface ConfigContextType {
   agents: AliceAgent[];

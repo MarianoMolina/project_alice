@@ -8,6 +8,7 @@ interface AuthContextProps {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginAndNavigate: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
 }
@@ -27,6 +28,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     try {
       const savedUser = localStorage.getItem('user');
+      console.log('token:', localStorage.getItem('token'));
       if (savedUser) {
         const parsedUser = JSON.parse(savedUser);
         setUser(parsedUser);
@@ -55,12 +57,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const userData = await loginUser(email, password);
       saveUserData(userData);
-      navigate('/');
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
     }
   };
+
+  const loginAndNavigate = async (email: string, password: string) => {
+    try {
+      await login(email, password)
+      navigate('/chat-alice');
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    }
+  }
 
   const register = async (name: string, email: string, password: string) => {
     try {
@@ -82,7 +93,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, loading, login, loginAndNavigate, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

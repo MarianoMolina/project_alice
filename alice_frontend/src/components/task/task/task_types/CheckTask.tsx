@@ -3,7 +3,7 @@ import { Box, TextField, Button, Typography } from '@mui/material';
 import { CheckTaskForm, TaskFormProps, PromptAgentTaskForm } from '../../../../utils/TaskTypes';
 import PromptAgentTask from './PromptAgentTask';
 
-const CheckTask: React.FC<TaskFormProps<CheckTaskForm>> = ({ form, setForm, agents, prompts, availableTasks, viewOnly }) => {
+const CheckTask: React.FC<TaskFormProps<CheckTaskForm>> = ({ form, setForm, viewOnly }) => {
   const handleBaseFormChange = (newBaseForm: PromptAgentTaskForm) => {
     setForm({ ...form, ...newBaseForm });
   };
@@ -33,9 +33,6 @@ const CheckTask: React.FC<TaskFormProps<CheckTaskForm>> = ({ form, setForm, agen
       <PromptAgentTask 
         form={form} 
         setForm={handleBaseFormChange} 
-        agents={agents} 
-        prompts={prompts}  
-        availableTasks={availableTasks} 
         viewOnly={viewOnly}
       />
      

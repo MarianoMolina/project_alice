@@ -1,12 +1,12 @@
-import mongoose, { Schema, Model, Types } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import { functionParametersSchema, ensureObjectIdForProperties } from '../utils/schemas';
-import { ITaskDocument } from '../interfaces/task.interface';
+import { ITaskDocument, ITaskModel, TaskType } from '../interfaces/task.interface';
 import { ensureObjectIdHelper } from '../utils/utils';
 
-const taskSchema = new Schema<ITaskDocument>({
-    task_name: { type: String, required: true, unique: true },
+const taskSchema = new Schema<ITaskDocument, ITaskModel>({
+    task_name: { type: String, required: true },
     task_description: { type: String, required: true },
-    task_type: { type: String, enum: ["CVGenerationTask", "RedditSearchTask", "APITask", "WikipediaSearchTask", "GoogleSearchTask", "ExaSearchTask", "ArxivSearchTask", "BasicAgentTask", "PromptAgentTask", "CheckTask", "CodeGenerationLLMTask", "CodeExecutionLLMTask", "AgentWithFunctions"], required: true },
+    task_type: { type: String, enum: Object.values(TaskType), required: true },
     input_variables: { type: functionParametersSchema },
     exit_codes: {
         type: Map,
@@ -146,6 +146,6 @@ taskSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
 taskSchema.pre('find', autoPopulate);
 taskSchema.pre('findOne', autoPopulate);
 
-const Task = mongoose.model<ITaskDocument, Model<ITaskDocument>>('Task', taskSchema);
+const Task = mongoose.model<ITaskDocument, ITaskModel>('Task', taskSchema);
 
 export default Task;

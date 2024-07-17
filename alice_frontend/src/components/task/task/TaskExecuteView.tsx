@@ -12,7 +12,6 @@ import { useTask } from '../../../context/TaskContext';
 const TaskExecuteView: React.FC<TaskComponentProps> = ({
     item
 }) => {
-    if (!item) return null;
     const classes = useStyles();
     const { 
         executionStatus, 
@@ -22,6 +21,7 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
         setSelectedTask, 
         setInputValues, 
     } = useTask();
+    if (!item) return null;
 
     const inputVariables = item.input_variables?.properties || {};
 

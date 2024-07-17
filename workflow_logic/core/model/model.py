@@ -19,17 +19,6 @@ class AliceModel(BaseModel):
     model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str})
 
     @model_validator(mode="after")
-    def validate_deployment(self):
-        if self.deployment == "remote":
-            if not self.base_url:
-                raise ValueError(f"Remote model needs a valid base URL. Base URL for {self.short_name} not found.")
-            if not self.api_key:
-                raise ValueError(f"Remote model needs a valid API key. API key for {self.short_name} not found.")
-        else:
-            raise ValueError(f"Deployment {self.deployment} for {self.short_name} not found.")
-        return self
-
-    @model_validator(mode="after")
     def validate_model_format_dict(self):
         required_fields = ["input_prefix", "input_suffix", "antiprompt", "pre_prompt_prefix", "pre_prompt_suffix"]
         if self.model_format not in model_formats:

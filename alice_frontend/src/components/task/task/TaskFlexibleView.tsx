@@ -10,7 +10,6 @@ import {
 } from '@mui/material';
 import { AliceTask, TaskComponentProps, TaskType, PromptAgentTaskForm, CheckTaskForm, CodeExecutionLLMTaskForm, CodeGenerationLLMTaskForm, WorkflowForm, AgentWithFunctionsForm, AnyTaskForm } from '../../../utils/TaskTypes';
 import { SelectChangeEvent } from '@mui/material';
-import { useConfig } from '../../../context/ConfigContext';
 import BasicAgentTask from './task_types/BasicAgentTask';
 import PromptAgentTask from './task_types/PromptAgentTask';
 import CheckTask from './task_types/CheckTask';
@@ -39,17 +38,10 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
 }) => {
     const isEditMode = mode === 'edit' || mode === 'create';
     const [taskType, setTaskType] = useState<TaskType>(item?.task_type || "BasicAgentTask");
-
-    const {
-        agents,
-        prompts,
-        tasks,
-    } = useConfig();
     
     if (!item) {
         return <Typography>No task data available.</Typography>;
     }   
-
 
     const handleTaskTypeChange = (event: SelectChangeEvent<TaskType>) => {
         const newType = event.target.value as TaskType;
@@ -89,9 +81,6 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
 
     const renderTaskForm = () => {
         const commonProps = {
-            agents: agents,
-            prompts: prompts,
-            availableTasks: tasks,
             viewOnly: !isEditMode,
         };
 

@@ -2,9 +2,9 @@ import aiohttp, asyncio, getpass
 from typing import  Optional
 from pydantic import Field
 from workflow_logic.util import User
-from workflow_logic.api.db import BackendAPI
-from workflow_logic.api.initialization_data import DB_STRUCTURE
-from workflow_logic.api.init_db import DBInitManager
+from workflow_logic.api.db_app.db import BackendAPI
+from workflow_logic.api.db_app.initialization_data import DB_STRUCTURE
+from workflow_logic.api.db_app.init_db import DBInitManager
 
 class InitializationBackendAPI(BackendAPI):
     temp_db_instance: Optional[DBInitManager] = Field(DBInitManager(), description="Temporary database instance for initialization")

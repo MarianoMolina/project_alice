@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useCallback } from 'react';
-import { useBlocker, useNavigate, useLocation } from 'react-router-dom';
+import { useBlocker, useLocation } from 'react-router-dom';
 
 interface NavigationGuardProps {
   children: React.ReactNode;
@@ -8,7 +8,6 @@ interface NavigationGuardProps {
 }
 
 const NavigationGuard: React.FC<NavigationGuardProps> = ({ children, hasUnsavedChanges, onConfirmNavigation }) => {
-  const navigate = useNavigate();
   const location = useLocation();
   const lastLocationRef = useRef(location);
   const hasUnsavedChangesRef = useRef(hasUnsavedChanges);

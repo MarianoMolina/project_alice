@@ -1,10 +1,10 @@
-import mongoose, { Schema, Model, CallbackWithoutResultAndOptionalError, Query } from 'mongoose';
+import mongoose, { Schema, CallbackWithoutResultAndOptionalError, Query } from 'mongoose';
 import { functionParametersSchema, ensureObjectIdForProperties, IFunctionParameters } from '../utils/schemas';
 import { ensureObjectIdHelper } from '../utils/utils';
-import { IPromptDocument } from '../interfaces/prompt.interface';
+import { IPromptDocument, IPromptModel } from '../interfaces/prompt.interface';
 
-const promptSchema = new Schema<IPromptDocument>({
-  name: { type: String, required: true, unique: true },
+const promptSchema = new Schema<IPromptDocument, IPromptModel>({
+  name: { type: String, required: true },
   content: { type: String, required: true },
   created_by: { type: Schema.Types.ObjectId, ref: 'User' },
   updated_by: { type: Schema.Types.ObjectId, ref: 'User' },
@@ -83,6 +83,6 @@ function autoPopulate(this: Query<any, any>, next: CallbackWithoutResultAndOptio
 promptSchema.pre('find', autoPopulate);
 promptSchema.pre('findOne', autoPopulate);
 
-const Prompt = mongoose.model<IPromptDocument, Model<IPromptDocument>>('Prompt', promptSchema);
+const Prompt = mongoose.model<IPromptDocument, IPromptModel>('Prompt', promptSchema);
 
 export default Prompt;

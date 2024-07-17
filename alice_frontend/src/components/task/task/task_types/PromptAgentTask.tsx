@@ -6,22 +6,20 @@ import {
   Checkbox, 
   FormControl, 
   InputLabel, 
-  Select, 
-  MenuItem, 
-  SelectChangeEvent, 
   Typography, 
   Chip 
 } from '@mui/material';
 import { TaskFormProps, PromptAgentTaskForm } from '../../../../utils/TaskTypes';
 import FunctionDefinitionBuilder from '../../../parameter/Function';
 import { FunctionParameters } from '../../../../utils/ParameterTypes';
-import PromptAdder from '../../../prompt/PromptAdder';
+import EnhancedAgent from '../../../agent/agent/EnhancedAgent';
+import EnhancedPrompt from '../../../prompt/prompt/EnhancedPrompt';
+import { AliceAgent } from '../../../../utils/AgentTypes';
+import { Prompt } from '../../../../utils/PromptTypes';
 
 const PromptAgentTask: React.FC<TaskFormProps<PromptAgentTaskForm>> = ({ 
   form, 
   setForm, 
-  agents, 
-  prompts, 
   viewOnly 
 }) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -34,41 +32,42 @@ const PromptAgentTask: React.FC<TaskFormProps<PromptAgentTaskForm>> = ({
     setForm({ ...form, [name]: checked });
   };
 
-  const handleAgentChange = (e: SelectChangeEvent<string>) => {
-    const newAgentId = e.target.value;
-    const newAgent = agents.find(agent => agent._id === newAgentId) || null;
-    setForm({ ...form, agent: newAgent });
+  const handleAgentChange = (selectedAgent: Partial<AliceAgent>) => {
+    setForm({ ...form, agent: selectedAgent as AliceAgent });
   };
 
-  const handleTemplateChange = (e: SelectChangeEvent<string>) => {
-    const newTemplateId = e.target.value;
-    const newTemplate = prompts.find(prompt => prompt._id === newTemplateId);
-    if (!newTemplate) return;
-    setForm({
-      ...form,
-      templates: { ...form.templates, task_template: newTemplate },
-    });
+  const handleTemplateChange = (selectedPrompt: Partial<Prompt>) => {
+    if (selectedPrompt) {
+      setForm({
+        ...form,
+        templates: { ...form.templates, task_template: selectedPrompt as Prompt },
+      });
+    }
   };
 
   const handleInputVariablesChange = (functionDefinition: FunctionParameters) => {
     console.log('functionDefinition:', functionDefinition)
     setForm({ ...form, input_variables: functionDefinition });
   }
-
   const handlePromptAdd = (name: string, promptId: string) => {
-    const newPrompt = prompts.find(prompt => prompt._id === promptId);
+    const newPrompt = form.prompts_to_add && typeof form.prompts_to_add === 'object' 
+      ? Object.values(form.prompts_to_add).find((prompt: Prompt) => prompt._id === promptId)
+      : undefined;
+
     if (newPrompt) {
       setForm({
         ...form,
-        prompts_to_add: { ...form.prompts_to_add, [name]: newPrompt }
+        prompts_to_add: { ...(form.prompts_to_add as Record<string, Prompt>), [name]: newPrompt }
       });
     }
   };
 
   const handlePromptRemove = (name: string) => {
-    const newPromptsToAdd = { ...form.prompts_to_add };
-    delete newPromptsToAdd[name];
-    setForm({ ...form, prompts_to_add: newPromptsToAdd });
+    if (form.prompts_to_add && typeof form.prompts_to_add === 'object') {
+      const newPromptsToAdd = { ...form.prompts_to_add };
+      delete newPromptsToAdd[name];
+      setForm({ ...form, prompts_to_add: newPromptsToAdd });
+    }
   };
 
   return (
@@ -97,17 +96,12 @@ const PromptAgentTask: React.FC<TaskFormProps<PromptAgentTaskForm>> = ({
       />
       <FormControl fullWidth margin="normal" disabled={viewOnly}>
         <InputLabel>Agent</InputLabel>
-        <Select 
-          value={form.agent?._id || ''} 
-          onChange={handleAgentChange} 
-          required
-        >
-          {agents.map((agent) => (
-            <MenuItem key={agent._id} value={agent._id || ''}>
-              {agent.name}
-            </MenuItem>
-          ))}
-        </Select>
+        <EnhancedAgent
+          mode="list"
+          fetchAll={true}
+          onInteraction={handleAgentChange}
+          isInteractable={!viewOnly}
+        />
       </FormControl>
       <Box>
         <Typography gutterBottom>Input Variables</Typography>
@@ -119,22 +113,17 @@ const PromptAgentTask: React.FC<TaskFormProps<PromptAgentTaskForm>> = ({
       </Box>
       <FormControl fullWidth margin="normal" disabled={viewOnly}>
         <InputLabel>Task Template</InputLabel>
-        <Select
-          value={form.templates?.task_template?._id || ''}
-          onChange={handleTemplateChange}
-          required
-        >
-          {prompts.map((prompt) => (
-            <MenuItem key={prompt._id} value={prompt._id || ''}>
-              {prompt.name}
-            </MenuItem>
-          ))}
-        </Select>
+        <EnhancedPrompt
+          mode="list"
+          fetchAll={true}
+          onInteraction={handleTemplateChange}
+          isInteractable={!viewOnly}
+        />
       </FormControl>
       <Box>
         <Typography gutterBottom>Prompts to Add</Typography>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-          {Object.entries(form.prompts_to_add || {}).map(([name, prompt]) => (
+          {form.prompts_to_add && typeof form.prompts_to_add === 'object' && Object.entries(form.prompts_to_add).map(([name, prompt]) => (
             <Chip
               key={name}
               label={`${name}: ${prompt.name}`}
@@ -143,7 +132,18 @@ const PromptAgentTask: React.FC<TaskFormProps<PromptAgentTaskForm>> = ({
             />
           ))}
         </Box>
-        {!viewOnly && <PromptAdder prompts={prompts} onAdd={handlePromptAdd} />}
+        {!viewOnly && (
+          <EnhancedPrompt
+            mode="list"
+            fetchAll={true}
+            onInteraction={(selectedPrompt: Partial<Prompt>) => {
+              if (selectedPrompt._id && selectedPrompt.name) {
+                handlePromptAdd(selectedPrompt.name, selectedPrompt._id);
+              }
+            }}
+            isInteractable={true}
+          />
+        )}
       </Box>
       <FormControlLabel
         control={

@@ -76,6 +76,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                     <MenuItem value="openai">OpenAI</MenuItem>
                     <MenuItem value="azure">Azure</MenuItem>
                     <MenuItem value="anthropic">Anthropic</MenuItem>
+                    <MenuItem value="custom">Custom</MenuItem>
                 </Select>
             </FormControl>
             

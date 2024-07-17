@@ -5,16 +5,15 @@ import {
     TextField,
     FormControl,
     InputLabel,
-    Select,
-    MenuItem,
     FormControlLabel,
     Button,
     Switch
 } from '@mui/material';
 import { AgentComponentProps } from '../../../utils/AgentTypes';
-import { useConfig } from '../../../context/ConfigContext';
 import { Prompt } from '../../../utils/PromptTypes';
 import { AliceModel } from '../../../utils/ModelTypes';
+import EnhancedModel from '../../model/model/EnhancedModel';
+import EnhancedPrompt from '../../prompt/prompt/EnhancedPrompt';
 
 const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     item,
@@ -22,16 +21,18 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     mode,
     handleSave
 }) => {
-    const {
-        models,
-        prompts,
-    } = useConfig();
-
     if (!item) {
         return <Typography>No agent data available.</Typography>;
     }
     const isEditMode = mode === 'edit' || mode === 'create';
-    console.log('item', item);
+
+    const handleModelChange = (selectedModel: AliceModel) => {
+        onChange({ model_id: selectedModel || null });
+    };
+
+    const handlePromptChange = (selectedPrompt: Prompt) => {
+        onChange({ system_message: selectedPrompt });
+    };
 
     return (
         <Box>
@@ -45,33 +46,21 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             />
             <FormControl fullWidth margin="normal">
                 <InputLabel>System Message</InputLabel>
-                <Select
-                    value={item?.system_message?._id}
-                    onChange={(e) => onChange({ system_message: prompts.find(prompt => prompt._id === e.target.value)})}
-                    disabled={!isEditMode}
-                >
-                    {prompts.map((prompt: Prompt) => (
-                        <MenuItem key={prompt._id} value={prompt._id}>{prompt.name}</MenuItem>
-                    ))}
-                </Select>
+                <EnhancedPrompt
+                    mode="list"
+                    fetchAll={true}
+                    onInteraction={handlePromptChange}
+                    isInteractable={isEditMode}
+                />
             </FormControl>
             <FormControl fullWidth margin="normal">
                 <InputLabel>Model</InputLabel>
-                <Select
-                    value={item?.model_id?._id || ''}
-                    onChange={(e) => {
-                        const selectedModel = models.find(model => model._id === e.target.value);
-                        onChange({ model_id: selectedModel || null });
-                    }}
-                    disabled={!isEditMode}
-                >
-                    <MenuItem value="">
-                        <em>None</em>
-                    </MenuItem>
-                    {models.map((model: AliceModel) => (
-                        <MenuItem key={model._id} value={model._id}>{model.short_name}</MenuItem>
-                    ))}
-                </Select>
+                <EnhancedModel
+                    mode="list"
+                    fetchAll={true}
+                    onInteraction={handleModelChange}
+                    isInteractable={isEditMode}
+                />
             </FormControl>
             <FormControlLabel
                 control={

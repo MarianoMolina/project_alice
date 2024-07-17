@@ -1,4 +1,4 @@
-import  { Document, Types } from 'mongoose';
+import  { Document, Types, Model } from 'mongoose';
 
 export interface IModel extends Document {
     short_name: string;
@@ -17,3 +17,15 @@ export interface IModel extends Document {
     updatedAt: Date;
 }
 
+export interface IModelMethods {
+    apiRepresentation(): any;
+}
+
+export interface IModelDocument extends IModel, Document, IModelMethods {
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface IModelModel extends Model<IModelDocument> {
+    // Add any static methods here if needed
+}

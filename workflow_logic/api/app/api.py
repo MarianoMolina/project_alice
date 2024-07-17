@@ -4,11 +4,11 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from workflow_logic.core.communication import MessageDict, DatabaseTaskResponse, MessageDict
-from workflow_logic.api.db import token_validation_middleware, ContainerAPI
+from workflow_logic.api.db_app.db import token_validation_middleware, ContainerAPI
 from workflow_logic.util.const import BACKEND_PORT, FRONTEND_PORT, HOST, FRONTEND_PORT_DOCKER, BACKEND_PORT_DOCKER, FRONTEND_HOST, BACKEND_HOST
 from concurrent.futures import ThreadPoolExecutor
-from workflow_logic.api.api_utils import TaskExecutionRequest, deep_api_check
-from workflow_logic.api.initialization_data import DB_STRUCTURE
+from workflow_logic.api.api_util.api_utils import TaskExecutionRequest, deep_api_check
+from workflow_logic.api.db_app.initialization_data import DB_STRUCTURE
 
 db_app = None
 thread_pool = None
@@ -55,13 +55,20 @@ async def auth_middleware(request: Request, call_next):
         response = await call_next(request)
         return response
 
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Access denied. No token provided.")
+
+    # Extract the token part
+    token = auth_header.split(" ")[-1]
+
     validation = token_validation_middleware(db_app)(request)
     if not validation["valid"]:
         raise HTTPException(status_code=401, detail=validation["message"])
-    db_app.user_token = request.headers.get("Authorization") # Set the admin token for the db_app
+
+    db_app.user_token = token  # Set only the token part for the db_app
     response = await call_next(request)
     return response
-
     
 @api_app.post("/validate-token")
 def validate_token(request: Request) -> dict[str, bool]:
@@ -70,6 +77,7 @@ def validate_token(request: Request) -> dict[str, bool]:
         raise HTTPException(status_code=401, detail="Access denied. No token provided.")
     token = token.split(" ")[1]
     return db_app.validate_token(token)
+    
 @api_app.post("/execute_task", response_model=DatabaseTaskResponse)
 async def execute_task_endpoint(request: TaskExecutionRequest) -> dict:
     print(f'execute_task_endpoint: {request}')
