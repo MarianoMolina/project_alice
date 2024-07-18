@@ -2,6 +2,7 @@ alice_frontend/node_modules
 backend/node_modules
 alice_frontend/build
 backend/dist
+workflow_logic/trash
 venv
 tmp
 .env

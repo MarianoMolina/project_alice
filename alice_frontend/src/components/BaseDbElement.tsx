@@ -104,6 +104,7 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
   const { fetchItem, createItem, updateItem } = useApi();
 
   useEffect(() => {
+    console.log('BaseDbElement useEffect:', { fetchAll, itemId, mode });
     if (fetchAll) {
       fetchAllItems();
     }

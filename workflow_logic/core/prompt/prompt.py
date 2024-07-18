@@ -5,6 +5,15 @@ from typing import Optional, List, Any, Dict
 from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
 from workflow_logic.core.parameters import FunctionParameters
 
+TYPE_MAPPING = {
+    "string": str,
+    "integer": int,
+    "float": float,
+    "boolean": bool,
+    "list": list,
+    "dict": dict
+}
+
 class Prompt(BaseModel):
     id: Optional[str] = Field(default="", description="The unique ID of the prompt, must match the ID in the database", alias="_id")
     name: str = Field(..., description="The name of the prompt.")
@@ -49,16 +58,32 @@ class Prompt(BaseModel):
         all_variables = {**self.partial_variables, **kwargs}
         for required in self.parameters.required:
             if required not in all_variables:
+                print(f'kwargs in failed validation: {kwargs}')
                 raise ValueError(f"Missing required parameter: {required}")
         
         for param_name, param_value in all_variables.items():
             if param_name not in self.parameters.properties:
-                raise ValueError(f"Unexpected parameter: {param_name}")
+                print(f'param_name not needed: {param_name} in Prompt: {self.name}')
+                continue
+                # raise ValueError(f"Unexpected parameter: {param_name}")
             
-            param_def = self.parameters.properties[param_name]
-            if not isinstance(param_value, eval(param_def.type)):
-                raise TypeError(f"Parameter {param_name} should be of type {param_def.type}")
+            param_def = self.parameters.properties[param_name]           
+            expected_type = TYPE_MAPPING.get(param_def.type)
+            if expected_type is None:
+                raise ValueError(f"Unknown type: {param_def.type}")
+            
+            # Check if the parameter is required
+            is_required = param_name in self.parameters.required
 
+            # If the value is None and the parameter is not required, skip the type check
+            if param_value is None:
+                if is_required:
+                    raise ValueError(f"Required parameter {param_name} cannot be None")
+                continue
+
+            if not isinstance(param_value, expected_type):
+                raise TypeError(f"Parameter {param_name} should be of type {param_def.type}: value is {param_value} ({type(param_value)})")
+    
     def get_template(self) -> Template:
         return Template(self.content)
 

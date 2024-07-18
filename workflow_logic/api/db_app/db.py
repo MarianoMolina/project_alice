@@ -1,5 +1,5 @@
 import requests, logging, aiohttp, asyncio
-import aiohttp, asyncio
+import aiohttp, asyncio, json
 from bson import ObjectId
 from aiohttp import ClientError
 from typing import get_args, Dict, Any, Optional, Literal
@@ -157,9 +157,9 @@ class BackendAPI(BaseModel):
                 async with session.get(url, headers=headers) as response:
                     if response is None:
                         raise ValueError(f"Failed to get a response from {url}")
-                    print(f'RESPONSE :{response}')
                     response.raise_for_status()
                     tasks = await response.json()
+                    print(f'RESPONSE tasks :{tasks}')
                     
                     if isinstance(tasks, list):
                         tasks = [await self.preprocess_data(task) for task in tasks]
@@ -309,13 +309,18 @@ class BackendAPI(BaseModel):
     async def store_task_response(self, task_response: DatabaseTaskResponse) -> DatabaseTaskResponse:
         url = f"{self.base_url}/taskResults"
         headers = self._get_headers()
-        data = task_response.model_dump()
+        headers['Content-Type'] = 'application/json'
         
-        print(f"Storing DatabaseTaskResponse with data: {data}")
-
+        # Use model_dump_json() to get a JSON string
+        json_str = task_response.model_dump_json(by_alias=True)
+        # Parse the JSON string back into a Python object
+        data = json.loads(json_str)
+        
+        print(f"Data after parsing: {str(data)}...") 
+        
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.post(url, json=data, headers=headers) as response:
+                async with session.post(url, json=data, headers=headers) as response:                
                     try:
                         response.raise_for_status()
                     except aiohttp.ClientResponseError as e:
@@ -323,17 +328,16 @@ class BackendAPI(BaseModel):
                         response_text = await response.text()
                         print(f"Response content: {response_text}")
                         raise
-
                     result = await response.json()
-                    print(f"DatabaseTaskResponse stored successfully with ID: {result['_id']}")
+                    print(f'Result: {result}')
                     return DatabaseTaskResponse(**result)
         except aiohttp.ClientError as e:
             print(f"Error storing DatabaseTaskResponse: {e}")
             raise
         except Exception as e:
             print(f"Unexpected error: {e}")
-            raise
-        
+            raise      
+
     async def store_task_response_on_chat(self, task_response: DatabaseTaskResponse, chat_id: str) -> Dict[str, Any]:
         url = f"{self.base_url}/chats/{chat_id}/add_task_response"
         headers = self._get_headers()

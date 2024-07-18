@@ -18,6 +18,7 @@ interface EnhancedTaskProps extends Omit<TaskComponentProps, 'items' | 'item' | 
     itemId?: string;
     fetchAll: boolean;
     onSave?: (savedItem: AliceTask) => void;
+    onExecute?: () => Promise<any>;
 }
 
 const EnhancedTask: React.FC<EnhancedTaskProps> = (props) => {
@@ -51,7 +52,7 @@ const EnhancedTask: React.FC<EnhancedTaskProps> = (props) => {
             case 'card':
                 return <TaskCardView {...commonProps} />;
             case 'execute':
-                return <TaskExecuteView {...commonProps} />;
+                return <TaskExecuteView {...commonProps} onExecute={props.onExecute} />;
             default:
                 return null;
         }

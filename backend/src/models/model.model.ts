@@ -8,7 +8,7 @@ const modelSchema = new Schema<IModelDocument, IModelModel>({
   ctx_size: { type: Number, required: true },
   model_type: { type: String, enum: ['instruct', 'chat', 'vision'], required: true },
   deployment: { type: String, enum: ['local', 'remote'], required: true },
-  api_name: { type: String, enum: ['openai', 'azure', 'anthropic'], default: 'openai' },
+  api_name: { type: String, enum: ['openai', 'azure', 'anthropic', 'custom'], default: 'openai' },
   temperature: { type: Number, default: 0.7 },
   seed: { type: Number, default: null },
   use_cache: { type: Boolean, default: false },

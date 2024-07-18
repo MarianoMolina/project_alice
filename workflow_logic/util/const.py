@@ -130,8 +130,7 @@ const_model_definitions = [
         "model_type": "chat",
         "deployment": "remote",
         "api_type": "openai",
-        "api_key": '',
-        "base_url": "https://api.openai.com/v1"
+        "temperature": 0.7,
     }
 ]
 

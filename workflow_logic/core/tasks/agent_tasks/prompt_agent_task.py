@@ -26,6 +26,7 @@ class PromptAgentTask(BasicAgentTask, TemplatedTask):
         sanitized_inputs = self.update_inputs(**kwargs)
         prompts = self.prompts_to_add if self.prompts_to_add else {}
         final_inputs = {**prompts, **sanitized_inputs}
+        print(f'creating messages for task {self.task_name} with inputs len: {len(final_inputs.keys())}')
         input_string = template.format_prompt(**final_inputs)
         messages = [MessageDict(content=input_string, role="user", generated_by="user", step=self.task_name)] if input_string else []
         return messages

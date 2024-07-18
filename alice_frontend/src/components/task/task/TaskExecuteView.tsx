@@ -10,14 +10,14 @@ import useStyles from '../TaskStyles';
 import { useTask } from '../../../context/TaskContext';
 
 const TaskExecuteView: React.FC<TaskComponentProps> = ({
-    item
+    item,
+    onExecute,
 }) => {
     const classes = useStyles();
     const { 
         executionStatus, 
         inputValues, 
         handleInputChange, 
-        handleExecuteTask, 
         setSelectedTask, 
         setInputValues, 
     } = useTask();
@@ -26,10 +26,10 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
     const inputVariables = item.input_variables?.properties || {};
 
     const executeTask = async (inputs: any) => {
-        if (!item) return;
+        if (!item || !onExecute) return;
         setSelectedTask(item as AliceTask);
         setInputValues(inputs);
-        await handleExecuteTask();
+        await onExecute();
     };
 
     return (

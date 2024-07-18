@@ -69,15 +69,20 @@ class APIManager(BaseModel):
 
     def get_api(self, api_name: ApiName) -> Optional[API]:
         return self.apis.get(api_name)
+    
+    def get_api_by_type(self, api_type: ApiType) -> Optional[API]:
+        return next((api for api in self.apis.values() if api.api_type == api_type), None)
 
     def retrieve_api_data(self, api_type: ApiType, model: Optional[AliceModel] = None) -> Union[Dict[str, Any], LLMConfig]:
+        if isinstance(api_type, str):
+            api_type = ApiType(api_type)
         if api_type == ApiType.LLM_MODEL:
             return self._retrieve_llm_api_data(model)
         else:
             return self._retrieve_non_llm_api_data(api_type)
 
     def _retrieve_llm_api_data(self, model: Optional[AliceModel] = None) -> LLMConfig:
-        llm_apis = [api for api in self.apis.values() if api.api_type == ApiType.LLM_MODEL and api.is_active]
+        llm_apis = [api for api in self.apis.values() if ApiType(api.api_type) == ApiType.LLM_MODEL and api.is_active]
         
         if not llm_apis:
             raise ValueError("No active LLM APIs available.")

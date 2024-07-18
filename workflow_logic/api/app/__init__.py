@@ -1,3 +1,3 @@
-from .api import api_app
+from .app import api_app
 
 __all__ = ['api_app']

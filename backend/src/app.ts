@@ -40,7 +40,9 @@ app.use(corsConfigMiddleware);
 // Explicitly handle preflight requests
 app.options('*', corsConfigMiddleware);
 
-app.use(bodyParser.json());
+// Increase the size limit for JSON payloads
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 // Health route should be registered before other routes
 app.use('/api/health', HealthRoutes);

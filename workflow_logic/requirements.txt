@@ -7,7 +7,12 @@
 # xmltodict
 # whisper
 # tiktoken
+asynctest
+pytest
+pytest-asyncio
 pyautogen
+pyautogen["anthropic"]
+anthropic
 exa_py
 aiohttp
 praw

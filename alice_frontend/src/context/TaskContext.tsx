@@ -96,16 +96,21 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setSelectedResult(result);
       setExecutionStatus('success');
 
-      // Add to recent executions
       setRecentExecutions(prev => [
         {
           taskId: selectedTask._id!,
           inputs: inputValues,
           result: result,
-          timestamp: new Date()
+          timestamp: selectedTask.createdAt || new Date()
         },
         ...prev.slice(0, 9) // Keep only the 10 most recent executions
       ]);
+      
+      // After setting the state, log the updated state
+      setRecentExecutions(updatedExecutions => {
+        console.log('Recent executions:', updatedExecutions);
+        return updatedExecutions;
+      });
 
     } catch (error) {
       console.error('Error executing task:', error);

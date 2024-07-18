@@ -3,5 +3,5 @@ from .prompt_agent_task import  PromptAgentTask, CheckTask, CodeExecutionLLMTask
 from .agent_with_functions import AgentWithFunctions
 
 __all__ = ['AliceTask', 'Workflow', 'AliceAgent','BasicAgentTask', 'PromptAgentTask', 'APITask', 'TemplatedTask', 'RedditSearchTask', 
-           'GoogleSearchTask', 'WikipediaSearchTask', 'ExaSearchTask', 'APISearchTask', 'SearchOutput', 'SearchResult', 'available_tasks', 'ArxivSearchTask', 
+           'GoogleSearchTask', 'WikipediaSearchTask', 'ExaSearchTask', 'APISearchTask', 'SearchOutput', 'SearchResult', 'ArxivSearchTask', 
            'CheckTask', 'CodeExecutionLLMTask', 'CodeGenerationLLMTask', 'AgentWithFunctions', 'CVGenerationTask']

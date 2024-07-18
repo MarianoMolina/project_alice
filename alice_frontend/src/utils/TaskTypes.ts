@@ -125,6 +125,7 @@ export interface TaskComponentProps {
   handleSave: () => Promise<void>;
   onInteraction?: (task: AliceTask) => void;
   onView?: (task: AliceTask) => void;
+  onExecute?: () => Promise<any>;
   isInteractable?: boolean;
   showHeaders?: boolean;
 }

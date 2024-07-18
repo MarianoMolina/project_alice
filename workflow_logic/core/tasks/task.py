@@ -1,12 +1,13 @@
 import uuid
-from typing import Dict, Any, Optional, List, Callable, Union
+from typing import Dict, Any, Optional, List, Callable, Union, Tuple
 from abc import ABC, abstractmethod
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from workflow_logic.core.api.api import APIManager
 from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.agent import AliceAgent
 from workflow_logic.core.communication import TaskResponse, DatabaseTaskResponse
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition, FunctionConfig, ToolFunction
+from workflow_logic.core.api import ApiType
 
 prompt_function_parameters = FunctionParameters(
     type="object",
@@ -18,7 +19,7 @@ prompt_function_parameters = FunctionParameters(
         )},
     required=["prompt"]
 )
-
+    
 class AliceTask(BaseModel, ABC):
     """
     An abstract Task class. A task is an atomic unit of work that can be executed in a workflow.
@@ -38,9 +39,9 @@ class AliceTask(BaseModel, ABC):
     prompts_to_add: Optional[Dict[str, Prompt]] = Field(None, description="A dictionary of prompts to add to the task")
     exit_code_response_map: Optional[Dict[str, int]] = Field(None, description="A dictionary mapping exit codes to responses")
     start_task: Optional[str] = Field(None, description="The name of the starting task")
-    required_apis: List[str] = Field([], description="A list of required APIs for the task")
+    required_apis: List[ApiType] = Field([], description="A list of required APIs for the task")
     task_selection_method: Optional[Callable[[TaskResponse, List[Dict[str, Any]]], Optional[str]]] = Field(None, description="A method to select the next task based on the current task's response")
-    tasks_end_code_routing: Optional[Dict[str, Dict[int, tuple[Union[str, None], bool]]]] = Field(None, description="A dictionary of tasks -> exit codes and the task to route to given each exit code and a bool to determine if the outcome represents an extra 'try' at the task")
+    tasks_end_code_routing: Optional[Dict[str, Dict[Union[str, int], Tuple[Optional[str], bool]]]] = Field(None, description="A dictionary of tasks -> exit codes and the task to route to given each exit code and a bool to determine if the outcome represents an extra 'try' at the task. If a selection method is provided, this isn't used")
     max_attempts: int = Field(3, description="The maximum number of failed task attempts before the workflow is considered failed. Default is 3.")
     recursive: bool = Field(False, description="Whether the workflow can be executed recursively. By default, tasks are recursive but workflows are not, unless one is expected to be used within another workflow")
     agent: Optional[AliceAgent] = Field(None, description="The agent that the task is associated with")
@@ -100,15 +101,17 @@ class AliceTask(BaseModel, ABC):
         
         # Run the task
         response = self.run(execution_history=execution_history, **kwargs)
-        return DatabaseTaskResponse(**response.model_dump())
+        return DatabaseTaskResponse.model_validate(response)
     
     def validate_required_apis(self, api_manager: APIManager) -> bool:
-        for api_name in self.required_apis:
-            api = api_manager.get_api(api_name)
+        for api_type in self.required_apis:
+            api = api_manager.get_api_by_type(api_type)
+            print(f'API: {api}')
+            print(f'API Type: {api_type}')
             if not api or not api.is_active:
-                raise ValueError(f"Required API {api_name} is not active or not found.")
+                raise ValueError(f"Required API {api_type} is not active or not found.")
             if api.health_status != "healthy":
-                raise ValueError(f"Required API {api_name} is not healthy.")
+                raise ValueError(f"Required API {api_type} is not healthy.")
         return True
     
     def deep_validate_required_apis(self, api_manager: APIManager) -> Dict[str, Any]:

@@ -1,12 +1,14 @@
+import logging
 from typing import get_type_hints, get_origin, get_args, Dict, Any, Union
 from pydantic import BaseModel, Field, ConfigDict
 from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, DatabaseTaskResponse, ParameterDefinition, FunctionParameters
 from workflow_logic.util import User
 from workflow_logic.core.api import API
-from workflow_logic.api.api_util.api_utils import create_task_from_json, EntityType
+from workflow_logic.api.api_util import available_task_types
+from workflow_logic.api.api_util.api_utils import EntityType
 
 class DBInitManager(BaseModel):
-    entity_key_map: Dict[EntityType, Dict[str, Dict[str, any]]] = Field(default_factory=lambda: {
+    entity_key_map: Dict[EntityType, Dict[str, Dict[str, Any]]] = Field(default_factory=lambda: {
         "users": {}, 
         "models": {}, 
         "prompts": {}, 
@@ -17,6 +19,17 @@ class DBInitManager(BaseModel):
         "task_responses": {},
         "apis": {}
     }, description="Map of entity keys to entity objects")
+    entity_obj_key_map: Dict[EntityType, Dict[str, BaseModel]] = Field(default_factory=lambda: {
+        "users": {}, 
+        "models": {}, 
+        "prompts": {}, 
+        "agents": {}, 
+        "tasks": {}, 
+        "chats": {}, 
+        "parameters": {}, 
+        "task_responses": {},
+        "apis": {}
+    }, description="Map of entity keys to Pydantic model instances")
     entity_class_map: Dict[str, BaseModel] = Field(default_factory=lambda: {
         "agents": AliceAgent,
         "chats": AliceChat,
@@ -33,18 +46,73 @@ class DBInitManager(BaseModel):
     def get_entity_class(self, entity_type: EntityType) -> BaseModel:
         return self.entity_class_map.get(entity_type)
     
+    def create_task_from_json(self, task_dict: dict) -> AliceTask:
+        task_type = task_dict.pop("task_type", "")
+        if not task_type:
+            raise ValueError("Task type not specified in task definition.")
+
+        # Handle nested tasks
+        if "tasks" in task_dict:
+            nested_tasks = task_dict["tasks"]
+            task_dict["tasks"] = {}
+            for task_key, task_data in nested_tasks.items():
+                if isinstance(task_data, str):
+                    # This is a reference to another task
+                    resolved_task = self.entity_key_map["tasks"].get(task_data)
+                    if not resolved_task:
+                        raise ValueError(f"Referenced task '{task_data}' not found in entity_key_map")
+                    task_dict["tasks"][task_key] = self.create_task_from_json(resolved_task)
+                elif isinstance(task_data, dict):
+                    # This is a new task definition
+                    task_dict["tasks"][task_key] = self.create_task_from_json(task_data)
+                else:
+                    raise ValueError(f"Invalid task data for key '{task_key}': {task_data}")
+
+        for task_class in available_task_types:
+            if task_type == task_class.__name__:
+                try:
+                    return task_class(**task_dict)
+                except Exception as e:
+                    logging.error(f"Error creating task of type {task_type}: {str(e)}")
+                    logging.error(f"Task data: {task_dict}")
+                    raise
+
+        raise ValueError(f"Task type {task_type} not found in available task types.")
+        
     def _get_entity_instance(self, entity_type: EntityType, entity_data: dict) -> BaseModel:
         EntityClass = self.get_entity_class(entity_type)
         try:
             if entity_type == "tasks":
                 entity_data.pop("key", None)
-                entity_instance = create_task_from_json(entity_data)
+                entity_instance = self.create_task_from_json(entity_data)
+            elif entity_type == "chats":
+                entity_instance = self.create_chat_from_json(entity_data)
             else:
                 entity_instance = EntityClass(**entity_data)
             return entity_instance
         except Exception as e:
             print(f"Error creating entity instance for {entity_type}: {entity_data}")
             raise e
+
+    def create_chat_from_json(self, chat_data: dict) -> AliceChat:
+        chat_data = chat_data.copy()
+        if 'functions' in chat_data and isinstance(chat_data['functions'], list):
+            functions = []
+            for func in chat_data['functions']:
+                if isinstance(func, str):
+                    # This is a reference to a task
+                    task = self.entity_key_map["tasks"].get(func)
+                    if not task:
+                        raise ValueError(f"Referenced task '{func}' not found in entity_key_map")
+                    functions.append(self.create_task_from_json(task))
+                elif isinstance(func, dict):
+                    # This is a new task definition
+                    functions.append(self.create_task_from_json(func))
+                else:
+                    raise ValueError(f"Invalid function data: {func}")
+            chat_data['functions'] = functions
+
+        return AliceChat(**chat_data)
 
     async def resolve_references_in_data(self, entity_type: EntityType, data: Dict[str, Any]) -> Dict[str, Any]:
         EntityClass = self.get_entity_class(entity_type)

@@ -12,7 +12,7 @@ class AliceModel(BaseModel):
     ctx_size: int = Field(..., title="Context Size", description="The context size of the model.")
     model_type: Literal["instruct", "chat", "vision"] = Field(..., title="Model Type", description="The type of the model.")
     deployment: Literal["local", "remote"] = Field(..., title="Model Deployment", description="The deployment of the model.")
-    api_name: Literal["openai", "azure", "anthropic"] = Field(default="openai", title="API name", description="The API to use for the model.")
+    api_name: Literal["openai", "azure", "anthropic", "custom"] = Field(default="openai", title="API name", description="The API to use for the model.")
     temperature: float = Field(0.7, description="The temperature setting for the model")
     seed: Optional[int] = Field(None, description="The seed for random number generation")
     use_cache: bool = Field(True, description="Whether to use caching for the model")

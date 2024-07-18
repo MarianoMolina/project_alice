@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Optional
+from typing import List, Optional, Callable, Dict
 from bson import ObjectId
 from workflow_logic.core.communication import MessageDict
 from workflow_logic.core.model import AliceModel
@@ -39,22 +39,19 @@ class AliceChat(BaseModel):
 
     @property
     def functions_list(self) -> List[FunctionConfig]:
-        return [func.get_function()["tool_function"] for func in self.functions] if self.functions else None
+        return [func.get_function()["tool_function"].model_dump() for func in self.functions] if self.functions else None
 
     def setup_chat_execution(self, api_manager):
-        if self.chat_execution is None:
-            llm_agent = self.get_autogen_agent(api_manager)
-            execution_agent = self.get_default_executor()
-            
-            functions = [task.get_function()["tool_function"] for task in self.functions] if self.functions else None
-            
+        if self.chat_execution is None:          
+            executor = self.get_default_executor()
+
             self.chat_execution = ChatExecutionFunctionality(
-                llm_agent=llm_agent,
-                execution_agent=execution_agent,
-                functions=functions,
-                code_execution_config=self.executor.code_execution_config,
-                valid_languages=["python", "shell"],  # You may want to make this configurable
-                return_output_to_agent=True  # You may want to make this configurable
+                llm_agent=self.get_autogen_agent(api_manager),
+                execution_agent=executor,
+                functions=self.functions_list,
+                code_execution_config=executor._code_execution_config,
+                valid_languages=["python", "shell"],  # may want to make this configurable
+                return_output_to_agent=True  # may want to make this configurable
             )
 
     def generate_response(self, api_manager, new_message: Optional[str] = None) -> List[MessageDict]:
@@ -69,11 +66,19 @@ class AliceChat(BaseModel):
         return new_messages
 
     def get_autogen_agent(self, api_manager: APIManager) -> ConversableAgent:
-        return self.alice_agent.get_autogen_agent(api_manager=api_manager, functions_list=self.functions_list)    
+        return self.alice_agent.get_autogen_agent(api_manager=api_manager, functions_list=self.functions_list) 
+       
+    def get_combined_function_map(self) -> Optional[Dict[str, Callable]]:
+        combined_function_map = {}
+        for func in self.functions:
+            function_details = func.get_function()
+            combined_function_map.update(function_details["function_map"])
+        return combined_function_map
     
     def get_default_executor(self) -> ConversableAgent:
-        return self.executor.get_autogen_agent({func.get_function()["function_map"] for func in self.functions} if self.functions else None)
-    
+        function_map = self.get_combined_function_map()
+        return self.executor.get_autogen_agent(function_map=function_map if function_map else None)
+        
     def inject_llm_config(self, task: AliceTask) -> AliceTask:
         llm_config = self.llm_config.model_dump() if self.llm_config else None
         if task.agent and not task.agent.llm_config:

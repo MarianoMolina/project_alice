@@ -35,8 +35,8 @@ customRouter.post('/', async (req: AuthRequest, res: Response) => {
       updated_by: user_id ? new Types.ObjectId(user_id) : undefined,
     });
 
-    await newChat.save();
-    res.status(201).json(newChat);
+    const saved_chat = await newChat.save();
+    res.status(201).json(saved_chat);
   } catch (error) {
     console.error('Error creating chat:', error);
     res.status(500).json({ message: 'Internal Server Error', error: (error as Error).message });

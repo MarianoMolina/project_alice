@@ -34,11 +34,12 @@ class BasicAgentTask(AliceTask):
             return self.get_failed_task_response(diagnostics=diagnostics, **kwargs)
 
         logging.info(f'Executing task: {self.task_name}')
-        task_inputs = messages.copy()
+        initial_inputs = {**kwargs, "messages": messages }
         result, exitcode = self.generate_agent_response(messages=messages, max_rounds=1, api_manager=api_manager, **kwargs)
         logging.info(f"Task {self.task_name} executed with exit code: {exitcode}. Response: {result}")
-        task_outputs = StringOutput(content=[result]) if isinstance(result, str) else LLMChatOutput(content=result)
-        messages.append(MessageDict(content=result, role="assistant", generated_by="llm", step=self.task_name, assistant_name=self.agent.name))
+        if isinstance(result, str):
+            result = MessageDict(content=result, role="assistant", generated_by="llm", step=self.task_name, assistant_name=self.agent.name)
+        task_outputs = LLMChatOutput(content=[result])
 
         if exitcode in self.exit_codes:
             return TaskResponse(
@@ -49,7 +50,7 @@ class BasicAgentTask(AliceTask):
                 result_code=exitcode,
                 task_outputs=str(task_outputs),
                 task_content=task_outputs,
-                task_inputs=task_inputs,
+                task_inputs=initial_inputs,
                 result_diagnostic="Task executed.",
                 execution_history=kwargs.get("execution_history", [])
             )
@@ -61,14 +62,14 @@ class BasicAgentTask(AliceTask):
             result_code=exitcode,
             task_outputs=str(task_outputs),
             task_content=task_outputs,
-            task_inputs=task_inputs,
+            task_inputs=initial_inputs,
             result_diagnostic=f"Exit code not found.",
             execution_history=kwargs.get("execution_history", [])
         )
 
     def update_agent(self, max_rounds=None):
         if max_rounds:
-            self.agent.update_max_consecutive_auto_reply(max_rounds)
+            self.agent.max_consecutive_auto_reply = max_rounds
         self.update_agent_human_input()
     
     def update_agent_human_input(self) -> None:

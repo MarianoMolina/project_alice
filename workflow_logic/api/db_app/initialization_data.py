@@ -43,7 +43,7 @@ DB_STRUCTURE = DBStructure(
             "model_type": "chat",
             "deployment": "remote",
             "temperature": 0.7,
-            # "api_name": "openai",
+            "api_name": "openai",
             # "api_key": OPENAI_API_KEY,
             # "base_url": "https://api.openai.com/v1"
         },
@@ -55,6 +55,7 @@ DB_STRUCTURE = DBStructure(
             "ctx_size": 32768,
             "model_type": "instruct",
             "deployment": "local",
+            "api_name": "custom",
         },
         {
             "key": "Claude3.5",
@@ -65,7 +66,7 @@ DB_STRUCTURE = DBStructure(
             "model_type": "chat",
             "deployment": "remote",
             "temperature": 0.7,
-            # "api_name": "anthropic",
+            "api_name": "anthropic",
             # "api_key": ANTHROPIC_API,
             # "base_url": "https://api.anthropic.com",
             # "model_client_cls": "AnthropicClient"
@@ -190,6 +191,7 @@ Once you believe the task is complete, create a summary with references for the 
                     "outputs_generate_code": "outputs_generate_code",
                     "outputs_execute_code": "outputs_execute_code",
                     "outputs_generate_unit_tests": "outputs_generate_unit_tests",
+                    "outputs_execute_unit_tests": "outputs_execute_unit_tests",
                 },
                 "required": ["outputs_plan_workflow"]
             }
@@ -205,6 +207,19 @@ Once you believe the task is complete, create a summary with references for the 
                     "outputs_generate_code": "outputs_generate_code",
                 },
                 "required": ["outputs_generate_code"]
+            }
+        },
+        {
+            "key": "code_execution_task_unit_tests",
+            "name": "Code Execution Task Unit Tests",
+            "content": "This is the code: {{ outputs_generate_unit_tests }}",
+            "is_templated": True,
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "outputs_generate_unit_tests": "outputs_generate_unit_tests",
+                },
+                "required": ["outputs_generate_unit_tests"]
             }
         },
         {
@@ -257,7 +272,8 @@ Once you believe the task is complete, create a summary with references for the 
             "system_message": "executor_agent", # Reference
             "autogen_class": "UserProxyAgent",
             "code_execution_config": True,
-            "default_auto_reply": ""
+            "default_auto_reply": "",
+            "model_id": None,
         },
         {
             "key": "coding_planner_agent",
@@ -475,12 +491,13 @@ Once you believe the task is complete, create a summary with references for the 
             "input_variables": {
                 "type": "object",
                 "properties": {
+                    "outputs_plan_workflow": "outputs_plan_workflow",
                     "outputs_generate_code": "outputs_generate_code",
                     "outputs_execute_code": "outputs_execute_code",
                     "outputs_generate_unit_tests": "outputs_generate_unit_tests",
                     "outputs_execute_unit_tests": "outputs_execute_unit_tests",
                 },
-                "required": ["outputs_generate_code", "outputs_execute_code"]
+                "required": ["outputs_plan_workflow", "outputs_generate_code", "outputs_execute_code"]
             },
             "templates": {
                 "task_template": "code_generation_task"
@@ -501,7 +518,7 @@ Once you believe the task is complete, create a summary with references for the 
                 "required": ["outputs_generate_unit_tests"]
             },
             "templates": {
-                "task_template": "code_execution_task"
+                "task_template": "code_execution_task_unit_tests"
             }
         },
         {
@@ -687,6 +704,7 @@ Once you believe the task is complete, create a summary with references for the 
             "alice_agent": "default_alice",  # Reference to agent key
             "executor": "executor_agent", # Reference
             "model_id": "GPT4o", # Reference
+            "functions": ["google_search"], # Reference
         }
     ]
 )

@@ -27,6 +27,7 @@ const EnhancedTaskResponse: React.FC<EnhancedTaskResponseProps> = (props) => {
     mode: BaseTaskResponseMode,
     handleSave: () => Promise<void>
   ) => {
+    console.log('Render Content called:', { items, item, mode });
     const commonProps: TaskResponseComponentProps = {
       items,
       item,

@@ -4,12 +4,13 @@ from pydantic import BaseModel, Field, ConfigDict
 from autogen.code_utils import extract_code
 from autogen.agentchat import ConversableAgent
 from workflow_logic.core.communication import DatabaseTaskResponse, MessageDict
+from workflow_logic.core.parameters import ToolFunction
 from workflow_logic.util.utils import get_language_matching
 
 class ChatExecutionFunctionality(BaseModel):
     llm_agent: ConversableAgent = Field(..., description="The LLM agent")
     execution_agent: ConversableAgent = Field(..., description="The execution agent")
-    functions: Optional[List[dict]] = Field(None, description="List of function definitions")
+    functions: Optional[List[ToolFunction]] = Field(None, description="List of function definitions")
     code_execution_config: Union[bool, dict] = Field(False, description="Code execution configuration")
     max_recursion_depth: int = Field(5, description="Maximum number of recursive calls allowed in a single turn")
     valid_languages: List[str] = Field(["python", "shell"], description="A list of valid languages for code execution")
@@ -20,7 +21,7 @@ class ChatExecutionFunctionality(BaseModel):
     def setup_agents(self):
         if self.functions:
             for func in self.functions:
-                self.llm_agent.register_function(func)
+                self.llm_agent.register_function(func.model_dump())
 
     def take_turn(self, messages: List[MessageDict]) -> Tuple[List[MessageDict], bool]:
         self.setup_agents()

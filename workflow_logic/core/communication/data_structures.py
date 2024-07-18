@@ -35,6 +35,11 @@ class TaskResponse(BaseModel):
     def __str__(self) -> str:
         return f"{self.task_name}: {self.task_description}\nTask Output:\n{self.task_outputs}"
     
+    def model_dump(self, *args, **kwargs):
+        data = super().model_dump(*args, **kwargs)
+        if self.task_content:
+            data['task_content'] = self.task_content.model_dump(*args, **kwargs)
+        return data
 class DatabaseTaskResponse(TaskResponse):
     task_content: Optional[Dict[str, Any]] = Field(None, description="The content of the task output, represents the model_dump of the OutputInterface used")
     
@@ -66,6 +71,13 @@ class DatabaseTaskResponse(TaskResponse):
             usage_metrics=self.usage_metrics,
             execution_history=self.execution_history
         )
+    
+    @classmethod
+    def model_validate(cls, obj):
+        if isinstance(obj, dict) and 'task_content' in obj and isinstance(obj['task_content'], OutputInterface):
+            obj = obj.copy()
+            obj['task_content'] = obj['task_content'].model_dump()
+        return super().model_validate(obj) 
     
 class MessageType(str, Enum):
     TEXT = 'text'
@@ -126,7 +138,7 @@ class SearchOutput(OutputInterface):
 
     def __str__(self) -> str:
         return "\n".join(
-            [f"Title: {result['title']}, URL: {result['url']}, Content: {result['content']}"
+            [f"Title: {result['title']} \nURL: {result['url']} \n Content: {result['content']}\n"
              for result in self.content]
         )
 

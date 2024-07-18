@@ -22,9 +22,13 @@ class AgentWithFunctions(PromptAgentTask):
    
     def setup_chat_execution(self, api_manager: APIManager):
         if self.chat_execution is None:
-            functions = [task.get_function()["tool_function"] for task in self.tasks.values()]
-            function_map = {func.get_function()["function_map"] for func in self.tasks.values()}
-           
+            functions = [task.get_function()["tool_function"].model_dump() for task in self.tasks.values()]
+            print(f'functions: {functions}')
+            
+            # Merge all function maps into a single dictionary
+            function_map = {}
+            for task in self.tasks.values():
+                function_map.update(task.get_function()["function_map"])
             self.chat_execution = ChatExecutionFunctionality(
                 llm_agent=self.agent.get_autogen_agent(api_manager=api_manager),
                 execution_agent=self.execution_agent.get_execution_agent(function_map),

@@ -1,12 +1,21 @@
 from abc import abstractmethod
 from typing import Any, Dict, List
-from pydantic import Field
+from pydantic import model_validator
+from workflow_logic.core.api import ApiType
 from workflow_logic.core.communication import SearchOutput, TaskResponse
 from workflow_logic.core.tasks.task import AliceTask
 from workflow_logic.core.api import APIManager
 
 class APITask(AliceTask):    
-    required_apis: List[str] = Field(..., description="A list of required APIs for the task")
+    required_apis: List[ApiType] = ["arxiv_search"]
+
+    @model_validator(mode='before')
+    def check_required_apis(cls, values):
+        required_apis = values.get('required_apis', [])
+        for api in required_apis:
+            if api not in ApiType.__members__.values():
+                raise ValueError(f'{api} is not a valid API type')
+        return values
 
     def run(self, api_manager: APIManager, **kwargs) -> TaskResponse:
         task_inputs = kwargs.copy()
@@ -26,6 +35,7 @@ class APITask(AliceTask):
                 execution_history=kwargs.get("execution_history", [])
             )
         except Exception as e:
+            import traceback
             return TaskResponse(
                 task_id=self.id if self.id else '',
                 task_name=self.task_name,
@@ -33,7 +43,7 @@ class APITask(AliceTask):
                 status="failed",
                 task_inputs=task_inputs,
                 result_code=1,
-                result_diagnostic=str(e),
+                result_diagnostic=str(f'Error: {e}\nTraceback: {traceback.format_exc()}'),
                 execution_history=kwargs.get("execution_history", [])
             )
         

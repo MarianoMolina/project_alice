@@ -11,7 +11,7 @@ from workflow_logic.core.model import AliceModel, LLMConfig
 class AliceAgent(BaseModel):
     id: str = Field(None, description="The ID of the agent", alias="_id")
     name: str = Field(..., description="The name of the agent")
-    system_message: Prompt = Field(default="default_agent", description="The name of the prompt to use for system_message")
+    system_message: Prompt = Field(default=Prompt(name="default", content="You are an AI assistant"), description="The name of the prompt to use for system_message")
     agents_in_group: Optional[List['AliceAgent']] = Field(default=None, description="A list of agent names in the group chat")
     autogen_class: Literal["ConversableAgent", "UserProxyAgent", "LLaVAAgent"] = Field(default="ConversableAgent", description="The autogen class of the agent")
     code_execution_config: Union[dict, bool] = Field(default=False, description="Whether the agent can execute code")
@@ -24,6 +24,7 @@ class AliceAgent(BaseModel):
     class Config:
         protected_namespaces=()
         json_encoders = {ObjectId: str}
+
     @property
     def system_message_str(self) -> str:
         return self.system_message.format_prompt()
@@ -32,7 +33,7 @@ class AliceAgent(BaseModel):
         return UserProxyAgent(
             name=self.name,
             human_input_mode=self.human_input_mode,
-            code_execution_config=True,
+            code_execution_config=self.get_code_execution_config(),
             default_auto_reply=self.default_auto_reply,
             is_termination_msg=lambda x: (
                 False if x.get("content") is None else
@@ -43,9 +44,24 @@ class AliceAgent(BaseModel):
             function_map=function_map if function_map else {},
             max_consecutive_auto_reply=self.max_consecutive_auto_reply
         )
+    
+    def get_code_execution_config(self) -> dict:
+        if isinstance(self.code_execution_config, bool):
+            import tempfile
+
+            # Create a temporary directory to store the code files.
+            temp_dir = tempfile.TemporaryDirectory()
+
+            return {
+                "work_dir": temp_dir.name,
+                "use_docker": True,
+                "timeout": 50,
+            }
+            
+        return self.code_execution_config
 
     def get_autogen_agent(self, api_manager: Optional[APIManager] = None, llm_config: Optional[LLMConfig] = None, function_map: Dict[str, Callable] = {}, functions_list: List[FunctionConfig] = []) -> ConversableAgent:
-        if not llm_config:
+        if not llm_config and not self.autogen_class == "UserProxyAgent":
             if not api_manager:
                 raise ValueError("Either llm_config or api_manager must be provided.")
             llm_config = api_manager.retrieve_api_data(ApiType.LLM_MODEL, self.model_id)
@@ -54,19 +70,7 @@ class AliceAgent(BaseModel):
         
         # Code execution config
         if self.code_execution_config:
-            if isinstance(self.code_execution_config, bool):
-                import tempfile
-
-                # Create a temporary directory to store the code files.
-                temp_dir = tempfile.TemporaryDirectory()
-
-                self.code_execution_config = {
-                    "work_dir": temp_dir.name,
-                    "use_docker": True,
-                    "timeout": 50,
-                }
-                
-            code_exec_config = self.code_execution_config
+            code_exec_config = self.get_code_execution_config()
         else:
             code_exec_config = False
         

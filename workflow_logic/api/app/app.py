@@ -83,6 +83,7 @@ async def execute_task_endpoint(request: TaskExecutionRequest) -> dict:
     print(f'execute_task_endpoint: {request}')
     taskId = request.taskId
     inputs = request.inputs
+    inputs_copy = inputs.copy()
     task = None
     try:
         task = await db_app.get_tasks(taskId)
@@ -99,12 +100,13 @@ async def execute_task_endpoint(request: TaskExecutionRequest) -> dict:
         
         if api_check_result["status"] == "warning":
             print(f'API Warning: {api_check_result["warnings"]}')
+            print(f'Api_check_result: {api_check_result}')
         
         # Add api_manager to inputs
         inputs['api_manager'] = api_manager
         
         print(f'task: {task}')
-        print(f'task_inputs: {inputs}')
+        print(f'task_inputs: {inputs_copy}')
         print(f'task type: {type(task)}')
         
         # Run the synchronous task in a thread pool
@@ -115,8 +117,8 @@ async def execute_task_endpoint(request: TaskExecutionRequest) -> dict:
         print(f'task_result: {result.model_dump()}')
         print(f'type: {type(result)}')
         db_result = await db_app.store_task_response(result)
-        print(f'db_result: {db_result.model_dump()}')
-        return db_result.model_dump(by_alias=True, exclude_unset=True)
+        print(f'db_result: {db_result.model_dump(by_alias=True)}')
+        return db_result.model_dump(by_alias=True)
     except Exception as e:
         import traceback
         result = DatabaseTaskResponse(
@@ -126,13 +128,13 @@ async def execute_task_endpoint(request: TaskExecutionRequest) -> dict:
             status="failed",
             result_code=1,
             task_outputs=None,
-            task_inputs=inputs,
+            task_inputs=inputs_copy,
             result_diagnostic=str(f'Error: {e}\nTraceback: {traceback.format_exc()}'),
             usage_metrics=None,
             execution_history=None
         )
         db_result = await db_app.store_task_response(result)
-        return db_result.model_dump(by_alias=True, exclude_unset=True)
+        return db_result.model_dump(by_alias=True)
 
 @api_app.post("/chat_response/{chat_id}")
 async def chat_response(chat_id: str) -> List[MessageDict]:

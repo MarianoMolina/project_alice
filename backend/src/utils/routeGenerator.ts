@@ -1,5 +1,5 @@
 import { Response, Router } from 'express';
-import { Model, Document } from 'mongoose';
+import { Model, Document, Types } from 'mongoose';
 import { AuthRequest } from '../interfaces/auth.interface';
 import adminOnly from '../middleware/admin.middleware';
 
@@ -24,8 +24,11 @@ export function createRoutes<T extends Document, K extends ModelName>(
         created_by: req.user?.userId,
         updated_by: req.user?.userId
       });
-      await item.save();
-      res.status(201).json(item);
+      console.log('Item before save:', item);
+      item._id = new Types.ObjectId();
+      const saved_item = await item.save();
+      console.log('Item after save:', saved_item);
+      res.status(201).json(saved_item);
     } catch (error) {
       handleErrors(res, error);
     }

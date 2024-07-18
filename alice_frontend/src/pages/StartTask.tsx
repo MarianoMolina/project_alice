@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { Box, Dialog, Typography, List } from '@mui/material';
-import { Add, Functions, PlayArrow, Assignment } from '@mui/icons-material';
-import { Card, CardContent, Skeleton, Stack } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, List, IconButton, Tooltip, Dialog } from '@mui/material';
+import { Add, Functions, PlayArrow, Assignment, ChevronRight, ChevronLeft } from '@mui/icons-material';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
 import { TaskResponse } from '../utils/TaskResponseTypes';
 import { AliceTask } from '../utils/TaskTypes';
@@ -19,21 +18,30 @@ const StartTask: React.FC = () => {
     recentExecutions,
     handleExecuteTask,
     setInputValues,
-    setTaskById,
+    setTaskById
   } = useTask();
-
-  const executeTask = async (execution: RecentExecution) => {
-    setTaskById(execution.taskId);
-    setInputValues(execution.inputs);
-    await handleExecuteTask();
-    return selectedResult;
-  };
 
   const [activeTab, setActiveTab] = useState('All Tasks');
   const [selectedResult, setSelectedResult] = useState<TaskResponse | null>(null);
   const [isTaskResultDialogOpen, setIsTaskResultDialogOpen] = useState(false);
   const [openTaskDialog, setOpenTaskDialog] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>(undefined);
+  const [showRecentExecutions, setShowRecentExecutions] = useState(true);
+
+  console.log('Render conditions:', { showRecentExecutions, recentExecutionsLength: recentExecutions.length });
+  useEffect(() => {
+    console.log('Recent executions in StartTask:', recentExecutions);
+  }, [recentExecutions]);
+
+  const executeTask = async () => {
+    await handleExecuteTask();
+  };
+
+  const setAndRunTaskFromExecution = async (execution: RecentExecution) => {
+    setTaskById(execution.taskId); 
+    setInputValues(execution.inputs);
+    await handleExecuteTask();
+  }
 
   const handleTaskClick = (task: AliceTask) => {
     setSelectedTaskId(task._id);
@@ -55,6 +63,7 @@ const StartTask: React.FC = () => {
   }
 
   const handleOpenTaskResult = (result: TaskResponse) => {
+    console.log('Opening task result:', result);
     setSelectedResult(result);
     setIsTaskResultDialogOpen(true);
   };
@@ -77,26 +86,6 @@ const StartTask: React.FC = () => {
     }
   };
 
-  const taskPlaceholder = () => {
-    return (
-      <Card>
-        <CardContent>
-          <Stack spacing={1}>
-            <Typography variant="h6">No task selected</Typography>
-            <Typography>Please select a task from the sidebar to execute.</Typography>
-            <Skeleton variant="rectangular" height={80} />
-            <Skeleton variant="rounded" height={90} />
-          </Stack>
-        </CardContent>
-      </Card>
-    );
-  };
-
-  const taskExecute = () => {
-    if (!selectedTask) return taskPlaceholder();
-    return <EnhancedTask mode={'execute'} itemId={selectedTask._id} fetchAll={false} />;
-  };
-
   return (
     <Box className={classes.container}>
       <VerticalMenuSidebar
@@ -107,13 +96,17 @@ const StartTask: React.FC = () => {
         expandedWidth={TASK_SIDEBAR_WIDTH}
         collapsedWidth={SIDEBAR_COLLAPSED_WIDTH}
       />
-      <Box className={classes.mainContentContainer}>
-        <Box className={classes.mainContent}>
-          {taskExecute()}
+      <Box className={classes.mainContainer}>
+        <Box className={classes.taskExecutionContainer}>
+          {selectedTask ? (
+            <EnhancedTask mode={'execute'} itemId={selectedTask._id} fetchAll={false} onExecute={executeTask}/>
+          ) : (
+            <Typography variant="h6">No task selected</Typography>
+          )}
         </Box>
-        <Box className={classes.recentExecutionsContainer}>
-          <Typography variant="h6">Recent Executions</Typography>
-          {recentExecutions.length > 0 && (
+        {(showRecentExecutions && recentExecutions.length > 0) && (
+          <Box className={classes.recentExecutionsContainer}>
+            <Typography variant="h6">Recent Executions</Typography>
             <List>
               {recentExecutions.map((execution, index) => (
                 <EnhancedTaskResponse
@@ -124,16 +117,23 @@ const StartTask: React.FC = () => {
                   onView={() => handleOpenTaskResult(execution.result)}
                   onInteraction={
                     selectedTask && execution.taskId === selectedTask._id
-                      ? () => executeTask(execution)
+                      ? () => setAndRunTaskFromExecution(execution)
                       : undefined
                   }
                 />
               ))}
             </List>
-          )}
-        </Box>
+          </Box>
+        )}
+        <Tooltip title={showRecentExecutions ? "Hide Recent Executions" : "Show Recent Executions"}>
+          <IconButton 
+            onClick={() => setShowRecentExecutions(!showRecentExecutions)}
+            className={classes.toggleRecentExecutionsButton}
+          >
+            {showRecentExecutions ? <ChevronRight /> : <ChevronLeft />}
+          </IconButton>
+        </Tooltip>
       </Box>
-
       <Dialog open={isTaskResultDialogOpen} onClose={handleCloseTaskResult} fullWidth maxWidth="md">
         {selectedResult && <EnhancedTaskResponse itemId={selectedResult._id} fetchAll={false} mode={'card'} />}
       </Dialog>

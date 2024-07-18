@@ -1,11 +1,12 @@
 import wikipedia
-import arxiv
+from arxiv import Result, Client, Search, SortCriterion
 from exa_py import Exa
 from googleapiclient.discovery import build
 from pydantic import Field
 from workflow_logic.core.communication import SearchResult, SearchOutput
 from workflow_logic.core.tasks.api_tasks.api_task import APITask
 from workflow_logic.core.parameters import ParameterDefinition, FunctionParameters
+from workflow_logic.core.api import ApiType
 from typing import Dict, Any, List
 
 search_task_parameters = FunctionParameters(
@@ -31,12 +32,13 @@ class APISearchTask(APITask):
 class WikipediaSearchTask(APISearchTask):
     task_name: str = "wikipedia_search"
     task_description: str = "Performs a Wikipedia search and retrieves results"
-    required_apis: List[str] = ["wikipedia_search"]
+    required_apis: List[ApiType] = ["wikipedia_search"]
 
     def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
         # Wikipedia doesn't require API keys, so we don't need to use api_data
-        search_results = wikipedia.search(prompt, results=max_results)
-        detailed_results = [wikipedia.page(title=result, auto_suggest=False) for result in search_results]
+        search_results = wikipedia.search(prompt, results=max_results, suggestion=True)
+        print(f'search_results: {search_results} type: {type(search_results)} type of search_results[0]: {type(search_results[0])}')
+        detailed_results = [wikipedia.page(title=result, auto_suggest=False) for result in search_results[0]]
         return SearchOutput(content=[
             SearchResult(
                 title=result.title,
@@ -49,7 +51,7 @@ class WikipediaSearchTask(APISearchTask):
 class GoogleSearchTask(APISearchTask):
     task_name: str = "google_search"
     task_description: str = "Performs a Google search and retrieves results"
-    required_apis: List[str] = ["google_search"]
+    required_apis: List[ApiType] = ["google_search"]
 
     def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
         if not api_data.get('api_key') or not api_data.get('cse_id'):
@@ -70,7 +72,7 @@ class GoogleSearchTask(APISearchTask):
 class ExaSearchTask(APISearchTask):
     task_name: str = "exa_search"
     task_description: str = "Performs an Exa search and retrieves results"
-    required_apis: List[str] = ["exa_search"]
+    required_apis: List[ApiType] = ["exa_search"]
 
     def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
         if not api_data.get('api_key'):
@@ -78,34 +80,49 @@ class ExaSearchTask(APISearchTask):
         
         exa_api = Exa(api_key=api_data['api_key'])
         exa_search = exa_api.search(query=prompt, num_results=max_results)
+        print(f'exa_search: {exa_search.results}')
+        results = exa_search.results
+
         return SearchOutput(content=[
             SearchResult(
-                title=result['title'],
-                url=result['url'],
-                content=result['snippet'],
-                metadata={key: value for key, value in result.items() if key not in {"title", "url", "snippet"}}
-            ) for result in exa_search.results
+                title=result.title,
+                url=result.url,
+                content=f'Score: {result.score} - Published Date: {result.published_date} - Author: {result.author}',
+                metadata={key: value for key, value in result.__dict__.items() if key not in {"title", "url", "score", "published_date", "author"}}
+            ) for result in results
         ])
 
 class ArxivSearchTask(APISearchTask):
     task_name: str = "arxiv_search"
-    task_description: str = "Performs an Arxiv search and retrieves results"
-    required_apis: List[str] = ["arxiv_search"]
+    task_description: str = "Performs an Arxiv search and retrieves results. The max_results specifies the number of pages, not of unique results. Each page contains 20 results."
+    required_apis: List[ApiType] = ["arxiv_search"]
 
     def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
         # arXiv doesn't require API keys, so we don't need to use api_data
-        client = arxiv.Client(page_size=20)
-        search = arxiv.Search(
+        client = Client(page_size=20)
+        print(f'prompt: {prompt}')
+        search = Search(
             query=prompt, 
             max_results=max_results,
-            sort_by=arxiv.SortCriterion.SubmittedDate
+            sort_by=SortCriterion.SubmittedDate
         )
-        results = list(client.results(search))
+        results: List[Result] = list(client.results(search))
+        if not results:
+            raise ValueError("No results found")
+
         return SearchOutput(content=[
             SearchResult(
                 title=result.title,
                 url=result.pdf_url,
                 content=result.summary,
-                metadata={key: getattr(result, key) for key in vars(result) if key not in {"title", "pdf_url", "summary"}}
+                metadata={
+                    "updated": result.updated,
+                    "published": result.published,
+                    "authors": [author.name for author in result.authors],
+                    "comment": result.comment,
+                    "primary_category": result.primary_category,
+                    "categories": result.categories,
+                    "links": {link.rel: link.href for link in result.links}
+                }
             ) for result in results
         ])

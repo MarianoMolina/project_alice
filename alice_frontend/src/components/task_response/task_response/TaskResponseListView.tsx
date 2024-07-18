@@ -18,8 +18,9 @@ const TaskResponseListView: React.FC<TaskResponseComponentProps> = ({
     onInteraction,
     onView,
 }) => {
+    console.log('TaskResponseListView props:', { items, item, onInteraction, onView });
     const renderTaskResponse = (taskResponse: TaskResponse) => (
-        <ListItem key={taskResponse._id} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <ListItem key={taskResponse._id}>
             <ListItemText
                 primary={
                     <Typography variant="subtitle1" component="div">
