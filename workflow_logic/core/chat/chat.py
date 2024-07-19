@@ -1,3 +1,4 @@
+import traceback, logging
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Callable, Dict
 from bson import ObjectId
@@ -9,6 +10,7 @@ from workflow_logic.core.api import APIManager
 from workflow_logic.core.tasks import AliceTask
 from autogen.agentchat import ConversableAgent
 from workflow_logic.core.chat.chat_execution_functionality import ChatExecutionFunctionality
+logger = logging.getLogger(__name__)
 
 default_system_message = {
     "name": "alice_default",
@@ -54,16 +56,25 @@ class AliceChat(BaseModel):
                 return_output_to_agent=True  # may want to make this configurable
             )
 
-    def generate_response(self, api_manager, new_message: Optional[str] = None) -> List[MessageDict]:
-        self.setup_chat_execution(api_manager)
-        
-        if new_message:
-            self.messages.append(MessageDict(role="user", content=new_message, generated_by="user", type="text"))
-        
-        new_messages, is_terminated = self.chat_execution.take_turn(self.messages)
-        self.messages.extend(new_messages)
-        
-        return new_messages
+    async def generate_response(self, api_manager: APIManager, new_message: Optional[str] = None) -> List[MessageDict]:
+        try:
+            self.setup_chat_execution(api_manager)
+            
+            if new_message:
+                self.messages.append(MessageDict(role="user", content=new_message, generated_by="user", type="text"))
+            
+            if self.chat_execution is None:
+                raise ValueError("Chat execution is not set up properly.")
+            
+            new_messages, is_terminated = await self.chat_execution.take_turn(self.messages)
+            self.messages.extend(new_messages)
+            
+            return new_messages
+        except Exception as e:
+            logger.error(f"Error in generate_response: {str(e)}")
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            return []
+
 
     def get_autogen_agent(self, api_manager: APIManager) -> ConversableAgent:
         return self.alice_agent.get_autogen_agent(api_manager=api_manager, functions_list=self.functions_list) 
@@ -78,9 +89,3 @@ class AliceChat(BaseModel):
     def get_default_executor(self) -> ConversableAgent:
         function_map = self.get_combined_function_map()
         return self.executor.get_autogen_agent(function_map=function_map if function_map else None)
-        
-    def inject_llm_config(self, task: AliceTask) -> AliceTask:
-        llm_config = self.llm_config.model_dump() if self.llm_config else None
-        if task.agent and not task.agent.llm_config:
-            task.agent.llm_config = llm_config
-        return task

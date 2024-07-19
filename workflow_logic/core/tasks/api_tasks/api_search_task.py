@@ -34,7 +34,7 @@ class WikipediaSearchTask(APISearchTask):
     task_description: str = "Performs a Wikipedia search and retrieves results"
     required_apis: List[ApiType] = ["wikipedia_search"]
 
-    def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
+    async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
         # Wikipedia doesn't require API keys, so we don't need to use api_data
         search_results = wikipedia.search(prompt, results=max_results, suggestion=True)
         print(f'search_results: {search_results} type: {type(search_results)} type of search_results[0]: {type(search_results[0])}')
@@ -53,7 +53,7 @@ class GoogleSearchTask(APISearchTask):
     task_description: str = "Performs a Google search and retrieves results"
     required_apis: List[ApiType] = ["google_search"]
 
-    def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
+    async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
         if not api_data.get('api_key') or not api_data.get('cse_id'):
             raise ValueError("Google Search API key or CSE ID not found in API data")
         
@@ -74,7 +74,7 @@ class ExaSearchTask(APISearchTask):
     task_description: str = "Performs an Exa search and retrieves results"
     required_apis: List[ApiType] = ["exa_search"]
 
-    def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
+    async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
         if not api_data.get('api_key'):
             raise ValueError("Exa API key not found in API data")
         
@@ -97,7 +97,7 @@ class ArxivSearchTask(APISearchTask):
     task_description: str = "Performs an Arxiv search and retrieves results. The max_results specifies the number of pages, not of unique results. Each page contains 20 results."
     required_apis: List[ApiType] = ["arxiv_search"]
 
-    def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
+    async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
         # arXiv doesn't require API keys, so we don't need to use api_data
         client = Client(page_size=20)
         print(f'prompt: {prompt}')

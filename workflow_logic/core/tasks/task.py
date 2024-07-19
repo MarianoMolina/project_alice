@@ -58,56 +58,13 @@ class AliceTask(BaseModel, ABC):
         return data
     
     @abstractmethod
-    def run(self, **kwargs) -> TaskResponse:
+    async def run(self, **kwargs) -> TaskResponse:
         """Runs the task and returns a TaskResponse."""
         ...
 
-    async def a_run(self, **kwargs) -> TaskResponse:
-        """
-        Asynchronous version of the run method.
-        This method should be implemented by subclasses.
-        """
-        return self.run(**kwargs)
-
-    # def execute(self, **kwargs) -> TaskResponse:
-    #     """Synchronous wrapper for a_execute"""
-    #     return asyncio.run(self.a_execute(**kwargs))
-
-    # async def a_execute(self, **kwargs) -> TaskResponse:
-    #     """Executes the task and returns a TaskResponse."""
-    #     return await self.execute(**kwargs)
-
-    def execute(self, **kwargs) -> DatabaseTaskResponse:
-        # Generate a new task ID for this execution
-        print(f'Executing task {self.task_name}')
-        task_id = self.id if self.id else str(uuid.uuid4())
-        
-        # Retrieve or initialize execution history
-        execution_history: List[Dict] = kwargs.pop("execution_history", [])
-        if self.required_apis and not self.validate_required_apis(kwargs.get("api_manager")):
-            raise ValueError("Required APIs are not active or healthy.")
-        # Check for recursion
-        if not self.recursive:
-            if any(task["task_name"] == self.task_name for task in execution_history):
-                # raise RecursionError(f"Task {self.task_name} is already in the execution history, preventing recursion.")
-                print(f'Error: Task {self.task_name} is already in the execution history. Execution history: {execution_history}')
-        
-        # Add current task to execution history
-        execution_history.append({
-            "task_name": self.task_name,
-            "task_id": task_id,
-            "task_description": self.task_description
-        })
-        
-        # Run the task
-        response = self.run(execution_history=execution_history, **kwargs)
-        return DatabaseTaskResponse.model_validate(response)
-    
     def validate_required_apis(self, api_manager: APIManager) -> bool:
         for api_type in self.required_apis:
             api = api_manager.get_api_by_type(api_type)
-            print(f'API: {api}')
-            print(f'API Type: {api_type}')
             if not api or not api.is_active:
                 raise ValueError(f"Required API {api_type} is not active or not found.")
             if api.health_status != "healthy":
@@ -136,6 +93,7 @@ class AliceTask(BaseModel, ABC):
                 result["warnings"].append(f"Warning in child task '{child_task_name}': {', '.join(child_result['warnings'])}")
 
         return result
+    
     async def a_execute(self, **kwargs) -> DatabaseTaskResponse:
         """Executes the task and returns a TaskResponse."""
         print(f'Executing task {self.task_name}')
@@ -160,7 +118,7 @@ class AliceTask(BaseModel, ABC):
         })
         
         # Run the task
-        response = await self.a_run(execution_history=execution_history, **kwargs)
+        response = await self.run(execution_history=execution_history, **kwargs)
         
         # Return the response
         return DatabaseTaskResponse(**response.model_dump())
@@ -202,6 +160,48 @@ class AliceTask(BaseModel, ABC):
             result_diagnostic=diagnostics,
             execution_history=kwargs.get("execution_history", [])
         )
+
+    # async def a_run(self, **kwargs) -> TaskResponse:
+    #     """
+    #     Asynchronous version of the run method.
+    #     This method should be implemented by subclasses.
+    #     """
+    #     return self.run(**kwargs)
+
+    # def execute(self, **kwargs) -> TaskResponse:
+    #     """Synchronous wrapper for a_execute"""
+    #     return asyncio.run(self.a_execute(**kwargs))
+
+    # async def a_execute(self, **kwargs) -> TaskResponse:
+    #     """Executes the task and returns a TaskResponse."""
+    #     return await self.execute(**kwargs)
+
+    # def execute(self, **kwargs) -> DatabaseTaskResponse:
+    #     # Generate a new task ID for this execution
+    #     print(f'Executing task {self.task_name}')
+    #     task_id = self.id if self.id else str(uuid.uuid4())
+        
+    #     # Retrieve or initialize execution history
+    #     execution_history: List[Dict] = kwargs.pop("execution_history", [])
+    #     if self.required_apis and not self.validate_required_apis(kwargs.get("api_manager")):
+    #         raise ValueError("Required APIs are not active or healthy.")
+    #     # Check for recursion
+    #     if not self.recursive:
+    #         if any(task["task_name"] == self.task_name for task in execution_history):
+    #             # raise RecursionError(f"Task {self.task_name} is already in the execution history, preventing recursion.")
+    #             print(f'Error: Task {self.task_name} is already in the execution history. Execution history: {execution_history}')
+        
+    #     # Add current task to execution history
+    #     execution_history.append({
+    #         "task_name": self.task_name,
+    #         "task_id": task_id,
+    #         "task_description": self.task_description
+    #     })
+        
+    #     # Run the task
+    #     response = self.run(execution_history=execution_history, **kwargs)
+    #     return DatabaseTaskResponse.model_validate(response)
+    
     # def update_input(self, **kwargs) -> list[Any]:
     #     """Executes the task and returns a TaskResponse."""
     #     ...

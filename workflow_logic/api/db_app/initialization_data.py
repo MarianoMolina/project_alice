@@ -704,7 +704,7 @@ Once you believe the task is complete, create a summary with references for the 
             "alice_agent": "default_alice",  # Reference to agent key
             "executor": "executor_agent", # Reference
             "model_id": "GPT4o", # Reference
-            "functions": ["google_search"], # Reference
+            "functions": [], # Reference
         }
     ]
 )

@@ -38,7 +38,7 @@ class AgentWithFunctions(PromptAgentTask):
                 return_output_to_agent=True
             )
 
-    def generate_agent_response(self, messages: List[Dict[str, Any]], api_manager: APIManager, max_rounds: int = 5, **kwargs) -> Tuple[List[MessageDict], bool]:
+    async def generate_agent_response(self, messages: List[Dict[str, Any]], api_manager: APIManager, max_rounds: int = 5, **kwargs) -> Tuple[List[MessageDict], bool]:
         self.setup_chat_execution(api_manager)
         
         message_dicts = [MessageDict(**msg) for msg in messages]
@@ -46,10 +46,10 @@ class AgentWithFunctions(PromptAgentTask):
         
         return new_messages, is_terminated
 
-    def run(self, api_manager: APIManager, **kwargs) -> TaskResponse:
+    async def run(self, api_manager: APIManager, **kwargs) -> TaskResponse:
         copy_kwargs = kwargs.copy()
         messages = self.create_message_list(**kwargs)
-        new_messages, is_terminated = self.generate_agent_response(messages, api_manager, **kwargs)
+        new_messages, is_terminated = await self.generate_agent_response(messages, api_manager, **kwargs)
         
         all_messages = messages + new_messages
         chat_output = LLMChatOutput(content=all_messages)

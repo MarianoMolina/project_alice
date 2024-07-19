@@ -26,7 +26,7 @@ class BasicAgentTask(AliceTask):
     exit_codes: dict[int, str] = Field(default={0: "Success", 1: "Generation failed."}, description="A dictionary of exit codes for the task")
     human_input: Optional[bool] = Field(default=False, description="Whether the task requires human input")
   
-    def run(self, messages: List[MessageDict], api_manager: APIManager, **kwargs) -> TaskResponse:
+    async def run(self, messages: List[MessageDict], api_manager: APIManager, **kwargs) -> TaskResponse:
         if not messages:
             # There's a conceit here that a task has to have messages to run. 
             # This is not strictly true, but it's a better default than allowing a system message to function as a task prompt. 
@@ -35,7 +35,7 @@ class BasicAgentTask(AliceTask):
 
         logging.info(f'Executing task: {self.task_name}')
         initial_inputs = {**kwargs, "messages": messages }
-        result, exitcode = self.generate_agent_response(messages=messages, max_rounds=1, api_manager=api_manager, **kwargs)
+        result, exitcode = await self.generate_agent_response(messages=messages, max_rounds=1, api_manager=api_manager, **kwargs)
         logging.info(f"Task {self.task_name} executed with exit code: {exitcode}. Response: {result}")
         if isinstance(result, str):
             result = MessageDict(content=result, role="assistant", generated_by="llm", step=self.task_name, assistant_name=self.agent.name)
@@ -78,10 +78,10 @@ class BasicAgentTask(AliceTask):
         else:
             self.agent.human_input_mode = "NEVER"
     
-    def generate_agent_response(self, messages: List[dict], api_manager, max_rounds: int = 1, **kwargs) -> Tuple[str, int]:
+    async def generate_agent_response(self, messages: List[dict], api_manager, max_rounds: int = 1, **kwargs) -> Tuple[str, int]:
         logging.info(f"Generating response by {self.agent.name} from messages: {messages}")  
         self.update_agent(max_rounds)
-        result = self.agent.get_autogen_agent(api_manager=api_manager).generate_reply(messages)
+        result = await self.agent.get_autogen_agent(api_manager=api_manager).a_generate_reply(messages)
         if result:
             if isinstance(result, str):
                 return result, 0

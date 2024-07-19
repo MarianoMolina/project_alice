@@ -45,7 +45,7 @@ class RedditSearchTask(APITask):
     input_variables: FunctionParameters = Field(reddit_search_parameters, description="This task requires a prompt input, and optional inputs such as sort, time_filter, subreddit, and limit. Default is 'hot', 'week', 'all', and 10.")
     required_apis: List[ApiType] = ["reddit_search"]
 
-    def generate_api_response(self, api_data: Dict[str, Any], prompt: str, sort: str = "hot", time_filter: str = "week", subreddit: str = "all", limit: int = 10, **kwargs) -> SearchOutput:
+    async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, sort: str = "hot", time_filter: str = "week", subreddit: str = "all", limit: int = 10, **kwargs) -> SearchOutput:
         if not api_data.get('client_id') or not api_data.get('client_secret'):
             raise ValueError("Reddit client ID or client secret not found in API data")
 

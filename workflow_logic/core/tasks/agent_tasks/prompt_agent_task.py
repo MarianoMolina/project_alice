@@ -31,17 +31,6 @@ class PromptAgentTask(BasicAgentTask, TemplatedTask):
         messages = [MessageDict(content=input_string, role="user", generated_by="user", step=self.task_name)] if input_string else []
         return messages
     
-    def generate_agent_response(self, messages: List[Dict], api_manager: APIManager, max_rounds: int = 1, **kwargs) -> Tuple[str, int]:
-        logging.info(f"Generating response by {self.agent.name} from messages: {messages}")
-        self.update_agent(max_rounds)
-        result = self.agent.get_autogen_agent(api_manager=api_manager).generate_reply(messages)
-        if result:
-            if isinstance(result, str):
-                return result, 0
-            elif isinstance(result, dict):
-                return result.get("content"), 0
-        return "", 1
-    
     def update_inputs(self, **kwargs) -> Dict[str, Any]:
         """
         Validates and sanitizes the input parameters based on the defined input_variables.
@@ -78,9 +67,9 @@ class CheckTask(PromptAgentTask):
     task_name: str = Field("check_output", description="The name of the task")
     exit_code_response_map: dict[str, int] = Field({"APPROVED": 0, "FAILED": 1}, description="A dictionary of exit codes mapped to string responses for the task. These strings should be present in the system prompt of the checking agent", examples=[{"TESTS PASSED": 0, "TESTS FAILED": 1}])
 
-    def generate_agent_response(self, messages: List[Dict], api_manager: APIManager, max_rounds: int = 1, **kwargs) -> Tuple[str, int]:
+    async def generate_agent_response(self, messages: List[Dict], api_manager: APIManager, max_rounds: int = 1, **kwargs) -> Tuple[str, int]:
         logging.info(f"Checking task by {self.agent.name} from messages: {messages}")
-        response, _ = super().generate_agent_response(messages, api_manager, max_rounds, **kwargs)
+        response, _ = await super().generate_agent_response(messages, api_manager, max_rounds, **kwargs)
         for key, value in self.exit_code_response_map.items():
             if key in response:
                 return response, value
@@ -92,9 +81,9 @@ class CodeGenerationLLMTask(PromptAgentTask):
     task_name: str = Field("generate_code", description="The name of the task")
     exit_codes: dict[int, str] = Field({0: "Success", 1: "Generation failed.", 2: "No code blocks in response"}, description="A dictionary of exit codes for the task")
 
-    def generate_agent_response(self, messages: List[Dict], api_manager: APIManager, max_rounds: int = 1, **kwargs) -> Tuple[str, int]:
+    async def generate_agent_response(self, messages: List[Dict], api_manager: APIManager, max_rounds: int = 1, **kwargs) -> Tuple[str, int]:
         logging.info(f"Generating code by {self.agent.name} from messages: {messages}")
-        result, exitcode = super().generate_agent_response(messages, api_manager, max_rounds, **kwargs)
+        result, exitcode = await super().generate_agent_response(messages, api_manager, max_rounds, **kwargs)
         if exitcode != 0:
             return self.exit_codes[1], 1
         code_blocks = extract_code(result)
@@ -110,7 +99,7 @@ class CodeExecutionLLMTask(PromptAgentTask):
     valid_languages: list[str] = Field(["python", "shell"], description="A list of valid languages for code execution")
     timeout: int = Field(50, description="The maximum time in seconds to wait for code execution")
 
-    def generate_agent_response(self, messages: List[Dict], api_manager: APIManager, max_rounds: int = 1, **kwargs) -> Tuple[str, int]:
+    async def generate_agent_response(self, messages: List[Dict], api_manager: APIManager, max_rounds: int = 1, **kwargs) -> Tuple[str, int]:
         code_blocks, exitcode = self.retrieve_code_blocks(messages=messages)
         if exitcode != 0:
             return code_blocks, exitcode

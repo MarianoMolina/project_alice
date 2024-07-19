@@ -85,7 +85,6 @@ class AliceAgent(BaseModel):
             llm_config = llm_config.replace_localhost().model_dump()
             if functions_list:
                 llm_config["functions"] = functions_list
-            print(f'LLM Config: {llm_config}')
 
         # Agent creation
         if self.autogen_class == "ConversableAgent":

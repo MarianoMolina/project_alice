@@ -109,10 +109,7 @@ async def execute_task_endpoint(request: TaskExecutionRequest) -> dict:
         print(f'task_inputs: {inputs_copy}')
         print(f'task type: {type(task)}')
         
-        # Run the synchronous task in a thread pool
-        loop = asyncio.get_running_loop()
-        func = functools.partial(task.execute, **inputs)
-        result = await loop.run_in_executor(thread_pool, func)
+        result = await task.a_execute(**inputs)
         
         print(f'task_result: {result.model_dump()}')
         print(f'type: {type(result)}')
@@ -155,9 +152,7 @@ async def chat_response(chat_id: str) -> List[MessageDict]:
     if api_check_result["status"] == "warning":
         print(f'API Warning: {api_check_result["warnings"]}')
    
-    # Run generate_response in a thread pool
-    loop = asyncio.get_running_loop()
-    responses = await loop.run_in_executor(thread_pool, chat_data[chat_id].generate_response, api_manager)
+    responses = await chat_data[chat_id].generate_response(api_manager)
    
     logging.info(f'Responses: {responses}')
    

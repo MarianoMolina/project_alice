@@ -4,7 +4,7 @@ from asynctest import patch
 from workflow_logic.api.db_app.initialization_data import DBStructure
 from workflow_logic.api.db_app.init_db import DBInitManager
 from workflow_logic.api.db_app.db import BackendAPI
-from workflow_logic.tests.TestModule import TestModule
+from workflow_logic.tests.test_module import TestModule
 
 class DBTests(TestModule):
     name: str = "DBTests"

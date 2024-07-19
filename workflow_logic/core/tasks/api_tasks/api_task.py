@@ -17,11 +17,11 @@ class APITask(AliceTask):
                 raise ValueError(f'{api} is not a valid API type')
         return values
 
-    def run(self, api_manager: APIManager, **kwargs) -> TaskResponse:
+    async def run(self, api_manager: APIManager, **kwargs) -> TaskResponse:
         task_inputs = kwargs.copy()
         try:
             api_data = api_manager.retrieve_api_data(self.required_apis[0])
-            task_outputs = self.generate_api_response(api_data=api_data, **kwargs)
+            task_outputs = await self.generate_api_response(api_data=api_data, **kwargs)
             return TaskResponse(
                 task_id=self.id if self.id else '',
                 task_name=self.task_name,
@@ -48,6 +48,6 @@ class APITask(AliceTask):
             )
         
     @abstractmethod
-    def generate_api_response(self, api_data: Dict[str, Any], **kwargs) -> SearchOutput:
+    async def generate_api_response(self, api_data: Dict[str, Any], **kwargs) -> SearchOutput:
         """Generates the API response for the task, using the provided API data."""
         pass

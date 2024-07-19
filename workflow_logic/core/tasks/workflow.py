@@ -25,19 +25,19 @@ class Workflow(AliceTask):
                 return task
         return None
 
-    def run(self, step_through: bool = False, **kwargs) -> TaskResponse:
+    async def run(self, step_through: bool = False, **kwargs) -> TaskResponse:
         task_inputs = kwargs.copy()
-        tasks_performed, status, diagnostic = self.execute_workflow(step_through, **kwargs)
+        tasks_performed, status, diagnostic = await self.execute_workflow(step_through, **kwargs)
         return self.create_workflow_response(tasks_performed, status, diagnostic, task_inputs, **kwargs)
 
-    def execute_workflow(self, step_through: bool, **kwargs) -> Tuple[List[TaskResponse], str, str]:
+    async def execute_workflow(self, step_through: bool, **kwargs) -> Tuple[List[TaskResponse], str, str]:
         tasks_performed = []
         attempts = 1
         current_task_name = self.get_initial_task_name()
 
         try:
             while current_task_name:
-                task_result = self.execute_task(current_task_name, **kwargs)
+                task_result = await self.execute_task(current_task_name, **kwargs)
                 tasks_performed.append(task_result)
                 kwargs = self.update_kwargs(kwargs, current_task_name, task_result)
                 
@@ -59,11 +59,11 @@ class Workflow(AliceTask):
     def get_initial_task(self) -> Optional[str]:
         return self.start_task if self.start_task else self.select_next_task(None, None)[0]
 
-    def execute_task(self, task_name: str, **kwargs) -> TaskResponse:
+    async def execute_task(self, task_name: str, **kwargs) -> TaskResponse:
         current_task = self.find_task_by_name(task_name)
         if not current_task:
             raise ValueError(f"Task {task_name} not found in the workflow.")
-        return current_task.execute(**kwargs)
+        return await current_task.a_execute(**kwargs)
 
     def update_kwargs(self, kwargs: Dict[str, Any], task_name: str, task_result: TaskResponse) -> Dict[str, Any]:
         kwargs[f'outputs_{task_name}'] = str(task_result.task_outputs) if task_result.task_outputs else None

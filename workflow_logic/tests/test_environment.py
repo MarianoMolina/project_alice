@@ -1,7 +1,7 @@
 from typing import Dict, Any
 from pydantic import BaseModel
 import datetime
-from workflow_logic.tests.TestModule import TestModule
+from workflow_logic.tests.test_module import TestModule
 from workflow_logic.api.db_app import DBStructure
 
 class TestEnvironment(BaseModel):
@@ -25,11 +25,14 @@ class TestEnvironment(BaseModel):
     async def run(self, db_structure: DBStructure, verbose: bool = False, **kwargs) -> Dict[str, Any]:
         self.results["DBTests"] = await self.run_module("DBTests", verbose, db_structure=db_structure)
 
-        if self.modules["APITests"]:
+        if "APITests" in self.modules:
             self.results["APITests"] = await self.run_module("APITests", verbose, db_init_manager=self.results["DBTests"]["outputs"]["db_init_manager"])
 
-        if self.modules["ChatTests"]:
+        if "ChatTests" in self.modules:
             self.results["ChatTests"] = await self.run_module("ChatTests", verbose, db_init_manager=self.results["DBTests"]["outputs"]["db_init_manager"])
+
+        if "TaskTests" in self.modules:
+            self.results["TaskTests"] = await self.run_module("TaskTests", verbose, db_init_manager=self.results["DBTests"]["outputs"]["db_init_manager"])
 
         return self.results
     
@@ -61,26 +64,34 @@ class TestEnvironment(BaseModel):
         success_count = 0
         errors = []
         failures = []
-
         for key, value in results.items():
-            if key == 'initialization':
-                if value != 'Success':
+            if isinstance(value, dict):
+                # If value is a dict, it contains results for multiple tests
+                for sub_key, sub_value in value.items():
+                    if sub_value == 'Success':
+                        success_count += 1
+                    elif 'error' in sub_value.lower():
+                        status = 'with_errors' if status != 'failed' else status
+                        error_count += 1
+                        errors.append(f"{key} - {sub_key}: {sub_value}")
+                    else:
+                        status = 'failed'
+                        failure_count += 1
+                        failures.append(f"{key} - {sub_key}: {sub_value}")
+            else:
+                # Handle single test results
+                if value == 'Success':
+                    success_count += 1
+                elif 'error' in value.lower():
+                    status = 'with_errors' if status != 'failed' else status
+                    error_count += 1
+                    errors.append(f"{key}: {value}")
+                else:
                     status = 'failed'
                     failure_count += 1
-                    failures.append(f"Initialization failed: {value}")
-            elif value == 'Success':
-                success_count += 1
-            elif 'error' in value.lower():
-                status = 'with_errors' if status != 'failed' else status
-                error_count += 1
-                errors.append(f"{key}: {value}")
-            else:
-                status = 'with_errors' if status != 'failed' else status
-                failure_count += 1
-                failures.append(f"{key}: {value}")
-
+                    failures.append(f"{key}: {value}")
+        
         total_tests = success_count + error_count + failure_count
-
         return {
             'status': status,
             'total_tests': total_tests,
