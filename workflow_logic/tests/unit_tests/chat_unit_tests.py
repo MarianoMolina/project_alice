@@ -1,5 +1,4 @@
 import unittest
-import logging
 from unittest.mock import AsyncMock, MagicMock, patch
 from workflow_logic.core.communication import MessageDict
 from workflow_logic.core.agent import AliceAgent

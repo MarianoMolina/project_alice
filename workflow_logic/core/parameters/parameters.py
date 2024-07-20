@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Annotated, Optional, Any, Literal, Dict,List
+from typing import Annotated, Optional, Any, Literal, Dict, List, Union
     
 class ParameterDefinition(BaseModel):
     id: Optional[str] = Field(None, description="The parameter ID", alias="_id")
@@ -36,3 +36,14 @@ class ToolFunction(BaseModel):
     """A function under tool as defined by the OpenAI API."""
     type: Annotated[Literal["function"], Field(default="function", description="Type of the tool function")]
     function: Annotated[FunctionConfig, Field(description="Function under tool")]
+
+class ToolCallConfig(BaseModel):
+    """A tool call config as defined by the OpenAI API"""
+    arguments: Annotated[Union[Dict[str, Any], str], Field(description="Arguments to the tool call")]
+    name: Annotated[str, Field(description="Name of the tool call")]
+
+class ToolCall(BaseModel):
+    """A tool call as defined by the OpenAI API"""
+    id: Optional[str] = Field(None, description="The tool call ID", alias="_id")
+    type: Annotated[Literal["function"], Field(default="function", description="Type of the tool function")]
+    function: Annotated[ToolCallConfig, Field(description="Function under tool")]

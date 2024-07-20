@@ -12,6 +12,8 @@ FRONTEND_HOST = os.getenv("FRONTEND_HOST", "frontend")
 BACKEND_HOST = os.getenv("BACKEND_HOST", "backend")
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN")
 
+LOGGING_FOLDER = os.getenv("LOGGING_FOLDER", "logs")
+
 active_models = ["GPT4o"]
 active_vision_models = ["Llava_vision"]
 

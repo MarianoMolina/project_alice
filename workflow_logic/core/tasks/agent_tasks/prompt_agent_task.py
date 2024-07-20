@@ -1,4 +1,4 @@
-import logging
+from workflow_logic.util.logging_config import LOGGER
 from typing import Dict, Any, Optional, List, Tuple
 from pydantic import Field
 from autogen.code_utils import extract_code
@@ -68,7 +68,7 @@ class CheckTask(PromptAgentTask):
     exit_code_response_map: dict[str, int] = Field({"APPROVED": 0, "FAILED": 1}, description="A dictionary of exit codes mapped to string responses for the task. These strings should be present in the system prompt of the checking agent", examples=[{"TESTS PASSED": 0, "TESTS FAILED": 1}])
 
     async def generate_agent_response(self, messages: List[Dict], api_manager: APIManager, max_rounds: int = 1, **kwargs) -> Tuple[str, int]:
-        logging.info(f"Checking task by {self.agent.name} from messages: {messages}")
+        LOGGER.info(f"Checking task by {self.agent.name} from messages: {messages}")
         response, _ = await super().generate_agent_response(messages, api_manager, max_rounds, **kwargs)
         for key, value in self.exit_code_response_map.items():
             if key in response:
@@ -82,7 +82,7 @@ class CodeGenerationLLMTask(PromptAgentTask):
     exit_codes: dict[int, str] = Field({0: "Success", 1: "Generation failed.", 2: "No code blocks in response"}, description="A dictionary of exit codes for the task")
 
     async def generate_agent_response(self, messages: List[Dict], api_manager: APIManager, max_rounds: int = 1, **kwargs) -> Tuple[str, int]:
-        logging.info(f"Generating code by {self.agent.name} from messages: {messages}")
+        LOGGER.info(f"Generating code by {self.agent.name} from messages: {messages}")
         result, exitcode = await super().generate_agent_response(messages, api_manager, max_rounds, **kwargs)
         if exitcode != 0:
             return self.exit_codes[1], 1
@@ -103,7 +103,7 @@ class CodeExecutionLLMTask(PromptAgentTask):
         code_blocks, exitcode = self.retrieve_code_blocks(messages=messages)
         if exitcode != 0:
             return code_blocks, exitcode
-        logging.info(f"Executing by {self.agent.name} code blocks: {code_blocks}")
+        LOGGER.info(f"Executing by {self.agent.name} code blocks: {code_blocks}")
 
         exitcode, logs = self.agent.get_autogen_agent(api_manager=api_manager).execute_code_blocks(code_blocks)
         exitcode2str = "execution succeeded" if exitcode == 0 else "execution failed"
@@ -121,7 +121,7 @@ class CodeExecutionLLMTask(PromptAgentTask):
                 if extracted_code:
                     code_blocks.extend(extracted_code)
         if not code_blocks:
-            logging.warning("No code blocks found in messages.")
+            LOGGER.warning("No code blocks found in messages.")
             return "No valid code blocks found. Please provide a valid python or shell code block to execute.", 2
         valid_code_blocks = []
         unsupported_languages = set()
@@ -133,9 +133,9 @@ class CodeExecutionLLMTask(PromptAgentTask):
                 unsupported_languages.add(lang)
         
         if unsupported_languages:
-            logging.warning(f"Removed code blocks with unsupported languages: {', '.join(unsupported_languages)}")
+            LOGGER.warning(f"Removed code blocks with unsupported languages: {', '.join(unsupported_languages)}")
         if not valid_code_blocks:
-            logging.warning("No valid code blocks found after removing unsupported languages.")
+            LOGGER.warning("No valid code blocks found after removing unsupported languages.")
             template = f'No valid code blocks found after removing unsupported languages. Code blocks received: {code_blocks}'
             return template, 2
 

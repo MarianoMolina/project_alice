@@ -60,6 +60,21 @@ class API(BaseModel):
     class Config:
         populate_by_name = True
         json_encoders = {ObjectId: str}
+        
+    def _create_llm_config(self, model: Optional[AliceModel] = None) -> LLMConfig:
+        if not model: 
+            if not self.default_model:
+                raise ValueError("No model specified.")
+            model = self.default_model
+        config = {
+            "model": model.model_name,
+            "api_key": self.api_config.get("api_key"),
+            "base_url": self.api_config.get("base_url"),
+            "api_type": self.api_name
+        }
+        if self.autogen_model_client_cls:
+            config["model_client_cls"] = self.autogen_model_client_cls
+        return LLMConfig(config_list=[config], temperature=model.temperature, use_cache=model.use_cache)
 
 class APIManager(BaseModel):
     apis: Dict[str, API] = {}
@@ -100,15 +115,7 @@ class APIManager(BaseModel):
         raise ValueError("No suitable LLM API found.")
 
     def _create_llm_config(self, api: API, model: AliceModel) -> LLMConfig:
-        config = {
-            "model": model.model_name,
-            "api_key": api.api_config.get("api_key"),
-            "base_url": api.api_config.get("base_url"),
-            "api_type": api.api_name
-        }
-        if api.autogen_model_client_cls:
-            config["model_client_cls"] = api.autogen_model_client_cls
-        return LLMConfig(config_list=[config], temperature=model.temperature, use_cache=model.use_cache)
+        return api._create_llm_config(model)
 
     def _retrieve_non_llm_api_data(self, api_type: ApiType) -> Dict[str, Any]:
         matching_api = next((api for api in self.apis.values() if api.api_type == api_type and api.is_active), None)

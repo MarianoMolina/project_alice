@@ -111,7 +111,7 @@ export const sendMessage = async (chatId: string, message: any): Promise<AliceCh
   }
 };
 
-export const generateChatResponse = async (chatId: string): Promise<any[]> => {
+export const generateChatResponse = async (chatId: string): Promise<boolean> => {
   try {
     console.log('Generating chat response for chatId:', chatId);
     const response = await taskAxiosInstance.post(`/chat_response/${chatId}`);

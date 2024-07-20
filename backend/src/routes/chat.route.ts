@@ -117,21 +117,27 @@ customRouter.patch('/:chatId/add_message', async (req: AuthRequest, res: Respons
   const { message } = req.body;
   const userId = req.user?.userId;
   try {
-    const chat = await AliceChat.findById(chatId);
-    if (!chat) {
-      console.log('Chat not found:', chatId);
-      return res.status(404).json({ message: 'Chat not found' });
-    }
     const newMessage: IMessageDocument = {
       ...message,
       created_by: userId ? new Types.ObjectId(userId) : undefined,
     };
-    chat.messages.push(newMessage);
-    if (userId) chat.updated_by = new Types.ObjectId(userId);
-    await chat.save();
-    console.log('Chat updated successfully', chat);
-    const chat_updated = await AliceChat.findById(chatId);
-    res.status(200).json({ message: 'Message added successfully', chat: chat_updated });
+
+    const updatedChat = await AliceChat.findOneAndUpdate(
+      { _id: chatId },
+      {
+        $push: { messages: newMessage },
+        $set: { updated_by: userId ? new Types.ObjectId(userId) : undefined }
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedChat) {
+      console.log('Chat not found:', chatId);
+      return res.status(404).json({ message: 'Chat not found' });
+    }
+
+    console.log('Chat updated successfully', updatedChat);
+    res.status(200).json({ message: 'Message added successfully'});
   } catch (error) {
     console.error('Error in add_message route:', error);
     res.status(500).json({ message: (error as Error).message, stack: (error as Error).stack });

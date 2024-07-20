@@ -1,3 +1,3 @@
-from .parameters import ParameterDefinition, FunctionParameters, FunctionConfig, ToolFunction
+from .parameters import ParameterDefinition, FunctionParameters, FunctionConfig, ToolFunction, ToolCall
 
-__all__ = ['ParameterDefinition', 'FunctionParameters', 'FunctionConfig', 'ToolFunction']
+__all__ = ['ParameterDefinition', 'FunctionParameters', 'FunctionConfig', 'ToolFunction', 'ToolCall']

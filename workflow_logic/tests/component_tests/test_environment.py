@@ -1,9 +1,14 @@
+import datetime
 from typing import Dict, Any
 from pydantic import BaseModel
-import datetime
-from workflow_logic.tests.test_module import TestModule
-from workflow_logic.api.db_app import DBStructure
+from workflow_logic.db_app import DBStructure
 
+class TestModule(BaseModel):
+    name: str
+
+    async def run(self, **kwargs) -> Dict[str, Any]:
+        raise NotImplementedError("Subclasses must implement run method")
+    
 class TestEnvironment(BaseModel):
     modules: Dict[str, TestModule] = {}
     results: Dict[str, Any] = {}

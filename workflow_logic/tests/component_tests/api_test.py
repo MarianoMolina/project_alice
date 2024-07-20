@@ -4,10 +4,10 @@ from exa_py import Exa
 from typing import Dict, Any
 from googleapiclient.discovery import build
 from arxiv import Client, Search, SortCriterion
-from workflow_logic.tests.test_module import TestModule
+from workflow_logic.tests.component_tests.test_environment import TestModule
 from workflow_logic.core.api import APIManager, API, ApiType
 from workflow_logic.core.agent.agent import AliceAgent
-from workflow_logic.api.db_app import DBInitManager
+from workflow_logic.db_app import DBInitManager
 
 class APITests(TestModule):
     name: str = "APITests"

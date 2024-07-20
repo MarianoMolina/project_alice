@@ -84,7 +84,7 @@ class AliceAgent(BaseModel):
                 raise ValueError("LLM Config must have a 'config_list' attribute with at least one config.")
             llm_config = llm_config.replace_localhost().model_dump()
             if functions_list:
-                llm_config["functions"] = functions_list
+                llm_config["tools"] = functions_list
 
         # Agent creation
         if self.autogen_class == "ConversableAgent":

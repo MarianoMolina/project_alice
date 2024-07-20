@@ -62,6 +62,18 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         }
     }, [user]);
 
+    const fetchCurrentChat = async () => {
+        if (!currentChatId) return;
+        try {
+            const chatData = await fetchChatById(currentChatId)
+            setCurrentChat(chatData);
+            setMessages(chatData.messages);
+            setAgents([chatData.alice_agent]);
+        } catch (error) {
+            console.error('Error fetching current chat:', error);
+        }
+    }
+
     const handleSelectChat = async (chatId: string) => {
         try {
           console.log('Fetching chat with id:', chatId);
@@ -100,7 +112,9 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         setIsGenerating(true);
         try {
             const response = await generateChatResponse(currentChatId);
-            setMessages(prevMessages => [...prevMessages, ...response]);
+            if (response) {
+                await fetchCurrentChat();
+            }
         } catch (error) {
             console.error('Error generating response:', error);
         } finally {

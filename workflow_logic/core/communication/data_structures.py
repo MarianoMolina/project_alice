@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional, Literal, Dict, Any, List, Union
 from typing_extensions import TypedDict, Optional, Literal, Annotated
+from workflow_logic.core.parameters import ToolCall
 from enum import Enum
 
 class OutputInterface(BaseModel):
@@ -37,7 +38,7 @@ class TaskResponse(BaseModel):
     
     def model_dump(self, *args, **kwargs):
         data = super().model_dump(*args, **kwargs)
-        if self.task_content:
+        if self.task_content and isinstance(self.task_content, OutputInterface):
             data['task_content'] = self.task_content.model_dump(*args, **kwargs)
         return data
 class DatabaseTaskResponse(TaskResponse):
@@ -88,28 +89,52 @@ class MessageType(str, Enum):
     TASK_RESPONSE = 'TaskResponse'
 
 class MessageDict(TypedDict, total=False):
-    """A dictionary representing a message in a chat conversation."""
     _id: Optional[str] = Field(default="", description="The id of the message", alias="_id")
-    role: Annotated[Literal["user", "assistant", "system", "tool"], Field(default="user", description="Role of the message")]
-    content: Annotated[str, Field(description="Content of the message")]
-    generated_by: Annotated[Literal["user", "llm", "tool"], Field(default="user", description="Who created the message")]
-    step: Annotated[Optional[str], Field(default="", description="Process that is creating this message, usually the task_name or tool_name")]
-    assistant_name: Annotated[Optional[str], Field(default="", description="Name of the assistant")]
-    context: Annotated[Optional[Dict[str, Any]], Field(default=None, description="Context of the message")]
-    type: Annotated[MessageType, Field(default="text", description="Type of the message")]
-    request_type: Annotated[Optional[str], Field(default=None, description="Request type of the message, if any. Can be 'approval', 'confirmation', etc.")]
-    task_responses: Optional[List[Union[str, TaskResponse]]] = Field(default_factory=list, description="List of associated task responses")
-    createdAt: Annotated[Optional[str], Field(default=None, description="Timestamp of the message")]
-    updatedAt: Annotated[Optional[str], Field(default=None, description="Timestamp of the message")]
-    created_by: Annotated[Optional[Union[str, dict]], Field(default=None, description="User id who created the message")]
-    updated_by: Annotated[Optional[Union[str, dict]], Field(default=None, description="User id who updated the message")]
+    role: Literal["user", "assistant", "system", "tool"] = Field(default="user", description="Role of the message")
+    content: str = Field(description="Content of the message")
+    generated_by: Literal["user", "llm", "tool"] = Field(default="user", description="Who created the message")
+    step: Optional[str] = Field(default="", description="Process that is creating this message, usually the task_name or tool_name")
+    assistant_name: Optional[str] = Field(default="", description="Name of the assistant")
+    context: Optional[Dict[str, Any]] = Field(default=None, description="Context of the message")
+    type: MessageType = Field(default="text", description="Type of the message")
+    tool_calls: Optional[List[ToolCall]] = Field(default=None, description="List of tool calls in the message")
+    function_call: Optional[Dict[str, Any]] = Field(default=None, description="Function call in the message")
+    request_type: Optional[str] = Field(default=None, description="Request type of the message, if any. Can be 'approval', 'confirmation', etc.")
+    task_responses: List[Union[str, TaskResponse]] = Field(default_factory=list, description="List of associated task responses")
+    createdAt: Optional[str] = Field(default=None, description="Timestamp of the message")
+    updatedAt: Optional[str] = Field(default=None, description="Timestamp of the message")
+    created_by: Optional[Union[str, dict]] = Field(default=None, description="User id who created the message")
+    updated_by: Optional[Union[str, dict]] = Field(default=None, description="User id who updated the message")
 
     def __str__(self) -> str:
-        if self.type == "text":
-            return f"{self.role}{f' ({self.assistant_name})' if self.assistant_name else ''}: {self.content}"
-        elif self.type == "tool":
-            return f"{self.role}: {self.content}{' (' + str(self.step) + ')' if self.step else ''}"
-        return f"{self.role}: {self.content}"
+        role = self.get('role', '')
+        content = self.get('content', '')
+        msg_type = self.get('type', '')
+        assistant_name = self.get('assistant_name', '')
+        step = self.get('step', '')
+
+        if msg_type == "text":
+            return f"{role}{f' ({assistant_name})' if assistant_name else ''}: {content}"
+        elif msg_type == "tool":
+            return f"{role}: {content}{f' ({step})' if step else ''}"
+        return f"{role}: {content}"
+    
+def to_autogen_compatible(message: MessageDict) -> dict:
+    """Convert MessageDict to a format compatible with Autogen."""
+    autogen_message = dict(message)
+    if not autogen_message.get('tool_calls'):
+        autogen_message.pop('tool_calls', None)
+    else:
+        autogen_message['tool_calls'] = [tool_call.model_dump(by_alias=True) for tool_call in autogen_message['tool_calls']]
+
+    if not autogen_message.get('function_call'):
+        autogen_message.pop('function_call', None)
+        
+    return autogen_message
+
+# Function to convert a list of MessageDict to Autogen-compatible format
+def messages_to_autogen_compatible(messages: List[MessageDict]) -> List[dict]:
+    return [to_autogen_compatible(message) for message in messages]
 
 class SearchResult(TypedDict):
     """A dictionary representing a search result."""

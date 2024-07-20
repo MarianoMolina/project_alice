@@ -1,6 +1,6 @@
 import os, pkgutil
 from pydantic import BaseModel, Field
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Literal
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -14,21 +14,54 @@ GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
 LOCAL_LLM_API_URL = os.getenv("LOCAL_LLM_API_URL")
 
 def get_prompt_file(file_name):
-    data = pkgutil.get_data('workflow_logic.api.db_app.prompts', file_name)
+    data = pkgutil.get_data('workflow_logic.db_app.prompts', file_name)
     if data:
         return data.decode('utf-8')
     else:
         raise FileNotFoundError(f"File {file_name} not found in the prompts directory")
 
+ComponentType = Literal["users", "models", "prompts", "agents", "tasks", "parameters", "apis", "chats"]
+
 class DBStructure(BaseModel):
-    users: List[Dict[str, Any]] = Field(..., description="List of users to create")
-    models: List[Dict[str, Any]] = Field(..., description="List of models to create")
-    prompts: List[Dict[str, Any]] = Field(..., description="List of prompts to create")
-    agents: List[Dict[str, Any]] = Field(..., description="List of agents to create")
-    tasks: List[Dict[str, Any]] = Field(..., description="List of tasks to create")
-    parameters: List[Dict[str, Any]] = Field(..., description="List of parameters to create")
-    apis: List[Dict[str, Any]] = Field(..., description="List of apis to create")
-    chats: List[Dict[str, Any]] = Field(..., description="List of chats to create")
+    users: List[Dict[str, Any]] = Field(default_factory=list, description="List of users to create")
+    models: List[Dict[str, Any]] = Field(default_factory=list, description="List of models to create")
+    prompts: List[Dict[str, Any]] = Field(default_factory=list, description="List of prompts to create")
+    agents: List[Dict[str, Any]] = Field(default_factory=list, description="List of agents to create")
+    tasks: List[Dict[str, Any]] = Field(default_factory=list, description="List of tasks to create")
+    parameters: List[Dict[str, Any]] = Field(default_factory=list, description="List of parameters to create")
+    apis: List[Dict[str, Any]] = Field(default_factory=list, description="List of apis to create")
+    chats: List[Dict[str, Any]] = Field(default_factory=list, description="List of chats to create")
+
+    def add_component(self, component_type: ComponentType, component: Dict[str, Any]):
+        """
+        Add a new component to the DBStructure.
+
+        :param component_type: The type of component to add (e.g., "users", "models", etc.)
+        :param component: The component data to add
+        """
+        if component_type not in self.model_fields:
+            raise ValueError(f"Invalid component type: {component_type}")
+
+        getattr(self, component_type).append(component)
+
+    def get_components_order(self) -> List[ComponentType]:
+        """
+        Get the order of components as defined in the class.
+
+        :return: A list of component types in the order they are defined
+        """
+        return list(self.model_fields.keys())
+
+    def add_components_from_dict(self, components_dict: Dict[str, List[Dict[str, Any]]]):
+        """
+        Add multiple components from a dictionary, maintaining the correct order.
+
+        :param components_dict: A dictionary containing components to add
+        """
+        for component_type in self.get_components_order():
+            if component_type in components_dict:
+                for component in components_dict[component_type]:
+                    self.add_component(component_type, component)
 
 DB_STRUCTURE = DBStructure(
     users=[
@@ -705,6 +738,16 @@ Once you believe the task is complete, create a summary with references for the 
             "executor": "executor_agent", # Reference
             "model_id": "GPT4o", # Reference
             "functions": [], # Reference
+        },
+        
+        {
+            "key": "default_chat_2",
+            "name": "New Chat 2",
+            "messages": [],
+            "alice_agent": "default_alice",  # Reference to agent key
+            "executor": "executor_agent", # Reference
+            "model_id": "GPT4o", # Reference
+            "functions": ["google_search"], # Reference
         }
     ]
 )

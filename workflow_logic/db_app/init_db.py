@@ -1,11 +1,10 @@
-import logging
+from workflow_logic.util.logging_config import LOGGER
 from typing import get_type_hints, get_origin, get_args, Dict, Any, Union
 from pydantic import BaseModel, Field, ConfigDict
 from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, DatabaseTaskResponse, ParameterDefinition, FunctionParameters
 from workflow_logic.util import User
 from workflow_logic.core.api import API
-from workflow_logic.api.api_util import available_task_types
-from workflow_logic.api.api_util.api_utils import EntityType
+from workflow_logic.core.api.api_utils import EntityType, available_task_types
 
 class DBInitManager(BaseModel):
     entity_key_map: Dict[EntityType, Dict[str, Dict[str, Any]]] = Field(default_factory=lambda: {
@@ -73,8 +72,8 @@ class DBInitManager(BaseModel):
                 try:
                     return task_class(**task_dict)
                 except Exception as e:
-                    logging.error(f"Error creating task of type {task_type}: {str(e)}")
-                    logging.error(f"Task data: {task_dict}")
+                    LOGGER.error(f"Error creating task of type {task_type}: {str(e)}")
+                    LOGGER.error(f"Task data: {task_dict}")
                     raise
 
         raise ValueError(f"Task type {task_type} not found in available task types.")

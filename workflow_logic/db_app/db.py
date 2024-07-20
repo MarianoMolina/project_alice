@@ -1,19 +1,20 @@
-import requests, logging, aiohttp, asyncio
+import requests, aiohttp, asyncio
 import aiohttp, asyncio, json
 from bson import ObjectId
 from aiohttp import ClientError
 from typing import get_args, Dict, Any, Optional, Literal
 from pydantic import BaseModel, Field
 from tqdm import tqdm
+from workflow_logic.util.logging_config import LOGGER
 from workflow_logic.core.communication import DatabaseTaskResponse, MessageDict
-from workflow_logic.api.api_util.api_utils import available_task_types
+from workflow_logic.core.api.api_utils import available_task_types
 from workflow_logic.util.const import BACKEND_PORT, HOST, ADMIN_TOKEN, BACKEND_PORT_DOCKER, BACKEND_HOST
 from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, DatabaseTaskResponse
 from workflow_logic.core.api import API, APIManager
 from workflow_logic.util import User
-from workflow_logic.api.api_util.api_utils import  EntityType
-from workflow_logic.api.db_app.initialization_data import DBStructure
-from workflow_logic.api.db_app.init_db import DBInitManager
+from workflow_logic.core.api.api_utils import  EntityType
+from workflow_logic.db_app.initialization_data import DBStructure
+from workflow_logic.db_app.init_db import DBInitManager
 
 class BackendAPI(BaseModel):
     base_url: Literal[f"http://{HOST}:{BACKEND_PORT}/api"] = Field(f"http://{HOST}:{BACKEND_PORT}/api", description="The base URL of the backend API", frozen=True)
@@ -48,7 +49,7 @@ class BackendAPI(BaseModel):
                 if validate.get("valid"):
                     return True
         except Exception as e:
-            logging.error(f"Error in initialize_libraries: {e}")
+            LOGGER.error(f"Error in initialize_libraries: {e}")
             raise
 
     def _get_headers(self):
@@ -90,10 +91,10 @@ class BackendAPI(BaseModel):
                         prompts = await self.preprocess_data(prompts)
                         return {prompts["_id"]: Prompt(**prompts)}
             except aiohttp.ClientError as e:
-                logging.error(f"Error retrieving prompts: {e}")
+                LOGGER.error(f"Error retrieving prompts: {e}")
                 return {}
             except Exception as e:
-                logging.error(f"Unexpected error retrieving prompts: {e}")
+                LOGGER.error(f"Unexpected error retrieving prompts: {e}")
                 return {}
             
     async def get_users(self, user_id: Optional[str] = None) -> Dict[str, User]:
@@ -300,8 +301,7 @@ class BackendAPI(BaseModel):
             async with aiohttp.ClientSession() as session:
                 async with session.patch(url, json=data, headers=headers) as response:
                     response.raise_for_status()
-                    result = await response.json()
-                    return await self.populate_chat(result["chat"])
+                    return True
         except aiohttp.ClientError as e:
             print(f"Error storing messages: {e}")
             return None

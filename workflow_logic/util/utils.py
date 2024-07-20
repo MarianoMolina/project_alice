@@ -1,12 +1,11 @@
-import json, os, base64, logging, re, datetime
-from typing import  Dict, List, Optional, Any, Union, Type, Tuple
+import json, base64, re, datetime
+from typing import List, Optional, Any, Union, Type, Tuple
 from openai import OpenAI as OriginalOpenAI
 from pydantic import BaseModel, Field
 from enum import Enum
 from workflow_logic.util.const import HOST
+from workflow_logic.util.logging_config import LOGGER
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-        
 def json_to_python_type_mapping(json_type: str) -> Type | Tuple[Type, ...] | None:
     type_mapping = {
         "string": str,
@@ -18,7 +17,7 @@ def json_to_python_type_mapping(json_type: str) -> Type | Tuple[Type, ...] | Non
     }
     if json_type in type_mapping:
         return type_mapping[json_type]
-    logging.error(f"Invalid JSON type: {json_type}")
+    LOGGER.error(f"Invalid JSON type: {json_type}")
     return None
 
 default_client = OriginalOpenAI(base_url=f"http://{HOST}:1234/v1", api_key="lm-studio")
@@ -33,9 +32,9 @@ def describe_image(model_name: str, image_path: str, client: OriginalOpenAI = de
         image = open(image_path.replace("'", ""), "rb").read()
         base64_image = base64.b64encode(image).decode("utf-8")
     except:
-        print("Couldn't read the image. Make sure the path is correct and the file exists.")
+        LOGGER.error("Couldn't read the image. Make sure the path is correct and the file exists.")
         exit()
-    prompt = prompt or "What’s in this image?"
+    prompt = prompt or "What's in this image?"
     system_message = system_message or "This is a chat between a user and an assistant. The assistant is helping the user to describe an image."
     completion = client.chat.completions.create(
         model = model_name,
@@ -65,8 +64,8 @@ def describe_image(model_name: str, image_path: str, client: OriginalOpenAI = de
         if chunk.choices[0].delta.content:
             chunk_str = chunk.choices[0].delta.content
             response += chunk_str
-            print(chunk_str, end="", flush=True)
-    print("")
+            LOGGER.debug(chunk_str, end="", flush=True)
+    LOGGER.debug("")
     del image, base64_image
     return response
     
@@ -77,6 +76,7 @@ def save_results_to_file(results: List[Any], file_path: str):
             if hasattr(result, "dict"):
                 results[i] = result.dict()
         json.dump(results, file, indent=2)
+    LOGGER.info(f"Results saved to {file_path}")
 
 def get_language_matching(language: str) -> Union[str, None]:
     language_map = {
@@ -119,6 +119,7 @@ def get_language_matching(language: str) -> Union[str, None]:
     }
     if language in language_map:
         return language_map[language]
+    LOGGER.warning(f"No matching language found for: {language}")
     return None
 
 def sanitize_and_limit_prompt(prompt: str, limit: int = 50) -> str:
@@ -126,6 +127,7 @@ def sanitize_and_limit_prompt(prompt: str, limit: int = 50) -> str:
     sanitized_prompt = re.sub(r'[^a-zA-Z0-9\s_-]', '_', prompt)
     # Limit to the first n characters
     limited_sanitized_prompt = sanitized_prompt[:limit]
+    LOGGER.debug(f"Sanitized and limited prompt: {limited_sanitized_prompt}")
     return limited_sanitized_prompt
 
 class UserRoles(str, Enum):

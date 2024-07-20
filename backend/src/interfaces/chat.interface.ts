@@ -19,7 +19,6 @@ export interface IChangeHistory {
 export interface IChangeHistoryDocument extends IChangeHistory, Document {
     apiRepresentation: () => any;
 }
-
 export interface IMessage {
     _id?: Types.ObjectId;  // Add this line
     content: string;
@@ -29,6 +28,7 @@ export interface IMessage {
     assistant_name: string;
     context: any;
     type: string;
+    tool_calls: any[];
     request_type: string | null;
     created_by: Types.ObjectId;
     task_responses: Types.ObjectId[];

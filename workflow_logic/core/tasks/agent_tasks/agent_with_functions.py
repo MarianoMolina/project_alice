@@ -1,7 +1,8 @@
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, Optional, Callable
+from autogen.agentchat import ConversableAgent
 from pydantic import Field
 from workflow_logic.core.api import APIManager
-from workflow_logic.core.model import LLMConfig
+from workflow_logic.core.parameters import FunctionConfig
 from workflow_logic.core.agent.agent import AliceAgent
 from workflow_logic.core.tasks.task import AliceTask
 from workflow_logic.core.tasks.agent_tasks.prompt_agent_task import PromptAgentTask
@@ -22,17 +23,12 @@ class AgentWithFunctions(PromptAgentTask):
    
     def setup_chat_execution(self, api_manager: APIManager):
         if self.chat_execution is None:
-            functions = [task.get_function()["tool_function"].model_dump() for task in self.tasks.values()]
+            functions = [task.get_function(api_manager)["tool_function"].model_dump() for task in self.tasks.values()]
             print(f'functions: {functions}')
             
-            # Merge all function maps into a single dictionary
-            function_map = {}
-            for task in self.tasks.values():
-                function_map.update(task.get_function()["function_map"])
             self.chat_execution = ChatExecutionFunctionality(
-                llm_agent=self.agent.get_autogen_agent(api_manager=api_manager),
-                execution_agent=self.execution_agent.get_execution_agent(function_map),
-                functions=functions,
+                llm_agent=self.get_default_autogen_agent(api_manager=api_manager),
+                execution_agent=self.get_default_executor(api_manager=api_manager),
                 code_execution_config=self.execution_agent.code_execution_config,
                 valid_languages=["python", "shell"],
                 return_output_to_agent=True
@@ -42,14 +38,14 @@ class AgentWithFunctions(PromptAgentTask):
         self.setup_chat_execution(api_manager)
         
         message_dicts = [MessageDict(**msg) for msg in messages]
-        new_messages, is_terminated = self.chat_execution.take_turn(message_dicts)
+        new_messages, is_terminated = await self.chat_execution.take_turn(message_dicts)
         
         return new_messages, is_terminated
 
     async def run(self, api_manager: APIManager, **kwargs) -> TaskResponse:
         copy_kwargs = kwargs.copy()
         messages = self.create_message_list(**kwargs)
-        new_messages, is_terminated = await self.generate_agent_response(messages, api_manager, **kwargs)
+        new_messages, is_terminated = await self.generate_agent_response(messages=messages, api_manager=api_manager, **kwargs)
         
         all_messages = messages + new_messages
         chat_output = LLMChatOutput(content=all_messages)
@@ -67,3 +63,22 @@ class AgentWithFunctions(PromptAgentTask):
             result_diagnostic="Task executed successfully." if not is_terminated else "Task execution terminated by the agent.",
             execution_history=kwargs.get("execution_history", [])
         )
+    
+    def functions_list(self, api_manager: APIManager) -> List[FunctionConfig]:
+        return [func.get_function(api_manager)["tool_function"].model_dump() for func in self.tasks.values()] if self.tasks else None
+    
+    def get_default_autogen_agent(self, api_manager: APIManager) -> ConversableAgent:
+        return self.agent.get_autogen_agent(api_manager=api_manager, functions_list=self.functions_list(api_manager=api_manager)) 
+    
+    def get_combined_function_map(self, api_manager: APIManager) -> Optional[Dict[str, Callable]]:
+        combined_function_map = {}
+        for func in self.tasks.values():
+            function_details = func.get_function(api_manager=api_manager)
+            combined_function_map.update(function_details["function_map"])
+        return combined_function_map
+    
+    def get_default_executor(self, api_manager: APIManager) -> ConversableAgent:
+        if not self.execution_agent:
+            return None
+        function_map = self.get_combined_function_map(api_manager=api_manager)
+        return self.execution_agent.get_autogen_agent(function_map=function_map if function_map else None)

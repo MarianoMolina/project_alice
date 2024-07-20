@@ -1,4 +1,4 @@
-import logging
+from workflow_logic.util.logging_config import LOGGER
 from typing import Optional, List, Tuple
 from pydantic import Field
 from workflow_logic.core.api.api import APIManager
@@ -33,10 +33,10 @@ class BasicAgentTask(AliceTask):
             diagnostics = "Failed to initialize messages."
             return self.get_failed_task_response(diagnostics=diagnostics, **kwargs)
 
-        logging.info(f'Executing task: {self.task_name}')
+        LOGGER.info(f'Executing task: {self.task_name}')
         initial_inputs = {**kwargs, "messages": messages }
         result, exitcode = await self.generate_agent_response(messages=messages, max_rounds=1, api_manager=api_manager, **kwargs)
-        logging.info(f"Task {self.task_name} executed with exit code: {exitcode}. Response: {result}")
+        LOGGER.info(f"Task {self.task_name} executed with exit code: {exitcode}. Response: {result}")
         if isinstance(result, str):
             result = MessageDict(content=result, role="assistant", generated_by="llm", step=self.task_name, assistant_name=self.agent.name)
         task_outputs = LLMChatOutput(content=[result])
@@ -79,7 +79,7 @@ class BasicAgentTask(AliceTask):
             self.agent.human_input_mode = "NEVER"
     
     async def generate_agent_response(self, messages: List[dict], api_manager, max_rounds: int = 1, **kwargs) -> Tuple[str, int]:
-        logging.info(f"Generating response by {self.agent.name} from messages: {messages}")  
+        LOGGER.info(f"Generating response by {self.agent.name} from messages: {messages}")  
         self.update_agent(max_rounds)
         result = await self.agent.get_autogen_agent(api_manager=api_manager).a_generate_reply(messages)
         if result:

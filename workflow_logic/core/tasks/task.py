@@ -32,14 +32,14 @@ class AliceTask(BaseModel, ABC):
     input_variables: FunctionParameters = Field(prompt_function_parameters, description="The input variables for the task. Default is a string prompt.")
     exit_codes: Dict[int, str] = Field(default={0: "Success", 1: "Failed"}, description="A dictionary of exit codes for the task, consistent with the TaskResponse structure", example={0: "Success", 1: "Failed"})
     recursive: bool = Field(True, description="Whether the task can be executed recursively")
-    templates: Dict[str, str] = Field(default={}, description="A dictionary of templates for the task")
-    tasks: Dict[str, "AliceTask"] = Field(default={}, description="A dictionary of task_id: task")
+    templates: Optional[Dict[str, str]] = Field(default={}, description="A dictionary of templates for the task")
+    tasks: Optional[Dict[str, "AliceTask"]] = Field(default={}, description="A dictionary of task_id: task")
     valid_languages: List[str] = Field([], description="A list of valid languages for the task")
     timeout: Optional[int] = Field(None, description="The timeout for the task in seconds")
     prompts_to_add: Optional[Dict[str, Prompt]] = Field(None, description="A dictionary of prompts to add to the task")
     exit_code_response_map: Optional[Dict[str, int]] = Field(None, description="A dictionary mapping exit codes to responses")
     start_task: Optional[str] = Field(None, description="The name of the starting task")
-    required_apis: List[ApiType] = Field([], description="A list of required APIs for the task")
+    required_apis: Optional[List[ApiType]] = Field([], description="A list of required APIs for the task")
     task_selection_method: Optional[Callable[[TaskResponse, List[Dict[str, Any]]], Optional[str]]] = Field(None, description="A method to select the next task based on the current task's response")
     tasks_end_code_routing: Optional[Dict[str, Dict[Union[str, int], Tuple[Optional[str], bool]]]] = Field(None, description="A dictionary of tasks -> exit codes and the task to route to given each exit code and a bool to determine if the outcome represents an extra 'try' at the task. If a selection method is provided, this isn't used")
     max_attempts: int = Field(3, description="The maximum number of failed task attempts before the workflow is considered failed. Default is 3.")
@@ -123,12 +123,14 @@ class AliceTask(BaseModel, ABC):
         # Return the response
         return DatabaseTaskResponse(**response.model_dump())
     
-    def get_function(self, execution_history: Optional[List]=[]) -> Dict[str, Any]:
+    def get_function(self, execution_history: Optional[List]=[], api_manager: Optional[APIManager] = None) -> Dict[str, Any]:
         """
         Returns a dictionary representing the function typedict and the function callable.
         """
-        def function_callable(**kwargs) -> DatabaseTaskResponse:
-            return self.execute(execution_history = execution_history, **kwargs)
+        async def function_callable(**kwargs) -> DatabaseTaskResponse:
+            params = {"api_manager": api_manager} if api_manager else {}
+            final_params = {"execution_history": execution_history, **params, **kwargs}
+            return await self.a_execute(**final_params)
         
         function_dict = FunctionConfig(
             name=self.task_name, 

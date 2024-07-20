@@ -4,23 +4,23 @@ import os
 from datetime import datetime
 from pydantic import BaseModel
 from typing import Dict, Any
-from workflow_logic.tests.test_environment import TestEnvironment
-from workflow_logic.tests.db_test import DBTests
-from workflow_logic.tests.api_test import APITests
-from workflow_logic.tests.chat_test import ChatTests
-from workflow_logic.tests.task_test import TaskTests
-from workflow_logic.api.db_app.initialization_data import DB_STRUCTURE
+from workflow_logic.tests.component_tests.test_environment import TestEnvironment
+from workflow_logic.tests.component_tests.db_test import DBTests
+from workflow_logic.tests.component_tests.api_test import APITests
+from workflow_logic.tests.component_tests.chat_tests import ChatTests
+from workflow_logic.tests.component_tests.task_test import TaskTests
+from workflow_logic.db_app.initialization_data import DB_STRUCTURE
 
 async def main():
     test_env = TestEnvironment()
     db_tests = DBTests()
     api_tests = APITests()
     chat_tests = ChatTests()
-    task_tests = TaskTests()  # Create TaskTests instance
+    task_tests = TaskTests()
     await test_env.add_module(db_tests)
     # await test_env.add_module(api_tests)
-    # await test_env.add_module(chat_tests)
-    await test_env.add_module(task_tests)  # Add TaskTests to the test environment
+    await test_env.add_module(chat_tests)
+    # await test_env.add_module(task_tests)
     test_settings = {
         "db_structure": DB_STRUCTURE,
         "verbose": True

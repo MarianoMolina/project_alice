@@ -11,7 +11,7 @@ asynctest
 pytest
 pytest-asyncio
 pyautogen
-pyautogen["anthropic"]
+pyautogen[anthropic]
 anthropic
 exa_py
 aiohttp
