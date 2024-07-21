@@ -22,9 +22,46 @@ prompt_function_parameters = FunctionParameters(
     
 class AliceTask(BaseModel, ABC):
     """
-    An abstract Task class. A task is an atomic unit of work that can be executed in a workflow.
-    Has to implement the run method which takes an input dict and returns a TaskResponse.
-    Can optionally include the input variables that the task expects and additional info relevant for use.
+    An abstract base class representing a task in the Alice workflow system.
+
+    AliceTask serves as the foundation for all task types in the system. It defines
+    the basic structure and interface that all tasks must implement, including
+    execution, API validation, and function representation for use in workflows.
+
+    Attributes:
+        id (Optional[str]): Unique identifier for the task.
+        task_name (str): Name of the task.
+        task_description (str): Detailed description of what the task does.
+        input_variables (FunctionParameters): Expected input structure for the task.
+        exit_codes (Dict[int, str]): Mapping of exit codes to their meanings.
+        recursive (bool): Whether the task can be called recursively.
+        templates (Optional[Dict[str, Prompt]]): Prompts used by the task.
+        tasks (Optional[Dict[str, "AliceTask"]]): Subtasks that this task may use.
+        valid_languages (List[str]): Programming languages the task can work with.
+        timeout (Optional[int]): Maximum execution time for the task.
+        prompts_to_add (Optional[Dict[str, Prompt]]): Additional prompts for the task.
+        exit_code_response_map (Optional[Dict[str, int]]): Mapping of responses to exit codes.
+        start_task (Optional[str]): Name of the initial subtask, if applicable.
+        required_apis (Optional[List[ApiType]]): APIs required for task execution.
+        task_selection_method (Optional[Callable]): Method for selecting the next task in a workflow.
+        tasks_end_code_routing (Optional[Dict]): Routing logic for subtasks based on exit codes.
+        max_attempts (int): Maximum number of execution attempts before failure.
+        agent (Optional[AliceAgent]): The agent associated with this task.
+        execution_agent (Optional[AliceAgent]): The agent responsible for executing this task.
+        human_input (Optional[bool]): Whether the task requires human interaction.
+
+    Methods:
+        task_type: Returns the class name of the task.
+        run: Abstract method to be implemented by subclasses for task execution.
+        validate_required_apis: Ensures all required APIs are available and healthy.
+        deep_validate_required_apis: Recursively validates APIs for this task and its subtasks.
+        a_execute: Asynchronously executes the task, handling recursion and history.
+        get_function: Returns a dictionary representing the task as a function for workflow use.
+        get_failed_task_response: Generates a TaskResponse object for a failed task execution.
+
+    The AliceTask class provides a robust framework for defining complex, multi-step
+    tasks that can be composed into workflows, with built-in support for API dependencies,
+    recursion control, and detailed execution tracking.
     """
     id: Optional[str] = Field(default=None, description="The task ID", alias="_id")
     task_name: str = Field(..., description="The name of the task")

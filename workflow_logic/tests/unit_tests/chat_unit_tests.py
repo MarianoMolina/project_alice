@@ -7,7 +7,7 @@ from workflow_logic.core.api import APIManager
 from workflow_logic.core.model import AliceModel, LLMConfig
 from workflow_logic.core.tasks import AliceTask
 from autogen.agentchat import ConversableAgent
-from workflow_logic.core.chat.chat_execution_functionality import ChatExecutionFunctionality
+from workflow_logic.core.chat_functionality import ChatExecutionFunctionality
 from workflow_logic.core.chat.chat import AliceChat
 
 class TestAliceChat(unittest.IsolatedAsyncioTestCase):

@@ -1,5 +1,5 @@
 from workflow_logic.util.logging_config import LOGGER
-from typing import Dict, Any, List, Tuple,  Union
+from typing import Dict, Any, List, Tuple,  Union, Optional
 from pydantic import BaseModel, Field, ConfigDict
 from autogen.code_utils import extract_code
 from autogen.agentchat import ConversableAgent
@@ -151,7 +151,7 @@ class ChatExecutionFunctionality(BaseModel):
         
         return new_messages
 
-    async def handle_potential_code_execution(self, response: str) -> List[MessageDict]:
+    async def handle_potential_code_execution(self, response: str, step_name: Optional[str] = None) -> List[MessageDict]:
         code_blocks = self.retrieve_code_blocks(response)
         if not code_blocks:
             return []
@@ -160,14 +160,17 @@ class ChatExecutionFunctionality(BaseModel):
             LOGGER.info(f"Executing code blocks: {code_blocks}")
             is_success, result = await self.execution_agent.execute_code_blocks(code_blocks)
             
-            if is_success and isinstance(result, dict) and 'content' in result:
-                content = result['content']
+            if is_success:
+                if isinstance(result, dict) and 'content' in result:
+                    content = result['content']
+                else:
+                    content = result
                 if isinstance(content, DatabaseTaskResponse):
                     return [MessageDict(
                         role="tool",
                         content=str(content),
                         generated_by="tool",
-                        step="code_execution",
+                        step=step_name if step_name else "code_execution",
                         type="TaskResponse",
                         task_responses=[content]
                     )]
@@ -176,7 +179,7 @@ class ChatExecutionFunctionality(BaseModel):
                         role="tool",
                         content=f"Code execution result: {content}",
                         generated_by="tool",
-                        step="code_execution",
+                        step=step_name if step_name else "code_execution",
                         type="text"
                     )]
             else:
@@ -185,7 +188,7 @@ class ChatExecutionFunctionality(BaseModel):
                     role="tool",
                     content=error_message,
                     generated_by="tool",
-                    step="code_execution",
+                    step=step_name if step_name else "code_execution",
                     type="text"
                 )]
         

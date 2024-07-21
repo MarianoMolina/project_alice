@@ -434,12 +434,12 @@ Once you believe the task is complete, create a summary with references for the 
         },
         {   
             "key": "search_hub",
-            "task_type": "AgentWithFunctions", 
+            "task_type": "PromptAgentTask", 
             "task_name": "search_hub",
             "task_description": "Searches multiple sources and returns the results",
             "agent": "research_agent", # Reference
-            "template": {
-                "task_template": "code_generation_task"
+            "templates": {
+                "task_template": "basic_prompt" # Reference
             },
             "execution_agent": "executor_agent", # Reference
             "tasks":{
@@ -452,7 +452,7 @@ Once you believe the task is complete, create a summary with references for the 
             "input_variables": {
                 "type": "object",
                 "properties": {
-                    "prompt": "prompt_parameter",
+                    "prompt": "prompt_parameter", # Reference
                 },
                 "required": ["prompt"]
             },
@@ -465,7 +465,7 @@ Once you believe the task is complete, create a summary with references for the 
             "task_description": "Takes a simple prompt and develops it into a full task prompt",
             "agent": "coding_planner_agent", # Reference
             "required_apis": ["llm_api"],
-            "template": {
+            "templates": {
                 "task_template": "basic_prompt"
             },
             "input_variables": {

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from workflow_logic.core.communication import DatabaseTaskResponse
+from workflow_logic.core.tasks import AliceTask
 from workflow_logic.core.api.api_utils import TaskExecutionRequest, deep_api_check
 from workflow_logic.util.logging_config import LOGGER
 from workflow_logic.api_app.util.dependencies import get_db_app
@@ -17,7 +18,7 @@ async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(ge
         task = await db_app.get_tasks(taskId)
         if not task or not task.get(taskId):
             raise ValueError(f"Task with ID {taskId} not found")
-        task = task[taskId]
+        task: AliceTask = task[taskId]
        
         # Retrieve API manager
         api_manager = await db_app.api_setter()

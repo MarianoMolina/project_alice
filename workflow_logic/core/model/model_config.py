@@ -13,6 +13,7 @@ class LLMConfig(BaseModel):
     config_list: List[ModelConfig]
     temperature: Optional[float] = 0.9
     timeout: Optional[int] = 300
+    tools: Optional[List[str]] = None
 
     def replace_localhost(self) -> 'LLMConfig':
         for config in self.config_list:

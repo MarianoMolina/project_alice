@@ -82,16 +82,16 @@ class AliceAgent(BaseModel):
                 llm_config = LLMConfig(**llm_config)
             if not llm_config.config_list:
                 raise ValueError("LLM Config must have a 'config_list' attribute with at least one config.")
-            llm_config = llm_config.replace_localhost().model_dump()
+            llm_config = llm_config.replace_localhost().model_dump(by_alias=True)
             if functions_list:
-                llm_config["tools"] = functions_list
+                llm_config["tools"] = [func.model_dump(by_alias=True) for func in functions_list]
 
         # Agent creation
         if self.autogen_class == "ConversableAgent":
             return ConversableAgent(
                 name=self.name,
                 system_message=self.system_message_str,
-                llm_config=llm_config,
+                llm_config=llm_config if llm_config else None,
                 max_consecutive_auto_reply=self.max_consecutive_auto_reply,
                 human_input_mode=self.human_input_mode,
             )
@@ -115,7 +115,7 @@ class AliceAgent(BaseModel):
                 name=self.name,
                 system_message=self.system_message_str,
                 human_input_mode=self.human_input_mode,
-                llm_config=llm_config,
+                llm_config=llm_config if llm_config else None,
                 max_consecutive_auto_reply=self.max_consecutive_auto_reply
             )
         else:

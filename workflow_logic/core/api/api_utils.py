@@ -3,11 +3,10 @@ from typing import Dict, Any, Literal, Union
 from workflow_logic.core.tasks.task import  AliceTask
 from workflow_logic.core import AliceChat
 from workflow_logic.core.api import APIManager
-from workflow_logic.core.tasks import APITask, AliceTask, RedditSearchTask, Workflow, WikipediaSearchTask, GoogleSearchTask, ExaSearchTask, ArxivSearchTask, BasicAgentTask, PromptAgentTask, CheckTask, CodeGenerationLLMTask, CodeExecutionLLMTask, AgentWithFunctions
+from workflow_logic.core.tasks import APITask, AliceTask, RedditSearchTask, Workflow, WikipediaSearchTask, GoogleSearchTask, ExaSearchTask, ArxivSearchTask, BasicAgentTask, PromptAgentTask, CheckTask, CodeGenerationLLMTask, CodeExecutionLLMTask
 
 available_task_types: list[AliceTask] = [
     Workflow,
-    AgentWithFunctions,
     PromptAgentTask,
     CodeGenerationLLMTask,
     CodeExecutionLLMTask,
