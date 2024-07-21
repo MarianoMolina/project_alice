@@ -1,7 +1,7 @@
 import traceback
 from workflow_logic.util.logging_config import LOGGER
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Optional, Callable, Dict
+from typing import List, Optional, Callable, Dict, Any
 from bson import ObjectId
 from workflow_logic.core.communication import MessageDict
 from workflow_logic.core.model import AliceModel
@@ -18,9 +18,9 @@ default_system_message = {
 }
 
 class AliceChat(BaseModel):
-    id: str = Field(default="", description="The unique ID of the chat conversation, must match the ID in the database", alias="_id")
+    id: Optional[str] = Field(default=None, description="The unique ID of the chat conversation, must match the ID in the database", alias="_id")
     name: str = Field("New Chat", description="The name of the chat conversation")
-    messages: List[MessageDict] = Field(..., description="List of messages in the chat conversation")
+    messages: Optional[List[MessageDict]] = Field([], description="List of messages in the chat conversation")
     alice_agent: AliceAgent = Field(
         default = AliceAgent(
             name="Alice",
@@ -86,3 +86,30 @@ class AliceChat(BaseModel):
     def get_default_executor(self, api_manager: APIManager) -> ConversableAgent:
         function_map = self.get_combined_function_map(api_manager=api_manager)
         return self.executor.get_autogen_agent(function_map=function_map if function_map else None)
+    
+    def deep_validate_required_apis(self, api_manager: APIManager) -> Dict[str, Any]:
+        result = {
+            "chat_name": self.name,
+            "status": "valid",
+            "warnings": [],
+            "llm_api": "valid",
+            "functions": []
+        }
+        
+        # Check LLM API
+        try:
+            api_manager.retrieve_api_data("llm_api", self.model_id)
+        except ValueError as e:
+            result["status"] = "warning"
+            result["llm_api"] = "invalid"
+            result["warnings"].append(str(e))
+        
+        # Check functions
+        for func in self.functions:
+            func_result = func.deep_validate_required_apis(api_manager)
+            result["functions"].append(func_result)
+            if func_result["status"] == "warning":
+                result["status"] = "warning"
+                result["warnings"].extend(func_result["warnings"])
+        
+        return result

@@ -43,7 +43,7 @@ def get_all_api_names() -> List[Tuple[str, str]]:
     return [(name, value) for name, value in ApiName.__members__.items()]
 
 class API(BaseModel):
-    id: Optional[str] = Field(None, alias="_id")
+    id: Optional[str] = Field(default=None, alias="_id")
     api_type: ApiType
     api_name: ApiName
     name: str

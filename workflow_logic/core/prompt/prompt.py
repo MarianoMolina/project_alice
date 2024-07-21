@@ -15,7 +15,7 @@ TYPE_MAPPING = {
 }
 
 class Prompt(BaseModel):
-    id: Optional[str] = Field(default="", description="The unique ID of the prompt, must match the ID in the database", alias="_id")
+    id: Optional[str] = Field(default=None, description="The unique ID of the prompt, must match the ID in the database", alias="_id")
     name: str = Field(..., description="The name of the prompt.")
     content: str = Field(..., description="The content of the prompt.")
     is_templated: bool = Field(default=False, description="Whether the prompt is templated or not.")

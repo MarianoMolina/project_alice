@@ -33,7 +33,7 @@ class Workflow(AliceTask):
     async def execute_workflow(self, step_through: bool, **kwargs) -> Tuple[List[TaskResponse], str, str]:
         tasks_performed = []
         attempts = 1
-        current_task_name = self.get_initial_task_name()
+        current_task_name, bool = self.get_initial_task_name()
 
         try:
             while current_task_name:
@@ -71,7 +71,7 @@ class Workflow(AliceTask):
 
     def get_next_task(self, task_result: TaskResponse, tasks_performed: List[TaskResponse]) -> Tuple[Optional[str], bool]:
         next_task_info = self.select_next_task(task_result, tasks_performed)
-        return next_task_info if isinstance(next_task_info, tuple) else (next_task_info, False)
+        return next_task_info
 
     def create_workflow_response(self, tasks_performed: List[TaskResponse], status: str, diagnostic: str, task_inputs: Dict[str, Any], **kwargs) -> TaskResponse:
         return TaskResponse(
@@ -91,7 +91,7 @@ class Workflow(AliceTask):
         import traceback
         return traceback.format_exc()
 
-    def select_next_task(self, task_response: Optional[TaskResponse], outputs: Optional[List[Dict[str, Any]]]) -> tuple[Optional[str], bool]:
+    def select_next_task(self, task_response: Optional[TaskResponse], outputs: Optional[List[Dict[str, Any]]]) -> Tuple[Optional[str], bool]:
         if self.task_selection_method:
             return self.task_selection_method(task_response, outputs)
         if not self.tasks_end_code_routing:
@@ -114,14 +114,19 @@ class Workflow(AliceTask):
             raise ValueError(f"Task {task_name} not found in the workflow routing.")
 
         result_code = task_response.result_code
-        task_routing = self.tasks_end_code_routing[task_name]
+        task_routing: Dict[Union[str, int], Union[Tuple[Optional[str], bool], List[Optional[Union[str, bool]]]]] = self.tasks_end_code_routing[task_name]
 
-        next_task_info = self.get_next_task_info(task_routing, result_code)
+        next_task_info: Union[Tuple[Optional[str], bool], List[Optional[Union[str, bool]]]] = self.get_next_task_info(task_routing, result_code)
         return self.parse_next_task_info(next_task_info)
 
-    def get_next_task_info(self, task_routing: Dict[Union[str, int], Any], result_code: Union[str, int]) -> Any:
+    def get_next_task_info(self, task_routing: Dict[Union[str, int], Union[Tuple[Optional[str], bool], List[Optional[Union[str, bool]]]]], result_code: Union[str, int]) -> Union[Tuple[Optional[str], bool], List[Optional[Union[str, bool]]]]:
         if result_code in task_routing:
             return task_routing[result_code]
+        try:
+            if int(result_code) in task_routing:
+                return task_routing[int(result_code)]
+        except:
+            raise ValueError(f"Exit code {result_code} not found in task routing.")
         
         converted_result_code = str(result_code) if isinstance(result_code, int) else int(result_code)
         if converted_result_code in task_routing:

@@ -2,7 +2,7 @@ from workflow_logic.util.logging_config import LOGGER
 from typing import Optional, List, Tuple
 from pydantic import Field
 from workflow_logic.core.api.api import APIManager
-from workflow_logic.core.communication import StringOutput, LLMChatOutput, MessageDict, TaskResponse
+from workflow_logic.core.communication import LLMChatOutput, MessageDict, TaskResponse, messages_to_autogen_compatible
 from workflow_logic.core.agent.agent import AliceAgent
 from workflow_logic.core.tasks.task import AliceTask
 from workflow_logic.core.parameters import ParameterDefinition, FunctionParameters
@@ -73,14 +73,15 @@ class BasicAgentTask(AliceTask):
         self.update_agent_human_input()
     
     def update_agent_human_input(self) -> None:
-        if self.human_input:
-            self.agent.human_input_mode = "ALWAYS"
-        else:
+        # if self.human_input:
+        #     self.agent.human_input_mode = "ALWAYS"
+        # else:
             self.agent.human_input_mode = "NEVER"
     
-    async def generate_agent_response(self, messages: List[dict], api_manager, max_rounds: int = 1, **kwargs) -> Tuple[str, int]:
+    async def generate_agent_response(self, messages: List[MessageDict], api_manager, max_rounds: int = 1, **kwargs) -> Tuple[str, int]:
         LOGGER.info(f"Generating response by {self.agent.name} from messages: {messages}")  
         self.update_agent(max_rounds)
+        messages = messages_to_autogen_compatible(messages)
         result = await self.agent.get_autogen_agent(api_manager=api_manager).a_generate_reply(messages)
         if result:
             if isinstance(result, str):

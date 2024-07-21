@@ -5,7 +5,7 @@ from workflow_logic.util.const import model_formats
 from workflow_logic.core.model.model_config import LLMConfig
 
 class AliceModel(BaseModel):
-    id: str = Field(None, title="Model ID", description="The ID of the model.", alias="_id")
+    id: Optional[str] = Field(None, title="Model ID", description="The ID of the model.", alias="_id")
     short_name: str = Field(..., title="Short Name", description="The short name of the model.")
     model_name: str = Field(..., title="Model Name", description="The complete name of the model.")
     model_format: str = Field(..., title="Model Format", description="The format of the model.")

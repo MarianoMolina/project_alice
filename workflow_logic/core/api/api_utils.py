@@ -29,33 +29,7 @@ class TaskExecutionRequest(BaseModel):
 EntityType = Literal["users", "models", "parameters", "prompts", "agents", "tasks", "chats", "task_responses", "apis"]
 # Utility function for deep API availability check
 async def deep_api_check(item: Union[AliceTask, AliceChat], api_manager: APIManager) -> Dict[str, Any]:
-    if isinstance(item, AliceTask):
+    if isinstance(item, AliceTask) or isinstance(item, AliceChat):
         return item.deep_validate_required_apis(api_manager)
-    elif isinstance(item, AliceChat):
-        result = {
-            "chat_name": item.name,
-            "status": "valid",
-            "warnings": [],
-            "llm_api": "valid",
-            "functions": []
-        }
-        
-        # Check LLM API
-        try:
-            api_manager.retrieve_api_data("llm_api", item.model_id)
-        except ValueError as e:
-            result["status"] = "warning"
-            result["llm_api"] = "invalid"
-            result["warnings"].append(str(e))
-        
-        # Check functions
-        for func in item.functions:
-            func_result = func.deep_validate_required_apis(api_manager)
-            result["functions"].append(func_result)
-            if func_result["status"] == "warning":
-                result["status"] = "warning"
-                result["warnings"].extend(func_result["warnings"])
-        
-        return result
     else:
         raise ValueError(f"Unsupported item type for API check: {type(item)}")

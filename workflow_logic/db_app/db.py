@@ -1,25 +1,21 @@
-import requests, aiohttp, asyncio
-import aiohttp, asyncio, json
-from bson import ObjectId
+import requests, aiohttp, asyncio, json
 from aiohttp import ClientError
-from typing import get_args, Dict, Any, Optional, Literal
+from bson import ObjectId
+from typing import Dict, Any, Optional, Literal
 from pydantic import BaseModel, Field
-from tqdm import tqdm
 from workflow_logic.util.logging_config import LOGGER
 from workflow_logic.core.communication import DatabaseTaskResponse, MessageDict
 from workflow_logic.core.api.api_utils import available_task_types
-from workflow_logic.util.const import BACKEND_PORT, HOST, ADMIN_TOKEN, BACKEND_PORT_DOCKER, BACKEND_HOST
+from workflow_logic.util.const import BACKEND_PORT, HOST, ADMIN_TOKEN
 from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, DatabaseTaskResponse
-from workflow_logic.core.api import API, APIManager
+from workflow_logic.core.api import API
 from workflow_logic.util import User
 from workflow_logic.core.api.api_utils import  EntityType
-from workflow_logic.db_app.initialization_data import DBStructure
-from workflow_logic.db_app.init_db import DBInitManager
 
 class BackendAPI(BaseModel):
     base_url: Literal[f"http://{HOST}:{BACKEND_PORT}/api"] = Field(f"http://{HOST}:{BACKEND_PORT}/api", description="The base URL of the backend API", frozen=True)
-    available_task_types: list[AliceTask] = Field(available_task_types, frozen=True, description="The available task types")
     user_token: str = Field(ADMIN_TOKEN, description="The admin token for the backend API")
+    available_task_types: list[AliceTask] = Field(available_task_types, frozen=True, description="The available task types")
     collection_map: Dict[EntityType, str] = Field(default_factory=lambda: {
         "users": "users",
         "models": "models",
@@ -31,7 +27,6 @@ class BackendAPI(BaseModel):
         "task_responses": "taskresults",
         "apis": "apis"
     }, description="Map of entity types to collection names")
-    temp_db_instance: Optional[DBInitManager] = Field(DBInitManager(), description="Temporary database instance for initialization")
 
     class Config:
         arbitrary_types_allowed = True
@@ -160,7 +155,6 @@ class BackendAPI(BaseModel):
                         raise ValueError(f"Failed to get a response from {url}")
                     response.raise_for_status()
                     tasks = await response.json()
-                    print(f'RESPONSE tasks :{tasks}')
                     
                     if isinstance(tasks, list):
                         tasks = [await self.preprocess_data(task) for task in tasks]
@@ -220,6 +214,20 @@ class BackendAPI(BaseModel):
                 print(f"Error retrieving APIs: {e}")
                 return {}
             
+    async def update_api_health(self, api_id: str, health_status: str) -> bool:
+        url = f"{self.base_url}/apis/{api_id}"
+        headers = self._get_headers()
+        data = {"health_status": health_status}
+
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.patch(url, json=data, headers=headers) as response:
+                    response.raise_for_status()
+                    return True
+            except aiohttp.ClientError as e:
+                print(f"Error updating API health: {e}")
+                return False
+    
     async def task_initializer(self, task: dict) -> AliceTask:
         if not task["task_type"] in self.task_types:
             raise ValueError(f"Task type {task['task_type']} not found in available task types.")
@@ -367,55 +375,14 @@ class BackendAPI(BaseModel):
             print(f"Error validating token: {e}")
             return {"valid": False, "message": str(e)}
         
-    async def initialize_database(self, db_structure: DBStructure) -> bool:
-        try:
-            db_structure_copy = db_structure.model_dump()
-            self.temp_db_instance = DBInitManager()
-            # Get the list of entity types from EntityType
-            entity_types = list(get_args(EntityType))
-            
-            # Create other entities
-            total_entities = sum(len(getattr(db_structure, et, [])) for et in entity_types)
-            
-            with tqdm(total=total_entities, desc="Initializing database") as pbar:
-                for entity_type in entity_types:
-                    await self.create_entities_by_type(entity_type, db_structure, pbar)
-            return await self.validate_initialization(DBStructure(**db_structure_copy))
-        except Exception as e:
-            print(f"Error in initialize_database: {str(e)}")
-
-    async def create_entities_by_type(self, entity_type: EntityType, db_structure: DBStructure, pbar: tqdm) -> bool:
-        entities = getattr(db_structure, entity_type, [])
-        for entity_data in entities:
-            try:
-                await self.create_entity(entity_type, entity_data)
-            except aiohttp.ClientResponseError as e:
-                if e.status == 409:
-                    print(f"Entity already exists: {entity_type} - {entity_data.get('name', entity_data.get('email'))}")
-                else:
-                    print(f"Error creating entity {entity_type}: {str(e)}")
-                    print(f"Entity data: {entity_data}")
-                    # If you want to stop the entire process on any error, uncomment the next line
-                    # raise
-            except Exception as e:
-                print(f"Unexpected error creating entity {entity_type}: {str(e)}")
-                print(f"Entity data: {entity_data}")
-                # If you want to stop the entire process on any error, uncomment the next line
-                # raise
-            pbar.update(1)
-
-    async def create_entity(self, entity_type: EntityType, entity_data: dict) -> str:
-    
-        # Resolve references in the data before creating the instance
-        resolved_data = await self.temp_db_instance.resolve_references_in_data(entity_type, entity_data)
-
+    async def create_entity_in_db(self, entity_type: EntityType, entity_data: dict) -> str:
         collection_name = self.collection_map[entity_type]
         url = f"{self.base_url}/{collection_name}"
         headers = self._get_headers()
 
         async with aiohttp.ClientSession() as session:
             try:
-                async with session.post(url, json=resolved_data, headers=headers) as response:
+                async with session.post(url, json=entity_data, headers=headers) as response:
                     if response.status == 400:
                         error_data = await response.json()
                         raise ValueError(f"Bad request when creating {entity_type}: {error_data}")
@@ -423,15 +390,15 @@ class BackendAPI(BaseModel):
                     response.raise_for_status()
                     result = await response.json()
                     print(f'Created {entity_type[:-1]}: {entity_data.get("key", entity_data.get("name", entity_data.get("email")))}')
-                    self.temp_db_instance.entity_key_map[entity_type][entity_data.get('key') or entity_data.get('name')] = result
+                    print(f'Result: {result}')
                     return result
             except aiohttp.ClientResponseError as e:
                 print(f"HTTP error during entity creation: {e.status} - {e.message}")
-                print(f"Entity data: {resolved_data}")
+                print(f"Entity data: {entity_data}")
                 raise
             except Exception as e:
                 print(f"Unexpected error during entity creation: {str(e)}")
-                print(f"Entity data: {resolved_data}")
+                print(f"Entity data: {entity_data}")
                 raise
 
     async def check_existing_data(self, max_retries=3, retry_delay=1) -> bool:
@@ -456,51 +423,6 @@ class BackendAPI(BaseModel):
                 print(f"Attempt {attempt + 1} failed, retrying in {retry_delay} seconds...")
                 await asyncio.sleep(retry_delay)
 
-    async def validate_initialization(self, db_structure: DBStructure) -> bool:
-        try:
-            for entity_type in get_args(EntityType):
-                if entity_type == 'users':
-                    continue
-                url = f"{self.base_url}/{self.collection_map[entity_type]}"
-                headers = self._get_headers()
-                
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(url, headers=headers) as response:
-                        response.raise_for_status()
-                        db_entities = await response.json()
-                        
-                        structure_entities = getattr(db_structure, entity_type, [])
-                        
-                        
-                        if len(db_entities) != len(structure_entities):
-                            print(f"Mismatch in {entity_type} count. Expected: {len(structure_entities)}, Found: {len(db_entities)}")
-                            return False
-                        
-                        # Check for the presence of each entity by name or email
-                        for entity in structure_entities:
-                            
-                            identifier = entity.get('name') or entity.get('email')
-                            if not any(db_entity.get('name') == identifier or db_entity.get('email') == identifier for db_entity in db_entities):
-                                print(f"Entity not found in database: {entity_type} - {identifier}")
-                                return False
-            
-            print("All entities validated successfully")
-            return True
-        
-        except Exception as e:
-            print(f"Error during validation: {str(e)}")
-            return False
-        
-    async def api_setter(self) -> APIManager:
-        api_manager = APIManager()
-        apis = await self.get_apis()
-        for api in apis.values():
-            api_manager.add_api(api)
-        return api_manager
-    
-class ContainerAPI(BackendAPI):
-    base_url: Literal[f"http://{BACKEND_HOST}:{BACKEND_PORT_DOCKER}/api"] = Field(f"http://{BACKEND_HOST}:{BACKEND_PORT_DOCKER}/api", description="The base URL of the backend API", frozen=True)
-        
 def token_validation_middleware(api: BackendAPI):
     def middleware(request) -> dict[str, bool]:
         token = request.headers.get("Authorization")

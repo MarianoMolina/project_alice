@@ -18,16 +18,16 @@ class APITests(TestModule):
         api_manager = APIManager()
 
         # Retrieve all APIs from db_init_manager
-        for api in db_init_manager.entity_key_map.get("apis", {}).values():
-            api_obj = API(**api)
-            api_manager.add_api(api_obj)
+        for api in db_init_manager.entity_obj_key_map.get("apis", {}).values():
+            api: API = api
+            api_manager.add_api(api)
 
             # Test each API
-            test_result = await self.test_api(api_obj, api_manager)
-            test_results[api_obj.name] = test_result
+            test_result = await self.test_api(api, api_manager)
+            test_results[api.api_name] = test_result
 
             if test_result == "Success":
-                available_apis.append((api_obj.api_type, api_obj.api_name))
+                available_apis.append((api.api_type, api.api_name))
 
         return {
             "test_results": test_results,

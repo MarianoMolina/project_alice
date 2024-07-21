@@ -65,7 +65,7 @@ class InitializationBackendAPI(BackendAPI):
         headers = {"Content-Type": "application/json"}
 
         async with aiohttp.ClientSession() as session:
-            async with session.post(url, json=user_data.model_dump(), headers=headers) as response:
+            async with session.post(url, json=user_data.model_dump(by_alias=True), headers=headers) as response:
                 response.raise_for_status()
                 result = await response.json()
                 user_data.id = result['_id']

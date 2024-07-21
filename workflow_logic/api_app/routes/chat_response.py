@@ -2,11 +2,13 @@ from fastapi import APIRouter, HTTPException, Depends
 from workflow_logic.core.api.api_utils import deep_api_check
 from workflow_logic.util.logging_config import LOGGER
 from workflow_logic.api_app.util.dependencies import get_db_app
+from workflow_logic.db_app.db import BackendAPI
+from workflow_logic.core.communication import serialize_message_dict
 
 router = APIRouter()
 
 @router.post("/chat_response/{chat_id}")
-async def chat_response(chat_id: str, db_app=Depends(get_db_app)) -> bool:
+async def chat_response(chat_id: str, db_app: BackendAPI = Depends(get_db_app)) -> bool:
     LOGGER.info(f'Generating chat response for id {chat_id}')
     chat_data = await db_app.get_chats(chat_id)
     if not chat_data:
@@ -31,9 +33,10 @@ async def chat_response(chat_id: str, db_app=Depends(get_db_app)) -> bool:
     # Store messages and task results in order
     if responses:
         for response in responses:
-            stored_chat = await db_app.store_chat_message(chat_id, response)
+            serializable_response = serialize_message_dict(response)
+            stored_chat = await db_app.store_chat_message(chat_id, serializable_response)
             if not stored_chat:
-                LOGGER.error(f"Failed to store message: {response} in chat_id {chat_id}")
+                LOGGER.error(f"Failed to store message: {serializable_response} in chat_id {chat_id}")
        
         LOGGER.info(f'Stored messages: {responses}')
         return True

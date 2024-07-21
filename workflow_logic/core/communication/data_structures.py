@@ -20,7 +20,7 @@ class OutputInterface(BaseModel):
         return str(self.content)
 
 class TaskResponse(BaseModel):
-    id: Optional[str] = Field(None, description="The id of the task response", alias="_id")
+    id: Optional[str] = Field(default=None, description="The id of the task response", alias="_id")
     task_id: Optional[str] = Field(None, description="The id of the task")
     task_name: str = Field(..., description="The name of the task")
     task_description: str = Field(..., description="A detailed description of the task")
@@ -41,6 +41,7 @@ class TaskResponse(BaseModel):
         if self.task_content and isinstance(self.task_content, OutputInterface):
             data['task_content'] = self.task_content.model_dump(*args, **kwargs)
         return data
+    
 class DatabaseTaskResponse(TaskResponse):
     task_content: Optional[Dict[str, Any]] = Field(None, description="The content of the task output, represents the model_dump of the OutputInterface used")
     
@@ -112,12 +113,25 @@ class MessageDict(TypedDict, total=False):
         msg_type = self.get('type', '')
         assistant_name = self.get('assistant_name', '')
         step = self.get('step', '')
-
         if msg_type == "text":
             return f"{role}{f' ({assistant_name})' if assistant_name else ''}: {content}"
         elif msg_type == "tool":
             return f"{role}: {content}{f' ({step})' if step else ''}"
         return f"{role}: {content}"
+
+def serialize_message_dict(message: MessageDict) -> Dict[str, Any]:
+    serialized = dict(message)
+    if serialized.get('tool_calls'):
+        serialized['tool_calls'] = [
+            tool_call.model_dump() if hasattr(tool_call, 'model_dump') else tool_call
+            for tool_call in serialized['tool_calls']
+        ]
+    if serialized.get('task_responses'):
+        serialized['task_responses'] = [
+            task_response.model_dump() if hasattr(task_response, 'model_dump') else task_response
+            for task_response in serialized['task_responses']
+        ]
+    return serialized
     
 def to_autogen_compatible(message: MessageDict) -> dict:
     """Convert MessageDict to a format compatible with Autogen."""

@@ -1,4 +1,4 @@
-from typing import Dict, Optional, List, Callable, Literal, Union
+from typing import Dict, Optional, List, Callable, Literal, Union, Any
 from pydantic import BaseModel, Field
 from bson import ObjectId
 from autogen.agentchat import Agent, ConversableAgent, GroupChat, UserProxyAgent
@@ -9,15 +9,15 @@ from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.model import AliceModel, LLMConfig
 
 class AliceAgent(BaseModel):
-    id: str = Field(None, description="The ID of the agent", alias="_id")
+    id: Optional[str] = Field(default=None, description="The ID of the agent", alias="_id")
     name: str = Field(..., description="The name of the agent")
     system_message: Prompt = Field(default=Prompt(name="default", content="You are an AI assistant"), description="The name of the prompt to use for system_message")
     agents_in_group: Optional[List['AliceAgent']] = Field(default=None, description="A list of agent names in the group chat")
     autogen_class: Literal["ConversableAgent", "UserProxyAgent", "LLaVAAgent"] = Field(default="ConversableAgent", description="The autogen class of the agent")
-    code_execution_config: Union[dict, bool] = Field(default=False, description="Whether the agent can execute code")
+    code_execution_config: Optional[Union[Dict, bool]] = Field(default=False, description="Whether the agent can execute code")
     max_consecutive_auto_reply: int = Field(default=10, description="The maximum number of consecutive auto replies")
     human_input_mode: Literal["ALWAYS", "TERMINATE", "NEVER"] = Field(default="NEVER", description="The mode for human input")
-    speaker_selection: dict = Field(default=dict, description="The speaker selection logic for the group chat")
+    speaker_selection: Optional[Dict[str, Any]] = Field(default_factory=dict, description="The speaker selection logic for the group chat")
     default_auto_reply: Optional[str] = Field(default="", description="The default auto reply for the agent")
     model_id: Optional[AliceModel] = Field(None, description="The model associated with the agent")
 
@@ -92,7 +92,8 @@ class AliceAgent(BaseModel):
                 name=self.name,
                 system_message=self.system_message_str,
                 llm_config=llm_config,
-                max_consecutive_auto_reply=self.max_consecutive_auto_reply
+                max_consecutive_auto_reply=self.max_consecutive_auto_reply,
+                human_input_mode=self.human_input_mode,
             )
         elif self.autogen_class == "UserProxyAgent":
             return UserProxyAgent(
@@ -113,6 +114,7 @@ class AliceAgent(BaseModel):
             return LLaVAAgent(
                 name=self.name,
                 system_message=self.system_message_str,
+                human_input_mode=self.human_input_mode,
                 llm_config=llm_config,
                 max_consecutive_auto_reply=self.max_consecutive_auto_reply
             )

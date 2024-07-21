@@ -1,7 +1,7 @@
 import uuid
 from typing import Dict, Any, Optional, List, Callable, Union, Tuple
 from abc import ABC, abstractmethod
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field
 from workflow_logic.core.api.api import APIManager
 from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.agent import AliceAgent
@@ -26,13 +26,13 @@ class AliceTask(BaseModel, ABC):
     Has to implement the run method which takes an input dict and returns a TaskResponse.
     Can optionally include the input variables that the task expects and additional info relevant for use.
     """
-    id: Optional[str] = Field(None, description="The task ID", alias="_id")
+    id: Optional[str] = Field(default=None, description="The task ID", alias="_id")
     task_name: str = Field(..., description="The name of the task")
     task_description: str = Field(..., description="A clear, concise statement of what the task entails")
     input_variables: FunctionParameters = Field(prompt_function_parameters, description="The input variables for the task. Default is a string prompt.")
     exit_codes: Dict[int, str] = Field(default={0: "Success", 1: "Failed"}, description="A dictionary of exit codes for the task, consistent with the TaskResponse structure", example={0: "Success", 1: "Failed"})
     recursive: bool = Field(True, description="Whether the task can be executed recursively")
-    templates: Optional[Dict[str, str]] = Field(default={}, description="A dictionary of templates for the task")
+    templates: Optional[Dict[str, Prompt]] = Field(default={}, description="A dictionary of templates for the task")
     tasks: Optional[Dict[str, "AliceTask"]] = Field(default={}, description="A dictionary of task_id: task")
     valid_languages: List[str] = Field([], description="A list of valid languages for the task")
     timeout: Optional[int] = Field(None, description="The timeout for the task in seconds")
@@ -121,7 +121,7 @@ class AliceTask(BaseModel, ABC):
         response = await self.run(execution_history=execution_history, **kwargs)
         
         # Return the response
-        return DatabaseTaskResponse(**response.model_dump())
+        return DatabaseTaskResponse(**response.model_dump(by_alias=True))
     
     def get_function(self, execution_history: Optional[List]=[], api_manager: Optional[APIManager] = None) -> Dict[str, Any]:
         """
