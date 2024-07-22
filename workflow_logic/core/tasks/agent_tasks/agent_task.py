@@ -1,7 +1,7 @@
 from typing import List, Dict, Optional, Tuple, Callable
 from pydantic import Field
 from workflow_logic.core.api import APIManager
-from workflow_logic.util.logging_config import LOGGER
+from workflow_logic.core.api import ApiType
 from workflow_logic.core.communication import MessageDict, TaskResponse, LLMChatOutput
 from workflow_logic.core.agent.agent import AliceAgent
 from autogen.agentchat import ConversableAgent
@@ -18,7 +18,7 @@ class BasicAgentTask(AliceTask):
 
     Attributes:
         agent (AliceAgent): The primary agent responsible for generating responses.
-        executor (AliceAgent): An agent responsible for executing code or functions.
+        execution_agent (AliceAgent): An agent responsible for executing code or functions.
         input_variables (FunctionParameters): Defines the expected input structure for the task.
         chat_execution (Optional[ChatExecutionFunctionality]): Handles the chat interaction and execution.
 
@@ -33,7 +33,7 @@ class BasicAgentTask(AliceTask):
         get_exit_code: Determines the exit code based on the chat output and response status.
     """
     agent: AliceAgent = Field(..., description="The primary agent to use for the task")
-    executor: AliceAgent = Field(
+    execution_agent: AliceAgent = Field(
         default=AliceAgent(
             name="default_executor",
             system_message={"name": "default_executor", "content": "Default executor agent."},
@@ -57,6 +57,7 @@ class BasicAgentTask(AliceTask):
         ),
         description="Inputs that the agent will require. Default is a list of messages."
     )
+    required_apis: List[ApiType] = Field(['llm_api'], description="A list of required APIs for the task")
     chat_execution: Optional[ChatExecutionFunctionality] = Field(None, description="Chat execution functionality")
 
     def setup_chat_execution(self, api_manager: APIManager):
@@ -84,7 +85,7 @@ class BasicAgentTask(AliceTask):
 
     def get_executor_agent(self, api_manager: APIManager) -> ConversableAgent:
         function_map = self.get_combined_function_map(api_manager=api_manager)
-        return self.executor.get_autogen_agent(function_map=function_map if function_map else None)
+        return self.execution_agent.get_autogen_agent(function_map=function_map if function_map else None)
     
     async def generate_response(self, messages: List[MessageDict]) -> Tuple[List[MessageDict], bool]:
         return await self.chat_execution.take_turn(messages)

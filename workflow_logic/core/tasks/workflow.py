@@ -20,7 +20,7 @@ class Workflow(AliceTask):
         """
         Utility method to find a task by its name.
         """
-        for task_id, task in self.tasks.items():
+        for task in self.tasks.values():
             if task.task_name == task_name:
                 return task
         return None
