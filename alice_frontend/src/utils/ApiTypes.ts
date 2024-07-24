@@ -64,3 +64,11 @@ export interface ApiComponentProps {
     showHeaders?: boolean;
     apiType?: ApiType;
 }
+export const getDefaultApiForm = (): Partial<API> => ({
+    api_type: ApiType.LLM_API,
+    name: '',
+    is_active: false,
+    health_status: 'unknown',
+    default_model: undefined,
+    api_config: {}
+});

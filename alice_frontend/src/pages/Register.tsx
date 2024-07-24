@@ -2,14 +2,12 @@ import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box, Alert, Stepper, Step, StepLabel, StepContent } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import IntentSelection from '../components/ui/registration/IntentSelection';
-import ApiSuggestions from '../components/ui/registration/ApiSuggestions';
 import ApiSetup from '../components/ui/registration/ApiSetup';
 import RegistrationComplete from '../components/ui/registration/RegistrationComplete';
 import { API } from '../utils/ApiTypes';
-import { createItem } from '../services/api';
+import { createItem, fetchItem } from '../services/api';
 import useStyles from '../styles/RegisterStyles';
-import { WavyBackground } from '../components/ui/WavyBackground';
+import { WavyBackground } from '../components/ui/aceternity/WavyBackground';
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -20,9 +18,7 @@ const Register = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [step, setStep] = useState(0);
-  const [userIntent, setUserIntent] = useState('');
-  const [suggestedApis, setSuggestedApis] = useState<API[]>([]);
-  const [configuredApis, setConfiguredApis] = useState<API[]>([]);
+  const [userApis, setUserApis] = useState<API[]>([]);
   const classes = useStyles();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,40 +26,25 @@ const Register = () => {
     setError(null);
 
     try {
-      // Use registerUser service directly to perform registration
       await register(name, email, password);
-      setStep(1); // Move to the next step after successful registration
+      const apis = await fetchItem('apis');
+      setUserApis(apis as API[]);
+      setStep(1); // Move to API setup after successful registration
     } catch (error) {
       setError('Registration failed. Please check your details and try again.');
     }
   };
 
-  const handleApiSuggestions = (apis: API[]) => {
-    const apisWithUser = apis.map(api => ({ ...api, user: { name, email } }));
-    setSuggestedApis(apisWithUser);
-    setStep(3);
-  };
-
   const handleApiSetupComplete = async (apis: API[]) => {
-    setConfiguredApis(apis);
-    try {
-      // Create each API individually
-      for (const api of configuredApis) {
-        await createItem('apis', api);
-      }
-      setStep(4); // Move to the final step
-    } catch (error) {
-      setError('Failed to save API configurations. Please try again.');
-    }
+      setStep(2); // Move to the final step
   };
 
   const handleComplete = async () => {
     try {
-      // Call the login function after all steps are complete
       console.log('Completing registration...');
-      navigate('/chat-alice'); // Navigate to the chat page after completion
+      navigate('/chat-alice');
     } catch (error) {
-      setError('Failed to log in after registration. Please try again.');
+      setError('Failed to complete registration. Please try again.');
     }
   };
 
@@ -111,16 +92,8 @@ const Register = () => {
       ),
     },
     {
-      label: 'Select Intent',
-      content: <IntentSelection onSelect={(intent: string) => { setUserIntent(intent); setStep(2); }} />,
-    },
-    {
-      label: 'API Suggestions',
-      content: <ApiSuggestions intent={userIntent} onSuggest={handleApiSuggestions} />,
-    },
-    {
-      label: 'API Setup',
-      content: <ApiSetup apis={suggestedApis} onComplete={handleApiSetupComplete} />,
+      label: 'Configure APIs',
+      content: <ApiSetup apis={userApis} onComplete={handleApiSetupComplete} />,
     },
     {
       label: 'Complete',
@@ -129,7 +102,6 @@ const Register = () => {
   ];
 
   return (
-    <WavyBackground>
     <Container maxWidth="sm" className={classes.registerContainer}>
       <Box mt={5}>
         <Typography variant="h4" component="h1" gutterBottom>
@@ -147,7 +119,6 @@ const Register = () => {
         </Stepper>
       </Box>
     </Container>
-    </WavyBackground>
   );
 };
 

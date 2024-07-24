@@ -51,3 +51,13 @@ export interface AgentComponentProps {
   onView?: (agent: AliceAgent) => void;
   showHeaders?: boolean;
 }
+export const getDefaultAgentForm = (): Partial<AliceAgent> => ({
+  name: '',
+  system_message: undefined,
+  autogen_class: 'ConversableAgent',
+  code_execution_config: false,
+  max_consecutive_auto_reply: 10,
+  human_input_mode: 'NEVER',
+  default_auto_reply: '',
+  model_id: null
+});

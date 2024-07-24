@@ -2,24 +2,40 @@ import { Theme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
 
 const useStyles = makeStyles((theme: Theme) => ({
-  container: {
+  databaseContainer: {
     display: 'flex',
-    flexDirection: 'column',
-    height: 'calc(100vh - 64px)', // Adjust this if you have a different app bar height
-    padding: theme.spacing(2),
+    height: '100%',
   },
-  buttonGroup: {
+  databaseMenu: {
+    borderRight: `1px solid ${theme.palette.divider}`,
+  },  
+  toggleBox: {
     display: 'flex',
     justifyContent: 'center',
-    flexWrap: 'wrap',
-    marginBottom: theme.spacing(2),
+    marginTop: theme.spacing(1),
   },
-  button: {
-    margin: theme.spacing(0.5),
+  databaseList: {
+    width: '350px',
+    borderRight: `1px solid ${theme.palette.divider}`,
+    overflowY: 'auto',
   },
-  listPageContainer: {
+  databaseContent: {
     flexGrow: 1,
-    overflow: 'hidden',
+    padding: theme.spacing(2),
+    overflowY: 'auto',
+  },
+  defaultCard: {
+    padding: theme.spacing(3),
+    backgroundColor: theme.palette.background.paper,
+    borderRadius: theme.shape.borderRadius,
+    boxShadow: theme.shadows[1],
+  },
+  createButton: {
+    margin: '10px auto !important',
+    display: 'inherit !important'
+  },
+  tableContainer: {
+    marginTop: theme.spacing(2),
   },
 }));
 

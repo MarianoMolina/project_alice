@@ -1,5 +1,3 @@
-export type ComponentMode = 'create' | 'edit' | 'view' | 'list' | 'shortList' | 'table';
-
 export interface ModelConfig {
   model: string;
   api_key?: string;

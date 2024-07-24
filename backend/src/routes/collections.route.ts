@@ -11,8 +11,9 @@ const modelMapping: { [key: string]: string } = {
   users: 'User',
   prompts: 'Prompt',
   taskresults: 'TaskResult',
-  chats: 'AliceChat',
+  alicechats: 'AliceChat',
   apis: 'API',
+  parameterdefinitions: 'ParameterDefinition',
 };
 
 // Get all collections in the database

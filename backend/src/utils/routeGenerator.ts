@@ -94,13 +94,21 @@ export function createRoutes<T extends Document, K extends ModelName>(
       handleErrors(res, error);
     }
   };
-
+  const getSchema: RouteHandler = async (req, res) => {
+    try {
+      const schema = model.schema.obj;
+      res.status(200).json(schema);
+    } catch (error) {
+      handleErrors(res, error);
+    }
+  };
   router.post('/', createOne);
   router.get('/', getAll);
   router.get('/all', adminOnly, getAllAdmin);
   router.get('/:id', getOne);
   router.patch('/:id', updateOne);
   router.delete('/:id', deleteOne);
+  router.get('/schema', getSchema);
 
   return router;
 }

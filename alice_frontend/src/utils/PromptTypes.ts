@@ -42,3 +42,10 @@ export interface PromptComponentProps {
     onInteraction?: (prompt: Prompt) => void;
     showHeaders?: boolean;
 }
+export const getDefaultPromptForm = (): Partial<Prompt> => ({
+    name: '',
+    content: '',
+    is_templated: false,
+    parameters: undefined,
+    partial_variables: {}
+});

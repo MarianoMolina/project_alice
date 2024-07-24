@@ -5,6 +5,7 @@ backend/dist
 workflow_logic/trash
 workflow_logic/tests/test_results
 logs
+.venv
 venv
 tmp
 .env

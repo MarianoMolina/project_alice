@@ -7,6 +7,28 @@ router = APIRouter()
 
 @router.post("/initialize_user_database/")
 async def initialize_user_database(request: Request, db_app=Depends(get_db_app)) -> dict:
+    """
+    Initialize the user's database with the default structure.
+
+    This endpoint checks if the user's database is empty and then initializes it
+    with the predefined database structure (DB_STRUCTURE).
+
+    Args:
+        request (Request): The incoming request object.
+        db_app: The database application instance (injected dependency).
+
+    Returns:
+        dict: A message indicating successful initialization.
+
+    Raises:
+        HTTPException: 
+            - 401 if no authorization token is provided.
+            - 400 if the user database already exists.
+            - 500 if there's an error during initialization.
+
+    Note:
+        This endpoint requires a valid authorization token in the request headers.
+    """
     token = request.headers.get("Authorization")
     if not token:
         raise HTTPException(status_code=401, detail="Access denied. No token provided.")

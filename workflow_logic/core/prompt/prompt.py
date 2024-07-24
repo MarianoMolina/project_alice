@@ -15,6 +15,46 @@ TYPE_MAPPING = {
 }
 
 class Prompt(BaseModel):
+    """
+    Represents a prompt for language models, with support for templating and parameter validation.
+
+    This class encapsulates the properties and methods needed to create, validate, and format
+    prompts, including support for templated prompts with defined parameters.
+
+    Attributes:
+        id (Optional[str]): The unique identifier for the prompt.
+        name (str): The name of the prompt.
+        content (str): The content of the prompt, which may include template variables.
+        is_templated (bool): Indicates whether the prompt is a template (default: False).
+        parameters (Optional[FunctionParameters]): The parameters expected by the prompt if it's templated.
+        partial_variables (Dict[str, Any]): Pre-filled variables for partial templates.
+
+    Methods:
+        input_variables() -> List[str]:
+            Returns a list of input variables required by the prompt template.
+        format(**kwargs: Any) -> str:
+            Formats the prompt using the provided variables.
+        format_prompt(**kwargs: Any) -> str:
+            Validates inputs (if templated) and formats the prompt.
+        validate_input(**kwargs: Any) -> None:
+            Validates the input against the prompt's parameters.
+        get_template() -> Template:
+            Returns a Jinja2 Template object for the prompt content.
+        partial(**kwargs: Any) -> 'Prompt':
+            Creates a new Prompt instance with some variables pre-filled.
+
+    Validators:
+        validate_templated_prompt():
+            Ensures consistency between is_templated flag and parameters.
+        validate_content(v: str, info: Any) -> str:
+            Validates that all parameters are used in templated prompts.
+
+    Example:
+        >>> prompt = Prompt(name="Greeting", content="Hello, {{name}}!", is_templated=True,
+        ...                 parameters=FunctionParameters(properties={"name": {"type": "string"}}, required=["name"]))
+        >>> prompt.format_prompt(name="Alice")
+        'Hello, Alice!'
+    """
     id: Optional[str] = Field(default=None, description="The unique ID of the prompt, must match the ID in the database", alias="_id")
     name: str = Field(..., description="The name of the prompt.")
     content: str = Field(..., description="The content of the prompt.")

@@ -1,3 +1,30 @@
+"""
+FastAPI application for the Workflow service.
+
+This module sets up the FastAPI application with middleware, routes, and initial tests.
+It uses a ContainerAPI for database operations and includes various routes for
+health checks, task execution, chat responses, and database initialization.
+
+Global Variables:
+    db_app (ContainerAPI): The database application instance.
+    thread_pool (ThreadPoolExecutor): Thread pool for concurrent operations.
+    WORKFLOW_APP (FastAPI): The main FastAPI application instance.
+
+Functions:
+    run_initial_tests(app: FastAPI): 
+        Runs initial tests for the application and stores results in app state.
+
+    lifespan(app: FastAPI): 
+        Asynchronous context manager for application lifespan management.
+
+Usage:
+    This module is typically used as the entry point for the Workflow service.
+    It can be run using a ASGI server like uvicorn:
+    
+    ```
+    uvicorn main:WORKFLOW_APP
+    ```
+"""
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from concurrent.futures import ThreadPoolExecutor
@@ -13,7 +40,6 @@ from workflow_logic.util.logging_config import LOGGER
 
 db_app = None
 thread_pool = None
-
 async def run_initial_tests(app: FastAPI):
     test_env = TestEnvironment()
     db_tests = DBTests()

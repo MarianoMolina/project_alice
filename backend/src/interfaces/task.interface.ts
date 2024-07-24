@@ -14,7 +14,6 @@ export enum TaskType {
   CheckTask = "CheckTask",
   CodeGenerationLLMTask = "CodeGenerationLLMTask",
   CodeExecutionLLMTask = "CodeExecutionLLMTask",
-  AgentWithFunctions = "AgentWithFunctions"
 }
 
 export interface ITask {

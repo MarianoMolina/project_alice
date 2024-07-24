@@ -49,3 +49,15 @@ export interface ModelComponentProps {
   onInteraction?: (model: AliceModel) => void;
   showHeaders?: boolean;
 }
+
+export const getDefaultModelForm = (): Partial<AliceModel> => ({
+    short_name: '',
+    model_name: '',
+    model_format: '',
+    ctx_size: 0,
+    model_type: 'chat',
+    deployment: 'remote',
+    api_name: 'openai',
+    temperature: 0.7,
+    use_cache: true
+});

@@ -57,6 +57,22 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const fetchedResults = await fetchItem('taskresults');
       setTaskResults(fetchedResults as TaskResponse[]);
+     
+      // Initialize recentExecutions with the latest 10 task results
+      const sortedResults = (fetchedResults as TaskResponse[])
+        .sort((a, b) => {
+          const dateA = new Date(a.createdAt || 0).getTime();
+          const dateB = new Date(b.createdAt || 0).getTime();
+          return dateB - dateA;
+        });
+  
+      const latestExecutions = sortedResults.slice(0, 10).map(result => ({
+        taskId: result.task_id,
+        inputs: result.task_inputs || {},
+        result: result,
+        timestamp: new Date(result.createdAt || new Date())
+      }));
+      setRecentExecutions(latestExecutions);
     } catch (error) {
       console.error('Error fetching task results:', error);
     }
@@ -101,7 +117,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           taskId: selectedTask._id!,
           inputs: inputValues,
           result: result,
-          timestamp: selectedTask.createdAt || new Date()
+          timestamp: new Date()
         },
         ...prev.slice(0, 9) // Keep only the 10 most recent executions
       ]);

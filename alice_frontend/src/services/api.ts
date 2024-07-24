@@ -1,39 +1,7 @@
 import { dbAxiosInstance, taskAxiosInstance } from './axiosInstance';
-import { AliceAgent, convertToAliceAgent } from '../utils/AgentTypes';
 import { AliceChat, convertToAliceChat } from '../utils/ChatTypes';
-import { AliceModel, convertToAliceModel } from '../utils/ModelTypes';
-import { AliceTask, convertToAliceTask } from '../utils/TaskTypes';
-import { Prompt, convertToPrompt } from '../utils/PromptTypes';
 import { TaskResponse, convertToTaskResponse } from '../utils/TaskResponseTypes';
-import { ParameterDefinition, convertToParameterDefinition } from '../utils/ParameterTypes';
-import { User, convertToUser } from '../utils/UserTypes';
-import { API, convertToAPI } from '../utils/ApiTypes';
-
-export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis';
-
-export type CollectionType = {
-  agents: AliceAgent;
-  chats: AliceChat;
-  models: AliceModel;
-  tasks: AliceTask;
-  prompts: Prompt;
-  taskresults: TaskResponse;
-  users: User;
-  parameters: ParameterDefinition;
-  apis: API;
-};
-
-const converters: { [K in CollectionName]: (data: any) => CollectionType[K] } = {
-  agents: convertToAliceAgent,
-  chats: convertToAliceChat,
-  models: convertToAliceModel,
-  tasks: convertToAliceTask,
-  prompts: convertToPrompt,
-  taskresults: convertToTaskResponse,
-  users: convertToUser,
-  parameters: convertToParameterDefinition,
-  apis: convertToAPI,
-};
+import { CollectionName, CollectionType, converters } from '../utils/CollectionTypes';
 
 export const fetchItem = async <T extends CollectionName>(
   collectionName: T,
@@ -86,16 +54,6 @@ export const updateItem = async <T extends CollectionName>(
     return data;
   } catch (error) {
     console.error(`Error updating item in ${collectionName}:`, error);
-    throw error;
-  }
-};
-
-export const fetchChatById = async (chatId: string): Promise<AliceChat> => {
-  try {
-    const response = await dbAxiosInstance.get(`/chats/${chatId}`);
-    return convertToAliceChat(response.data);
-  } catch (error) {
-    console.error('Error fetching chat:', error);
     throw error;
   }
 };

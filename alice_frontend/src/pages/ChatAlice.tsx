@@ -1,17 +1,17 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Box, Skeleton, Stack, Typography, Dialog } from '@mui/material';
 import { Add, Chat, Info, Functions, Assignment } from '@mui/icons-material';
 import { TaskResponse } from '../utils/TaskResponseTypes';
 import { AliceTask } from '../utils/TaskTypes';
 import { AliceChat } from '../utils/ChatTypes';
-import { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
+import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
 import { useChat } from '../context/ChatContext';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
-import EnhancedChat from '../components/chat/chat/EnhancedChat';
-import EnhancedTask from '../components/task/task/EnhancedTask';
-import EnhancedTaskResponse from '../components/task_response/task_response/EnhancedTaskResponse';
-import EnhancedAgent from '../components/agent/agent/EnhancedAgent';
-import ChatInput from '../components/chat/ChatInput';
+import EnhancedChat from '../components/enhanced/chat/chat/EnhancedChat';
+import EnhancedTask from '../components/enhanced/task/task/EnhancedTask';
+import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
+import EnhancedAgent from '../components/enhanced/agent/agent/EnhancedAgent';
+import ChatInput from '../components/enhanced/chat/ChatInput';
 import useStyles from '../styles/ChatAliceStyles';
 
 const ChatAlice: React.FC = () => {
@@ -25,7 +25,7 @@ const ChatAlice: React.FC = () => {
     currentChat,
     setCurrentChatId,
     addTasksToChat,
-    addTaskResultsToChat, 
+    addTaskResultsToChat,
     isTaskInChat,
     isTaskResultInChat,
   } = useChat();
@@ -33,22 +33,22 @@ const ChatAlice: React.FC = () => {
   const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>(undefined);
   const [selectedResult, setSelectedResult] = useState<TaskResponse | null>(null);
   const [isTaskResultDialogOpen, setIsTaskResultDialogOpen] = useState(false);
+  const [openChatCreateDialog, setOpenChatCreateDialog] = useState(false);
+  const [openAgentDialog, setOpenAgentDialog] = useState(false);
+  const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>(undefined);
+  const [openChatDialog, setOpenChatDialog] = useState(false);
+  const [selectedChatId, setSelectedChatId] = useState<string | undefined>(undefined);
+  const [activeTab, setActiveTab] = useState('Select Chat');
+  const [listKey, setListKey] = useState(0);
 
-  const [ openAgentDialog, setOpenAgentDialog ] = useState(false);
-  const [ selectedAgentId, setSelectedAgentId ] = useState<string | undefined>(undefined);
-
-  const [ openChatDialog, setOpenChatDialog ] = useState(false);
-  const [ selectedChatId, setSelectedChatId ] = useState<string | undefined>(undefined);
-  
   const lastMessage = messages[messages.length - 1];
 
-  const [activeTab, setActiveTab] = useState('Select Chat');
-
-  // Create a memoized key that changes when messages change
-  const chatKey = useMemo(() => JSON.stringify(messages), [messages]);
+  const chatKey = useMemo(() => {
+    return JSON.stringify(messages);
+  }, [messages, currentChatId]);
 
   const handleNewChatCreated = async (chat: AliceChat) => {
-    fetchChats();
+    await fetchChats();
     setCurrentChatId(chat?._id);
     setActiveTab('Current Chat');
   };
@@ -59,8 +59,28 @@ const ChatAlice: React.FC = () => {
     setActiveTab('Current Chat');
   };
 
+  const handleCreateNew = useCallback(() => {
+    console.log('Create new clicked');
+    setOpenChatCreateDialog(true);
+  }, []);
+
+  const handleTabChange = (tabName: string) => {
+    setActiveTab(tabName);
+    if (tabName === 'Select Chat') {
+      setListKey(prev => prev + 1);
+    }
+  };
+
+  const actions = [
+    {
+      name: `Create ${activeTab}`,
+      icon: Add,
+      action: handleCreateNew,
+      disabled: activeTab === 'Task Results'
+    }
+  ];
+
   const tabs = [
-    { name: 'New Chat', icon: Add },
     { name: 'Select Chat', icon: Chat },
     { name: 'Current Chat', icon: Info, disabled: !currentChatId },
     { name: 'Add Functions', icon: Functions, disabled: !currentChatId },
@@ -72,11 +92,13 @@ const ChatAlice: React.FC = () => {
       addTasksToChat([task._id]);
     }
   }
+
   const checkAndAddTaskResult = (taskResult: TaskResponse) => {
     if (taskResult._id && !isTaskResultInChat(taskResult._id)) {
       addTaskResultsToChat([taskResult._id]);
     }
   }
+
   const triggerTaskDialog = (task: AliceTask) => {
     triggerTaskDialogId(task._id)
   }
@@ -95,6 +117,7 @@ const ChatAlice: React.FC = () => {
     setSelectedResult(taskResult);
     setIsTaskResultDialogOpen(true);
   }
+
   const handleCloseTaskResult = () => {
     setIsTaskResultDialogOpen(false);
     setSelectedResult(null);
@@ -107,20 +130,17 @@ const ChatAlice: React.FC = () => {
 
   const renderSidebarContent = (tabName: string) => {
     switch (tabName) {
-      case 'New Chat':
-        return <EnhancedChat
-          mode="create"
-          fetchAll={false}
-          onSave={handleNewChatCreated}
-        />;
       case 'Select Chat':
-        return <EnhancedChat
-          mode="shortList"
-          onView={triggerChatDialog}
-          onInteraction={selectChatId}
-          fetchAll={true}
-          isInteractable={true}
-        />;
+        return (
+          <EnhancedChat
+            key={listKey}
+            mode="list"
+            onView={triggerChatDialog}
+            onInteraction={selectChatId}
+            fetchAll={true}
+            isInteractable={true}
+          />
+        );
       case 'Current Chat':
         return (
           <EnhancedChat
@@ -133,11 +153,21 @@ const ChatAlice: React.FC = () => {
         );
       case 'Add Functions':
         return (
-          <EnhancedTask mode={'list'} fetchAll={true} onInteraction={checkAndAddTask} onView={triggerTaskDialog} />
+          <EnhancedTask 
+            mode={'list'} 
+            fetchAll={true} 
+            onInteraction={checkAndAddTask} 
+            onView={triggerTaskDialog} 
+          />
         );
       case 'Add TaskResults':
         return (
-          <EnhancedTaskResponse mode={'list'} fetchAll={true} onView={triggerTaskResultDialog} onInteraction={checkAndAddTaskResult}/>
+          <EnhancedTaskResponse 
+            mode={'list'} 
+            fetchAll={true} 
+            onView={triggerTaskResultDialog} 
+            onInteraction={checkAndAddTaskResult} 
+          />
         );
       default:
         return null;
@@ -147,18 +177,19 @@ const ChatAlice: React.FC = () => {
   return (
     <Box className={classes.chatAliceContainer}>
       <VerticalMenuSidebar
+        actions={actions}
         tabs={tabs}
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
         renderContent={renderSidebarContent}
-        expandedWidth={SIDEBAR_WIDTH}
+        expandedWidth={TASK_SIDEBAR_WIDTH}
         collapsedWidth={SIDEBAR_COLLAPSED_WIDTH}
       />
       <Box className={classes.chatAliceMain}>
         <Box className={classes.chatAliceMessages}>
           {currentChat ? (
             <EnhancedChat
-              key={chatKey} 
+              key={chatKey}
               itemId={currentChat._id}
               mode="full"
               fetchAll={false}
@@ -191,7 +222,14 @@ const ChatAlice: React.FC = () => {
           {selectedAgentId && <EnhancedAgent itemId={selectedAgentId} mode={'card'} fetchAll={false} />}
         </Dialog>
         <Dialog open={openChatDialog} onClose={() => setOpenChatDialog(false)}>
-          {selectedChatId && <EnhancedChat itemId={selectedChatId} mode={'card'} fetchAll={false} />}
+          {selectedChatId && <EnhancedChat itemId={selectedChatId} mode={'card'} fetchAll={false} handleTaskClick={triggerTaskDialogId} />}
+        </Dialog>
+        <Dialog open={openChatCreateDialog} onClose={() => setOpenChatCreateDialog(false)}>
+          <EnhancedChat
+            mode="create"
+            fetchAll={false}
+            onSave={handleNewChatCreated}
+          />
         </Dialog>
       </Box>
     </Box>

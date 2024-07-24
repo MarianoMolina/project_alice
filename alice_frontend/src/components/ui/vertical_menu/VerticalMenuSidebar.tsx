@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
-import { Box, IconButton, Tooltip } from '@mui/material';
+import { Box, IconButton, Tooltip, Divider } from '@mui/material';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { SvgIconComponent } from '@mui/icons-material';
 import useStyles from './VerticalMenuSidebarStyles';
+
+interface ActionConfig {
+  name: string;
+  icon: SvgIconComponent;
+  action: () => void;
+  disabled?: boolean;
+}
 
 interface TabConfig {
   name: string;
@@ -11,15 +18,17 @@ interface TabConfig {
 }
 
 interface VerticalMenuSidebarProps {
+  actions?: ActionConfig[];
   tabs: TabConfig[];
   activeTab: string;
   onTabChange: (tabName: string) => void;
-  renderContent: (tabName: string) => React.ReactNode;
+  renderContent?: (tabName: string) => React.ReactNode;
   expandedWidth: number;
   collapsedWidth: number;
 }
 
 const VerticalMenuSidebar: React.FC<VerticalMenuSidebarProps> = ({
+  actions,
   tabs,
   activeTab,
   onTabChange,
@@ -31,42 +40,64 @@ const VerticalMenuSidebar: React.FC<VerticalMenuSidebarProps> = ({
   const [isExpanded, setIsExpanded] = useState(true);
 
   const handleTabChange = (tabName: string) => {
-    if (tabName === activeTab) {
-      setIsExpanded(!isExpanded);
-    } else {
-      onTabChange(tabName);
+    onTabChange(tabName);
+    if (renderContent) {
       setIsExpanded(true);
     }
   };
 
   return (
-    <Box 
+    <Box
       className={classes.sidebar}
       style={{ width: isExpanded ? expandedWidth : collapsedWidth }}
     >
-      <Box className={classes.verticalMenu}>
-        {tabs.map((tab) => (
-          <Tooltip key={tab.name} title={tab.name} placement="right">
-            <span>
-              <IconButton
-                onClick={() => handleTabChange(tab.name)}
-                color={activeTab === tab.name ? 'primary' : 'default'}
-                disabled={tab.disabled}
-              >
-                <tab.icon />
-              </IconButton>
-            </span>
-          </Tooltip>
-        ))}
-        <Box className={classes.expandButton}>
-          <Tooltip title={isExpanded ? "Collapse" : "Expand"} placement="right">
-            <IconButton onClick={() => setIsExpanded(!isExpanded)}>
-              {isExpanded ? <ChevronLeft /> : <ChevronRight />}
-            </IconButton>
-          </Tooltip>
+      <Box className={classes.verticalMenu} style={{ width: collapsedWidth }}>
+        {actions && actions.length > 0 && (
+          <>
+            <Box className={classes.actionsSection}>
+              {actions.map((action) => (
+                <Tooltip key={action.name} title={action.name} placement="right">
+                  <span>
+                    <IconButton
+                      onClick={action.action}
+                      color="primary"
+                      disabled={action.disabled}
+                    >
+                      <action.icon />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              ))}
+            </Box>
+            <Divider className={classes.divider} />
+          </>
+        )}
+        <Box className={classes.tabsSection}>
+          {tabs.map((tab) => (
+            <Tooltip key={tab.name} title={tab.name} placement="right">
+              <span>
+                <IconButton
+                  onClick={() => handleTabChange(tab.name)}
+                  color={activeTab === tab.name ? 'primary' : 'default'}
+                  disabled={tab.disabled}
+                >
+                  <tab.icon />
+                </IconButton>
+              </span>
+            </Tooltip>
+          ))}
         </Box>
+        {renderContent && (
+          <Box className={classes.expandButton}>
+            <Tooltip title={isExpanded ? "Collapse" : "Expand"} placement="right">
+              <IconButton onClick={() => setIsExpanded(!isExpanded)}>
+                {isExpanded ? <ChevronLeft /> : <ChevronRight />}
+              </IconButton>
+            </Tooltip>
+          </Box>
+        )}
       </Box>
-      {isExpanded && (
+      {isExpanded && renderContent && (
         <Box className={classes.content}>
           {renderContent(activeTab)}
         </Box>

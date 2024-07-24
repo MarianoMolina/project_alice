@@ -1,48 +1,41 @@
-from enum import Enum, EnumMeta
-from typing import Optional, Dict, Any, Union, List, Tuple
+from typing import Optional, Dict, Any, Union
 from pydantic import BaseModel, Field
 from bson import ObjectId
 from workflow_logic.util.utils import User
 from workflow_logic.core.model import AliceModel, LLMConfig
-
-class ApiType(str, Enum):
-    LLM_MODEL = 'llm_api'
-    GOOGLE_SEARCH = 'google_search'
-    REDDIT_SEARCH = 'reddit_search'
-    WIKIPEDIA_SEARCH = 'wikipedia_search'
-    EXA_SEARCH = 'exa_search'
-    ARXIV_SEARCH = 'arxiv_search'
-
-class ApiNameMeta(EnumMeta):
-    def __new__(metacls, cls, bases, classdict):
-        # Extend with all ApiType values except LLM_MODEL
-        for name, value in ApiType.__members__.items():
-            if name != 'LLM_MODEL':
-                classdict[name] = value.value
-        
-        # Add LLM-specific API names
-        classdict['OPENAI'] = 'openai'
-        classdict['AZURE'] = 'azure'
-        classdict['ANTHROPIC'] = 'anthropic'
-        classdict['CUSTOM'] = 'custom'
-        
-        return super().__new__(metacls, cls, bases, classdict)
-
-    @classmethod
-    def _missing_(cls, value):
-        # This allows using ApiName with new ApiType values
-        if value in ApiType.__members__:
-            return cls(ApiType[value].value)
-        return super()._missing_(value)
-
-class ApiName(str, Enum, metaclass=ApiNameMeta):
-    pass
-
-# Helper function to get all ApiName values
-def get_all_api_names() -> List[Tuple[str, str]]:
-    return [(name, value) for name, value in ApiName.__members__.items()]
+from workflow_logic.core.api.api_utils import ApiType, ApiName
 
 class API(BaseModel):
+    """
+    Represents an API configuration for various services, including LLM models and search APIs.
+
+    This class encapsulates the properties and methods needed to define and manage
+    an API configuration, including its type, name, status, and associated model.
+
+    Attributes:
+        id (Optional[str]): The unique identifier for the API configuration.
+        api_type (ApiType): The type of API (e.g., LLM_MODEL, GOOGLE_SEARCH).
+        api_name (ApiName): The specific name or provider of the API.
+        name (str): A human-readable name for this API configuration.
+        is_active (bool): Indicates whether this API is currently active.
+        health_status (str): The current health status of the API ("healthy", "unhealthy", or "unknown").
+        default_model (Optional[AliceModel]): The default language model associated with this API.
+        api_config (Optional[Dict[str, Any]]): Additional configuration parameters for the API.
+        autogen_model_client_cls (Optional[str]): The class name for a custom AutoGen model client.
+        created_by (Optional[User]): The user who created this API configuration.
+        updated_by (Optional[User]): The user who last updated this API configuration.
+        created_at (Optional[str]): The timestamp of when this configuration was created.
+        updated_at (Optional[str]): The timestamp of when this configuration was last updated.
+
+    Methods:
+        _create_llm_config(model: Optional[AliceModel] = None) -> LLMConfig:
+            Creates an LLMConfig object based on the API's configuration and the given model.
+
+    Example:
+        >>> api = API(api_type=ApiType.LLM_MODEL, api_name=ApiName.OPENAI, name="OpenAI GPT-3",
+        ...           is_active=True, health_status="healthy",
+        ...           api_config={"api_key": "your-api-key", "base_url": "https://api.openai.com/v1"})
+    """
     id: Optional[str] = Field(default=None, alias="_id")
     api_type: ApiType
     api_name: ApiName

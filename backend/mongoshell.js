@@ -1,9 +1,8 @@
 // List of collections to clear
 const collections = [
-    'health', 
     'apis', 
     'agents', 
-    'chats', 
+    'alicechats', 
     'collections', 
     'models', 
     'prompts', 

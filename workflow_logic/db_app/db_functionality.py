@@ -9,6 +9,32 @@ from workflow_logic.db_app.init_db import DBInitManager
 from workflow_logic.db_app.db import BackendAPI
 
 class BackendFunctionalityAPI(BackendAPI):
+    """
+    Extends BackendAPI with additional functionality for database initialization and validation.
+
+    This class provides methods to initialize the database with a given structure,
+    create entities of various types, and validate the initialization process.
+
+    Attributes:
+        temp_db_instance (Optional[DBInitManager]): Temporary database instance for initialization.
+
+    Methods:
+        initialize_database(db_structure: DBStructure) -> bool:
+            Initializes the database with the given structure.
+
+        create_entities_by_type(entity_type: EntityType, db_structure: DBStructure, pbar: tqdm) -> bool:
+            Creates entities of a specific type from the database structure.
+
+        validate_initialization(db_structure: DBStructure) -> bool:
+            Validates that the database was initialized correctly.
+
+        api_setter() -> APIManager:
+            Sets up and returns an APIManager instance with the current APIs.
+
+    Example:
+        >>> api = BackendFunctionalityAPI(base_url="http://api.example.com", user_token="your_token_here")
+        >>> success = await api.initialize_database(your_db_structure)
+    """
     temp_db_instance: Optional[DBInitManager] = Field(DBInitManager(), description="Temporary database instance for initialization")
         
     async def initialize_database(self, db_structure: DBStructure) -> bool:

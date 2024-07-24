@@ -1,4 +1,3 @@
-// StartTaskStyles.ts
 import { Theme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
 
@@ -13,6 +12,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     flexGrow: 1,
     position: 'relative',
     overflow: 'hidden',
+    height: '100%',
   },
   taskExecutionContainer: {
     flexBasis: '66.66%',
@@ -20,24 +20,68 @@ const useStyles = makeStyles((theme: Theme) => ({
     overflowY: 'auto',
     height: '100%',
   },
-  recentExecutionsContainer: {
+  apiAndRecentExecutionsContainer: {
     flexBasis: '33.33%',
-    padding: theme.spacing(3),
-    overflowY: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
     height: '100%',
     backgroundColor: theme.palette.background.default,
     borderLeft: `1px solid ${theme.palette.divider}`,
-    transition: 'transform 0.3s ease-in-out',
+    overflow: 'hidden',
   },
-  toggleRecentExecutionsButton: {
-    position: 'absolute',
-    top: '50%',
-    right: 0,
-    transform: 'translateY(-50%)',
-    backgroundColor: theme.palette.background.paper,
-    '&:hover': {
-      backgroundColor: theme.palette.action.hover,
+  apiStatusContainer: {
+    padding: theme.spacing(3),
+    borderBottom: `1px solid ${theme.palette.divider}`,
+  },
+  sectionTitle: {
+    textAlign: 'center',
+    fontWeight: 'bold',
+    marginBottom: theme.spacing(2),
+    color: theme.palette.primary.main,
+  },
+  apiTooltipContainer: {
+    marginTop: theme.spacing(2),
+    display: 'flex',
+    justifyContent: 'center',
+  },
+  recentExecutionsAccordion: {
+    flexGrow: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    margin: '0 !important',
+    height: '100%',
+    overflow: 'hidden',
+    '& .MuiCollapse-root': {
+      height: '100%',
     },
+    '& .MuiCollapse-wrapper': {
+      height: '100%',
+    },
+    '& .MuiCollapse-wrapperInner': {
+      height: '100%',
+    },
+    '& .MuiAccordion-region': {
+      height: '100%',
+    },
+  },
+  recentExecutionsAccordionDetails: {
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '0 !important',
+    overflow: 'hidden',
+  },
+  recentExecutionsList: {
+    overflowY: 'auto',
+    width: '100%',
+    paddingTop: '0 !important',
+    flexGrow: 1,
+  },
+  recentExecutionsAccordionSummary: {
+    height: 'auto',
+  },
+  accordionRoot: {
+    height: '100%',
   },
 }));
 

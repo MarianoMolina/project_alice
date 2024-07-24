@@ -14,8 +14,8 @@ const RegistrationComplete: React.FC<RegistrationCompleteProps> = ({ onComplete 
       <Typography variant="body1" paragraph>
         Thank you for setting up your account with Alice. You're now ready to start using the platform.
       </Typography>
-      <Button variant="contained" onClick={onComplete}>
-        Continue to Alice Chat
+      <Button variant="contained" color="primary" onClick={onComplete}>
+        Start Using Alice
       </Button>
     </Box>
   );

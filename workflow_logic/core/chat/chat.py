@@ -18,6 +18,39 @@ default_system_message = {
 }
 
 class AliceChat(BaseModel):
+    """
+    Represents a chat session with an AI assistant, managing the conversation flow and execution.
+
+    This class encapsulates the properties and methods needed to create and manage
+    a chat session, including the conversation history, associated agents, available
+    functions, and chat execution functionality.
+
+    Attributes:
+        id (Optional[str]): The unique identifier for the chat session.
+        name (str): The name of the chat session.
+        messages (Optional[List[MessageDict]]): List of messages in the conversation history.
+        alice_agent (AliceAgent): The main AI agent for the chat.
+        functions (Optional[List[AliceTask]]): List of available functions/tasks for the agent.
+        executor (AliceAgent): The agent responsible for executing code and functions.
+        model_id (AliceModel): The language model associated with the chat.
+        chat_execution (Optional[ChatExecutionFunctionality]): Functionality for executing the chat flow.
+
+    Methods:
+        functions_list(api_manager: APIManager) -> List[FunctionConfig]:
+            Returns a list of function configurations for the available tasks.
+        setup_chat_execution(api_manager: APIManager) -> None:
+            Initializes the chat execution functionality.
+        generate_response(api_manager: APIManager, new_message: Optional[str] = None) -> List[MessageDict]:
+            Generates a response in the chat, processing any new user message.
+        get_autogen_agent(api_manager: APIManager) -> ConversableAgent:
+            Returns the configured AutoGen agent for the chat.
+        get_combined_function_map(api_manager: APIManager) -> Optional[Dict[str, Callable]]:
+            Combines all available function maps from the registered tasks.
+        get_default_executor(api_manager: APIManager) -> ConversableAgent:
+            Returns the default executor agent with the combined function map.
+        deep_validate_required_apis(api_manager: APIManager) -> Dict[str, Any]:
+            Performs a deep validation of all required APIs for the chat and its functions.
+    """
     id: Optional[str] = Field(default=None, description="The unique ID of the chat conversation, must match the ID in the database", alias="_id")
     name: str = Field("New Chat", description="The name of the chat conversation")
     messages: Optional[List[MessageDict]] = Field([], description="List of messages in the chat conversation")

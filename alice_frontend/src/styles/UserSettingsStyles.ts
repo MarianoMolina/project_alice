@@ -3,16 +3,11 @@ import { Theme } from '@mui/material/styles';
 
 const useStyles = makeStyles((theme: Theme) => ({
     root: {
-        padding: theme.spacing(3),
-        overflowY: "auto",
+        display: 'flex',
+        height: '100%',
     },
     title: {
         marginBottom: theme.spacing(3),
-    },
-    column: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing(3),
     },
     card: {
         height: '100%',

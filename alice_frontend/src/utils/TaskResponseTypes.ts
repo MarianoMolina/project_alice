@@ -4,6 +4,7 @@ export interface TaskResultProps {
 
 export interface TaskResponse {
     task_name: string;
+    task_id: string;
     task_description: string;
     status: 'pending' | 'complete' | 'failed';
     result_code: number;
@@ -24,6 +25,7 @@ export const convertToTaskResponse = (data: any): TaskResponse => {
     return {
         task_name: data?.task_name || '',
         task_description: data?.task_description || '',
+        task_id: data?.task_id || '',
         status: data?.status || 'pending',
         result_code: data?.result_code || 0,
         task_outputs: data?.task_outputs || {},

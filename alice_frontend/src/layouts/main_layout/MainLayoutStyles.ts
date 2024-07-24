@@ -21,6 +21,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     height: '100%',
     zIndex: 1,
   },
+  canvasContainer: {
+    height: '100%',
+    width: '100%',
+  },
   mainLayoutHeader: {
     flexShrink: 0,
     zIndex: 2,

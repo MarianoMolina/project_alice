@@ -40,3 +40,8 @@ export interface ParameterComponentProps {
     onInteraction?: (parameter: ParameterDefinition) => void;
     showHeaders?: boolean;
 }
+export const getDefaultParameterForm = (): Partial<ParameterDefinition> => ({
+    type: 'string',
+    description: '',
+    default: null
+});

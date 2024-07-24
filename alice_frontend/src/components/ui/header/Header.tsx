@@ -1,7 +1,8 @@
 import React from 'react';
 import { AppBar, Toolbar, IconButton, Box, Tooltip, Button, Typography } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { SettingsApplications, Storage, Chat, Task, Home} from '@mui/icons-material';
+import { SettingsApplications, Storage, Chat, Task, Home } from '@mui/icons-material';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuth } from '../../../context/AuthContext';
 import useStyles from './HeaderStyles';
 
@@ -16,6 +17,7 @@ const Header: React.FC = () => {
   };
 
   const handleLogout = () => {
+    console.log('Logging out');
     logout();
     navigate('/login');
   };
@@ -25,7 +27,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <AppBar position="static">
+    <AppBar position="static" className={classes.header}>
       <Toolbar className={classes.toolbar}>
         <Box className={classes.leftSection}>
           <Tooltip title="Home">
@@ -42,15 +44,6 @@ const Header: React.FC = () => {
 
         {isAuthenticated && (
           <Box className={classes.centerSection}>
-            <Tooltip title="Execute Task">
-              <IconButton
-                color="inherit"
-                onClick={() => handleNavigation('/start-task')}
-                className={isActive('/start-task') ? classes.activeButton : ''}
-              >
-                <Task />
-              </IconButton>
-            </Tooltip>
             <Tooltip title="Chat with Alice">
               <IconButton
                 color="inherit"
@@ -58,6 +51,15 @@ const Header: React.FC = () => {
                 className={isActive('/chat-alice') ? classes.activeButton : ''}
               >
                 <Chat />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Execute Task">
+              <IconButton
+                color="inherit"
+                onClick={() => handleNavigation('/start-task')}
+                className={isActive('/start-task') ? classes.activeButton : ''}
+              >
+                <Task />
               </IconButton>
             </Tooltip>
             <Tooltip title="View Database">
@@ -69,15 +71,6 @@ const Header: React.FC = () => {
                 <Storage />
               </IconButton>
             </Tooltip>
-            <Tooltip title="User Settings">
-              <IconButton
-                color="inherit"
-                onClick={() => handleNavigation('/user-settings')}
-                className={isActive('/user-settings') ? classes.activeButton : ''}
-              >
-                <SettingsApplications />
-              </IconButton>
-            </Tooltip>
           </Box>
         )}
 
@@ -87,9 +80,23 @@ const Header: React.FC = () => {
               <Typography variant="body1" className={classes.userEmail}>
                 {user?.email}
               </Typography>
-              <Button color="inherit" onClick={handleLogout}>
-                Logout
-              </Button>
+              <Tooltip title="User Settings">
+                <IconButton
+                  color="inherit"
+                  onClick={() => handleNavigation('/user-settings')}
+                  className={isActive('/user-settings') ? classes.activeButton : ''}
+                >
+                  <SettingsApplications />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Logout">
+                <IconButton
+                  color="inherit"
+                  onClick={handleLogout}
+                >
+                  <LogoutIcon />
+                </IconButton>
+              </Tooltip>
             </>
           ) : (
             <Button color="inherit" onClick={() => handleNavigation('/login')}>

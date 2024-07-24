@@ -1,7 +1,11 @@
 import { Theme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
+import { hexToRgba } from '../../../utils/StyleUtils';
 
 const useStyles = makeStyles((theme: Theme) => ({
+  header: {
+    backgroundColor: `${hexToRgba(theme.palette.background.paper, 0.1)} !important`,
+  },
   toolbar: {
     display: 'flex',
     justifyContent: 'space-between',

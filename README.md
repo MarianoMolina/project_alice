@@ -22,7 +22,6 @@ The project consists of three main components:
   - CheckTask
   - CodeGenerationLLMTask
   - CodeExecutionLLMTask
-  - AgentWithFunctions
   - Workflow
   - API tasks (Reddit, Wikipedia, Google, Exa, Arxiv search)
 

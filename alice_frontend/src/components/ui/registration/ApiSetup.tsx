@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Box, Typography, Button, Stepper, Step, StepLabel, StepContent } from '@mui/material';
+import { Box, Typography, Button } from '@mui/material';
 import { API } from '../../../utils/ApiTypes';
-import { API_TYPE_CONFIGS } from '../../../utils/ApiUtils';
-import EnhancedAPI from '../../api/api/EnhancedApi';
+import ApiTooltipView from '../../enhanced/api/api/ApiTooltipView';
+import EnhancedAPI from '../../enhanced/api/api/EnhancedApi';
 
 interface ApiSetupProps {
   apis: API[];
@@ -10,50 +10,41 @@ interface ApiSetupProps {
 }
 
 const ApiSetup: React.FC<ApiSetupProps> = ({ apis, onComplete }) => {
-  const [activeStep, setActiveStep] = useState(0);
-  const [configuredApis, setConfiguredApis] = useState<API[]>([]);
+  const [selectedApi, setSelectedApi] = useState<API | null>(null);
+  const [configuredApis, setConfiguredApis] = useState<API[]>(apis);
 
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  const handleApiSelect = (api: API) => {
+    setSelectedApi(api);
   };
 
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  const handleApiUpdate = (updatedApi: API) => {
+    setConfiguredApis(prevApis => 
+      prevApis.map(api => api._id === updatedApi._id ? updatedApi : api)
+    );
+    setSelectedApi(null);
   };
 
-  const handleApiConfig = (api: API) => {
-    setConfiguredApis((prev) => [...prev, api]);
-    handleNext();
+  const handleComplete = () => {
+    onComplete(configuredApis);
   };
 
   return (
     <Box>
-      <Stepper activeStep={activeStep} orientation="vertical">
-        {apis.map((api, index) => (
-          <Step key={index}>
-            <StepLabel>{API_TYPE_CONFIGS[api.api_type].name}</StepLabel>
-            <StepContent>
-              <EnhancedAPI mode={'create'} fetchAll={true} onSave={handleApiConfig} apiType={api.api_type}/>;
-              <Box sx={{ mb: 2 }}>
-                <div>
-                  <Button variant="contained" onClick={handleNext} sx={{ mt: 1, mr: 1 }}>
-                    {index === apis.length - 1 ? 'Finish' : 'Continue'}
-                  </Button>
-                  <Button disabled={index === 0} onClick={handleBack} sx={{ mt: 1, mr: 1 }}>
-                    Back
-                  </Button>
-                </div>
-              </Box>
-            </StepContent>
-          </Step>
-        ))}
-      </Stepper>
-      {activeStep === apis.length && (
-        <Box>
-          <Typography>All APIs configured successfully.</Typography>
-          <Button onClick={() => onComplete(configuredApis)}>Complete Registration</Button>
-        </Box>
+      <Typography variant="h6" gutterBottom>
+        Configure Your APIs
+      </Typography>
+      <ApiTooltipView items={configuredApis} onInteraction={handleApiSelect} item={null} onChange={() => {}} mode={'view'} handleSave={async () => {}}/>
+      {selectedApi && (
+        <EnhancedAPI
+          mode="edit"
+          itemId={selectedApi._id}
+          fetchAll={false}
+          onSave={handleApiUpdate}
+        />
       )}
+      <Button variant="contained" color="primary" onClick={handleComplete}>
+        Complete Setup
+      </Button>
     </Box>
   );
 };

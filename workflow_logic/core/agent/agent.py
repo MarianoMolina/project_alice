@@ -1,7 +1,7 @@
 from typing import Dict, Optional, List, Callable, Literal, Union, Any
 from pydantic import BaseModel, Field
 from bson import ObjectId
-from autogen.agentchat import Agent, ConversableAgent, GroupChat, UserProxyAgent
+from autogen.agentchat import ConversableAgent, UserProxyAgent
 from autogen.agentchat.contrib.llava_agent import LLaVAAgent
 from workflow_logic.core.api import APIManager, ApiType
 from workflow_logic.core.parameters import FunctionConfig
@@ -9,6 +9,37 @@ from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.model import AliceModel, LLMConfig
 
 class AliceAgent(BaseModel):
+    """
+    Represents an AI agent with configurable properties and behaviors.
+
+    This class encapsulates the properties and methods needed to create and manage
+    an AI agent, including its name, system message, associated model, and various
+    configuration options for interaction and code execution.
+
+    Attributes:
+        id (Optional[str]): The unique identifier for the agent.
+        name (str): The name of the agent.
+        system_message (Prompt): The prompt object containing the agent's system message.
+        agents_in_group (Optional[List['AliceAgent']]): A list of other agents in the group chat, if applicable.
+        autogen_class (Literal["ConversableAgent", "UserProxyAgent", "LLaVAAgent"]): The type of AutoGen agent to use.
+        code_execution_config (Optional[Union[Dict, bool]]): Configuration for code execution capabilities.
+        max_consecutive_auto_reply (int): Maximum number of consecutive automatic replies.
+        human_input_mode (Literal["ALWAYS", "TERMINATE", "NEVER"]): When to request human input.
+        speaker_selection (Optional[Dict[str, Any]]): Logic for selecting speakers in a group chat.
+        default_auto_reply (Optional[str]): Default reply when no specific response is generated.
+        model_id (Optional[AliceModel]): The associated language model for the agent.
+
+    Methods:
+        system_message_str() -> str: Returns the formatted system message string.
+        get_execution_agent(function_map: Optional[Dict[str, Callable]] = None) -> ConversableAgent:
+            Creates and returns a UserProxyAgent for code execution.
+        get_code_execution_config() -> dict: Returns the code execution configuration.
+        get_autogen_agent(api_manager: Optional[APIManager] = None, 
+                          llm_config: Optional[LLMConfig] = None, 
+                          function_map: Dict[str, Callable] = {}, 
+                          functions_list: List[FunctionConfig] = []) -> ConversableAgent:
+            Creates and returns the appropriate AutoGen agent based on the configuration.
+    """
     id: Optional[str] = Field(default=None, description="The ID of the agent", alias="_id")
     name: str = Field(..., description="The name of the agent")
     system_message: Prompt = Field(default=Prompt(name="default", content="You are an AI assistant"), description="The name of the prompt to use for system_message")
@@ -121,20 +152,3 @@ class AliceAgent(BaseModel):
         else:
             raise ValueError(f"Invalid agent class: {self.autogen_class}. Expected 'ConversableAgent', or 'UserProxyAgent'.")
         
-    @staticmethod
-    def create_speaker_selection_method(speaker_selection_logic: dict) -> Callable[[ConversableAgent, GroupChat], Optional[Agent]]:
-        def speaker_selection(last_speaker: ConversableAgent, groupchat: GroupChat) -> Optional[Agent]:
-            if last_speaker is None or last_speaker.name not in speaker_selection_logic["speaker_sequence"]:
-                selected = speaker_selection_logic["speaker_sequence"][0]
-                agent_selected = next(agent for agent in groupchat.agents if agent.name == selected)
-                return agent_selected
-            elif last_speaker.name in speaker_selection_logic["speaker_sequence"]:
-                if speaker_selection_logic["termination_condition"](groupchat.messages[-1]["content"]):
-                    print("Termination condition met.")
-                    return None
-                current_index = speaker_selection_logic["speaker_sequence"].index(last_speaker.name)
-                if current_index + 1 < len(speaker_selection_logic["speaker_sequence"]):
-                    return next(agent for agent in groupchat.agents if agent.name == speaker_selection_logic["speaker_sequence"][current_index + 1])
-                return next(agent for agent in groupchat.agents if agent.name == speaker_selection_logic["speaker_sequence"][0])
-            return None
-        return speaker_selection

@@ -6,9 +6,38 @@ from workflow_logic.db_app.db import BackendAPI
 from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, DatabaseTaskResponse, ParameterDefinition, FunctionParameters
 from workflow_logic.util import User
 from workflow_logic.core.api import API
-from workflow_logic.core.api.api_utils import EntityType, available_task_types
+from workflow_logic.core.api.api_utils import EntityType
+from workflow_logic.core.tasks.task_utils import available_task_types
 
 class DBInitManager(BaseModel):
+    """
+    Manages the initialization and resolution of database entities.
+
+    This class provides functionality to create, store, and resolve references between
+    different types of entities during the database initialization process.
+
+    Attributes:
+        entity_key_map (Dict[EntityType, Dict[str, Dict[str, Any]]]): Maps entity keys to their data.
+        entity_obj_key_map (Dict[EntityType, Dict[str, BaseModel]]): Maps entity keys to their Pydantic model instances.
+        entity_class_map (Dict[str, BaseModel]): Maps entity types to their corresponding Pydantic model classes.
+
+    Methods:
+        get_entity_instance(entity_type: EntityType, entity_data: dict) -> BaseModel:
+            Creates and returns an instance of the specified entity type.
+
+        create_entity_instance(entity_type: EntityType, entity_data: dict, db_app: Optional[BackendAPI] = None) -> BaseModel:
+            Creates an entity instance and stores it in the database if a BackendAPI is provided.
+
+        resolve_references_in_data(entity_type: EntityType, data: Dict[str, Any]) -> Dict[str, Any]:
+            Resolves references in the entity data, replacing keys with actual entity instances.
+
+    Private Methods:
+        Various private methods to handle specific aspects of entity resolution and creation.
+
+    Example:
+        >>> init_manager = DBInitManager()
+        >>> entity = await init_manager.create_entity_instance(EntityType.PROMPTS, prompt_data, backend_api)
+    """
     entity_key_map: Dict[EntityType, Dict[str, Dict[str, Any]]] = Field(default_factory=lambda: {
         "users": {}, 
         "models": {}, 

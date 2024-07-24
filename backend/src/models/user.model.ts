@@ -18,7 +18,7 @@ const userSchema = new Schema<IUserDocument, IUserModel>({
 
 userSchema.methods.apiRepresentation = function(this: IUserDocument) {
   return {
-    id: this._id,
+    _id: this._id,
     name: this.name || null,
     email: this.email || null,
     role: this.role || "user",

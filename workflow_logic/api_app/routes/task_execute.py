@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 from workflow_logic.core.communication import DatabaseTaskResponse
 from workflow_logic.core.tasks import AliceTask
-from workflow_logic.core.api.api_utils import TaskExecutionRequest, deep_api_check
+from workflow_logic.core.tasks.task_utils import TaskExecutionRequest
+from workflow_logic.api_app.util.utils import deep_api_check
 from workflow_logic.util.logging_config import LOGGER
 from workflow_logic.api_app.util.dependencies import get_db_app
 
@@ -9,6 +10,27 @@ router = APIRouter()
 
 @router.post("/execute_task", response_model=DatabaseTaskResponse)
 async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(get_db_app)) -> dict:
+    """
+    Execute a specific task and store its response.
+
+    This endpoint retrieves the task, performs API checks, executes the task,
+    and stores the result in the database.
+
+    Args:
+        request (TaskExecutionRequest): The request containing task ID and inputs.
+        db_app: The database application instance (injected dependency).
+
+    Returns:
+        dict: The stored task response as a dictionary.
+
+    Raises:
+        ValueError: If the specified task is not found.
+
+    Note:
+        - This endpoint performs deep API checks before task execution.
+        - If an error occurs during execution, it creates and stores a failed task response.
+        - All exceptions are caught, logged, and returned as failed task responses.
+    """
     LOGGER.info(f'execute_task_endpoint: {request}')
     taskId = request.taskId
     inputs = request.inputs

@@ -13,6 +13,17 @@ const handleErrors = (res: Response, error: any) => {
   res.status(500).json({ error: 'An error occurred while processing the request' });
 };
 
+// Middleware to check if the user is accessing their own data or is an admin
+const userSelfOrAdmin = (req: AuthRequest, res: Response, next: Function) => {
+  if (req.user?.userId === req.params.id || req.user?.role === 'admin') {
+    next();
+  } else {
+    res.status(403).json({ message: 'Unauthorized' });
+  }
+};
+
+// Public routes
+
 // Register a new user
 router.post('/register', async (req: Request, res: Response) => {
   const { name, email, password, role } = req.body;
@@ -54,8 +65,11 @@ router.post('/login', async (req: Request, res: Response) => {
   }
 });
 
+// Protected routes (require authentication)
+router.use(auth);
+
 // Validate user
-router.get('/validate', auth, async (req: AuthRequest, res: Response) => {
+router.get('/validate', async (req: AuthRequest, res: Response) => {
   try {
     const user = await User.findById(req.user?.userId);
     if (!user) {
@@ -67,12 +81,9 @@ router.get('/validate', auth, async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Get a specific user by ID (authenticated users can get their own info)
-router.get('/:id', auth, async (req: AuthRequest, res: Response) => {
+// Get a specific user by ID (authenticated users can get their own info, admins can get any user's info)
+router.get('/:id', userSelfOrAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    if (req.user?.userId !== req.params.id && req.user?.role !== 'admin') {
-      return res.status(403).json({ message: 'Unauthorized' });
-    }
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -83,12 +94,9 @@ router.get('/:id', auth, async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Update a user by ID (authenticated users can update their own info)
-router.put('/:id', auth, async (req: AuthRequest, res: Response) => {
+// Update a user by ID (authenticated users can update their own info, admins can update any user's info)
+router.put('/:id', userSelfOrAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    if (req.user?.userId !== req.params.id && req.user?.role !== 'admin') {
-      return res.status(403).json({ message: 'Unauthorized' });
-    }
     if (req.body.password) {
       req.body.password = await bcrypt.hash(req.body.password, 10);
     }
@@ -103,10 +111,9 @@ router.put('/:id', auth, async (req: AuthRequest, res: Response) => {
 });
 
 // Admin-only routes
-router.use(adminOnly);
 
 // Get all users (admin only)
-router.get('/', async (_req: Request, res: Response) => {
+router.get('/', adminOnly, async (_req: Request, res: Response) => {
   try {
     const users = await User.find();
     res.json(users.map(user => user.apiRepresentation()));
@@ -116,7 +123,7 @@ router.get('/', async (_req: Request, res: Response) => {
 });
 
 // Delete a user by ID (admin only)
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', adminOnly, async (req: Request, res: Response) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) {

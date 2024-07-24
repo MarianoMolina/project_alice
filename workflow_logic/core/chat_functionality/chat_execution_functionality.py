@@ -8,6 +8,52 @@ from workflow_logic.core.parameters import ToolCall
 from workflow_logic.util.utils import get_language_matching
 
 class ChatExecutionFunctionality(BaseModel):
+    """
+    Manages the execution of a chat conversation, including handling of LLM responses,
+    function calls, and code execution.
+
+    This class orchestrates the interaction between an LLM agent and an execution agent,
+    processing messages, handling function calls, and managing code execution within
+    the context of a chat conversation.
+
+    Attributes:
+        llm_agent (ConversableAgent): The language model agent responsible for generating responses.
+        execution_agent (ConversableAgent): The agent responsible for executing functions and code.
+        code_execution_config (Union[bool, dict]): Configuration for code execution.
+        max_recursion_depth (int): Maximum number of recursive calls allowed in a single turn.
+        valid_languages (List[str]): List of programming languages supported for code execution.
+        return_output_to_agent (bool): Whether to return tool/code outputs to the LLM agent.
+
+    Methods:
+        take_turn(messages: List[MessageDict]) -> Tuple[List[MessageDict], bool]:
+            Processes a single turn in the conversation, generating responses and handling function calls.
+
+        gen_turn_responses(messages: List[MessageDict]) -> List[MessageDict]:
+            Generates responses for a single turn, including handling of function calls and code execution.
+
+        handle_function_call(response: dict) -> List[MessageDict]:
+            Processes function or tool calls made by the LLM agent.
+
+        handle_potential_code_execution(response: str, step_name: Optional[str] = None) -> List[MessageDict]:
+            Extracts and executes code blocks from the LLM agent's response.
+
+        chat(initial_message: str, max_turns: int = 1) -> List[MessageDict]:
+            Conducts a chat conversation for a specified number of turns.
+
+        retrieve_code_blocks(content: str) -> List[Tuple[str, str]]:
+            Extracts valid code blocks from a given content string.
+
+    Private Methods:
+        get_message_from_tool_exec(tool_response: Dict[str, Any], is_success: bool, step_name: str) -> MessageDict:
+            Formats the response from a tool or function execution into a MessageDict.
+
+    Example:
+        >>> llm_agent = ConversableAgent(...)
+        >>> execution_agent = ConversableAgent(...)
+        >>> chat_exec = ChatExecutionFunctionality(llm_agent=llm_agent, execution_agent=execution_agent)
+        >>> messages, terminated = await chat_exec.take_turn([MessageDict(role="user", content="Hello, can you help me?")])
+    """
+
     llm_agent: ConversableAgent = Field(..., description="The LLM agent")
     execution_agent: ConversableAgent = Field(..., description="The execution agent")
     code_execution_config: Union[bool, dict] = Field(False, description="Code execution configuration")

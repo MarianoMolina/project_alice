@@ -5,7 +5,7 @@ from typing import Dict, Any, Optional, Literal
 from pydantic import BaseModel, Field
 from workflow_logic.util.logging_config import LOGGER
 from workflow_logic.core.communication import DatabaseTaskResponse, MessageDict
-from workflow_logic.core.api.api_utils import available_task_types
+from workflow_logic.core.tasks.task_utils import available_task_types
 from workflow_logic.util.const import BACKEND_PORT, HOST, ADMIN_TOKEN
 from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, DatabaseTaskResponse
 from workflow_logic.core.api import API
@@ -13,6 +13,39 @@ from workflow_logic.util import User
 from workflow_logic.core.api.api_utils import  EntityType
 
 class BackendAPI(BaseModel):
+    """
+    Represents a connection to the backend API, providing methods to interact with various entities.
+
+    This class encapsulates the functionality to communicate with the backend API,
+    including methods to retrieve, create, and update various entities such as prompts,
+    users, agents, tasks, models, APIs, and chats.
+
+    Attributes:
+        base_url (str): The base URL of the backend API.
+        user_token (str): The authentication token for API requests.
+        available_task_types (list[AliceTask]): List of available task types.
+        collection_map (Dict[EntityType, str]): Mapping of entity types to collection names.
+
+    Methods:
+        initialize_db_app(): Initializes the database application.
+        get_prompts(prompt_id: Optional[str] = None) -> Dict[str, Prompt]: Retrieves prompts.
+        get_users(user_id: Optional[str] = None) -> Dict[str, User]: Retrieves users.
+        get_agents(agent: Optional[str] = None) -> Dict[str, AliceAgent]: Retrieves agents.
+        get_tasks(task_id: Optional[str] = None) -> Dict[str, AliceTask]: Retrieves tasks.
+        get_models(model_id: Optional[str] = None) -> Dict[str, AliceModel]: Retrieves models.
+        get_apis(api_id: Optional[str] = None) -> Dict[str, API]: Retrieves APIs.
+        update_api_health(api_id: str, health_status: str) -> bool: Updates API health status.
+        get_chats(chat_id: Optional[str] = None) -> Dict[str, AliceChat]: Retrieves chats.
+        store_chat_message(chat_id: str, message: MessageDict) -> AliceChat: Stores a chat message.
+        store_task_response(task_response: DatabaseTaskResponse) -> DatabaseTaskResponse: Stores a task response.
+        validate_token(token: str) -> dict: Validates an authentication token.
+        create_entity_in_db(entity_type: EntityType, entity_data: dict) -> str: Creates an entity in the database.
+        check_existing_data(max_retries=3, retry_delay=1) -> bool: Checks for existing data in the database.
+
+    Example:
+        >>> api = BackendAPI(base_url="http://api.example.com", user_token="your_token_here")
+        >>> prompts = await api.get_prompts()
+    """
     base_url: Literal[f"http://{HOST}:{BACKEND_PORT}/api"] = Field(f"http://{HOST}:{BACKEND_PORT}/api", description="The base URL of the backend API", frozen=True)
     user_token: str = Field(ADMIN_TOKEN, description="The admin token for the backend API")
     available_task_types: list[AliceTask] = Field(available_task_types, frozen=True, description="The available task types")
@@ -434,6 +467,6 @@ def token_validation_middleware(api: BackendAPI):
         if not validation_response.get("valid"):
             return {"valid": False, "message": validation_response.get("message", "Invalid token")}
         print('validation_response', validation_response)
-        request.state.user_id = validation_response["user"]["id"]
+        request.state.user_id = validation_response["user"]["_id"]
         return {"valid": True}
     return middleware

@@ -38,7 +38,7 @@ interface ChatProviderProps {
 }
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
-    const { fetchItem, updateItem, fetchChatById, sendMessage, generateChatResponse } = useApi();
+    const { fetchItem, updateItem, sendMessage, generateChatResponse } = useApi();
     const [messages, setMessages] = useState<MessageType[]>([]);
     const [pastChats, setPastChats] = useState<AliceChat[]>([]);
     const [currentChatId, setCurrentChatId] = useState<string | null>(null);
@@ -50,6 +50,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     const fetchChats = async () => {
         try {
             const chats = await fetchItem('chats') as AliceChat[];
+            console.log('Fetched chats:', chats);
             setPastChats(chats);
         } catch (error) {
             console.error('Error fetching chats:', error);
@@ -61,6 +62,17 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             fetchChats();
         }
     }, [user]);
+
+    const fetchChatById = async (chatId: string): Promise<AliceChat> => {
+        try {
+            const chatData = await fetchItem('chats', chatId) as AliceChat;
+            console.log('Fetched chat by id:', chatData);
+            return chatData;
+        } catch (error) {
+            console.error('Error fetching chat by id:', error);
+            throw error;
+        }
+    };
 
     const fetchCurrentChat = async () => {
         if (!currentChatId) return;
@@ -76,17 +88,17 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
     const handleSelectChat = async (chatId: string) => {
         try {
-          console.log('Fetching chat with id:', chatId);
-          const chatData = await fetchChatById(chatId);
-          console.log('Fetched chat data:', chatData);
-          setCurrentChat(chatData);
-          setMessages(chatData.messages);
-          setCurrentChatId(chatId);
-          setAgents([chatData.alice_agent]);
+            console.log('Fetching chat with id:', chatId);
+            const chatData = await fetchChatById(chatId);
+            console.log('Fetched chat data:', chatData);
+            setCurrentChat(chatData);
+            setMessages(chatData.messages);
+            setCurrentChatId(chatId);
+            setAgents([chatData.alice_agent]);
         } catch (error) {
-          console.error('Error fetching chat:', error);
+            console.error('Error fetching chat:', error);
         }
-      };
+    };
 
     const handleSendMessage = async (messageContent: string) => {
         if (!currentChatId) {
@@ -188,7 +200,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             });
             const updatedMessages = [...messages, ...newMessages];
             console.log('Adding task results to chat:', updatedTaskResponses, updatedMessages);
-            await updateItem("chats", currentChatId, { 
+            await updateItem("chats", currentChatId, {
                 task_responses: updatedTaskResponses,
                 messages: updatedMessages
             });

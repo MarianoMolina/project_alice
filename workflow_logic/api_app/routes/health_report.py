@@ -9,10 +9,31 @@ router = APIRouter()
 
 @router.get("/health")
 async def health_check() -> dict:
+    """
+    Basic health check endpoint for the Workflow service.
+
+    Returns:
+        dict: A status message indicating the service is healthy.
+    """
     return {"status": "OK", "message": "Workflow service is healthy"}
 
 @router.get("/health/admin")
 async def admin_health_check(request: Request) -> dict:
+    """
+    Admin-level health check endpoint.
+
+    This endpoint provides more detailed health information, including initial test results.
+    It requires admin-level access.
+
+    Args:
+        request (Request): The incoming request object.
+
+    Returns:
+        dict: Detailed health status including initial test results.
+
+    Raises:
+        HTTPException: 403 error if the user doesn't have admin access.
+    """
     if not request.state.user or request.state.user.role != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
    
@@ -24,6 +45,25 @@ async def admin_health_check(request: Request) -> dict:
 
 @router.get("/health/user")
 async def user_health_check(request: Request, db_app=Depends(get_db_app)) -> dict:
+    """
+    User-level health check endpoint.
+
+    This endpoint runs API tests for the user's configured APIs and updates their health status
+    in the database.
+
+    Args:
+        request (Request): The incoming request object.
+        db_app: The database application instance (injected dependency).
+
+    Returns:
+        dict: Health status of the user's APIs.
+
+    Raises:
+        HTTPException: 404 error if no APIs are found for the user.
+
+    Note:
+        This endpoint updates the health status of each API in the database based on test results.
+    """
     user_apis = await db_app.get_apis()
    
     if not user_apis:
