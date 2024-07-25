@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Chat, PlayArrow, Code } from '@mui/icons-material';
 import useStyles from './DashboardStyles';
 import { EvervaultCard } from '../aceternity/EvervaultCard';
+import logo from '../../../assets/img/logo1024.png';
 
 const Dashboard: React.FC = () => {
   const classes = useStyles();
@@ -13,7 +14,7 @@ const Dashboard: React.FC = () => {
     {
       title: "Chat with Alice",
       description: "Continue a chat, adjust the agent's skills or start a new one with a different agent.",
-      icon: <Chat />,
+      image: logo,
       path: "/chat-alice",
     },
     {
@@ -37,7 +38,7 @@ const Dashboard: React.FC = () => {
           <EvervaultCard
             title={cardDetails[0].title}
             description={cardDetails[0].description}
-            icon={cardDetails[0].icon}
+            image={cardDetails[0].image}
             onClick={() => navigate(cardDetails[0].path)}
           />
         </Grid>

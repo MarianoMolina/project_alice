@@ -8,6 +8,7 @@ from workflow_logic.core.agent import AliceAgent
 from workflow_logic.core.communication import TaskResponse, DatabaseTaskResponse
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition, FunctionConfig, ToolFunction
 from workflow_logic.core.api import ApiType
+from workflow_logic.core.api.api_generators import APIEngine
 
 prompt_function_parameters = FunctionParameters(
     type="object",
@@ -84,15 +85,49 @@ class AliceTask(BaseModel, ABC):
     agent: Optional[AliceAgent] = Field(None, description="The agent that the task is associated with")
     execution_agent: Optional[AliceAgent] = Field(None, description="The agent that the task is executed by")
     human_input: Optional[bool] = Field(default=False, description="Whether the task requires human input")
+    api_engine: Optional[APIEngine] = Field(None, description="The API engine for the task")
 
     @property
     def task_type(self) -> str:
         return self.__class__.__name__
     
     def model_dump(self, *args, **kwargs):
-        data = super().model_dump(*args, **kwargs)
-        data['task_type'] = self.task_type
-        return data
+        # Create a copy of the current instance's dict
+        data = dict(self.__dict__)
+        
+        # Handle nested tasks before calling super().model_dump()
+        if 'tasks' in data and isinstance(data['tasks'], dict):
+            data['tasks'] = {
+                task_id: task.model_dump(*args, **kwargs) if isinstance(task, AliceTask) else task
+                for task_id, task in data['tasks'].items()
+            }
+
+        # Call super().model_dump() with the updated data
+        dumped_data = super().model_dump(*args, **kwargs, exclude={'tasks'})
+        
+        # Add the task_type
+        dumped_data['task_type'] = self.task_type
+
+        # Add the processed tasks back to the dumped data
+        if 'tasks' in data:
+            dumped_data['tasks'] = data['tasks']
+
+        # Handle other potential nested AliceTask objects
+        for key, value in dumped_data.items():
+            if isinstance(value, AliceTask):
+                dumped_data[key] = value.model_dump(*args, **kwargs)
+            elif isinstance(value, list):
+                dumped_data[key] = [
+                    item.model_dump(*args, **kwargs) if isinstance(item, AliceTask) else item
+                    for item in value
+                ]
+            elif isinstance(value, dict):
+                dumped_data[key] = {
+                    k: v.model_dump(*args, **kwargs) if isinstance(v, AliceTask) else v
+                    for k, v in value.items()
+                }
+
+        return dumped_data
     
     @abstractmethod
     async def run(self, **kwargs) -> TaskResponse:

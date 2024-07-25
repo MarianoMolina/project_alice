@@ -36,7 +36,7 @@ const Register = () => {
   };
 
   const handleApiSetupComplete = async (apis: API[]) => {
-      setStep(2); // Move to the final step
+    setStep(2); // Move to the final step
   };
 
   const handleComplete = async () => {

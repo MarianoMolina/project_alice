@@ -120,7 +120,6 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
       const data = await fetchItem(collectionName);
       setItems(data as T[]);
       setError(null);
-      console.log('fetched all items:', data);
     } catch (err) {
       setError('Failed to fetch items');
       console.error(err);
@@ -135,7 +134,6 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
       const data = await fetchItem(collectionName, itemId!);
       setItem(data as T);
       setError(null);
-      console.log('fetched single item:', data);
     } catch (err) {
       setError('Failed to fetch item');
       console.error(err);

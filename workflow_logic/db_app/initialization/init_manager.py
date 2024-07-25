@@ -2,7 +2,7 @@ from copy import deepcopy
 from workflow_logic.util.logging_config import LOGGER
 from typing import get_type_hints, get_origin, get_args, Dict, Any, Union, Optional, List
 from pydantic import BaseModel, Field, ConfigDict, ValidationError
-from workflow_logic.db_app.db import BackendAPI
+from workflow_logic.db_app.app import BackendAPI
 from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, DatabaseTaskResponse, ParameterDefinition, FunctionParameters
 from workflow_logic.util import User
 from workflow_logic.core.api import API
@@ -90,7 +90,7 @@ class DBInitManager(BaseModel):
             return entity_instance
         except Exception as e:
             if entity_type not in ["tasks", "chats"]: LOGGER.error(f"Error creating entity instance for {entity_type}")
-            raise e
+            raise ValueError(f"Error creating entity instance for {entity_type}: {str(e)}")
         
     def clean_entity_object(self, entity_data: dict) -> dict:
         return {k: v for k, v in entity_data.items() if v}
@@ -135,6 +135,7 @@ class DBInitManager(BaseModel):
     def create_task_from_json(self, task_dict: dict) -> AliceTask:
         task_type = task_dict.pop("task_type", "")
         if not task_type:
+            LOGGER.error(f'Task type not specified in task definition: {task_dict}')
             raise ValueError("Task type not specified in task definition.")
 
         # Handle nested tasks
@@ -166,13 +167,14 @@ class DBInitManager(BaseModel):
         raise ValueError(f"Task type {task_type} not found in available task types.")
     
     def create_chat_from_json(self, chat_data: dict) -> AliceChat:
+        LOGGER.debug(f"Creating chat from JSON: {chat_data}")
         chat_data = deepcopy(chat_data)
         if 'functions' in chat_data and isinstance(chat_data['functions'], list):
             functions = []
             for func in chat_data['functions']:
                 if isinstance(func, str):
                     # This is a reference to a task
-                    task = self.entity_obj_key_map["tasks"].get(func)
+                    task = self.get_entity_instance_by_key('tasks', func)
                     if not task:
                         raise ValueError(f"Referenced task '{func}' not found in entity_obj_key_map")
                     functions.append(task)

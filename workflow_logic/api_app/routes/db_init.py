@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, HTTPException, Depends
-from workflow_logic.db_app.initialization_data import DB_STRUCTURE
+from workflow_logic.db_app.initialization import DB_STRUCTURE
 from workflow_logic.util.logging_config import LOGGER
 from workflow_logic.api_app.util.dependencies import get_db_app
 

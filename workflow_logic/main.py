@@ -5,4 +5,6 @@ def run_app():
     uvicorn.run(WORKFLOW_APP, host="0.0.0.0", port=int(WORKFLOW_PORT))
 
 if __name__ == "__main__":
-    run_app()
+    # run_app()
+    from dotenv import dotenv_values
+    print("Contents of .env file:", dotenv_values())

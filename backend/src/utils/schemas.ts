@@ -1,5 +1,6 @@
 import { Schema, Types, Query } from 'mongoose';
 import { ensureObjectIdHelper } from './utils';
+import { ApiType } from '../interfaces/api.interface';
 
 interface IFunctionParameters {
   type: 'object';
@@ -36,4 +37,28 @@ function ensureObjectIdForProperties(properties: Map<string, Types.ObjectId>) {
   }
 }
 
-export { functionParametersSchema, IFunctionParameters, ensureObjectIdForProperties };
+
+interface IAPIEngine {
+  required_api: ApiType;
+  input_variables: IFunctionParameters;
+}
+
+const apiEngineSchema = new Schema<IAPIEngine>({
+  required_api: {
+    type: String,
+    required: true,
+    enum: Object.values(ApiType),
+    description: "Required API for the task"
+  },
+  input_variables: {
+    type: functionParametersSchema,
+    required: true,
+    description: "Input variables for the API"
+  }
+}, { _id: false });
+
+function ensureObjectIdForAPIEngine(apiEngine: IAPIEngine) {
+  ensureObjectIdForProperties(apiEngine.input_variables.properties);
+}
+
+export { functionParametersSchema, IFunctionParameters, ensureObjectIdForProperties, apiEngineSchema, IAPIEngine, ensureObjectIdForAPIEngine };

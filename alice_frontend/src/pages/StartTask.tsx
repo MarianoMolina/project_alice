@@ -30,7 +30,6 @@ const StartTask: React.FC = () => {
   const [openTaskCreateDialog, setOpenTaskCreateDialog] = useState(false);
   const [listKey, setListKey] = useState(0);
 
-  console.log('Render conditions:', { recentExecutionsLength: recentExecutions.length });
   useEffect(() => {
     console.log('Recent executions in StartTask:', recentExecutions);
   }, [recentExecutions]);
@@ -57,7 +56,7 @@ const StartTask: React.FC = () => {
 
   const actions = [
     {
-      name: `Create ${activeTab}`,
+      name: `Create task`,
       icon: Add,
       action: handleCreateNew,
       disabled: activeTab === 'Task Results'

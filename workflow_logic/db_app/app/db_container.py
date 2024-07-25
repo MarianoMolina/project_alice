@@ -1,4 +1,4 @@
-from workflow_logic.db_app.db_functionality import BackendFunctionalityAPI
+from workflow_logic.db_app.app.db_functionality import BackendFunctionalityAPI
 from typing import Literal
 from pydantic import Field
 from workflow_logic.util.const import BACKEND_HOST, BACKEND_PORT_DOCKER

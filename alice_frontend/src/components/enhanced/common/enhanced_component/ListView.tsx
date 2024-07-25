@@ -9,6 +9,26 @@ import {
     Tooltip
 } from '@mui/material';
 import { Visibility, ChevronRight } from '@mui/icons-material';
+import { styled } from '@mui/material/styles';
+
+const ListItemStyled = styled(ListItem)(({ theme }) => ({
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: theme.spacing(1, 2),
+}));
+
+const ContentBox = styled(Box)({
+    flexGrow: 1,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+});
+
+const ButtonBox = styled(Box)({
+    display: 'flex',
+    justifyContent: 'flex-end',
+    width: '80px',
+});
 
 interface EnhancedListItemProps<T> {
     item: T;
@@ -20,38 +40,40 @@ interface EnhancedListItemProps<T> {
     viewTooltip?: string;
 }
 
-function EnhancedListItem<T>({ 
-    item, 
-    primaryText, 
-    secondaryText, 
-    onView, 
+function EnhancedListItem<T>({
+    item,
+    primaryText,
+    secondaryText,
+    onView,
     onInteraction,
     interactionTooltip = "Select Item",
     viewTooltip = "View Item"
 }: EnhancedListItemProps<T>) {
     return (
-        <ListItem>
-            <ListItemText
-                primary={primaryText}
-                secondary={secondaryText}
-            />
-            <Box>
+        <ListItemStyled>
+            <ContentBox>
+                <ListItemText
+                    primary={primaryText}
+                    secondary={secondaryText}
+                />
+            </ContentBox>
+            <ButtonBox>
                 {onView && (
                     <Tooltip title={viewTooltip}>
-                        <IconButton edge="end" onClick={() => onView(item)}>
+                        <IconButton size="small" onClick={() => onView(item)}>
                             <Visibility />
                         </IconButton>
                     </Tooltip>
                 )}
                 {onInteraction && (
                     <Tooltip title={interactionTooltip}>
-                        <IconButton edge="end" onClick={() => onInteraction(item)}>
+                        <IconButton size="small" onClick={() => onInteraction(item)}>
                             <ChevronRight />
                         </IconButton>
                     </Tooltip>
                 )}
-            </Box>
-        </ListItem>
+            </ButtonBox>
+        </ListItemStyled>
     );
 }
 

@@ -4,9 +4,8 @@ from pydantic import Field
 from tqdm import tqdm
 from workflow_logic.core.api import APIManager
 from workflow_logic.core.api.api_utils import  EntityType
-from workflow_logic.db_app.initialization_data import DBStructure
-from workflow_logic.db_app.init_db import DBInitManager
-from workflow_logic.db_app.db import BackendAPI
+from workflow_logic.db_app.initialization import DBStructure, DBInitManager
+from workflow_logic.db_app.app.db import BackendAPI
 
 class BackendFunctionalityAPI(BackendAPI):
     """

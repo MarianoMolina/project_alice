@@ -1,5 +1,5 @@
 from fastapi import Request, HTTPException
-from workflow_logic.db_app.db import token_validation_middleware
+from workflow_logic.db_app.app import token_validation_middleware
 
 async def auth_middleware(request: Request, call_next):
     # Skip authorization for OPTIONS requests and health check

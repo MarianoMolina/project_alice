@@ -1,5 +1,6 @@
 import { AliceModel, convertToAliceModel } from "./ModelTypes";
 import { convertToUser, User } from "./UserTypes";
+import { FunctionParameters } from "./ParameterTypes";
 
 export enum ApiType {
     LLM_API = 'llm_api',
@@ -51,6 +52,11 @@ export const convertToAPI = (data: any): API => {
         updated_at: data?.updated_at ? new Date(data.updated_at) : undefined,
     };
 };
+
+export interface APIEngine {
+    required_api: ApiType;
+    input_variables: FunctionParameters;
+}
 
 export interface ApiComponentProps {
     items: API[] | null;

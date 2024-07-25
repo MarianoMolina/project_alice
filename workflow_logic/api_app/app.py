@@ -28,14 +28,10 @@ Usage:
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from concurrent.futures import ThreadPoolExecutor
-from workflow_logic.db_app.db_container import ContainerAPI
-from workflow_logic.api_app.middleware.cors import add_cors_middleware
-from workflow_logic.api_app.middleware.auth import auth_middleware
+from workflow_logic.db_app import ContainerAPI, DB_STRUCTURE
+from workflow_logic.api_app.middleware import add_cors_middleware, auth_middleware
 from workflow_logic.api_app.routes import health_route, task_execute, chat_response, db_init
-from workflow_logic.tests.component_tests.test_environment import TestEnvironment
-from workflow_logic.tests.component_tests.db_test import DBTests
-from workflow_logic.tests.component_tests.api_test import APITests
-from workflow_logic.db_app.initialization_data import DB_STRUCTURE
+from workflow_logic.tests.component_tests import TestEnvironment, DBTests, APITests
 from workflow_logic.util.logging_config import LOGGER
 
 db_app = None

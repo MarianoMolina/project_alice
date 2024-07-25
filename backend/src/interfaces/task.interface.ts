@@ -1,13 +1,9 @@
 import { Document, Types, Model } from 'mongoose';
+import { IFunctionParameters, IAPIEngine } from '../utils/schemas';
 
 export enum TaskType {
   CVGenerationTask = "CVGenerationTask",
-  RedditSearchTask = "RedditSearchTask",
   APITask = "APITask",
-  WikipediaSearchTask = "WikipediaSearchTask",
-  GoogleSearchTask = "GoogleSearchTask",
-  ExaSearchTask = "ExaSearchTask",
-  ArxivSearchTask = "ArxivSearchTask",
   Workflow = "Workflow",
   BasicAgentTask = "BasicAgentTask",
   PromptAgentTask = "PromptAgentTask",
@@ -20,7 +16,7 @@ export interface ITask {
   task_name: string;
   task_description: string;
   task_type: TaskType;
-  input_variables: any | null;
+  input_variables: IFunctionParameters | null;
   exit_codes: Map<string, string>;
   recursive: boolean;
   templates: Map<string, Types.ObjectId> | null;
@@ -38,6 +34,7 @@ export interface ITask {
   agent: Types.ObjectId | null;
   execution_agent: Types.ObjectId | null;
   human_input: boolean;
+  api_engine: IAPIEngine | null;
   created_by: Types.ObjectId;
   updated_by: Types.ObjectId;
 }

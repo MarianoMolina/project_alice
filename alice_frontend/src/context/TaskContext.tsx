@@ -44,6 +44,11 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [executionStatus, setExecutionStatus] = useState<'idle' | 'progress' | 'success'>('idle');
   const [recentExecutions, setRecentExecutions] = useState<RecentExecution[]>([]);
 
+  useEffect(() => {
+    fetchTasks();
+    fetchTaskResults();
+  }, []);
+  
   const fetchTasks = async () => {
     try {
       const fetchedTasks = await fetchItem('tasks');
@@ -55,6 +60,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const fetchTaskResults = async () => {
     try {
+      console.log('Fetching task results');
       const fetchedResults = await fetchItem('taskresults');
       setTaskResults(fetchedResults as TaskResponse[]);
      
@@ -85,11 +91,6 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  useEffect(() => {
-    fetchTasks();
-    fetchTaskResults();
-  }, []);
-
   const handleSelectTask = (task: AliceTask) => {
     setSelectedTask(task);
     console.log('Selected task in context:', task);
@@ -107,27 +108,10 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.log('Executing task:', selectedTask._id, inputValues);
       setExecutionStatus('progress');
       const result = await executeTask(selectedTask._id, inputValues);
-      await fetchTaskResults();
+      await fetchTaskResults(); // This will update recentExecutions
       console.log('Task execution result:', result);
       setSelectedResult(result);
       setExecutionStatus('success');
-
-      setRecentExecutions(prev => [
-        {
-          taskId: selectedTask._id!,
-          inputs: inputValues,
-          result: result,
-          timestamp: new Date()
-        },
-        ...prev.slice(0, 9) // Keep only the 10 most recent executions
-      ]);
-      
-      // After setting the state, log the updated state
-      setRecentExecutions(updatedExecutions => {
-        console.log('Recent executions:', updatedExecutions);
-        return updatedExecutions;
-      });
-
     } catch (error) {
       console.error('Error executing task:', error);
       setExecutionStatus('idle');

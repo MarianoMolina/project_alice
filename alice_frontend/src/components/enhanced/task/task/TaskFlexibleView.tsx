@@ -30,11 +30,6 @@ const taskTypes: TaskType[] = [
     "CodeGenerationLLMTask",
     "CodeExecutionLLMTask",
     "Workflow",
-    "RedditSearchTask",
-    "GoogleSearchTask",
-    "WikipediaSearchTask",
-    "ExaSearchTask",
-    "ArxivSearchTask",
     "APITask"
 ];
 
@@ -127,11 +122,6 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             case 'Workflow':
                 return <Workflow {...commonProps} />;
             case 'APITask':
-            case 'WikipediaSearchTask':
-            case 'GoogleSearchTask':
-            case 'ExaSearchTask':
-            case 'ArxivSearchTask':
-            case 'RedditSearchTask':
                 return <ApiTask {...commonProps} />;
             default:
                 return null;

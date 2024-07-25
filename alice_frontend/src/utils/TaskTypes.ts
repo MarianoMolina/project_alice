@@ -3,7 +3,7 @@ import { Prompt } from "./PromptTypes";
 import { FunctionParameters } from "./ParameterTypes";
 import { AliceModel } from './ModelTypes';
 import { ApiType } from './ApiTypes';
-import { API } from './ApiTypes';
+import { API, APIEngine } from './ApiTypes';
 
 export type TaskType = "CVGenerationTask" | "RedditSearchTask" | "APITask" | "WikipediaSearchTask" | "GoogleSearchTask" | "ExaSearchTask" | "ArxivSearchTask" | "BasicAgentTask" | "PromptAgentTask" | "CheckTask" | "CodeGenerationLLMTask" | "CodeExecutionLLMTask" | "Workflow";
 
@@ -29,6 +29,7 @@ export interface AliceTask {
   agent?: AliceAgent | null;
   execution_agent?: AliceAgent | null;
   human_input?: boolean;
+  api_engine?: APIEngine | null;
   created_by?: string;
   updated_by?: string;
   createdAt?: Date;
@@ -61,6 +62,7 @@ export const convertToAliceTask = (data: any): AliceTask => {
     agent: data?.agent || null,
     execution_agent: data?.execution_agent || null,
     human_input: data?.human_input || false,
+    api_engine: data?.api_engine || null,
     created_by: data?.created_by || '',
     updated_by: data?.updated_by || '',
     createdAt: data?.createdAt ? new Date(data.createdAt) : undefined,
@@ -126,11 +128,6 @@ export const getDefaultTaskForm = (taskType: TaskType): AliceTask => {
     case 'Workflow':
       return { ...baseForm, recursive: true };
     case 'APITask':
-    case 'WikipediaSearchTask':
-    case 'GoogleSearchTask':
-    case 'ExaSearchTask':
-    case 'ArxivSearchTask':
-    case 'RedditSearchTask':
       return {
         ...baseForm,
         task_name: '',

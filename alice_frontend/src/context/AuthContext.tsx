@@ -30,6 +30,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const savedUser = localStorage.getItem('user');
       console.log('token:', localStorage.getItem('token'));
       if (savedUser) {
+        if (savedUser === 'null') console.log('savedUser is null');
         const parsedUser = JSON.parse(savedUser);
         setUser(parsedUser);
         setIsAuthenticated(true);

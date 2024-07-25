@@ -1,3 +1,4 @@
+import React from 'react';
 import {
     List,
     ListItem,
@@ -8,6 +9,27 @@ import {
     Tooltip
 } from '@mui/material';
 import { Visibility, PlayArrow } from '@mui/icons-material';
+import { styled } from '@mui/material/styles';
+
+const ListItemStyled = styled(ListItem)(({ theme }) => ({
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: theme.spacing(1, 2),
+}));
+
+const ContentBox = styled(Box)({
+    flexGrow: 1,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+});
+
+const ButtonBox = styled(Box)({
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    width: '48px', // Reduced width for stacked buttons
+});
 
 interface EnhancedShortListItemProps<T> {
     item: T;
@@ -17,40 +39,42 @@ interface EnhancedShortListItemProps<T> {
     onInteraction?: (item: T) => void;
 }
 
-function EnhancedShortListItem<T>({ 
-    item, 
-    primaryText, 
-    secondaryText, 
-    onView, 
-    onInteraction 
+function EnhancedShortListItem<T>({
+    item,
+    primaryText,
+    secondaryText,
+    onView,
+    onInteraction
 }: EnhancedShortListItemProps<T>) {
     return (
-        <ListItem>
-            <ListItemText
-                primary={primaryText}
-                secondary={
-                    <Typography component="span" variant="body2" color="textSecondary">
-                        {secondaryText}
-                    </Typography>
-                }
-            />
-            <Box>
+        <ListItemStyled>
+            <ContentBox>
+                <ListItemText
+                    primary={primaryText}
+                    secondary={
+                        <Typography component="span" variant="body2" color="textSecondary">
+                            {secondaryText}
+                        </Typography>
+                    }
+                />
+            </ContentBox>
+            <ButtonBox>
                 {onView && (
                     <Tooltip title="View Item">
-                        <IconButton edge="end" onClick={() => onView(item)}>
+                        <IconButton size="small" onClick={() => onView(item)}>
                             <Visibility />
                         </IconButton>
                     </Tooltip>
                 )}
                 {onInteraction && (
                     <Tooltip title="Select Item">
-                        <IconButton edge="end" onClick={() => onInteraction(item)}>
+                        <IconButton size="small" onClick={() => onInteraction(item)}>
                             <PlayArrow />
                         </IconButton>
                     </Tooltip>
                 )}
-            </Box>
-        </ListItem>
+            </ButtonBox>
+        </ListItemStyled>
     );
 }
 

@@ -9,12 +9,14 @@ export const EvervaultCard = ({
   title,
   description,
   icon,
+  image,
   onClick,
   className,
 }: {
   title: string;
   description: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
+  image?: string;
   onClick: () => void;
   className?: string;
 }) => {
@@ -54,7 +56,10 @@ export const EvervaultCard = ({
         <div className="relative z-10 flex flex-col items-center justify-between h-full w-full">
           <div className="text-center flex-grow flex flex-col justify-center">
             <Typography variant="h5" className="mb-2 text-white" style={{ minHeight: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {icon} {title}
+              {image ? (
+                <img src={image} alt={title} className="w-8 h-8 mr-2 object-contain" />
+              ) : icon}
+              {title}
             </Typography>
             <Typography variant="body2" className="text-white/80" style={{ minHeight: '48px', overflow: 'hidden' }}>
               {description}

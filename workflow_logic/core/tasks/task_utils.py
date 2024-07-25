@@ -1,4 +1,4 @@
-from workflow_logic.core.tasks import APITask, AliceTask, RedditSearchTask, Workflow, WikipediaSearchTask, GoogleSearchTask, ExaSearchTask, ArxivSearchTask, BasicAgentTask, PromptAgentTask, CheckTask, CodeGenerationLLMTask, CodeExecutionLLMTask
+from workflow_logic.core.tasks import APITask, AliceTask, Workflow, BasicAgentTask, PromptAgentTask, CheckTask, CodeGenerationLLMTask, CodeExecutionLLMTask
 from pydantic import BaseModel
 from typing import Any, Dict
 
@@ -9,11 +9,6 @@ available_task_types: list[AliceTask] = [
     CodeExecutionLLMTask,
     CheckTask,
     BasicAgentTask,
-    RedditSearchTask,
-    ExaSearchTask,
-    WikipediaSearchTask,
-    GoogleSearchTask,
-    ArxivSearchTask,
     APITask
 ]
 class TaskExecutionRequest(BaseModel):

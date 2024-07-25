@@ -1,4 +1,5 @@
 import { Types, Model, Document } from 'mongoose';
+import { IFunctionParameters } from '../utils/schemas';
 
 export enum ApiType {
   LLM_MODEL = 'llm_api',

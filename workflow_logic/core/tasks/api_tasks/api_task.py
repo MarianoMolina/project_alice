@@ -1,27 +1,60 @@
-from abc import abstractmethod
-from typing import Any, Dict, List
-from pydantic import model_validator
-from workflow_logic.core.api import ApiType
-from workflow_logic.core.communication import SearchOutput, TaskResponse
+from typing import List, Type
+from pydantic import Field, model_validator
+from workflow_logic.core.api import ApiType, APIManager
+from workflow_logic.core.communication import TaskResponse
 from workflow_logic.core.tasks.task import AliceTask
-from workflow_logic.core.api import APIManager
+from workflow_logic.core.api.api_generators import APIEngine, WikipediaSearchAPI, GoogleSearchAPI, ExaSearchAPI, ArxivSearchAPI, RedditSearchAPI
 
-class APITask(AliceTask):    
-    required_apis: List[ApiType] = ["arxiv_search"]
+class APITask(AliceTask):
+    required_apis: List[ApiType] = Field(..., min_items=1, max_items=1)
+    api_engine_class: Type[APIEngine] = Field(None)
 
-    @model_validator(mode='before')
-    def check_required_apis(cls, values):
-        required_apis = values.get('required_apis', [])
-        for api in required_apis:
-            if api not in ApiType.__members__.values():
-                raise ValueError(f'{api} is not a valid API type')
+    @model_validator(mode='after')
+    def validate_api_task(cls, values):
+        # Validate that there's exactly one required API
+        required_apis = values.required_apis
+        if len(required_apis) != 1:
+            raise ValueError("APITask must have exactly one required API")
+
+        # Validate that the API type is valid and not LLM_MODEL
+        api_type = required_apis[0]
+        if api_type not in ApiType.__members__.values() or api_type == ApiType.LLM_MODEL:
+            raise ValueError(f"{api_type} is not a valid API type for APITask")
+
+        # Map API types to their corresponding engine classes
+        api_engine_map = {
+            ApiType.WIKIPEDIA_SEARCH: WikipediaSearchAPI,
+            ApiType.GOOGLE_SEARCH: GoogleSearchAPI,
+            ApiType.EXA_SEARCH: ExaSearchAPI,
+            ApiType.ARXIV_SEARCH: ArxivSearchAPI,
+            ApiType.REDDIT_SEARCH: RedditSearchAPI,
+        }
+
+        # Get the correct API engine class
+        api_engine_class = api_engine_map.get(api_type)
+        if api_engine_class is None:
+            raise ValueError(f"No API engine class found for {api_type}")
+
+        # Instantiate the API engine to access its input_variables
+        api_engine_instance = api_engine_class()
+
+        # Validate that the task's input variables are consistent with the API engine's requirements
+        task_inputs = values.input_variables
+        engine_inputs = api_engine_instance.input_variables
+
+        for required_param in engine_inputs.required:
+            if required_param not in task_inputs.properties:
+                raise ValueError(f"Required parameter '{required_param}' from API engine not found in task inputs")
+
+        values.api_engine_class = api_engine_class
         return values
 
     async def run(self, api_manager: APIManager, **kwargs) -> TaskResponse:
         task_inputs = kwargs.copy()
         try:
             api_data = api_manager.retrieve_api_data(self.required_apis[0])
-            task_outputs = await self.generate_api_response(api_data=api_data, **kwargs)
+            api_engine = self.api_engine_class()  # Instantiate the API engine
+            task_outputs = await api_engine.generate_api_response(api_data=api_data, **kwargs)
             return TaskResponse(
                 task_id=self.id if self.id else '',
                 task_name=self.task_name,
@@ -46,8 +79,3 @@ class APITask(AliceTask):
                 result_diagnostic=str(f'Error: {e}\nTraceback: {traceback.format_exc()}'),
                 execution_history=kwargs.get("execution_history", [])
             )
-        
-    @abstractmethod
-    async def generate_api_response(self, api_data: Dict[str, Any], **kwargs) -> SearchOutput:
-        """Generates the API response for the task, using the provided API data."""
-        pass

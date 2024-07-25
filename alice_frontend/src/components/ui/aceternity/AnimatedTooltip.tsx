@@ -8,15 +8,19 @@ import {
   useSpring,
 } from "framer-motion";
 
+type ImageType = string | React.ReactNode;
+
+interface TooltipItem {
+  id: string;
+  name: string;
+  designation: string;
+  image: ImageType;
+}
+
 export const AnimatedTooltip = ({
   items,
 }: {
-  items: {
-    id: string;
-    name: string;
-    designation: string;
-    image: React.ReactNode;
-  }[];
+  items: TooltipItem[];
 }) => {
   const [hoveredIndex, setHoveredIndex] = useState<string | null>(null);
   const springConfig = { stiffness: 100, damping: 5 };
@@ -33,6 +37,20 @@ export const AnimatedTooltip = ({
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     const halfWidth = event.currentTarget.offsetWidth / 2;
     x.set(event.nativeEvent.offsetX - halfWidth);
+  };
+
+  const renderImage = (image: ImageType) => {
+    if (typeof image === 'string') {
+      return (
+        <img
+          src={image}
+          alt="Profile"
+          className="object-cover w-full h-full rounded-full"
+        />
+      );
+    } else {
+      return image;
+    }
   };
 
   return (
@@ -79,7 +97,7 @@ export const AnimatedTooltip = ({
             onMouseMove={handleMouseMove}
             className="object-cover !m-0 !p-0 object-top rounded-full h-14 w-14 border-2 group-hover:scale-105 group-hover:z-30 border-white relative transition duration-500"
           >
-            {item.image}
+            {renderImage(item.image)}
           </div>
         </div>
       ))}

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from workflow_logic.tests.component_tests.test_environment import TestEnvironment
 from workflow_logic.tests.component_tests.api_test import APITests
-from workflow_logic.db_app.initialization_data import DBStructure
+from workflow_logic.db_app.initialization import DBStructure
 from workflow_logic.api_app.util.dependencies import get_db_app
 from workflow_logic.api_app.middleware.auth import auth_middleware
 

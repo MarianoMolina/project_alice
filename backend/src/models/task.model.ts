@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { functionParametersSchema, ensureObjectIdForProperties } from '../utils/schemas';
+import { functionParametersSchema, ensureObjectIdForProperties, apiEngineSchema, ensureObjectIdForAPIEngine} from '../utils/schemas';
 import { ITaskDocument, ITaskModel, TaskType } from '../interfaces/task.interface';
 import { ensureObjectIdHelper } from '../utils/utils';
 
@@ -29,6 +29,7 @@ const taskSchema = new Schema<ITaskDocument, ITaskModel>({
     model_id: { type: Schema.Types.ObjectId, ref: 'Model', default: null },
     execution_agent: { type: Schema.Types.ObjectId, ref: 'Agent', default: null },
     human_input: { type: Boolean, default: false },
+    api_engine: { type: apiEngineSchema, default: null },
     created_by: { type: Schema.Types.ObjectId, ref: 'User' },
     updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
@@ -58,6 +59,7 @@ taskSchema.methods.apiRepresentation = function (this: ITaskDocument) {
         agent: this.agent ? (this.agent._id || this.agent) : null,
         execution_agent: this.execution_agent ? (this.execution_agent._id || this.execution_agent) : null,
         human_input: this.human_input || false,
+        api_engine: this.api_engine || null,
         created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
         updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,
         created_at: this.createdAt || null,
@@ -86,7 +88,8 @@ function ensureObjectIdForSave(this: ITaskDocument, next: mongoose.CallbackWitho
             this.prompts_to_add.set(key, ensureObjectIdHelper(value));
         }
     }
-    ensureObjectIdForProperties(this.input_variables.properties); 
+    if (this.input_variables && this.input_variables.properties) ensureObjectIdForProperties(this.input_variables.properties); 
+    if (this.api_engine) ensureObjectIdForAPIEngine(this.api_engine);
     next();
 }
 
@@ -113,6 +116,8 @@ function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.
     update.created_by = ensureObjectIdHelper(update.created_by);
     update.updated_by = ensureObjectIdHelper(update.updated_by);
 
+    if (update.api_engine) ensureObjectIdForAPIEngine(update.api_engine);
+
     if (update && update.input_variables && update.input_variables.properties) {
         ensureObjectIdForProperties(update.input_variables.properties);
       }
@@ -137,7 +142,8 @@ function autoPopulate(this: mongoose.Query<any, any>, next: mongoose.CallbackWit
         path: 'prompts_to_add',
         options: { strictPopulate: false }
     });
-    this.populate('input_variables.properties')
+    this.populate('input_variables.properties');
+    this.populate('api_engine.input_variables.properties');
     next();
 }
 
