@@ -19,7 +19,7 @@ async def main():
     task_tests = TaskTests()
     await test_env.add_module(db_tests)
     # await test_env.add_module(api_tests)
-    # await test_env.add_module(chat_tests)
+    await test_env.add_module(chat_tests)
     await test_env.add_module(task_tests)
     results = await test_env.run(db_structure=DB_STRUCTURE, verbose=True)
     print(f'Test results: {results.keys()}')

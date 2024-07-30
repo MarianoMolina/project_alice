@@ -2,7 +2,7 @@ from bson import ObjectId
 from typing import Dict, List, Literal, Optional
 from pydantic import BaseModel, Field, model_validator, ConfigDict
 from workflow_logic.util.const import model_formats
-from workflow_logic.core.model.model_config import LLMConfig
+from workflow_logic.util.api_utils import ApiName
 
 class AliceModel(BaseModel):
     id: Optional[str] = Field(None, title="Model ID", description="The ID of the model.", alias="_id")
@@ -12,10 +12,11 @@ class AliceModel(BaseModel):
     ctx_size: int = Field(..., title="Context Size", description="The context size of the model.")
     model_type: Literal["instruct", "chat", "vision"] = Field(..., title="Model Type", description="The type of the model.")
     deployment: Literal["local", "remote"] = Field(..., title="Model Deployment", description="The deployment of the model.")
-    api_name: Literal["openai", "azure", "anthropic", "custom"] = Field(default="openai", title="API name", description="The API to use for the model.")
+    api_name: ApiName = Field(default='lm-studio', title="API name", description="The API to use for the model.")
     temperature: float = Field(0.7, description="The temperature setting for the model")
     seed: Optional[int] = Field(None, description="The seed for random number generation")
     use_cache: bool = Field(True, description="Whether to use caching for the model")
+    lm_studio_preset: Optional[str] = Field(None, description="The preset to use for the model in LM Studio")
     model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str})
 
     @model_validator(mode="after")
@@ -35,11 +36,6 @@ class AliceModel(BaseModel):
     @property
     def antiprompts(self) -> List[str]:
         return self.model_format_dict.get("antiprompt", [])
-    
-    def autogen_default_llm_config(self, model_list: List[dict]) -> LLMConfig:
-        if isinstance(model_list, dict):
-            model_list = [model_list]
-        return LLMConfig(temperature=0.3, config_list=model_list, timeout=120)
     
     def get_model_format_dict(self) -> dict:
         if self.model_format not in model_formats:

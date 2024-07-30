@@ -1,4 +1,5 @@
 import  { Document, Types, Model } from 'mongoose';
+import { ApiName } from './api.interface';
 
 export interface IModel extends Document {
     short_name: string;
@@ -7,14 +8,13 @@ export interface IModel extends Document {
     ctx_size: number;
     model_type: 'instruct' | 'chat' | 'vision';
     deployment: 'local' | 'remote';
-    api_name: 'openai' | 'azure' | 'anthropic';
+    api_name: ApiName;
     temperature: number;
     seed: number | null;
     use_cache: boolean;
+    lm_studio_preset: string;
     created_by: Types.ObjectId;
     updated_by: Types.ObjectId;
-    createdAt: Date;
-    updatedAt: Date;
 }
 
 export interface IModelMethods {
@@ -22,6 +22,7 @@ export interface IModelMethods {
 }
 
 export interface IModelDocument extends IModel, Document, IModelMethods {
+    _id: Types.ObjectId;
     createdAt: Date;
     updatedAt: Date;
 }

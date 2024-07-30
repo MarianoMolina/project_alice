@@ -10,7 +10,9 @@ REDDIT_CLIENT_ID = os.getenv("REDDIT_CLIENT_ID")
 REDDIT_CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
-LOCAL_LLM_API_URL = os.getenv("LOCAL_LLM_API_URL")
+BACKEND_HOST = os.getenv("BACKEND_HOST")
+BACKEND_PORT = os.getenv("BACKEND_PORT")
+LOCAL_LLM_API_URL = f"http://{BACKEND_HOST}:{BACKEND_PORT}"
 
 class BaseModule(InitializationModule):
     name: str = "base"
@@ -39,7 +41,8 @@ base_module = BaseModule(
                 "ctx_size": 32768,
                 "model_type": "instruct",
                 "deployment": "local",
-                "api_name": "custom",
+                "api_name": "lm-studio",
+                "lm_studio_preset": "Llama 3 V3"
             },
             {
                 "key": "Claude3.5",
@@ -49,8 +52,18 @@ base_module = BaseModule(
                 "ctx_size": 200000,
                 "model_type": "chat",
                 "deployment": "remote",
-                "temperature": 0.7,
                 "api_name": "anthropic",
+            },
+            {
+                "key": "Llama3_8B_Hermes",
+                "short_name": "Llama3_8B_Hermes",
+                "model_format": "Llama3",
+                "model_name": "NousResearch/Hermes-2-Theta-Llama-3-8B-GGUF",
+                "ctx_size": 32768,
+                "model_type": "chat",
+                "deployment": "local",
+                "api_name": "lm-studio",
+                "lm_studio_preset": "Llama 3 V3"
             }
         ],
         "apis": [
@@ -137,16 +150,39 @@ base_module = BaseModule(
             {
                 "key": "local_lm_studio",
                 "api_type": "llm_api",
-                "api_name": "custom",
+                "api_name": "lm-studio",
                 "name": "LM Studio API",
                 "api_config": {
-                    "api_key": "local_lm_studio",
-                    "base_url": "LOCAL_LLM_API_URL"
+                    "api_key": "lm-studio",
+                    "base_url": LOCAL_LLM_API_URL
                 },
                 "is_active": True,
                 "health_status": "healthy",
-                "default_model": "Llama3_8B_Instruct",
+                "default_model": "Llama3_8B_Hermes",
             }
+        ],
+        "parameters": [
+            {
+                "key": "prompt_parameter",
+                "type": "string",
+                "description": "The input prompt for the task",
+                "default": None
+            },
+        ],
+        "prompts": [
+            {
+                "key": "basic_prompt",
+                "name": "Basic Prompt",
+                "content": "{{ prompt }}",
+                "is_templated": True,
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "prompt": "prompt_parameter"
+                    },
+                    "required": ["prompt"]
+                }
+            },
         ]
     }
 )

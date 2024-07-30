@@ -1,65 +1,66 @@
-import { ApiType, API } from "./ApiTypes";
+import { ApiType, API, LlmProvider } from "./ApiTypes";
+import { BACKEND_HOST, BACKEND_PORT } from "./Constants";
 
 export interface ApiTypeConfig {
-  name: string;
+  api_name: string;
   apiConfig: Record<string, string>;
   baseUrl?: string;
 }
 
 export const API_TYPE_CONFIGS: Record<ApiType, ApiTypeConfig> = {
   [ApiType.LLM_API]: {
-    name: 'LLM API',
+    api_name: 'llm_api',
     apiConfig: {
       api_key: '',
       base_url: '',
     },
   },
   [ApiType.REDDIT_SEARCH]: {
-    name: 'Reddit Search',
+    api_name: 'reddit_search',
     apiConfig: {
       client_id: '',
       secret: '',
     },
   },
   [ApiType.WIKIPEDIA_SEARCH]: {
-    name: 'Wikipedia Search',
+    api_name: 'wikipedia_search',
     apiConfig: {},
   },
   [ApiType.GOOGLE_SEARCH]: {
-    name: 'Google Search',
+    api_name: 'google_search',
     apiConfig: {
       cse_id: '',
       api_key: '',
     },
   },
   [ApiType.EXA_SEARCH]: {
-    name: 'Exa Search',
+    api_name: 'exa_search',
     apiConfig: {
       api_key: '',
     },
   },
   [ApiType.ARXIV_SEARCH]: {
-    name: 'Arxiv Search',
+    api_name: 'arxiv_search',
     apiConfig: {},
   },
 };
 
 export const LLM_PROVIDERS = {
   OpenAI: {
-    name: 'OpenAI',
+    api_name: LlmProvider.OPENAI,
     baseUrl: 'https://api.openai.com/v1',
   },
   OpenAIAzure: {
-    name: 'OpenAI Azure',
+    api_name: LlmProvider.AZURE,
     baseUrl: 'https://YOUR_RESOURCE_NAME.openai.azure.com',
   },
   Anthropic: {
-    name: 'Anthropic',
+    api_name: LlmProvider.ANTHROPIC,
     baseUrl: 'https://api.anthropic.com',
   },
-  Custom: {
-    name: 'Custom',
-    baseUrl: '',
+  LMStudio: {
+    api_name: LlmProvider.LM_STUDIO,
+    baseUrl: `http://${BACKEND_HOST}:${BACKEND_PORT}/chat/completions`,
   },
 };
 

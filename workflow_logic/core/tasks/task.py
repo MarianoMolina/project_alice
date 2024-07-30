@@ -1,14 +1,16 @@
 import uuid
+from enum import Enum
 from typing import Dict, Any, Optional, List, Callable, Union, Tuple
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field
-from workflow_logic.core.api.api import APIManager
+from workflow_logic.util.logging_config import LOGGER
+from workflow_logic.core.api import APIManager
 from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.agent import AliceAgent
 from workflow_logic.core.communication import TaskResponse, DatabaseTaskResponse
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition, FunctionConfig, ToolFunction
 from workflow_logic.core.api import ApiType
-from workflow_logic.core.api.api_generators import APIEngine
+from workflow_logic.core.api.engines.api_engine import APIEngine
 
 prompt_function_parameters = FunctionParameters(
     type="object",
@@ -112,21 +114,36 @@ class AliceTask(BaseModel, ABC):
         if 'tasks' in data:
             dumped_data['tasks'] = data['tasks']
 
-        # Handle other potential nested AliceTask objects
+        # Handle ApiType enums or strings in required_apis
+        if 'required_apis' in dumped_data and dumped_data['required_apis']:
+            LOGGER.debug(f'Original required_apis: {dumped_data["required_apis"]}')
+            dumped_data['required_apis'] = [
+                api.value if isinstance(api, Enum) else api
+                for api in dumped_data['required_apis']
+            ]
+            LOGGER.debug(f'Updated required_apis: {dumped_data["required_apis"]}')
+
+        # Handle other potential nested AliceTask objects and enums
         for key, value in dumped_data.items():
             if isinstance(value, AliceTask):
                 dumped_data[key] = value.model_dump(*args, **kwargs)
             elif isinstance(value, list):
                 dumped_data[key] = [
+                    item.value if isinstance(item, Enum) else
                     item.model_dump(*args, **kwargs) if isinstance(item, AliceTask) else item
                     for item in value
                 ]
             elif isinstance(value, dict):
                 dumped_data[key] = {
-                    k: v.model_dump(*args, **kwargs) if isinstance(v, AliceTask) else v
+                    k: (v.value if isinstance(v, Enum) else
+                        v.model_dump(*args, **kwargs) if isinstance(v, AliceTask) else v)
                     for k, v in value.items()
                 }
-
+            elif isinstance(value, Enum):
+                dumped_data[key] = value.value
+        if 'api_engine' in dumped_data and dumped_data['api_engine']:
+            dumped_data.pop('api_engine')
+            
         return dumped_data
     
     @abstractmethod

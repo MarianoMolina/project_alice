@@ -36,6 +36,5 @@ def setup_logging(log_level=logging.WARNING):
     return logger
 
 # Environment variable to control log level
-LOG_LEVEL = "DEBUG"# os.getenv("LOG_LEVEL", "WARNING")
-print('LOG_LEVEL:', LOG_LEVEL)
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 LOGGER = setup_logging(getattr(logging, LOG_LEVEL))

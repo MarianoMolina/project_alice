@@ -9,13 +9,14 @@ import TaskRoutes from './routes/task.route';
 import UserRoutes from './routes/user.route';
 import CollectionsRoutes from './routes/collections.route';
 import PromptRoutes from './routes/prompt.route';
-import TaskResultRouter from './routes/taskresult.route';
+import TaskResultRouter from './routes/taskResult.route';
 import ChatRoutes from './routes/chat.route';
 import ParametersRoutes from './routes/parameter.route';
 import HealthRoutes from './routes/health.route';
 import APIRoutes from './routes/api.route';
 import corsConfigMiddleware from './middleware/corsConfig.middleware';
 import loggingMiddleware from './middleware/logging.middleware';
+import lmStudioRoute from './routes/lmStudio.route';
 
 dotenv.config();
 
@@ -55,6 +56,7 @@ app.use('/api/prompts', PromptRoutes);
 app.use('/api/taskresults', TaskResultRouter);
 app.use('/api/tasks', TaskRoutes);
 app.use('/api/users', UserRoutes);
+app.use('/lm-studio', lmStudioRoute);
 app.use('/api/parameters', ParametersRoutes);
 
 export default app;

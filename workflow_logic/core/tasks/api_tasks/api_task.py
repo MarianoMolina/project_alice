@@ -3,11 +3,11 @@ from pydantic import Field, model_validator
 from workflow_logic.core.api import ApiType, APIManager
 from workflow_logic.core.communication import TaskResponse
 from workflow_logic.core.tasks.task import AliceTask
-from workflow_logic.core.api.api_generators import APIEngine, WikipediaSearchAPI, GoogleSearchAPI, ExaSearchAPI, ArxivSearchAPI, RedditSearchAPI
+from workflow_logic.core.api.engines import APIEngine, WikipediaSearchAPI, GoogleSearchAPI, ExaSearchAPI, ArxivSearchAPI, RedditSearchAPI
 
 class APITask(AliceTask):
     required_apis: List[ApiType] = Field(..., min_items=1, max_items=1)
-    api_engine_class: Type[APIEngine] = Field(None)
+    api_engine: Type[APIEngine] = Field(None)
 
     @model_validator(mode='after')
     def validate_api_task(cls, values):
@@ -46,14 +46,14 @@ class APITask(AliceTask):
             if required_param not in task_inputs.properties:
                 raise ValueError(f"Required parameter '{required_param}' from API engine not found in task inputs")
 
-        values.api_engine_class = api_engine_class
+        values.api_engine = api_engine_class
         return values
 
     async def run(self, api_manager: APIManager, **kwargs) -> TaskResponse:
         task_inputs = kwargs.copy()
         try:
             api_data = api_manager.retrieve_api_data(self.required_apis[0])
-            api_engine = self.api_engine_class()  # Instantiate the API engine
+            api_engine = self.api_engine()  # Instantiate the API engine
             task_outputs = await api_engine.generate_api_response(api_data=api_data, **kwargs)
             return TaskResponse(
                 task_id=self.id if self.id else '',

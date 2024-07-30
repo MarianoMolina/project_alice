@@ -1,5 +1,4 @@
 import { Types, Model, Document } from 'mongoose';
-import { IFunctionParameters } from '../utils/schemas';
 
 export enum ApiType {
   LLM_MODEL = 'llm_api',
@@ -14,6 +13,7 @@ export enum ApiName {
   OPENAI = 'openai',
   AZURE = 'azure',
   ANTHROPIC = 'anthropic',
+  LM_STUDIO = 'lm-studio',
   CUSTOM = 'Custom',
   GOOGLE_SEARCH = 'google_search',
   REDDIT_SEARCH = 'reddit_search',
@@ -24,11 +24,11 @@ export enum ApiName {
 
 export interface IAPI {
   api_type: ApiType;
-  name: string; // e.g., "OpenAI", "Anthropic", "Google"
-  api_name: ApiName; // e.g., "openai", "anthropic", "google_search"
+  name: string;
+  api_name: ApiName; 
   is_active: boolean;
   health_status: 'healthy' | 'unhealthy' | 'unknown';
-  default_model?: Types.ObjectId; // Reference to the default model for LLM APIs
+  default_model?: Types.ObjectId; 
   api_config?: Map<string, any>;
   created_by?: Types.ObjectId;
   updated_by?: Types.ObjectId;

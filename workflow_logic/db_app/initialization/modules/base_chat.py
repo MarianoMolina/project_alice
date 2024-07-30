@@ -19,19 +19,6 @@ base_chat_module = BaseChatModule(
                 "is_templated": False
             },
             {
-                "key": "basic_prompt",
-                "name": "Basic Prompt",
-                "content": "{{ prompt }}",
-                "is_templated": True,
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "prompt": "prompt_parameter"
-                    },
-                    "required": ["prompt"]
-                }
-            },
-            {
                 "key": "executor_agent",
                 "name": "Executor Agent",
                 "content": "Executor Agent. Executes the code and returns the result."

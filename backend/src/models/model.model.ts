@@ -1,5 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { IModelDocument, IModelModel } from '../interfaces/model.interface';
+import { ApiName } from '../interfaces/api.interface';
 
 const modelSchema = new Schema<IModelDocument, IModelModel>({
   short_name: { type: String, required: true },
@@ -8,10 +9,11 @@ const modelSchema = new Schema<IModelDocument, IModelModel>({
   ctx_size: { type: Number, required: true },
   model_type: { type: String, enum: ['instruct', 'chat', 'vision'], required: true },
   deployment: { type: String, enum: ['local', 'remote'], required: true },
-  api_name: { type: String, enum: ['openai', 'azure', 'anthropic', 'custom'], default: 'openai' },
+  api_name: { type: String, default: ApiName.LM_STUDIO },
   temperature: { type: Number, default: 0.7 },
   seed: { type: Number, default: null },
   use_cache: { type: Boolean, default: false },
+  lm_studio_preset: { type: String, default: 'OpenChat' },
   created_by: { type: Schema.Types.ObjectId, ref: 'User' },
   updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
 }, {
@@ -27,10 +29,11 @@ modelSchema.virtual('apiRepresentation').get(function(this: IModelDocument) {
     ctx_size: this.ctx_size || null,
     model_type: this.model_type || null,
     deployment: this.deployment || null,
-    api_name: this.api_name || 'openai',
+    api_name: this.api_name || 'lm-studio',
     temperature: this.temperature || null,
     seed: this.seed || null,
     use_cache: this.use_cache || false,
+    lm_studio_preset: this.lm_studio_preset || 'OpenChat',
     created_by: this.created_by || null,
     updated_by: this.updated_by || null,
     created_at: this.createdAt || null,

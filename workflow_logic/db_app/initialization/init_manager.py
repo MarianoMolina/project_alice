@@ -6,7 +6,7 @@ from workflow_logic.db_app.app import BackendAPI
 from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, DatabaseTaskResponse, ParameterDefinition, FunctionParameters
 from workflow_logic.util import User
 from workflow_logic.core.api import API
-from workflow_logic.core.api.api_utils import EntityType
+from workflow_logic.util.api_utils import EntityType
 from workflow_logic.core.tasks.task_utils import available_task_types
 
 class DBInitManager(BaseModel):
@@ -108,7 +108,7 @@ class DBInitManager(BaseModel):
             LOGGER.error(f"Unable to find entity instance with key: {entity_type}, key: {key}")
             raise ValueError(f"Unable to find entity instance with key: {entity_type}, key: {key}")
         LOGGER.debug(f"Retrieved entity instance: {entity}")
-        LOGGER.debug(f"Current {entity_type} map: {self.entity_obj_key_map[entity_type]}")
+        # LOGGER.debug(f"Current {entity_type} map: {self.entity_obj_key_map[entity_type]}")
         return entity
     
     async def create_entity_instance(self, entity_type: EntityType, entity_data: dict, db_app: Optional[BackendAPI] = None) -> BaseModel:
@@ -120,6 +120,7 @@ class DBInitManager(BaseModel):
             resolved_data = self.resolve_references_in_data(entity_type, entity_data_copy)
             LOGGER.debug(f"Resolved data for {entity_type}: {resolved_data}")
             if db_app:
+                LOGGER.debug(f"Creating entity in DB: {entity_type}, {resolved_data}")
                 response = await db_app.create_entity_in_db(entity_type, resolved_data)
                 resolved_data['_id'] = response.get('_id', response.get('id', ''))
                 LOGGER.debug(f"Entity created in DB with ID: {resolved_data['_id']}")
@@ -270,14 +271,14 @@ class DBInitManager(BaseModel):
                 return [self._resolve_list_item(referenced_entity_type, item) for item in value]
         return value
 
-    def _resolve_list_item(self, referenced_entity_type: str, item: Any) -> Any:
+    def _resolve_list_item(self, referenced_entity_type: str, item: Any) -> Dict[str, Any]:
         if isinstance(item, str):
             return self.get_entity_instance_by_key(referenced_entity_type, item).model_dump(by_alias=True)
         elif isinstance(item, dict) and 'key' in item:
             return self.get_entity_instance_by_key(referenced_entity_type, item['key']).model_dump(by_alias=True)
         return item
 
-    def _resolve_dict_value(self, field_type: Any, origin: Any, args: Any, value: Dict[str, Any]) -> Any:
+    def _resolve_dict_value(self, field_type: Any, origin: Any, args: Any, value: Dict[str, Any]) -> Dict[str, Any]:
         if isinstance(field_type, type) and issubclass(field_type, FunctionParameters):
             return self._resolve_function_parameters(value)
         elif isinstance(field_type, type) and issubclass(field_type, BaseModel):
@@ -287,7 +288,7 @@ class DBInitManager(BaseModel):
         else:
             return value
 
-    def _resolve_basemodel_dict(self, field_type: Any, value: Dict[str, Any]) -> Any:
+    def _resolve_basemodel_dict(self, field_type: Any, value: Dict[str, Any]) -> Dict[str, Any]:
         referenced_entity_type = self._get_referenced_entity_type(field_type)
         if referenced_entity_type:
             if 'key' in value:
@@ -305,7 +306,7 @@ class DBInitManager(BaseModel):
             }
         return value
 
-    def _resolve_dict_item(self, referenced_entity_type: str, item: Any) -> Any:
+    def _resolve_dict_item(self, referenced_entity_type: str, item: Any) -> Dict[str, Any]:
         if isinstance(item, str):
             return self.get_entity_instance_by_key(referenced_entity_type, item).model_dump(by_alias=True)
         elif isinstance(item, dict):
@@ -323,20 +324,20 @@ class DBInitManager(BaseModel):
                 resolved_dict[key] = item
         return resolved_dict
 
-    def _resolve_string_value(self, field_type: Any, value: str) -> Any:
+    def _resolve_string_value(self, field_type: Any, value: str) -> Union[str, Dict[str, Any]]:
         LOGGER.debug(f"Resolving string value: {value} for field type {field_type}")
         if isinstance(field_type, type) and issubclass(field_type, BaseModel):
             referenced_entity_type = self._get_referenced_entity_type(field_type)
             if referenced_entity_type:
                 try:
-                    entity = self.get_entity_instance_by_key(referenced_entity_type, value)
+                    entity = self.get_entity_instance_by_key(referenced_entity_type, value).model_dump(by_alias=True)
                     LOGGER.debug(f"Retrieved entity: {entity}")
-                    return entity.model_dump(by_alias=True)
+                    return entity
                 except ValueError:
                     LOGGER.warning(f"Failed to resolve reference: {value} for {referenced_entity_type}")
         return value
 
-    def _resolve_string_reference(self, item: str) -> Any:
+    def _resolve_string_reference(self, item: str) -> Union[str, Dict[str, Any]]:
         for ref_type in self.entity_class_map.keys():
             try:
                 return self.get_entity_instance_by_key(ref_type, item).model_dump(by_alias=True)

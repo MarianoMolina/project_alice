@@ -1,11 +1,8 @@
 import unittest
 from unittest.mock import patch
 from pydantic import ValidationError
-from autogen.agentchat import ConversableAgent, UserProxyAgent
-from autogen.agentchat.contrib.llava_agent import LLaVAAgent
-from workflow_logic.core.api import APIManager
+from autogen.agentchat import UserProxyAgent
 from workflow_logic.core.prompt import Prompt
-from workflow_logic.core.model import LLMConfig, ModelConfig
 from workflow_logic.core.agent.agent import AliceAgent
 
 
@@ -55,22 +52,7 @@ class TestAliceAgent(unittest.TestCase):
         self.alice_agent_data["code_execution_config"] = custom_config
         agent = AliceAgent(**self.alice_agent_data)
         self.assertEqual(agent.get_code_execution_config(), custom_config)
-    
-    @patch.object(APIManager, 'retrieve_api_data')
-    def test_get_autogen_agent_conversable(self, mock_retrieve_api_data):
-        mock_retrieve_api_data.return_value = LLMConfig(config_list=[ModelConfig(model="test-model", api_key="test-key", base_url="test-url", api_type="openai")], temperature=0.3, timeout=120)
-        agent = AliceAgent(**self.alice_agent_data)
-        auto_agent = agent.get_autogen_agent(api_manager=APIManager())
-        self.assertIsInstance(auto_agent, ConversableAgent)
-    
-    @patch.object(APIManager, 'retrieve_api_data')
-    def test_get_autogen_agent_llava(self, mock_retrieve_api_data):
-        self.alice_agent_data["autogen_class"] = "LLaVAAgent"
-        mock_retrieve_api_data.return_value = LLMConfig(config_list=[ModelConfig(model="test-model", api_key="test-key", base_url="test-url", api_type="openai")], temperature=0.3, timeout=120)
-        agent = AliceAgent(**self.alice_agent_data)
-        auto_agent = agent.get_autogen_agent(api_manager=APIManager())
-        self.assertIsInstance(auto_agent, LLaVAAgent)
-    
+       
     def test_get_autogen_agent_user_proxy(self):
         self.alice_agent_data["autogen_class"] = "UserProxyAgent"
         agent = AliceAgent(**self.alice_agent_data)

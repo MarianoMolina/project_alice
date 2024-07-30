@@ -12,7 +12,7 @@ type ImageType = string | React.ReactNode;
 
 interface TooltipItem {
   id: string;
-  name: string;
+  name: string | undefined;
   designation: string;
   image: ImageType;
 }

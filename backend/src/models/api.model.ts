@@ -19,6 +19,7 @@ apiSchema.methods.apiRepresentation = function (this: IAPIDocument) {
   return {
     id: this._id,
     api_type: this.api_type || null,
+    api_name: this.api_name || null,
     name: this.name || null,
     is_active: this.is_active || false,
     health_status: this.health_status || 'unknown',

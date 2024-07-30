@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 from pydantic import Field
-from workflow_logic.db_app.initialization.modules.init_module import InitializationModule
+from workflow_logic.db_app.initialization.modules.init_module import InitializationModule, get_prompt_file
 
 class CodingWorkflowModule(InitializationModule):
     name: str = "coding_workflow"
@@ -40,22 +40,22 @@ coding_workflow_module = CodingWorkflowModule(
             {
                 "key": "planner_agent",
                 "name": "Planner Agent",
-                "content": "Content of coding_planner_agent.prompt file",
+                "content": get_prompt_file("coding_planner_agent.prompt"),
             },
             {
                 "key": "coding_agent",
                 "name": "Coding Agent",
-                "content": "Content of coding_agent.prompt file",
+                "content": get_prompt_file("coding_agent.prompt"),
             },
             {
                 "key": "unit_tester_agent",
                 "name": "Unit Tester Agent",
-                "content": "Content of unit_tester_agent.prompt file",
+                "content": get_prompt_file("unit_tester_agent.prompt"),
             },
             {
                 "key": "code_generation_task",
                 "name": "Code Generation Task",
-                "content": "Content of code_generation_task.prompt file",
+                "content": get_prompt_file("code_generation_task.prompt"),
                 "is_templated": True,
                 "parameters": {
                     "type": "object",
@@ -84,12 +84,12 @@ coding_workflow_module = CodingWorkflowModule(
             {
                 "key": "unit_test_check_agent",
                 "name": "Unit Test Check Agent",
-                "content": "Content of unit_test_execution_checker_agent.prompt file",
+                "content": get_prompt_file("unit_test_execution_checker_agent.prompt"),
             },
             {
                 "key": "unit_test_check_prompt",
                 "name": "Unit Test Check Prompt",
-                "content": "Content of unit_test_execution_check_task.prompt file",
+                "content": get_prompt_file("unit_test_execution_check_task.prompt"),
                 "is_templated": True,
                 "parameters": {
                     "type": "object",

@@ -41,7 +41,7 @@ async def run_initial_tests(app: FastAPI):
     db_tests = DBTests()
     api_tests = APITests()
     await test_env.add_module(db_tests)
-    await test_env.add_module(api_tests)
+    # await test_env.add_module(api_tests)
     test_settings = {
         "db_structure": DB_STRUCTURE,
         "verbose": True

@@ -1,154 +1,238 @@
-from typing import Dict, Optional, List, Callable, Literal, Union, Any
 from pydantic import BaseModel, Field
-from bson import ObjectId
-from autogen.agentchat import ConversableAgent, UserProxyAgent
-from autogen.agentchat.contrib.llava_agent import LLaVAAgent
-from workflow_logic.core.api import APIManager, ApiType
-from workflow_logic.core.parameters import FunctionConfig
+from typing import Dict, Any, List, Optional, Tuple, Callable
+from workflow_logic.core.parameters import ToolFunction
 from workflow_logic.core.prompt import Prompt
-from workflow_logic.core.model import AliceModel, LLMConfig
+from workflow_logic.core.model import AliceModel
+from workflow_logic.core.api import APIManager, ApiType
+from workflow_logic.core.communication import MessageDict
+from workflow_logic.util.logging_config import LOGGER
+import docker
+import os
+import tempfile
 
 class AliceAgent(BaseModel):
-    """
-    Represents an AI agent with configurable properties and behaviors.
-
-    This class encapsulates the properties and methods needed to create and manage
-    an AI agent, including its name, system message, associated model, and various
-    configuration options for interaction and code execution.
-
-    Attributes:
-        id (Optional[str]): The unique identifier for the agent.
-        name (str): The name of the agent.
-        system_message (Prompt): The prompt object containing the agent's system message.
-        agents_in_group (Optional[List['AliceAgent']]): A list of other agents in the group chat, if applicable.
-        autogen_class (Literal["ConversableAgent", "UserProxyAgent", "LLaVAAgent"]): The type of AutoGen agent to use.
-        code_execution_config (Optional[Union[Dict, bool]]): Configuration for code execution capabilities.
-        max_consecutive_auto_reply (int): Maximum number of consecutive automatic replies.
-        human_input_mode (Literal["ALWAYS", "TERMINATE", "NEVER"]): When to request human input.
-        speaker_selection (Optional[Dict[str, Any]]): Logic for selecting speakers in a group chat.
-        default_auto_reply (Optional[str]): Default reply when no specific response is generated.
-        model_id (Optional[AliceModel]): The associated language model for the agent.
-
-    Methods:
-        system_message_str() -> str: Returns the formatted system message string.
-        get_execution_agent(function_map: Optional[Dict[str, Callable]] = None) -> ConversableAgent:
-            Creates and returns a UserProxyAgent for code execution.
-        get_code_execution_config() -> dict: Returns the code execution configuration.
-        get_autogen_agent(api_manager: Optional[APIManager] = None, 
-                          llm_config: Optional[LLMConfig] = None, 
-                          function_map: Dict[str, Callable] = {}, 
-                          functions_list: List[FunctionConfig] = []) -> ConversableAgent:
-            Creates and returns the appropriate AutoGen agent based on the configuration.
-    """
     id: Optional[str] = Field(default=None, description="The ID of the agent", alias="_id")
     name: str = Field(..., description="The name of the agent")
-    system_message: Prompt = Field(default=Prompt(name="default", content="You are an AI assistant"), description="The name of the prompt to use for system_message")
-    agents_in_group: Optional[List['AliceAgent']] = Field(default=None, description="A list of agent names in the group chat")
-    autogen_class: Literal["ConversableAgent", "UserProxyAgent", "LLaVAAgent"] = Field(default="ConversableAgent", description="The autogen class of the agent")
-    code_execution_config: Optional[Union[Dict, bool]] = Field(default=False, description="Whether the agent can execute code")
-    max_consecutive_auto_reply: int = Field(default=10, description="The maximum number of consecutive auto replies")
-    human_input_mode: Literal["ALWAYS", "TERMINATE", "NEVER"] = Field(default="NEVER", description="The mode for human input")
-    speaker_selection: Optional[Dict[str, Any]] = Field(default_factory=dict, description="The speaker selection logic for the group chat")
-    default_auto_reply: Optional[str] = Field(default="", description="The default auto reply for the agent")
+    system_message: Prompt = Field(default=Prompt(name="default", content="You are an AI assistant"), description="The prompt to use for system message")
     model_id: Optional[AliceModel] = Field(None, description="The model associated with the agent")
+    has_functions: bool = Field(default=False, description="Whether the agent can use functions")
+    has_code_exec: bool = Field(default=False, description="Whether the agent can execute code")
+    max_consecutive_auto_reply: int = Field(default=10, description="The maximum number of consecutive auto replies")
 
-    class Config:
-        protected_namespaces=()
-        json_encoders = {ObjectId: str}
-
-    @property
-    def system_message_str(self) -> str:
-        return self.system_message.format_prompt()
-        
-    def get_execution_agent(self, function_map: Dict[str, Callable] = None) -> ConversableAgent:
-        return UserProxyAgent(
-            name=self.name,
-            human_input_mode=self.human_input_mode,
-            code_execution_config=self.get_code_execution_config(),
-            default_auto_reply=self.default_auto_reply,
-            is_termination_msg=lambda x: (
-                False if x.get("content") is None else
-                x.get("content", "").rstrip().endswith("TERMINATE")
-                if isinstance(x.get("content"), str) else
-                False
-                ),
-            function_map=function_map if function_map else {},
-            max_consecutive_auto_reply=self.max_consecutive_auto_reply
-        )
-    
-    def get_code_execution_config(self) -> dict:
-        if isinstance(self.code_execution_config, bool):
-            import tempfile
-
-            # Create a temporary directory to store the code files.
-            temp_dir = tempfile.TemporaryDirectory()
-
-            return {
-                "work_dir": temp_dir.name,
-                "use_docker": True,
-                "timeout": 50,
-            }
+    async def generate_response(self, api_manager: APIManager, messages: List[MessageDict], tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []) -> List[MessageDict]:
+        try:
+            api_messages = self._prepare_messages_for_api(messages)
             
-        return self.code_execution_config
+            response: MessageDict = await api_manager.generate_response_with_api_engine(
+                api_type=ApiType.LLM_MODEL,
+                model=self.model_id,
+                messages=api_messages,
+                tool_choice='auto' if self.has_functions else 'none',
+                tools=tools_list,
+                temperature=0.7,
+                max_tokens=1000
+            )
+            
+            new_messages = []
+            content = response['content']
+            tool_calls = response['tool_calls'] if self.has_functions else None
+            
+            if tool_calls:
+                new_messages.extend(await self._process_tool_calls(tool_calls, tool_map, tools_list))
+            
+            if self.has_code_exec:
+                code_messages = await self._process_code_execution(content)
+                if code_messages:
+                    new_messages.extend(code_messages)
+            
+            if new_messages:
+                follow_up_response = await self.generate_response(api_manager, messages + new_messages, tool_map, tools_list)
+                new_messages.extend(follow_up_response)
+            else:
+                new_messages.append(MessageDict(
+                    role="assistant",
+                    content=content,
+                    generated_by="llm",
+                    type="text",
+                    assistant_name=self.name
+                ))
+            
+            return new_messages
 
-    def get_autogen_agent(self, api_manager: Optional[APIManager] = None, llm_config: Optional[LLMConfig] = None, function_map: Dict[str, Callable] = {}, functions_list: List[FunctionConfig] = []) -> ConversableAgent:
-        if not llm_config and not self.autogen_class == "UserProxyAgent":
-            if not api_manager:
-                raise ValueError("Either llm_config or api_manager must be provided.")
-            llm_config = api_manager.retrieve_api_data(ApiType.LLM_MODEL, self.model_id)
-        if not self.autogen_class:
-            raise ValueError(f"The agent class must be specified. {self.name}")
-        
-        # Code execution config
-        if self.code_execution_config:
-            code_exec_config = self.get_code_execution_config()
-        else:
-            code_exec_config = False
-        
-        # LLMConfig
-        if self.autogen_class != "UserProxyAgent":
-            if not llm_config:
-                raise ValueError(f"LLM Config must be provided for conversable agents.")
-            if isinstance(llm_config, dict):
-                llm_config = LLMConfig(**llm_config)
-            if not llm_config.config_list:
-                raise ValueError("LLM Config must have a 'config_list' attribute with at least one config.")
-            llm_config = llm_config.replace_localhost().model_dump(by_alias=True)
-            if functions_list:
-                llm_config["tools"] = [func.model_dump(by_alias=True) for func in functions_list]
+        except Exception as e:
+            LOGGER.error(f"Error generating response: {str(e)}")
+            raise
 
-        # Agent creation
-        if self.autogen_class == "ConversableAgent":
-            return ConversableAgent(
-                name=self.name,
-                system_message=self.system_message_str,
-                llm_config=llm_config if llm_config else None,
-                max_consecutive_auto_reply=self.max_consecutive_auto_reply,
-                human_input_mode=self.human_input_mode,
-            )
-        elif self.autogen_class == "UserProxyAgent":
-            return UserProxyAgent(
-                name=self.name,
-                human_input_mode=self.human_input_mode,
-                code_execution_config=code_exec_config,
-                default_auto_reply=self.default_auto_reply,
-                is_termination_msg=lambda x: (
-                    False if x.get("content") is None else
-                    x.get("content", "").rstrip().endswith("TERMINATE")
-                    if isinstance(x.get("content"), str) else
-                    False
-                    ),
-                function_map=function_map if function_map else {},
-                max_consecutive_auto_reply=self.max_consecutive_auto_reply
-            )
-        elif self.autogen_class == "LLaVAAgent":
-            return LLaVAAgent(
-                name=self.name,
-                system_message=self.system_message_str,
-                human_input_mode=self.human_input_mode,
-                llm_config=llm_config if llm_config else None,
-                max_consecutive_auto_reply=self.max_consecutive_auto_reply
-            )
-        else:
-            raise ValueError(f"Invalid agent class: {self.autogen_class}. Expected 'ConversableAgent', or 'UserProxyAgent'.")
+    async def _process_tool_calls(self, tool_calls: List[Dict[str, Any]], tool_map: Dict[str, Callable], tools_list: List[ToolFunction]) -> List[MessageDict]:
+        tool_messages = []
+        for tool_call in tool_calls:
+            function_name = tool_call["function"]["name"]
+            arguments = tool_call["function"]["arguments"]
+            
+            if function_name not in tool_map:
+                tool_messages.append(MessageDict(
+                    role="tool",
+                    content=f"Error: Tool '{function_name}' not found",
+                    generated_by="tool",
+                    step=function_name,
+                    type="text"
+                ))
+                continue
+            
+            tool_function = next((tool for tool in tools_list if tool.function.name == function_name), None)
+            if not tool_function:
+                tool_messages.append(MessageDict(
+                    role="tool",
+                    content=f"Error: Tool function '{function_name}' not found in tools list",
+                    generated_by="tool",
+                    step=function_name,
+                    type="text"
+                ))
+                continue
+            
+            # Validate inputs
+            valid_inputs, error_message = self._validate_tool_inputs(tool_function, arguments)
+            if not valid_inputs:
+                tool_messages.append(MessageDict(
+                    role="tool",
+                    content=f"Error in tool '{function_name}': {error_message}",
+                    generated_by="tool",
+                    step=function_name,
+                    type="text"
+                ))
+                continue
+            
+            # Execute the AliceTask
+            try:
+                result = await tool_map[function_name](**arguments)
+                tool_messages.append(MessageDict(
+                    role="tool",
+                    content=str(result),
+                    generated_by="tool",
+                    step=function_name,
+                    type="text"
+                ))
+            except Exception as e:
+                tool_messages.append(MessageDict(
+                    role="tool",
+                    content=f"Error executing tool '{function_name}': {str(e)}",
+                    generated_by="tool",
+                    step=function_name,
+                    type="text"
+                ))
         
+        return tool_messages
+
+    def _validate_tool_inputs(self, tool_function: ToolFunction, arguments: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
+        required_params = tool_function.function.parameters.required
+        properties = tool_function.function.parameters.properties
+
+        for param in required_params:
+            if param not in arguments:
+                return False, f"Missing required parameter: {param}"
+
+        for param, value in arguments.items():
+            if param not in properties:
+                return False, f"Unexpected parameter: {param}"
+            
+            expected_type = properties[param].type
+            if not isinstance(value, eval(expected_type)):
+                return False, f"Invalid type for parameter '{param}'. Expected {expected_type}, got {type(value).__name__}"
+
+        return True, None
+
+    async def _process_code_execution(self, content: str) -> List[MessageDict]:
+        code_blocks = self._extract_code_blocks(content)
+        if not code_blocks:
+            return []
+
+        executed_messages = []
+        for lang, code in code_blocks:
+            exit_code, logs, _ = self._execute_code_in_docker(code, lang)
+            executed_messages.append(MessageDict(
+                role="tool",
+                content=f"Exit Code: {exit_code}\nOutput:\n{logs}",
+                generated_by="tool",
+                step="code_execution",
+                type="text"
+            ))
+        return executed_messages
+
+    def _extract_code_blocks(self, content: str) -> List[Tuple[str, str]]:
+        code_blocks = []
+        lines = content.split('\n')
+        in_code_block = False
+        current_block = []
+        current_language = ""
+
+        for line in lines:
+            if line.startswith('```'):
+                if in_code_block:
+                    code_blocks.append((current_language, '\n'.join(current_block)))
+                    current_block = []
+                    in_code_block = False
+                else:
+                    in_code_block = True
+                    current_language = line[3:].strip()
+            elif in_code_block:
+                current_block.append(line)
+
+        return code_blocks
+
+    def _execute_code_in_docker(self, code: str, lang: str) -> Tuple[int, str, Optional[str]]:
+        client = docker.from_env()
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix=f'.{lang}', delete=False) as temp_file:
+            temp_file.write(code)
+            temp_file_path = temp_file.name
+
+        try:
+            image = "python:3-slim" if lang.startswith("python") else "ubuntu:latest"
+            
+            cmd = ["python", f"/code/{os.path.basename(temp_file_path)}"] if lang.startswith("python") else ["sh", "-c", f"chmod +x /code/{os.path.basename(temp_file_path)} && /code/{os.path.basename(temp_file_path)}"]
+            
+            container = client.containers.run(
+                image,
+                command=cmd,
+                volumes={os.path.dirname(temp_file_path): {'bind': '/code', 'mode': 'ro'}},
+                detach=True
+            )
+
+            exit_code = container.wait()['StatusCode']
+            logs = container.logs().decode('utf-8')
+
+            return exit_code, logs, image
+        
+        finally:
+            os.unlink(temp_file_path)
+            if 'container' in locals():
+                container.remove()
+
+    def _prepare_messages_for_api(self, messages: List[MessageDict]) -> List[Dict[str, Any]]:
+        """Prepare messages for the API call, including the system message."""
+        system_message = {"role": "system", "content": self.system_message.format_prompt()}
+        return [system_message] + [self._convert_message_dict_to_api_format(msg) for msg in messages]
+
+    def _convert_message_dict_to_api_format(self, message: MessageDict) -> Dict[str, Any]:
+        """Convert a MessageDict to the format expected by the API."""
+        api_message = {
+            "role": message["role"],
+            "content": message["content"]
+        }
+        if message.get("tool_calls"):
+            api_message["tool_calls"] = message["tool_calls"]
+        if message.get("function_call"):
+            api_message["function_call"] = message["function_call"]
+        return api_message
+
+    async def chat(self, api_manager: APIManager, initial_message: str, max_turns: int = 1, tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []) -> List[MessageDict]:
+        messages = [MessageDict(role="user", content=initial_message)]
+        
+        for _ in range(max_turns):
+            new_messages = await self.generate_response(api_manager, messages, tool_map, tools_list)
+            messages.extend(new_messages)
+            
+            if any("TERMINATE" in msg.content for msg in new_messages):
+                break
+        
+        return messages

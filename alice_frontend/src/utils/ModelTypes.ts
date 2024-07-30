@@ -1,4 +1,5 @@
 import { User, convertToUser } from "./UserTypes";
+import { LlmProvider } from "./ApiTypes";
 
 export interface AliceModel {
     _id?: string;
@@ -8,7 +9,7 @@ export interface AliceModel {
     ctx_size?: number;
     model_type: 'instruct' | 'chat' | 'vision';
     deployment: 'local' | 'remote';
-    api_name: 'openai' | 'azure' | 'anthropic';
+    api_name: LlmProvider;
     temperature?: number;
     seed?: number | null;
     use_cache?: boolean;
@@ -27,7 +28,7 @@ export const convertToAliceModel = (data: any): AliceModel => {
         ctx_size: data?.ctx_size || undefined,
         model_type: data?.model_type || 'chat',
         deployment: data?.deployment || 'local',
-        api_name: data?.api_name || 'openai',
+        api_name: data?.api_name || 'lm-studio',
         temperature: data?.temperature || undefined,
         seed: data?.seed || null,
         use_cache: data?.use_cache || false,
@@ -57,7 +58,7 @@ export const getDefaultModelForm = (): Partial<AliceModel> => ({
     ctx_size: 0,
     model_type: 'chat',
     deployment: 'remote',
-    api_name: 'openai',
+    api_name: LlmProvider.OPENAI,
     temperature: 0.7,
     use_cache: true
 });

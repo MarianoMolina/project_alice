@@ -102,6 +102,7 @@ class MessageDict(TypedDict, total=False):
     function_call: Optional[Dict[str, Any]] = Field(default=None, description="Function call in the message")
     request_type: Optional[str] = Field(default=None, description="Request type of the message, if any. Can be 'approval', 'confirmation', etc.")
     task_responses: List[Union[str, TaskResponse]] = Field(default_factory=list, description="List of associated task responses")
+    creation_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Metadata about the creation of the message, like cost, tokens, end reason, etc.")
     createdAt: Optional[str] = Field(default=None, description="Timestamp of the message")
     updatedAt: Optional[str] = Field(default=None, description="Timestamp of the message")
     created_by: Optional[Union[str, dict]] = Field(default=None, description="User id who created the message")
@@ -132,23 +133,6 @@ def serialize_message_dict(message: MessageDict) -> Dict[str, Any]:
             for task_response in serialized['task_responses']
         ]
     return serialized
-    
-def to_autogen_compatible(message: MessageDict) -> dict:
-    """Convert MessageDict to a format compatible with Autogen."""
-    autogen_message = dict(message)
-    if not autogen_message.get('tool_calls'):
-        autogen_message.pop('tool_calls', None)
-    else:
-        autogen_message['tool_calls'] = [tool_call.model_dump(by_alias=True) for tool_call in autogen_message['tool_calls']]
-
-    if not autogen_message.get('function_call'):
-        autogen_message.pop('function_call', None)
-        
-    return autogen_message
-
-# Function to convert a list of MessageDict to Autogen-compatible format
-def messages_to_autogen_compatible(messages: List[MessageDict]) -> List[dict]:
-    return [to_autogen_compatible(message) for message in messages]
 
 class SearchResult(TypedDict):
     """A dictionary representing a search result."""

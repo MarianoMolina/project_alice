@@ -11,6 +11,7 @@ import {
     Typography
 } from '@mui/material';
 import { ModelComponentProps } from '../../../../utils/ModelTypes';
+import { LlmProvider } from '../../../../utils/ApiTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 
 const ModelFlexibleView: React.FC<ModelComponentProps> = ({
@@ -77,12 +78,13 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                 <InputLabel>API Type</InputLabel>
                 <Select
                     value={item.api_name || 'openai'}
-                    onChange={(e) => onChange({ api_name: e.target.value as 'openai' | 'azure' | 'anthropic' })}
+                    onChange={(e) => onChange({ api_name: e.target.value as LlmProvider })}
                     disabled={!isEditMode}
                 >
                     <MenuItem value="openai">OpenAI</MenuItem>
                     <MenuItem value="azure">Azure</MenuItem>
                     <MenuItem value="anthropic">Anthropic</MenuItem>
+                    <MenuItem value="lm-studio">LM Studio</MenuItem>
                     <MenuItem value="custom">Custom</MenuItem>
                 </Select>
             </FormControl>

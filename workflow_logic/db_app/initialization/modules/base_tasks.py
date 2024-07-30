@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 from pydantic import Field
-from workflow_logic.db_app.initialization.modules.init_module import InitializationModule
+from workflow_logic.db_app.initialization.modules.init_module import InitializationModule, get_prompt_file
 
 class BaseTasksModule(InitializationModule):
     name: str = "base_tasks"
@@ -10,12 +10,6 @@ class BaseTasksModule(InitializationModule):
 base_tasks_module = BaseTasksModule(
     data = {
         "parameters": [
-            {
-                "key": "prompt_parameter",
-                "type": "string",
-                "description": "The input prompt for the task",
-                "default": None
-            },
             {
                 "key": "max_results_parameter",
                 "type": "integer",
@@ -45,9 +39,7 @@ base_tasks_module = BaseTasksModule(
             {
                 "key": "research_agent",
                 "name": "Research Agent",
-                "content": """You are a research specialist. You have access to different tools that retrieve information from different sources. 
-    Look at the task the user requested and use any tools you believe could be relevant. 
-    Once you believe the task is complete, create a summary with references for the user and end with 'TERMINATE'.""",
+                "content": get_prompt_file("research_agent.prompt"),
                 "is_templated": False
             },
         ],

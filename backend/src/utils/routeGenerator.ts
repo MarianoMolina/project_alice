@@ -24,10 +24,8 @@ export function createRoutes<T extends Document, K extends ModelName>(
         created_by: req.user?.userId,
         updated_by: req.user?.userId
       });
-      console.log('Item before save:', item);
       item._id = new Types.ObjectId();
       const saved_item = await item.save();
-      console.log('Item after save:', saved_item);
       res.status(201).json(saved_item);
     } catch (error) {
       handleErrors(res, error);

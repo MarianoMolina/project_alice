@@ -1,6 +1,5 @@
 from .agent import AliceAgent
 from .chat import AliceChat
-from .chat_functionality import ChatExecutionFunctionality
 from .model import AliceModel
 from .parameters import ParameterDefinition, FunctionParameters
 from .prompt import Prompt
@@ -11,5 +10,5 @@ from .api import APIManager, API
 
 __all__ = ['AliceTask', 'Workflow', 'AliceAgent', 'AliceModel', 'BasicAgentTask', 'PromptAgentTask', 'APITask', 
            'TemplatedTask', 'Workflow', 'CVGenerationTask', 'CodeGenerationLLMTask', 'CodeExecutionLLMTask', 'CheckTask', 'Prompt', 'AliceChat', 
-            'ParameterDefinition', 'FunctionParameters', 'TaskResponse', 'DatabaseTaskResponse', 'MessageDict', 'ChatExecutionFunctionality',
+            'ParameterDefinition', 'FunctionParameters', 'TaskResponse', 'DatabaseTaskResponse', 'MessageDict',
            'OutputInterface', 'SearchResult', 'StringOutput', 'LLMChatOutput', 'SearchOutput', 'WorkflowOutput', 'APIManager', 'API']

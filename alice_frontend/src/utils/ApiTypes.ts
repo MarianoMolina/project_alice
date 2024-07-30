@@ -10,10 +10,17 @@ export enum ApiType {
     EXA_SEARCH = 'exa_search',
     ARXIV_SEARCH = 'arxiv_search',
 }
+export enum LlmProvider {
+    OPENAI = 'openai',
+    AZURE = 'azure',
+    ANTHROPIC = 'anthropic',
+    LM_STUDIO = 'lm-studio',
+}
 export interface API {
     _id?: string;
     api_type: ApiType;
-    name: string;
+    api_name: ApiType | LlmProvider | undefined;
+    name?: string;
     is_active: boolean;
     health_status: 'healthy' | 'unhealthy' | 'unknown';
     default_model?: AliceModel;
@@ -27,7 +34,8 @@ export interface LLMAPI {
     _id?: string;
     user: User;
     api_type: ApiType.LLM_API;
-    name: string;
+    api_name: LlmProvider;
+    name?: string;
     is_active: boolean;
     health_status: 'healthy' | 'unhealthy' | 'unknown';
     default_model?: AliceModel;
@@ -41,6 +49,7 @@ export const convertToAPI = (data: any): API => {
     return {
         _id: data?._id || undefined,
         api_type: data?.api_type || ApiType.LLM_API,
+        api_name: data?.api_name || '',
         name: data?.name || '',
         is_active: data?.is_active || false,
         health_status: data?.health_status || 'unknown',
@@ -72,6 +81,7 @@ export interface ApiComponentProps {
 }
 export const getDefaultApiForm = (): Partial<API> => ({
     api_type: ApiType.LLM_API,
+    api_name: undefined,
     name: '',
     is_active: false,
     health_status: 'unknown',

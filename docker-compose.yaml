@@ -34,6 +34,8 @@ services:
     environment:
       - NODE_ENV=development
     command: sh -c "npm run build && nodemon --watch src --ext ts --exec 'npm run build && node dist/index.js'"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${BACKEND_PORT_DOCKER}/api/health"]
       interval: 30s

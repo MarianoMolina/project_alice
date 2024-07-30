@@ -186,8 +186,8 @@ class CodeExecutionLLMTask(PromptAgentTask):
         if not messages or not 'content' in messages[-1]:
             LOGGER.warning(f"No messages to execute code from in task {self.task_name}")
             return [], True
-        response = await self.chat_execution.handle_potential_code_execution(messages[-1]['content'])
-        if not response:
+        responses = self.chat_execution.handle_potential_code_execution(messages[-1]['content'])
+        if not responses:
             LOGGER.warning(f"Code execution failed")
             return [], True
-        return response, False
+        return responses, False

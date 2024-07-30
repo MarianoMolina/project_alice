@@ -10,7 +10,7 @@ from workflow_logic.util.const import BACKEND_PORT, HOST, ADMIN_TOKEN
 from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, DatabaseTaskResponse
 from workflow_logic.core.api import API
 from workflow_logic.util import User
-from workflow_logic.core.api.api_utils import  EntityType
+from workflow_logic.util.api_utils import  EntityType
 
 class BackendAPI(BaseModel):
     """
@@ -370,7 +370,6 @@ class BackendAPI(BaseModel):
                         print(f"Response content: {response_text}")
                         raise
                     result = await response.json()
-                    print(f'Result: {result}')
                     return DatabaseTaskResponse(**result)
         except aiohttp.ClientError as e:
             print(f"Error storing DatabaseTaskResponse: {e}")
@@ -422,8 +421,7 @@ class BackendAPI(BaseModel):
                     
                     response.raise_for_status()
                     result = await response.json()
-                    print(f'Created {entity_type[:-1]}: {entity_data.get("key", entity_data.get("name", entity_data.get("email")))}')
-                    print(f'Result: {result}')
+                    LOGGER.info(f'Created {entity_type[:-1]}')
                     return result
             except aiohttp.ClientResponseError as e:
                 print(f"HTTP error during entity creation: {e.status} - {e.message}")

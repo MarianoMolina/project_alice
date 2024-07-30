@@ -8,7 +8,7 @@ const APIShortListView: React.FC<ApiComponentProps> = ({
     onInteraction,
     onView,
 }) => {
-    const getPrimaryText = (api: API) => api.name;
+    const getPrimaryText = (api: API) => api.name ?? 'API';
     const getSecondaryText = (api: API) => api.api_type;
 
     return (

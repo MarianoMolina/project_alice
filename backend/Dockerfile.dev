@@ -23,5 +23,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=20 \
   CMD curl -f http://localhost:3000/api/health || exit 1
 
-# Start the server with nodemon for development
+# Start the Node.js application
 CMD ["sh", "-c", "npm run build && nodemon --watch src --ext ts --exec 'npm run build && node dist/index.js'"]

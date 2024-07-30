@@ -8,7 +8,7 @@ import {
     TextField,
     Dialog,
 } from '@mui/material';
-import { ApiComponentProps, API, ApiType, getDefaultApiForm } from '../../../../utils/ApiTypes';
+import { ApiComponentProps, API, ApiType, getDefaultApiForm, LlmProvider } from '../../../../utils/ApiTypes';
 import { API_TYPE_CONFIGS, LLM_PROVIDERS, isLlmApi, getAvailableApiTypes } from '../../../../utils/ApiUtils';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import EnhancedModel from '../../model/model/EnhancedModel';
@@ -62,7 +62,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
             ...form,
             api_type: newApiType,
             api_config: config.apiConfig,
-            name: config.name,
+            api_name: config.api_name as LlmProvider,
         });
         setLlmProvider('');
     };
@@ -77,7 +77,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                     base_url: LLM_PROVIDERS[provider as keyof typeof LLM_PROVIDERS].baseUrl,
                     api_key: '',
                 },
-                name: LLM_PROVIDERS[provider as keyof typeof LLM_PROVIDERS].name,
+                api_name: LLM_PROVIDERS[provider as keyof typeof LLM_PROVIDERS].api_name,
             });
         }
     };
@@ -125,7 +125,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                         onChange={(e) => handleApiTypeChange(e.target.value as ApiType)}
                     >
                         {availableApiTypes.map((type) => (
-                            <MenuItem key={type} value={type}>{API_TYPE_CONFIGS[type].name}</MenuItem>
+                            <MenuItem key={type} value={type}>{API_TYPE_CONFIGS[type].api_name}</MenuItem>
                         ))}
                     </Select>
                 </FormControl>
@@ -139,7 +139,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                         onChange={(e) => handleLlmProviderChange(e.target.value)}
                     >
                         {Object.entries(LLM_PROVIDERS).map(([key, config]) => (
-                            <MenuItem key={key} value={key}>{config.name}</MenuItem>
+                            <MenuItem key={key} value={key}>{config.api_name}</MenuItem>
                         ))}
                         <MenuItem value="Custom">Custom</MenuItem>
                     </Select>
@@ -150,10 +150,10 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                 fullWidth
                 name="name"
                 label="API Name"
-                value={form.name || ''}
+                value={form.api_name || ''}
                 onChange={handleInputChange}
                 margin="normal"
-                disabled={!isEditMode || form.api_type && (isLlmApi(form.api_type) && llmProvider !== 'Custom')}
+                disabled={!isEditMode || (form.api_type && (isLlmApi(form.api_type) && llmProvider !== 'Custom'))}
             />
 
             {form.api_config && Object.entries(form.api_config).map(([key, value]) => (
