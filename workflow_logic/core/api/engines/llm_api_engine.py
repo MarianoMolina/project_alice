@@ -4,7 +4,7 @@ from workflow_logic.core.api.engines import APIEngine
 from workflow_logic.core.api import ApiType
 from workflow_logic.util.api_utils import LLMConfig
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
-from workflow_logic.core.communication import MessageDict, MessageType
+from workflow_logic.util.communication import MessageDict, MessageType
 from workflow_logic.util.logging_config import LOGGER
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletion

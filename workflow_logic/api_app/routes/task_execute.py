@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from workflow_logic.core.communication import DatabaseTaskResponse
+from workflow_logic.util.communication import DatabaseTaskResponse
 from workflow_logic.core.tasks import AliceTask
 from workflow_logic.core.tasks.task_utils import TaskExecutionRequest
 from workflow_logic.api_app.util.utils import deep_api_check

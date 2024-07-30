@@ -11,7 +11,6 @@ class AliceModel(BaseModel):
     model_format: str = Field(..., title="Model Format", description="The format of the model.")
     ctx_size: int = Field(..., title="Context Size", description="The context size of the model.")
     model_type: Literal["instruct", "chat", "vision"] = Field(..., title="Model Type", description="The type of the model.")
-    deployment: Literal["local", "remote"] = Field(..., title="Model Deployment", description="The deployment of the model.")
     api_name: ApiName = Field(default='lm-studio', title="API name", description="The API to use for the model.")
     temperature: float = Field(0.7, description="The temperature setting for the model")
     seed: Optional[int] = Field(None, description="The seed for random number generation")

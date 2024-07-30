@@ -2,7 +2,7 @@ import praw
 from praw.models import Submission, ListingGenerator, Subreddits
 from typing import List, Dict, Any
 from pydantic import Field
-from workflow_logic.core.communication import SearchResult, SearchOutput
+from workflow_logic.util.communication import SearchResult, SearchOutput
 from workflow_logic.core.tasks.api_tasks.api_task import APITask
 from workflow_logic.core.parameters import ParameterDefinition, FunctionParameters
 from workflow_logic.core.api import ApiType

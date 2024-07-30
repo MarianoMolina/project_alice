@@ -1,12 +1,14 @@
-import traceback
+import traceback, json
 from workflow_logic.util.logging_config import LOGGER
+from pydantic import BaseModel
 from unittest.mock import patch, AsyncMock
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from workflow_logic.tests.component_tests.test_environment import TestModule
 from workflow_logic.db_app import DBInitManager
-from workflow_logic.core.api import APIManager
+from workflow_logic.core.api import APIManager, ApiType
+from workflow_logic.core.model import AliceModel
 from workflow_logic.core.chat.chat import AliceChat
-from workflow_logic.core.communication import MessageDict
+from workflow_logic.util.communication import MessageDict, DatabaseTaskResponse
 
 class ChatTests(TestModule):
     name: str = "ChatTests"
@@ -85,9 +87,9 @@ class ChatTests(TestModule):
             LOGGER.error(f"Error in test_multi_turn_conversation: {str(e)}")
             LOGGER.error(traceback.format_exc())
             return f"Error: {str(e)}"
-
-    async def simulate_function_call(self, api_type, model, **kwargs):
-        # Simulate an API response that includes a function call
+            
+    async def simulate_api_response(api_manager: APIManager, api_type: ApiType, model: Optional[AliceModel] = None, **kwargs):
+        print(f"simulate_api_response called with: api_type={api_type}, model={model}, kwargs={kwargs}")
         return MessageDict(
             role="assistant",
             content="I'm calling a function to help with your request.",
@@ -98,19 +100,60 @@ class ChatTests(TestModule):
                     "name": "mock_function",
                     "arguments": '{"arg1": "value1", "arg2": "value2"}'
                 }
-            }]
+            }],
+            generated_by="llm",
+            type="text",
+            assistant_name="Default Assistant"
         )
-
+    
     async def test_function_execution(self, chat: AliceChat, api_manager: APIManager) -> str:
+        LOGGER.debug(f"api_manager state: {get_first_n_chars(api_manager, 100)}")
+        LOGGER.debug(f"chat state: {get_first_n_chars(chat, 100)}")
         try:
+            # Mock function for testing
+            async def mock_function(**kwargs):
+                return DatabaseTaskResponse(
+                    task_id="mock_task_id",
+                    task_name="mock_function",
+                    task_description="A mock function for testing",
+                    status="complete",
+                    result_code=0,
+                    task_outputs="Mock function executed successfully",
+                    task_inputs=kwargs,
+                    result_diagnostic="",
+                    execution_history=[]
+                )
 
-            # Patch the generate_response_with_api_engine method
-            with patch.object(APIManager, 'generate_response_with_api_engine', new=self.simulate_function_call):
+            # Create a mock tool_map
+            mock_tool_map = {func.task_name: mock_function for func in chat.functions}
+
+            # Simulate API response with function call
+            async def simulate_api_response(api_type: ApiType, model: Optional[AliceModel] = None, **kwargs):
+                return MessageDict(
+                    role="assistant",
+                    content="I'm calling a function to help with your request.",
+                    tool_calls=[{
+                        "id": "call_123",
+                        "type": "function",
+                        "function": {
+                            "name": list(mock_tool_map.keys())[0],  # Use the first function name
+                            "arguments": '{"arg1": "value1", "arg2": "value2"}'
+                        }
+                    }],
+                    generated_by="llm",
+                    type="text",
+                    assistant_name="Default Assistant"
+                )
+
+            # Patch the necessary methods
+            with patch.object(APIManager, 'generate_response_with_api_engine', new=simulate_api_response), \
+                patch.object(AliceChat, 'tool_map', return_value=mock_tool_map):
+                
                 test_message = "Execute a function for me."
                 response = await chat.generate_response(api_manager, test_message)
                 self.log_response(response)
 
-            if any(msg['role'] == "tool" for msg in response):
+            if any(msg['role'] == "tool" and msg.get('task_responses') for msg in response):
                 return "Success"
             else:
                 return f"Failed: Function call not detected in response - {response}"
@@ -118,7 +161,7 @@ class ChatTests(TestModule):
             LOGGER.error(f"Error in test_function_execution: {str(e)}")
             LOGGER.error(traceback.format_exc())
             return f"Error: {str(e)}"
-
+        
     async def test_code_execution(self, chat: AliceChat, api_manager: APIManager) -> str:
         try:
             # Mock code execution
@@ -146,3 +189,20 @@ class ChatTests(TestModule):
                 LOGGER.info(f"Tool Calls: {msg['tool_calls']}")
             if msg.get('function_call'):
                 LOGGER.info(f"Function Call: {msg['function_call']}")
+
+def get_first_n_chars(obj: Any, n: int = 100) -> str:
+    return json.dumps(safe_serialize(obj))[:n]
+
+def safe_serialize(obj: Any):
+    try:
+        if isinstance(obj, dict):
+            return {k: safe_serialize(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [safe_serialize(i) for i in obj]
+        elif hasattr(obj, 'model_dump'):
+            return obj.model_dump()
+        else:
+            return str(obj)
+    except Exception as e:
+        LOGGER.error(f"Error in safe_serialize: {str(e)}")
+        return str(obj)

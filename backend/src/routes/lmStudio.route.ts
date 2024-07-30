@@ -170,7 +170,7 @@ router.get('/models/:modelId', async (req, res) => {
 // List available models endpoint
 router.get('/models', async (req, res) => {
     try {
-        const dbModels = await Model.find({ deployment: 'local' });
+        const dbModels = await Model.find({ api_name: 'lm-studio' });
         const downloadedModels = await client.system.listDownloadedModels();
         console.log('Downloaded models:', downloadedModels);
 

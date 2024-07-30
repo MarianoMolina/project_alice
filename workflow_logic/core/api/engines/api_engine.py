@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from pydantic import BaseModel, Field
-from workflow_logic.core.communication import SearchOutput, MessageDict
+from workflow_logic.util.communication import SearchOutput, MessageDict
 from workflow_logic.core.api import ApiType
 from workflow_logic.core.parameters import FunctionParameters
 from typing import Dict, Any, Union

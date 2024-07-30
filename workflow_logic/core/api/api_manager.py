@@ -3,7 +3,7 @@ from typing import Dict, Any, Union, Optional
 from workflow_logic.util.api_utils import ApiType, ApiName, LLMConfig
 from workflow_logic.core.model import AliceModel
 from workflow_logic.core.api.api import API
-from workflow_logic.core.communication import SearchOutput, MessageDict
+from workflow_logic.util.communication import SearchOutput, MessageDict
 from workflow_logic.util.logging_config import LOGGER
 from workflow_logic.core.api.engines import APIEngine, LLMAnthropic, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI, ExaSearchAPI, ArxivSearchAPI, LLMEngine
 
@@ -82,6 +82,7 @@ class APIManager(BaseModel):
         Returns:
             Union[SearchOutput, MessageDict]: The generated response from the API engine.
         """
+        LOGGER.debug(f"Chat generate_response_with_api_engine called with api_type: {api_type}, model: {model}, kwargs: {kwargs}")
         try:
             api = self.get_api_by_type(api_type)
             if not api:

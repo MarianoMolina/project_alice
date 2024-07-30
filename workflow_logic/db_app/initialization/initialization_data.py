@@ -74,7 +74,6 @@
 #             "model_name": "gpt-4o-2024-05-13",
 #             "ctx_size": 128000,
 #             "model_type": "chat",
-#             "deployment": "remote",
 #             "temperature": 0.7,
 #             "api_name": "openai",
 #             # "api_key": OPENAI_API_KEY,
@@ -87,7 +86,6 @@
 #             "model_format": "Llama3",
 #             "ctx_size": 32768,
 #             "model_type": "instruct",
-#             "deployment": "local",
 #             "api_name": "custom",
 #         },
 #         {
@@ -97,7 +95,6 @@
 #             "model_name": "claude-3-5-sonnet-20240620",
 #             "ctx_size": 200000,
 #             "model_type": "chat",
-#             "deployment": "remote",
 #             "temperature": 0.7,
 #             "api_name": "anthropic",
 #             # "api_key": ANTHROPIC_API,

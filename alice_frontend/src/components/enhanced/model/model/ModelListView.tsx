@@ -12,7 +12,7 @@ const ModelListView: React.FC<ModelComponentProps> = ({
     const getPrimaryText = (model: AliceModel) => model.model_name as string;
     const getSecondaryText = (model: AliceModel) => (
         <Typography component="span" variant="body2" color="textSecondary">
-            Created: {model.deployment}
+            API: {model.api_name}
         </Typography>
     );
 

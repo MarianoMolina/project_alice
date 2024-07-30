@@ -1,7 +1,7 @@
 from typing import List, Type
 from pydantic import Field, model_validator
 from workflow_logic.core.api import ApiType, APIManager
-from workflow_logic.core.communication import TaskResponse
+from workflow_logic.util.communication import TaskResponse
 from workflow_logic.core.tasks.task import AliceTask
 from workflow_logic.core.api.engines import APIEngine, WikipediaSearchAPI, GoogleSearchAPI, ExaSearchAPI, ArxivSearchAPI, RedditSearchAPI
 

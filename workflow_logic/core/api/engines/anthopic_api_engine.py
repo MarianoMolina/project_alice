@@ -1,5 +1,5 @@
 from typing import Dict, Any
-from workflow_logic.core.communication import SearchResult, SearchOutput
+from workflow_logic.util.communication import SearchResult, SearchOutput
 from workflow_logic.core.parameters import ParameterDefinition
 from workflow_logic.core.api.engines.llm_api_engine import LLMEngine
 from workflow_logic.util.logging_config import LOGGER

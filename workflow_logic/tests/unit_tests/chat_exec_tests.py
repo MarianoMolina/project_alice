@@ -3,7 +3,7 @@ from unittest.mock import Mock, AsyncMock
 from workflow_logic.core.agent import AliceAgent
 from workflow_logic.core.api import LLMEngine
 from workflow_logic.core.prompt import Prompt
-from workflow_logic.core.communication import MessageDict, SearchOutput, SearchResult
+from workflow_logic.util.communication import MessageDict, SearchOutput, SearchResult
 import unittest
 
 @pytest.fixture

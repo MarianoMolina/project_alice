@@ -20,7 +20,6 @@ class API(BaseModel):
         health_status (str): The current health status of the API ("healthy", "unhealthy", or "unknown").
         default_model (Optional[AliceModel]): The default language model associated with this API.
         api_config (Optional[Dict[str, Any]]): Additional configuration parameters for the API.
-        autogen_model_client_cls (Optional[str]): The class name for a custom AutoGen model client.
         created_by (Optional[User]): The user who created this API configuration.
         updated_by (Optional[User]): The user who last updated this API configuration.
         created_at (Optional[str]): The timestamp of when this configuration was created.
@@ -34,7 +33,6 @@ class API(BaseModel):
     health_status: str = Field("unknown", pattern="^(healthy|unhealthy|unknown)$")
     default_model: Optional[AliceModel] = None
     api_config: Optional[Dict[str, Any]] = None
-    autogen_model_client_cls: Optional[str] = Field(None, title="Autogen Model Client Class", description="Optional. The class for the autogen model client if it is a custom client.")
     created_by: Optional[User] = None
     updated_by: Optional[User] = None
     created_at: Optional[str] = None

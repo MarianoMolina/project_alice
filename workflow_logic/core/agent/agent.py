@@ -4,7 +4,7 @@ from workflow_logic.core.parameters import ToolFunction
 from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.model import AliceModel
 from workflow_logic.core.api import APIManager, ApiType
-from workflow_logic.core.communication import MessageDict
+from workflow_logic.util.communication import MessageDict
 from workflow_logic.util.logging_config import LOGGER
 import docker
 import os
@@ -21,6 +21,7 @@ class AliceAgent(BaseModel):
 
     async def generate_response(self, api_manager: APIManager, messages: List[MessageDict], tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []) -> List[MessageDict]:
         try:
+            LOGGER.debug(f"Agent Calling generate_response_with_api_engine with: api_type={ApiType.LLM_MODEL}, model={self.model_id}")
             api_messages = self._prepare_messages_for_api(messages)
             
             response: MessageDict = await api_manager.generate_response_with_api_engine(
@@ -110,6 +111,7 @@ class AliceAgent(BaseModel):
                     content=str(result),
                     generated_by="tool",
                     step=function_name,
+                    task_responses=[result],
                     type="text"
                 ))
             except Exception as e:

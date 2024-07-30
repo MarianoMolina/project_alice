@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
-from workflow_logic.core.communication import MessageDict
+from workflow_logic.util.communication import MessageDict
 from workflow_logic.core.agent import AliceAgent
 from workflow_logic.core.parameters import FunctionConfig, FunctionParameters, ParameterDefinition
 from workflow_logic.core.api import APIManager, LLMConfig
@@ -33,7 +33,7 @@ class TestAliceChat(unittest.IsolatedAsyncioTestCase):
             "messages": self.messages,
             "alice_agent": self.alice_agent,
             "executor": self.executor_agent,
-            "model_id": AliceModel(short_name="test_model", model_type="chat", model_name="test_model", model_format="OpenChat", ctx_size=1024, deployment="local"),
+            "model_id": AliceModel(short_name="test_model", model_type="chat", model_name="test_model", model_format="OpenChat", ctx_size=1024),
             "functions": [],
             "chat_execution": None
         }

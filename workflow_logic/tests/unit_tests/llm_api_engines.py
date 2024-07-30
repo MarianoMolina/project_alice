@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, AsyncMock
 from workflow_logic.core.api import LLMEngine, LLMOpenAI, LLMAnthropic
-from workflow_logic.core.communication import SearchResult, SearchOutput
+from workflow_logic.util.communication import SearchResult, SearchOutput
 
 @pytest.fixture
 def mock_aiohttp_session():

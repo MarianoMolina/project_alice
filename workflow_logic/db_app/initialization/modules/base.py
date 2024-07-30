@@ -29,7 +29,6 @@ base_module = BaseModule(
                 "model_name": "gpt-4o-2024-05-13",
                 "ctx_size": 128000,
                 "model_type": "chat",
-                "deployment": "remote",
                 "temperature": 0.7,
                 "api_name": "openai",
             },
@@ -40,7 +39,6 @@ base_module = BaseModule(
                 "model_format": "Llama3",
                 "ctx_size": 32768,
                 "model_type": "instruct",
-                "deployment": "local",
                 "api_name": "lm-studio",
                 "lm_studio_preset": "Llama 3 V3"
             },
@@ -51,7 +49,6 @@ base_module = BaseModule(
                 "model_name": "claude-3-5-sonnet-20240620",
                 "ctx_size": 200000,
                 "model_type": "chat",
-                "deployment": "remote",
                 "api_name": "anthropic",
             },
             {
@@ -61,7 +58,6 @@ base_module = BaseModule(
                 "model_name": "NousResearch/Hermes-2-Theta-Llama-3-8B-GGUF",
                 "ctx_size": 32768,
                 "model_type": "chat",
-                "deployment": "local",
                 "api_name": "lm-studio",
                 "lm_studio_preset": "Llama 3 V3"
             }

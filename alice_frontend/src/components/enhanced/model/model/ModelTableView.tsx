@@ -15,8 +15,8 @@ const ModelTableView: React.FC<ModelComponentProps> = ({
       render: (model: AliceModel) => model.model_name
     },
     {
-      header: 'Deployment',
-      render: (model: AliceModel) => model.deployment || 'N/A'
+      header: 'API',
+      render: (model: AliceModel) => model.api_name || 'N/A'
     },
     {
       header: 'Created At',

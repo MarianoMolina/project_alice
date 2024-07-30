@@ -7,7 +7,6 @@ export interface IModel extends Document {
     model_format: string;
     ctx_size: number;
     model_type: 'instruct' | 'chat' | 'vision';
-    deployment: 'local' | 'remote';
     api_name: ApiName;
     temperature: number;
     seed: number | null;

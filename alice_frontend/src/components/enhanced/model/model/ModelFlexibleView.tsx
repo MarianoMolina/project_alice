@@ -64,17 +64,6 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                 </Select>
             </FormControl>
             <FormControl fullWidth margin="normal">
-                <InputLabel>Deployment</InputLabel>
-                <Select
-                    value={item.deployment || 'local'}
-                    onChange={(e) => onChange({ deployment: e.target.value as 'local' | 'remote' })}
-                    disabled={!isEditMode}
-                >
-                    <MenuItem value="local">Local</MenuItem>
-                    <MenuItem value="remote">Remote</MenuItem>
-                </Select>
-            </FormControl>
-            <FormControl fullWidth margin="normal">
                 <InputLabel>API Type</InputLabel>
                 <Select
                     value={item.api_name || 'openai'}

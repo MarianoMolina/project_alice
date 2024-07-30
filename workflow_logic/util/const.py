@@ -25,7 +25,6 @@ const_model_definitions = [
         "model_format": "Mistral_Instruct",
         "ctx_size": 32768,
         "model_type": "instruct",
-        "deployment": "local",
     },
     {  
         "short_name": "Starling7B_Chat",
@@ -34,7 +33,6 @@ const_model_definitions = [
         "model_format": "OpenChat",
         "ctx_size": 8192,
         "model_type": "chat",
-        "deployment": "local",
     },
     {
         "short_name": "Llama8B_Chat",
@@ -43,7 +41,6 @@ const_model_definitions = [
         "model_file": "bartowski/llama-3-neural-chat-v2.2-8B-GGUF/llama-3-neural-chat-v2.2-8B-Q6_K.gguf",
         "ctx_size": 8192,
         "model_type": "chat",
-        "deployment": "local",
     },
     {
         "short_name": "StarCoder2_15B",
@@ -52,7 +49,6 @@ const_model_definitions = [
         "model_file": "second-state/StarCoder2-15B-GGUF/starcoder2-15b-Q6_K.gguf",
         "ctx_size": 16384,
         "model_type": "instruct",
-        "deployment": "local",
     },
     {
         "short_name": "Llama3_Medichat",
@@ -61,7 +57,6 @@ const_model_definitions = [
         "model_file": "mradermacher/Medichat-V2-Llama3-8B-GGUF/Medichat-V2-Llama3-8B.Q8_0.gguf",
         "ctx_size": 32768,
         "model_type": "instruct",
-        "deployment": "local",
     },
     {
         "short_name": "Llama3_8B_Instruct_v2",
@@ -70,7 +65,6 @@ const_model_definitions = [
         "model_file": "bartowski/Llama-3-8B-Instruct-Gradient-1048k-GGUF/Llama-3-8B-Instruct-Gradient-1048k-Q8_0.gguf",
         "ctx_size": 64000,
         "model_type": "instruct",
-        "deployment": "local",
     },
     {
         "short_name": "Llama3_8B_Instruct",
@@ -79,7 +73,6 @@ const_model_definitions = [
         "model_file": "nisten/llama3-8b-instruct-32k-gguf/llama3ins-8b-32k-q6.gguf",
         "ctx_size": 32768,
         "model_type": "instruct",
-        "deployment": "local",
     },
     {
         "short_name": "Llava_vision",
@@ -88,7 +81,6 @@ const_model_definitions = [
         "model_file": "xtuner/llava-llama-3-8b-v1_1-gguf/llava-llama-3-8b-v1_1-f16.gguf",
         "ctx_size": 4096,
         "model_type": "vision",
-        "deployment": "local",
     },
     {
         "short_name": "GPT3.5",
@@ -96,7 +88,6 @@ const_model_definitions = [
         "model_name": "gpt-3.5-turbo-0125",
         "ctx_size": 16385,
         "model_type": "chat",
-        "deployment": "remote",
         "api_type": "openai",
         "api_key": '',
         "base_url": "https://api.openai.com/v1"
@@ -107,7 +98,6 @@ const_model_definitions = [
         "model_name": "gpt-4-turbo-2024-04-09",
         "ctx_size": 128000,
         "model_type": "chat",
-        "deployment": "remote",
         "api_type": "openai",
         "api_key":'',
         "base_url": "https://api.openai.com/v1"
@@ -118,7 +108,6 @@ const_model_definitions = [
         "model_name": "claude-3-opus-20240229",
         "ctx_size": 200000,
         "model_type": "chat",
-        "deployment": "remote",
         "api_type": "anthropic",
         "api_key": '',
         "base_url": "https://api.anthropic.com",
@@ -130,7 +119,6 @@ const_model_definitions = [
         "model_name": "gpt-4o-2024-05-13",
         "ctx_size": 128000,
         "model_type": "chat",
-        "deployment": "remote",
         "api_type": "openai",
         "temperature": 0.7,
     }

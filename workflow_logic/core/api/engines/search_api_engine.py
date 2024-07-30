@@ -5,7 +5,7 @@ from arxiv import Result, Client, Search, SortCriterion
 from exa_py import Exa
 from pydantic import Field
 from googleapiclient.discovery import build
-from workflow_logic.core.communication import SearchResult, SearchOutput
+from workflow_logic.util.communication import SearchResult, SearchOutput
 from workflow_logic.core.api import ApiType
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 from typing import Dict, Any, List

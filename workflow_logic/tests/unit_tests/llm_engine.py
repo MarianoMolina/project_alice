@@ -1,6 +1,6 @@
 import asyncio
 from workflow_logic.core.api.engines import LLMEngine
-from workflow_logic.core.communication import MessageDict
+from workflow_logic.util.communication import MessageDict
 from workflow_logic.core.model import LLMConfig
 
 async def test_llm_engine():

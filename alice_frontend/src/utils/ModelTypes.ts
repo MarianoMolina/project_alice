@@ -8,7 +8,6 @@ export interface AliceModel {
     model_format?: string;
     ctx_size?: number;
     model_type: 'instruct' | 'chat' | 'vision';
-    deployment: 'local' | 'remote';
     api_name: LlmProvider;
     temperature?: number;
     seed?: number | null;
@@ -27,7 +26,6 @@ export const convertToAliceModel = (data: any): AliceModel => {
         model_format: data?.model_format || undefined,
         ctx_size: data?.ctx_size || undefined,
         model_type: data?.model_type || 'chat',
-        deployment: data?.deployment || 'local',
         api_name: data?.api_name || 'lm-studio',
         temperature: data?.temperature || undefined,
         seed: data?.seed || null,
@@ -57,7 +55,6 @@ export const getDefaultModelForm = (): Partial<AliceModel> => ({
     model_format: '',
     ctx_size: 0,
     model_type: 'chat',
-    deployment: 'remote',
     api_name: LlmProvider.OPENAI,
     temperature: 0.7,
     use_cache: true
