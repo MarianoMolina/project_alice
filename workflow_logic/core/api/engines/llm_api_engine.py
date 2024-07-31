@@ -1,10 +1,11 @@
-from typing import Dict, Any
+import traceback
+from typing import Dict, Any, List, Optional
 from pydantic import Field
 from workflow_logic.core.api.engines import APIEngine
 from workflow_logic.core.api import ApiType
 from workflow_logic.util.api_utils import LLMConfig
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
-from workflow_logic.util.communication import MessageDict, MessageType
+from workflow_logic.util import MessageDict, MessageType
 from workflow_logic.util.logging_config import LOGGER
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletion
@@ -19,14 +20,9 @@ class LLMEngine(APIEngine):
                     description="The list of messages in the conversation.",
                     default=None
                 ),
-                "functions": ParameterDefinition(
-                    type="array",
-                    description="A list of function definitions that the model may generate JSON inputs for.",
-                    default=None
-                ),
-                "function_call": ParameterDefinition(
+                "system": ParameterDefinition(
                     type="string",
-                    description="Controls how the model responds to function calls.",
+                    description="System message to be used for the conversation.",
                     default=None
                 ),
                 "tools": ParameterDefinition(
@@ -61,7 +57,7 @@ class LLMEngine(APIEngine):
     )
     required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
 
-    async def generate_api_response(self, api_data: LLMConfig, **kwargs) -> MessageDict:
+    async def generate_api_response(self, api_data: LLMConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[Dict[str, Any]]] = None, max_tokens: Optional[int] = None, tool_choice: Optional[str] = 'auto', n: Optional[int] = 1, **kwargs) -> MessageDict:
         """Generates the API response for the task, using the provided API data and messages."""
         if not api_data.api_key:
             raise ValueError("API key not found in API data")
@@ -78,16 +74,18 @@ class LLMEngine(APIEngine):
             api_key=api_data.api_key,
             base_url=base_url
         )
+        if system:
+            messages = [{"role": "system", "content": system}] + messages
 
         try:
             response: ChatCompletion = await client.chat.completions.create(
                 model=api_data.model,
-                messages=kwargs['messages'],
-                max_tokens=kwargs.get('max_tokens'),
+                messages=messages,
+                max_tokens=max_tokens,
                 temperature=api_data.temperature,
-                tools=kwargs.get('tools'),
-                tool_choice=kwargs.get('tool_choice', 'auto') if kwargs.get('tools') else None,
-                n=kwargs.get('n', 1), 
+                tools=tools if tools else None,
+                tool_choice=tool_choice if tools else None,
+                n=n, 
                 stream=False
             )
 
@@ -113,6 +111,7 @@ class LLMEngine(APIEngine):
 
         except Exception as e:
             LOGGER.error(f"Error in LLM API call: {str(e)}")
+            LOGGER.error(traceback.format_exc())
             raise
 
     @staticmethod

@@ -5,7 +5,7 @@ from arxiv import Result, Client, Search, SortCriterion
 from exa_py import Exa
 from pydantic import Field
 from googleapiclient.discovery import build
-from workflow_logic.util.communication import SearchResult, SearchOutput
+from workflow_logic.util import SearchResult, SearchOutput
 from workflow_logic.core.api import ApiType
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 from typing import Dict, Any, List
@@ -92,7 +92,6 @@ class ArxivSearchAPI(APISearchEngine):
     async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
         # arXiv doesn't require API keys, so we don't need to use api_data
         client = Client(page_size=20)
-        print(f'prompt: {prompt}')
         search = Search(
             query=prompt, 
             max_results=max_results,

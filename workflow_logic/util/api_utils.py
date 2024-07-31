@@ -50,3 +50,6 @@ class LLMConfig(BaseModel):
     timeout: Optional[int] = 300
     use_cache: Optional[bool] = False
     tools: Optional[List[str]] = None
+    model_config = {
+        'protected_namespaces': ()
+    }

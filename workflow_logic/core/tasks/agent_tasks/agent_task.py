@@ -2,7 +2,7 @@ from typing import List, Dict, Optional, Callable
 from pydantic import Field
 from workflow_logic.core.api import APIManager
 from workflow_logic.core.api import ApiType
-from workflow_logic.util.communication import MessageDict, TaskResponse, LLMChatOutput
+from workflow_logic.util import MessageDict, TaskResponse, LLMChatOutput
 from workflow_logic.core.agent.agent import AliceAgent
 from workflow_logic.core.tasks.task import AliceTask
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition, FunctionConfig

@@ -3,7 +3,7 @@ from typing import Dict, Any, Union, Optional
 from workflow_logic.util.api_utils import ApiType, ApiName, LLMConfig
 from workflow_logic.core.model import AliceModel
 from workflow_logic.core.api.api import API
-from workflow_logic.util.communication import SearchOutput, MessageDict
+from workflow_logic.util import SearchOutput, MessageDict
 from workflow_logic.util.logging_config import LOGGER
 from workflow_logic.core.api.engines import APIEngine, LLMAnthropic, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI, ExaSearchAPI, ArxivSearchAPI, LLMEngine
 

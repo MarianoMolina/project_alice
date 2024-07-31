@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container, Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { Chat, PlayArrow, Code } from '@mui/icons-material';
+import { PlayArrow, Code } from '@mui/icons-material';
 import useStyles from './DashboardStyles';
 import { EvervaultCard } from '../aceternity/EvervaultCard';
 import logo from '../../../assets/img/logo1024.png';

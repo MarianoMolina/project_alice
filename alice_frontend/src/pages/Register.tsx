@@ -5,9 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import ApiSetup from '../components/ui/registration/ApiSetup';
 import RegistrationComplete from '../components/ui/registration/RegistrationComplete';
 import { API } from '../utils/ApiTypes';
-import { createItem, fetchItem } from '../services/api';
+import { fetchItem } from '../services/api';
 import useStyles from '../styles/RegisterStyles';
-import { WavyBackground } from '../components/ui/aceternity/WavyBackground';
 
 const Register = () => {
   const [name, setName] = useState('');

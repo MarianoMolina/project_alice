@@ -8,7 +8,7 @@ from workflow_logic.db_app import DBInitManager
 from workflow_logic.core.api import APIManager, ApiType
 from workflow_logic.core.model import AliceModel
 from workflow_logic.core.chat.chat import AliceChat
-from workflow_logic.util.communication import MessageDict, DatabaseTaskResponse
+from workflow_logic.util import MessageDict, DatabaseTaskResponse
 
 class ChatTests(TestModule):
     name: str = "ChatTests"

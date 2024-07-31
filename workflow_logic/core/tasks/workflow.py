@@ -1,8 +1,8 @@
 from typing import Dict, Any, Optional, List, Callable, Union, Tuple
 from pydantic import Field
-from workflow_logic.util.communication import TaskResponse
+from workflow_logic.util import TaskResponse
 from workflow_logic.core.tasks.task import AliceTask
-from workflow_logic.util.communication import WorkflowOutput
+from workflow_logic.util import WorkflowOutput
 
 class Workflow(AliceTask):
     """

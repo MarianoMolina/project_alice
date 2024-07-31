@@ -27,7 +27,7 @@
  *
  * @template T - The type of the database item being handled
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { CircularProgress, Box } from '@mui/material';
 import { useApi } from '../../../../context/ApiContext';
 import { CollectionName, CollectionType } from '../../../../utils/CollectionTypes';
@@ -103,18 +103,7 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
 
   const { fetchItem, createItem, updateItem } = useApi();
 
-  useEffect(() => {
-    if (fetchAll) {
-      fetchAllItems();
-    }
-    if (itemId && mode !== 'create') {
-      fetchSingleItem();
-    } else if (mode === 'create') {
-      setItem({} as T);
-    }
-  }, [itemId, collectionName, mode, fetchAll]);
-
-  const fetchAllItems = async () => {
+  const fetchAllItems = useCallback(async () => {
     setLoading(true);
     try {
       const data = await fetchItem(collectionName);
@@ -126,9 +115,9 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchItem, collectionName]);
 
-  const fetchSingleItem = async () => {
+  const fetchSingleItem = useCallback(async () => {
     setLoading(true);
     try {
       const data = await fetchItem(collectionName, itemId!);
@@ -140,7 +129,18 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchItem, collectionName, itemId]);
+
+  useEffect(() => {
+    if (fetchAll) {
+      fetchAllItems();
+    }
+    if (itemId && mode !== 'create') {
+      fetchSingleItem();
+    } else if (mode === 'create') {
+      setItem({} as T);
+    }
+  }, [itemId, collectionName, mode, fetchAll, fetchAllItems, fetchSingleItem]);
 
   const handleSave = async () => {
     if (!item) return;

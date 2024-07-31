@@ -45,7 +45,7 @@ const ChatAlice: React.FC = () => {
 
   const chatKey = useMemo(() => {
     return JSON.stringify(messages);
-  }, [messages, currentChatId]);
+  }, [messages]);
 
   const handleNewChatCreated = async (chat: AliceChat) => {
     await fetchChats();

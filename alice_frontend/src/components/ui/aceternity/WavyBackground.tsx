@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "../../../utils/cn";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { createNoise3D } from "simplex-noise";
 
 export const WavyBackground = ({
@@ -27,85 +27,91 @@ export const WavyBackground = ({
   [key: string]: any;
 }) => {
   const noise = createNoise3D();
-  let w: number,
-    h: number,
-    nt: number,
-    i: number,
-    x: number,
-    ctx: any,
-    canvas: any;
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const getSpeed = () => {
-    switch (speed) {
-      case "slow":
-        return 0.001;
-      case "fast":
-        return 0.002;
-      default:
-        return 0.001;
-    }
-  };
+  const [isSafari, setIsSafari] = useState(false);
+  const animationRef = useRef<number>();
 
-  const init = () => {
-    canvas = canvasRef.current;
-    ctx = canvas.getContext("2d");
-    w = ctx.canvas.width = window.innerWidth;
-    h = ctx.canvas.height = window.innerHeight;
-    ctx.filter = `blur(${blur}px)`;
-    nt = 0;
-    window.onresize = function () {
-      w = ctx.canvas.width = window.innerWidth;
-      h = ctx.canvas.height = window.innerHeight;
-      ctx.filter = `blur(${blur}px)`;
-    };
-    render();
-  };
-
-  const waveColors = colors ?? [
+  const waveColors = useMemo(() => colors ?? [
     "#38bdf8",
     "#818cf8",
     "#c084fc",
     "#e879f9",
     "#22d3ee",
-  ];
-  const drawWave = (n: number) => {
-    nt += getSpeed();
-    for (i = 0; i < n; i++) {
+  ], [colors]);
+
+  const getSpeed = useCallback(() => {
+    return speed === "slow" ? 0.001 : 0.002;
+  }, [speed]);
+
+  const drawWave = useCallback((ctx: CanvasRenderingContext2D, w: number, h: number, nt: number) => {
+    for (let i = 0; i < 5; i++) {
       ctx.beginPath();
       ctx.lineWidth = waveWidth || 50;
       ctx.strokeStyle = waveColors[i % waveColors.length];
-      for (x = 0; x < w; x += 5) {
-        var y = noise(x / 800, 0.3 * i, nt) * 100;
-        ctx.lineTo(x, y + h * 0.5); // adjust for height, currently at 50% of the container
+      for (let x = 0; x < w; x += 5) {
+        const y = noise(x / 800, 0.3 * i, nt) * 100;
+        ctx.lineTo(x, y + h * 0.5);
       }
       ctx.stroke();
       ctx.closePath();
     }
-  };
+  }, [noise, waveColors, waveWidth]);
 
-  let animationId: number;
-  const render = () => {
+  const render = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const w = ctx.canvas.width;
+    const h = ctx.canvas.height;
+
     ctx.fillStyle = backgroundFill || "black";
-    ctx.globalAlpha = waveOpacity || 0.5;
+    ctx.globalAlpha = waveOpacity;
     ctx.fillRect(0, 0, w, h);
-    drawWave(5);
-    animationId = requestAnimationFrame(render);
-  };
 
-  useEffect(() => {
-    init();
-    return () => {
-      cancelAnimationFrame(animationId);
+    drawWave(ctx, w, h, (animationRef.current || 0) * getSpeed());
+
+    animationRef.current = requestAnimationFrame(render);
+  }, [backgroundFill, drawWave, getSpeed, waveOpacity]);
+
+  const init = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      ctx.filter = `blur(${blur}px)`;
     };
-  }, []);
 
-  const [isSafari, setIsSafari] = useState(false);
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    render();
+
+    return () => {
+      window.removeEventListener("resize", resizeCanvas);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [blur, render]);
+
   useEffect(() => {
-    // I'm sorry but i have got to support it on safari.
+    const cleanup = init();
+    return cleanup;
+  }, [init]);
+
+  useEffect(() => {
     setIsSafari(
       typeof window !== "undefined" &&
-        navigator.userAgent.includes("Safari") &&
-        !navigator.userAgent.includes("Chrome")
+      navigator.userAgent.includes("Safari") &&
+      !navigator.userAgent.includes("Chrome")
     );
   }, []);
 

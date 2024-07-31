@@ -23,14 +23,13 @@ const ApiTaskForm: React.FC<TaskFormsProps> = ({
 }) => {
     const isEditMode = mode === 'edit' || mode === 'create';
 
+    const availableApiTypes = useMemo(() => {
+        return apis ? Array.from(new Set(apis.map(api => api.api_type))) : [];
+    }, [apis]);
+
     if (!item) {
         return <Box>No task data available.</Box>;
     }
-
-    const availableApiTypes = useMemo(() => {
-        if (!apis) return [];
-        return Array.from(new Set(apis.map(api => api.api_type)));
-    }, [apis]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;

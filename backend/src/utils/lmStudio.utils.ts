@@ -65,6 +65,7 @@ export function unloadInactiveModels(client: LMStudioClient, loadedModels: { [ke
 
 export async function isModelAvailable(client: LMStudioClient, model_name: string) {
     const downloadedModels = await client.system.listDownloadedModels();
+    console.log('Downloaded Models:', downloadedModels);
     const isModelAvailable = downloadedModels.some((model: any) => model.path.includes(model_name));
     return isModelAvailable
 }
@@ -76,6 +77,7 @@ export async function loadModel(modelId: string, client: LMStudioClient, loadedM
         if (!modelInfo) {
             throw new Error(`Model with id ${modelId} not found in the database`);
         }
+        console.log('Model Info:', modelInfo);
         const isModelAv = await isModelAvailable(client, modelInfo.model_name);
 
         if (!isModelAv) {

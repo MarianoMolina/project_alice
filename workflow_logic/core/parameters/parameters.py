@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Annotated, Optional, Any, Literal, Dict, List, Union
-    
+from anthropic.types import ToolParam
+
 class ParameterDefinition(BaseModel):
     id: Optional[str] = Field(None, description="The parameter ID", alias="_id")
     type: Annotated[str, Field(description="Type of the parameter")]
@@ -26,16 +27,44 @@ class FunctionParameters(BaseModel):
     properties: Annotated[Dict[str, ParameterDefinition], Field(description="Dict of parameters name to their type, description, and default value")]
     required: Annotated[List[str], Field(description="Required parameters")]
 
+    def model_dump(self, **kwargs):
+        input_schema = {
+            "type": "object",
+            "properties": {},
+            "required": self.required
+        }
+        
+        for param_name, param in self.properties.items():
+            param_schema = {
+                "type": param.type,
+                "description": param.description
+            }
+            if param.default is not None:
+                param_schema["default"] = param.default
+            input_schema["properties"][param_name] = param_schema
+        
+        return input_schema
+    
 class FunctionConfig(BaseModel):
     """A function as defined by the OpenAI API"""
     name: Annotated[str, Field(description="Name of the function")]
     description: Annotated[str, Field(description="Description of the function")]
     parameters: Annotated[FunctionParameters, Field(description="Parameters of the function")]
 
+    def convert_to_tool_params(self) -> ToolParam:
+        return {
+            "name": self.name,
+            "description": self.description,
+            "input_schema": self.parameters.model_dump()
+        }
+ 
 class ToolFunction(BaseModel):
     """A function under tool as defined by the OpenAI API."""
     type: Annotated[Literal["function"], Field(default="function", description="Type of the tool function")]
     function: Annotated[FunctionConfig, Field(description="Function under tool")]
+
+    def convert_to_tool_params(self) -> ToolParam:
+        return self.function.convert_to_tool_params()
 
 class ToolCallConfig(BaseModel):
     """A tool call config as defined by the OpenAI API"""

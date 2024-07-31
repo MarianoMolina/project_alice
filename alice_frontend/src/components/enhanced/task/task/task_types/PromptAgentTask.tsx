@@ -1,8 +1,7 @@
 import React from 'react';
 import { TaskFormsProps } from '../../../../../utils/TaskTypes';
 import BasicAgentTask from './BasicAgentTask';
-import { Edit, Close, ExpandMore } from '@mui/icons-material';
-import { Box, Accordion, AccordionSummary, AccordionDetails, IconButton, Dialog } from '@mui/material';
+import { Box } from '@mui/material';
 import EnhancedSelect from '../../../common/enhanced_select/EnhancedSelect';
 import EnhancedPrompt from '../../../prompt/prompt/EnhancedPrompt';
 import { Prompt } from '../../../../../utils/PromptTypes';

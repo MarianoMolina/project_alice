@@ -1,14 +1,13 @@
-from pydantic import BaseModel, Field
+import docker, os, tempfile
+from bson import ObjectId
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Dict, Any, List, Optional, Tuple, Callable
 from workflow_logic.core.parameters import ToolFunction
 from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.model import AliceModel
 from workflow_logic.core.api import APIManager, ApiType
-from workflow_logic.util.communication import MessageDict
-from workflow_logic.util.logging_config import LOGGER
-import docker
-import os
-import tempfile
+from workflow_logic.util import MessageDict, LOGGER
+
 
 class AliceAgent(BaseModel):
     id: Optional[str] = Field(default=None, description="The ID of the agent", alias="_id")
@@ -18,6 +17,7 @@ class AliceAgent(BaseModel):
     has_functions: bool = Field(default=False, description="Whether the agent can use functions")
     has_code_exec: bool = Field(default=False, description="Whether the agent can execute code")
     max_consecutive_auto_reply: int = Field(default=10, description="The maximum number of consecutive auto replies")
+    model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str})
 
     async def generate_response(self, api_manager: APIManager, messages: List[MessageDict], tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []) -> List[MessageDict]:
         try:
@@ -28,6 +28,7 @@ class AliceAgent(BaseModel):
                 api_type=ApiType.LLM_MODEL,
                 model=self.model_id,
                 messages=api_messages,
+                system=self.system_message.format_prompt(),
                 tool_choice='auto' if self.has_functions else 'none',
                 tools=tools_list,
                 temperature=0.7,
@@ -212,8 +213,7 @@ class AliceAgent(BaseModel):
 
     def _prepare_messages_for_api(self, messages: List[MessageDict]) -> List[Dict[str, Any]]:
         """Prepare messages for the API call, including the system message."""
-        system_message = {"role": "system", "content": self.system_message.format_prompt()}
-        return [system_message] + [self._convert_message_dict_to_api_format(msg) for msg in messages]
+        return [self._convert_message_dict_to_api_format(msg) for msg in messages]
 
     def _convert_message_dict_to_api_format(self, message: MessageDict) -> Dict[str, Any]:
         """Convert a MessageDict to the format expected by the API."""

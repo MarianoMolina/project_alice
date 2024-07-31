@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Box, Button, Stack, Typography, Skeleton, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Box, Stack, Typography, Skeleton, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { Add, Person, Mode, Settings, Description, Functions, Assignment, Chat, Api, ViewList, List, TableChart } from '@mui/icons-material';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
@@ -131,7 +131,7 @@ const Database: React.FC = () => {
                 })()}
             </Box>
         );
-    }, [activeTab, handleCreateNew, handleItemSelect, viewMode, handleViewModeChange, classes.createButton]);
+    }, [activeTab, handleItemSelect, viewMode, handleViewModeChange, classes.toggleBox]);
 
     const renderActiveComponent = useCallback(() => {
         if (!showActiveComponent) {

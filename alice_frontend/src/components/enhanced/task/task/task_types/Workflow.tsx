@@ -20,13 +20,14 @@ const Workflow: React.FC<TaskFormsProps> = ({
   const { fetchItem } = useApi();
   const isEditMode = mode === 'edit' || mode === 'create';
 
-  if (!item) {
-    return <Box>No task data available.</Box>;
-  }
   const availableApiTypes = useMemo(() => {
     if (!apis) return [];
     return Array.from(new Set(apis.map(api => api.api_type)));
   }, [apis]);
+  
+  if (!item) {
+    return <Box>No task data available.</Box>;
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

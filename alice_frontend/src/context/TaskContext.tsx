@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback } from 'react';
 import { TaskResponse } from '../utils/TaskResponseTypes';
 import { useApi } from './ApiContext';
 import { AliceTask } from '../utils/TaskTypes';
@@ -44,21 +44,17 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [executionStatus, setExecutionStatus] = useState<'idle' | 'progress' | 'success'>('idle');
   const [recentExecutions, setRecentExecutions] = useState<RecentExecution[]>([]);
 
-  useEffect(() => {
-    fetchTasks();
-    fetchTaskResults();
-  }, []);
   
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     try {
       const fetchedTasks = await fetchItem('tasks');
       setTasks(fetchedTasks as AliceTask[]);
     } catch (error) {
       console.error('Error fetching tasks:', error);
     }
-  };
+  }, [fetchItem]);
 
-  const fetchTaskResults = async () => {
+  const fetchTaskResults = useCallback(async () => {
     try {
       console.log('Fetching task results');
       const fetchedResults = await fetchItem('taskresults');
@@ -82,7 +78,12 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       console.error('Error fetching task results:', error);
     }
-  };
+  }, [fetchItem]);
+
+  useEffect(() => {
+    fetchTasks();
+    fetchTaskResults();
+  }, [fetchTasks, fetchTaskResults]);
 
   const setTaskById = (taskId: string) => {
     const task = tasks.find(task => task._id === taskId);

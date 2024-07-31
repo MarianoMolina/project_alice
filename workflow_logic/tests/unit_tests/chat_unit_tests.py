@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
-from workflow_logic.util.communication import MessageDict
+from workflow_logic.util import MessageDict
 from workflow_logic.core.agent import AliceAgent
 from workflow_logic.core.parameters import FunctionConfig, FunctionParameters, ParameterDefinition
 from workflow_logic.core.api import APIManager, LLMConfig
