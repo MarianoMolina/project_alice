@@ -1,10 +1,8 @@
-from workflow_logic.util.logging_config import LOGGER
 import traceback
+from bson import ObjectId
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Dict, Callable, Any
-from bson import ObjectId
-from workflow_logic.util import MessageDict
-from workflow_logic.core.model import AliceModel
+from workflow_logic.util import MessageDict, LOGGER
 from workflow_logic.core.agent import AliceAgent
 from workflow_logic.core.parameters import ToolFunction
 from workflow_logic.core.prompt import Prompt

@@ -1,31 +1,29 @@
-# langchain
-# langchain_openai
-# langchain-community
-# langgraph
-# pytz
-# stackapi
-# xmltodict
-# whisper
-# tiktoken
-debugpy
-asynctest
+# Testing
 pytest
 pytest-asyncio
+
+# Web
+aiohttp
+
+# API
+uvicorn
+fastapi
+fastapi-cors
+
+# Docker
+docker
+
+# Utilities
+pydantic
+jinja2
+pillow
+python-dotenv
+
+# Third party APIs
+google-api-python-client
+openai
 anthropic
 exa_py
-aiohttp
 praw
 arxiv
 wikipedia
-replicate
-openai
-pymongo
-jinja2
-python-dotenv
-pillow
-google-api-python-client
-fastapi
-pydantic
-uvicorn
-fastapi-cors
-docker

@@ -1,9 +1,8 @@
 from typing import List, Type
 from pydantic import Field, model_validator
-from workflow_logic.core.api import ApiType, APIManager
+from workflow_logic.core.api import ApiType, APIManager, APIEngine, WikipediaSearchAPI, GoogleSearchAPI, ExaSearchAPI, ArxivSearchAPI, RedditSearchAPI
 from workflow_logic.util import TaskResponse
 from workflow_logic.core.tasks.task import AliceTask
-from workflow_logic.core.api.engines import APIEngine, WikipediaSearchAPI, GoogleSearchAPI, ExaSearchAPI, ArxivSearchAPI, RedditSearchAPI
 
 class APITask(AliceTask):
     required_apis: List[ApiType] = Field(..., min_length=1, max_length=1)

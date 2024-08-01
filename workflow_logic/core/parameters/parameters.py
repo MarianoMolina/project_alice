@@ -23,7 +23,7 @@ class ParameterDefinition(BaseModel):
 
 class FunctionParameters(BaseModel):
     """Parameters of a function as defined by the OpenAI API"""
-    type: Annotated[Literal["object"], Field(description="Type of the parameters")]
+    type: Annotated[Literal["object"], Field("object", description="Type of the parameters")]
     properties: Annotated[Dict[str, ParameterDefinition], Field(description="Dict of parameters name to their type, description, and default value")]
     required: Annotated[List[str], Field(description="Required parameters")]
 

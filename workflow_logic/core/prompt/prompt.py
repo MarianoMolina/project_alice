@@ -1,7 +1,7 @@
 import re
 from bson import ObjectId
 from jinja2 import Template
-from typing import Optional, List, Any, Dict
+from typing import Optional, List, Any, Dict, Union
 from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
 from workflow_logic.core.parameters import FunctionParameters
 
@@ -55,6 +55,23 @@ class Prompt(BaseModel):
         >>> prompt.format_prompt(name="Alice")
         'Hello, Alice!'
     """
+import re
+from bson import ObjectId
+from jinja2 import Template
+from typing import Optional, List, Any, Dict
+from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
+from workflow_logic.core.parameters import FunctionParameters
+
+TYPE_MAPPING = {
+    "string": str,
+    "integer": int,
+    "float": float,
+    "boolean": bool,
+    "list": list,
+    "dict": dict
+}
+
+class Prompt(BaseModel):
     id: Optional[str] = Field(default=None, description="The unique ID of the prompt, must match the ID in the database", alias="_id")
     name: str = Field(..., description="The name of the prompt.")
     content: str = Field(..., description="The content of the prompt.")
@@ -81,49 +98,51 @@ class Prompt(BaseModel):
     def format(self, **kwargs: Any) -> str:
         """Format the prompt with the inputs using Jinja2 templating."""
         all_variables = {**self.partial_variables, **kwargs}
+        
+        # Add default values for any missing parameters
+        if self.parameters:
+            for param_name, param in self.parameters.properties.items():
+                if param_name not in all_variables and param.default is not None:
+                    all_variables[param_name] = param.default
+        
         template = Template(self.content)
         return template.render(**all_variables)
+
+    def validate_input(self, **kwargs: Any) -> Union[bool, str]:
+        """Validate the input against the prompt's parameters."""
+        if not self.is_templated or not self.parameters:
+            return True
+        
+        all_variables = {**self.partial_variables, **kwargs}
+        
+        # Check required parameters
+        for required in self.parameters.required:
+            if required not in all_variables:
+                return f"Missing required parameter: {required}"
+        
+        # Check parameter types
+        for param_name, param_value in all_variables.items():
+            if param_name not in self.parameters.properties:
+                continue
+            
+            param_def = self.parameters.properties[param_name]
+            expected_type = TYPE_MAPPING.get(param_def.type)
+            if expected_type is None:
+                return f"Unknown type for parameter: {param_name}"
+            
+            if param_value is not None and not isinstance(param_value, expected_type):
+                return f"Parameter {param_name} should be of type {param_def.type}"
+        
+        return True
 
     def format_prompt(self, **kwargs: Any) -> str:
         """Validate input (if templated) and format the prompt."""
         if self.is_templated:
-            self.validate_input(**kwargs)
+            validation_result = self.validate_input(**kwargs)
+            if validation_result is not True:
+                raise ValueError(f"Invalid input parameters: {validation_result}")
         return self.format(**kwargs)
 
-    def validate_input(self, **kwargs: Any) -> None:
-        """Validate the input against the prompt's parameters."""
-        if not self.is_templated or not self.parameters:
-            return
-        
-        all_variables = {**self.partial_variables, **kwargs}
-        for required in self.parameters.required:
-            if required not in all_variables:
-                print(f'kwargs in failed validation: {kwargs}')
-                raise ValueError(f"Missing required parameter: {required}")
-        
-        for param_name, param_value in all_variables.items():
-            if param_name not in self.parameters.properties:
-                print(f'param_name not needed: {param_name} in Prompt: {self.name}')
-                continue
-                # raise ValueError(f"Unexpected parameter: {param_name}")
-            
-            param_def = self.parameters.properties[param_name]           
-            expected_type = TYPE_MAPPING.get(param_def.type)
-            if expected_type is None:
-                raise ValueError(f"Unknown type: {param_def.type}")
-            
-            # Check if the parameter is required
-            is_required = param_name in self.parameters.required
-
-            # If the value is None and the parameter is not required, skip the type check
-            if param_value is None:
-                if is_required:
-                    raise ValueError(f"Required parameter {param_name} cannot be None")
-                continue
-
-            if not isinstance(param_value, expected_type):
-                raise TypeError(f"Parameter {param_name} should be of type {param_def.type}: value is {param_value} ({type(param_value)})")
-    
     def get_template(self) -> Template:
         return Template(self.content)
 

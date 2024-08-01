@@ -6,6 +6,7 @@ workflow_logic/trash
 workflow_logic/tests/test_results
 logs
 .venv
+.pytest_cache
 venv
 tmp
 .env

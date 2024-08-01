@@ -1,8 +1,8 @@
+from enum import Enum
 from pydantic import BaseModel, Field
 from typing import Optional, Literal, Dict, Any, List, Union
 from typing_extensions import TypedDict, Optional, Literal, Annotated
 from workflow_logic.core.parameters import ToolCall
-from enum import Enum
 
 class OutputInterface(BaseModel):
     content: List[Any] = Field([], description="The content of the output.")

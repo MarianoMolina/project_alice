@@ -3,14 +3,11 @@ from enum import Enum
 from typing import Dict, Any, Optional, List, Callable, Union, Tuple
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field
-from workflow_logic.util.logging_config import LOGGER
-from workflow_logic.core.api import APIManager
 from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.agent import AliceAgent
-from workflow_logic.util import TaskResponse, DatabaseTaskResponse
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition, FunctionConfig, ToolFunction
-from workflow_logic.core.api import ApiType
-from workflow_logic.core.api.engines.api_engine import APIEngine
+from workflow_logic.core.api import APIManager, APIEngine
+from workflow_logic.util import TaskResponse, DatabaseTaskResponse, ApiType, LOGGER
 
 prompt_function_parameters = FunctionParameters(
     type="object",

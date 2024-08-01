@@ -1,6 +1,6 @@
-from workflow_logic.core.tasks import APITask, AliceTask, Workflow, BasicAgentTask, PromptAgentTask, CheckTask, CodeGenerationLLMTask, CodeExecutionLLMTask
 from pydantic import BaseModel
 from typing import Any, Dict
+from workflow_logic.core.tasks import APITask, AliceTask, Workflow, BasicAgentTask, PromptAgentTask, CheckTask, CodeGenerationLLMTask, CodeExecutionLLMTask
 
 available_task_types: list[AliceTask] = [
     Workflow,

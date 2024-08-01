@@ -6,9 +6,9 @@ Alice is a sophisticated AI assistant framework that integrates task execution a
 
 The project consists of three main components:
 
-1. Backend API (Node.js with Express)
-2. Workflow Service (Python)
-3. Frontend (React)
+1. Backend (Node.js with Express - TS)
+2. Workflow (Python - Pydantic)
+3. Frontend (React - TS)
 
 ## Features
 
@@ -17,13 +17,10 @@ The project consists of three main components:
 - Define new parameters, prompts/templates, and agents for task deployment
 - Execute tasks with custom parameters directly
 - Supported task types include:
-  - BasicAgentTask
-  - PromptAgentTask
-  - CheckTask
-  - CodeGenerationLLMTask
-  - CodeExecutionLLMTask
   - Workflow
-  - API tasks (Reddit, Wikipedia, Google, Exa, Arxiv search)
+  - BasicAgentTask: CodeExecutionLLMTask
+  - PromptAgentTask: CheckTask + CodeGenerationLLMTask
+  - API tasks: Reddit + Wikipedia + Google + Exa + Arxiv search
 
 ### 2. Intelligent Chat
 - Create and manage chat conversations with AI agents
@@ -87,6 +84,9 @@ The backend provides RESTful API endpoints for managing various entities:
 - `/api/taskresults`: Manage task execution results
 - `/api/users`: User management
 - `/api/parameters`: Manage task parameters
+
+It also provides an endpoint that manages the LM Studio completions:
+-  `/lm-studio/chat/completions`: Offers an OpenAI-like endpoint that interacts with the local LM Studio to load models, presets, and create completions. 
 
 ### Creating a Task
 

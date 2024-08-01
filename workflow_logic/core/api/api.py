@@ -47,6 +47,7 @@ class API(BaseModel):
             if not self.default_model:
                 raise ValueError("No model specified.")
             model = self.default_model
+        print(f'model: {model}')
         return LLMConfig( 
             temperature=model.temperature, 
             use_cache=model.use_cache,

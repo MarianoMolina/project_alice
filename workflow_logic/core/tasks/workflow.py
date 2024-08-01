@@ -28,7 +28,7 @@ class Workflow(AliceTask):
     async def run(self, step_through: bool = False, **kwargs) -> TaskResponse:
         task_inputs = kwargs.copy()
         tasks_performed, status, diagnostic = await self.execute_workflow(step_through, **kwargs)
-        return self.create_workflow_response(tasks_performed, status, diagnostic, task_inputs, **kwargs)
+        return self.create_workflow_response(tasks_performed, status, diagnostic, **task_inputs)
 
     async def execute_workflow(self, step_through: bool, **kwargs) -> Tuple[List[TaskResponse], str, str]:
         tasks_performed = []
@@ -73,7 +73,7 @@ class Workflow(AliceTask):
         next_task_info = self.select_next_task(task_result, tasks_performed)
         return next_task_info
 
-    def create_workflow_response(self, tasks_performed: List[TaskResponse], status: str, diagnostic: str, task_inputs: Dict[str, Any], **kwargs) -> TaskResponse:
+    def create_workflow_response(self, tasks_performed: List[TaskResponse], status: str, diagnostic: str, **kwargs) -> TaskResponse:
         kwargs.pop("api_manager", None)
         exec_history = kwargs.pop("execution_history", None)
         return TaskResponse(
@@ -84,7 +84,7 @@ class Workflow(AliceTask):
             result_code=1 if status == "failed" else 0,
             task_outputs=str(WorkflowOutput(content=tasks_performed)),
             task_content=WorkflowOutput(content=tasks_performed),
-            task_inputs=task_inputs,
+            task_inputs=kwargs,
             result_diagnostic=diagnostic,
             execution_history=exec_history
         )

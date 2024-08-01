@@ -1,7 +1,7 @@
 import traceback, json
 from typing import Dict, Any, List, Optional
 from anthropic import AsyncAnthropic
-from anthropic.types import TextBlock, ToolUseBlock, MessageParam, ToolParam, Message
+from anthropic.types import TextBlock, ToolUseBlock, ToolParam, Message
 from workflow_logic.core.parameters import ToolCall, ToolCallConfig, ToolFunction
 from workflow_logic.core.api.engines.llm_api_engine import LLMEngine
 from workflow_logic.util import LOGGER, MessageDict, MessageType, LLMConfig

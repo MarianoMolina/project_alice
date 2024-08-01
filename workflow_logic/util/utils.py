@@ -1,8 +1,8 @@
 import json, base64, re, datetime
+from enum import Enum
+from pydantic import BaseModel, Field
 from typing import List, Optional, Any, Union, Type, Tuple
 from openai import OpenAI as OriginalOpenAI
-from pydantic import BaseModel, Field
-from enum import Enum
 from workflow_logic.util.const import HOST
 from workflow_logic.util.logging_config import LOGGER
 

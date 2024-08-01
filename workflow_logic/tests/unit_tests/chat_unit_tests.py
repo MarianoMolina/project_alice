@@ -1,11 +1,6 @@
 import pytest
 from unittest.mock import Mock, AsyncMock
-from workflow_logic.core.chat import AliceChat
-from workflow_logic.core.prompt import Prompt
-from workflow_logic.core.model import AliceModel
-from workflow_logic.core.api import APIManager
-from workflow_logic.core.agent import AliceAgent
-from workflow_logic.core.tasks import AliceTask
+from workflow_logic.core import AliceChat, Prompt, AliceModel, APIManager, AliceAgent, AliceTask
 from workflow_logic.core.parameters import ToolFunction, FunctionConfig, FunctionParameters, ParameterDefinition
 
 @pytest.fixture

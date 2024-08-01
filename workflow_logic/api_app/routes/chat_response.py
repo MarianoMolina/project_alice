@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 from workflow_logic.api_app.util.utils import deep_api_check
-from workflow_logic.util.logging_config import LOGGER
 from workflow_logic.api_app.util.dependencies import get_db_app
 from workflow_logic.db_app.app import BackendAPI
+from workflow_logic.util import LOGGER
 from workflow_logic.util.communication import serialize_message_dict
 
 router = APIRouter()

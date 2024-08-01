@@ -1,7 +1,7 @@
-from typing import List, Dict, Any, Tuple, Optional
 from pydantic import Field
+from typing import List, Dict, Any
 from workflow_logic.core.api import APIManager
-from workflow_logic.util import LOGGER, MessageDict, TaskResponse, ApiType
+from workflow_logic.util import LOGGER, MessageDict, TaskResponse
 from workflow_logic.util.utils import json_to_python_type_mapping
 from workflow_logic.core.agent.agent import AliceAgent
 from workflow_logic.core.tasks.agent_tasks.agent_task import BasicAgentTask

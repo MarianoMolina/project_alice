@@ -1,12 +1,7 @@
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
-from workflow_logic.core.tasks.agent_tasks.prompt_agent_task import PromptAgentTask
-from workflow_logic.core.agent import AliceAgent
-from workflow_logic.core.api import APIManager, ApiType
+from workflow_logic.core import PromptAgentTask, AliceAgent, FunctionParameters, ParameterDefinition, Prompt, AliceModel, APIManager
 from workflow_logic.util import TaskResponse, MessageDict
-from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
-from workflow_logic.core.prompt import Prompt
-from workflow_logic.core.model import AliceModel
 
 @pytest.fixture
 def mock_api_manager():

@@ -1,7 +1,6 @@
 import traceback
 from typing import Dict, Any
 from pydantic import ValidationError
-from asynctest import patch
 from workflow_logic.util.logging_config import LOGGER
 from workflow_logic.db_app import DBStructure, DBInitManager, BackendFunctionalityAPI
 from workflow_logic.tests.component_tests.test_environment import TestModule

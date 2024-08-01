@@ -1,14 +1,12 @@
-import wikipedia
-import praw
+import wikipedia, praw
 from praw.models import Submission, ListingGenerator, Subreddits
 from arxiv import Result, Client, Search, SortCriterion
 from exa_py import Exa
 from pydantic import Field
 from googleapiclient.discovery import build
-from workflow_logic.util import SearchResult, SearchOutput
-from workflow_logic.core.api import ApiType
-from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 from typing import Dict, Any, List
+from workflow_logic.util import SearchResult, SearchOutput, ApiType
+from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 from workflow_logic.core.api.engines.api_engine import APIEngine
 
 class APISearchEngine(APIEngine):

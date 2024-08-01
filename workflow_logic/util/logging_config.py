@@ -1,5 +1,4 @@
-import logging
-import os
+import logging, os
 from logging.handlers import RotatingFileHandler
 from workflow_logic.util.const import LOGGING_FOLDER
 from dotenv import load_dotenv
