@@ -62,15 +62,6 @@ const BasicAgentTask: React.FC<TaskFormsProps> = ({
     }
   };
 
-  const handleExecutorAgentChange = async (selectedIds: string[]) => {
-    if (selectedIds.length > 0) {
-      const agent = await fetchItem('agents', selectedIds[0]) as AliceAgent;
-      onChange({ ...item, execution_agent: agent });
-    } else {
-      onChange({ ...item, execution_agent: null });
-    }
-  };
-
   const handleTasksChange = async (selectedIds: string[]) => {
     const tasks = await Promise.all(selectedIds.map(id => fetchItem('tasks', id) as Promise<AliceTask>));
     const tasksObject = tasks.reduce((acc, task) => {
@@ -125,19 +116,6 @@ const BasicAgentTask: React.FC<TaskFormsProps> = ({
         onAccordionToggle={handleAccordionToggle}
         onView={(id) => handleViewDetails("agent", id)}
         accordionEntityName="agent"
-      />
-
-      <EnhancedSelect<AliceAgent>
-        componentType="agents"
-        EnhancedComponent={EnhancedAgent}
-        selectedItems={item.execution_agent ? [item.execution_agent] : []}
-        onSelect={handleExecutorAgentChange}
-        isInteractable={isEditMode}
-        label="Select Executor Agent"
-        activeAccordion={activeAccordion}
-        onAccordionToggle={handleAccordionToggle}
-        onView={(id) => handleViewDetails("executor", id)}
-        accordionEntityName="executor-agent"
       />
 
       <EnhancedSelect<AliceTask>

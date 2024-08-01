@@ -4,14 +4,10 @@ import { Model, Types, Document } from 'mongoose';
 export interface IChangeHistory {
     previous_agent: Types.ObjectId | null;
     updated_agent: Types.ObjectId | null;
-    previous_executor: Types.ObjectId | null;
-    updated_executor: Types.ObjectId | null;
     previous_functions: Types.ObjectId[];
     updated_functions: Types.ObjectId[];
     previous_task_responses: Types.ObjectId[];
     updated_task_responses: Types.ObjectId[];
-    previous_model_id: any;
-    updated_model_id: any;
     changed_by: Types.ObjectId;
     timestamp: Date;
 }
@@ -48,8 +44,6 @@ export interface IAliceChat {
     changeHistory: IChangeHistoryDocument[];
     alice_agent: Types.ObjectId;
     functions: Types.ObjectId[];
-    executor: Types.ObjectId;
-    model_id: any;
     created_by: Types.ObjectId;
     updated_by: Types.ObjectId;
 }

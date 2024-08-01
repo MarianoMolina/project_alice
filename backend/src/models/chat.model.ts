@@ -6,14 +6,10 @@ import { ensureObjectIdHelper } from '../utils/utils';
 const changeHistorySchema = new Schema<IChangeHistoryDocument>({
   previous_agent: { type: Schema.Types.ObjectId, ref: 'Agent', required: false },
   updated_agent: { type: Schema.Types.ObjectId, ref: 'Agent', required: false },
-  previous_executor: { type: Schema.Types.ObjectId, ref: 'Agent', required: false },
-  updated_executor: { type: Schema.Types.ObjectId, ref: 'Agent', required: false },
   previous_functions: [{ type: Schema.Types.ObjectId, ref: 'Task', required: false }],
   updated_functions: [{ type: Schema.Types.ObjectId, ref: 'Task', required: false }],
   previous_task_responses: [{ type: Schema.Types.ObjectId, ref: 'TaskResult', required: false }],
   updated_task_responses: [{ type: Schema.Types.ObjectId, ref: 'TaskResult', required: false }],
-  previous_model_id: { type: Schema.Types.ObjectId, ref: 'Model', required: false },
-  updated_model_id: { type: Schema.Types.ObjectId, ref: 'Model', required: false },
   changed_by: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   timestamp: { type: Date, default: Date.now },
 });
@@ -23,14 +19,10 @@ changeHistorySchema.methods.apiRepresentation = function (this: IChangeHistoryDo
     id: this._id,
     previous_agent: this.previous_agent ? (this.previous_agent._id || this.previous_agent) : null,
     updated_agent: this.updated_agent ? (this.updated_agent._id || this.updated_agent) : null,
-    previous_executor: this.previous_executor ? (this.previous_executor._id || this.previous_executor) : null,
-    updated_executor: this.updated_executor ? (this.updated_executor._id || this.updated_executor) : null,
     previous_functions: this.previous_functions.map(func => func._id || func),
     updated_functions: this.updated_functions.map(func => func._id || func),
     previous_task_responses: this.previous_task_responses.map(task => task._id || task),
     updated_task_responses: this.updated_task_responses.map(task => task._id || task),
-    previous_model_id: this.previous_model_id || {},
-    updated_model_id: this.updated_model_id || {},
     changed_by: this.changed_by ? (this.changed_by._id || this.changed_by) : null,
     timestamp: this.timestamp || null
   };
@@ -77,8 +69,6 @@ const aliceChatSchema = new Schema<IAliceChatDocument, IAliceChatModel>({
   changeHistory: [{ type: changeHistorySchema, default: [], description: "List of changes in the chat conversation" }],
   alice_agent: { type: Schema.Types.ObjectId, ref: 'Agent', required: true, description: "The Alice agent object" },
   functions: [{ type: Schema.Types.ObjectId, ref: 'Task', default: [], description: "List of functions to be registered with the agent" }],
-  executor: { type: Schema.Types.ObjectId, ref: 'Agent', required: true, description: "The executor agent object" },
-  model_id: { type: Schema.Types.ObjectId, ref: 'Model', description: "The configuration for the LLM agent"},
   created_by: { type: Schema.Types.ObjectId, ref: 'User' },
   updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
@@ -90,8 +80,6 @@ aliceChatSchema.methods.apiRepresentation = function (this: IAliceChatDocument) 
     changeHistory: this.changeHistory.map(change => change.apiRepresentation()),
     alice_agent: this.alice_agent ? (this.alice_agent._id || this.alice_agent) : null,
     functions: this.functions.map(func => func._id || func),
-    executor: this.executor ? (this.executor._id || this.executor) : null,
-    model_id: this.model_id || {},
     created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
     updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,
     created_at: this.createdAt || null,
@@ -99,12 +87,9 @@ aliceChatSchema.methods.apiRepresentation = function (this: IAliceChatDocument) 
   };
 };
 function ensureObjectIdForSave(this: IAliceChatDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {
-  console.log('Before conversion:', this.model_id);
   if (this.alice_agent) this.alice_agent = ensureObjectIdHelper(this.alice_agent);
-  if (this.executor) this.executor = ensureObjectIdHelper(this.executor);
   if (this.created_by) this.created_by = ensureObjectIdHelper(this.created_by);
   if (this.updated_by) this.updated_by = ensureObjectIdHelper(this.updated_by);
-  if (this.model_id) this.model_id = ensureObjectIdHelper(this.model_id);
 
   if (this.functions) {
     this.functions = this.functions.map(func => ensureObjectIdHelper(func));
@@ -116,10 +101,8 @@ function ensureObjectIdForSave(this: IAliceChatDocument, next: mongoose.Callback
 function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
   const update = this.getUpdate() as any;
   update.alice_agent = ensureObjectIdHelper(update.alice_agent);
-  update.executor = ensureObjectIdHelper(update.executor);
   update.created_by = ensureObjectIdHelper(update.created_by);
   update.updated_by = ensureObjectIdHelper(update.updated_by);
-  update.model_id = ensureObjectIdHelper(update.model_id);
 
   if (update.functions) {
     update.functions = update.functions.map((func: any) => ensureObjectIdHelper(func));
@@ -129,7 +112,7 @@ function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.
 }
 
 function autoPopulate(this: mongoose.Query<any, any>) {
-  this.populate('alice_agent executor created_by updated_by model_id')
+  this.populate('alice_agent created_by updated_by')
     .populate({
       path: 'functions',
       model: 'Task'

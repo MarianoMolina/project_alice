@@ -105,6 +105,23 @@ const useStyles = makeStyles((theme: Theme) => ({
       backgroundColor: theme.palette.action.hover,
     },
   },
+
+  // New style for empty messages container
+  emptyMessagesContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+  },
+  skeletonContainer: {
+    width: '100%',
+    margin: theme.spacing(2, 0),
+  },
+  skeleton: {
+    height: '80px !important',
+    marginBottom: theme.spacing(2),
+  },
 }));
 
 export default useStyles;

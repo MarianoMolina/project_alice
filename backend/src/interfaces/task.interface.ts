@@ -29,10 +29,8 @@ export interface ITask {
   start_task: string | null;
   task_selection_method: any | null;
   tasks_end_code_routing: Map<string, Map<string, any>> | null;
-  model_id: Types.ObjectId | null;
   max_attempts: number;
   agent: Types.ObjectId | null;
-  execution_agent: Types.ObjectId | null;
   human_input: boolean;
   api_engine: IAPIEngine | null;
   created_by: Types.ObjectId;

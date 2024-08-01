@@ -48,12 +48,10 @@ base_tasks_module = BaseTasksModule(
                 "key": "research_agent",
                 "name": "research_agent",
                 "system_message": "research_agent",
-                "autogen_class": "ConversableAgent",
                 "model_id": "GPT4o",
-                "code_execution_config": False,
-                "max_consecutive_auto_reply": 10,
-                "human_input_mode": "NEVER",
-                "default_auto_reply": ""
+                "has_code_exec": False,
+                "has_functions": True,
+                "max_consecutive_auto_reply": 5,
             },
         ],
         "tasks": [
@@ -144,7 +142,6 @@ base_tasks_module = BaseTasksModule(
                 "templates": {
                     "task_template": "basic_prompt"
                 },
-                "execution_agent": "executor_agent",
                 "tasks":{
                     "reddit_search": "reddit_search",
                     "exa_search": "exa_search",

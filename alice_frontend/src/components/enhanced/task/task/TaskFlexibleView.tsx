@@ -73,11 +73,10 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
     };
 
-    const handleViewDetails = (type: 'agent' | 'executor' | 'task' | 'api' | 'template' | 'prompt', itemId: string) => {
+    const handleViewDetails = (type: 'agent' | 'task' | 'api' | 'template' | 'prompt', itemId: string) => {
         let content;
         switch (type) {
             case 'agent':
-            case 'executor':
                 content = <EnhancedAgent mode="card" itemId={itemId} fetchAll={false} />;
                 break;
             case 'task':

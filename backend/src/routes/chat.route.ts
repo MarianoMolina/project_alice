@@ -19,9 +19,6 @@ customRouter.post('/', async (req: AuthRequest, res: Response) => {
   try {
     const { messages = [] } = req.body;
     const user_id = req.user?.userId;
-
-    console.log("Creating chat: ", req.body);
-
     const updatedMessages = messages.map((message: IMessage) => ({
       ...message,
       created_by: user_id ? new Types.ObjectId(user_id) : undefined,
@@ -61,7 +58,6 @@ customRouter.patch('/:id', async (req: AuthRequest, res: Response) => {
     const changeHistoryData: any = { changed_by: user_id ? new Types.ObjectId(user_id) : undefined };
 
     checkAndUpdateChanges(chat, updatedChat, changeHistoryData, 'alice_agent');
-    checkAndUpdateChanges(chat, updatedChat, changeHistoryData, 'executor');
     checkArrayChangesAndUpdate(chat, updatedChat, changeHistoryData, 'functions');
 
     if (req.body.model && JSON.stringify(req.body.model) !== JSON.stringify(chat.model)) {

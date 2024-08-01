@@ -22,14 +22,14 @@ const AgentCardView: React.FC<AgentComponentProps> = ({
         <Card>
             <CardContent>
                 <Typography variant="h6">{item.name}</Typography>
-                <Typography variant="body2">Execute Code: {item.code_execution_config ? 'Yes' : 'No'}</Typography>
+                <Typography variant="body2">Execute Code: {item.has_code_exec ? 'Yes' : 'No'}</Typography>
                 <Typography variant="caption">
                     Agent ID: {item._id}
                 </Typography>
                 <List>
                     <ListItemButton>
                         <ListItemIcon><Category /></ListItemIcon>
-                        <ListItemText primary="Agent Type" secondary={item.autogen_class} />
+                        <ListItemText primary="Can use functions?" secondary={item.has_functions} />
                     </ListItemButton>
                     <ListItemButton>
                         <ListItemIcon><LibraryBooks /></ListItemIcon>

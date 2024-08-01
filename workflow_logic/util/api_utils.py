@@ -1,6 +1,6 @@
 from enum import Enum, EnumMeta
 from typing import Literal, List, Tuple, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 # The order of this list is used to determine which entities are created first
 EntityType = Literal["users", "models", "parameters", "prompts", "agents", "tasks", "chats", "task_responses", "apis"]
@@ -50,6 +50,4 @@ class LLMConfig(BaseModel):
     timeout: Optional[int] = 300
     use_cache: Optional[bool] = False
     tools: Optional[List[str]] = None
-    model_config = {
-        'protected_namespaces': ()
-    }
+    model_config = ConfigDict(protected_namespaces=())

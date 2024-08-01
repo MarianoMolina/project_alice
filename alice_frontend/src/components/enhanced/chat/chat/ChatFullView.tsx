@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Box, Button } from '@mui/material';
+import { Box, Button, Typography, Skeleton } from '@mui/material';
 import { ChatComponentProps } from '../../../../utils/ChatTypes';
 import Message from '../Message';
 import useStyles from '../ChatStyles';
@@ -18,7 +18,7 @@ const ChatFullView: React.FC<ChatFullViewProps> = ({
   const classes = useStyles();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { isGenerating, generateResponse, handleRegenerateResponse } = useChat();
- 
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [item?.messages]);
@@ -44,9 +44,22 @@ const ChatFullView: React.FC<ChatFullViewProps> = ({
   return (
     <Box className={classes.fullChatView}>
       <Box className={classes.messagesContainer}>
-        {item.messages && item.messages.map((message, index) => (
-          <Message key={index} message={message} />
-        ))}
+        {item.messages && item.messages.length > 0 ? (
+          item.messages.map((message, index) => (
+            <Message key={index} message={message} />
+          ))
+        ) : (
+          <Box className={classes.emptyMessagesContainer}>
+            <Typography variant="body1" align="center" gutterBottom>
+              No messages yet. Send your first message to start the conversation.
+            </Typography>
+            <Box className={classes.skeletonContainer}>
+              <Skeleton variant="rectangular" className={classes.skeleton} />
+              <Skeleton variant="rectangular" className={classes.skeleton} />
+              <Skeleton variant="rectangular" className={classes.skeleton} />
+            </Box>
+          </Box>
+        )}
       </Box>
       {showRegenerate &&
         <Box className={classes.actionButtonContainer}>

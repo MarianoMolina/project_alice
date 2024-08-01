@@ -11,8 +11,6 @@ debugpy
 asynctest
 pytest
 pytest-asyncio
-pyautogen
-pyautogen[anthropic]
 anthropic
 exa_py
 aiohttp
@@ -30,3 +28,4 @@ fastapi
 pydantic
 uvicorn
 fastapi-cors
+docker

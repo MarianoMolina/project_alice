@@ -6,13 +6,9 @@ export interface AliceAgent {
   _id?: string;
   name: string;
   system_message: Prompt;
-  agents_in_group?: any[];
-  autogen_class: "ConversableAgent" | "UserProxyAgent" | "LLaVAAgent";
-  code_execution_config: boolean;
+  has_functions: boolean;
+  has_code_exec: boolean;
   max_consecutive_auto_reply?: number;
-  human_input_mode?: "ALWAYS" | "TERMINATE" | "NEVER";
-  speaker_selection?: { [key: string]: string };
-  default_auto_reply?: string | null;
   model_id?: AliceModel | null;
   created_by?: User;
   updated_by?: User;
@@ -25,13 +21,9 @@ export const convertToAliceAgent = (data: any): AliceAgent => {
     _id: data?._id || undefined,
     name: data?.name || '',
     system_message: data?.system_message || {},
-    agents_in_group: data?.agents_in_group || [],
-    autogen_class: data?.autogen_class || "ConversableAgent",
-    code_execution_config: data?.code_execution_config || false,
+    has_functions: data?.has_functions || false,
+    has_code_exec: data?.has_code_exec || false,
     max_consecutive_auto_reply: data?.max_consecutive_auto_reply || undefined,
-    human_input_mode: data?.human_input_mode || undefined,
-    speaker_selection: data?.speaker_selection || {},
-    default_auto_reply: data?.default_auto_reply || null,
     model_id: data?.model_id || null,
     created_by: data?.created_by || undefined,
     updated_by: data?.updated_by || undefined,
@@ -54,10 +46,8 @@ export interface AgentComponentProps {
 export const getDefaultAgentForm = (): Partial<AliceAgent> => ({
   name: '',
   system_message: undefined,
-  autogen_class: 'ConversableAgent',
-  code_execution_config: false,
-  max_consecutive_auto_reply: 10,
-  human_input_mode: 'NEVER',
-  default_auto_reply: '',
+  max_consecutive_auto_reply: 1,
+  has_functions: false,
+  has_code_exec: false,
   model_id: null
 });

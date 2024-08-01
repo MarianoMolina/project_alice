@@ -100,6 +100,11 @@ coding_workflow_module = CodingWorkflowModule(
                     },
                     "required": ["outputs_generate_unit_tests", "outputs_generate_code", "outputs_execute_unit_tests"]
                 }
+            }, 
+            {
+                "key": "execution_agent_prompt",
+                "name": "Execution Agent Prompt",
+                "content": "This agent executes the code",
             }
         ],
         "agents": [
@@ -109,10 +114,9 @@ coding_workflow_module = CodingWorkflowModule(
                 "system_message": "planner_agent",
                 "autogen_class": "ConversableAgent",
                 "model_id": "GPT4o",
-                "code_execution_config": False,
-                "max_consecutive_auto_reply": 10,
-                "human_input_mode": "NEVER",
-                "default_auto_reply": ""
+                "max_consecutive_auto_reply": 1,
+                "has_functions": False,
+                "has_code_exec": False,                
             },
             {
                 "key": "coding_agent",
@@ -120,10 +124,9 @@ coding_workflow_module = CodingWorkflowModule(
                 "system_message": "coding_agent",
                 "autogen_class": "ConversableAgent",
                 "model_id": "GPT4o",
-                "code_execution_config": False,
-                "max_consecutive_auto_reply": 10,
-                "human_input_mode": "NEVER",
-                "default_auto_reply": ""
+                "max_consecutive_auto_reply": 1,
+                "has_functions": False,
+                "has_code_exec": False,                
             },
             {
                 "key": "unit_tester_agent",
@@ -131,21 +134,17 @@ coding_workflow_module = CodingWorkflowModule(
                 "system_message": "unit_tester_agent",
                 "autogen_class": "ConversableAgent",
                 "model_id": "GPT4o",
-                "code_execution_config": False,
-                "max_consecutive_auto_reply": 10,
-                "human_input_mode": "NEVER",
-                "default_auto_reply": ""
+                "max_consecutive_auto_reply": 1,
+                "has_functions": False,
+                "has_code_exec": False,                
             },
             {
-                "key": "unit_test_execution_checker_agent",
-                "name": "unit_test_execution_checker_agent",
-                "system_message": "unit_test_check_agent",
-                "autogen_class": "ConversableAgent",
-                "model_id": "GPT4o",
-                "code_execution_config": False,
-                "max_consecutive_auto_reply": 10,
-                "human_input_mode": "NEVER",
-                "default_auto_reply": ""
+                "key": "execution_agent",
+                "name": "execution_agent",
+                "system_message": "execution_agent_prompt",
+                "max_consecutive_auto_reply": 1,
+                "has_functions": False,
+                "has_code_exec": True,
             }
         ],
         "tasks": [
@@ -193,8 +192,7 @@ coding_workflow_module = CodingWorkflowModule(
                 "task_type": "CodeExecutionLLMTask",
                 "task_name": "execute_code",
                 "task_description": "Executes the code available in a list of message dicts",
-                "agent": "executor_agent",
-                "execution_agent": "executor_agent",
+                "agent": "execution_agent",
                 "input_variables": {
                     "type": "object",
                     "properties": {
@@ -231,8 +229,7 @@ coding_workflow_module = CodingWorkflowModule(
                 "task_type": "CodeExecutionLLMTask",
                 "task_name": "execute_unit_tests",
                 "task_description": "Executes the code available in a list of message dicts",
-                "agent": "executor_agent",
-                "execution_agent": "executor_agent",
+                "agent": "execution_agent",
                 "input_variables": {
                     "type": "object",
                     "properties": {

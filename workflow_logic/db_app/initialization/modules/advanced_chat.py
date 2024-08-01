@@ -14,9 +14,7 @@ advanced_chat_module = AdvancedChatModule(
                 "key": "advanced_chat",
                 "name": "Advanced Chat",
                 "messages": [],
-                "alice_agent": "default_alice",  # Reference to agent key from base_chat
-                "executor": "executor_agent",  # Reference to agent key from base_chat
-                "model_id": "GPT4o",  # Reference to model key from base
+                "alice_agent": "lm_studio_alice",  # Reference to agent key from base_chat
                 "functions": ["search_hub", "coding_workflow"],  # Reference to task keys from base_tasks and coding_workflow
             }
         ]

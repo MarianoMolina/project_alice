@@ -27,7 +27,6 @@ export interface AliceTask {
   tasks_end_code_routing?: { [key: string]: { [key: number]: any } } | null;
   max_attempts?: number;
   agent?: AliceAgent | null;
-  execution_agent?: AliceAgent | null;
   human_input?: boolean;
   api_engine?: APIEngine | null;
   created_by?: string;
@@ -60,7 +59,6 @@ export const convertToAliceTask = (data: any): AliceTask => {
     max_attempts: data?.max_attempts || undefined,
     model_id: data?.model_id || null,
     agent: data?.agent || null,
-    execution_agent: data?.execution_agent || null,
     human_input: data?.human_input || false,
     api_engine: data?.api_engine || null,
     created_by: data?.created_by || '',
@@ -89,7 +87,7 @@ export interface TaskComponentProps {
 export interface TaskFormsProps extends TaskComponentProps {
   handleAccordionToggle: (accordion: string | null) => void;
   activeAccordion: string | null;
-  handleViewDetails: (type: 'agent' | 'executor' | 'task' | 'api' | 'template' | 'prompt', item_id: string) => void;
+  handleViewDetails: (type: 'agent' | 'task' | 'api' | 'template' | 'prompt', item_id: string) => void;
   apis: API[];
 }
 
@@ -99,7 +97,6 @@ export const getDefaultTaskForm = (taskType: TaskType): AliceTask => {
     task_description: '',
     task_type: taskType,
     agent: null,
-    execution_agent: null,
     human_input: false,
     input_variables: null,
     templates: {},

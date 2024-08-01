@@ -2,7 +2,7 @@ import requests, aiohttp, asyncio, json
 from aiohttp import ClientError
 from bson import ObjectId
 from typing import Dict, Any, Optional, Literal
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from workflow_logic.util.logging_config import LOGGER
 from workflow_logic.core.tasks.task_utils import available_task_types
 from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, API
@@ -58,11 +58,7 @@ class BackendAPI(BaseModel):
         "task_responses": "taskresults",
         "apis": "apis"
     }, description="Map of entity types to collection names")
-
-    class Config:
-        arbitrary_types_allowed = True
-        protected_namespaces = ()
-        json_encoders = {ObjectId: str}
+    model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str}, arbitrary_types_allowed=True)
 
     @property
     def task_types(self) -> Dict[str, AliceTask]:
@@ -289,7 +285,6 @@ class BackendAPI(BaseModel):
                 async with session.get(url, headers=headers) as response:
                     response.raise_for_status()
                     chats = await response.json()
-                    print(f'Chats response: {chats}')
                     
                     if isinstance(chats, list):
                         chats = [await self.preprocess_data(chat) for chat in chats]
@@ -302,8 +297,6 @@ class BackendAPI(BaseModel):
                 return {}
         
     async def populate_chat(self, chat: dict) -> AliceChat:
-        print(f'Chat: {chat}')
-
         if 'functions' in chat and chat['functions']:
             processed_functions = []
             for function in chat['functions']:

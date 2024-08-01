@@ -1,4 +1,4 @@
-import docker, os, tempfile
+import docker, os, tempfile, json
 from bson import ObjectId
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Dict, Any, List, Optional, Tuple, Callable
@@ -19,15 +19,24 @@ class AliceAgent(BaseModel):
     max_consecutive_auto_reply: int = Field(default=10, description="The maximum number of consecutive auto replies")
     model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str})
 
-    async def generate_response(self, api_manager: APIManager, messages: List[MessageDict], tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []) -> List[MessageDict]:
+    async def generate_response(self, api_manager: APIManager, messages: List[MessageDict], tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = [], recursion_depth: int = 0) -> List[MessageDict]:
         try:
-            LOGGER.debug(f"Agent Calling generate_response_with_api_engine with: api_type={ApiType.LLM_MODEL}, model={self.model_id}")
-            api_messages = self._prepare_messages_for_api(messages)
-            
+            if recursion_depth >= self.max_consecutive_auto_reply:
+                print("Max recursion depth reached")
+                return [MessageDict(
+                    role="assistant",
+                    content="Maximum recursion depth reached. Terminating response generation.",
+                    generated_by="llm",
+                    type="text",
+                    assistant_name=self.name
+                )]
+
+            print(f"Calling generate_response_with_api_engine")
+            print(f'Agent: {self.model_dump()}')
             response: MessageDict = await api_manager.generate_response_with_api_engine(
                 api_type=ApiType.LLM_MODEL,
                 model=self.model_id,
-                messages=api_messages,
+                messages=self._prepare_messages_for_api(messages),
                 system=self.system_message.format_prompt(),
                 tool_choice='auto' if self.has_functions else 'none',
                 tools=tools_list,
@@ -35,42 +44,62 @@ class AliceAgent(BaseModel):
                 max_tokens=1000
             )
             
+            print(f"API response: {response}")
+            
             new_messages = []
-            content = response['content']
+            content = response['content'] if response['content'] else "Using tools" if response['tool_calls'] else "No response from API"
             tool_calls = response['tool_calls'] if self.has_functions else None
             
+            print(f"Content: {content}")
+            print(f"Tool calls: {tool_calls}")
+            
+            new_messages.append(MessageDict(
+                role="assistant",
+                content=content,
+                generated_by="llm",
+                tool_calls=tool_calls,
+                type="text",
+                assistant_name=self.name
+            ))
+
             if tool_calls:
-                new_messages.extend(await self._process_tool_calls(tool_calls, tool_map, tools_list))
+                print("Processing tool calls")
+                tool_messages = await self._process_tool_calls(tool_calls, tool_map, tools_list)
+                new_messages.extend(tool_messages)
             
             if self.has_code_exec:
+                print("Processing code execution")
                 code_messages = await self._process_code_execution(content)
                 if code_messages:
                     new_messages.extend(code_messages)
             
-            if new_messages:
-                follow_up_response = await self.generate_response(api_manager, messages + new_messages, tool_map, tools_list)
-                new_messages.extend(follow_up_response)
-            else:
-                new_messages.append(MessageDict(
-                    role="assistant",
-                    content=content,
-                    generated_by="llm",
-                    type="text",
-                    assistant_name=self.name
-                ))
-            
+            print(f"Returning messages: {new_messages}")
             return new_messages
 
         except Exception as e:
+            print(f"Error in generate_response: {str(e)}")
             LOGGER.error(f"Error generating response: {str(e)}")
             raise
-
-    async def _process_tool_calls(self, tool_calls: List[Dict[str, Any]], tool_map: Dict[str, Callable], tools_list: List[ToolFunction]) -> List[MessageDict]:
+        
+    async def _process_tool_calls(self, tool_calls, tool_map, tools_list):
         tool_messages = []
         for tool_call in tool_calls:
             function_name = tool_call["function"]["name"]
-            arguments = tool_call["function"]["arguments"]
+            arguments_str = tool_call["function"]["arguments"]
             
+            try:
+                arguments = json.loads(arguments_str)
+            except json.JSONDecodeError:
+                error_msg = f"Error decoding JSON arguments: {arguments_str}"
+                tool_messages.append(MessageDict(
+                    role="tool",
+                    content=error_msg,
+                    generated_by="tool",
+                    step=function_name,
+                    type="text"
+                ))
+                continue
+
             if function_name not in tool_map:
                 tool_messages.append(MessageDict(
                     role="tool",
@@ -81,7 +110,7 @@ class AliceAgent(BaseModel):
                 ))
                 continue
             
-            tool_function = next((tool for tool in tools_list if tool.function.name == function_name), None)
+            tool_function = next((tool for tool in tools_list if tool['function']['name'] == function_name), None)
             if not tool_function:
                 tool_messages.append(MessageDict(
                     role="tool",
@@ -92,8 +121,7 @@ class AliceAgent(BaseModel):
                 ))
                 continue
             
-            # Validate inputs
-            valid_inputs, error_message = self._validate_tool_inputs(tool_function, arguments)
+            valid_inputs, error_message = self._validate_tool_inputs(ToolFunction(**tool_function), arguments)
             if not valid_inputs:
                 tool_messages.append(MessageDict(
                     role="tool",
@@ -104,7 +132,6 @@ class AliceAgent(BaseModel):
                 ))
                 continue
             
-            # Execute the AliceTask
             try:
                 result = await tool_map[function_name](**arguments)
                 tool_messages.append(MessageDict(
@@ -112,7 +139,6 @@ class AliceAgent(BaseModel):
                     content=str(result),
                     generated_by="tool",
                     step=function_name,
-                    task_responses=[result],
                     type="text"
                 ))
             except Exception as e:
@@ -125,10 +151,20 @@ class AliceAgent(BaseModel):
                 ))
         
         return tool_messages
-
+    
     def _validate_tool_inputs(self, tool_function: ToolFunction, arguments: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
         required_params = tool_function.function.parameters.required
         properties = tool_function.function.parameters.properties
+
+        # Map string type names to Python types
+        type_map = {
+            "string": str,
+            "integer": int,
+            "number": float,
+            "boolean": bool,
+            "array": list,
+            "object": dict
+        }
 
         for param in required_params:
             if param not in arguments:
@@ -139,7 +175,12 @@ class AliceAgent(BaseModel):
                 return False, f"Unexpected parameter: {param}"
             
             expected_type = properties[param].type
-            if not isinstance(value, eval(expected_type)):
+            python_type = type_map.get(expected_type)
+            
+            if python_type is None:
+                return False, f"Unknown type '{expected_type}' for parameter '{param}'"
+            
+            if not isinstance(value, python_type):
                 return False, f"Invalid type for parameter '{param}'. Expected {expected_type}, got {type(value).__name__}"
 
         return True, None

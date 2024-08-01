@@ -12,7 +12,7 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
 BACKEND_HOST = os.getenv("BACKEND_HOST")
 BACKEND_PORT = os.getenv("BACKEND_PORT")
-LOCAL_LLM_API_URL = f"http://{BACKEND_HOST}:{BACKEND_PORT}"
+LOCAL_LLM_API_URL = f"http://{BACKEND_HOST}:{BACKEND_PORT}/lm-studio"
 
 class BaseModule(InitializationModule):
     name: str = "base"
@@ -58,6 +58,16 @@ base_module = BaseModule(
                 "model_name": "NousResearch/Hermes-2-Theta-Llama-3-8B-GGUF",
                 "ctx_size": 32768,
                 "model_type": "chat",
+                "api_name": "lm-studio",
+                "lm_studio_preset": "Llama 3 V3"
+            },
+            {
+                "key": "Llama3_1_8B",
+                "short_name": "Llama3_1_8B",
+                "model_format": "Llama3",
+                "model_name": "lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF",
+                "ctx_size": 131072,
+                "model_type": "instruct",
                 "api_name": "lm-studio",
                 "lm_studio_preset": "Llama 3 V3"
             }

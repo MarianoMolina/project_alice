@@ -6,7 +6,7 @@ from workflow_logic.core.tasks.task import AliceTask
 from workflow_logic.core.api.engines import APIEngine, WikipediaSearchAPI, GoogleSearchAPI, ExaSearchAPI, ArxivSearchAPI, RedditSearchAPI
 
 class APITask(AliceTask):
-    required_apis: List[ApiType] = Field(..., min_items=1, max_items=1)
+    required_apis: List[ApiType] = Field(..., min_length=1, max_length=1)
     api_engine: Type[APIEngine] = Field(None)
 
     @model_validator(mode='after')
@@ -53,6 +53,8 @@ class APITask(AliceTask):
         task_inputs = kwargs.copy()
         try:
             api_data = api_manager.retrieve_api_data(self.required_apis[0])
+            if not api_data:
+                raise ValueError(f"API data not found for {self.required_apis[0]}")
             api_engine = self.api_engine()  # Instantiate the API engine
             task_outputs = await api_engine.generate_api_response(api_data=api_data, **kwargs)
             return TaskResponse(

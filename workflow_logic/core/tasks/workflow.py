@@ -74,6 +74,8 @@ class Workflow(AliceTask):
         return next_task_info
 
     def create_workflow_response(self, tasks_performed: List[TaskResponse], status: str, diagnostic: str, task_inputs: Dict[str, Any], **kwargs) -> TaskResponse:
+        kwargs.pop("api_manager", None)
+        exec_history = kwargs.pop("execution_history", None)
         return TaskResponse(
             task_id=self.id if self.id else '',
             task_name=self.task_name,
@@ -84,7 +86,7 @@ class Workflow(AliceTask):
             task_content=WorkflowOutput(content=tasks_performed),
             task_inputs=task_inputs,
             result_diagnostic=diagnostic,
-            execution_history=kwargs.get("execution_history", [])
+            execution_history=exec_history
         )
 
     def get_traceback(self) -> str:

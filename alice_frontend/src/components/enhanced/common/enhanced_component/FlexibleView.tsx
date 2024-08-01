@@ -11,7 +11,6 @@ const FlexibleViewContainer = styled(Paper)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
     padding: theme.spacing(3),
-    marginBottom: theme.spacing(3),
 }));
 
 const TitleContainer = styled(Box)(({ theme }) => ({

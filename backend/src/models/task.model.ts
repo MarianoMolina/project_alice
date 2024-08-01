@@ -26,8 +26,6 @@ const taskSchema = new Schema<ITaskDocument, ITaskModel>({
     max_attempts: { type: Number, default: 3 },
     required_apis: { type: [String], default: null },
     agent: { type: Schema.Types.ObjectId, ref: 'Agent', default: null },
-    model_id: { type: Schema.Types.ObjectId, ref: 'Model', default: null },
-    execution_agent: { type: Schema.Types.ObjectId, ref: 'Agent', default: null },
     human_input: { type: Boolean, default: false },
     api_engine: { type: apiEngineSchema, default: null },
     created_by: { type: Schema.Types.ObjectId, ref: 'User' },
@@ -55,9 +53,7 @@ taskSchema.methods.apiRepresentation = function (this: ITaskDocument) {
             Array.from(this.tasks_end_code_routing.entries()).map(([key, value]) => [key, Object.fromEntries(value)])
         ) : null,
         max_attempts: this.max_attempts || 3,
-        model_id: this.model_id ? (this.model_id._id || this.model_id) : null,
         agent: this.agent ? (this.agent._id || this.agent) : null,
-        execution_agent: this.execution_agent ? (this.execution_agent._id || this.execution_agent) : null,
         human_input: this.human_input || false,
         api_engine: this.api_engine || null,
         created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
@@ -69,7 +65,6 @@ taskSchema.methods.apiRepresentation = function (this: ITaskDocument) {
 
 function ensureObjectIdForSave(this: ITaskDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {
     this.agent = ensureObjectIdHelper(this.agent);
-    this.execution_agent = ensureObjectIdHelper(this.execution_agent);
     this.created_by = ensureObjectIdHelper(this.created_by);
     this.updated_by = ensureObjectIdHelper(this.updated_by);
 
@@ -112,7 +107,6 @@ function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.
         );
     }
     update.agent = ensureObjectIdHelper(update.agent);
-    update.execution_agent = ensureObjectIdHelper(update.execution_agent);
     update.created_by = ensureObjectIdHelper(update.created_by);
     update.updated_by = ensureObjectIdHelper(update.updated_by);
 
@@ -128,7 +122,6 @@ function autoPopulate(this: mongoose.Query<any, any>, next: mongoose.CallbackWit
     this.populate('created_by')
         .populate('updated_by')
         .populate('agent')
-        .populate('execution_agent');
 
     this.populate({
         path: 'templates',

@@ -50,7 +50,6 @@ class AliceTask(BaseModel, ABC):
         tasks_end_code_routing (Optional[Dict]): Routing logic for subtasks based on exit codes.
         max_attempts (int): Maximum number of execution attempts before failure.
         agent (Optional[AliceAgent]): The agent associated with this task.
-        execution_agent (Optional[AliceAgent]): The agent responsible for executing this task.
         human_input (Optional[bool]): Whether the task requires human interaction.
 
     Methods:
@@ -85,7 +84,6 @@ class AliceTask(BaseModel, ABC):
     max_attempts: int = Field(3, description="The maximum number of failed task attempts before the workflow is considered failed. Default is 3.")
     recursive: bool = Field(False, description="Whether the workflow can be executed recursively. By default, tasks are recursive but workflows are not, unless one is expected to be used within another workflow")
     agent: Optional[AliceAgent] = Field(None, description="The agent that the task is associated with")
-    execution_agent: Optional[AliceAgent] = Field(None, description="The agent that the task is executed by")
     human_input: Optional[bool] = Field(default=False, description="Whether the task requires human input")
     api_engine: Optional[APIEngine] = Field(None, description="The API engine for the task")
 
@@ -205,10 +203,8 @@ class AliceTask(BaseModel, ABC):
             "task_id": task_id,
             "task_description": self.task_description
         })
-        
         # Run the task
-        response = await self.run(execution_history=execution_history, **kwargs)
-        
+        response = await self.run(execution_history=execution_history, **kwargs)        
         # Return the response
         return DatabaseTaskResponse(**response.model_dump(by_alias=True))
     
@@ -240,6 +236,8 @@ class AliceTask(BaseModel, ABC):
         """
         Returns a failed task response with the given diagnostics.
         """
+        exec_history = kwargs.pop("execution_history", None)
+        kwargs.pop("api_manager", None)
         return TaskResponse(
             task_id = self.id if self.id else '',
             task_name=self.task_name,
@@ -249,7 +247,7 @@ class AliceTask(BaseModel, ABC):
             task_outputs=None,
             task_inputs=kwargs,
             result_diagnostic=diagnostics,
-            execution_history=kwargs.get("execution_history", [])
+            execution_history=exec_history
         )
 
     # async def a_run(self, **kwargs) -> TaskResponse:

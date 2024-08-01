@@ -129,8 +129,8 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             <FormControlLabel
                 control={
                     <Switch
-                        name="code_execution_config"
-                        checked={form.code_execution_config || false}
+                        name="has_code_exec"
+                        checked={form.has_code_exec || false}
                         onChange={handleCheckboxChange}
                         disabled={!isEditMode}
                     />

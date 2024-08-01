@@ -1,68 +1,119 @@
-import unittest
-from unittest.mock import patch
-from pydantic import ValidationError
-from autogen.agentchat import UserProxyAgent
+import pytest
+from unittest.mock import Mock, AsyncMock
 from workflow_logic.core.prompt import Prompt
-from workflow_logic.core.agent.agent import AliceAgent
+from workflow_logic.core.model import AliceModel
+from workflow_logic.core.api import APIManager
+from workflow_logic.util import MessageDict
+from workflow_logic.core.agent import AliceAgent
+from workflow_logic.core.parameters import ToolFunction, FunctionConfig, FunctionParameters, ParameterDefinition
 
+@pytest.fixture
+def mock_api_manager():
+    return Mock(spec=APIManager)
 
-class TestAliceAgent(unittest.TestCase):
-    
-    def setUp(self):
-        self.prompt = Prompt(name="default", content="You are an AI assistant")
-        self.alice_agent_data = {
-            "_id": "60b8d29562c1f0c025ae4c89",
-            "name": "Alice",
-            "system_message": self.prompt,
-            "autogen_class": "ConversableAgent",
-            "code_execution_config": False,
-            "max_consecutive_auto_reply": 10,
-            "human_input_mode": "NEVER",
-            "speaker_selection": {},
-            "default_auto_reply": "",
-            "model_id": None
-        }
-    
-    def test_initialization(self):
-        agent = AliceAgent(**self.alice_agent_data)
-        self.assertEqual(agent.id, "60b8d29562c1f0c025ae4c89")
-        self.assertEqual(agent.name, "Alice")
-        self.assertEqual(agent.system_message, self.prompt)
-        self.assertEqual(agent.autogen_class, "ConversableAgent")
-    
-    def test_system_message_str(self):
-        agent = AliceAgent(**self.alice_agent_data)
-        self.assertEqual(agent.system_message_str, "You are an AI assistant")
-    
-    def test_get_execution_agent(self):
-        agent = AliceAgent(**self.alice_agent_data)
-        execution_agent = agent.get_execution_agent()
-        self.assertIsInstance(execution_agent, UserProxyAgent)
-        self.assertEqual(execution_agent.name, "Alice")
-    
-    def test_get_code_execution_config_default(self):
-        agent = AliceAgent(**self.alice_agent_data)
-        code_config = agent.get_code_execution_config()
-        self.assertIsInstance(code_config, dict)
-        self.assertTrue(code_config["use_docker"])
-        self.assertEqual(code_config["timeout"], 50)
-    
-    def test_get_code_execution_config_custom(self):
-        custom_config = {"use_docker": False, "timeout": 100}
-        self.alice_agent_data["code_execution_config"] = custom_config
-        agent = AliceAgent(**self.alice_agent_data)
-        self.assertEqual(agent.get_code_execution_config(), custom_config)
-       
-    def test_get_autogen_agent_user_proxy(self):
-        self.alice_agent_data["autogen_class"] = "UserProxyAgent"
-        agent = AliceAgent(**self.alice_agent_data)
-        auto_agent = agent.get_autogen_agent()
-        self.assertIsInstance(auto_agent, UserProxyAgent)
-    
-    def test_invalid_agent_class(self):
-        self.alice_agent_data["autogen_class"] = "InvalidAgent"
-        with self.assertRaises(ValidationError):
-            AliceAgent(**self.alice_agent_data)
+@pytest.fixture
+def sample_agent():
+    return AliceAgent(
+        name="TestAgent",
+        system_message=Prompt(name="test", content="You are a test assistant"),
+        model_id=AliceModel(short_name="TestModel", model_name="test-model", model_format="OpenChat", ctx_size=1000, model_type="chat", deployment="test"),
+        has_functions=True,
+        has_code_exec=False,
+        max_consecutive_auto_reply=5
+    )
 
-if __name__ == '__main__':
-    unittest.main()
+@pytest.mark.asyncio
+async def test_generate_response_basic(sample_agent, mock_api_manager):
+    mock_api_manager.generate_response_with_api_engine = AsyncMock(return_value={
+        "content": "Test response",
+        "tool_calls": None
+    })
+    
+    messages = [MessageDict(role="user", content="Hello")]
+    result = await sample_agent.generate_response(mock_api_manager, messages)
+    
+    assert isinstance(result, list), f"Expected result to be a list, but got {type(result)}"
+    assert len(result) == 1, f"Expected 1 message in result, but got {len(result)}"
+    assert isinstance(result[0], dict), f"Expected result[0] to be a dict, but got {type(result[0])}"
+    assert result[0]["role"] == "assistant", f"Expected role to be 'assistant', but got {result[0].get('role')}"
+    assert result[0]["content"] == "Test response", f"Expected content to be 'Test response', but got {result[0].get('content')}"
+    assert result[0]["generated_by"] == "llm", f"Expected generated_by to be 'llm', but got {result[0].get('generated_by')}"
+
+@pytest.mark.asyncio
+async def test_generate_response_with_tool_call(sample_agent, mock_api_manager):
+    mock_api_manager.generate_response_with_api_engine = AsyncMock(return_value={
+        "content": "API response content",
+        "tool_calls": [{
+            "function": {
+                "name": "test_function",
+                "arguments": '{"arg1": "value1", "arg2": 42}'
+            }
+        }]
+    })
+    
+    async def test_function(arg1: str, arg2: int):
+        return f"Function result: {arg1}, {arg2}"
+
+    tool_map = {"test_function": test_function}
+    tools_list = [ToolFunction(function=FunctionConfig(
+        name="test_function",
+        description="Test function",
+        parameters=FunctionParameters(
+            type="object",
+            properties={
+                "arg1": ParameterDefinition(type="string", description="Test string argument"),
+                "arg2": ParameterDefinition(type="integer", description="Test integer argument")
+            },
+            required=["arg1", "arg2"]
+        )
+    ))]
+    
+    messages = [MessageDict(role="user", content="Use test function")]
+    result = await sample_agent.generate_response(mock_api_manager, messages, tool_map, tools_list)
+    
+    print(f'Result: {result}')
+    assert isinstance(result, list), f"Expected result to be a list, but got {type(result)}"
+    assert len(result) == 2, f"Expected 2 messages in result, but got {len(result)}"
+    assert result[0]["role"] == "assistant", f"Expected first message role to be 'assistant', but got {result[0].get('role')}"
+    assert result[0]["content"] == "API response content", f"Expected first message content to be 'API response content', but got {result[0].get('content')}"
+    assert result[0]["tool_calls"] is not None, f"Expected tool_calls to be present in the first message"
+    assert result[1]["role"] == "tool", f"Expected second message role to be 'tool', but got {result[1].get('role')}"
+    assert result[1]["content"] == "Function result: value1, 42", f"Expected second message content to be 'Function result: value1, 42', but got {result[1].get('content')}"
+
+@pytest.mark.asyncio
+async def test_generate_response_recursion_limit(sample_agent, mock_api_manager):
+    mock_api_manager.generate_response_with_api_engine = AsyncMock(return_value={
+        "content": "API response",
+        "tool_calls": [{
+            "function": {
+                "name": "test_function",
+                "arguments": '{}'
+            }
+        }]
+    })
+    
+    async def test_function():
+        return "Function called"
+
+    tool_map = {"test_function": test_function}
+    tools_list = [ToolFunction(function=FunctionConfig(
+        name="test_function",
+        description="Test function",
+        parameters=FunctionParameters(
+            type="object",
+            properties={},
+            required=[]
+        )
+    ))]
+    
+    messages = [MessageDict(role="user", content="Start recursion")]
+    result = await sample_agent.generate_response(mock_api_manager, messages, tool_map, tools_list)
+    
+    assert len(result) == 2, f"Expected 2 messages, but got {len(result)}"
+    assert result[0]["role"] == "assistant", f"Expected first message role to be 'assistant', but got {result[0].get('role')}"
+    assert result[0]["content"] == "API response", f"Expected first message content to be 'API response', but got {result[0].get('content')}"
+    assert result[1]["role"] == "tool", f"Expected second message role to be 'tool', but got {result[1].get('role')}"
+    assert result[1]["content"] == "Function called", f"Expected second message content to be 'Function called', but got {result[1].get('content')}"
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

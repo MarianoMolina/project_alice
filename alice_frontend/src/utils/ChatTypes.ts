@@ -2,7 +2,6 @@ import { User } from './UserTypes';
 import { AliceTask, convertToAliceTask } from './TaskTypes';
 import { AliceAgent, convertToAliceAgent } from './AgentTypes';
 import { TaskResponse } from './TaskResponseTypes';
-import { AliceModel } from './ModelTypes';
 
 export interface AliceChat {
     _id: string;
@@ -10,8 +9,6 @@ export interface AliceChat {
     messages: MessageType[];
     alice_agent: AliceAgent;
     functions?: AliceTask[];
-    executor: AliceAgent;
-    model_id?: AliceModel;
     task_responses?: TaskResponse[];
     created_by?: User;
     updated_by?: User;
@@ -62,8 +59,6 @@ export const convertToAliceChat = (data: any): AliceChat => {
         messages: (data?.messages || []).map(convertToMessageType),
         alice_agent: convertToAliceAgent(data?.alice_agent),
         functions: (data?.functions || []).map(convertToAliceTask),
-        executor: convertToAliceAgent(data?.executor),
-        model_id: data?.model_id || undefined,
         task_responses: (data?.task_responses || []).map((response: any) => ({
             ...response,
             createdAt: response.createdAt ? new Date(response.createdAt) : undefined,
@@ -83,8 +78,6 @@ export interface MessageProps {
 export interface CreateAliceChat {
     name: string;
     alice_agent: string | AliceAgent;
-    executor: string | AliceAgent;
-    model_id?: string | AliceModel;
     functions?: string[] | AliceTask[];
 }
 
@@ -108,8 +101,6 @@ export const getDefaultChatForm = (): Partial<AliceChat> => ({
     name: '',
     messages: [],
     alice_agent: undefined,
-    executor: undefined,
-    model_id: undefined,
     functions: [],
     task_responses: [],
 });

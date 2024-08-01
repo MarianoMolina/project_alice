@@ -6,7 +6,7 @@ import {
   ListItemIcon,
   ListItemText,
 } from '@mui/material';
-import { SupportAgent, Terminal, Functions, Summarize } from '@mui/icons-material';
+import { SupportAgent, Functions, Summarize } from '@mui/icons-material';
 import { ChatComponentProps } from '../../../../utils/ChatTypes';
 import useStyles from '../ChatStyles';
 
@@ -24,15 +24,11 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
 
   return (
     <div className={classes.chatDetails}>
-      <Typography variant="h6">Agents</Typography>
+      <Typography variant="h6">Agent</Typography>
       <List>
         <ListItemButton onClick={() => item.alice_agent?._id && handleAgentClick && handleAgentClick(item.alice_agent._id)}>
           <ListItemIcon><SupportAgent /></ListItemIcon>
           <ListItemText primary="Alice Agent" secondary={item.alice_agent?.name || 'N/A'} />
-        </ListItemButton>
-        <ListItemButton onClick={() => item.executor?._id && handleAgentClick && handleAgentClick(item.executor._id)}>
-          <ListItemIcon><Terminal /></ListItemIcon>
-          <ListItemText primary="Execution Agent" secondary={item.executor?.name || 'N/A'} />
         </ListItemButton>
       </List>
       <Typography variant="h6">Available Functions</Typography>

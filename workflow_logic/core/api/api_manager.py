@@ -59,17 +59,46 @@ class APIManager(BaseModel):
     def get_api(self, api_name: ApiName) -> Optional[API]:
         return self.apis.get(api_name)
    
-    def get_api_by_type(self, api_type: ApiType) -> Optional[API]:
-        return next((api for api in self.apis.values() if api.api_type == api_type), None)
-    
-    def retrieve_api_data(self, api_type: ApiType, model: Optional[AliceModel] = None) -> Union[Dict[str, Any], LLMConfig]:
+    def get_api_by_type(self, api_type: ApiType, model: Optional[AliceModel] = None) -> Optional[API]:
         if isinstance(api_type, str):
             api_type = ApiType(api_type)
         if api_type == ApiType.LLM_MODEL:
-            return self._retrieve_llm_api_data(model)
+            return self._retrieve_llm_api(model)
         else:
-            return self._retrieve_non_llm_api_data(api_type)
+            return self._retrieve_non_llm_api(api_type)
+    
+    def _retrieve_llm_api(self, model: Optional[AliceModel] = None) -> Optional[API]:
+        llm_apis = [api for api in self.apis.values() if ApiType(api.api_type) == ApiType.LLM_MODEL and api.is_active]
         
+        if not llm_apis:
+            print("No LLM APIs found.")
+            print(f'APIs: {self.apis}')
+            return None
+        print(f'LLM APIs: {llm_apis}')
+        print(f'matching model: {model}')
+        if model:
+            matching_api = next((api for api in llm_apis if api.api_name == model.api_name and api.is_active), None)
+            if matching_api:
+                return matching_api
+            else:
+                print(f'No matching API found for model: {model} with api_name: {model.api_name}')
+
+        # If no matching API found or no model specified, use the first available LLM API
+        default_api = next((api for api in llm_apis if api.default_model), None)
+        if default_api:
+            return default_api
+
+        return None
+    
+    def _retrieve_non_llm_api(self, api_type: ApiType) -> Optional[API]:
+        return next((api for api in self.apis.values() if api.api_type == api_type and api.is_active), None)
+        
+    def retrieve_api_data(self, api_type: ApiType, model: Optional[AliceModel] = None) -> Union[Dict[str, Any], LLMConfig]:
+        api = self.get_api_by_type(api_type, model)
+        if api is None:
+            raise ValueError(f"No active API found for type: {api_type}")
+        return api.get_api_data(model)
+
     async def generate_response_with_api_engine(self, api_type: ApiType, model: Optional[AliceModel] = None, **kwargs) -> Union[SearchOutput, MessageDict]:
         """
         Select the appropriate API engine, validate inputs, and generate a response.
@@ -84,10 +113,10 @@ class APIManager(BaseModel):
         """
         LOGGER.debug(f"Chat generate_response_with_api_engine called with api_type: {api_type}, model: {model}, kwargs: {kwargs}")
         try:
-            api = self.get_api_by_type(api_type)
+            api = self.get_api_by_type(api_type, model)
             if not api:
                 raise ValueError(f"No API found for type: {api_type}")
-
+            LOGGER.debug(f"API found: {api}")
             api_data = api.get_api_data(model)
             
             api_engine = get_api_engine(api_type, api.api_name)()
@@ -101,7 +130,7 @@ class APIManager(BaseModel):
 
         except Exception as e:
             LOGGER.error(f"Error generating response with API engine: {str(e)}")
-            raise
+            raise ValueError(f"Error generating response with API engine: {str(e)}")
 
     def _validate_inputs(self, api_engine: APIEngine, kwargs: Dict[str, Any]):
         # Validate that the provided kwargs match the expected input_variables of the API engine
@@ -115,27 +144,3 @@ class APIManager(BaseModel):
         for required_input in api_engine.input_variables.required:
             if required_input not in kwargs:
                 raise ValueError(f"Missing required input: {required_input}")
-            
-    def _retrieve_llm_api_data(self, model: Optional[AliceModel] = None) -> LLMConfig:
-        llm_apis = [api for api in self.apis.values() if ApiType(api.api_type) == ApiType.LLM_MODEL and api.is_active]
-        
-        if not llm_apis:
-            raise ValueError("No active LLM APIs available.")
-
-        if model:
-            matching_api = next((api for api in llm_apis if api.default_model == model), None)
-            if matching_api:
-                return self._create_llm_config(matching_api, model)
-
-        # If no matching API found or no model specified, use the first available LLM API
-        default_api = next((api for api in llm_apis if api.default_model), None)
-        if default_api:
-            return self._create_llm_config(default_api, default_api.default_model)
-
-        raise ValueError("No suitable LLM API found.")
-
-    def _retrieve_non_llm_api_data(self, api_type: ApiType) -> Dict[str, Any]:
-        matching_api = next((api for api in self.apis.values() if api.api_type == api_type and api.is_active), None)
-        if not matching_api:
-            raise ValueError(f"No active API found for type: {api_type}")
-        return matching_api.api_config

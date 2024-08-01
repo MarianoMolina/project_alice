@@ -1,119 +1,163 @@
-import unittest
-from unittest.mock import AsyncMock, MagicMock, patch
-from workflow_logic.util import MessageDict
-from workflow_logic.core.agent import AliceAgent
-from workflow_logic.core.parameters import FunctionConfig, FunctionParameters, ParameterDefinition
-from workflow_logic.core.api import APIManager, LLMConfig
+import pytest
+from unittest.mock import Mock, AsyncMock
+from workflow_logic.core.chat import AliceChat
+from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.model import AliceModel
+from workflow_logic.core.api import APIManager
+from workflow_logic.core.agent import AliceAgent
 from workflow_logic.core.tasks import AliceTask
-from autogen.agentchat import ConversableAgent
-from workflow_logic.core.chat.chat import AliceChat
+from workflow_logic.core.parameters import ToolFunction, FunctionConfig, FunctionParameters, ParameterDefinition
 
-class TestAliceChat(unittest.IsolatedAsyncioTestCase):
+@pytest.fixture
+def mock_api_manager():
+    return Mock(spec=APIManager)
 
-    def setUp(self):
-        self.messages = [
-            MessageDict(role="system", content="System message", generated_by="llm", type="text"),
-            MessageDict(role="user", content="Hello, Alice!", generated_by="user", type="text")
-        ]
-        self.alice_agent = AliceAgent(
-            name="Alice",
-            system_message={"name": "alice_default", "content": "You are Alice, an AI personal assistant."}
-        )
-        self.executor_agent = AliceAgent(
-            name="executor_agent",
-            system_message={"name": "executor_agent", "content": "Executor Agent."},
-            autogen_class="UserProxyAgent",
-            code_execution_config=True,
-            default_auto_reply=""
-        )
-        self.chat_data = {
-            "_id": "60b8d29562c1f0c025ae4c89",
-            "name": "Test Chat",
-            "messages": self.messages,
-            "alice_agent": self.alice_agent,
-            "executor": self.executor_agent,
-            "model_id": AliceModel(short_name="test_model", model_type="chat", model_name="test_model", model_format="OpenChat", ctx_size=1024),
-            "functions": [],
-            "chat_execution": None
-        }
+@pytest.fixture
+def sample_chat():
+    return AliceChat(
+        name="TestChat",
+        alice_agent=AliceAgent(
+            name="TestAgent",
+            system_message=Prompt(name="test", content="You are a test assistant"),
+            has_functions=True,
+            has_code_exec=True,
+            model_id=AliceModel(short_name="TestModel", model_name="test-model", model_format="OpenChat", ctx_size=1000, model_type="chat", deployment="test"),
+        ),
+    )
 
-    def test_initialization(self):
-        chat = AliceChat(**self.chat_data)
-        self.assertEqual(chat.id, "60b8d29562c1f0c025ae4c89")
-        self.assertEqual(chat.name, "Test Chat")
-        self.assertEqual(chat.alice_agent, self.alice_agent)
-        self.assertEqual(chat.executor, self.executor_agent)
-        self.assertEqual(chat.model_id, self.chat_data["model_id"])
-        self.assertIsNone(chat.chat_execution)
-        self.assertEqual(
-            [{k: v for k, v in msg.items() if k in ["role", "content", "generated_by", "type"]} for msg in chat.messages],
-            self.messages
-        )
+@pytest.fixture
+def sample_task():
+    return Mock(spec=AliceTask)
 
-    def test_functions_list(self):
-        chat = AliceChat(**self.chat_data)
-        self.assertIsNone(chat.functions_list)
+@pytest.mark.asyncio
+async def test_generate_response_basic(sample_chat, mock_api_manager):
+    mock_api_manager.generate_response_with_api_engine = AsyncMock(return_value={
+        "content": "Test response",
+        "tool_calls": None
+    })
+    
+    new_messages = await sample_chat.generate_response(mock_api_manager, "Hello, AI!")
+    
+    assert len(new_messages) == 1
+    assert new_messages[0]["role"] == "assistant"
+    assert new_messages[0]["content"] == "Test response"
+    assert new_messages[0]["generated_by"] == "llm"
+    assert len(sample_chat.messages) == 2  # User message + AI response
 
-        function_mock = MagicMock(spec=AliceTask)
-        function_obj = FunctionConfig(
-                name="test_function", 
-                description="Test function", 
-                parameters=FunctionParameters(
-                    type="object",
-                    properties={
-                        "name": ParameterDefinition(type="string", description="Dummy parameter")
-                    },
-                    required=["name"]
-                )
+@pytest.mark.asyncio
+async def test_generate_response_with_function(sample_chat, mock_api_manager, sample_task):
+    mock_api_manager.generate_response_with_api_engine = AsyncMock(return_value={
+        "content": "Calling a function",
+        "tool_calls": [{
+            "function": {
+                "name": "test_function",
+                "arguments": '{"arg": "value"}'
+            }
+        }]
+    })
+    
+    sample_task.get_function.return_value = {
+        "tool_function": ToolFunction(function=FunctionConfig(
+            name="test_function",
+            description="Test function",
+            parameters=FunctionParameters(
+                type="object",
+                properties={"arg": ParameterDefinition(type="string", description="Test argument")},
+                required=["arg"]
             )
-        function_mock.get_function.return_value = {
-            "tool_function": function_obj,
-            "function_map": {"test_function": lambda x: x}
-        }
-        chat.functions = [function_mock]
-        self.assertEqual(chat.functions_list, [function_obj.model_dump()])
+        )),
+        "function_map": {"test_function": AsyncMock(return_value="Function result")}
+    }
+    
+    sample_chat.functions = [sample_task]
+    
+    new_messages = await sample_chat.generate_response(mock_api_manager, "Call a function")
+    
+    assert len(new_messages) == 2
+    assert new_messages[0]["role"] == "assistant"
+    assert new_messages[0]["content"] == "Calling a function"
+    assert new_messages[1]["role"] == "tool"
+    assert new_messages[1]["content"] == "Function result"
+    assert len(sample_chat.messages) == 3  # User message + AI response + Function result
 
-    @patch.object(AliceChat, 'get_default_executor')
-    @patch.object(AliceChat, 'get_autogen_agent')
-    def test_setup_chat_execution(self, mock_get_autogen_agent, mock_get_default_executor):
-        chat = AliceChat(**self.chat_data)
-        api_manager = MagicMock(spec=APIManager)
-        mock_get_autogen_agent.return_value = MagicMock(spec=ConversableAgent)
-        mock_get_default_executor.return_value = MagicMock(spec=ConversableAgent, _code_execution_config={})
-        chat.setup_chat_execution(api_manager)
-        self.assertIsNotNone(chat.chat_execution)
+def test_tool_list(sample_chat, mock_api_manager, sample_task):
+    sample_task.get_function.return_value = {
+        "tool_function": ToolFunction(function=FunctionConfig(
+            name="test_function",
+            description="Test function",
+            parameters=FunctionParameters(
+                type="object",
+                properties={},
+                required=[]
+            )
+        )),
+        "function_map": {}
+    }
+    
+    sample_chat.functions = [sample_task]
+    
+    tool_list = sample_chat.tool_list(mock_api_manager)
+    
+    assert len(tool_list) == 1
+    assert tool_list[0]["function"]["name"] == "test_function"
 
-    @patch.object(APIManager, 'retrieve_api_data')
-    def test_get_autogen_agent(self, mock_retrieve_api_data):
-        chat = AliceChat(**self.chat_data)
-        api_manager = APIManager()
-        mock_retrieve_api_data.return_value = LLMConfig(
-            api_key="test_key",
-            base_url="https://test.com",
-            model="test_model",
-            api_type="openai"
-        )
-        autogen_agent = chat.get_autogen_agent(api_manager)
-        self.assertIsInstance(autogen_agent, ConversableAgent)
+def test_tool_map(sample_chat, mock_api_manager, sample_task):
+    mock_function = AsyncMock()
+    sample_task.get_function.return_value = {
+        "tool_function": ToolFunction(function=FunctionConfig(
+            name="test_function",
+            description="Test function",
+            parameters=FunctionParameters(
+                type="object",
+                properties={},
+                required=[]
+            )
+        )),
+        "function_map": {"test_function": mock_function}
+    }
+    
+    sample_chat.functions = [sample_task]
+    
+    tool_map = sample_chat.tool_map(mock_api_manager)
+    
+    assert len(tool_map) == 1
+    assert "test_function" in tool_map
+    assert tool_map["test_function"] == mock_function
 
-    def test_get_combined_function_map(self):
-        chat = AliceChat(**self.chat_data)
-        self.assertEqual(chat.get_combined_function_map(), {})
+def test_deep_validate_required_apis(sample_chat, mock_api_manager, sample_task):
+    mock_api_manager.retrieve_api_data.return_value = {}  # Simulate successful API retrieval
+    
+    sample_task.deep_validate_required_apis.return_value = {
+        "status": "valid",
+        "warnings": []
+    }
+    
+    sample_chat.functions = [sample_task]
+    
+    validation_result = sample_chat.deep_validate_required_apis(mock_api_manager)
+    
+    assert validation_result["status"] == "valid"
+    assert validation_result["llm_api"] == "valid"
+    assert len(validation_result["functions"]) == 1
+    assert validation_result["functions"][0]["status"] == "valid"
 
-        function_mock = MagicMock(spec=AliceTask)
-        function_mock.get_function.return_value = {"function_map": {"test_function": lambda x: x}}
-        chat.functions = [function_mock]
-        self.assertEqual(chat.get_combined_function_map(), {"test_function": function_mock.get_function()["function_map"]["test_function"]})
+def test_deep_validate_required_apis_with_warnings(sample_chat, mock_api_manager, sample_task):
+    mock_api_manager.retrieve_api_data.side_effect = ValueError("API not found")
+    
+    sample_task.deep_validate_required_apis.return_value = {
+        "status": "warning",
+        "warnings": ["Task warning"]
+    }
+    
+    sample_chat.functions = [sample_task]
+    
+    validation_result = sample_chat.deep_validate_required_apis(mock_api_manager)
+    
+    assert validation_result["status"] == "warning"
+    assert validation_result["llm_api"] == "invalid"
+    assert len(validation_result["warnings"]) == 2  # LLM API warning + Task warning
+    assert "API not found" in validation_result["warnings"]
+    assert "Task warning" in validation_result["warnings"]
 
-    @patch.object(AliceChat, 'get_combined_function_map')
-    def test_get_default_executor(self, mock_get_combined_function_map):
-        chat = AliceChat(**self.chat_data)
-        function_map = {"test_function": lambda x: x}
-        mock_get_combined_function_map.return_value = function_map
-        executor = chat.get_default_executor()
-        self.assertIsInstance(executor, ConversableAgent)
-        self.assertEqual(executor.function_map, function_map)
-
-if __name__ == '__main__':
-    unittest.main()
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

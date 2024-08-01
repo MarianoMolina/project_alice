@@ -1,17 +1,14 @@
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Optional
 from pydantic import Field
 from workflow_logic.core.api import APIManager
-from workflow_logic.util.logging_config import LOGGER
-from workflow_logic.util import MessageDict, TaskResponse
-from autogen.code_utils import extract_code
+from workflow_logic.util import LOGGER, MessageDict, TaskResponse, ApiType
 from workflow_logic.util.utils import json_to_python_type_mapping
 from workflow_logic.core.agent.agent import AliceAgent
 from workflow_logic.core.tasks.agent_tasks.agent_task import BasicAgentTask
 from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
-from workflow_logic.core.tasks.templated_task import TemplatedTask
-
-class PromptAgentTask(BasicAgentTask, TemplatedTask):
+    
+class PromptAgentTask(BasicAgentTask):
     """
     A task class that processes a string prompt using templates before passing it to the agent.
 
@@ -44,13 +41,24 @@ class PromptAgentTask(BasicAgentTask, TemplatedTask):
     )
     templates: Dict[str, Any] = Field(
         default={
-            "task_template": {
-                "name": "basic_prompt",
-                "content": "{{prompt}}",
-                "is_templated": True
-            }
+            "task_template": Prompt(
+                name = "basic_prompt",
+                content = "{{prompt}}",
+                is_templated = True,
+                parameters=FunctionParameters(
+                    type="object",
+                    properties={
+                        "prompt": ParameterDefinition(
+                            type="string",
+                            description="The input prompt for the task",
+                            default=None
+                        )
+                    },
+                    required=["prompt"]
+                )
+            )
         },
-        description="A dictionary of template names and their prompt configurations."
+        description="A dictionary of template names and their prompt objects."
     )
 
     def create_message_list(self, **kwargs) -> List[MessageDict]:
@@ -81,10 +89,10 @@ class PromptAgentTask(BasicAgentTask, TemplatedTask):
                 raise ValueError(f"Missing required parameter: {param}")
             value = kwargs[param]
             param_type = self.input_variables.properties[param].type
-            param_type = json_to_python_type_mapping(param_type)
-            if not param_type:
-                raise ValueError(f"Invalid parameter type: {self.input_variables.properties[param].type}")
-            if not isinstance(value, param_type):
+            python_type = json_to_python_type_mapping(param_type)
+            if not python_type:
+                raise ValueError(f"Invalid parameter type: {param_type}")
+            if not isinstance(value, python_type):
                 raise TypeError(f"Parameter '{param}' should be of type {param_type}")
             sanitized_input[param] = value
         
@@ -93,13 +101,21 @@ class PromptAgentTask(BasicAgentTask, TemplatedTask):
             if param not in sanitized_input:
                 value = kwargs.get(param, definition.default)
                 if value is not None:
-                    param_type = definition.default
-                    if param_type and not isinstance(value, eval(param_type)):
+                    param_type = definition.type
+                    python_type = json_to_python_type_mapping(param_type)
+                    if not python_type:
+                        raise ValueError(f"Invalid parameter type: {param_type}")
+                    if not isinstance(value, python_type):
                         raise TypeError(f"Parameter '{param}' should be of type {param_type}")
                 sanitized_input[param] = value
         
         return sanitized_input
     
+    def get_prompt_template(self, template_name: str) -> Prompt:
+        if template_name not in self.templates or not self.templates[template_name]:
+            raise ValueError(f"Template {template_name} not found in the task templates dictionary.")
+        return self.templates[template_name]
+
 class CheckTask(PromptAgentTask):
     """
     A specialized task for checking if the generated output includes certain strings.
@@ -148,46 +164,7 @@ class CodeGenerationLLMTask(PromptAgentTask):
     def get_exit_code(self, chat_output: List[MessageDict], response_code: bool) -> int:
         if not chat_output or not 'content' in chat_output[-1]:
             return 1
-        code_blocks = extract_code(chat_output[-1]["content"])
+        code_blocks = self.agent._extract_code_blocks(chat_output[-1]["content"])
         if not code_blocks:
             return 2
         return 0
-    
-class CodeExecutionLLMTask(PromptAgentTask):
-    """
-    A task for executing code that is extracted from a prompt or previous outputs.
-
-    This task is capable of executing code in specified languages and handling
-    the execution results.
-
-    Attributes:
-        agent (AliceAgent): The agent responsible for code execution.
-        task_name (str): The name of the task, defaulting to "execute_code".
-        exit_codes (dict[int, str]): A mapping of exit codes to their descriptions.
-        valid_languages (list[str]): A list of programming languages that can be executed.
-        timeout (int): The maximum time allowed for code execution.
-
-    Methods:
-        get_exit_code: Determines the exit code based on the success of code execution.
-        generate_response: Handles the extraction and execution of code from the input messages.
-    """
-    agent: AliceAgent = Field(..., description="The agent to use for the task")
-    task_name: str = Field("execute_code", description="The name of the task")
-    exit_codes: dict[int, str] = Field({0: "Success", 1: "Execution failed."}, description="A dictionary of exit codes for the task")
-    valid_languages: list[str] = Field(["python", "shell"], description="A list of valid languages for code execution")
-    timeout: int = Field(50, description="The maximum time in seconds to wait for code execution")
-
-    def get_exit_code(self, chat_output: List[MessageDict], response_code: bool) -> int:
-        if not chat_output or response_code or not 'content' in chat_output[-1] or chat_output[-1]["content"].startswith("Error"):
-            return 1
-        return 0
-    
-    async def generate_response(self, messages: List[MessageDict]) -> Tuple[List[MessageDict], bool]:
-        if not messages or not 'content' in messages[-1]:
-            LOGGER.warning(f"No messages to execute code from in task {self.task_name}")
-            return [], True
-        responses = self.chat_execution.handle_potential_code_execution(messages[-1]['content'])
-        if not responses:
-            LOGGER.warning(f"Code execution failed")
-            return [], True
-        return responses, False

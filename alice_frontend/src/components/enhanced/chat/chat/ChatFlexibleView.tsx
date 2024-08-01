@@ -9,7 +9,6 @@ import EnhancedModel from '../../model/model/EnhancedModel';
 import EnhancedAgent from '../../agent/agent/EnhancedAgent';
 import EnhancedTask from '../../task/task/EnhancedTask';
 import { AliceAgent } from '../../../../utils/AgentTypes';
-import { AliceModel } from '../../../../utils/ModelTypes';
 import { AliceTask } from '../../../../utils/TaskTypes';
 import { useApi } from '../../../../context/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
@@ -39,30 +38,12 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
         onChange({ ...form, [name]: value });
     };
 
-    const handleModelChange = async (selectedIds: string[]) => {
-        if (selectedIds.length > 0) {
-            const model = await fetchItem('models', selectedIds[0]) as AliceModel;
-            onChange({ ...form, model_id: model });
-        } else {
-            onChange({ ...form, model_id: undefined });
-        }
-    };
-
     const handleAgentChange = async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {
             const agent = await fetchItem('agents', selectedIds[0]) as AliceAgent;
             onChange({ ...form, alice_agent: agent });
         } else {
             onChange({ ...form, alice_agent: undefined });
-        }
-    };
-
-    const handleExecutorChange = async (selectedIds: string[]) => {
-        if (selectedIds.length > 0) {
-            const agent = await fetchItem('agents', selectedIds[0]) as AliceAgent;
-            onChange({ ...form, executor: agent });
-        } else {
-            onChange({ ...form, executor: undefined });
         }
     };
 
@@ -75,11 +56,10 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
     };
 
-    const handleViewDetails = (type: 'agent' | 'executor' | 'model' | 'task', itemId: string) => {
+    const handleViewDetails = (type: 'agent' | 'model' | 'task', itemId: string) => {
         let content;
         switch (type) {
             case 'agent':
-            case 'executor':
                 content = <EnhancedAgent mode="card" itemId={itemId} fetchAll={false} />;
                 break;
             case 'model':
@@ -122,30 +102,6 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                 onAccordionToggle={handleAccordionToggle}
                 onView={(id) => handleViewDetails("agent", id)}
                 accordionEntityName="agent"
-            />
-            <EnhancedSelect<AliceAgent>
-                componentType="agents"
-                EnhancedComponent={EnhancedAgent}
-                selectedItems={form.executor ? [form.executor] : []}
-                onSelect={handleExecutorChange}
-                isInteractable={isEditMode}
-                label="Select Executor Agent"
-                activeAccordion={activeAccordion}
-                onAccordionToggle={handleAccordionToggle}
-                onView={(id) => handleViewDetails("executor", id)}
-                accordionEntityName="executor"
-            />
-            <EnhancedSelect<AliceModel>
-                componentType="models"
-                EnhancedComponent={EnhancedModel}
-                selectedItems={form.model_id ? [form.model_id] : []}
-                onSelect={handleModelChange}
-                isInteractable={isEditMode}
-                label="Select Model"
-                activeAccordion={activeAccordion}
-                onAccordionToggle={handleAccordionToggle}
-                onView={(id) => handleViewDetails("model", id)}
-                accordionEntityName="model"
             />
             <EnhancedSelect<AliceTask>
                 componentType="tasks"

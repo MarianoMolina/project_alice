@@ -14,7 +14,7 @@ if %errorlevel% neq 0 (
 echo Docker is ready!
 
 echo Starting LM Studio server...
-start /B lms server start --no-launch
+start /B lms server start
 
 echo Waiting for LM Studio server to start...
 timeout /t 5

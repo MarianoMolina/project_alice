@@ -18,44 +18,58 @@ base_chat_module = BaseChatModule(
                 You are kind and humble, but direct, honest and clear. You are here to help, and you are always learning and improving.""",
                 "is_templated": False
             },
-            {
-                "key": "executor_agent",
-                "name": "Executor Agent",
-                "content": "Executor Agent. Executes the code and returns the result."
-            },
         ],
         "agents": [
             {
-                "key": "default_alice",
-                "name": "Default Assistant",
+                "key": "gpt_alice",
+                "name": "Alice (GPT)",
                 "system_message": "default_system_message",
-                "autogen_class": "ConversableAgent",
                 "model_id": "GPT4o",
-                "code_execution_config": False,
-                "max_consecutive_auto_reply": 10,
-                "human_input_mode": "NEVER",
-                "default_auto_reply": ""
+                "max_consecutive_auto_reply": 2,
+                "has_functions": True,
+                "has_code_exec": True,
             },
             {
-                "key": "executor_agent",
-                "name": "executor_agent",
-                "system_message": "executor_agent",
-                "autogen_class": "UserProxyAgent",
-                "code_execution_config": True,
-                "default_auto_reply": "",
-                "model_id": None,
+                "key": "claude_alice",
+                "name": "Alice (Claude)",
+                "system_message": "default_system_message",
+                "model_id": "Claude3.5",
+                "max_consecutive_auto_reply": 2,
+                "has_functions": True,
+                "has_code_exec": True,
             },
+            {
+                "key": "lm_studio_alice",
+                "name": "Alice (LM Studio)",
+                "system_message": "default_system_message",
+                "model_id": "Llama3_1_8B",
+                "max_consecutive_auto_reply": 2,
+                "has_functions": True,
+                "has_code_exec": True,
+            }
         ],
         "chats": [
             {
                 "key": "default_chat",
-                "name": "New Chat",
+                "name": "GPT4 Chat",
                 "messages": [],
-                "alice_agent": "default_alice",
-                "executor": "executor_agent",
-                "model_id": "GPT4o",
+                "alice_agent": "gpt_alice",
                 "functions": [],
             },
+            {
+                "key": "claude_chat",
+                "name": "Claude Chat",
+                "messages": [],
+                "alice_agent": "claude_alice",
+                "functions": [],
+            },
+            {
+                "key": "lm_studio_chat",
+                "name": "LMStudio Chat",
+                "messages": [],
+                "alice_agent": "lm_studio_alice",
+                "functions": [],
+            }
         ]
     }
 )
