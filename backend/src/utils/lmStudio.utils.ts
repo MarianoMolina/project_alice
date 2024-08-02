@@ -77,7 +77,6 @@ export async function loadModel(modelId: string, client: LMStudioClient, loadedM
         if (!modelInfo) {
             throw new Error(`Model with id ${modelId} not found in the database`);
         }
-        console.log('Model Info:', modelInfo);
         const isModelAv = await isModelAvailable(client, modelInfo.model_name);
 
         if (!isModelAv) {

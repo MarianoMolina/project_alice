@@ -5,6 +5,8 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Card,
+  CardContent,
 } from '@mui/material';
 import { SupportAgent, Functions, Summarize } from '@mui/icons-material';
 import { ChatComponentProps } from '../../../../utils/ChatTypes';
@@ -23,44 +25,49 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
   }
 
   return (
-    <div className={classes.chatDetails}>
-      <Typography variant="h6">Agent</Typography>
-      <List>
-        <ListItemButton onClick={() => item.alice_agent?._id && handleAgentClick && handleAgentClick(item.alice_agent._id)}>
-          <ListItemIcon><SupportAgent /></ListItemIcon>
-          <ListItemText primary="Alice Agent" secondary={item.alice_agent?.name || 'N/A'} />
-        </ListItemButton>
-      </List>
-      <Typography variant="h6">Available Functions</Typography>
-      <List>
-        {item.functions && item.functions.length > 0 ? (
-          item.functions.map((func, index) => (
-            <ListItemButton key={index} onClick={() => func._id && handleTaskClick && handleTaskClick(func._id)}>
-              <ListItemIcon><Functions /></ListItemIcon>
-              <ListItemText primary={func.task_name} />
-            </ListItemButton>
-          ))
-        ) : (
-          <Typography variant="body2">No functions available</Typography>
-        )}
-      </List>
-      <Typography variant="h6">Task Results</Typography>
-      <List>
-        {item.task_responses && item.task_responses.length > 0 ? (
-          item.task_responses.map((result, index) => (
-            <ListItemButton key={index} onClick={() => result._id && handleTaskResultClick && handleTaskResultClick(result._id)}>
-              <ListItemIcon><Summarize /></ListItemIcon>
-              <ListItemText
-                primary={result.task_name}
-                secondary={`Status: ${result.status}, Code: ${result.result_code}`}
-              />
-            </ListItemButton>
-          ))
-        ) : (
-          <Typography variant="body2">No task responses yet</Typography>
-        )}
-      </List>
-    </div>
+    <Card className={classes.chatDetails}>
+      <CardContent>
+        <Typography variant="h6">{item.name}</Typography>
+        <Typography variant="caption">
+          Chat ID: {item._id}
+        </Typography>
+        <List>
+          <ListItemButton onClick={() => item.alice_agent?._id && handleAgentClick && handleAgentClick(item.alice_agent._id)}>
+            <ListItemIcon><SupportAgent /></ListItemIcon>
+            <ListItemText primary="Alice Agent" secondary={item.alice_agent?.name || 'N/A'} />
+          </ListItemButton>
+        </List>
+        <Typography variant="h6">Available Functions</Typography>
+        <List>
+          {item.functions && item.functions.length > 0 ? (
+            item.functions.map((func, index) => (
+              <ListItemButton key={index} onClick={() => func._id && handleTaskClick && handleTaskClick(func._id)}>
+                <ListItemIcon><Functions /></ListItemIcon>
+                <ListItemText primary={func.task_name} />
+              </ListItemButton>
+            ))
+          ) : (
+            <Typography variant="body2">No functions available</Typography>
+          )}
+        </List>
+        <Typography variant="h6">Task Results</Typography>
+        <List>
+          {item.task_responses && item.task_responses.length > 0 ? (
+            item.task_responses.map((result, index) => (
+              <ListItemButton key={index} onClick={() => result._id && handleTaskResultClick && handleTaskResultClick(result._id)}>
+                <ListItemIcon><Summarize /></ListItemIcon>
+                <ListItemText
+                  primary={result.task_name}
+                  secondary={`Status: ${result.status}, Code: ${result.result_code}`}
+                />
+              </ListItemButton>
+            ))
+          ) : (
+            <Typography variant="body2">No task responses yet</Typography>
+          )}
+        </List>
+      </CardContent>
+    </Card>
   );
 };
 

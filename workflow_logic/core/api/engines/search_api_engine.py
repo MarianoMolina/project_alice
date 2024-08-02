@@ -1,9 +1,9 @@
 import wikipedia, praw
 from praw.models import Submission, ListingGenerator, Subreddits
 from arxiv import Result, Client, Search, SortCriterion
+from googleapiclient.discovery import build
 from exa_py import Exa
 from pydantic import Field
-from googleapiclient.discovery import build
 from typing import Dict, Any, List
 from workflow_logic.util import SearchResult, SearchOutput, ApiType
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition

@@ -18,9 +18,10 @@ The project consists of three main components:
 - Execute tasks with custom parameters directly
 - Supported task types include:
   - Workflow
-  - BasicAgentTask: CodeExecutionLLMTask
-  - PromptAgentTask: CheckTask + CodeGenerationLLMTask
-  - API tasks: Reddit + Wikipedia + Google + Exa + Arxiv search
+  - API tasks: Reddit, Wikipedia, Google, Exa, and Arxiv search
+  - Agentic tasks:
+    - BasicAgentTask: Including CodeExecutionLLMTask
+    - PromptAgentTask: Including CheckTask and CodeGenerationLLMTask
 
 ### 2. Intelligent Chat
 - Create and manage chat conversations with AI agents
@@ -37,105 +38,58 @@ The project consists of three main components:
 - User authentication and authorization
 - Role-based access control (user and admin roles)
 
+### 5. Flexible Model Deployment
+- Deploy local models using LM Studio
+- Use OpenAI-compatible endpoints or Anthropic models to power your agents and workflows
+
 ## Setup and Installation
 
-1. Clone the repository:
+1. Ensure you have Docker installed on your system.
+
+2. (Optional) Install LM Studio if you plan to use local models.
+
+3. Download the repository:
    ```
    git clone [repository_url]
    ```
 
-2. Set up environment variables:
-   Create a `.env` file in the root directory and add the following variables:
-   ```
-   MONGODB_URI=mongodb://mongo/alice_database
-   JWT_SECRET=[your_jwt_secret]
-   BACKEND_PORT=3000
-   FRONTEND_PORT=4000
-   WORKFLOW_PORT=8000
-   HOST=localhost
-   ```
+4. Create a `.env` file in the root directory using the `template.env` file as a reference. Complete the data for any APIs you want to use (e.g., OpenAI API key).
 
-3. Install dependencies:
-   ```
-   npm install
-   ```
+5. Run the appropriate script for your operating system:
+   - Windows: Run `run.bat`
+   - Linux/Mac: Run the equivalent shell script
 
-4. Initialize the database:
-   ```
-   npm run init-db
-   ```
-
-5. Start the services:
-   ```
-   docker-compose up
-   ```
+This will build and launch the containers. Once ready, the frontend will be accessible at `http://localhost:4000/`.
 
 ## Usage
 
-### API Endpoints
+The Alice framework provides a user-friendly frontend interface for interacting with the system. Through this interface, you can:
 
-The backend provides RESTful API endpoints for managing various entities:
+1. Create and manage AI agents
+2. Start and manage chat conversations
+3. Create and execute various types of tasks
+4. View and analyze task results
+5. Manage user accounts and permissions
 
-- `/api/agents`: CRUD operations for AI agents
-- `/api/chats`: Manage chat conversations
-- `/api/models`: Manage AI models
-- `/api/prompts`: Manage prompts and templates
-- `/api/tasks`: Manage tasks
-- `/api/taskresults`: Manage task execution results
-- `/api/users`: User management
-- `/api/parameters`: Manage task parameters
+### Types of Tasks
 
-It also provides an endpoint that manages the LM Studio completions:
--  `/lm-studio/chat/completions`: Offers an OpenAI-like endpoint that interacts with the local LM Studio to load models, presets, and create completions. 
+1. API Tasks:
+   - Google Search
+   - Exa Search
+   - Reddit Search
+   - Wikipedia Search
+   - Arxiv Search
 
-### Creating a Task
+2. Agentic Tasks:
+   - BasicAgentTask: General-purpose tasks executed by an AI agent
+     - CodeExecutionLLMTask: For executing code snippets
+   - PromptAgentTask: Tasks that involve specific prompts or instructions
+     - CheckTask: For validating or checking specific conditions
+     - CodeGenerationLLMTask: For generating code based on prompts
 
-To create a new task, send a POST request to `/api/tasks` with the task details:
-
-```json
-{
-  "task_name": "Example Task",
-  "task_description": "This is an example task",
-  "task_type": "BasicAgentTask",
-  "input_variables": {
-    "type": "object",
-    "properties": {
-      "prompt": {
-        "type": "string",
-        "description": "The input prompt for the task"
-      }
-    },
-    "required": ["prompt"]
-  },
-  "agent": "[agent_id]"
-}
-```
-
-### Starting a Chat
-
-To start a new chat, send a POST request to `/api/chats`:
-
-```json
-{
-  "name": "New Chat",
-  "alice_agent": "[agent_id]",
-  "executor": "[executor_agent_id]",
-  "model_id": "[model_id]"
-}
-```
-
-### Executing a Task
-
-To execute a task, use the Workflow service API. Send a POST request to `/execute_task` with the task ID and inputs:
-
-```json
-{
-  "taskId": "[task_id]",
-  "inputs": {
-    "prompt": "Example prompt for the task"
-  }
-}
-```
+3. Workflows:
+   - Combine multiple tasks into a sequential or conditional flow
+   - Define complex processes involving multiple agents and task types
 
 ## Development
 
@@ -150,7 +104,7 @@ To execute a task, use the Workflow service API. Send a POST request to `/execut
 
 1. Add the model configuration to the `const_model_definitions` in `const.py`.
 2. Update the `ModelManager` class in the Workflow module if necessary.
-3. Add the model to the database using the `/api/models` endpoint.
+3. Add the model to the database using the frontend interface.
 
 ## Contributing
 

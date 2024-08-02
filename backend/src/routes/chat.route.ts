@@ -131,8 +131,6 @@ customRouter.patch('/:chatId/add_message', async (req: AuthRequest, res: Respons
       console.log('Chat not found:', chatId);
       return res.status(404).json({ message: 'Chat not found' });
     }
-
-    console.log('Chat updated successfully', updatedChat);
     res.status(200).json({ message: 'Message added successfully'});
   } catch (error) {
     console.error('Error in add_message route:', error);

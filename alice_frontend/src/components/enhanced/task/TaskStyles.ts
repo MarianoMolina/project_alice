@@ -108,6 +108,16 @@ const useStyles = makeStyles((theme: Theme) => ({
   reRunButton: {
     marginLeft: theme.spacing(1),
   },  
+  chip: {
+    margin: theme.spacing(0.5),
+  },
+  exitCodesContainer: {
+    marginTop: theme.spacing(2),
+  },
+  exitCodeChip: {
+    margin: theme.spacing(0.5),
+    backgroundColor: theme.palette.grey[200],
+  },
 }));
 
 export default useStyles;

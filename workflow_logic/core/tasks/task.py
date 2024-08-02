@@ -147,6 +147,9 @@ class AliceTask(BaseModel, ABC):
         ...
 
     def validate_required_apis(self, api_manager: APIManager) -> bool:
+        if not self.required_apis:
+            LOGGER.debug(f"No required APIs for task {self.task_name}")
+            return True
         for api_type in self.required_apis:
             api = api_manager.get_api_by_type(api_type)
             if not api or not api.is_active:

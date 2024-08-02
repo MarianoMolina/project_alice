@@ -72,8 +72,6 @@ class APIManager(BaseModel):
             print("No LLM APIs found.")
             print(f'APIs: {self.apis}')
             return None
-        print(f'LLM APIs: {llm_apis}')
-        print(f'matching model: {model}')
         if model:
             matching_api = next((api for api in llm_apis if api.api_name == model.api_name and api.is_active), None)
             if matching_api:

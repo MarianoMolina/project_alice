@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
-from workflow_logic.core.api import APIManager, API, ApiType, ApiName, APIEngine
-from workflow_logic.core import AliceModel
-from workflow_logic.util import SearchOutput, LLMConfig
+from workflow_logic.core.api import APIManager, API, APIEngine
+from workflow_logic.core import AliceModel, FunctionParameters, ParameterDefinition
+from workflow_logic.util import SearchOutput, LLMConfig, ApiType, ApiName
 
 @pytest.fixture
 def sample_api():
@@ -64,17 +64,6 @@ def test_retrieve_api_data_non_llm(api_manager):
 def test_retrieve_api_data_no_active_api(api_manager):
     with pytest.raises(ValueError, match="No active API found for type:"):
         api_manager.retrieve_api_data(ApiType.GOOGLE_SEARCH)
-
-import pytest
-from unittest.mock import Mock, AsyncMock, patch
-from workflow_logic.core.api import APIManager, API, ApiType, ApiName
-from workflow_logic.core.model import AliceModel
-from workflow_logic.util import SearchOutput, MessageDict
-from workflow_logic.core.api.engines import APIEngine
-from workflow_logic.util.api_utils import LLMConfig
-from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
-
-# ... (keep the existing fixtures and other tests)
 
 @pytest.mark.asyncio
 async def test_generate_response_with_api_engine_llm(api_manager, sample_api):

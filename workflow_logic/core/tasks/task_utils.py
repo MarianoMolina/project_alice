@@ -11,6 +11,7 @@ available_task_types: list[AliceTask] = [
     BasicAgentTask,
     APITask
 ]
+
 class TaskExecutionRequest(BaseModel):
     taskId: str
     inputs: Dict[str, Any]

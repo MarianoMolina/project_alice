@@ -94,6 +94,7 @@ export interface ChatComponentProps {
     handleTaskClick?: (taskId: string) => void;
     handleTaskResultClick?: (taskResultId: string) => void;
     handleAgentClick?: (agentId: string) => void;
+    handleMessageClick?: (messageId: string) => void;
     showHeaders?: boolean;
 }
 

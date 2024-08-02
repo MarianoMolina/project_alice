@@ -1,9 +1,8 @@
-from typing import Optional, Dict, Any, Union
-from pydantic import BaseModel, Field
 from bson import ObjectId
-from workflow_logic.util.utils import User
+from pydantic import BaseModel, Field
+from typing import Optional, Dict, Any, Union
+from workflow_logic.util import User, ApiType, ApiName, LLMConfig
 from workflow_logic.core.model import AliceModel
-from workflow_logic.util.api_utils import ApiType, ApiName, LLMConfig
 
 class API(BaseModel):
     """

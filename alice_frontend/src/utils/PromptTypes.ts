@@ -41,6 +41,7 @@ export interface PromptComponentProps {
     onView?: (prompt: Prompt) => void;
     onInteraction?: (prompt: Prompt) => void;
     showHeaders?: boolean;
+    handleParameterClick?: (parameterId: string) => void;
 }
 export const getDefaultPromptForm = (): Partial<Prompt> => ({
     name: '',

@@ -38,6 +38,8 @@ const EnhancedAgent: React.FC<EnhancedAgentProps> = (props) => {
       onInteraction: props.onInteraction,
       showHeaders: props.showHeaders,
       onView: props.onView,
+      handlePromptClick: props.handlePromptClick,
+      handleModelClick: props.handleModelClick,
     };
 
     switch (props.mode) {

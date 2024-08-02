@@ -13,6 +13,9 @@ import EnhancedTaskResponse from '../components/enhanced/task_response/task_resp
 import EnhancedAgent from '../components/enhanced/agent/agent/EnhancedAgent';
 import ChatInput from '../components/enhanced/chat/ChatInput';
 import useStyles from '../styles/ChatAliceStyles';
+import EnhancedPrompt from '../components/enhanced/prompt/prompt/EnhancedPrompt';
+import EnhancedModel from '../components/enhanced/model/model/EnhancedModel';
+import EnhancedParameter from '../components/enhanced/parameter/parameter/EnhancedParameter';
 
 const ChatAlice: React.FC = () => {
   const classes = useStyles();
@@ -38,6 +41,13 @@ const ChatAlice: React.FC = () => {
   const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>(undefined);
   const [openChatDialog, setOpenChatDialog] = useState(false);
   const [selectedChatId, setSelectedChatId] = useState<string | undefined>(undefined);
+  const [openPromptDialog, setOpenPromptDialog] = useState(false);
+  const [selectedPromptId, setSelectedPromptId] = useState<string | undefined>(undefined);
+  const [openModelDialog, setOpenModelDialog] = useState(false);
+  const [selectedModelId, setSelectedModelId] = useState<string | undefined>(undefined);
+  const [openParameterDialog, setOpenParameterDialog] = useState(false);
+  const [selectParameterId, setSelectParameterId] = useState<string | undefined>(undefined);
+
   const [activeTab, setActiveTab] = useState('Select Chat');
   const [listKey, setListKey] = useState(0);
 
@@ -118,15 +128,25 @@ const ChatAlice: React.FC = () => {
     setIsTaskResultDialogOpen(true);
   }
 
-  const handleCloseTaskResult = () => {
-    setIsTaskResultDialogOpen(false);
-    setSelectedResult(null);
-  };
-
   const triggerChatDialog = (chat: AliceChat) => {
     setSelectedChatId(chat._id);
     setOpenChatDialog(true);
   };
+
+  const triggerPromptDialog = (promptId: string) => {
+    setSelectedPromptId(promptId);
+    setOpenPromptDialog(true);
+  };
+
+  const triggerModelDialog = (modelId: string) => {
+    setSelectedModelId(modelId);
+    setOpenModelDialog(true);
+  };
+
+  const triggerParameterDialog = (parameterId: string) => {
+    setSelectParameterId(parameterId);
+    setOpenParameterDialog(true);
+  }
 
   const renderSidebarContent = (tabName: string) => {
     switch (tabName) {
@@ -213,16 +233,25 @@ const ChatAlice: React.FC = () => {
           />
         </Box>
         <Dialog open={openTaskDialog} onClose={() => setOpenTaskDialog(false)}>
-          {selectedTaskId && <EnhancedTask itemId={selectedTaskId} mode={'card'} fetchAll={false} />}
+          {selectedTaskId && <EnhancedTask itemId={selectedTaskId} mode={'card'} fetchAll={false} handleAgentClick={triggerAgentDialogId} handleModelClick={triggerModelDialog} handleTaskClick={triggerTaskDialogId} handlePromptClick={triggerPromptDialog}/>}
         </Dialog>
-        <Dialog open={isTaskResultDialogOpen} onClose={handleCloseTaskResult} fullWidth maxWidth="md">
+        <Dialog open={isTaskResultDialogOpen} onClose={() => setIsTaskResultDialogOpen(false)}>
           {selectedResult && <EnhancedTaskResponse itemId={selectedResult._id} fetchAll={false} mode={'card'} />}
         </Dialog>
         <Dialog open={openAgentDialog} onClose={() => setOpenAgentDialog(false)}>
-          {selectedAgentId && <EnhancedAgent itemId={selectedAgentId} mode={'card'} fetchAll={false} />}
+          {selectedAgentId && <EnhancedAgent itemId={selectedAgentId} mode={'card'} fetchAll={false} handleModelClick={triggerModelDialog} handlePromptClick={triggerPromptDialog} />}
         </Dialog>
         <Dialog open={openChatDialog} onClose={() => setOpenChatDialog(false)}>
-          {selectedChatId && <EnhancedChat itemId={selectedChatId} mode={'card'} fetchAll={false} handleTaskClick={triggerTaskDialogId} />}
+          {selectedChatId && <EnhancedChat itemId={selectedChatId} mode={'card'} fetchAll={false} handleTaskClick={triggerTaskDialogId} handleAgentClick={triggerAgentDialogId}/>}
+        </Dialog>
+        <Dialog open={openPromptDialog} onClose={() => setOpenPromptDialog(false)}>
+          {selectedPromptId && <EnhancedPrompt itemId={selectedPromptId} mode={'card'} fetchAll={false} handleParameterClick={triggerParameterDialog} />}
+        </Dialog>
+        <Dialog open={openModelDialog} onClose={() => setOpenModelDialog(false)}>
+          {selectedModelId && <EnhancedModel itemId={selectedModelId} mode={'card'} fetchAll={false} />}
+        </Dialog>
+        <Dialog open={openParameterDialog} onClose={() => setOpenParameterDialog(false)}>
+          {selectParameterId && <EnhancedParameter itemId={selectParameterId} mode={'card'} fetchAll={false} />}
         </Dialog>
         <Dialog open={openChatCreateDialog} onClose={() => setOpenChatCreateDialog(false)}>
           <EnhancedChat

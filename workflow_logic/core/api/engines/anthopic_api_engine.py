@@ -17,7 +17,7 @@ ANTHROPIC_PRICING_1k = {
 }
 
 class LLMAnthropic(LLMEngine):
-    async def generate_api_response(self, api_data: LLMConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[Dict[str, Any]]] = None, max_tokens: Optional[int] = None, tool_choice: Optional[str] = 'auto', n: Optional[int] = 1, **kwargs) -> MessageDict:
+    async def generate_api_response(self, api_data: LLMConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[Dict[str, Any]]] = None, max_tokens: Optional[int] = None, tool_choice: str = 'auto', n: Optional[int] = 1, **kwargs) -> MessageDict:
         if not api_data.api_key:
             raise ValueError("Anthropic API key not found in API data")
 
@@ -87,7 +87,7 @@ class LLMAnthropic(LLMEngine):
             raise
         
     def _convert_into_tool_params(self, tools: List[ToolFunction]) -> List[ToolParam]:
-        return [tool.convert_to_tool_params() for tool in tools]
+        return [(tool if isinstance(tool, ToolFunction) else ToolFunction(**tool)).convert_to_tool_params() for tool in tools]
 
     def calculate_cost(self, input_tokens: int, output_tokens: int, model: str) -> float:
         if model in ANTHROPIC_PRICING_1k:

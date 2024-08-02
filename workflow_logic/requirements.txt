@@ -18,6 +18,7 @@ pydantic
 jinja2
 pillow
 python-dotenv
+pymongo # BSON
 
 # Third party APIs
 google-api-python-client

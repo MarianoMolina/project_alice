@@ -1,9 +1,9 @@
 from pydantic import Field
 from typing import List, Dict, Optional, Callable, Tuple
-from workflow_logic.core.api import APIManager, ApiType
+from workflow_logic.core.api import APIManager
 from workflow_logic.core.agent.agent import AliceAgent
 from workflow_logic.core.tasks.task import AliceTask
-from workflow_logic.util import MessageDict, TaskResponse, LLMChatOutput, LOGGER
+from workflow_logic.util import MessageDict, TaskResponse, LLMChatOutput, LOGGER, ApiType
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition, FunctionConfig
 
 class BasicAgentTask(AliceTask):

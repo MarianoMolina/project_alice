@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from workflow_logic.core import BasicAgentTask, FunctionParameters, ParameterDefinition, AliceAgent, Prompt, AliceModel
-from workflow_logic.core.api import APIManager, ApiType
-from workflow_logic.util import TaskResponse, MessageDict, LLMChatOutput
+from workflow_logic.core.api import APIManager
+from workflow_logic.util import TaskResponse, MessageDict, LLMChatOutput, ApiType
 
 @pytest.fixture
 def mock_api_manager():

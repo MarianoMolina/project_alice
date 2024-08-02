@@ -41,6 +41,8 @@ export interface AgentComponentProps {
   isInteractable?: boolean;
   onInteraction?: (agent: AliceAgent) => void;
   onView?: (agent: AliceAgent) => void;
+  handlePromptClick?: (promptId: string) => void;
+  handleModelClick?: (modelId: string) => void;
   showHeaders?: boolean;
 }
 export const getDefaultAgentForm = (): Partial<AliceAgent> => ({

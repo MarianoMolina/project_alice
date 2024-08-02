@@ -82,6 +82,10 @@ export interface TaskComponentProps {
   onExecute?: () => Promise<any>;
   isInteractable?: boolean;
   showHeaders?: boolean;
+  handleModelClick?: (modelId: string) => void;
+  handleAgentClick?: (agentId: string) => void;
+  handleTaskClick?: (taskId: string) => void;
+  handlePromptClick?: (promptId: string) => void;
 }
 
 export interface TaskFormsProps extends TaskComponentProps {
