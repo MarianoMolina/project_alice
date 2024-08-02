@@ -1,4 +1,5 @@
 # Alice: Advanced Language Intelligence and Cognitive Engine
+![Alice LOGO](./alice_frontend/public/logo_alice.ico)
 
 Alice is a sophisticated AI assistant framework that integrates task execution and intelligent chat capabilities. It provides a flexible environment for creating, managing, and deploying AI agents for various purposes, leveraging a microservices architecture with MongoDB for data persistence.
 
@@ -57,7 +58,8 @@ The project consists of three main components:
 
 5. Run the appropriate script for your operating system:
    - Windows: Run `run.bat`
-   - Linux/Mac: Run the equivalent shell script
+   - Linux/Mac: Run `run.sh`
+Alternatively you can just execute run.py. 
 
 This will build and launch the containers. Once ready, the frontend will be accessible at `http://localhost:4000/`.
 
@@ -65,11 +67,15 @@ This will build and launch the containers. Once ready, the frontend will be acce
 
 The Alice framework provides a user-friendly frontend interface for interacting with the system. Through this interface, you can:
 
-1. Create and manage AI agents
+1. Create and manage AI agents, models, prompts, parameters, tasks, api, etc. in your personal database
+![Database](./img/database.PNG "View, create and edit all the elements you'll need")
 2. Start and manage chat conversations
+![Chat](./img/chat.PNG "Chat with your own Alice AI Assistant")
 3. Create and execute various types of tasks
+![Execute Task](./img/exec_task.PNG "Execute tasks to test them extensively")
 4. View and analyze task results
-5. Manage user accounts and permissions
+![Task Results](./img/task_result.PNG "View task results and troubleshoot your tasks")
+5. Manage user accounts and permissions, api config, etc. 
 
 ### Types of Tasks
 
@@ -100,11 +106,11 @@ The Alice framework provides a user-friendly frontend interface for interacting 
 3. Add the new task type to the `task_type` enum in the `task.model.ts` file.
 4. Update the task creation logic in the frontend to include the new task type.
 
-### Adding New Models
+### Adding New Models, APIs, Tasks, Chats, Agents
 
-1. Add the model configuration to the `const_model_definitions` in `const.py`.
-2. Update the `ModelManager` class in the Workflow module if necessary.
-3. Add the model to the database using the frontend interface.
+1. Simply navigate to the Database page in the frontend and select the entity type you want to create and click on create new. 
+2. If you want to add them so that new users start with these extra entities, you can modify the workflow_manager.db_app.initialization.modules, add new modules, or remove them
+3. If you create tasks or workflows that you would like to share, let me know! If people want to share, I'll offer a way to do so. 
 
 ## Contributing
 
