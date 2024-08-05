@@ -268,14 +268,15 @@ class AliceAgent(BaseModel):
             api_message["function_call"] = message["function_call"]
         return api_message
 
-    async def chat(self, api_manager: APIManager, initial_message: str, max_turns: int = 1, tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []) -> List[MessageDict]:
-        messages = [MessageDict(role="user", content=initial_message)]
-        
+    async def chat(self, api_manager: APIManager, messages: Optional[List[MessageDict]] = [], initial_message: Optional[str] = None, max_turns: int = 1, tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []) -> List[MessageDict]:
+        all_messages = messages if messages else []
+        if initial_message:
+            all_messages.append(MessageDict(role="user", content=initial_message))
         for _ in range(max_turns):
             new_messages = await self.generate_response(api_manager, messages, tool_map, tools_list)
             messages.extend(new_messages)
             
-            if any("TERMINATE" in msg.content for msg in new_messages):
+            if any("TERMINATE" in msg.get('content') for msg in new_messages):
                 break
         
         return messages

@@ -51,15 +51,17 @@ class BasicAgentTask(AliceTask):
             combined_function_map.update(function_details["function_map"])
         return combined_function_map
     
-    async def run(self, api_manager: APIManager, **kwargs) -> TaskResponse:     
+    async def generate_response(self, api_manager: APIManager, **kwargs) ->  Tuple[List[MessageDict], int]:     
         messages = kwargs.get('messages', [])
-        new_messages = await self.agent.chat(api_manager=api_manager, messages=messages, max_turns=1, tool_map=self.tool_map(api_manager), tool_list=self.tool_list(api_manager))
-        
+        new_messages = await self.agent.chat(api_manager=api_manager, messages=messages, max_turns=1, tool_map=self.tool_map(api_manager), tools_list=self.tool_list(api_manager))
         is_terminated = True if 'TERMINATE' in new_messages[-1]['content'] else False
-
         exitcode = self.get_exit_code(new_messages, is_terminated)
-        all_messages = messages + new_messages
-        chat_output = LLMChatOutput(content=all_messages)
+        return new_messages, exitcode
+    
+    async def run(self, api_manager: APIManager, **kwargs) -> TaskResponse:     
+        new_messages, exitcode = await self.generate_response(api_manager, **kwargs)
+        chat_output = LLMChatOutput(content=new_messages)
+        exec_history = kwargs.pop("execution_history", None)
         
         return TaskResponse(
             task_id=self.id,
@@ -70,8 +72,8 @@ class BasicAgentTask(AliceTask):
             task_outputs=str(chat_output),
             task_content=chat_output,
             task_inputs=kwargs,
-            result_diagnostic="Task executed successfully." if not is_terminated else "Task execution terminated by the agent.",
-            execution_history=kwargs.get("execution_history", [])
+            result_diagnostic="Task executed successfully." if exitcode == 0 else "Task execution failed.",
+            execution_history=exec_history
         )
     
     def get_exit_code(self, chat_output: List[MessageDict], response_code: bool) -> int:
@@ -109,12 +111,17 @@ class CodeExecutionLLMTask(BasicAgentTask):
             return 1
         return 0
     
-    async def generate_response(self, messages: List[MessageDict]) -> Tuple[List[MessageDict], bool]:
-        if not messages or not 'content' in messages[-1]:
+    async def generate_response(self, api_manager: APIManager, **kwargs) ->  Tuple[List[MessageDict], int]:     
+        if not kwargs.get('messages'):
             LOGGER.warning(f"No messages to execute code from in task {self.task_name}")
-            return [], True
-        responses = self.agent._process_code_execution(messages[-1]['content'])
-        if not responses:
-            LOGGER.warning(f"Code execution failed")
-            return [], True
-        return responses, False
+            return [], self.get_exit_code([], False)
+        code_execs = []
+        for msg in kwargs.get('messages'):
+            if not 'content' in msg:
+                LOGGER.warning(f"No content in message: {msg}")
+                continue
+            code_execs.extend(await self.agent._process_code_execution(msg['content']))
+        if not code_execs:
+            LOGGER.warning(f"No code executions found in messages: {kwargs.get('messages')}")
+            return [], self.get_exit_code([], False)
+        return code_execs, self.get_exit_code(code_execs, True)

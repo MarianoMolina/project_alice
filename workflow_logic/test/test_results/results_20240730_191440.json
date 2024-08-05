@@ -1,0 +1,183 @@
+{
+    "DBTests": {
+        "test_results": {
+            "models_GPT4o_validation": "Success",
+            "models_Llama3_8B_Instruct_validation": "Success",
+            "models_Claude3.5_validation": "Success",
+            "models_Llama3_8B_Hermes_validation": "Success",
+            "apis_reddit_search_validation": "Success",
+            "apis_exa_search_validation": "Success",
+            "apis_google_search_validation": "Success",
+            "apis_wikipedia_search_validation": "Success",
+            "apis_arxiv_search_validation": "Success",
+            "apis_openai_validation": "Success",
+            "apis_anthropic_validation": "Success",
+            "apis_local_lm_studio_validation": "Success",
+            "parameters_prompt_parameter_validation": "Success",
+            "parameters_max_results_parameter_validation": "Success",
+            "parameters_sort_parameter_validation": "Success",
+            "parameters_time_filter_parameter_validation": "Success",
+            "parameters_subreddit_parameter_validation": "Success",
+            "parameters_outputs_plan_workflow_validation": "Success",
+            "parameters_outputs_generate_code_validation": "Success",
+            "parameters_outputs_execute_code_validation": "Success",
+            "parameters_outputs_generate_unit_tests_validation": "Success",
+            "parameters_outputs_execute_unit_tests_validation": "Success",
+            "prompts_basic_prompt_validation": "Success",
+            "prompts_research_agent_validation": "Success",
+            "prompts_default_system_message_validation": "Success",
+            "prompts_executor_agent_validation": "Success",
+            "prompts_planner_agent_validation": "Success",
+            "prompts_coding_agent_validation": "Success",
+            "prompts_unit_tester_agent_validation": "Success",
+            "prompts_code_generation_task_validation": "Success",
+            "prompts_code_execution_task_validation": "Success",
+            "prompts_unit_test_check_agent_validation": "Success",
+            "prompts_unit_test_check_prompt_validation": "Success",
+            "agents_research_agent_validation": "Success",
+            "agents_default_alice_validation": "Success",
+            "agents_executor_agent_validation": "Success",
+            "agents_coding_planner_agent_validation": "Success",
+            "agents_coding_agent_validation": "Success",
+            "agents_unit_tester_agent_validation": "Success",
+            "agents_unit_test_execution_checker_agent_validation": "Success",
+            "tasks_reddit_search_validation": "Success",
+            "tasks_exa_search_validation": "Success",
+            "tasks_wikipedia_search_validation": "Success",
+            "tasks_google_search_validation": "Success",
+            "tasks_arxiv_search_validation": "Success",
+            "tasks_search_hub_validation": "Success",
+            "tasks_plan_workflow_validation": "Success",
+            "tasks_generate_code_validation": "Success",
+            "tasks_execute_code_validation": "Success",
+            "tasks_generate_unit_tests_validation": "Success",
+            "tasks_execute_unit_tests_validation": "Success",
+            "tasks_check_unit_test_results_validation": "Success",
+            "tasks_coding_workflow_validation": "Success",
+            "chats_default_chat_validation": "Success",
+            "chats_advanced_chat_validation": "Success",
+            "initialization": "Success"
+        },
+        "summary": {
+            "status": "success",
+            "total_tests": 56,
+            "success_count": 56,
+            "error_count": 0,
+            "failure_count": 0,
+            "errors": [],
+            "failures": [],
+            "timestamp": "2024-07-30T19:14:31.540037"
+        }
+    },
+    "ChatTests": {
+        "test_results": {
+            "New Chat": {
+                "basic_response": "Success",
+                "multi_turn_conversation": "Success",
+                "function_execution": "Skipped",
+                "code_execution": "Skipped"
+            },
+            "Advanced Chat": {
+                "basic_response": "Success",
+                "multi_turn_conversation": "Success",
+                "function_execution": "Failed: Function call not detected in response - []",
+                "code_execution": "Skipped"
+            }
+        },
+        "summary": {
+            "status": "failed",
+            "total_tests": 8,
+            "success_count": 4,
+            "error_count": 0,
+            "failure_count": 4,
+            "errors": [],
+            "failures": [
+                "New Chat - function_execution: Skipped",
+                "New Chat - code_execution: Skipped",
+                "Advanced Chat - function_execution: Failed: Function call not detected in response - []",
+                "Advanced Chat - code_execution: Skipped"
+            ],
+            "timestamp": "2024-07-30T19:14:40.228028"
+        }
+    },
+    "TaskTests": {
+        "test_results": {
+            "task_initialization": "Success",
+            "task_reddit_search": {
+                "basic_execution": "Success",
+                "api_validation": "Success",
+                "function_generation": "Success"
+            },
+            "task_exa_search": {
+                "basic_execution": "Success",
+                "api_validation": "Success",
+                "function_generation": "Success"
+            },
+            "task_wikipedia_search": {
+                "basic_execution": "Success",
+                "api_validation": "Success",
+                "function_generation": "Success"
+            },
+            "task_google_search": {
+                "basic_execution": "Success",
+                "api_validation": "Success",
+                "function_generation": "Success"
+            },
+            "task_arxiv_search": {
+                "basic_execution": "Success",
+                "api_validation": "Success",
+                "function_generation": "Success"
+            },
+            "task_search_hub": {
+                "basic_execution": "Success",
+                "api_validation": "Success",
+                "function_generation": "Success"
+            },
+            "task_plan_workflow": {
+                "basic_execution": "Success",
+                "api_validation": "Success",
+                "function_generation": "Success"
+            },
+            "task_generate_code": {
+                "basic_execution": "Success",
+                "api_validation": "Success",
+                "function_generation": "Success"
+            },
+            "task_execute_code": {
+                "basic_execution": "Success",
+                "api_validation": "Success",
+                "function_generation": "Success"
+            },
+            "task_generate_unit_tests": {
+                "basic_execution": "Success",
+                "api_validation": "Success",
+                "function_generation": "Success"
+            },
+            "task_execute_unit_tests": {
+                "basic_execution": "Success",
+                "api_validation": "Success",
+                "function_generation": "Success"
+            },
+            "task_check_unit_test_results": {
+                "basic_execution": "Success",
+                "api_validation": "Success",
+                "function_generation": "Success"
+            },
+            "task_coding_workflow": {
+                "basic_execution": "Success",
+                "api_validation": "Success",
+                "function_generation": "Success"
+            }
+        },
+        "summary": {
+            "status": "success",
+            "total_tests": 40,
+            "success_count": 40,
+            "error_count": 0,
+            "failure_count": 0,
+            "errors": [],
+            "failures": [],
+            "timestamp": "2024-07-30T19:14:40.293026"
+        }
+    }
+}

@@ -2,11 +2,11 @@ import asyncio, json, os
 from datetime import datetime
 from pydantic import BaseModel
 from typing import Dict, Any
-from workflow_logic.tests.component_tests.test_environment import TestEnvironment
-from workflow_logic.tests.component_tests.db_test import DBTests
-from workflow_logic.tests.component_tests.api_test import APITests
-from workflow_logic.tests.component_tests.chat_tests import ChatTests
-from workflow_logic.tests.component_tests.task_test import TaskTests
+from workflow_logic.test.component_tests.test_environment import TestEnvironment
+from workflow_logic.test.component_tests.db_test import DBTests
+from workflow_logic.test.component_tests.api_test import APITests
+from workflow_logic.test.component_tests.chat_tests import ChatTests
+from workflow_logic.test.component_tests.task_test import TaskTests
 from workflow_logic.db_app.initialization import DB_STRUCTURE
  
 async def main():

@@ -3,7 +3,7 @@ from typing import Dict, Any
 from pydantic import ValidationError
 from workflow_logic.util.logging_config import LOGGER
 from workflow_logic.db_app import DBStructure, DBInitManager, BackendFunctionalityAPI
-from workflow_logic.tests.component_tests.test_environment import TestModule
+from workflow_logic.test.component_tests.test_environment import TestModule
 
 class DBTests(TestModule):
     name: str = "DBTests"

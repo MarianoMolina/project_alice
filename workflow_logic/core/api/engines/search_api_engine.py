@@ -34,7 +34,17 @@ class WikipediaSearchAPI(APISearchEngine):
         # Wikipedia doesn't require API keys, so we don't need to use api_data
         search_results = wikipedia.search(prompt, results=max_results, suggestion=True)
         print(f'search_results: {search_results} type: {type(search_results)} type of search_results[0]: {type(search_results[0])}')
-        detailed_results = [wikipedia.page(title=result, auto_suggest=False) for result in search_results[0]]
+        detailed_results = []
+        for result in search_results[0]:
+            try:
+                detailed_results += [wikipedia.page(title=result, auto_suggest=False)]
+            except wikipedia.exceptions.DisambiguationError as e:
+                try:
+                    detailed_results += [wikipedia.page(title=e.options[0], auto_suggest=False)]
+                except:
+                    pass
+        if not detailed_results:
+            raise ValueError("No results found")
         return SearchOutput(content=[
             SearchResult(
                 title=result.title,

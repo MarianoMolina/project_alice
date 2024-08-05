@@ -2,7 +2,7 @@ import traceback, json
 from workflow_logic.util.logging_config import LOGGER
 from unittest.mock import patch, AsyncMock
 from typing import Dict, Any, List, Optional
-from workflow_logic.tests.component_tests.test_environment import TestModule
+from workflow_logic.test.component_tests.test_environment import TestModule
 from workflow_logic.db_app import DBInitManager
 from workflow_logic.core import AliceModel, AliceChat, APIManager
 from workflow_logic.util import MessageDict, DatabaseTaskResponse, ApiType
