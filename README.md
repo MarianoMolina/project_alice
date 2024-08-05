@@ -51,7 +51,7 @@ The project consists of three main components:
 
 3. Download the repository:
    ```
-   git clone [repository_url]
+   git clone https://github.com/MarianoMolina/project_alice.git
    ```
 
 4. Create a `.env` file in the root directory using the `template.env` file as a reference. Complete the data for any APIs you want to use (e.g., OpenAI API key).
@@ -59,7 +59,7 @@ The project consists of three main components:
 5. Run the appropriate script for your operating system:
    - Windows: Run `run.bat`
    - Linux/Mac: Run `run.sh`
-Alternatively you can just execute run.py. 
+Alternatively you can just execute run.py using `python run.py` in a commandline while in the repository folder
 
 This will build and launch the containers. Once ready, the frontend will be accessible at `http://localhost:4000/`.
 
@@ -79,7 +79,7 @@ The Alice framework provides a user-friendly frontend interface for interacting 
 
 ### Types of Tasks
 
-1. API Tasks:
+1. API Tasks: These tasks don't use an LLM model, but instead other types of APIs to produce information. Each has their input structure, but usually take a str prompt and an int max_results: 
    - Google Search
    - Exa Search
    - Reddit Search
@@ -87,15 +87,15 @@ The Alice framework provides a user-friendly frontend interface for interacting 
    - Arxiv Search
 
 2. Agentic Tasks:
-   - BasicAgentTask: General-purpose tasks executed by an AI agent
+   - BasicAgentTask: General-purpose tasks executed by an AI agent. Takes a list of messages as input. If the task has other tasks available, the agent can use those tasks as tools. 
      - CodeExecutionLLMTask: For executing code snippets
-   - PromptAgentTask: Tasks that involve specific prompts or instructions
+   - PromptAgentTask: Tasks that deploy templated prompts, allowing the inputs to be a string ({{ prompt }} is the basic task prompt) instead of a list of messages. 
      - CheckTask: For validating or checking specific conditions
      - CodeGenerationLLMTask: For generating code based on prompts
 
 3. Workflows:
    - Combine multiple tasks into a sequential or conditional flow
-   - Define complex processes involving multiple agents and task types
+   - Define complex processes involving multiple agents and task types, check tasks, api tasks, agents with tools, etc. 
 
 ## Development
 
