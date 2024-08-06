@@ -185,17 +185,26 @@ class AliceAgent(BaseModel):
 
         return True, None
 
-    async def _process_code_execution(self, content: str) -> List[MessageDict]:
-        code_blocks = self._extract_code_blocks(content)
+    async def _process_code_execution(self, code_blocks: List[Tuple[str, str]]) -> List[MessageDict]:
         if not code_blocks:
+            LOGGER.warning(f'No code blocks found')
             return []
 
-        executed_messages = []
+        # Group code blocks by language
+        code_by_lang = {}
         for lang, code in code_blocks:
-            exit_code, logs, _ = self._execute_code_in_docker(code, lang)
+            if lang not in code_by_lang:
+                code_by_lang[lang] = []
+            code_by_lang[lang].append(code)
+
+        executed_messages = []
+        for lang, codes in code_by_lang.items():
+            # Merge code blocks for each language
+            merged_code = "\n\n".join(codes)
+            exit_code, logs, _ = self._execute_code_in_docker(merged_code, lang)
             executed_messages.append(MessageDict(
                 role="tool",
-                content=f"Exit Code: {exit_code}\nOutput:\n{logs}",
+                content=f"Language: {lang}\nExit Code: {exit_code}\nOutput:\n{logs}",
                 generated_by="tool",
                 step="code_execution",
                 type="text"
@@ -210,7 +219,7 @@ class AliceAgent(BaseModel):
         current_language = ""
 
         for line in lines:
-            if line.startswith('```'):
+            if line.strip().startswith('```'):
                 if in_code_block:
                     code_blocks.append((current_language, '\n'.join(current_block)))
                     current_block = []
@@ -224,34 +233,57 @@ class AliceAgent(BaseModel):
         return code_blocks
 
     def _execute_code_in_docker(self, code: str, lang: str) -> Tuple[int, str, Optional[str]]:
+        LOGGER.info(f"Executing code in {lang}:")
+        LOGGER.info(code)
+        
         client = docker.from_env()
         
-        with tempfile.NamedTemporaryFile(mode='w', suffix=f'.{lang}', delete=False) as temp_file:
-            temp_file.write(code)
-            temp_file_path = temp_file.name
-
         try:
             image = "python:3-slim" if lang.startswith("python") else "ubuntu:latest"
             
-            cmd = ["python", f"/code/{os.path.basename(temp_file_path)}"] if lang.startswith("python") else ["sh", "-c", f"chmod +x /code/{os.path.basename(temp_file_path)} && /code/{os.path.basename(temp_file_path)}"]
+            # Create a Dockerfile
+            dockerfile = f"""
+            FROM {image}
+            WORKDIR /app
+            COPY code.{lang} .
+            CMD ["python", "code.{lang}"] if "{lang}".startswith("python") else ["sh", "code.{lang}"]
+            """
             
-            container = client.containers.run(
-                image,
-                command=cmd,
-                volumes={os.path.dirname(temp_file_path): {'bind': '/code', 'mode': 'ro'}},
-                detach=True
-            )
-
-            exit_code = container.wait()['StatusCode']
+            # Create a build context
+            with tempfile.TemporaryDirectory() as tmpdir:
+                # Write the code to a file
+                with open(os.path.join(tmpdir, f'code.{lang}'), 'w') as f:
+                    f.write(code)
+                
+                # Write the Dockerfile
+                with open(os.path.join(tmpdir, 'Dockerfile'), 'w') as f:
+                    f.write(dockerfile)
+                
+                # Build the image
+                image, _ = client.images.build(path=tmpdir, rm=True)
+            
+            # Run the container
+            container = client.containers.run(image.id, detach=True)
+            
+            container.wait()
             logs = container.logs().decode('utf-8')
+            exit_code = container.attrs['State']['ExitCode']
 
-            return exit_code, logs, image
+            LOGGER.info(f"Container exit code: {exit_code}")
+            LOGGER.info(f"Container logs: {logs}")
+
+            return exit_code, logs, image.id
         
+        except docker.errors.DockerException as e:
+            LOGGER.error(f"Docker error during execution: {str(e)}")
+            return 1, str(e), None
+        except Exception as e:
+            LOGGER.error(f"Error during Docker execution: {str(e)}")
+            return 1, str(e), None
         finally:
-            os.unlink(temp_file_path)
             if 'container' in locals():
                 container.remove()
-
+                
     def _prepare_messages_for_api(self, messages: List[MessageDict]) -> List[Dict[str, Any]]:
         """Prepare messages for the API call, including the system message."""
         return [self._convert_message_dict_to_api_format(msg) for msg in messages]

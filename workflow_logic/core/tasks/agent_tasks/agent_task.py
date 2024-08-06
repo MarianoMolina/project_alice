@@ -3,7 +3,7 @@ from typing import List, Dict, Optional, Callable, Tuple
 from workflow_logic.core.api import APIManager
 from workflow_logic.core.agent.agent import AliceAgent
 from workflow_logic.core.tasks.task import AliceTask
-from workflow_logic.util import MessageDict, TaskResponse, LLMChatOutput, LOGGER, ApiType
+from workflow_logic.util import MessageDict, TaskResponse, LLMChatOutput, ApiType
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition, FunctionConfig
 
 class BasicAgentTask(AliceTask):
@@ -78,50 +78,3 @@ class BasicAgentTask(AliceTask):
     
     def get_exit_code(self, chat_output: List[MessageDict], response_code: bool) -> int:
         return 0 if (chat_output and 'content' in chat_output[-1]) else 1
-    
-
-    
-class CodeExecutionLLMTask(BasicAgentTask):
-    """
-    A task for executing code that is extracted from a prompt or previous outputs.
-
-    This task is capable of executing code in specified languages and handling
-    the execution results.
-
-    Attributes:
-        agent (AliceAgent): The agent responsible for code execution.
-        task_name (str): The name of the task, defaulting to "execute_code".
-        exit_codes (dict[int, str]): A mapping of exit codes to their descriptions.
-        valid_languages (list[str]): A list of programming languages that can be executed.
-        timeout (int): The maximum time allowed for code execution.
-
-    Methods:
-        get_exit_code: Determines the exit code based on the success of code execution.
-        generate_response: Handles the extraction and execution of code from the input messages.
-    """
-    agent: AliceAgent = Field(..., description="The agent to use for the task")
-    task_name: str = Field("execute_code", description="The name of the task")
-    exit_codes: dict[int, str] = Field({0: "Success", 1: "Execution failed."}, description="A dictionary of exit codes for the task")
-    valid_languages: list[str] = Field(["python", "shell"], description="A list of valid languages for code execution")
-    timeout: int = Field(50, description="The maximum time in seconds to wait for code execution")
-    required_apis: Optional[List[ApiType]] = Field(None, description="A list of required APIs for the task")
-
-    def get_exit_code(self, chat_output: List[MessageDict], response_code: bool) -> int:
-        if not chat_output or response_code or not 'content' in chat_output[-1] or chat_output[-1]["content"].startswith("Error"):
-            return 1
-        return 0
-    
-    async def generate_response(self, api_manager: APIManager, **kwargs) ->  Tuple[List[MessageDict], int]:     
-        if not kwargs.get('messages'):
-            LOGGER.warning(f"No messages to execute code from in task {self.task_name}")
-            return [], self.get_exit_code([], False)
-        code_execs = []
-        for msg in kwargs.get('messages'):
-            if not 'content' in msg:
-                LOGGER.warning(f"No content in message: {msg}")
-                continue
-            code_execs.extend(await self.agent._process_code_execution(msg['content']))
-        if not code_execs:
-            LOGGER.warning(f"No code executions found in messages: {kwargs.get('messages')}")
-            return [], self.get_exit_code([], False)
-        return code_execs, self.get_exit_code(code_execs, True)

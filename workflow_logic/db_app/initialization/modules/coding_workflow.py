@@ -71,7 +71,7 @@ coding_workflow_module = CodingWorkflowModule(
             {
                 "key": "code_execution_task",
                 "name": "Code Execution Task",
-                "content": "This is the code: {{ outputs_generate_code }}",
+                "content": "This is the code:\n{{ outputs_generate_code }}",
                 "is_templated": True,
                 "parameters": {
                     "type": "object",
@@ -79,6 +79,20 @@ coding_workflow_module = CodingWorkflowModule(
                         "outputs_generate_code": "outputs_generate_code",
                     },
                     "required": ["outputs_generate_code"]
+                }
+            },
+            {
+                "key": "test_execution_task",
+                "name": "Test Code Execution Task",
+                "content": "This is the code:\n{{ outputs_generate_unit_tests }}",
+                "is_templated": True,
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "outputs_generate_code": "outputs_generate_code",
+                        "outputs_generate_unit_tests": "outputs_generate_unit_tests",
+                    },
+                    "required": ["outputs_generate_unit_tests"]
                 }
             },
             {
@@ -213,6 +227,7 @@ coding_workflow_module = CodingWorkflowModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
+                        "outputs_plan_workflow": "outputs_plan_workflow",
                         "outputs_generate_code": "outputs_generate_code",
                         "outputs_execute_code": "outputs_execute_code",
                         "outputs_generate_unit_tests": "outputs_generate_unit_tests",
@@ -238,7 +253,7 @@ coding_workflow_module = CodingWorkflowModule(
                     "required": ["outputs_generate_unit_tests"]
                 },
                 "templates": {
-                    "task_template": "code_execution_task"
+                    "task_template": "test_execution_task"
                 }
             },
             {
@@ -250,6 +265,7 @@ coding_workflow_module = CodingWorkflowModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
+                        "outputs_plan_workflow": "outputs_plan_workflow",
                         "outputs_generate_unit_tests": "outputs_generate_unit_tests",
                         "outputs_generate_code": "outputs_generate_code",
                         "outputs_execute_unit_tests": "outputs_execute_unit_tests",

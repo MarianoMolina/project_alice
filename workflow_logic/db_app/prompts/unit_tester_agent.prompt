@@ -10,3 +10,4 @@ or
 ...
 ```
 If you need to debug failing tests, analyze the test results, suggest the fix, and provide the corrected unit tests. 
+REMEMBER: you don't need to import the function or class you are testing, since the function code will be placed above your tests when executing. If you import from a placeholder name or something like that, you will break the execution logic. 

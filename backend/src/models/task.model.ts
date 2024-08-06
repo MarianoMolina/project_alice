@@ -1,5 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
-import { functionParametersSchema, ensureObjectIdForProperties, apiEngineSchema, ensureObjectIdForAPIEngine} from '../utils/schemas';
+import { functionParametersSchema, apiEngineSchema } from '../utils/schemas';
+import { ensureObjectIdForProperties, ensureObjectIdForAPIEngine } from '../utils/utils';
 import { ITaskDocument, ITaskModel, TaskType } from '../interfaces/task.interface';
 import { ensureObjectIdHelper } from '../utils/utils';
 
@@ -83,7 +84,9 @@ function ensureObjectIdForSave(this: ITaskDocument, next: mongoose.CallbackWitho
             this.prompts_to_add.set(key, ensureObjectIdHelper(value));
         }
     }
-    if (this.input_variables && this.input_variables.properties) ensureObjectIdForProperties(this.input_variables.properties); 
+    if (this.input_variables && this.input_variables.properties) {
+        this.input_variables.properties = ensureObjectIdForProperties(this.input_variables.properties);
+    }
     if (this.api_engine) ensureObjectIdForAPIEngine(this.api_engine);
     next();
 }
@@ -113,8 +116,8 @@ function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.
     if (update.api_engine) ensureObjectIdForAPIEngine(update.api_engine);
 
     if (update && update.input_variables && update.input_variables.properties) {
-        ensureObjectIdForProperties(update.input_variables.properties);
-      }
+        update.input_variables.properties = ensureObjectIdForProperties(update.input_variables.properties);
+    }
     next();
 }
 

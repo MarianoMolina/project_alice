@@ -57,6 +57,7 @@ services:
       - "${WORKFLOW_PORT}:${WORKFLOW_PORT_DOCKER}"
     volumes:
       - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock  # Add this line
     depends_on:
       backend:
         condition: service_healthy

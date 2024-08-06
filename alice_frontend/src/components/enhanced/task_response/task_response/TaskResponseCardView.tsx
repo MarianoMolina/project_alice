@@ -5,7 +5,11 @@ import {
     CardContent,
     Chip,
     Box,
+    Accordion,
+    AccordionSummary,
+    AccordionDetails,
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TaskResponseComponentProps } from '../../../../utils/TaskResponseTypes';
 import { CommandLineLog } from '../CommandLog';
 import { CodeBlock } from '../CodeBlock';
@@ -13,6 +17,23 @@ import { StringOutput } from '../StringOutput';
 import { LLMChatOutput } from '../LLMChatOutput';
 import { SearchOutput } from '../SearchOutput';
 import { WorkflowOutput } from '../WorkflowOutput';
+import { styled } from '@mui/material/styles';
+
+const ExitCodeChip = styled(Chip)(({ theme }) => ({
+    fontWeight: 'bold',
+    '&.success': {
+        backgroundColor: theme.palette.success.main,
+        color: theme.palette.success.contrastText,
+    },
+    '&.warning': {
+        backgroundColor: theme.palette.warning.main,
+        color: theme.palette.warning.contrastText,
+    },
+    '&.error': {
+        backgroundColor: theme.palette.error.main,
+        color: theme.palette.error.contrastText,
+    },
+}));
 
 const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
     item,
@@ -20,6 +41,17 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
     if (!item) {
         return <Typography>No task response data available.</Typography>;
     }
+
+    const getExitCodeProps = (exitCode: number) => {
+        switch (exitCode) {
+            case 0:
+                return { label: 'Exit: 0', className: 'success' };
+            case 1:
+                return { label: 'Exit: 1', className: 'error' };
+            default:
+                return { label: `Exit: ${exitCode}`, className: 'warning' };
+        }
+    };
 
     const renderOutputContent = (content: any) => {
         if (!content || typeof content !== 'object') {
@@ -40,6 +72,17 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
         }
     };
 
+    const AccordionSection = ({ title, content, disabled = false }: { title: string, content: React.ReactNode, disabled?: boolean }) => (
+        <Accordion disabled={disabled}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="h6">{title}</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+                {content}
+            </AccordionDetails>
+        </Accordion>
+    );
+
     return (
         <Card elevation={3}>
             <CardContent>
@@ -47,50 +90,54 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
                 
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                     <Typography variant="h6">{item.task_name}</Typography>
-                    <Chip
-                        label={item.status}
-                        color={item.status === 'complete' ? 'success' : 'error'}
-                    />
+                    <Box display="flex" gap={1}>
+                        <ExitCodeChip
+                            {...getExitCodeProps(item.result_code)}
+                            size="small"
+                        />
+                        <Chip
+                            label={item.status}
+                            color={item.status === 'complete' ? 'success' : 'error'}
+                            size="small"
+                        />
+                    </Box>
                 </Box>
 
                 <Typography variant="body1" paragraph>{item.task_description}</Typography>
 
-                {item.task_inputs && (
-                    <Box my={2}>
-                        <Typography variant="h6">Inputs</Typography>
-                        <CodeBlock language="json" code={JSON.stringify(item.task_inputs, null, 2)} />
-                    </Box>
-                )}
+                <AccordionSection
+                    title="Output"
+                    content={renderOutputContent(item.task_content)}
+                    disabled={!item.task_content}
+                />
 
-                {item.result_diagnostic && (
-                    <Box my={2}>
-                        <Typography variant="h6">Diagnostics</Typography>
-                        <CommandLineLog content={item.result_diagnostic} />
-                    </Box>
-                )}
+                <AccordionSection
+                    title="Inputs"
+                    content={<CodeBlock language="json" code={JSON.stringify(item.task_inputs, null, 2)} />}
+                    disabled={!item.task_inputs}
+                />
 
-                {item.task_outputs && (
-                    <Box my={2}>
-                        <Typography variant="h6">Raw Output</Typography>
+                <AccordionSection
+                    title="Diagnostics"
+                    content={<CommandLineLog content={item.result_diagnostic ?? ''} />}
+                    disabled={!item.result_diagnostic}
+                />
+
+                <AccordionSection
+                    title="Raw Output"
+                    content={
                         <Typography variant="body2" component="pre" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                             {typeof item.task_outputs === 'string' ? item.task_outputs : JSON.stringify(item.task_outputs, null, 2)}
                         </Typography>
-                    </Box>
-                )}
+                    }
+                    disabled={!item.task_outputs}
+                />
 
-                {item.task_content && (
-                    <Box my={2}>
-                        <Typography variant="h6">Processed Output</Typography>
-                        {renderOutputContent(item.task_content)}
-                    </Box>
-                )}
-
-                {item.usage_metrics && (
-                    <Box my={2}>
-                        <Typography variant="h6">Usage Metrics</Typography>
-                        <CodeBlock language="json" code={JSON.stringify(item.usage_metrics, null, 2)} />
-                    </Box>
-                )}
+                <AccordionSection
+                    title="Usage Metrics"
+                    content={<CodeBlock language="json" code={JSON.stringify(item.usage_metrics, null, 2)} />}
+                    disabled={!item.usage_metrics}
+                />
 
                 <Box mt={2} display="flex" justifyContent="space-between" alignItems="center">
                     <Typography variant="caption">

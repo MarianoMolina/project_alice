@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
 import { IMessage } from '../interfaces/chat.interface';
+import { IAPIEngine } from './schemas';
 
 type ObjectWithId = { _id: Types.ObjectId | string } | Types.ObjectId | string;
 
@@ -49,4 +50,26 @@ export function ensureObjectIdHelper(value: any): Types.ObjectId | any {
     return value._id;
   }
   return value;
+}
+
+export function ensureObjectIdForProperties(properties: Map<string, Types.ObjectId> | { [key: string]: any }) {
+  let propertiesMap: Map<string, Types.ObjectId>;
+
+  if (properties instanceof Map) {
+    propertiesMap = properties;
+  } else if (typeof properties === 'object' && properties !== null) {
+    propertiesMap = new Map<string, Types.ObjectId>(Object.entries(properties));
+  } else {
+    throw new Error('Invalid input: properties must be a Map or an Object');
+  }
+
+  for (const [key, value] of propertiesMap.entries()) {
+    propertiesMap.set(key, ensureObjectIdHelper(value));
+  }
+
+  return propertiesMap;
+}
+
+export function ensureObjectIdForAPIEngine(apiEngine: IAPIEngine) {
+  ensureObjectIdForProperties(apiEngine.input_variables.properties);
 }
