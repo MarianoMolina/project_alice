@@ -1,5 +1,7 @@
 import React from 'react';
-import { List, ListItem, ListItemText, Typography, Link } from '@mui/material';
+import { Box, Typography, Link, Paper, Chip } from '@mui/material';
+import { StringOutput } from './StringOutput';
+import useStyles from './TaskResponseStyles';
 
 interface SearchResult {
   title: string;
@@ -9,31 +11,46 @@ interface SearchResult {
 }
 
 interface SearchOutputProps {
-  content: SearchResult[];
+  result: SearchResult;
 }
 
-export const SearchOutput: React.FC<SearchOutputProps> = ({ content }) => {
+export const SearchOutput: React.FC<SearchOutputProps> = ({ result }) => {
+  const classes = useStyles();
+
   return (
-    <List>
-      {content.map((result, index) => (
-        <ListItem key={index}>
-          <ListItemText
-            primary={<Link href={result.url} target="_blank" rel="noopener noreferrer">{result.title}</Link>}
-            secondary={
-              <>
-                <Typography component="span" variant="body2" color="textPrimary">
-                  {result.content}
-                </Typography>
-                {result.metadata && (
-                  <Typography component="span" variant="caption" display="block">
-                    Metadata: {JSON.stringify(result.metadata)}
-                  </Typography>
-                )}
-              </>
-            }
-          />
-        </ListItem>
-      ))}
-    </List>
+    <Paper elevation={1} className={classes.searchResultCard}>
+      <Box className={classes.searchResultContent}>
+        <Typography variant="subtitle1" className={classes.sectionLabel}>TITLE:</Typography>
+        <Typography variant="h6" className={classes.searchResultTitle}>
+          {result.title}
+        </Typography>
+
+        <Typography variant="subtitle1" className={classes.sectionLabel}>URL:</Typography>
+        <Typography variant="body2" className={classes.searchResultUrl}>
+          {result.url} [<Link href={result.url} target="_blank" rel="noopener noreferrer" color="primary">LINK</Link>]
+        </Typography>
+
+        <Typography variant="subtitle1" className={classes.sectionLabel}>CONTENT:</Typography>
+        <Box className={classes.searchResultBody}>
+          <StringOutput content={result.content} />
+        </Box>
+
+        {result.metadata && Object.keys(result.metadata).length > 0 && (
+          <>
+            <Typography variant="subtitle1" className={classes.sectionLabel}>Metadata:</Typography>
+            <Box className={classes.searchResultMetadata}>
+              {Object.entries(result.metadata).map(([key, value]) => (
+                <Chip
+                  key={key}
+                  label={`${key}: ${value}`}
+                  size="small"
+                  className={classes.metadataChip}
+                />
+              ))}
+            </Box>
+          </>
+        )}
+      </Box>
+    </Paper>
   );
 };

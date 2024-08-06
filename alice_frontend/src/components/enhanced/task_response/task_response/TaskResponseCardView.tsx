@@ -13,9 +13,6 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TaskResponseComponentProps } from '../../../../utils/TaskResponseTypes';
 import { CommandLineLog } from '../CommandLog';
 import { CodeBlock } from '../CodeBlock';
-import { StringOutput } from '../StringOutput';
-import { LLMChatOutput } from '../LLMChatOutput';
-import { SearchOutput } from '../SearchOutput';
 import { WorkflowOutput } from '../WorkflowOutput';
 import { styled } from '@mui/material/styles';
 
@@ -50,25 +47,6 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
                 return { label: 'Exit: 1', className: 'error' };
             default:
                 return { label: `Exit: ${exitCode}`, className: 'warning' };
-        }
-    };
-
-    const renderOutputContent = (content: any) => {
-        if (!content || typeof content !== 'object') {
-            return <Typography>No output content available</Typography>;
-        }
-
-        switch (content.output_type) {
-            case 'StringOutput':
-                return <StringOutput content={content.content} />;
-            case 'LLMChatOutput':
-                return <LLMChatOutput content={content.content} />;
-            case 'SearchOutput':
-                return <SearchOutput content={content.content} />;
-            case 'WorkflowOutput':
-                return <WorkflowOutput content={content.content} />;
-            default:
-                return <CodeBlock language="json" code={JSON.stringify(content, null, 2)} />;
         }
     };
 
@@ -107,7 +85,13 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
 
                 <AccordionSection
                     title="Output"
-                    content={renderOutputContent(item.task_content)}
+                    content={
+                        item.task_content ? (
+                            <WorkflowOutput content={item} />
+                        ) : (
+                            <Typography>No output content available</Typography>
+                        )
+                    }
                     disabled={!item.task_content}
                 />
 
