@@ -20,7 +20,8 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.4.1",
-    "mongoose-schema-jsonschema": "^2.2.0"
+    "mongoose-schema-jsonschema": "^2.2.0",
+    "winston": "^3.13.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

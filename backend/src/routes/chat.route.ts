@@ -7,6 +7,7 @@ import auth from '../middleware/auth.middleware';
 import { AuthRequest } from '../interfaces/auth.interface';
 import { createRoutes } from '../utils/routeGenerator';
 import { chatHelpers } from '../utils/chatHelpers.utils';
+import logger from '../utils/logger';
 
 // Create a router using routeGenerator for common CRUD routes
 const generatedRouter = createRoutes<IAliceChatDocument, 'AliceChat'>(AliceChat, 'AliceChat');
@@ -50,25 +51,45 @@ customRouter.patch('/:chatId/add_message', async (req: AuthRequest, res: Respons
   const { chatId } = req.params;
   const message: Partial<IMessage> = req.body.message;
   const userId = req.user?.userId;
+
+  logger.info(`Received request to add message to chat ${chatId}`, { 
+    chatId, 
+    userId, 
+    messageContent: message.content,
+    hasTaskResponse: !!message.task_responses
+  });
+
   try {
     // Remove the _id field if it exists and is not a valid ObjectId
     if (message._id && !Types.ObjectId.isValid(message._id)) {
       delete message._id;
+      logger.info('Removed invalid _id from message');
     }
+
+    logger.debug('Message object before creating in chat', { message });
 
     const updatedChat = await chatHelpers.create_message_in_chat(chatId, message, userId);
-
+    
     if (!updatedChat) {
-      console.log('Chat not found:', chatId);
+      logger.error(`Chat not found: ${chatId}`);
       return res.status(404).json({ message: 'Chat not found' });
     }
+
+    logger.info('Message added successfully', { 
+      chatId, 
+      messageId: updatedChat._id,
+      hasTaskResponse: updatedChat.task_responses?.length
+    });
+
     res.status(200).json({ message: 'Message added successfully', chat: updatedChat });
   } catch (error) {
-    console.error('Error in add_message route:', error);
+    logger.error('Error in add_message route:', { 
+      error: (error as Error).message, 
+      stack: (error as Error).stack 
+    });
     res.status(500).json({ message: (error as Error).message, stack: (error as Error).stack });
   }
 });
-
 customRouter.patch('/:chatId/add_task_response', async (req: AuthRequest, res: Response) => {
   const { chatId } = req.params;
   const { taskResultId } = req.body;

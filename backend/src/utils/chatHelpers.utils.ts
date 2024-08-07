@@ -3,6 +3,7 @@ import AliceChat from '../models/chat.model';
 import TaskResult from '../models/taskresult.model';
 import { IAliceChatDocument, IMessage, IMessageDocument } from '../interfaces/chat.interface';
 import { getObjectId, ObjectWithId } from './utils';
+import logger from './logger';
 
 export const chatHelpers = {
     async create_chat(chat: Partial<IAliceChatDocument>, userId?: string): Promise<IAliceChatDocument | null> {
@@ -86,6 +87,9 @@ export const chatHelpers = {
 
     async create_message_in_chat(chatId: string, message: Partial<IMessage>, userId?: string): Promise<IMessage | null> {
         try {
+            logger.info(`Creating message in chat ${chatId}`, { chatId, userId });
+            logger.info('Message object received', { message });
+
             const newMessage: Partial<IMessageDocument> = {
                 ...message,
                 _id: new Types.ObjectId(),
@@ -93,13 +97,20 @@ export const chatHelpers = {
                 createdAt: new Date(),
                 updatedAt: new Date()
             };
+
+            logger.info('New message object after processing', { newMessage });
+
             (Object.keys(newMessage) as Array<keyof IMessageDocument>).forEach(key => {
                 if (newMessage[key] === undefined) {
                     delete newMessage[key];
+                    logger.info(`Deleted undefined key from newMessage: ${key}`);
                 }
             });
+
             if (newMessage.task_responses && Array.isArray(newMessage.task_responses)) {
+                logger.info('Processing task responses', { count: newMessage.task_responses.length });
                 newMessage.task_responses = await chatHelpers.handleTaskResponses(newMessage.task_responses, userId);
+                logger.info('Processed task responses', { taskResponses: newMessage.task_responses });
             }
 
             const updatedChat = await AliceChat.findByIdAndUpdate(
@@ -112,12 +123,20 @@ export const chatHelpers = {
             );
 
             if (!updatedChat) {
+                logger.error(`Chat not found: ${chatId}`);
                 throw new Error('Chat not found');
             }
 
-            return updatedChat.messages[updatedChat.messages.length - 1];
+            const createdMessage = updatedChat.messages[updatedChat.messages.length - 1];
+            logger.info('Message created successfully', { 
+                chatId, 
+                messageId: createdMessage._id,
+                hasTaskResponse: !!createdMessage.task_responses
+            });
+
+            return createdMessage;
         } catch (error) {
-            console.error('Error creating message in chat:', error);
+            logger.error('Error creating message in chat:', error);
             return null;
         }
     },
@@ -241,28 +260,51 @@ export const chatHelpers = {
         });
     },
     async handleTaskResponses(taskResponses: any[], userId?: string): Promise<Types.ObjectId[]> {
+        logger.info('Handling task responses', { count: taskResponses.length });
         const processedTaskResponses: Types.ObjectId[] = [];
         for (const tr of taskResponses) {
+            logger.debug('Processing task response', { tr });
             if (typeof tr === 'string') {
                 processedTaskResponses.push(new Types.ObjectId(tr));
+                logger.debug('Processed string task response', { taskResponseId: tr });
             } else if (typeof tr === 'object' && tr !== null) {
-                if (tr._id) {
+                logger.debug('Processing object task response', { tr });
+                if (tr._id && tr._id !== null) {
                     await TaskResult.findByIdAndUpdate(tr._id, {
                         ...tr,
                         updated_by: userId ? new Types.ObjectId(userId) : undefined,
                     });
                     processedTaskResponses.push(new Types.ObjectId(tr._id));
+                    logger.debug('Updated existing task response', { taskResponseId: tr._id });
                 } else {
-                    const newTaskResult = new TaskResult({
-                        ...tr,
-                        created_by: userId ? new Types.ObjectId(userId) : undefined,
-                        updated_by: userId ? new Types.ObjectId(userId) : undefined,
-                    });
-                    const savedTaskResult = await newTaskResult.save();
-                    processedTaskResponses.push(savedTaskResult._id as Types.ObjectId);
+                    logger.debug('Attempting to create new task response', { tr });
+                    try {
+                        const newTaskResult = new TaskResult({
+                            ...tr,
+                            _id: undefined,  // Ensure we're not passing null as _id
+                            created_by: userId ? new Types.ObjectId(userId) : undefined,
+                            updated_by: userId ? new Types.ObjectId(userId) : undefined,
+                        });
+                        const savedTaskResult = await newTaskResult.save();
+                        if (savedTaskResult._id instanceof Types.ObjectId) {
+                            processedTaskResponses.push(savedTaskResult._id);
+                            logger.debug('Created new task response', { taskResponseId: savedTaskResult._id.toString() });
+                        } else {
+                            logger.error('Saved task result has invalid _id', { savedTaskResult });
+                            throw new Error('Invalid _id after saving task result');
+                        }
+                    } catch (error) {
+                        logger.error('Error creating new task response', { error, tr });
+                    }
                 }
+            } else {
+                logger.warn('Invalid task response format', { tr });
             }
         }
+        logger.info('Finished processing task responses', { 
+            count: processedTaskResponses.length, 
+            processedTaskResponses: processedTaskResponses.map(id => id.toString()) 
+        });
         return processedTaskResponses;
     }
 };
