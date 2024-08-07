@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { Category, LibraryBooks, AddCircleOutline, Functions, SupportAgent, Code, ApiRounded, Sos } from '@mui/icons-material';
 import FunctionDefinitionBuilder from '../../common/function_select/Function';
-import { TaskComponentProps } from '../../../../utils/TaskTypes';
+import { TaskComponentProps } from '../../../../types/TaskTypes';
 import useStyles from '../TaskStyles';
 
 const TaskCardView: React.FC<TaskComponentProps> = ({

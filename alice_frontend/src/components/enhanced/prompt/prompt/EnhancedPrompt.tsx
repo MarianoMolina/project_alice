@@ -4,9 +4,9 @@ import PromptListView from './PromptListView';
 import PromptTableView from './PromptTableView';
 import PromptCardView from './PromptCardView';
 import PromptShortListView from './PromptShortListView';
-import { Prompt } from '../../../../utils/PromptTypes';
+import { Prompt } from '../../../../types/PromptTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
-import { PromptComponentProps } from '../../../../utils/PromptTypes';
+import { PromptComponentProps } from '../../../../types/PromptTypes';
 
 type BasePromptMode = BaseDbElementProps<Prompt>['mode'];
 type ExtendedPromptMode = 'list' | 'shortList' | 'card' | 'table';

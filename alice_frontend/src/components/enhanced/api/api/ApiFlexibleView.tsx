@@ -8,11 +8,11 @@ import {
     TextField,
     Dialog,
 } from '@mui/material';
-import { ApiComponentProps, API, ApiType, getDefaultApiForm, LlmProvider } from '../../../../utils/ApiTypes';
+import { ApiComponentProps, API, ApiType, getDefaultApiForm, LlmProvider } from '../../../../types/ApiTypes';
 import { API_TYPE_CONFIGS, LLM_PROVIDERS, isLlmApi, getAvailableApiTypes } from '../../../../utils/ApiUtils';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import EnhancedModel from '../../model/model/EnhancedModel';
-import { AliceModel } from '../../../../utils/ModelTypes';
+import { AliceModel } from '../../../../types/ModelTypes';
 import { useApi } from '../../../../context/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 

@@ -3,13 +3,13 @@ import {
     TextField,
     Dialog
 } from '@mui/material';
-import { ChatComponentProps, AliceChat, getDefaultChatForm } from '../../../../utils/ChatTypes';
+import { ChatComponentProps, AliceChat, getDefaultChatForm } from '../../../../types/ChatTypes';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import EnhancedModel from '../../model/model/EnhancedModel';
 import EnhancedAgent from '../../agent/agent/EnhancedAgent';
 import EnhancedTask from '../../task/task/EnhancedTask';
-import { AliceAgent } from '../../../../utils/AgentTypes';
-import { AliceTask } from '../../../../utils/TaskTypes';
+import { AliceAgent } from '../../../../types/AgentTypes';
+import { AliceTask } from '../../../../types/TaskTypes';
 import { useApi } from '../../../../context/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 

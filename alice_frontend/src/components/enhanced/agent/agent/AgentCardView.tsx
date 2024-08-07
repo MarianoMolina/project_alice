@@ -10,7 +10,7 @@ import {
     ListItem,
 } from '@mui/material';
 import { Category, LibraryBooks, Code, Build, ChatBubbleOutline } from '@mui/icons-material';
-import { AgentComponentProps } from '../../../../utils/AgentTypes';
+import { AgentComponentProps } from '../../../../types/AgentTypes';
 
 const AgentCardView: React.FC<AgentComponentProps> = ({
     item,

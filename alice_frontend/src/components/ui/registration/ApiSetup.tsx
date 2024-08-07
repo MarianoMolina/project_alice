@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Typography, Button } from '@mui/material';
-import { API } from '../../../utils/ApiTypes';
+import { API } from '../../../types/ApiTypes';
 import ApiTooltipView from '../../enhanced/api/api/ApiTooltipView';
 import EnhancedAPI from '../../enhanced/api/api/EnhancedApi';
 

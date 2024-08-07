@@ -5,9 +5,9 @@ import {
     Switch,
     Dialog
 } from '@mui/material';
-import { AgentComponentProps, AliceAgent, getDefaultAgentForm } from '../../../../utils/AgentTypes';
-import { Prompt } from '../../../../utils/PromptTypes';
-import { AliceModel } from '../../../../utils/ModelTypes';
+import { AgentComponentProps, AliceAgent, getDefaultAgentForm } from '../../../../types/AgentTypes';
+import { Prompt } from '../../../../types/PromptTypes';
+import { AliceModel } from '../../../../types/ModelTypes';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import EnhancedModel from '../../model/model/EnhancedModel';
 import EnhancedPrompt from '../../prompt/prompt/EnhancedPrompt';

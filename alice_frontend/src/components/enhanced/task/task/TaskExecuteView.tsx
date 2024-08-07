@@ -5,7 +5,7 @@ import {
     Alert
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { AliceTask, TaskComponentProps } from '../../../../utils/TaskTypes';
+import { AliceTask, TaskComponentProps } from '../../../../types/TaskTypes';
 import useStyles from '../TaskStyles';
 import { useTask } from '../../../../context/TaskContext';
 import TaskCardView from './TaskCardView';

@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { Box, Button, Typography, Skeleton } from '@mui/material';
-import { ChatComponentProps } from '../../../../utils/ChatTypes';
+import { ChatComponentProps } from '../../../../types/ChatTypes';
 import Message from '../Message';
 import useStyles from '../ChatStyles';
 import { useChat } from '../../../../context/ChatContext';

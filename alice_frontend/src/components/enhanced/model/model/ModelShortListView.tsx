@@ -1,5 +1,5 @@
 import React from 'react';
-import { AliceModel, ModelComponentProps } from '../../../../utils/ModelTypes';
+import { AliceModel, ModelComponentProps } from '../../../../types/ModelTypes';
 import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
 
 const ModelShortListView: React.FC<ModelComponentProps> = ({

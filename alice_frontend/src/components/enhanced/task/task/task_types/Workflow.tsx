@@ -1,10 +1,10 @@
 import React, {useMemo} from 'react';
 import { Box, TextField, FormControlLabel, Checkbox, FormControl, InputLabel, Select, MenuItem, Chip, SelectChangeEvent } from '@mui/material';
-import { TaskFormsProps, AliceTask } from '../../../../../utils/TaskTypes';
+import { TaskFormsProps, AliceTask } from '../../../../../types/TaskTypes';
 import EnhancedSelect from '../../../common/enhanced_select/EnhancedSelect';
 import FunctionDefinitionBuilder from '../../../common/function_select/Function';
-import { FunctionParameters } from '../../../../../utils/ParameterTypes';
-import { ApiType } from '../../../../../utils/ApiTypes';
+import { FunctionParameters } from '../../../../../types/ParameterTypes';
+import { ApiType } from '../../../../../types/ApiTypes';
 import EnhancedTask from '../../../task/task/EnhancedTask';
 import { useApi } from '../../../../../context/ApiContext';
 

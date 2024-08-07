@@ -12,7 +12,7 @@ import {
   Alert,
   Grid
 } from '@mui/material';
-import { ParameterDefinition, FunctionParameters } from '../../../../utils/ParameterTypes';
+import { ParameterDefinition, FunctionParameters } from '../../../../types/ParameterTypes';
 import EnhancedParameter from '../../parameter/parameter/EnhancedParameter';
 import { useConfig } from '../../../../context/ConfigContext';
 import { IconButton, Tooltip } from '@mui/material';

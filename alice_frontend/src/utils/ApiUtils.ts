@@ -1,4 +1,4 @@
-import { ApiType, API, LlmProvider } from "./ApiTypes";
+import { ApiType, API, LlmProvider } from "../types/ApiTypes";
 import { BACKEND_HOST, BACKEND_PORT } from "./Constants";
 
 export interface ApiTypeConfig {

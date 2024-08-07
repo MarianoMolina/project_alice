@@ -10,10 +10,10 @@ import {
     Chip,
     SelectChangeEvent
 } from '@mui/material';
-import { TaskFormsProps } from '../../../../../utils/TaskTypes';
+import { TaskFormsProps } from '../../../../../types/TaskTypes';
 import FunctionDefinitionBuilder from '../../../common/function_select/Function';
-import { FunctionParameters } from '../../../../../utils/ParameterTypes';
-import { ApiType } from '../../../../../utils/ApiTypes';
+import { FunctionParameters } from '../../../../../types/ParameterTypes';
+import { ApiType } from '../../../../../types/ApiTypes';
 
 const ApiTaskForm: React.FC<TaskFormsProps> = ({
     item,

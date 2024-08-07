@@ -8,8 +8,8 @@ import {
   Card,
   CardContent,
 } from '@mui/material';
-import { SupportAgent, Functions, Summarize } from '@mui/icons-material';
-import { ChatComponentProps } from '../../../../utils/ChatTypes';
+import { SupportAgent, Functions } from '@mui/icons-material';
+import { ChatComponentProps } from '../../../../types/ChatTypes';
 import useStyles from '../ChatStyles';
 
 const ChatCardView: React.FC<ChatComponentProps> = ({
@@ -48,22 +48,6 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
             ))
           ) : (
             <Typography variant="body2">No functions available</Typography>
-          )}
-        </List>
-        <Typography variant="h6">Task Results</Typography>
-        <List>
-          {item.task_responses && item.task_responses.length > 0 ? (
-            item.task_responses.map((result, index) => (
-              <ListItemButton key={index} onClick={() => result._id && handleTaskResultClick && handleTaskResultClick(result._id)}>
-                <ListItemIcon><Summarize /></ListItemIcon>
-                <ListItemText
-                  primary={result.task_name}
-                  secondary={`Status: ${result.status}, Code: ${result.result_code}`}
-                />
-              </ListItemButton>
-            ))
-          ) : (
-            <Typography variant="body2">No task responses yet</Typography>
           )}
         </List>
       </CardContent>

@@ -4,9 +4,9 @@ import { Box, TextField, Typography, Button, Dialog, Card, CardContent, Paper } 
 import { Person, Api } from '@mui/icons-material';
 import { useApi } from '../context/ApiContext';
 import { useAuth } from '../context/AuthContext';
-import { User } from '../utils/UserTypes';
-import { API, getDefaultApiForm } from '../utils/ApiTypes';
-import { ComponentMode } from '../utils/CollectionTypes';
+import { User } from '../types/UserTypes';
+import { API, getDefaultApiForm } from '../types/ApiTypes';
+import { ComponentMode } from '../types/CollectionTypes';
 import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
 import useStyles from '../styles/UserSettingsStyles';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';

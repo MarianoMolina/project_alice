@@ -7,7 +7,7 @@ import {
     Box
 } from '@mui/material';
 import FunctionDefinitionBuilder from '../../common/function_select/Function';
-import { PromptComponentProps } from '../../../../utils/PromptTypes';
+import { PromptComponentProps } from '../../../../types/PromptTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 
 const PromptFlexibleView: React.FC<PromptComponentProps> = ({

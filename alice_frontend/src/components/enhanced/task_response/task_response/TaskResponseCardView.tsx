@@ -10,7 +10,7 @@ import {
     AccordionDetails,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { TaskResponseComponentProps } from '../../../../utils/TaskResponseTypes';
+import { TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
 import { CommandLineLog } from '../CommandLog';
 import { CodeBlock } from '../CodeBlock';
 import { WorkflowOutput } from '../WorkflowOutput';

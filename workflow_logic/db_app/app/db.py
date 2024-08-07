@@ -3,11 +3,10 @@ from aiohttp import ClientError
 from bson import ObjectId
 from typing import Dict, Any, Optional, Literal
 from pydantic import BaseModel, Field, ConfigDict
-from workflow_logic.util.logging_config import LOGGER
 from workflow_logic.core.tasks import available_task_types
 from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, API
 from workflow_logic.util.const import BACKEND_PORT, HOST, ADMIN_TOKEN
-from workflow_logic.util import User, DatabaseTaskResponse, MessageDict, EntityType
+from workflow_logic.util import User, DatabaseTaskResponse, MessageDict, EntityType, LOGGER
 
 class BackendAPI(BaseModel):
     """
@@ -321,13 +320,13 @@ class BackendAPI(BaseModel):
             return AliceChat(**chat)
         except Exception as e:
             print(f"Error creating AliceChat object: {str(e)}")
-            # You might want to add more detailed error handling here
+            # Might want to add more detailed error handling here
             raise
     
     async def store_chat_message(self, chat_id: str, message: MessageDict) -> AliceChat:
         url = f"{self.base_url}/chats/{chat_id}/add_message"
         headers = self._get_headers()
-        data = {"message": message}  # Wrap the message in a "message" key
+        data = {"message": message.model_dump(by_alias=True) if message else {}}
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.patch(url, json=data, headers=headers) as response:

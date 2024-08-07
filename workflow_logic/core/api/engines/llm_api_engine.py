@@ -114,7 +114,7 @@ class LLMEngine(APIEngine):
     @staticmethod
     def get_usage(message: MessageDict) -> Dict[str, Any]:
         """Return usage summary of the response."""
-        creation_metadata = message.get('creation_metadata', {})
+        creation_metadata = message.creation_metadata
         usage = creation_metadata.get('usage', {})
         return {
             "prompt_tokens": usage.get('prompt_tokens', 0),

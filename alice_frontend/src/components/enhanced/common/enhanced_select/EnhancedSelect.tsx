@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, IconButton, Accordion, AccordionSummary, AccordionDetails, Typography } from '@mui/material';
 import { Edit, Close, ExpandMore, Delete } from '@mui/icons-material';
-import { CollectionName, CollectionType } from '../../../../utils/CollectionTypes';
+import { CollectionName, CollectionType } from '../../../../types/CollectionTypes';
 
 interface EnhancedSelectProps<T extends CollectionType[CollectionName]> {
   componentType: CollectionName;

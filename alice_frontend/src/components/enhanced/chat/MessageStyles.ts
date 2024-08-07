@@ -7,6 +7,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     paddingLeft: theme.spacing(5),
     padding: theme.spacing(1),
     borderRadius: theme.shape.borderRadius,
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
   },
   userMessage: {
     backgroundColor: theme.palette.primary.main,
@@ -16,7 +20,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: theme.palette.secondary.main,
     color: theme.palette.secondary.contrastText,
   },
-  otherMessage: {
+  toolMessage: {
     backgroundColor: theme.palette.secondary.dark,
     color: theme.palette.primary.dark,
   },
@@ -33,6 +37,30 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   markdownText: {
     fontFamily: theme.typography.fontFamily,
+  },
+  messageHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: theme.spacing(1),
+  },
+  editButton: {
+    padding: theme.spacing(0.5),
+    '& svg': {
+      fontSize: '0.875rem',
+    },
+  },
+  metadataContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    marginTop: theme.spacing(1),
+  },
+  metadata: {
+    color: theme.palette.text.secondary,
+    fontSize: theme.typography.caption.fontSize,
+    '&:not(:last-child)': {
+      marginBottom: theme.spacing(0.5),
+    },
   },
 }));
 

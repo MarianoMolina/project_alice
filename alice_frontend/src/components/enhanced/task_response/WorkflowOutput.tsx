@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, List, ListItem, Typography, Paper, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { TaskResponse } from '../../../utils/TaskResponseTypes';
+import { TaskResponse } from '../../../types/TaskResponseTypes';
 import { StringOutput } from './StringOutput';
 import { LLMChatOutput } from './LLMChatOutput';
 import { SearchOutput } from './SearchOutput';
@@ -35,6 +35,7 @@ const AccordionSection: React.FC<{
 
 export const WorkflowOutput: React.FC<WorkflowOutputProps> = ({ content, depth = 0 }) => {
   const classes = useStyles();
+  console.log('WorkflowOutput content:', content);
 
   const renderContent = (item: any) => {
     if (!item || typeof item !== 'object') {

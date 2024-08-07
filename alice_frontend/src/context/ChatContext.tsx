@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { TaskResponse } from '../utils/TaskResponseTypes';
-import { AliceAgent } from '../utils/AgentTypes';
-import { AliceTask } from '../utils/TaskTypes';
-import { MessageType, AliceChat } from '../utils/ChatTypes';
+import { TaskResponse } from '../types/TaskResponseTypes';
+import { AliceAgent } from '../types/AgentTypes';
+import { AliceTask } from '../types/TaskTypes';
+import { MessageType, AliceChat } from '../types/ChatTypes';
 import { useAuth } from '../context/AuthContext';
 import { useApi } from './ApiContext';
 
@@ -23,8 +23,8 @@ interface ChatContextType {
     handleRegenerateResponse: () => Promise<void>;
     fetchChats: () => Promise<void>;
     currentChat: AliceChat | null;
-    addTasksToChat: (taskIds: string[]) => Promise<void>;
-    addTaskResultsToChat: (taskResultIds: string[]) => Promise<void>;
+    addTaskToChat: (taskId: string) => Promise<void>;
+    addTaskResultToChat: (taskResultId: string) => Promise<void>;
     isTaskInChat: (taskId: string) => boolean;
     isTaskResultInChat: (taskResultId: string) => boolean;
     fetchAvailableTasks: () => Promise<AliceTask[]>;
@@ -38,7 +38,7 @@ interface ChatProviderProps {
 }
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
-    const { fetchItem, updateItem, sendMessage, generateChatResponse } = useApi();
+    const { fetchItem, updateItem, sendMessage, generateChatResponse, addTaskResponse } = useApi();
     const [messages, setMessages] = useState<MessageType[]>([]);
     const [pastChats, setPastChats] = useState<AliceChat[]>([]);
     const [currentChatId, setCurrentChatId] = useState<string | null>(null);
@@ -153,15 +153,24 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     };
 
     const isTaskResultInChat = (taskResultId: string): boolean => {
-        return currentChat?.task_responses?.some(result => result._id === taskResultId) || false;
+        if (!currentChat || !currentChat.messages) {
+            console.log('Trying to check task results but no chat or messages found');
+            return false;
+        }
+    
+        return currentChat.messages.some((message: MessageType) => 
+            message.task_responses?.some(result => result._id === taskResultId)
+        );
     };
-    const addTasksToChat = async (taskIds: string[]) => {
+
+    const addTaskToChat = async (taskId: string) => {
         if (!currentChatId || !currentChat) return;
         try {
-            const tasks = await Promise.all(taskIds.map(id => fetchItem("tasks", id)));
+            const task = await fetchItem("tasks", taskId) as AliceTask;
+            if (!task) return console.error('Task not found', taskId);
+            if (isTaskInChat(taskId)) return console.log('Task already in chat');
             const updatedFunctions = [
-                ...(currentChat.functions || []),
-                ...tasks.flatMap(task => Array.isArray(task) ? task : [task])
+                ...(currentChat.functions || []), task
             ];
             await updateItem("chats", currentChatId, { functions: updatedFunctions });
             await handleSelectChat(currentChatId);
@@ -170,40 +179,10 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         }
     };
 
-    const addTaskResultsToChat = async (taskResultIds: string[]) => {
+    const addTaskResultToChat = async (taskResultId: string) => {
         if (!currentChatId || !currentChat) return console.log('No chat selected');
         try {
-            const taskResults = await Promise.all(taskResultIds.map(id => fetchItem("taskresults", id)));
-            console.log('Task results:', taskResults);
-            const updatedTaskResponses = [
-                ...(currentChat.task_responses || []),
-                ...taskResults.flatMap(result => Array.isArray(result) ? result : [result])
-            ];
-            const newMessages: MessageType[] = taskResults.flatMap(result => {
-                if (Array.isArray(result)) {
-                    return result.map(r => ({
-                        role: 'assistant',
-                        content: JSON.stringify(r.task_outputs),
-                        generated_by: 'tool',
-                        type: 'TaskResponse',
-                        step: r.task_name,
-                    }));
-                } else {
-                    return [{
-                        role: 'assistant',
-                        content: JSON.stringify(result.task_outputs),
-                        generated_by: 'tool',
-                        type: 'TaskResponse',
-                        step: result.task_name,
-                    }];
-                }
-            });
-            const updatedMessages = [...messages, ...newMessages];
-            console.log('Adding task results to chat:', updatedTaskResponses, updatedMessages);
-            await updateItem("chats", currentChatId, {
-                task_responses: updatedTaskResponses,
-                messages: updatedMessages
-            });
+            await addTaskResponse(currentChatId, taskResultId);
             await handleSelectChat(currentChatId);
         } catch (error) {
             console.error('Error adding task results to chat:', error);
@@ -247,8 +226,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         handleRegenerateResponse,
         fetchChats,
         currentChat,
-        addTasksToChat,
-        addTaskResultsToChat,
+        addTaskToChat,
+        addTaskResultToChat,
         isTaskInChat,
         isTaskResultInChat,
         fetchAvailableTasks,

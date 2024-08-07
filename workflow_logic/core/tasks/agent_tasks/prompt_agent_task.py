@@ -134,10 +134,10 @@ class CheckTask(PromptAgentTask):
     exit_code_response_map: dict[str, int] = Field({"APPROVED": 0, "FAILED": 1}, description="A dictionary of exit codes mapped to string responses for the task. These strings should be present in the system prompt of the checking agent", examples=[{"TESTS PASSED": 0, "TESTS FAILED": 1}])
 
     def get_exit_code(self, chat_output: List[MessageDict], response_code: bool) -> int:
-        if not chat_output or not 'content' in chat_output[-1]:
+        if not chat_output or not chat_output[-1].content:
             return 1
         for key, value in self.exit_code_response_map.items():
-            if key in chat_output[-1]["content"]:
+            if key in chat_output[-1].content:
                 return value
         LOGGER.warning(f"None of the exit code responses were found in the output of the task {self.task_name}")
         return 1
@@ -162,9 +162,9 @@ class CodeGenerationLLMTask(PromptAgentTask):
     exit_codes: dict[int, str] = Field({0: "Success", 1: "Generation failed.", 2: "No code blocks in response"}, description="A dictionary of exit codes for the task")
 
     def get_exit_code(self, chat_output: List[MessageDict], response_code: bool) -> int:
-        if not chat_output or not 'content' in chat_output[-1]:
+        if not chat_output or not chat_output[-1].content:
             return 1
-        code_blocks = self.agent._extract_code_blocks(chat_output[-1]["content"])
+        code_blocks = self.agent._extract_code_blocks(chat_output[-1].content)
         if not code_blocks:
             return 2
         return 0
@@ -197,7 +197,7 @@ class CodeExecutionLLMTask(PromptAgentTask):
 
     def get_exit_code(self, chat_output: List[MessageDict], response_code: bool) -> int:
         LOGGER.info(f"Chat output: {chat_output} \nResponse code: {response_code}")
-        if not chat_output or not response_code or not 'content' in chat_output[-1] or chat_output[-1]["content"].startswith("Error"):
+        if not chat_output or not response_code or not chat_output[-1].content or chat_output[-1].content.startswith("Error"):
             return 1
         return 0
     
@@ -206,17 +206,7 @@ class CodeExecutionLLMTask(PromptAgentTask):
             LOGGER.warning(f"No messages to execute code from in task {self.task_name}")
             return [], self.get_exit_code([], False)
 
-        # Collect all code blocks from all messages
-        all_code_blocks = []
-        for msg in kwargs.get('messages'):
-            if 'content' in msg:
-                all_code_blocks.extend(self.agent._extract_code_blocks(msg['content']))
-
-        if not all_code_blocks:
-            LOGGER.warning(f"No code blocks found in messages: {kwargs.get('messages')}")
-            return [], self.get_exit_code([], False)
-
         # Process and execute the code blocks
-        code_execs = await self.agent._process_code_execution(all_code_blocks)
+        code_execs = await self.agent._process_code_execution(kwargs.get('messages'))
         
         return code_execs, self.get_exit_code(code_execs, True)

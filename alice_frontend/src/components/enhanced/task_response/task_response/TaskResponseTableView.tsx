@@ -1,5 +1,5 @@
 import React from 'react';
-import { TaskResponse, TaskResponseComponentProps } from '../../../../utils/TaskResponseTypes';
+import { TaskResponse, TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
 import EnhancedTableView from '../../common/enhanced_component/TableView';
 
 const TaskResponseTableView: React.FC<TaskResponseComponentProps> = ({

@@ -4,9 +4,9 @@ import ParameterListView from './ParameterListView';
 import ParameterTableView from './ParameterTableView';
 import ParameterCardView from './ParameterCardView';
 import ParameterShortListView from './ParameterShortListView';
-import { ParameterDefinition } from '../../../../utils/ParameterTypes';
+import { ParameterDefinition } from '../../../../types/ParameterTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
-import { ParameterComponentProps } from '../../../../utils/ParameterTypes';
+import { ParameterComponentProps } from '../../../../types/ParameterTypes';
 
 type BaseParameterMode = BaseDbElementProps<ParameterDefinition>['mode'];
 type ExtendedParameterMode = 'list' | 'shortList' | 'card' | 'table';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { AgentComponentProps, AliceAgent } from '../../../../utils/AgentTypes';
+import { AgentComponentProps, AliceAgent } from '../../../../types/AgentTypes';
 import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
 
 const AgentShortListView: React.FC<AgentComponentProps> = ({

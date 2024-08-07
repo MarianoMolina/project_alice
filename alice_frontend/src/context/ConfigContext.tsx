@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { AliceModel } from '../utils/ModelTypes';
-import { ParameterDefinition } from '../utils/ParameterTypes';
-import { Prompt } from '../utils/PromptTypes';
-import { TaskResponse } from '../utils/TaskResponseTypes';
-import { AliceAgent } from '../utils/AgentTypes';
-import { AliceTask } from '../utils/TaskTypes';
+import { AliceModel } from '../types/ModelTypes';
+import { ParameterDefinition } from '../types/ParameterTypes';
+import { Prompt } from '../types/PromptTypes';
+import { TaskResponse } from '../types/TaskResponseTypes';
+import { AliceAgent } from '../types/AgentTypes';
+import { AliceTask } from '../types/TaskTypes';
 import { useApi } from './ApiContext';
-import { AliceChat } from '../utils/ChatTypes';
-import { API } from '../utils/ApiTypes';
+import { AliceChat } from '../types/ChatTypes';
+import { API } from '../types/ApiTypes';
 
 export type ConfigItemType = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API';
 

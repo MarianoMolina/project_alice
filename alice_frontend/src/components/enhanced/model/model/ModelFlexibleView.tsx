@@ -10,8 +10,8 @@ import {
     FormControlLabel,
     Typography
 } from '@mui/material';
-import { ModelComponentProps } from '../../../../utils/ModelTypes';
-import { LlmProvider } from '../../../../utils/ApiTypes';
+import { ModelComponentProps } from '../../../../types/ModelTypes';
+import { LlmProvider } from '../../../../types/ApiTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 
 const ModelFlexibleView: React.FC<ModelComponentProps> = ({

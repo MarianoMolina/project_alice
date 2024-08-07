@@ -4,7 +4,7 @@ import {
     Paper,
     Box,
 } from '@mui/material';
-import { TaskResponseComponentProps } from '../../../../utils/TaskResponseTypes';
+import { TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
 
 const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
     item,

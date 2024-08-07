@@ -1,5 +1,5 @@
 import React from 'react';
-import { AliceModel, ModelComponentProps } from '../../../../utils/ModelTypes';
+import { AliceModel, ModelComponentProps } from '../../../../types/ModelTypes';
 import EnhancedTableView from '../../common/enhanced_component/TableView';
 
 const ModelTableView: React.FC<ModelComponentProps> = ({

@@ -4,9 +4,9 @@ import ModelListView from './ModelListView';
 import ModelTableView from './ModelTableView';
 import ModelShortListView from './ModelShortListView';
 import ModelCardView from './ModelCardView';
-import { AliceModel } from '../../../../utils/ModelTypes';
+import { AliceModel } from '../../../../types/ModelTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
-import { ModelComponentProps } from '../../../../utils/ModelTypes';
+import { ModelComponentProps } from '../../../../types/ModelTypes';
 
 type BaseModelMode = BaseDbElementProps<AliceModel>['mode'];
 type ExtendedModelMode = 'list' | 'shortList' | 'card' | 'table';

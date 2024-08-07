@@ -10,7 +10,7 @@ import {
     MenuItem,
     Dialog,
 } from '@mui/material';
-import { AliceTask, TaskComponentProps, TaskType, getDefaultTaskForm } from '../../../../utils/TaskTypes';
+import { AliceTask, TaskComponentProps, TaskType, getDefaultTaskForm } from '../../../../types/TaskTypes';
 import { SelectChangeEvent } from '@mui/material';
 import BasicAgentTask from './task_types/BasicAgentTask';
 import PromptAgentTask from './task_types/PromptAgentTask';
@@ -19,7 +19,7 @@ import CodeGenerationLLMTask from './task_types/CodeGenerationLLMTask';
 import CodeExecutionLLMTask from './task_types/CodeExecutionLLMTask';
 import Workflow from './task_types/Workflow';
 import ApiTask from './task_types/ApiTask';
-import { API } from '../../../../utils/ApiTypes';
+import { API } from '../../../../types/ApiTypes';
 import { useApi } from '../../../../context/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 

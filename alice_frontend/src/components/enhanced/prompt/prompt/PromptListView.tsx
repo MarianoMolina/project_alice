@@ -1,5 +1,5 @@
 import React from 'react';
-import { Prompt, PromptComponentProps } from '../../../../utils/PromptTypes';
+import { Prompt, PromptComponentProps } from '../../../../types/PromptTypes';
 import { Typography } from '@mui/material';
 import EnhancedListView from '../../common/enhanced_component/ListView';
 

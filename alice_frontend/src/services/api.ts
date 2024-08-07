@@ -1,7 +1,7 @@
 import { dbAxiosInstance, taskAxiosInstance } from './axiosInstance';
-import { AliceChat, convertToAliceChat } from '../utils/ChatTypes';
-import { TaskResponse, convertToTaskResponse } from '../utils/TaskResponseTypes';
-import { CollectionName, CollectionType, converters } from '../utils/CollectionTypes';
+import { AliceChat, convertToAliceChat } from '../types/ChatTypes';
+import { TaskResponse, convertToTaskResponse } from '../types/TaskResponseTypes';
+import { CollectionName, CollectionType, converters } from '../types/CollectionTypes';
 
 export const fetchItem = async <T extends CollectionName>(
   collectionName: T,
@@ -87,6 +87,17 @@ export const executeTask = async (taskId: string, inputs: any): Promise<TaskResp
     return convertToTaskResponse(response.data);
   } catch (error) {
     console.error('Error executing task:', error);
+    throw error;
+  }
+};
+
+export const addTaskResponse = async (chatId: string, taskResultId: string): Promise<AliceChat> => {
+  try {
+    console.log('Adding task response to chatId:', chatId, 'with taskResultId:', taskResultId);
+    const response = await dbAxiosInstance.patch(`/chats/${chatId}/add_task_response`, { taskResultId });
+    return convertToAliceChat(response.data.chat);
+  } catch (error) {
+    console.error('Error adding task response:', error);
     throw error;
   }
 };

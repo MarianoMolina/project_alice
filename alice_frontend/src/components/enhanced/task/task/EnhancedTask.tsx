@@ -1,6 +1,6 @@
 import React from 'react';
-import { AliceChat } from '../../../../utils/ChatTypes';
-import { AliceTask, TaskComponentProps } from '../../../../utils/TaskTypes';
+import { AliceChat } from '../../../../types/ChatTypes';
+import { AliceTask, TaskComponentProps } from '../../../../types/TaskTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
 import TaskFlexibleView from './TaskFlexibleView';
 import TaskCardView from './TaskCardView';

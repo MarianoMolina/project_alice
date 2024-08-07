@@ -76,3 +76,11 @@ class ToolCall(BaseModel):
     id: Optional[str] = Field(None, description="The tool call ID", alias="_id")
     type: Annotated[Literal["function"], Field(default="function", description="Type of the tool function")]
     function: Annotated[ToolCallConfig, Field(description="Function under tool")]
+
+def ensure_tool_function(item: Union[ToolFunction, Dict[str, Any]]) -> ToolFunction:
+    if isinstance(item, ToolFunction):
+        return item
+    elif isinstance(item, dict):
+        return ToolFunction(**item)
+    else:
+        raise ValueError("Item must be either a ToolFunction instance or a dictionary.")

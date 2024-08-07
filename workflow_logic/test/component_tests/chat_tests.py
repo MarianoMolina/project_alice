@@ -54,7 +54,7 @@ class ChatTests(TestModule):
         try:
             response = await chat.generate_response(api_manager, test_message)
             self.log_response(response)
-            if isinstance(response, list) and len(response) > 0 and response[0]['role'] == "assistant":
+            if isinstance(response, list) and len(response) > 0 and response[0].role == "assistant":
                 return "Success"
             else:
                 return f"Failed: Unexpected response format - {response}"
@@ -150,7 +150,7 @@ class ChatTests(TestModule):
                 response = await chat.generate_response(api_manager, test_message)
                 self.log_response(response)
 
-            if any(msg['role'] == "tool" and msg.get('task_responses') for msg in response):
+            if any(msg.role == "tool" and msg.task_responses for msg in response):
                 return "Success"
             else:
                 return f"Failed: Function call not detected in response - {response}"
@@ -181,11 +181,11 @@ class ChatTests(TestModule):
     @staticmethod
     def log_response(response: List[MessageDict]):
         for msg in response:
-            LOGGER.info(f"Role: {msg['role']}, Content: {msg['content'][:100]}...")  # Log first 100 chars of content
-            if msg.get('tool_calls'):
-                LOGGER.info(f"Tool Calls: {msg['tool_calls']}")
-            if msg.get('function_call'):
-                LOGGER.info(f"Function Call: {msg['function_call']}")
+            LOGGER.info(f"Role: {msg.role}, Content: {msg.content[:100]}...")  # Log first 100 chars of content
+            if msg.tool_calls:
+                LOGGER.info(f"Tool Calls: {msg.tool_calls}")
+            if msg.function_call:
+                LOGGER.info(f"Function Call: {msg.function_call}")
 
 def get_first_n_chars(obj: Any, n: int = 100) -> str:
     return json.dumps(safe_serialize(obj))[:n]

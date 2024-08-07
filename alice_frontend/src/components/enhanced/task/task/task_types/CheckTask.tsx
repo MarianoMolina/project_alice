@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, TextField, Button, Typography } from '@mui/material';
-import { TaskFormsProps } from '../../../../../utils/TaskTypes';
+import { TaskFormsProps } from '../../../../../types/TaskTypes';
 import PromptAgentTask from './PromptAgentTask';
 
 const CheckTask: React.FC<TaskFormsProps> = ({ item, onChange, mode, handleAccordionToggle, handleViewDetails, activeAccordion, handleSave, apis }) => {

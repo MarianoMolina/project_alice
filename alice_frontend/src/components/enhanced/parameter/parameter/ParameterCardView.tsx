@@ -9,7 +9,7 @@ import {
     CardContent,
 } from '@mui/material';
 import { Category } from '@mui/icons-material';
-import { ParameterComponentProps } from '../../../../utils/ParameterTypes';
+import { ParameterComponentProps } from '../../../../types/ParameterTypes';
 
 const ParameterCardView: React.FC<ParameterComponentProps> = ({
     item,

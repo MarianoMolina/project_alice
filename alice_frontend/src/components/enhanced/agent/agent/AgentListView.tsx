@@ -1,6 +1,6 @@
 import React from 'react';
 import { Typography } from '@mui/material';
-import { AliceAgent, AgentComponentProps } from '../../../../utils/AgentTypes';
+import { AliceAgent, AgentComponentProps } from '../../../../types/AgentTypes';
 import EnhancedListView from '../../common/enhanced_component/ListView';
 
 const AgentListView: React.FC<AgentComponentProps> = ({

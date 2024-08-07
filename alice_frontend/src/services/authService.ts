@@ -1,6 +1,6 @@
 import { dbAxiosInstance, taskAxiosInstance } from './axiosInstance';
 import axios from 'axios';
-import { User } from '../utils/UserTypes';
+import { User } from '../types/UserTypes';
 
 export interface LoginResponse {
   token: string;

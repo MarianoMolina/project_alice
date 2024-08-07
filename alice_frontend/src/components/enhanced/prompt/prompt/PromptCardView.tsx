@@ -14,7 +14,7 @@ import {
     ListItem,
 } from '@mui/material';
 import { Code, ExpandMore, Assignment, QueryBuilder } from '@mui/icons-material';
-import { PromptComponentProps } from '../../../../utils/PromptTypes';
+import { PromptComponentProps } from '../../../../types/PromptTypes';
 import useStyles from '../PromptStyles';
 
 const PromptCardView: React.FC<PromptComponentProps> = ({

@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ApiSetup from '../components/ui/registration/ApiSetup';
 import RegistrationComplete from '../components/ui/registration/RegistrationComplete';
-import { API } from '../utils/ApiTypes';
+import { API } from '../types/ApiTypes';
 import { fetchItem } from '../services/api';
 import useStyles from '../styles/RegisterStyles';
 

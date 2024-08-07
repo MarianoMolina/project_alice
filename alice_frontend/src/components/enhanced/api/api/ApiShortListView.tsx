@@ -1,5 +1,5 @@
 import React from 'react';
-import { API, ApiComponentProps } from '../../../../utils/ApiTypes';
+import { API, ApiComponentProps } from '../../../../types/ApiTypes';
 import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
 
 const APIShortListView: React.FC<ApiComponentProps> = ({

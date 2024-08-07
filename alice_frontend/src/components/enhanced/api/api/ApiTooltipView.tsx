@@ -1,6 +1,6 @@
 import React from 'react';
 import { AnimatedTooltip } from '../../../ui/aceternity/AnimatedTooltip';
-import { API, ApiComponentProps, ApiType } from '../../../../utils/ApiTypes';
+import { API, ApiComponentProps, ApiType } from '../../../../types/ApiTypes';
 import { LaptopMac, Reddit, Google, Search, Book } from '@mui/icons-material';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 

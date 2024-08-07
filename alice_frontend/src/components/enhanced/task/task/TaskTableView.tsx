@@ -11,7 +11,7 @@ import {
   Tooltip
 } from '@mui/material';
 import { Visibility, ChevronRight } from '@mui/icons-material';
-import { TaskComponentProps } from '../../../../utils/TaskTypes';
+import { TaskComponentProps } from '../../../../types/TaskTypes';
 
 const TaskTableView: React.FC<TaskComponentProps> = ({
   items,

@@ -1,5 +1,5 @@
 import { Typography } from '@mui/material';
-import { API, ApiComponentProps } from '../../../../utils/ApiTypes';
+import { API, ApiComponentProps } from '../../../../types/ApiTypes';
 import EnhancedListView from '../../common/enhanced_component/ListView';
 
 const ApiListView: React.FC<ApiComponentProps> = ({

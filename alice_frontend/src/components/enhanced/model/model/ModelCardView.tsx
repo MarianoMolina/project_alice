@@ -11,7 +11,7 @@ import {
     Box,
 } from '@mui/material';
 import { Category, Memory, FormatShapes, Thermostat, Cached, Speed } from '@mui/icons-material';
-import { ModelComponentProps } from '../../../../utils/ModelTypes';
+import { ModelComponentProps } from '../../../../types/ModelTypes';
 import useStyles from '../ModelStyles';
 
 const ModelCardView: React.FC<ModelComponentProps> = ({ item }) => {

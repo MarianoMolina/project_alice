@@ -69,7 +69,7 @@ class AliceChat(BaseModel):
             self.messages.extend(new_messages)
             return new_messages
         except Exception as e:
-            LOGGER.error(f"Error in generate_response: {str(e)}")
+            LOGGER.error(f"Error in chat generate_response: {str(e)}")
             LOGGER.error(f"Traceback: {traceback.format_exc()}")
             return []
     

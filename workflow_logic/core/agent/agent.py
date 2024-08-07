@@ -1,12 +1,13 @@
-import docker, os, tempfile, json
+import docker, os, tempfile, json, traceback
 from bson import ObjectId
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Dict, Any, List, Optional, Tuple, Callable
-from workflow_logic.core.parameters import ToolFunction
+from workflow_logic.core.parameters import ToolFunction, ToolCall
+from workflow_logic.core.parameters.parameters import ensure_tool_function
 from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.model import AliceModel
 from workflow_logic.core.api import APIManager
-from workflow_logic.util import MessageDict, LOGGER, ApiType
+from workflow_logic.util import MessageDict, LOGGER, ApiType, MessageType, TaskResponse, DatabaseTaskResponse
 
 
 class AliceAgent(BaseModel):
@@ -47,8 +48,8 @@ class AliceAgent(BaseModel):
             print(f"API response: {response}")
             
             new_messages = []
-            content = response['content'] if response['content'] else "Using tools" if response['tool_calls'] else "No response from API"
-            tool_calls = response['tool_calls'] if self.has_functions else None
+            content = response.content if response.content else "Using tools" if response.tool_calls else "No response from API"
+            tool_calls = response.tool_calls if self.has_functions else None
             
             print(f"Content: {content}")
             print(f"Tool calls: {tool_calls}")
@@ -62,14 +63,15 @@ class AliceAgent(BaseModel):
                 assistant_name=self.name
             ))
 
-            if tool_calls:
+            if tool_calls and self.has_functions:
                 print("Processing tool calls")
                 tool_messages = await self._process_tool_calls(tool_calls, tool_map, tools_list)
-                new_messages.extend(tool_messages)
+                if tool_messages:
+                    new_messages.extend(tool_messages)
             
             if self.has_code_exec:
                 print("Processing code execution")
-                code_messages = await self._process_code_execution(content)
+                code_messages = await self._process_code_execution(new_messages)
                 if code_messages:
                     new_messages.extend(code_messages)
             
@@ -77,15 +79,16 @@ class AliceAgent(BaseModel):
             return new_messages
 
         except Exception as e:
-            print(f"Error in generate_response: {str(e)}")
-            LOGGER.error(f"Error generating response: {str(e)}")
+            print(f"Error in agent.generate_response: {str(e)}")
+            print(f"Traceback: {traceback.format_exc()}")
+            LOGGER.error(f"Error in agent.generating response: {str(e)}")
             raise
         
-    async def _process_tool_calls(self, tool_calls, tool_map, tools_list):
+    async def _process_tool_calls(self, tool_calls: List[ToolCall] = [], tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []):
         tool_messages = []
         for tool_call in tool_calls:
-            function_name = tool_call["function"]["name"]
-            arguments_str = tool_call["function"]["arguments"]
+            function_name = tool_call.function.name
+            arguments_str = tool_call.function.arguments
             
             try:
                 arguments = json.loads(arguments_str)
@@ -96,7 +99,7 @@ class AliceAgent(BaseModel):
                     content=error_msg,
                     generated_by="tool",
                     step=function_name,
-                    type="text"
+                    type=MessageType.TEXT
                 ))
                 continue
 
@@ -106,40 +109,42 @@ class AliceAgent(BaseModel):
                     content=f"Error: Tool '{function_name}' not found",
                     generated_by="tool",
                     step=function_name,
-                    type="text"
+                    type=MessageType.TEXT
                 ))
                 continue
             
-            tool_function = next((tool for tool in tools_list if tool['function']['name'] == function_name), None)
+            tool_function = next((tool for tool in (ensure_tool_function(tool) for tool in tools_list) if tool.function.name == function_name), None)
             if not tool_function:
                 tool_messages.append(MessageDict(
                     role="tool",
                     content=f"Error: Tool function '{function_name}' not found in tools list",
                     generated_by="tool",
                     step=function_name,
-                    type="text"
+                    type=MessageType.TEXT
                 ))
                 continue
             
-            valid_inputs, error_message = self._validate_tool_inputs(ToolFunction(**tool_function), arguments)
+            valid_inputs, error_message = self._validate_tool_inputs(ensure_tool_function(tool_function), arguments)
             if not valid_inputs:
                 tool_messages.append(MessageDict(
                     role="tool",
                     content=f"Error in tool '{function_name}': {error_message}",
                     generated_by="tool",
                     step=function_name,
-                    type="text"
+                    type=MessageType.TEXT
                 ))
                 continue
             
             try:
                 result = await tool_map[function_name](**arguments)
+                task_result = result if isinstance(result, TaskResponse) or isinstance(result, DatabaseTaskResponse) else None
                 tool_messages.append(MessageDict(
                     role="tool",
                     content=str(result),
                     generated_by="tool",
                     step=function_name,
-                    type="text"
+                    type=MessageType.TASK_RESPONSE if task_result else MessageType.TEXT,
+                    task_responses=[task_result] if task_result else None
                 ))
             except Exception as e:
                 tool_messages.append(MessageDict(
@@ -147,7 +152,7 @@ class AliceAgent(BaseModel):
                     content=f"Error executing tool '{function_name}': {str(e)}",
                     generated_by="tool",
                     step=function_name,
-                    type="text"
+                    type=MessageType.TEXT
                 ))
         
         return tool_messages
@@ -184,8 +189,23 @@ class AliceAgent(BaseModel):
                 return False, f"Invalid type for parameter '{param}'. Expected {expected_type}, got {type(value).__name__}"
 
         return True, None
+    
+    def collect_code_blocs(self, messages: List[MessageDict]) -> List[Tuple[str, str]]:
+        code_blocks: List[Tuple[str, str]] = []
+        for message in messages:
+            if not isinstance(message, MessageDict):
+                try:
+                    message = MessageDict(**message)
+                except Exception as e:
+                    LOGGER.error(f"Error parsing message: {e}")
+                    continue
+            if message.content:
+                code_blocks.extend(self._extract_code_blocks(message.content))
+        return code_blocks
 
-    async def _process_code_execution(self, code_blocks: List[Tuple[str, str]]) -> List[MessageDict]:
+    async def _process_code_execution(self, messages: List[MessageDict]) -> List[MessageDict]:
+        
+        code_blocks = self.collect_code_blocs(messages)
         if not code_blocks:
             LOGGER.warning(f'No code blocks found')
             return []
@@ -291,13 +311,13 @@ class AliceAgent(BaseModel):
     def _convert_message_dict_to_api_format(self, message: MessageDict) -> Dict[str, Any]:
         """Convert a MessageDict to the format expected by the API."""
         api_message = {
-            "role": message["role"],
-            "content": message["content"]
+            "role": message.role,
+            "content": message.content
         }
-        if message.get("tool_calls"):
-            api_message["tool_calls"] = message["tool_calls"]
-        if message.get("function_call"):
-            api_message["function_call"] = message["function_call"]
+        if message.tool_calls:
+            api_message["tool_calls"] = message.tool_calls
+        if message.function_call:
+            api_message["function_call"] = message.function_call
         return api_message
 
     async def chat(self, api_manager: APIManager, messages: Optional[List[MessageDict]] = [], initial_message: Optional[str] = None, max_turns: int = 1, tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []) -> List[MessageDict]:
@@ -308,7 +328,7 @@ class AliceAgent(BaseModel):
             new_messages = await self.generate_response(api_manager, messages, tool_map, tools_list)
             messages.extend(new_messages)
             
-            if any("TERMINATE" in msg.get('content') for msg in new_messages):
+            if any("TERMINATE" in msg.content for msg in new_messages):
                 break
         
         return messages

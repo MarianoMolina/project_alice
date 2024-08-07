@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, TextField, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
 import PromptAgentTask from './PromptAgentTask';
-import { TaskFormsProps } from '../../../../../utils/TaskTypes';
+import { TaskFormsProps } from '../../../../../types/TaskTypes';
 
 const CodeExecutionLLMTask: React.FC<TaskFormsProps> = ({
   item, onChange, mode, handleAccordionToggle, handleViewDetails, activeAccordion, handleSave, apis

@@ -54,11 +54,9 @@ async def test_llm_engines():
             inputs = kwargs.copy()
             response: MessageDict = await engine.generate_api_response(config, **inputs)
             print(f"Response from {name}:")
-            print(f"Role: {response['role']}")
-            print(f"Content: {response['content']}")
-            print("\nCreation Metadata:")
-            for key, value in response.get('creation_metadata', {}).items():
-                print(f"{key}: {value}")
+            print(f"Role: {response.role}")
+            print(f"Content: {response.content}")
+            print(f"\nCreation Metadata: {response.creation_metadata}")
             usage = engine.get_usage(response)
             print("\nUsage Information:")
             for key, value in usage.items():

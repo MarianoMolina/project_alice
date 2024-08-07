@@ -1,5 +1,5 @@
 import React from 'react';
-import { ParameterComponentProps, ParameterDefinition } from '../../../../utils/ParameterTypes';
+import { ParameterComponentProps, ParameterDefinition } from '../../../../types/ParameterTypes';
 import EnhancedTableView from '../../common/enhanced_component/TableView';
 
 const ParameterTableView: React.FC<ParameterComponentProps> = ({

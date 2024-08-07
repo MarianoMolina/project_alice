@@ -7,7 +7,7 @@ import {
     Select,
     MenuItem,
 } from '@mui/material';
-import { ParameterComponentProps } from '../../../../utils/ParameterTypes';
+import { ParameterComponentProps } from '../../../../types/ParameterTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 
 const ParameterFlexibleView: React.FC<ParameterComponentProps> = ({

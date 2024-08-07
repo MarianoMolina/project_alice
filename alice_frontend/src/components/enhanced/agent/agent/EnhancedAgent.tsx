@@ -4,9 +4,9 @@ import AgentListView from './AgentListView';
 import AgentTableView from './AgentTableView';
 import AgentCardView from './AgentCardView';
 import AgentShortListView from './AgentShortListView';
-import { AliceAgent } from '../../../../utils/AgentTypes';
+import { AliceAgent } from '../../../../types/AgentTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
-import { AgentComponentProps } from '../../../../utils/AgentTypes';
+import { AgentComponentProps } from '../../../../types/AgentTypes';
 
 type BaseAgentMode = BaseDbElementProps<AliceAgent>['mode'];
 type ExtendedAgentMode = 'list' | 'shortList' | 'card' | 'table';

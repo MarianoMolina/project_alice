@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { Box, Skeleton, Stack, Typography, Dialog } from '@mui/material';
 import { Add, Chat, Info, Functions, Assignment } from '@mui/icons-material';
-import { TaskResponse } from '../utils/TaskResponseTypes';
-import { AliceTask } from '../utils/TaskTypes';
-import { AliceChat } from '../utils/ChatTypes';
+import { TaskResponse } from '../types/TaskResponseTypes';
+import { AliceTask } from '../types/TaskTypes';
+import { AliceChat } from '../types/ChatTypes';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
 import { useChat } from '../context/ChatContext';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
@@ -27,10 +27,9 @@ const ChatAlice: React.FC = () => {
     fetchChats,
     currentChat,
     setCurrentChatId,
-    addTasksToChat,
-    addTaskResultsToChat,
+    addTaskToChat,
+    addTaskResultToChat,
     isTaskInChat,
-    isTaskResultInChat,
   } = useChat();
   const [openTaskDialog, setOpenTaskDialog] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>(undefined);
@@ -99,13 +98,13 @@ const ChatAlice: React.FC = () => {
 
   const checkAndAddTask = (task: AliceTask) => {
     if (task._id && !isTaskInChat(task._id)) {
-      addTasksToChat([task._id]);
+      addTaskToChat(task._id);
     }
   }
 
   const checkAndAddTaskResult = (taskResult: TaskResponse) => {
-    if (taskResult._id && !isTaskResultInChat(taskResult._id)) {
-      addTaskResultsToChat([taskResult._id]);
+    if (taskResult._id) {
+      addTaskResultToChat(taskResult._id);
     }
   }
 

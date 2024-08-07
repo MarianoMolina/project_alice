@@ -2,9 +2,9 @@ import React from 'react';
 import TaskResponseListView from './TaskResponseListView';
 import TaskResponseTableView from './TaskResponseTableView';
 import TaskResponseCardView from './TaskResponseCardView';
-import { TaskResponse } from '../../../../utils/TaskResponseTypes';
+import { TaskResponse } from '../../../../types/TaskResponseTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
-import { TaskResponseComponentProps } from '../../../../utils/TaskResponseTypes';
+import { TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
 import TaskResponseShortList from './TaskResponseShortListView';
 
 type BaseTaskResponseMode = BaseDbElementProps<TaskResponse>['mode'];

@@ -1,6 +1,6 @@
 import React from 'react';
 import EnhancedTableView from '../../common/enhanced_component/TableView';
-import { API, ApiComponentProps } from '../../../../utils/ApiTypes';
+import { API, ApiComponentProps } from '../../../../types/ApiTypes';
 
 const AgentTableView: React.FC<ApiComponentProps> = ({
   items,

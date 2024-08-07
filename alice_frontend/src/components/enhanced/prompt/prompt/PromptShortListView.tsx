@@ -1,5 +1,5 @@
 import React from 'react';
-import { Prompt, PromptComponentProps } from '../../../../utils/PromptTypes';
+import { Prompt, PromptComponentProps } from '../../../../types/PromptTypes';
 import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
 
 const PromptShortListView: React.FC<PromptComponentProps> = ({

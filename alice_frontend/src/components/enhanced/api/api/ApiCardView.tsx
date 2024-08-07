@@ -8,7 +8,7 @@ import {
     ListItemText,
     Switch,
 } from '@mui/material';
-import { ApiComponentProps } from '../../../../utils/ApiTypes';
+import { ApiComponentProps } from '../../../../types/ApiTypes';
 
 const ApiCardView: React.FC<ApiComponentProps> = ({
     item,

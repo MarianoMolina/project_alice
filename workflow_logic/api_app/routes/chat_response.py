@@ -3,7 +3,6 @@ from workflow_logic.api_app.util.utils import deep_api_check
 from workflow_logic.api_app.util.dependencies import get_db_app
 from workflow_logic.db_app.app import BackendAPI
 from workflow_logic.util import LOGGER
-from workflow_logic.util.communication import serialize_message_dict
 
 router = APIRouter()
 
@@ -53,10 +52,9 @@ async def chat_response(chat_id: str, db_app: BackendAPI = Depends(get_db_app)) 
     # Store messages and task results in order
     if responses:
         for response in responses:
-            serializable_response = serialize_message_dict(response)
-            stored_chat = await db_app.store_chat_message(chat_id, serializable_response)
+            stored_chat = await db_app.store_chat_message(chat_id, response)
             if not stored_chat:
-                LOGGER.error(f"Failed to store message: {serializable_response} in chat_id {chat_id}")
+                LOGGER.error(f"Failed to store message: {response} in chat_id {chat_id}")
        
         LOGGER.info(f'Stored messages: {responses}')
         return True

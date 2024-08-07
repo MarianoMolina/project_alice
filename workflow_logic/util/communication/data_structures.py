@@ -1,7 +1,8 @@
+from datetime import datetime
 from enum import Enum
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from typing import Optional, Literal, Dict, Any, List, Union
-from typing_extensions import TypedDict, Optional, Literal, Annotated
+from typing_extensions import Optional, Literal, Annotated
 from workflow_logic.core.parameters import ToolCall
 
 class OutputInterface(BaseModel):
@@ -89,10 +90,10 @@ class MessageType(str, Enum):
     FILE = 'file'
     TASK_RESPONSE = 'TaskResponse'
 
-class MessageDict(TypedDict, total=False):
-    _id: Optional[str] = Field(default="", description="The id of the message", alias="_id")
+class MessageDict(BaseModel):
+    id: Optional[str] = Field(default="", description="The id of the message", alias="_id")
     role: Literal["user", "assistant", "system", "tool"] = Field(default="user", description="Role of the message")
-    content: str = Field(description="Content of the message")
+    content: Optional[str] = Field(default=None, description="Content of the message")
     generated_by: Literal["user", "llm", "tool"] = Field(default="user", description="Who created the message")
     step: Optional[str] = Field(default="", description="Process that is creating this message, usually the task_name or tool_name")
     assistant_name: Optional[str] = Field(default="", description="Name of the assistant")
@@ -101,7 +102,7 @@ class MessageDict(TypedDict, total=False):
     tool_calls: Optional[List[ToolCall]] = Field(default=None, description="List of tool calls in the message")
     function_call: Optional[Dict[str, Any]] = Field(default=None, description="Function call in the message")
     request_type: Optional[str] = Field(default=None, description="Request type of the message, if any. Can be 'approval', 'confirmation', etc.")
-    task_responses: List[Union[str, TaskResponse]] = Field(default_factory=list, description="List of associated task responses")
+    task_responses: Optional[List[Union[str, TaskResponse]]] = Field(default_factory=list, description="List of associated task responses")
     creation_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Metadata about the creation of the message, like cost, tokens, end reason, etc.")
     createdAt: Optional[str] = Field(default=None, description="Timestamp of the message")
     updatedAt: Optional[str] = Field(default=None, description="Timestamp of the message")
@@ -109,37 +110,38 @@ class MessageDict(TypedDict, total=False):
     updated_by: Optional[Union[str, dict]] = Field(default=None, description="User id who updated the message")
 
     def __str__(self) -> str:
-        role = self.get('role', '')
-        content = self.get('content', '')
-        msg_type = self.get('type', '')
-        assistant_name = self.get('assistant_name', '')
-        step = self.get('step', '')
+        role = self.role if self.role else ''
+        content = self.content if self.content else ''
+        msg_type = self.type if self.type else ''
+        assistant_name = self.assistant_name if self.assistant_name else ''
+        step = self.step if self.step else ''
         if msg_type == "text":
             return f"{role}{f' ({assistant_name})' if assistant_name else ''}: {content}"
         elif msg_type == "tool":
-            return f"{role}: {content}{f' ({step})' if step else ''}"
+            return f"Tool result: {content}{f' ({step})' if step else ''}"
         return f"{role}: {content}"
 
-def serialize_message_dict(message: MessageDict) -> Dict[str, Any]:
-    serialized = dict(message)
-    if serialized.get('tool_calls'):
-        serialized['tool_calls'] = [
-            tool_call.model_dump() if hasattr(tool_call, 'model_dump') else tool_call
-            for tool_call in serialized['tool_calls']
-        ]
-    if serialized.get('task_responses'):
-        serialized['task_responses'] = [
-            task_response.model_dump() if hasattr(task_response, 'model_dump') else task_response
-            for task_response in serialized['task_responses']
-        ]
-    return serialized
+class SearchResult(BaseModel):
+    title: str
+    url: str
+    content: str
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
-class SearchResult(TypedDict):
-    """A dictionary representing a search result."""
-    title: Annotated[str, Field(description="Title of the search result")]
-    url: Annotated[str, Field("", description="URL of the search result")]
-    content: Annotated[str, Field("", description="Content of the search result")]
-    metadata: Annotated[Optional[Dict[str, Any]], Field({}, description="Metadata of the search result")]
+    @model_validator(mode='before')
+    def sanitize_metadata(cls, values):
+        sanitized_metadata = {}
+        metadata = values.get('metadata', {})
+        for key, val in metadata.items():
+            try:
+                if isinstance(val, datetime):
+                    sanitized_metadata[key] = val.isoformat()
+                else:
+                    sanitized_metadata[key] = str(val)
+            except Exception as e:
+                print(f"Error serializing value for key {key}: {val}, Exception: {e}")
+                sanitized_metadata[key] = "Unserializable value"
+        values['metadata'] = sanitized_metadata
+        return values
 
 class StringOutput(OutputInterface):
     content: List[str] = Field([], description="The content of the output.")
@@ -152,7 +154,7 @@ class LLMChatOutput(OutputInterface):
 
     def __str__(self) -> str:
         return "\n".join(
-            [f"{message['role']}: " + (f"{message['assistant_name']}\n" if message.get('assistant_name') else "\n") + message['content']
+            [f"{message.role}: " + (f"{message.assistant_name}\n" if message.assistant_name else "\n") + message.content
              for message in self.content]
         )
 
@@ -161,7 +163,7 @@ class SearchOutput(OutputInterface):
 
     def __str__(self) -> str:
         return "\n".join(
-            [f"Title: {result['title']} \nURL: {result['url']} \n Content: {result['content']}\n"
+            [f"Title: {result.title} \nURL: {result.url} \n Content: {result.content}\n"
              for result in self.content]
         )
 

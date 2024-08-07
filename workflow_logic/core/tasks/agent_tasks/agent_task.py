@@ -52,9 +52,9 @@ class BasicAgentTask(AliceTask):
         return combined_function_map
     
     async def generate_response(self, api_manager: APIManager, **kwargs) ->  Tuple[List[MessageDict], int]:     
-        messages = kwargs.get('messages', [])
+        messages: List[MessageDict] = kwargs.get('messages', [])
         new_messages = await self.agent.chat(api_manager=api_manager, messages=messages, max_turns=1, tool_map=self.tool_map(api_manager), tools_list=self.tool_list(api_manager))
-        is_terminated = True if 'TERMINATE' in new_messages[-1]['content'] else False
+        is_terminated = True if 'TERMINATE' in new_messages[-1].content else False
         exitcode = self.get_exit_code(new_messages, is_terminated)
         return new_messages, exitcode
     
@@ -77,4 +77,4 @@ class BasicAgentTask(AliceTask):
         )
     
     def get_exit_code(self, chat_output: List[MessageDict], response_code: bool) -> int:
-        return 0 if (chat_output and 'content' in chat_output[-1]) else 1
+        return 0 if (chat_output and chat_output[-1].content) else 1

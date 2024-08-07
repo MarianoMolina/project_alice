@@ -1,5 +1,5 @@
 import React from 'react';
-import { AliceTask, TaskComponentProps } from '../../../../utils/TaskTypes';
+import { AliceTask, TaskComponentProps } from '../../../../types/TaskTypes';
 import { Typography } from '@mui/material';
 import EnhancedListView from '../../common/enhanced_component/ListView';
 

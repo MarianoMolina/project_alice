@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
-import { Prompt } from '../../../utils/PromptTypes';
+import { Prompt } from '../../../types/PromptTypes';
 
 interface PromptAdderProps {
   prompts: Prompt[];

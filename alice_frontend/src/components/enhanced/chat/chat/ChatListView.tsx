@@ -1,5 +1,5 @@
 import React from 'react';
-import { AliceChat, ChatComponentProps } from '../../../../utils/ChatTypes';
+import { AliceChat, ChatComponentProps } from '../../../../types/ChatTypes';
 import { Typography } from '@mui/material';
 import EnhancedListView from '../../common/enhanced_component/ListView';
 

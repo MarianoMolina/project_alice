@@ -8,8 +8,6 @@ const changeHistorySchema = new Schema<IChangeHistoryDocument>({
   updated_agent: { type: Schema.Types.ObjectId, ref: 'Agent', required: false },
   previous_functions: [{ type: Schema.Types.ObjectId, ref: 'Task', required: false }],
   updated_functions: [{ type: Schema.Types.ObjectId, ref: 'Task', required: false }],
-  previous_task_responses: [{ type: Schema.Types.ObjectId, ref: 'TaskResult', required: false }],
-  updated_task_responses: [{ type: Schema.Types.ObjectId, ref: 'TaskResult', required: false }],
   changed_by: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   timestamp: { type: Date, default: Date.now },
 });
@@ -21,8 +19,6 @@ changeHistorySchema.methods.apiRepresentation = function (this: IChangeHistoryDo
     updated_agent: this.updated_agent ? (this.updated_agent._id || this.updated_agent) : null,
     previous_functions: this.previous_functions.map(func => func._id || func),
     updated_functions: this.updated_functions.map(func => func._id || func),
-    previous_task_responses: this.previous_task_responses.map(task => task._id || task),
-    updated_task_responses: this.updated_task_responses.map(task => task._id || task),
     changed_by: this.changed_by ? (this.changed_by._id || this.changed_by) : null,
     timestamp: this.timestamp || null
   };
@@ -86,6 +82,7 @@ aliceChatSchema.methods.apiRepresentation = function (this: IAliceChatDocument) 
     updated_at: this.updatedAt || null
   };
 };
+
 function ensureObjectIdForSave(this: IAliceChatDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {
   if (this.alice_agent) this.alice_agent = ensureObjectIdHelper(this.alice_agent);
   if (this.created_by) this.created_by = ensureObjectIdHelper(this.created_by);
@@ -94,6 +91,12 @@ function ensureObjectIdForSave(this: IAliceChatDocument, next: mongoose.Callback
   if (this.functions) {
     this.functions = this.functions.map(func => ensureObjectIdHelper(func));
   }
+
+  this.messages.forEach(message => {
+    if (message.task_responses) {
+      message.task_responses = message.task_responses.map(response => ensureObjectIdHelper(response));
+    }
+  });
 
   next();
 }
@@ -108,6 +111,14 @@ function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.
     update.functions = update.functions.map((func: any) => ensureObjectIdHelper(func));
   }
 
+  if (update.messages) {
+    update.messages.forEach((message: any) => {
+      if (message.task_responses) {
+        message.task_responses = message.task_responses.map((response: any) => ensureObjectIdHelper(response));
+      }
+    });
+  }
+
   next();
 }
 
@@ -116,6 +127,10 @@ function autoPopulate(this: mongoose.Query<any, any>) {
     .populate({
       path: 'functions',
       model: 'Task'
+    })
+    .populate({
+      path: 'messages.task_responses',
+      model: 'TaskResult'
     });
 }
 

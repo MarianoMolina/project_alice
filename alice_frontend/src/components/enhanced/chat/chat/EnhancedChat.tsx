@@ -5,9 +5,9 @@ import ChatTableView from './ChatTableView';
 import ChatCardView from './ChatCardView';
 import ChatFullView from './ChatFullView';
 import ChatShortListView from './ChatShortListView';
-import { AliceChat } from '../../../../utils/ChatTypes';
+import { AliceChat } from '../../../../types/ChatTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
-import { ChatComponentProps } from '../../../../utils/ChatTypes';
+import { ChatComponentProps } from '../../../../types/ChatTypes';
 
 type BaseChatMode = BaseDbElementProps<AliceChat>['mode'];
 type ExtendedChatMode = 'list' | 'shortList' | 'card' | 'full' | 'table';

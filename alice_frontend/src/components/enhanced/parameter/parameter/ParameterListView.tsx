@@ -1,5 +1,5 @@
 import React from 'react';
-import { ParameterDefinition, ParameterComponentProps } from '../../../../utils/ParameterTypes';
+import { ParameterDefinition, ParameterComponentProps } from '../../../../types/ParameterTypes';
 import { Typography } from '@mui/material';
 import EnhancedListView from '../../common/enhanced_component/ListView';
 

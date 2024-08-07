@@ -1,10 +1,10 @@
 import React from 'react';
-import { TaskFormsProps } from '../../../../../utils/TaskTypes';
+import { TaskFormsProps } from '../../../../../types/TaskTypes';
 import BasicAgentTask from './BasicAgentTask';
 import { Box } from '@mui/material';
 import EnhancedSelect from '../../../common/enhanced_select/EnhancedSelect';
 import EnhancedPrompt from '../../../prompt/prompt/EnhancedPrompt';
-import { Prompt } from '../../../../../utils/PromptTypes';
+import { Prompt } from '../../../../../types/PromptTypes';
 import { useApi } from '../../../../../context/ApiContext';
 
 const PromptAgentTask: React.FC<TaskFormsProps> = ({ item, onChange, mode, handleAccordionToggle, handleViewDetails, activeAccordion, handleSave, apis }) => {

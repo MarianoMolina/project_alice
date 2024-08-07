@@ -11,7 +11,7 @@ import {
   Tooltip
 } from '@mui/material';
 import { Visibility, ChevronRight } from '@mui/icons-material';
-import { ChatComponentProps } from '../../../../utils/ChatTypes';
+import { ChatComponentProps } from '../../../../types/ChatTypes';
 
 const ChatTableView: React.FC<ChatComponentProps> = ({
   items,

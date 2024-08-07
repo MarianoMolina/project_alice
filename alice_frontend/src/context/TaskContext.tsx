@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback } from 'react';
-import { TaskResponse } from '../utils/TaskResponseTypes';
+import { TaskResponse } from '../types/TaskResponseTypes';
 import { useApi } from './ApiContext';
-import { AliceTask } from '../utils/TaskTypes';
+import { AliceTask } from '../types/TaskTypes';
 
 export interface RecentExecution {
   taskId: string;

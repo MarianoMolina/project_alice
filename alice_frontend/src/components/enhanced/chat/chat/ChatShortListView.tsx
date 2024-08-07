@@ -1,5 +1,5 @@
 import React from 'react';
-import { AliceChat, ChatComponentProps } from '../../../../utils/ChatTypes';
+import { AliceChat, ChatComponentProps } from '../../../../types/ChatTypes';
 import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
 
 const ChatShortListView: React.FC<ChatComponentProps> = ({
