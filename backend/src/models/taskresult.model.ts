@@ -60,7 +60,7 @@ function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.
 }
 
 function autoPopulate(this: mongoose.Query<any, any>) {
-  this.populate('task_id created_by updated_by');
+  this.populate('created_by updated_by'); // We don't populate task_id - its the only case and the goal is to avoid too much data
 }
 
 taskResultSchema.pre('save', ensureObjectIdForSave);
