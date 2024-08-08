@@ -1,5 +1,6 @@
 import { User, convertToUser } from "./UserTypes";
 import { LlmProvider } from "./ApiTypes";
+import { HandleClickProps } from "./CollectionTypes";
 
 export interface AliceModel {
     _id?: string;
@@ -37,7 +38,7 @@ export const convertToAliceModel = (data: any): AliceModel => {
     };
 };
 
-export interface ModelComponentProps {
+export interface ModelComponentProps extends HandleClickProps {
   items: AliceModel[] | null;
   item: AliceModel | null;
   onChange: (newItem: Partial<AliceModel>) => void;

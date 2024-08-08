@@ -9,17 +9,6 @@ from workflow_logic.core.parameters import FunctionParameters, ParameterDefiniti
 from workflow_logic.core.api import APIManager, APIEngine
 from workflow_logic.util import TaskResponse, DatabaseTaskResponse, ApiType, LOGGER
 
-prompt_function_parameters = FunctionParameters(
-    type="object",
-    properties={
-        "prompt": ParameterDefinition(
-            type="string",
-            description="The input prompt for the task",
-            default=None
-        )},
-    required=["prompt"]
-)
-    
 class AliceTask(BaseModel, ABC):
     """
     An abstract base class representing a task in the Alice workflow system.
@@ -65,7 +54,17 @@ class AliceTask(BaseModel, ABC):
     id: Optional[str] = Field(default=None, description="The task ID", alias="_id")
     task_name: str = Field(..., description="The name of the task")
     task_description: str = Field(..., description="A clear, concise statement of what the task entails")
-    input_variables: FunctionParameters = Field(prompt_function_parameters, description="The input variables for the task. Default is a string prompt.")
+    input_variables: FunctionParameters = Field(FunctionParameters(
+            type="object",
+            properties={
+                "prompt": ParameterDefinition(
+                    type="string",
+                    description="The input prompt for the task",
+                    default=None
+                )},
+            required=["prompt"]
+        ), description="The input variables for the task. Default is a string prompt."
+    )
     exit_codes: Dict[int, str] = Field(default={0: "Success", 1: "Failed"}, description="A dictionary of exit codes for the task, consistent with the TaskResponse structure", example={0: "Success", 1: "Failed"})
     recursive: bool = Field(True, description="Whether the task can be executed recursively")
     templates: Optional[Dict[str, Prompt]] = Field(default={}, description="A dictionary of templates for the task")

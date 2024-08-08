@@ -1,18 +1,13 @@
 import React from 'react';
 import {
     Typography,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-    Card,
-    CardContent,
     Chip,
     Box,
 } from '@mui/material';
-import { Category, Memory, FormatShapes, Thermostat, Cached, Speed } from '@mui/icons-material';
+import { Category, Memory, FormatShapes, Speed, Thermostat, Cached } from '@mui/icons-material';
 import { ModelComponentProps } from '../../../../types/ModelTypes';
 import useStyles from '../ModelStyles';
+import CommonCardView from '../../common/enhanced_component/CardView';
 
 const ModelCardView: React.FC<ModelComponentProps> = ({ item }) => {
     const classes = useStyles();
@@ -21,54 +16,39 @@ const ModelCardView: React.FC<ModelComponentProps> = ({ item }) => {
         return <Typography>No model data available.</Typography>;
     }
 
+    const listItems = [
+        { icon: <Category />, primary_text: "Model Type", secondary_text: item.model_type },
+        { icon: <FormatShapes />, primary_text: "Model Format", secondary_text: item.model_format || 'N/A' },
+        { icon: <Memory />, primary_text: "Context Size", secondary_text: item.ctx_size ? `${item.ctx_size} tokens` : 'N/A' },
+        { icon: <Speed />, primary_text: "API Provider", secondary_text: item.api_name },
+    ];
+
     return (
-        <Card className={classes.card}>
-            <CardContent>
-                <Typography variant="h5" className={classes.title}>{item.short_name}</Typography>
-                <Typography variant="subtitle1">{item.model_name}</Typography>
-                <Typography variant="caption" className={classes.modelId}>
-                    Model ID: {item._id}
-                </Typography>
-
-                <List className={classes.list}>
-                    <ListItem>
-                        <ListItemIcon><Category /></ListItemIcon>
-                        <ListItemText primary="Model Type" secondary={item.model_type} />
-                    </ListItem>
-                    <ListItem>
-                        <ListItemIcon><FormatShapes /></ListItemIcon>
-                        <ListItemText primary="Model Format" secondary={item.model_format || 'N/A'} />
-                    </ListItem>
-                    <ListItem>
-                        <ListItemIcon><Memory /></ListItemIcon>
-                        <ListItemText primary="Context Size" secondary={item.ctx_size ? `${item.ctx_size} tokens` : 'N/A'} />
-                    </ListItem>
-                    <ListItem>
-                        <ListItemIcon><Speed /></ListItemIcon>
-                        <ListItemText primary="API Provider" secondary={item.api_name} />
-                    </ListItem>
-                </List>
-
-                <Box className={classes.chipContainer}>
+        <CommonCardView
+            title={item.short_name}
+            subtitle={item.model_name}
+            id={item._id}
+            listItems={listItems}
+        >
+            <Box className={classes.chipContainer}>
+                <Chip
+                    icon={<Thermostat />}
+                    label={`Temperature: ${item.temperature?.toFixed(2) || 'N/A'}`}
+                    className={classes.chip}
+                />
+                <Chip
+                    icon={<Cached />}
+                    label={`Use Cache: ${item.use_cache ? 'Yes' : 'No'}`}
+                    className={classes.chip}
+                />
+                {item.seed !== undefined && item.seed !== null && (
                     <Chip
-                        icon={<Thermostat />}
-                        label={`Temperature: ${item.temperature?.toFixed(2) || 'N/A'}`}
+                        label={`Seed: ${item.seed}`}
                         className={classes.chip}
                     />
-                    <Chip
-                        icon={<Cached />}
-                        label={`Use Cache: ${item.use_cache ? 'Yes' : 'No'}`}
-                        className={classes.chip}
-                    />
-                    {item.seed !== undefined && item.seed !== null && (
-                        <Chip
-                            label={`Seed: ${item.seed}`}
-                            className={classes.chip}
-                        />
-                    )}
-                </Box>
-            </CardContent>
-        </Card>
+                )}
+            </Box>
+        </CommonCardView>
     );
 };
 

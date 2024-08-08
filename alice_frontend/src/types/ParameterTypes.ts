@@ -1,3 +1,4 @@
+import { HandleClickProps } from "./CollectionTypes";
 import { User, convertToUser } from "./UserTypes";
 
 export interface FunctionParameters {
@@ -29,7 +30,7 @@ export const convertToParameterDefinition = (data: any): ParameterDefinition => 
     };
 };
 
-export interface ParameterComponentProps {
+export interface ParameterComponentProps extends HandleClickProps {
     items: ParameterDefinition[] | null;
     item: ParameterDefinition | null;
     onChange: (newItem: Partial<ParameterDefinition>) => void;

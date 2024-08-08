@@ -6,9 +6,6 @@ const useStyles = makeStyles((theme: Theme) => ({
         display: 'flex',
         height: '100%',
     },
-    title: {
-        marginBottom: theme.spacing(3),
-    },
     card: {
         height: '100%',
     },

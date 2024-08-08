@@ -4,7 +4,7 @@ from openai.types.chat import ChatCompletion
 from pydantic import Field
 from typing import Dict, Any, List, Optional
 from workflow_logic.core.api.engines import APIEngine
-from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
+from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition, ToolCall
 from workflow_logic.util import MessageDict, MessageType, LOGGER, LLMConfig, ApiType
 
 class LLMEngine(APIEngine):
@@ -90,10 +90,16 @@ class LLMEngine(APIEngine):
             choice = response.choices[0]
             content = choice.message.content
 
+            if choice.message.tool_calls:
+                print(f"Tool calls: {choice.message.tool_calls}")
+                print(f'Model dump: {choice.message.tool_calls[0].model_dump()}')
+                print(f'Tool call: {ToolCall(**choice.message.tool_calls[0].model_dump())}')
+
+
             return MessageDict(
                 role="assistant",
                 content=content,
-                tool_calls=[tool_call.model_dump() for tool_call in choice.message.tool_calls] if choice.message.tool_calls else None,
+                tool_calls=[ToolCall(**tool_call.model_dump()) for tool_call in choice.message.tool_calls] if choice.message.tool_calls else None,
                 function_call=choice.message.function_call.model_dump() if choice.message.function_call else None,
                 generated_by="llm",
                 type=MessageType.TEXT,

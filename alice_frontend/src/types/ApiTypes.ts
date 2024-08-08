@@ -1,6 +1,7 @@
 import { AliceModel, convertToAliceModel } from "./ModelTypes";
 import { convertToUser, User } from "./UserTypes";
 import { FunctionParameters } from "./ParameterTypes";
+import { HandleClickProps } from "./CollectionTypes";
 
 export enum ApiType {
     LLM_API = 'llm_api',
@@ -67,7 +68,7 @@ export interface APIEngine {
     input_variables: FunctionParameters;
 }
 
-export interface ApiComponentProps {
+export interface ApiComponentProps extends HandleClickProps {
     items: API[] | null;
     item: API | null;
     onChange: (newItem: Partial<API>) => void;

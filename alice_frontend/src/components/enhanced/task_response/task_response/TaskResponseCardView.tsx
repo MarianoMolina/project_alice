@@ -1,10 +1,7 @@
 import React from 'react';
 import {
     Typography,
-    Card,
-    CardContent,
     Chip,
-    Box,
     Accordion,
     AccordionSummary,
     AccordionDetails,
@@ -15,6 +12,8 @@ import { CommandLineLog } from '../CommandLog';
 import { CodeBlock } from '../CodeBlock';
 import { WorkflowOutput } from '../WorkflowOutput';
 import { styled } from '@mui/material/styles';
+import CommonCardView from '../../common/enhanced_component/CardView';
+import { AccessTime, CheckCircle, Error, Warning, Output, Code, BugReport, DataObject, Analytics } from '@mui/icons-material';
 
 const ExitCodeChip = styled(Chip)(({ theme }) => ({
     fontWeight: 'bold',
@@ -42,11 +41,11 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
     const getExitCodeProps = (exitCode: number) => {
         switch (exitCode) {
             case 0:
-                return { label: 'Exit: 0', className: 'success' };
+                return { label: 'Exit: 0', className: 'success', icon: <CheckCircle /> };
             case 1:
-                return { label: 'Exit: 1', className: 'error' };
+                return { label: 'Exit: 1', className: 'error', icon: <Error /> };
             default:
-                return { label: `Exit: ${exitCode}`, className: 'warning' };
+                return { label: `Exit: ${exitCode}`, className: 'warning', icon: <Warning /> };
         }
     };
 
@@ -61,28 +60,29 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
         </Accordion>
     );
 
-    return (
-        <Card elevation={3}>
-            <CardContent>
-                <Typography variant="h5" gutterBottom>Task Execution Report</Typography>
-                
-                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                    <Typography variant="h6">{item.task_name}</Typography>
-                    <Box display="flex" gap={1}>
-                        <ExitCodeChip
-                            {...getExitCodeProps(item.result_code)}
-                            size="small"
-                        />
-                        <Chip
-                            label={item.status}
-                            color={item.status === 'complete' ? 'success' : 'error'}
-                            size="small"
-                        />
-                    </Box>
-                </Box>
+    const exitCodeProps = getExitCodeProps(item.result_code);
 
-                <Typography variant="body1" paragraph>{item.task_description}</Typography>
-
+    const listItems = [
+        {
+            icon: exitCodeProps.icon,
+            primary_text: "Exit Code",
+            secondary_text: (
+                <ExitCodeChip
+                    label={exitCodeProps.label}
+                    className={exitCodeProps.className}
+                    size="small"
+                />
+            )
+        },
+        {
+            icon: <AccessTime />,
+            primary_text: "Execution Time",
+            secondary_text: item.createdAt ? new Date(item.createdAt).toLocaleString() : 'N/A'
+        },
+        {
+            icon: <Output />,
+            primary_text: "Output",
+            secondary_text: (
                 <AccordionSection
                     title="Output"
                     content={
@@ -94,19 +94,34 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
                     }
                     disabled={!item.task_content}
                 />
-
+            )
+        },
+        {
+            icon: <Code />,
+            primary_text: "Inputs",
+            secondary_text: (
                 <AccordionSection
                     title="Inputs"
                     content={<CodeBlock language="json" code={JSON.stringify(item.task_inputs, null, 2)} />}
                     disabled={!item.task_inputs}
                 />
-
+            )
+        },
+        {
+            icon: <BugReport />,
+            primary_text: "Diagnostics",
+            secondary_text: (
                 <AccordionSection
                     title="Diagnostics"
                     content={<CommandLineLog content={item.result_diagnostic ?? ''} />}
                     disabled={!item.result_diagnostic}
                 />
-
+            )
+        },
+        {
+            icon: <DataObject />,
+            primary_text: "Raw Output",
+            secondary_text: (
                 <AccordionSection
                     title="Raw Output"
                     content={
@@ -116,20 +131,28 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
                     }
                     disabled={!item.task_outputs}
                 />
-
+            )
+        },
+        {
+            icon: <Analytics />,
+            primary_text: "Usage Metrics",
+            secondary_text: (
                 <AccordionSection
                     title="Usage Metrics"
                     content={<CodeBlock language="json" code={JSON.stringify(item.usage_metrics, null, 2)} />}
                     disabled={!item.usage_metrics}
                 />
+            )
+        }
+    ];
 
-                <Box mt={2} display="flex" justifyContent="space-between" alignItems="center">
-                    <Typography variant="caption">
-                        Execution Time: {item.createdAt ? new Date(item.createdAt).toLocaleString() : 'N/A'}
-                    </Typography>
-                </Box>
-            </CardContent>
-        </Card>
+    return (
+        <CommonCardView
+            title={item.task_name}
+            subtitle={item.task_description}
+            id={item._id}
+            listItems={listItems}
+        />
     );
 };
 

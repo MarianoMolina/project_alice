@@ -3,6 +3,7 @@ import { AliceTask, convertToAliceTask } from './TaskTypes';
 import { AliceAgent, convertToAliceAgent } from './AgentTypes';
 import { ToolCall } from './ParameterTypes';
 import { TaskResponse } from './TaskResponseTypes';
+import { HandleClickProps } from './CollectionTypes';
 
 export interface AliceChat {
     _id: string;
@@ -78,7 +79,7 @@ export interface MessageProps {
     message: MessageType
 }
 
-export interface ChatComponentProps {
+export interface ChatComponentProps extends HandleClickProps {
     items: AliceChat[] | null;
     item: AliceChat | null;
     onChange: (newItem: Partial<AliceChat>) => void;
@@ -88,10 +89,6 @@ export interface ChatComponentProps {
     onInteraction?: (chat: AliceChat) => void;
     onView?: (chat: AliceChat) => void;
     showRegenerate?: boolean;
-    handleTaskClick?: (taskId: string) => void;
-    handleTaskResultClick?: (taskResultId: string) => void;
-    handleAgentClick?: (agentId: string) => void;
-    handleMessageClick?: (messageId: string) => void;
     showHeaders?: boolean;
 }
 

@@ -1,21 +1,15 @@
 import React from 'react';
 import {
     Typography,
-    List,
-    ListItemIcon,
-    ListItemText,
-    Card,
-    CardContent,
-    Box,
     Chip,
     Accordion,
     AccordionSummary,
     AccordionDetails,
-    ListItem,
 } from '@mui/material';
-import { Code, ExpandMore, Assignment, QueryBuilder } from '@mui/icons-material';
+import { Code, ExpandMore, Assignment, QueryBuilder, Settings } from '@mui/icons-material';
 import { PromptComponentProps } from '../../../../types/PromptTypes';
 import useStyles from '../PromptStyles';
+import CommonCardView from '../../common/enhanced_component/CardView';
 
 const PromptCardView: React.FC<PromptComponentProps> = ({
     item,
@@ -27,73 +21,77 @@ const PromptCardView: React.FC<PromptComponentProps> = ({
         return <Typography>No prompt data available.</Typography>;
     }
 
+    const listItems = [
+        {
+            icon: <Code />,
+            primary_text: "Templated",
+            secondary_text: item.is_templated ? 'Yes' : 'No'
+        },
+        {
+            icon: <QueryBuilder />,
+            primary_text: "Created at",
+            secondary_text: new Date(item.createdAt || '').toLocaleString()
+        },
+        ...(item.version !== undefined ? [{
+            icon: <Assignment />,
+            primary_text: "Version",
+            secondary_text: item.version.toString()
+        }] : []),
+        ...(item.parameters ? [{
+            icon: <Settings />,
+            primary_text: "Parameters",
+            secondary_text: (
+                <>
+                    {Object.entries(item.parameters.properties).map(([key, param]) => (
+                        <Chip
+                            key={key}
+                            label={`${key}: ${param.type}`}
+                            onClick={() => handleParameterClick && handleParameterClick(param._id!)}
+                            className={classes.chip}
+                            color={item.parameters?.required.includes(key) ? "primary" : "default"}
+                        />
+                    ))}
+                </>
+            )
+        }] : []),
+        ...(item.partial_variables && Object.keys(item.partial_variables).length > 0 ? [{
+            icon: <Settings />,
+            primary_text: "Partial Variables",
+            secondary_text: (
+                <>
+                    {Object.keys(item.partial_variables).map((key) => (
+                        <Chip
+                            key={key}
+                            label={key}
+                            className={classes.chip}
+                        />
+                    ))}
+                </>
+            )
+        }] : [])
+    ];
+
     return (
-        <Card className={classes.card}>
-            <CardContent>
-                <Typography variant="h5" className={classes.title}>{item.name}</Typography>
-                <Typography variant="caption" className={classes.promptId}>
-                    Prompt ID: {item._id}
-                </Typography>
-
-                <Accordion>
-                    <AccordionSummary expandIcon={<ExpandMore />}>
-                        <Typography>Prompt Content</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <Typography variant="body2" className={classes.content}>{item.content}</Typography>
-                    </AccordionDetails>
-                </Accordion>
-
-                <List className={classes.list}>
-                    <ListItem>
-                        <ListItemIcon><Code /></ListItemIcon>
-                        <ListItemText primary="Templated" secondary={item.is_templated ? 'Yes' : 'No'} />
-                    </ListItem>
-                    <ListItem>
-                        <ListItemIcon><QueryBuilder /></ListItemIcon>
-                        <ListItemText primary="Created at" secondary={new Date(item.createdAt || '').toLocaleString()} />
-                    </ListItem>
-                    {item.version !== undefined && (
-                        <ListItem>
-                            <ListItemIcon><Assignment /></ListItemIcon>
-                            <ListItemText primary="Version" secondary={item.version} />
-                        </ListItem>
-                    )}
-                </List>
-
-                {item.parameters && (
-                    <Box className={classes.section}>
-                        <Typography variant="subtitle1">Parameters</Typography>
-                        <Box className={classes.chipContainer}>
-                            {Object.entries(item.parameters.properties).map(([key, param]) => (
-                                <Chip
-                                    key={key}
-                                    label={`${key}: ${param.type}`}
-                                    onClick={() => handleParameterClick && handleParameterClick(param._id!)}
-                                    className={classes.chip}
-                                    color={item.parameters?.required.includes(key) ? "primary" : "default"}
-                                />
-                            ))}
-                        </Box>
-                    </Box>
-                )}
-
-                {item.partial_variables && Object.keys(item.partial_variables).length > 0 && (
-                    <Box className={classes.section}>
-                        <Typography variant="subtitle1">Partial Variables</Typography>
-                        <Box className={classes.chipContainer}>
-                            {Object.keys(item.partial_variables).map((key) => (
-                                <Chip
-                                    key={key}
-                                    label={key}
-                                    className={classes.chip}
-                                />
-                            ))}
-                        </Box>
-                    </Box>
-                )}
-            </CardContent>
-        </Card>
+        <CommonCardView
+            title={item.name}
+            id={item._id}
+            listItems={listItems}
+        >
+            <Accordion>
+                <AccordionSummary
+                    expandIcon={<ExpandMore />}
+                    aria-controls="prompt-content"
+                    id="prompt-content-header"
+                >
+                    <Typography>Prompt Content</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <Typography variant="body2" className={classes.content}>
+                        {item.content}
+                    </Typography>
+                </AccordionDetails>
+            </Accordion>
+        </CommonCardView>
     );
 };
 

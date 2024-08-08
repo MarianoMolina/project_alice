@@ -1,39 +1,39 @@
 import React from 'react';
-import {
-    Typography,
-    List,
-    ListItemButton,
-    ListItemIcon,
-    ListItemText,
-    Card,
-    CardContent,
-} from '@mui/material';
-import { Category } from '@mui/icons-material';
+import { Typography } from '@mui/material';
+import { Category, TypeSpecimen, Description } from '@mui/icons-material';
 import { ParameterComponentProps } from '../../../../types/ParameterTypes';
+import CommonCardView from '../../common/enhanced_component/CardView';
 
-const ParameterCardView: React.FC<ParameterComponentProps> = ({
-    item,
-}) => {
+const ParameterCardView: React.FC<ParameterComponentProps> = ({ item }) => {
+
     if (!item) {
-        return <Typography>No chat data available.</Typography>;
+        return <Typography>No parameter data available.</Typography>;
     }
 
+    const listItems = [
+        {
+            icon: <Description />,
+            primary_text: "Description",
+            secondary_text: item.description
+        },
+        {
+            icon: <TypeSpecimen />,
+            primary_text: "Type",
+            secondary_text: item.type
+        },
+        {
+            icon: <Category />,
+            primary_text: "Created at",
+            secondary_text: new Date(item.createdAt || '').toDateString()
+        }
+    ];
+
     return (
-        <Card>
-            <CardContent>
-                <Typography variant="h6">Description: {item.description}</Typography>
-                <Typography variant="body2">Type: {item.type}</Typography>
-                <Typography variant="caption">
-                    Model ID: {item._id}
-                </Typography>
-                <List>
-                    <ListItemButton>
-                        <ListItemIcon><Category /></ListItemIcon>
-                        <ListItemText primary="Created at" secondary={new Date(item.createdAt || '').toDateString()} />
-                    </ListItemButton>
-                </List>
-            </CardContent>
-        </Card>
+        <CommonCardView
+            title="Parameter"
+            id={item._id}
+            listItems={listItems}
+        />
     );
 };
 

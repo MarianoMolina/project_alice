@@ -1,9 +1,10 @@
 import React, { useRef, useEffect } from 'react';
-import { Box, Button, Typography, Skeleton } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import { ChatComponentProps } from '../../../../types/ChatTypes';
 import Message from '../Message';
 import useStyles from '../ChatStyles';
 import { useChat } from '../../../../context/ChatContext';
+import PlaceholderSkeleton from '../../../ui/placeholder_skeleton/PlaceholderSkeleton';
 
 interface ChatFullViewProps extends ChatComponentProps {
   isGenerating?: boolean;
@@ -50,14 +51,7 @@ const ChatFullView: React.FC<ChatFullViewProps> = ({
           ))
         ) : (
           <Box className={classes.emptyMessagesContainer}>
-            <Typography variant="body1" align="center" gutterBottom>
-              No messages yet. Send your first message to start the conversation.
-            </Typography>
-            <Box className={classes.skeletonContainer}>
-              <Skeleton variant="rectangular" className={classes.skeleton} />
-              <Skeleton variant="rectangular" className={classes.skeleton} />
-              <Skeleton variant="rectangular" className={classes.skeleton} />
-            </Box>
+            <PlaceholderSkeleton mode="chat" text='No messages yet. Send your first message to start the conversation.' className={classes.skeletonContainer} />
           </Box>
         )}
       </Box>

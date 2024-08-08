@@ -85,6 +85,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: theme.palette.background.paper,
     border: `1px solid ${theme.palette.divider}`,
   },
+  outputInterfaceList: {
+    overflowX: 'auto',
+  }
 }));
 
 export default useStyles;

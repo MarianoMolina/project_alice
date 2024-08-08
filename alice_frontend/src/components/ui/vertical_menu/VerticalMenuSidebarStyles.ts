@@ -13,13 +13,12 @@ const useStyles = makeStyles((theme: Theme) => ({
   verticalMenu: {
     display: 'flex',
     flexDirection: 'column',
-    borderRight: `1px solid ${theme.palette.divider}`,
     height: '100%',
     overflowY: 'auto',
     overflowX: 'hidden',
   },
   actionsSection: {
-    backgroundColor: theme.palette.action.hover,
+    backgroundColor: theme.palette.primary.main,
     padding: theme.spacing(1, 0),
     display: 'flex',
     flexDirection: 'column',

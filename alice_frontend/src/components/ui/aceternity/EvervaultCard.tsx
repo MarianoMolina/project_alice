@@ -3,7 +3,8 @@ import { useMotionValue } from "framer-motion";
 import React, { useState, useEffect } from "react";
 import { useMotionTemplate, motion } from "framer-motion";
 import { cn } from "../../../utils/cn";
-import { Typography, Button } from '@mui/material';
+import { Typography, Button, Avatar } from '@mui/material';
+import useStyles from "./EvervaultCardStyles";
 
 export const EvervaultCard = ({
   title,
@@ -23,9 +24,10 @@ export const EvervaultCard = ({
   let mouseX = useMotionValue(0);
   let mouseY = useMotionValue(0);
   const [randomString, setRandomString] = useState("");
+  const classes = useStyles();
 
   useEffect(() => {
-    let str = generateRandomString(1500);
+    let str = generateRandomString(3500);
     setRandomString(str);
   }, []);
 
@@ -33,7 +35,7 @@ export const EvervaultCard = ({
     let { left, top } = currentTarget.getBoundingClientRect();
     mouseX.set(clientX - left);
     mouseY.set(clientY - top);
-    const str = generateRandomString(1500);
+    const str = generateRandomString(3500);
     setRandomString(str);
   }
 
@@ -54,15 +56,42 @@ export const EvervaultCard = ({
           randomString={randomString}
         />
         <div className="relative z-10 flex flex-col items-center justify-between h-full w-full">
-          <div className="text-center flex-grow flex flex-col justify-center">
-            <Typography variant="h5" className="mb-2 text-white" style={{ minHeight: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="text-center flex-grow flex flex-col justify-center items-center">
+            <Avatar className={classes.avatarIcon}>
               {image ? (
-                <img src={image} alt={title} className="w-8 h-8 mr-2 object-contain" />
+                <img src={image} alt={title} className="w-8 h-8 object-contain" />
               ) : icon}
-              {title}
+            </Avatar>
+            <Typography
+              variant="h6"
+              className="mt-4 mb-2 text-white highlighted-text"
+              style={{
+                minHeight: '64px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative',
+                zIndex: 1,
+              }}
+            >
+              <mark className={classes.markStyles}>
+                {title}
+              </mark>
             </Typography>
-            <Typography variant="body2" className="text-white/80" style={{ minHeight: '48px', overflow: 'hidden' }}>
-              {description}
+            <Typography
+              variant="body2"
+              className="text-white highlighted-text"
+              style={{
+                minHeight: '48px',
+                overflow: 'hidden',
+                position: 'relative',
+                zIndex: 1,
+                textAlign: 'center',
+              }}
+            >
+              <mark className={classes.markStyles}>
+                {description}
+              </mark>
             </Typography>
           </div>
           <Button

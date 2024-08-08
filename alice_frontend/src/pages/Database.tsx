@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { Box, Stack, Typography, Skeleton, ToggleButton, ToggleButtonGroup } from '@mui/material';
-import { Add, Person, Mode, Settings, Description, Functions, Assignment, Chat, Api, ViewList, List, TableChart } from '@mui/icons-material';
+import { Box } from '@mui/material';
+import { Add, Person, Category, Settings, Description, Functions, Assignment, Chat, Api } from '@mui/icons-material';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
 import { ComponentMode } from '../types/CollectionTypes';
@@ -20,16 +20,19 @@ import EnhancedTask from '../components/enhanced/task/task/EnhancedTask';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
 import EnchancedChat from '../components/enhanced/chat/chat/EnhancedChat';
 import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
-import { useConfig } from '../context/ConfigContext';
+import { useConfig, ConfigItemType } from '../context/ConfigContext';
 import useStyles from '../styles/DatabaseStyles';
+import ToggleBox from '../components/ui/toggle_box/ToggleBox';
+import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
+import EnhancedCardDialogs from '../components/enhanced/common/enhanced_card_dialogs/EnhancedCardDialogs';
 
 const Database: React.FC = () => {
     const classes = useStyles();
-    const { selectedItem, setSelectedItem, refreshItems } = useConfig();
-    const [activeTab, setActiveTab] = useState('Agent');
+    const { selectedItem, setSelectedItem, refreshItems, triggerItemDialog } = useConfig();
+    const [activeTab, setActiveTab] = useState<ConfigItemType>('Agent');
     const [showActiveComponent, setShowActiveComponent] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
-    const [viewMode, setViewMode] = useState<'list' | 'shortList' | 'table'>('list');
+    const [viewMode, setViewMode] = useState<'list' | 'shortList' | 'table'>('shortList');
 
     const handleCreateNew = useCallback(() => {
         console.log('Create new clicked');
@@ -43,21 +46,20 @@ const Database: React.FC = () => {
             name: `Create ${activeTab}`,
             icon: Add,
             action: handleCreateNew,
-            disabled: activeTab === 'Task Results'
+            disabled: activeTab === 'TaskResponse'
         }
     ];
 
     const tabs = [
-        { name: 'Agent', icon: Person },
-        { name: 'Model', icon: Mode },
-        { name: 'Parameter', icon: Settings },
-        { name: 'Prompt', icon: Description },
-        { name: 'Task', icon: Functions },
-        { name: 'Task Results', icon: Assignment },
-        { name: 'Chat', icon: Chat },
-        { name: 'API', icon: Api },
+        { name: 'Agent' as ConfigItemType, icon: Person },
+        { name: 'Model' as ConfigItemType, icon: Category },
+        { name: 'Parameter' as ConfigItemType, icon: Settings },
+        { name: 'Prompt' as ConfigItemType, icon: Description },
+        { name: 'Task' as ConfigItemType, icon: Functions },
+        { name: 'TaskResponse' as ConfigItemType, icon: Assignment },
+        { name: 'Chat' as ConfigItemType, icon: Chat },
+        { name: 'API' as ConfigItemType, icon: Api },
     ];
-
 
     const handleItemSelect = useCallback((item: AliceAgent | AliceModel | ParameterDefinition | Prompt | AliceTask | TaskResponse | AliceChat | API) => {
         console.log('Item selected:', item);
@@ -84,29 +86,17 @@ const Database: React.FC = () => {
         const commonProps = {
             mode: viewMode,
             fetchAll: true,
-            onView: handleItemSelect,
+            onInteraction: handleItemSelect,
+            onView: (item: any) => {
+                if (item._id) {
+                    triggerItemDialog(activeTab, item._id);
+                }
+            },
         };
 
         return (
             <Box>
-                <Box className={classes.toggleBox}>
-                    <ToggleButtonGroup
-                        value={viewMode}
-                        exclusive
-                        onChange={handleViewModeChange}
-                        aria-label="view mode"
-                    >
-                        <ToggleButton value="list" aria-label="list view">
-                            <List />
-                        </ToggleButton>
-                        <ToggleButton value="shortList" aria-label="short list view">
-                            <ViewList />
-                        </ToggleButton>
-                        <ToggleButton value="table" aria-label="table view">
-                            <TableChart />
-                        </ToggleButton>
-                    </ToggleButtonGroup>
-                </Box>
+                <ToggleBox activeTab={activeTab} viewMode={viewMode} handleViewModeChange={handleViewModeChange} />
                 {(() => {
                     switch (activeTab) {
                         case 'Agent':
@@ -119,7 +109,7 @@ const Database: React.FC = () => {
                             return <EnhancedPrompt {...commonProps} />;
                         case 'Task':
                             return <EnhancedTask {...commonProps} />;
-                        case 'Task Results':
+                        case 'TaskResponse':
                             return <EnhancedTaskResponse {...commonProps} />;
                         case 'Chat':
                             return <EnchancedChat {...commonProps} />;
@@ -129,22 +119,15 @@ const Database: React.FC = () => {
                             return null;
                     }
                 })()}
+                <EnhancedCardDialogs />
             </Box>
         );
-    }, [activeTab, handleItemSelect, viewMode, handleViewModeChange, classes.toggleBox]);
+    }, [activeTab, handleItemSelect, viewMode, handleViewModeChange, triggerItemDialog]);
 
     const renderActiveComponent = useCallback(() => {
         if (!showActiveComponent) {
             return (
-                <Stack spacing={1}>
-                    <Typography variant="h6">Please select an item or create a new one to start configuring.</Typography>
-                    <Skeleton variant="rectangular" height={40} />
-                    <Skeleton variant="rectangular" height={40} />
-                    <Skeleton variant="rectangular" height={40} />
-                    <Skeleton variant="rectangular" height={40} />
-                    <Skeleton variant="rectangular" height={40} />
-                    <Skeleton variant="rectangular" height={40} />
-                </Stack>
+                <PlaceholderSkeleton mode="compact" text='Select an item or create a new one to start configuring.'/>
             );
         }
 
@@ -165,7 +148,7 @@ const Database: React.FC = () => {
                 return <EnhancedPrompt {...commonProps} />;
             case 'Task':
                 return <EnhancedTask {...commonProps} />;
-            case 'Task Results':
+            case 'TaskResponse':
                 return <EnhancedTaskResponse {...commonProps} mode={'card'} />;
             case 'Chat':
                 return <EnchancedChat {...commonProps} />;
@@ -176,14 +159,13 @@ const Database: React.FC = () => {
         }
     }, [activeTab, isCreating, selectedItem, handleSave, showActiveComponent]);
 
-
     return (
         <Box className={classes.databaseContainer}>
             <VerticalMenuSidebar
                 actions={actions}
                 tabs={tabs}
                 activeTab={activeTab}
-                onTabChange={useCallback((tab) => {
+                onTabChange={useCallback((tab: ConfigItemType) => {
                     console.log('Tab changed to:', tab);
                     setActiveTab(tab);
                     setSelectedItem(null);

@@ -11,23 +11,23 @@ interface ActionConfig {
   disabled?: boolean;
 }
 
-interface TabConfig {
-  name: string;
+interface TabConfig<T> {
+  name: T;
   icon: SvgIconComponent;
   disabled?: boolean;
 }
 
-interface VerticalMenuSidebarProps {
+interface VerticalMenuSidebarProps<T extends string> {
   actions?: ActionConfig[];
-  tabs: TabConfig[];
-  activeTab: string;
-  onTabChange: (tabName: string) => void;
-  renderContent?: (tabName: string) => React.ReactNode;
+  tabs: TabConfig<T>[];
+  activeTab: T;
+  onTabChange: (tabName: T) => void;
+  renderContent?: (tabName: T) => React.ReactNode;
   expandedWidth: number;
   collapsedWidth: number;
 }
 
-const VerticalMenuSidebar: React.FC<VerticalMenuSidebarProps> = ({
+function VerticalMenuSidebar<T extends string>({
   actions,
   tabs,
   activeTab,
@@ -35,11 +35,11 @@ const VerticalMenuSidebar: React.FC<VerticalMenuSidebarProps> = ({
   renderContent,
   expandedWidth,
   collapsedWidth,
-}) => {
+}: VerticalMenuSidebarProps<T>): React.ReactElement {
   const classes = useStyles();
   const [isExpanded, setIsExpanded] = useState(true);
 
-  const handleTabChange = (tabName: string) => {
+  const handleTabChange = (tabName: T) => {
     onTabChange(tabName);
     if (renderContent) {
       setIsExpanded(true);
@@ -60,7 +60,7 @@ const VerticalMenuSidebar: React.FC<VerticalMenuSidebarProps> = ({
                   <span>
                     <IconButton
                       onClick={action.action}
-                      color="primary"
+                      color="warning"
                       disabled={action.disabled}
                     >
                       <action.icon />
@@ -104,6 +104,6 @@ const VerticalMenuSidebar: React.FC<VerticalMenuSidebarProps> = ({
       )}
     </Box>
   );
-};
+}
 
 export default VerticalMenuSidebar;

@@ -42,6 +42,7 @@ const EnhancedTask: React.FC<EnhancedTaskProps> = (props) => {
             handleModelClick: props.handleModelClick,
             handleTaskClick: props.handleTaskClick,
             handlePromptClick: props.handlePromptClick,
+            handleParameterClick: props.handleParameterClick,
             showHeaders: props.showHeaders,
         };
         switch (props.mode) {

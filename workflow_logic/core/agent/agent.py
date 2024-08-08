@@ -75,7 +75,6 @@ class AliceAgent(BaseModel):
                 if code_messages:
                     new_messages.extend(code_messages)
             
-            print(f"Returning messages: {new_messages}")
             return new_messages
 
         except Exception as e:
@@ -87,6 +86,7 @@ class AliceAgent(BaseModel):
     async def _process_tool_calls(self, tool_calls: List[ToolCall] = [], tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []):
         tool_messages = []
         for tool_call in tool_calls:
+            tool_call_id = tool_call.id
             function_name = tool_call.function.name
             arguments_str = tool_call.function.arguments
             
@@ -143,6 +143,7 @@ class AliceAgent(BaseModel):
                     content=str(result),
                     generated_by="tool",
                     step=function_name,
+                    tool_call_id=tool_call_id,
                     type=MessageType.TASK_RESPONSE if task_result else MessageType.TEXT,
                     task_responses=[task_result] if task_result else None
                 ))
@@ -315,9 +316,11 @@ class AliceAgent(BaseModel):
             "content": message.content
         }
         if message.tool_calls:
-            api_message["tool_calls"] = message.tool_calls
+            api_message["tool_calls"] = [tool_call.model_dump() for tool_call in message.tool_calls]
         if message.function_call:
-            api_message["function_call"] = message.function_call
+            api_message["function_call"] = message.function_call.model_dump()
+        if message.tool_call_id:
+            api_message["tool_call_id"] = str(message.tool_call_id)
         return api_message
 
     async def chat(self, api_manager: APIManager, messages: Optional[List[MessageDict]] = [], initial_message: Optional[str] = None, max_turns: int = 1, tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []) -> List[MessageDict]:

@@ -53,3 +53,13 @@ export const converters: { [K in CollectionName]: (data: any) => CollectionType[
 };
 
 export type ComponentMode = 'create' | 'edit' | 'view' | 'list' | 'shortList' | 'table';
+
+export interface HandleClickProps {
+    handleModelClick?: (modelId: string) => void;
+    handleAgentClick?: (agentId: string) => void;
+    handleTaskClick?: (taskId: string) => void;
+    handlePromptClick?: (promptId: string) => void;
+    handleParameterClick?: (paramId: string) => void;
+    handleApiClick?: (apiId: string) => void;
+    handleTaskResultClick?: (taskResultId: string) => void;
+}

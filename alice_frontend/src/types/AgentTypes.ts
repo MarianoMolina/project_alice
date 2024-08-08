@@ -1,6 +1,7 @@
 import { User } from "./UserTypes";
 import { AliceModel } from "./ModelTypes";
 import { Prompt } from "./PromptTypes";
+import { HandleClickProps } from "./CollectionTypes";
 
 export interface AliceAgent {
   _id?: string;
@@ -32,7 +33,7 @@ export const convertToAliceAgent = (data: any): AliceAgent => {
   };
 };
 
-export interface AgentComponentProps {
+export interface AgentComponentProps extends HandleClickProps {
   items: AliceAgent[] | null;
   item: AliceAgent | null;
   onChange: (newItem: Partial<AliceAgent>) => void;
@@ -41,8 +42,6 @@ export interface AgentComponentProps {
   isInteractable?: boolean;
   onInteraction?: (agent: AliceAgent) => void;
   onView?: (agent: AliceAgent) => void;
-  handlePromptClick?: (promptId: string) => void;
-  handleModelClick?: (modelId: string) => void;
   showHeaders?: boolean;
 }
 export const getDefaultAgentForm = (): Partial<AliceAgent> => ({

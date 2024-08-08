@@ -8,6 +8,16 @@ const useStyles = makeStyles((theme: Theme) => ({
     flexDirection: 'column',
     gap: theme.spacing(2),
   },
+  title: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+    padding: theme.spacing(2),
+    borderRadius: theme.shape.borderRadius,
+    marginBottom: theme.spacing(1),
+  },
   formControl: {
     marginBottom: theme.spacing(2),
   },
@@ -18,9 +28,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
-  },
-  title: {
-    marginBottom: theme.spacing(1),
   },
   modelId: {
     display: 'block',

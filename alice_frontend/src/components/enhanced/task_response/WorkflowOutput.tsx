@@ -45,7 +45,7 @@ export const WorkflowOutput: React.FC<WorkflowOutputProps> = ({ content, depth =
     return (
       <List>
         {item.content.map((subItem: any, index: number) => (
-          <ListItem key={index}>
+          <ListItem key={index} className={classes.outputInterfaceList}>
             {(() => {
               switch (item.output_type) {
                 case 'StringOutput':

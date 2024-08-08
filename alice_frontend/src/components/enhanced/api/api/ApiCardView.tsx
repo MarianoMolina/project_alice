@@ -1,14 +1,12 @@
 import React from 'react';
 import {
     Typography,
-    Card,
-    CardContent,
-    List,
-    ListItem,
-    ListItemText,
     Switch,
+    ListItemSecondaryAction,
 } from '@mui/material';
 import { ApiComponentProps } from '../../../../types/ApiTypes';
+import CommonCardView from '../../common/enhanced_component/CardView';
+import { Category, HealthAndSafety, PowerSettingsNew } from '@mui/icons-material';
 
 const ApiCardView: React.FC<ApiComponentProps> = ({
     item,
@@ -24,24 +22,39 @@ const ApiCardView: React.FC<ApiComponentProps> = ({
         }
     };
 
+    const listItems = [
+        {
+            icon: <Category />,
+            primary_text: "API Type",
+            secondary_text: item.api_type
+        },
+        {
+            icon: <HealthAndSafety />,
+            primary_text: "Status",
+            secondary_text: item.health_status
+        },
+        {
+            icon: <PowerSettingsNew />,
+            primary_text: "Active",
+            secondary_text: (
+                <ListItemSecondaryAction>
+                    <Switch
+                        edge="end"
+                        checked={item.is_active}
+                        onChange={handleToggleActive}
+                        color="primary"
+                    />
+                </ListItemSecondaryAction>
+            )
+        }
+    ];
+
     return (
-        <Card>
-            <CardContent>
-                <Typography variant="h6">{item.name}</Typography>
-                <Typography variant="body2">Type: {item.api_type}</Typography>
-                <Typography variant="body2">Status: {item.health_status}</Typography>
-                <List>
-                    <ListItem>
-                        <ListItemText primary="Active" />
-                        <Switch
-                            checked={item.is_active}
-                            onChange={handleToggleActive}
-                            color="primary"
-                        />
-                    </ListItem>
-                </List>
-            </CardContent>
-        </Card>
+        <CommonCardView
+            title={item.name ?? 'API'}
+            id={item._id}
+            listItems={listItems}
+        />
     );
 };
 

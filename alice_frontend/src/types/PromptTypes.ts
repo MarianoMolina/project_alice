@@ -1,5 +1,6 @@
 import { User, convertToUser } from './UserTypes';
 import { FunctionParameters } from './ParameterTypes';
+import { HandleClickProps } from './CollectionTypes';
 
 export interface Prompt {
     _id?: string;
@@ -31,7 +32,7 @@ export const convertToPrompt = (data: any): Prompt => {
     };
 };
 
-export interface PromptComponentProps {
+export interface PromptComponentProps extends HandleClickProps {
     items: Prompt[] | null;
     item: Prompt | null;
     onChange: (newItem: Partial<Prompt>) => void;
@@ -41,7 +42,6 @@ export interface PromptComponentProps {
     onView?: (prompt: Prompt) => void;
     onInteraction?: (prompt: Prompt) => void;
     showHeaders?: boolean;
-    handleParameterClick?: (parameterId: string) => void;
 }
 export const getDefaultPromptForm = (): Partial<Prompt> => ({
     name: '',

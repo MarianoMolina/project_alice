@@ -1,3 +1,5 @@
+import { HandleClickProps } from "./CollectionTypes";
+
 export interface TaskResponse {
     task_name: string;
     task_id: string;
@@ -38,7 +40,7 @@ export const convertToTaskResponse = (data: any): TaskResponse => {
     };
 };
 
-export interface TaskResponseComponentProps {
+export interface TaskResponseComponentProps extends HandleClickProps {
     items: TaskResponse[] | null;
     item: TaskResponse | null;
     mode: 'create' | 'view' | 'edit';

@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Box, Typography, List, Dialog, Accordion, AccordionSummary, AccordionDetails, Stack, Skeleton } from '@mui/material';
+import { Box, Typography, List, Dialog, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import { Add, Functions, Assignment, ExpandMore } from '@mui/icons-material';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
-import { TaskResponse } from '../types/TaskResponseTypes';
 import { AliceTask } from '../types/TaskTypes';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
@@ -10,6 +9,9 @@ import EnhancedTask from '../components/enhanced/task/task/EnhancedTask';
 import { RecentExecution, useTask } from '../context/TaskContext';
 import useStyles from '../styles/StartTaskStyles';
 import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
+import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
+import EnhancedCardDialogs from '../components/enhanced/common/enhanced_card_dialogs/EnhancedCardDialogs';
+import { useConfig, ConfigItemType } from '../context/ConfigContext';
 
 const StartTask: React.FC = () => {
   const classes = useStyles();
@@ -21,12 +23,9 @@ const StartTask: React.FC = () => {
     setInputValues,
     setTaskById
   } = useTask();
+  const { triggerItemDialog } = useConfig();
 
-  const [activeTab, setActiveTab] = useState('All Tasks');
-  const [selectedResult, setSelectedResult] = useState<TaskResponse | null>(null);
-  const [isTaskResultDialogOpen, setIsTaskResultDialogOpen] = useState(false);
-  const [openTaskDialog, setOpenTaskDialog] = useState(false);
-  const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>(undefined);
+  const [activeTab, setActiveTab] = useState<ConfigItemType>('Task');
   const [openTaskCreateDialog, setOpenTaskCreateDialog] = useState(false);
   const [listKey, setListKey] = useState(0);
 
@@ -44,11 +43,6 @@ const StartTask: React.FC = () => {
     await handleExecuteTask();
   }
 
-  const handleTaskClick = (task: AliceTask) => {
-    setSelectedTaskId(task._id);
-    setOpenTaskDialog(true);
-  };
-
   const handleCreateNew = useCallback(() => {
     console.log('Create new clicked');
     setOpenTaskCreateDialog(true);
@@ -59,18 +53,18 @@ const StartTask: React.FC = () => {
       name: `Create task`,
       icon: Add,
       action: handleCreateNew,
-      disabled: activeTab === 'Task Results'
+      disabled: activeTab === 'TaskResponse'
     }
   ];
 
   const tabs = [
-    { name: 'All Tasks', icon: Functions },
-    { name: 'Task Results', icon: Assignment },
+    { name: 'Task' as ConfigItemType, icon: Functions },
+    { name: 'TaskResponse' as ConfigItemType, icon: Assignment },
   ]
 
-  const handleTabChange = (tabName: string) => {
+  const handleTabChange = (tabName: ConfigItemType) => {
     setActiveTab(tabName);
-    if (tabName === 'All Tasks' || tabName === 'Task Results') {
+    if (tabName === 'Task' || tabName === 'TaskResponse') {
       setListKey(prev => prev + 1);
     }
   };
@@ -81,23 +75,25 @@ const StartTask: React.FC = () => {
     }
   }
 
-  const handleOpenTaskResult = (result: TaskResponse) => {
-    console.log('Opening task result:', result);
-    setSelectedResult(result);
-    setIsTaskResultDialogOpen(true);
-  };
-
-  const handleCloseTaskResult = () => {
-    setIsTaskResultDialogOpen(false);
-    setSelectedResult(null);
-  };
-
   const renderSidebarContent = () => {
     switch (activeTab) {
-      case 'Task Results':
-        return <EnhancedTaskResponse key={listKey} onView={handleOpenTaskResult} mode={'list'} fetchAll={true} />;
-      case 'All Tasks':
-        return <EnhancedTask key={listKey} mode={'list'} fetchAll={true} onView={handleTaskClick} onInteraction={handleTabWhenTaskSelect} />;
+      case 'TaskResponse':
+        return <EnhancedTaskResponse 
+          key={listKey} 
+          onView={(taskResult) => taskResult._id && triggerItemDialog('TaskResponse', taskResult._id)} 
+          mode={'shortList'} 
+          fetchAll={true} 
+        />;
+      case 'Task':
+        return <EnhancedTask 
+          key={listKey} 
+          mode={'shortList'} 
+          fetchAll={true} 
+          onView={(task) => task._id && triggerItemDialog('Task', task._id)} 
+          onInteraction={handleTabWhenTaskSelect} 
+        />;
+      default:
+        return null;
     }
   };
 
@@ -117,13 +113,7 @@ const StartTask: React.FC = () => {
           {selectedTask ? (
             <EnhancedTask mode={'execute'} itemId={selectedTask._id} fetchAll={false} onExecute={executeTask} />
           ) : (
-              <Stack spacing={2}>
-                  <Typography variant="h6">Please select a task to execute.</Typography>
-                  <Skeleton variant="rectangular" height={60} />
-                  <Skeleton variant="rectangular" height={60} />
-                  <Skeleton variant="rectangular" height={60} />
-                  <Skeleton variant="rectangular" height={60} />
-              </Stack>
+            <PlaceholderSkeleton mode="task" text='Select a task to execute.' />
           )}
         </Box>
         <Box className={classes.apiAndRecentExecutionsContainer}>
@@ -133,8 +123,8 @@ const StartTask: React.FC = () => {
               <EnhancedAPI mode='tooltip' fetchAll={true} />
             </Box>
           </Box>
-          <Accordion 
-            className={classes.recentExecutionsAccordion} 
+          <Accordion
+            className={classes.recentExecutionsAccordion}
             defaultExpanded
             classes={{
               root: classes.accordionRoot,
@@ -156,7 +146,7 @@ const StartTask: React.FC = () => {
                     itemId={execution.result._id}
                     mode={'list'}
                     fetchAll={false}
-                    onView={() => handleOpenTaskResult(execution.result)}
+                    onView={() => execution.result._id && triggerItemDialog('TaskResponse', execution.result._id)}
                     onInteraction={
                       selectedTask && execution.taskId === selectedTask._id
                         ? () => setAndRunTaskFromExecution(execution)
@@ -169,14 +159,7 @@ const StartTask: React.FC = () => {
           </Accordion>
         </Box>
       </Box>
-      <Dialog open={isTaskResultDialogOpen} onClose={handleCloseTaskResult} fullWidth maxWidth="md">
-        {selectedResult && <EnhancedTaskResponse itemId={selectedResult._id} fetchAll={false} mode={'card'} />}
-      </Dialog>
-      <Dialog open={openTaskDialog} onClose={() => setOpenTaskDialog(false)}>
-        {selectedTaskId && (
-          <EnhancedTask itemId={selectedTaskId} mode={'card'} fetchAll={false} />
-        )}
-      </Dialog>
+      <EnhancedCardDialogs />
       <Dialog open={openTaskCreateDialog} onClose={() => setOpenTaskCreateDialog(false)}>
         <EnhancedTask mode={'create'} fetchAll={false} />
       </Dialog>

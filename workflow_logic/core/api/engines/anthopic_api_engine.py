@@ -2,6 +2,7 @@ import traceback, json
 from typing import Dict, Any, List, Optional
 from anthropic import AsyncAnthropic
 from anthropic.types import TextBlock, ToolUseBlock, ToolParam, Message
+from anthropic.types.message_create_params import ToolChoiceToolChoiceAuto
 from workflow_logic.core.parameters import ToolCall, ToolCallConfig, ToolFunction
 from workflow_logic.core.api.engines.llm_api_engine import LLMEngine
 from workflow_logic.util import LOGGER, MessageDict, MessageType, LLMConfig
@@ -17,6 +18,48 @@ ANTHROPIC_PRICING_1k = {
 }
 
 class LLMAnthropic(LLMEngine):
+    def adapt_messages(self, messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        adapted = []
+        for i, msg in enumerate(messages):
+            role = msg.get("role", "")
+            content = msg.get("content", "")
+
+            if role not in ["user", "assistant"]:
+                if i > 0 and i < len(messages) - 1:
+                    prev_role = messages[i-1].get("role", "")
+                    next_role = messages[i+1].get("role", "")
+                    
+                    if prev_role != next_role:
+                        # Append content to the previous message
+                        adapted[-1]["content"] += f"\n[{role}]: {content}"
+                        continue
+                    else:
+                        # Use the other role
+                        role = "user" if prev_role == "assistant" else "assistant"
+                else:
+                    # If it's the first or last message, default to user
+                    role = "user"
+
+            adapted.append({"role": role, "content": content})
+
+        # Ensure alternating user-assistant pattern and start with user
+        final_adapted = []
+        expected_role = "user"
+        for msg in adapted:
+            if msg["role"] == expected_role:
+                final_adapted.append(msg)
+                expected_role = "assistant" if expected_role == "user" else "user"
+            else:
+                # Log warning about incorrect order
+                LOGGER.warning(f"Message order issue: Expected {expected_role}, got {msg['role']}. Message content: {msg['content'][:50]}...")
+
+        # Ensure it starts with a user message
+        if final_adapted and final_adapted[0]["role"] != "user":
+            LOGGER.warning("First message is not from user. Adjusting order.")
+            final_adapted.insert(0, {"role": "user", "content": "Please continue."})
+
+        return final_adapted
+    
     async def generate_api_response(self, api_data: LLMConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[Dict[str, Any]]] = None, max_tokens: Optional[int] = None, tool_choice: str = 'auto', n: Optional[int] = 1, **kwargs) -> MessageDict:
         if not api_data.api_key:
             raise ValueError("Anthropic API key not found in API data")
@@ -28,10 +71,10 @@ class LLMAnthropic(LLMEngine):
 
         anthropic_tools: Optional[List[ToolParam]] = self._convert_into_tool_params(tools) if tools else None
 
-        # Prepare the parameters for the API call
+        adjusted_messages = self.adapt_messages(messages=messages)
         api_params = {
             "model": api_data.model,
-            "messages": messages,
+            "messages": adjusted_messages,
             "max_tokens": max_tokens,
             "temperature": api_data.temperature,
             "system": system,
@@ -40,11 +83,12 @@ class LLMAnthropic(LLMEngine):
         # Only add tools and tool_choice if tools are provided
         if anthropic_tools:
             api_params["tools"] = anthropic_tools
-            api_params["tool_choice"] = tool_choice
+            api_params["tool_choice"] = { 'type': tool_choice }
 
         print(f'API parameters: {api_params}')
         
         try:
+            
             response: Message = await client.messages.create(**api_params)
             
             message_text = ""

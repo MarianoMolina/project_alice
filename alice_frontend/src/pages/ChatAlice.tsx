@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Box, Skeleton, Stack, Typography, Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import { Add, Chat, Info, Functions, Assignment } from '@mui/icons-material';
 import { TaskResponse } from '../types/TaskResponseTypes';
 import { AliceTask } from '../types/TaskTypes';
@@ -10,12 +10,11 @@ import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSide
 import EnhancedChat from '../components/enhanced/chat/chat/EnhancedChat';
 import EnhancedTask from '../components/enhanced/task/task/EnhancedTask';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
-import EnhancedAgent from '../components/enhanced/agent/agent/EnhancedAgent';
 import ChatInput from '../components/enhanced/chat/ChatInput';
 import useStyles from '../styles/ChatAliceStyles';
-import EnhancedPrompt from '../components/enhanced/prompt/prompt/EnhancedPrompt';
-import EnhancedModel from '../components/enhanced/model/model/EnhancedModel';
-import EnhancedParameter from '../components/enhanced/parameter/parameter/EnhancedParameter';
+import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
+import EnhancedCardDialogs from '../components/enhanced/common/enhanced_card_dialogs/EnhancedCardDialogs';
+import { useConfig } from '../context/ConfigContext';
 
 const ChatAlice: React.FC = () => {
   const classes = useStyles();
@@ -31,21 +30,9 @@ const ChatAlice: React.FC = () => {
     addTaskResultToChat,
     isTaskInChat,
   } = useChat();
-  const [openTaskDialog, setOpenTaskDialog] = useState(false);
-  const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>(undefined);
-  const [selectedResult, setSelectedResult] = useState<TaskResponse | null>(null);
-  const [isTaskResultDialogOpen, setIsTaskResultDialogOpen] = useState(false);
+
+  const { triggerItemDialog } = useConfig();
   const [openChatCreateDialog, setOpenChatCreateDialog] = useState(false);
-  const [openAgentDialog, setOpenAgentDialog] = useState(false);
-  const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>(undefined);
-  const [openChatDialog, setOpenChatDialog] = useState(false);
-  const [selectedChatId, setSelectedChatId] = useState<string | undefined>(undefined);
-  const [openPromptDialog, setOpenPromptDialog] = useState(false);
-  const [selectedPromptId, setSelectedPromptId] = useState<string | undefined>(undefined);
-  const [openModelDialog, setOpenModelDialog] = useState(false);
-  const [selectedModelId, setSelectedModelId] = useState<string | undefined>(undefined);
-  const [openParameterDialog, setOpenParameterDialog] = useState(false);
-  const [selectParameterId, setSelectParameterId] = useState<string | undefined>(undefined);
 
   const [activeTab, setActiveTab] = useState('Select Chat');
   const [listKey, setListKey] = useState(0);
@@ -108,56 +95,27 @@ const ChatAlice: React.FC = () => {
     }
   }
 
-  const triggerTaskDialog = (task: AliceTask) => {
-    triggerTaskDialogId(task._id)
-  }
-
-  const triggerTaskDialogId = (taskid?: string) => {
-    setSelectedTaskId(taskid);
-    setOpenTaskDialog(true);
-  }
-
-  const triggerAgentDialogId = (agentid?: string) => {
-    setSelectedAgentId(agentid);
-    setOpenAgentDialog(true);
-  }
-
-  const triggerTaskResultDialog = (taskResult: TaskResponse) => {
-    setSelectedResult(taskResult);
-    setIsTaskResultDialogOpen(true);
-  }
-
-  const triggerChatDialog = (chat: AliceChat) => {
-    setSelectedChatId(chat._id);
-    setOpenChatDialog(true);
-  };
-
-  const triggerPromptDialog = (promptId: string) => {
-    setSelectedPromptId(promptId);
-    setOpenPromptDialog(true);
-  };
-
-  const triggerModelDialog = (modelId: string) => {
-    setSelectedModelId(modelId);
-    setOpenModelDialog(true);
-  };
-
-  const triggerParameterDialog = (parameterId: string) => {
-    setSelectParameterId(parameterId);
-    setOpenParameterDialog(true);
-  }
-
   const renderSidebarContent = (tabName: string) => {
+    const handleProps = {
+      handleAgentClick: (id: string) => triggerItemDialog('Agent', id),
+      handleTaskClick: (id: string) => triggerItemDialog('Task', id),
+      handleModelClick: (id: string) => triggerItemDialog('Model', id),
+      handlePromptClick: (id: string) => triggerItemDialog('Prompt', id),
+      handleParameterClick: (id: string) => triggerItemDialog('Parameter', id),
+      handleAPIClick: (id: string) => triggerItemDialog('API', id),
+    };
+
     switch (tabName) {
       case 'Select Chat':
         return (
           <EnhancedChat
             key={listKey}
-            mode="list"
-            onView={triggerChatDialog}
+            mode="shortList"
+            onView={(chat) => triggerItemDialog('Chat', chat._id)}
             onInteraction={selectChatId}
             fetchAll={true}
             isInteractable={true}
+            {...handleProps}
           />
         );
       case 'Current Chat':
@@ -166,26 +124,27 @@ const ChatAlice: React.FC = () => {
             itemId={currentChat?._id}
             mode="card"
             fetchAll={false}
-            handleTaskClick={triggerTaskDialogId}
-            handleAgentClick={triggerAgentDialogId}
+            {...handleProps}
           />
         );
       case 'Add Functions':
         return (
-          <EnhancedTask 
-            mode={'list'} 
-            fetchAll={true} 
-            onInteraction={checkAndAddTask} 
-            onView={triggerTaskDialog} 
+          <EnhancedTask
+            mode={'list'}
+            fetchAll={true}
+            onInteraction={checkAndAddTask}
+            onView={(task) => task._id && triggerItemDialog('Task', task._id)}
+            {...handleProps}
           />
         );
       case 'Add TaskResults':
         return (
-          <EnhancedTaskResponse 
-            mode={'list'} 
-            fetchAll={true} 
-            onView={triggerTaskResultDialog} 
-            onInteraction={checkAndAddTaskResult} 
+          <EnhancedTaskResponse
+            mode={'list'}
+            fetchAll={true}
+            onView={(taskResult) => taskResult._id && triggerItemDialog('TaskResponse', taskResult._id)}
+            onInteraction={checkAndAddTaskResult}
+            {...handleProps}
           />
         );
       default:
@@ -215,13 +174,10 @@ const ChatAlice: React.FC = () => {
               showRegenerate={true}
             />
           ) : (
-            <Stack spacing={1}>
-              <Typography variant="h6">Please select a chat to start chatting with Alice.</Typography>
-              <Skeleton variant="circular" width={40} height={40} />
-              <Skeleton variant="rectangular" height={80} />
-              <Skeleton variant="circular" className={classes.right_circle} width={40} height={40} />
-              <Skeleton variant="rounded" height={90} />
-            </Stack>
+            <PlaceholderSkeleton
+              mode="chat"
+              text='Select a chat to start chatting with Alice.'
+            />
           )}
         </Box>
         <Box className={classes.chatAliceInput}>
@@ -231,27 +187,7 @@ const ChatAlice: React.FC = () => {
             chatSelected={!!currentChatId}
           />
         </Box>
-        <Dialog open={openTaskDialog} onClose={() => setOpenTaskDialog(false)}>
-          {selectedTaskId && <EnhancedTask itemId={selectedTaskId} mode={'card'} fetchAll={false} handleAgentClick={triggerAgentDialogId} handleModelClick={triggerModelDialog} handleTaskClick={triggerTaskDialogId} handlePromptClick={triggerPromptDialog}/>}
-        </Dialog>
-        <Dialog open={isTaskResultDialogOpen} onClose={() => setIsTaskResultDialogOpen(false)}>
-          {selectedResult && <EnhancedTaskResponse itemId={selectedResult._id} fetchAll={false} mode={'card'} />}
-        </Dialog>
-        <Dialog open={openAgentDialog} onClose={() => setOpenAgentDialog(false)}>
-          {selectedAgentId && <EnhancedAgent itemId={selectedAgentId} mode={'card'} fetchAll={false} handleModelClick={triggerModelDialog} handlePromptClick={triggerPromptDialog} />}
-        </Dialog>
-        <Dialog open={openChatDialog} onClose={() => setOpenChatDialog(false)}>
-          {selectedChatId && <EnhancedChat itemId={selectedChatId} mode={'card'} fetchAll={false} handleTaskClick={triggerTaskDialogId} handleAgentClick={triggerAgentDialogId}/>}
-        </Dialog>
-        <Dialog open={openPromptDialog} onClose={() => setOpenPromptDialog(false)}>
-          {selectedPromptId && <EnhancedPrompt itemId={selectedPromptId} mode={'card'} fetchAll={false} handleParameterClick={triggerParameterDialog} />}
-        </Dialog>
-        <Dialog open={openModelDialog} onClose={() => setOpenModelDialog(false)}>
-          {selectedModelId && <EnhancedModel itemId={selectedModelId} mode={'card'} fetchAll={false} />}
-        </Dialog>
-        <Dialog open={openParameterDialog} onClose={() => setOpenParameterDialog(false)}>
-          {selectParameterId && <EnhancedParameter itemId={selectParameterId} mode={'card'} fetchAll={false} />}
-        </Dialog>
+        <EnhancedCardDialogs />
         <Dialog open={openChatCreateDialog} onClose={() => setOpenChatCreateDialog(false)}>
           <EnhancedChat
             mode="create"

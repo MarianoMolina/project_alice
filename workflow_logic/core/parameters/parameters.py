@@ -57,6 +57,11 @@ class FunctionConfig(BaseModel):
             "description": self.description,
             "input_schema": self.parameters.model_dump()
         }
+    
+    def model_dump(self, *args, **kwargs):
+        data = super().model_dump(*args, **kwargs)
+        data['parameters'] = self.parameters.model_dump(*args, **kwargs)
+        return data
  
 class ToolFunction(BaseModel):
     """A function under tool as defined by the OpenAI API."""
@@ -65,17 +70,33 @@ class ToolFunction(BaseModel):
 
     def convert_to_tool_params(self) -> ToolParam:
         return self.function.convert_to_tool_params()
+    
+    def model_dump(self, *args, **kwargs):
+        data = super().model_dump(*args, **kwargs)
+        data['function'] = self.function.model_dump(*args, **kwargs)
+        return data
 
 class ToolCallConfig(BaseModel):
     """A tool call config as defined by the OpenAI API"""
     arguments: Annotated[Union[Dict[str, Any], str], Field(description="Arguments to the tool call")]
     name: Annotated[str, Field(description="Name of the tool call")]
 
+    def model_dump(self, *args, **kwargs):
+        data = super().model_dump(*args, **kwargs)
+        if isinstance(self.arguments, dict):
+            data['arguments'] = {k: v.model_dump(*args, **kwargs) if isinstance(v, BaseModel) else v for k, v in self.arguments.items()}
+        return data
+
 class ToolCall(BaseModel):
     """A tool call as defined by the OpenAI API"""
-    id: Optional[str] = Field(None, description="The tool call ID", alias="_id")
+    id: Optional[str] = Field(None, description="The tool call ID")
     type: Annotated[Literal["function"], Field(default="function", description="Type of the tool function")]
     function: Annotated[ToolCallConfig, Field(description="Function under tool")]
+
+    def model_dump(self, *args, **kwargs):
+        data = super().model_dump(*args, **kwargs)
+        data['function'] = self.function.model_dump(*args, **kwargs)
+        return data
 
 def ensure_tool_function(item: Union[ToolFunction, Dict[str, Any]]) -> ToolFunction:
     if isinstance(item, ToolFunction):
