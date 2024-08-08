@@ -13,8 +13,6 @@ const apiSchema = new Schema<IAPIDocument, IAPIModel>({
   updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 
-apiSchema.index({ created_by: 1, api_type: 1, name: 1 }, { unique: true });
-
 apiSchema.methods.apiRepresentation = function (this: IAPIDocument) {
   return {
     id: this._id,
