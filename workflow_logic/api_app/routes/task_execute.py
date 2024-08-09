@@ -60,7 +60,7 @@ async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(ge
         LOGGER.info(f'task_result: {result.model_dump()}')
         LOGGER.debug(f'type: {type(result)}')
         db_result = await db_app.store_task_response(result)
-        LOGGER.info(f'db_result: {db_result.model_dump(by_alias=True)}')
+        LOGGER.debug(f'db_result: {db_result.model_dump(by_alias=True)}')
         return db_result.model_dump(by_alias=True)
     except Exception as e:
         import traceback

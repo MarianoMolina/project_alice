@@ -108,11 +108,13 @@ coding_workflow_module = CodingWorkflowModule(
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "outputs_generate_unit_tests": "outputs_generate_unit_tests",
+                        "outputs_plan_workflow": "outputs_plan_workflow",
                         "outputs_generate_code": "outputs_generate_code",
+                        "outputs_execute_code": "outputs_execute_code",
+                        "outputs_generate_unit_tests": "outputs_generate_unit_tests",
                         "outputs_execute_unit_tests": "outputs_execute_unit_tests",
                     },
-                    "required": ["outputs_generate_unit_tests", "outputs_generate_code", "outputs_execute_unit_tests"]
+                    "required": ["outputs_generate_unit_tests", "outputs_generate_code", "outputs_execute_unit_tests", "outputs_plan_workflow", "outputs_execute_code"]
                 }
             }, 
             {
@@ -126,7 +128,6 @@ coding_workflow_module = CodingWorkflowModule(
                 "key": "coding_planner_agent",
                 "name": "coding_planner_agent",
                 "system_message": "planner_agent",
-                "autogen_class": "ConversableAgent",
                 "model_id": "GPT4o",
                 "max_consecutive_auto_reply": 1,
                 "has_functions": False,
@@ -136,7 +137,6 @@ coding_workflow_module = CodingWorkflowModule(
                 "key": "coding_agent",
                 "name": "coding_agent",
                 "system_message": "coding_agent",
-                "autogen_class": "ConversableAgent",
                 "model_id": "GPT4o",
                 "max_consecutive_auto_reply": 1,
                 "has_functions": False,
@@ -146,11 +146,19 @@ coding_workflow_module = CodingWorkflowModule(
                 "key": "unit_tester_agent",
                 "name": "unit_tester_agent",
                 "system_message": "unit_tester_agent",
-                "autogen_class": "ConversableAgent",
                 "model_id": "GPT4o",
                 "max_consecutive_auto_reply": 1,
                 "has_functions": False,
                 "has_code_exec": False,                
+            },
+            {
+                "key": "unit_test_check_agent",
+                "name": "unit_test_check_agent",
+                "system_message": "unit_test_check_agent",
+                "model_id": "GPT4o",
+                "max_consecutive_auto_reply": 1,
+                "has_functions": False,
+                "has_code_exec": False,
             },
             {
                 "key": "execution_agent",
@@ -261,19 +269,20 @@ coding_workflow_module = CodingWorkflowModule(
                 "task_type": "CheckTask",
                 "task_name": "check_unit_test_results",
                 "task_description": "Checks the results of the unit tests",
-                "agent": "unit_tester_agent",
+                "agent": "unit_test_check_agent",
                 "input_variables": {
                     "type": "object",
                     "properties": {
                         "outputs_plan_workflow": "outputs_plan_workflow",
-                        "outputs_generate_unit_tests": "outputs_generate_unit_tests",
                         "outputs_generate_code": "outputs_generate_code",
+                        "outputs_execute_code": "outputs_execute_code",
+                        "outputs_generate_unit_tests": "outputs_generate_unit_tests",
                         "outputs_execute_unit_tests": "outputs_execute_unit_tests",
                     },
                     "required": ["outputs_generate_unit_tests", "outputs_generate_code", "outputs_execute_unit_tests"]
                 },
-                "exit_code_response_map": {"FAILED": 2, "TEST PASSED": 0, "TEST CODE ERROR": 3},
-                "exit_codes": {0: "Test Passed", 1: "Response generation failed", 2: "Test Failed"},
+                "exit_code_response_map": {"TEST FAILED": 2, "ALL TESTS PASSED": 0, "TEST CODE ERROR": 3},
+                "exit_codes": {0: "Test Passed", 1: "Response generation failed", 2: "Test Failed", 3: "Test Code Error"},
                 "templates": {
                     "task_template": "unit_test_check_prompt"
                 }
@@ -326,7 +335,7 @@ coding_workflow_module = CodingWorkflowModule(
                         3: ("generate_unit_tests", True)
                     }
                 },
-                "max_attempts": 5,
+                "max_attempts": 3,
                 "recursive": False,
                 "input_variables": {
                     "type": "object",

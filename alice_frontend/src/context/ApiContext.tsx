@@ -1,5 +1,5 @@
 import React, { createContext, useContext, ReactNode } from 'react';
-import { fetchItem, createItem, updateItem, executeTask, generateChatResponse, sendMessage, addTaskResponse } from '../services/api';
+import { fetchItem, createItem, updateItem, executeTask, generateChatResponse, sendMessage, addTaskResponse, purgeAndReinitializeDatabase } from '../services/api';
 
 interface ApiContextType {
     fetchItem: typeof fetchItem;
@@ -9,6 +9,7 @@ interface ApiContextType {
     generateChatResponse: typeof generateChatResponse;
     sendMessage: typeof sendMessage;
     addTaskResponse: typeof addTaskResponse;
+    purgeAndReinitializeDatabase: typeof purgeAndReinitializeDatabase;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -29,7 +30,8 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         executeTask,
         generateChatResponse,
         sendMessage,
-        addTaskResponse
+        addTaskResponse,
+        purgeAndReinitializeDatabase,
     };
 
     return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>;

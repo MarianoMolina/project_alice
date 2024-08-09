@@ -4,7 +4,7 @@ import { alpha } from '@mui/material/styles';
 
 const useStyles = makeStyles((theme: Theme) => ({
     avatarIcon: {
-        backgroundColor: `${alpha(theme.palette.primary.light, 0.5)} !important`, // Added 80 for 50% opacity
+        backgroundColor: `${alpha(theme.palette.primary.light, 0)} !important`,
         color: `${theme.palette.primary.contrastText} !important`,
         width: `${theme.spacing(7)} !important`,
         height: `${theme.spacing(7)} !important`,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
-import { Box, TextField, Typography, Button, Dialog, Card, CardContent, Paper } from '@mui/material';
-import { Person, Api } from '@mui/icons-material';
+import { Box, TextField, Typography, Button, Dialog, Card, CardContent, Paper, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Person, Api, Warning } from '@mui/icons-material';
 import { useApi } from '../context/ApiContext';
 import { useAuth } from '../context/AuthContext';
 import { User } from '../types/UserTypes';
@@ -16,11 +16,12 @@ interface UserSettingsProps {
 }
 
 const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => {
-    const { fetchItem, updateItem } = useApi();
+    const { fetchItem, updateItem, purgeAndReinitializeDatabase } = useApi();
     const [userObject, setUserObject] = useState<User | null>(null);
     const [originalUserObject, setOriginalUserObject] = useState<User | null>(null);
     const { user } = useAuth();
     const [showCreateAPI, setShowCreateAPI] = useState(false);
+    const [showConfirmPurge, setShowConfirmPurge] = useState(false);
     const classes = useStyles();
     const isInitialMount = useRef(true);
     const [apiUpdateTrigger, setApiUpdateTrigger] = useState(0);
@@ -89,7 +90,20 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
         setSelectedItem(item);
         setIsCreating(false);
         setShowCreateAPI(true);
-    }, [setSelectedItem]);
+    }, []);
+
+    const handlePurgeAndReinitialize = useCallback(async () => {
+        try {
+            await purgeAndReinitializeDatabase();
+            console.log('Database successfully purged and reinitialized');
+            // You might want to refresh the user data or perform other actions here
+        } catch (error) {
+            console.error('Failed to purge and reinitialize database:', error);
+            // Handle the error, perhaps show an error message to the user
+        } finally {
+            setShowConfirmPurge(false);
+        }
+    }, [purgeAndReinitializeDatabase]);
 
     const tabs = [
         { name: 'Personal information', icon: Person },
@@ -132,6 +146,26 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
                             >
                                 Save
                             </Button>
+                        </CardContent>
+                    </Card>
+                    <Card className={classes.card}>
+                        <CardContent>
+                            <Box className={classes.dangerZone}>
+                                <Box className={classes.userInfoHeader}>
+                                    <Warning color="error" />
+                                    <Typography variant="h5">Danger Zone</Typography>
+                                </Box>
+                                <Typography variant="body1" color="error" paragraph>
+                                    The following action will delete all your data and reinitialize your database. This cannot be undone.
+                                </Typography>
+                                <Button
+                                    variant="contained"
+                                    onClick={() => setShowConfirmPurge(true)}
+                                    className={classes.dangerButton}
+                                >
+                                    Purge and Reinitialize Database
+                                </Button>
+                            </Box>
                         </CardContent>
                     </Card>
                 </Box>
@@ -183,6 +217,22 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
                     fetchAll={true}
                     onSave={handleApiCreated}
                 />
+            </Dialog>
+            <Dialog open={showConfirmPurge} onClose={() => setShowConfirmPurge(false)}>
+                <DialogTitle>Confirm Database Purge and Reinitialization</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        Are you sure you want to purge and reinitialize your database? This action cannot be undone and will delete all your current data.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setShowConfirmPurge(false)} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handlePurgeAndReinitialize} color="error" variant="contained">
+                        Confirm Purge and Reinitialize
+                    </Button>
+                </DialogActions>
             </Dialog>
         </Box>
     );

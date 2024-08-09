@@ -101,3 +101,14 @@ export const addTaskResponse = async (chatId: string, taskResultId: string): Pro
     throw error;
   }
 };
+
+export const purgeAndReinitializeDatabase = async (): Promise<void> => {
+  try {
+    console.log('Purging and reinitializing database');
+    const response = await dbAxiosInstance.post('/users/purge-and-reinitialize');
+    console.log('Database purged and reinitialized:', response.data);
+  } catch (error) {
+    console.error('Error purging and reinitializing database:', error);
+    throw error;
+  }
+};

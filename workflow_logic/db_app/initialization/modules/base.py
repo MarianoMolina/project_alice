@@ -151,7 +151,6 @@ base_module = BaseModule(
                 "is_active": True,
                 "health_status": "healthy",
                 "default_model": "Claude3.5",
-                "model_client_cls": "AnthropicClient"
             },
             {
                 "key": "local_lm_studio",

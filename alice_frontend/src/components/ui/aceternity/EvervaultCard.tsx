@@ -63,7 +63,7 @@ export const EvervaultCard = ({
               ) : icon}
             </Avatar>
             <Typography
-              variant="h6"
+              variant="h5"
               className="mt-4 mb-2 text-white highlighted-text"
               style={{
                 minHeight: '64px',

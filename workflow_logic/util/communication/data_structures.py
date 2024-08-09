@@ -11,12 +11,22 @@ class OutputInterface(BaseModel):
     @property
     def output_type(self) -> str:
         return self.__class__.__name__
-    
+   
     def model_dump(self, *args, **kwargs):
         data = super().model_dump(*args, **kwargs)
         data['output_type'] = self.output_type
+        
+        # Propagate args and kwargs to content if they are BaseModel objects
+        if isinstance(self.content, list):
+            data['content'] = [
+                item.model_dump(*args, **kwargs) if isinstance(item, BaseModel) else item
+                for item in self.content
+            ]
+        elif isinstance(self.content, BaseModel):
+            data['content'] = self.content.model_dump(*args, **kwargs)
+        
         return data
-    
+   
     def __str__(self) -> str:
         return str(self.content)
 

@@ -39,6 +39,7 @@ const EnhancedAPI: React.FC<EnhancedApiProps> = (props: EnhancedApiProps) => {
       isInteractable: props.isInteractable,
       onInteraction: props.onInteraction,
       showHeaders: props.showHeaders,
+      handleModelClick: props.handleModelClick,
     };
 
     switch (props.mode) {

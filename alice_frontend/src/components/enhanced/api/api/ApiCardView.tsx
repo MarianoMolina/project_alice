@@ -3,14 +3,16 @@ import {
     Typography,
     Switch,
     ListItemSecondaryAction,
+    ListItemButton,
 } from '@mui/material';
 import { ApiComponentProps } from '../../../../types/ApiTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { Category, HealthAndSafety, PowerSettingsNew } from '@mui/icons-material';
+import { Api, Category, HealthAndSafety, PowerSettingsNew } from '@mui/icons-material';
 
 const ApiCardView: React.FC<ApiComponentProps> = ({
     item,
     onChange,
+    handleModelClick
 }) => {
     if (!item) {
         return <Typography>No API data available.</Typography>;
@@ -24,7 +26,7 @@ const ApiCardView: React.FC<ApiComponentProps> = ({
 
     const listItems = [
         {
-            icon: <Category />,
+            icon: <Api />,
             primary_text: "API Type",
             secondary_text: item.api_type
         },
@@ -45,6 +47,16 @@ const ApiCardView: React.FC<ApiComponentProps> = ({
                         color="primary"
                     />
                 </ListItemSecondaryAction>
+            )
+        },
+        {
+            icon: <Category />,
+            primary_text: "Default Model",
+            secondary_text: (item.default_model ?
+                <ListItemButton onClick={() => item.default_model?._id && handleModelClick && handleModelClick(item.default_model._id)}>
+                    {item.default_model?.model_name || 'N/A'}
+                </ListItemButton>
+                : "N/A"
             )
         }
     ];

@@ -32,8 +32,8 @@ class AliceAgent(BaseModel):
                     assistant_name=self.name
                 )]
 
-            print(f"Calling generate_response_with_api_engine")
-            print(f'Agent: {self.model_dump()}')
+            LOGGER.info(f"Calling generate_response_with_api_engine")
+            LOGGER.debug(f'Agent: {self.model_dump()}')
             response: MessageDict = await api_manager.generate_response_with_api_engine(
                 api_type=ApiType.LLM_MODEL,
                 model=self.model_id,
@@ -45,14 +45,14 @@ class AliceAgent(BaseModel):
                 max_tokens=1000
             )
             
-            print(f"API response: {response}")
+            LOGGER.info(f"API response: {response}")
             
             new_messages = []
             content = response.content if response.content else "Using tools" if response.tool_calls else "No response from API"
             tool_calls = response.tool_calls if self.has_functions else None
             
-            print(f"Content: {content}")
-            print(f"Tool calls: {tool_calls}")
+            LOGGER.debug(f"Content: {content}")
+            LOGGER.debug(f"Tool calls: {tool_calls}")
             
             new_messages.append(MessageDict(
                 role="assistant",
@@ -64,22 +64,22 @@ class AliceAgent(BaseModel):
             ))
 
             if tool_calls and self.has_functions:
-                print("Processing tool calls")
+                LOGGER.debug("Processing tool calls")
                 tool_messages = await self._process_tool_calls(tool_calls, tool_map, tools_list)
                 if tool_messages:
                     new_messages.extend(tool_messages)
             
             if self.has_code_exec:
-                print("Processing code execution")
-                code_messages = await self._process_code_execution(new_messages)
+                LOGGER.debug("Processing code execution")
+                code_messages, _ = await self._process_code_execution(new_messages)
                 if code_messages:
                     new_messages.extend(code_messages)
             
             return new_messages
 
         except Exception as e:
-            print(f"Error in agent.generate_response: {str(e)}")
-            print(f"Traceback: {traceback.format_exc()}")
+            LOGGER.debug(f"Error in agent.generate_response: {str(e)}")
+            LOGGER.debug(f"Traceback: {traceback.format_exc()}")
             LOGGER.error(f"Error in agent.generating response: {str(e)}")
             raise
         
@@ -204,7 +204,7 @@ class AliceAgent(BaseModel):
                 code_blocks.extend(self._extract_code_blocks(message.content))
         return code_blocks
 
-    async def _process_code_execution(self, messages: List[MessageDict]) -> List[MessageDict]:
+    async def _process_code_execution(self, messages: List[MessageDict]) -> Tuple[List[MessageDict], Dict]:
         
         code_blocks = self.collect_code_blocs(messages)
         if not code_blocks:
@@ -230,7 +230,7 @@ class AliceAgent(BaseModel):
                 step="code_execution",
                 type="text"
             ))
-        return executed_messages
+        return executed_messages, code_by_lang
 
     def _extract_code_blocks(self, content: str) -> List[Tuple[str, str]]:
         code_blocks = []
@@ -323,15 +323,18 @@ class AliceAgent(BaseModel):
             api_message["tool_call_id"] = str(message.tool_call_id)
         return api_message
 
-    async def chat(self, api_manager: APIManager, messages: Optional[List[MessageDict]] = [], initial_message: Optional[str] = None, max_turns: int = 1, tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []) -> List[MessageDict]:
-        all_messages = messages if messages else []
+    async def chat(self, api_manager: APIManager, messages: Optional[List[MessageDict]] = [], initial_message: Optional[str] = None, max_turns: int = 1, tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []) -> Tuple[List[MessageDict], List[MessageDict]]:
+        start_messages = messages if messages else []
+        gen_messages = []
         if initial_message:
-            all_messages.append(MessageDict(role="user", content=initial_message))
+            start_messages.append(MessageDict(role="user", content=initial_message))
+        all_messages = start_messages
         for _ in range(max_turns):
-            new_messages = await self.generate_response(api_manager, messages, tool_map, tools_list)
-            messages.extend(new_messages)
+            new_messages = await self.generate_response(api_manager, all_messages, tool_map, tools_list)
+            all_messages.extend(new_messages)
+            gen_messages.extend(new_messages)
             
             if any("TERMINATE" in msg.content for msg in new_messages):
                 break
         
-        return messages
+        return gen_messages, start_messages

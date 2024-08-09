@@ -24,12 +24,12 @@ class Workflow(AliceTask):
                 return task
         return None
 
-    async def run(self, step_through: bool = False, **kwargs) -> TaskResponse:
+    async def run(self, **kwargs) -> TaskResponse:
         task_inputs = kwargs.copy()
-        tasks_performed, status, diagnostic = await self.execute_workflow(step_through, **kwargs)
+        tasks_performed, status, diagnostic = await self.execute_workflow(**kwargs)
         return self.create_workflow_response(tasks_performed, status, diagnostic, **task_inputs)
 
-    async def execute_workflow(self, step_through: bool, **kwargs) -> Tuple[List[TaskResponse], str, str]:
+    async def execute_workflow(self, **kwargs) -> Tuple[List[TaskResponse], str, str]:
         tasks_performed = []
         attempts = 1
         current_task_name, bool = self.get_initial_task_name()
@@ -47,9 +47,6 @@ class Workflow(AliceTask):
                     if attempts > self.max_attempts:
                         return tasks_performed, "failed", "Workflow ended due to maximum attempts reached."
 
-                if step_through:
-                    input("Press Enter to continue to the next step...")
-
             return tasks_performed, "complete", "Workflow completed successfully"
 
         except Exception as e:
@@ -62,7 +59,7 @@ class Workflow(AliceTask):
         current_task = self.find_task_by_name(task_name)
         if not current_task:
             raise ValueError(f"Task {task_name} not found in the workflow.")
-        return await current_task.a_execute(**kwargs)
+        return await current_task.run(**kwargs)
 
     def update_kwargs(self, kwargs: Dict[str, Any], task_name: str, task_result: TaskResponse) -> Dict[str, Any]:
         kwargs[f'outputs_{task_name}'] = str(task_result.task_outputs) if task_result.task_outputs else None

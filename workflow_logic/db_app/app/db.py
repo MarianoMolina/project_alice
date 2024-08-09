@@ -346,7 +346,7 @@ class BackendAPI(BaseModel):
         # Parse the JSON string back into a Python object
         data = json.loads(json_str)
         
-        print(f"Data after parsing: {str(data)}...") 
+        LOGGER.debug(f"Data after parsing: {str(data)}...") 
         
         try:
             async with aiohttp.ClientSession() as session:
@@ -354,17 +354,17 @@ class BackendAPI(BaseModel):
                     try:
                         response.raise_for_status()
                     except aiohttp.ClientResponseError as e:
-                        print(f"Response status: {response.status}")
+                        LOGGER.info(f"Response status: {response.status}")
                         response_text = await response.text()
-                        print(f"Response content: {response_text}")
+                        LOGGER.info(f"Response content: {response_text}")
                         raise
                     result = await response.json()
                     return DatabaseTaskResponse(**result)
         except aiohttp.ClientError as e:
-            print(f"Error storing DatabaseTaskResponse: {e}")
+            LOGGER.error(f"Error storing DatabaseTaskResponse: {e}")
             raise
         except Exception as e:
-            print(f"Unexpected error: {e}")
+            LOGGER.error(f"Unexpected error: {e}")
             raise      
 
     async def store_task_response_on_chat(self, task_response: DatabaseTaskResponse, chat_id: str) -> Dict[str, Any]:

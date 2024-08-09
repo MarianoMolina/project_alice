@@ -10,6 +10,13 @@ import { TaskComponentProps } from '../../../../types/TaskTypes';
 import useStyles from '../TaskStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
 
+interface ChipItem {
+    _id?: string;
+    [key: string]: any;
+}
+
+type ChipRecord = Record<string, ChipItem | null>;
+
 const TaskCardView: React.FC<TaskComponentProps> = ({
     item,
     handleAgentClick,
@@ -24,89 +31,70 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
         return <Typography>No task data available.</Typography>;
     }
 
+    const renderChips = (items: ChipRecord | null | undefined, onClick: (id: string) => void, emptyText: string) => {
+        if (!items || Object.keys(items).length === 0) {
+            return <Typography variant="body2" color="textSecondary">{emptyText}</Typography>;
+        }
+        return (
+            <Box>
+                {Object.entries(items).map(([key, value]) => {
+                    if (value === null) return null;
+                    return (
+                        <Chip
+                            key={key}
+                            label={key}
+                            onClick={() => value._id && onClick(value._id)}
+                            className={classes.chip}
+                        />
+                    );
+                })}
+            </Box>
+        );
+    };
+
     const listItems = [
         {
             icon: <Category />,
             primary_text: "Task Type",
             secondary_text: item.task_type
         },
-        ...(item.agent && handleAgentClick ? [{
+        {
             icon: <Person />,
             primary_text: "Agent",
-            secondary_text: (
-                <ListItemButton onClick={() => handleAgentClick(item.agent!._id!)}>
-                    {item.agent.name}
-                </ListItemButton>
-            )
-        }] : []),
-        ...(item.model_id && handleModelClick ? [{
-            icon: <Code />,
-            primary_text: "Model",
-            secondary_text: (
-                <ListItemButton onClick={() => handleModelClick(item.model_id!._id!)}>
-                    {item.model_id.short_name}
-                </ListItemButton>
-            )
-        }] : []),
+            secondary_text: (item.agent?.name ?
+                <ListItemButton onClick={() => item.agent?._id && handleAgentClick && handleAgentClick(item.agent._id)}>
+                    {item.agent?.name}
+                </ListItemButton> : <Typography variant="body2" color="textSecondary">No agent</Typography>
+                )
+        },
         {
             icon: <Description />,
             primary_text: "Templates",
-            secondary_text: (
-                <Box>
-                    {Object.entries(item.templates || {}).map(([key, prompt]) => (
-                        <Chip
-                            key={key}
-                            label={key}
-                            onClick={() => handlePromptClick && prompt && handlePromptClick(prompt._id!)}
-                            className={classes.chip}
-                        />
-                    ))}
-                </Box>
-            )
+            secondary_text: renderChips(item.templates as ChipRecord, (id) => handlePromptClick && handlePromptClick(id), "No templates available")
         },
         {
             icon: <Description />,
             primary_text: "Prompts to Add",
-            secondary_text: (
-                <Box>
-                    {Object.entries(item.prompts_to_add || {}).map(([key, prompt]) => (
-                        <Chip
-                            key={key}
-                            label={key}
-                            onClick={() => handlePromptClick && handlePromptClick(prompt._id!)}
-                            className={classes.chip}
-                        />
-                    ))}
-                </Box>
-            )
+            secondary_text: renderChips(item.prompts_to_add as ChipRecord, (id) => handlePromptClick && handlePromptClick(id), "No prompts to add")
         },
         {
             icon: <Functions />,
             primary_text: "Subtasks",
-            secondary_text: (
-                <Box>
-                    {Object.entries(item.tasks || {}).map(([key, task]) => (
-                        <Chip
-                            key={key}
-                            label={key}
-                            onClick={() => handleTaskClick && handleTaskClick(task._id!)}
-                            className={classes.chip}
-                        />
-                    ))}
-                </Box>
-            )
+            secondary_text: renderChips(item.tasks as ChipRecord, (id) => handleTaskClick && handleTaskClick(id), "No subtasks available")
         },
-        ...(item.required_apis ? [{
+        {
             icon: <ApiRounded />,
             primary_text: "Required APIs",
-            secondary_text: item.required_apis.join(", ")
-        }] : []),
-        ...(item.input_variables ? [{
+            secondary_text: item.required_apis?.length! > 0 ? item.required_apis?.join(", ") : "No required APIs"
+        },
+        {
             icon: <Settings />,
             primary_text: "Input Variables",
             secondary_text: (
+                !item.input_variables?.properties || Object.keys(item.input_variables.properties).length === 0 ?
+                <Typography variant="body2" color="textSecondary">No input variables defined</Typography> :
                 <Box onClick={(e) => e.stopPropagation()}>
-                    {Object.entries(item.input_variables.properties).map(([key, param]) => (
+                    {Object.entries(item.input_variables.properties).map(([key, param]: [string, any]) => (
                         <Chip
                             key={key}
                             label={`${key}: ${param.type}`}
@@ -118,18 +106,20 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
                                 }
                             }}
                             className={classes.chip}
-                            color={item.input_variables?.required.includes(key) ? "primary" : "default"}
+                            color={item.input_variables?.required?.includes(key) ? "primary" : "default"}
                         />
                     ))}
                 </Box>
             )
-        }] : []),
+        },
         {
             icon: <Logout />,
             primary_text: "Exit Codes",
             secondary_text: (
+                !item.exit_codes || Object.keys(item.exit_codes).length === 0 ?
+                <Typography variant="body2" color="textSecondary">No exit codes defined</Typography> :
                 <Box>
-                    {Object.entries(item.exit_codes || {}).map(([code, description]) => (
+                    {Object.entries(item.exit_codes).map(([code, description]) => (
                         <Chip
                             key={code}
                             label={`${code}: ${description}`}

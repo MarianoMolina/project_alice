@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Box } from '@mui/material';
 import { Add, Person, Category, Settings, Description, Functions, Assignment, Chat, Api } from '@mui/icons-material';
-import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH, TASK_SIDEBAR_WIDTH_TABLE } from '../utils/Constants';
+import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH, TASK_SIDEBAR_WIDTH_TABLE, TASK_SIDEBAR_WIDTH_COMPACT } from '../utils/Constants';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
 import { ComponentMode, CollectionElement, CollectionElementString } from '../types/CollectionTypes';
 import EnhancedAgent from '../components/enhanced/agent/agent/EnhancedAgent';
@@ -166,7 +166,7 @@ const Database: React.FC = () => {
                     setShowActiveComponent(false);
                 }, [setSelectedItem])}
                 renderContent={renderActiveList}
-                expandedWidth={viewMode === 'table' ? TASK_SIDEBAR_WIDTH_TABLE : TASK_SIDEBAR_WIDTH}
+                expandedWidth={viewMode === 'table' ? TASK_SIDEBAR_WIDTH_TABLE : viewMode === 'list' ? TASK_SIDEBAR_WIDTH : TASK_SIDEBAR_WIDTH_COMPACT}
                 collapsedWidth={SIDEBAR_COLLAPSED_WIDTH}
             />
             <Box className={classes.databaseContent}>

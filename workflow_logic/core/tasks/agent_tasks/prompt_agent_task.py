@@ -1,3 +1,4 @@
+import re
 from pydantic import Field
 from typing import List, Dict, Any, Tuple, Optional
 from workflow_logic.core.api import APIManager
@@ -119,27 +120,39 @@ class PromptAgentTask(BasicAgentTask):
 class CheckTask(PromptAgentTask):
     """
     A specialized task for checking if the generated output includes certain strings.
-
     This task type is used when you need to validate the output against predefined
     responses and return specific exit codes based on the match.
-
-    Attributes:
-        task_name (str): The name of the task, defaulting to "check_output".
-        exit_code_response_map (dict[str, int]): A mapping of expected responses to exit codes.
-
-    Methods:
-        get_exit_code: Determines the exit code based on the presence of predefined strings in the output.
     """
     task_name: str = Field("check_output", description="The name of the task")
-    exit_code_response_map: dict[str, int] = Field({"APPROVED": 0, "FAILED": 1}, description="A dictionary of exit codes mapped to string responses for the task. These strings should be present in the system prompt of the checking agent", examples=[{"TESTS PASSED": 0, "TESTS FAILED": 1}])
+    exit_code_response_map: Dict[str, int] = Field(
+        {"APPROVED": 0, "FAILED": 1},
+        description="A dictionary of exit codes mapped to string responses for the task. These strings should be present in the system prompt of the checking agent",
+        examples=[{"TESTS PASSED": 0, "TESTS FAILED": 1}]
+    )
 
     def get_exit_code(self, chat_output: List[MessageDict], response_code: bool) -> int:
-        if not chat_output or not chat_output[-1].content:
+        """
+        Determines the exit code based on the presence of predefined strings in the output.
+        
+        Args:
+            chat_output (List[MessageDict]): The output from the chat.
+            response_code (bool): A flag indicating if the response was successful.
+        
+        Returns:
+            int: The determined exit code.
+        """
+        if not response_code or not chat_output or not chat_output[-1].content:
+            LOGGER.warning(f"Invalid input for task {self.task_name}. Returning default failure code. Response code: {response_code} Chat output: {chat_output}")
             return 1
+
+        content = chat_output[-1].content.upper()
         for key, value in self.exit_code_response_map.items():
-            if key in chat_output[-1].content:
+            normalized_key = ' '.join(key.upper().split())  # Normalize whitespace
+            if normalized_key in content:
+                LOGGER.info(f"Found matching response '{key}' for task {self.task_name}. Returning exit code {value}.")
                 return value
-        LOGGER.warning(f"None of the exit code responses were found in the output of the task {self.task_name}")
+
+        LOGGER.warning(f"No matching response found for task {self.task_name}. Returning default failure code. \nResponse code: {response_code} \nChat output: {chat_output} \nexit_code_response_map: {self.exit_code_response_map}")
         return 1
     
 class CodeGenerationLLMTask(PromptAgentTask):
@@ -162,7 +175,8 @@ class CodeGenerationLLMTask(PromptAgentTask):
     exit_codes: dict[int, str] = Field({0: "Success", 1: "Generation failed.", 2: "No code blocks in response"}, description="A dictionary of exit codes for the task")
 
     def get_exit_code(self, chat_output: List[MessageDict], response_code: bool) -> int:
-        if not chat_output or not chat_output[-1].content:
+        if not response_code or not chat_output or not chat_output[-1].content:
+            LOGGER.warning(f"Invalid input for task {self.task_name}. Returning default failure code. Response code: {response_code} Chat output: {chat_output}")
             return 1
         code_blocks = self.agent._extract_code_blocks(chat_output[-1].content)
         if not code_blocks:
@@ -198,15 +212,16 @@ class CodeExecutionLLMTask(PromptAgentTask):
     def get_exit_code(self, chat_output: List[MessageDict], response_code: bool) -> int:
         LOGGER.info(f"Chat output: {chat_output} \nResponse code: {response_code}")
         if not chat_output or not response_code or not chat_output[-1].content or chat_output[-1].content.startswith("Error"):
+            LOGGER.warning(f"Invalid input for task {self.task_name}. Returning default failure code. Response code: {response_code} Chat output: {chat_output}")
             return 1
         return 0
     
-    async def generate_response(self, api_manager: APIManager, **kwargs) -> Tuple[List[MessageDict], int]:    
+    async def generate_response(self, api_manager: APIManager, **kwargs) -> Tuple[List[MessageDict], int, Optional[Dict[str, str]]]:    
         if not kwargs.get('messages'):
             LOGGER.warning(f"No messages to execute code from in task {self.task_name}")
             return [], self.get_exit_code([], False)
 
         # Process and execute the code blocks
-        code_execs = await self.agent._process_code_execution(kwargs.get('messages'))
+        code_execs, code_blocks = await self.agent._process_code_execution(kwargs.get('messages'))
         
-        return code_execs, self.get_exit_code(code_execs, True)
+        return code_execs, self.get_exit_code(code_execs, True), code_blocks

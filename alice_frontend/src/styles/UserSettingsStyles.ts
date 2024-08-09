@@ -7,12 +7,15 @@ const useStyles = makeStyles((theme: Theme) => ({
         height: '100%',
     },
     card: {
-        height: '100%',
+        marginBottom: theme.spacing(3),
     },
     userInfoHeader: {
         display: 'flex',
         alignItems: 'center',
         marginBottom: theme.spacing(2),
+        '& > *:first-child': {
+            marginRight: theme.spacing(1),
+        },
     },
     apiConfigHeader: {
         display: 'flex',
@@ -31,6 +34,19 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
     leaveButton: {
         marginTop: theme.spacing(3),
+    },
+    dangerZone: {
+        marginTop: theme.spacing(4),
+        borderTop: `1px solid ${theme.palette.divider}`,
+        paddingTop: theme.spacing(2),
+    },
+    dangerButton: {
+        marginTop: theme.spacing(2),
+        backgroundColor: theme.palette.error.main,
+        color: theme.palette.error.contrastText,
+        '&:hover': {
+            backgroundColor: theme.palette.error.dark,
+        },
     },
 }));
 

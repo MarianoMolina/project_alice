@@ -5,8 +5,13 @@ import auth from '../middleware/auth.middleware';
 import adminOnly from '../middleware/admin.middleware';
 import User from '../models/user.model';
 import { AuthRequest } from '../interfaces/auth.interface';
+import axios from 'axios';
+import mongoose from 'mongoose';
 
 const router: Router = express.Router();
+
+const workflow_port = process.env.WORKFLOW_PORT_DOCKER || 8000;
+const workflow_name = process.env.WORKFLOW_NAME || 'workflow';
 
 const handleErrors = (res: Response, error: any) => {
   console.error('Error in user route:', error);
@@ -107,6 +112,58 @@ router.put('/:id', userSelfOrAdmin, async (req: AuthRequest, res: Response) => {
     res.json(user.apiRepresentation());
   } catch (error) {
     handleErrors(res, error);
+  }
+});
+
+router.post('/purge-and-reinitialize', auth, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    // List of collections to clear
+    const collections = [
+      'apis',
+      'agents',
+      'alicechats',
+      'collections',
+      'models',
+      'prompts',
+      'taskresults',
+      'tasks',
+      'parameterdefinitions'
+    ];
+
+    // Clear collections
+    for (const collectionName of collections) {
+      const collection = mongoose.connection.collection(collectionName);
+      await collection.deleteMany({ userId: userId });
+    }
+
+    // Get the original authorization token from the request
+    const token = req.headers.authorization;
+
+    if (!token) {
+      return res.status(401).json({ message: 'No authorization token provided' });
+    }
+
+    // Call the initialize_user_database endpoint in the workflow container
+    const workflowUrl = `http://${workflow_name}:${workflow_port}/initialize_user_database`;
+    await axios.post(workflowUrl, {}, {
+      headers: {
+        Authorization: token
+      }
+    });
+
+    res.json({ message: 'Database purged and re-initialized successfully' });
+  } catch (error) {
+    console.error('Error in purge-and-reinitialize:', error);
+    if (axios.isAxiosError(error)) {
+      res.status(error.response?.status || 500).json({ message: error.response?.data || 'An error occurred while reinitializing the database' });
+    } else {
+      handleErrors(res, error);
+    }
   }
 });
 

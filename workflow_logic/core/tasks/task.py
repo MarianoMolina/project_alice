@@ -231,7 +231,7 @@ class AliceTask(BaseModel, ABC):
             "function_map": {self.task_name: function_callable}
         }
     
-    def get_failed_task_response(self, diagnostics: str = None, **kwargs) -> DatabaseTaskResponse:
+    def get_failed_task_response(self, diagnostics: str = None, **kwargs) -> TaskResponse:
         """
         Returns a failed task response with the given diagnostics.
         """
@@ -248,7 +248,7 @@ class AliceTask(BaseModel, ABC):
             result_diagnostic=diagnostics,
             execution_history=exec_history
         )
-
+    
     # async def a_run(self, **kwargs) -> TaskResponse:
     #     """
     #     Asynchronous version of the run method.
