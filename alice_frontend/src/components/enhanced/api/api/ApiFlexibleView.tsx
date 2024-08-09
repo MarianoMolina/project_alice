@@ -112,6 +112,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
 
     return (
         <GenericFlexibleView
+            elementType='API'
             title={title}
             onSave={handleSave}
             saveButtonText={saveButtonText}
@@ -168,19 +169,20 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                     disabled={!isEditMode || (key === 'base_url' && form.api_type && isLlmApi(form.api_type) && llmProvider !== 'Custom')}
                 />
             ))}
-
-            <EnhancedSelect<AliceModel>
-                componentType="models"
-                EnhancedComponent={EnhancedModel}
-                selectedItems={form.default_model ? [form.default_model] : []}
-                onSelect={handleDefaultModelChange}
-                isInteractable={isEditMode}
-                label="Select Default Model"
-                activeAccordion={activeAccordion}
-                onAccordionToggle={handleAccordionToggle}
-                onView={(id) => handleViewDetails("model", id)}
-                accordionEntityName="default-model"
-            />
+            {form.api_type && isLlmApi(form.api_type) && (
+                <EnhancedSelect<AliceModel>
+                    componentType="models"
+                    EnhancedComponent={EnhancedModel}
+                    selectedItems={form.default_model ? [form.default_model] : []}
+                    onSelect={handleDefaultModelChange}
+                    isInteractable={isEditMode}
+                    label="Select Default Model"
+                    activeAccordion={activeAccordion}
+                    onAccordionToggle={handleAccordionToggle}
+                    onView={(id) => handleViewDetails("model", id)}
+                    accordionEntityName="default-model"
+                />
+            )}
 
             <FormControl fullWidth margin="normal">
                 <InputLabel>Is Active</InputLabel>

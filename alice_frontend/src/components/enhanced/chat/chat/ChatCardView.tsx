@@ -50,6 +50,7 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
 
   return (
     <CommonCardView
+      elementType='Chat'
       title={item.name}
       id={item._id}
       listItems={listItems}

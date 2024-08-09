@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
     Box,
     TextField,
@@ -11,7 +11,7 @@ import {
     SelectChangeEvent
 } from '@mui/material';
 import { TaskFormsProps } from '../../../../../types/TaskTypes';
-import FunctionDefinitionBuilder from '../../../common/function_select/Function';
+import FunctionDefinitionBuilder from '../../../common/function_select/FunctionDefinitionBuilder';
 import { FunctionParameters } from '../../../../../types/ParameterTypes';
 import { ApiType } from '../../../../../types/ApiTypes';
 
@@ -27,6 +27,10 @@ const ApiTaskForm: React.FC<TaskFormsProps> = ({
         return apis ? Array.from(new Set(apis.map(api => api.api_type))) : [];
     }, [apis]);
 
+    const handleInputVariablesChange = useCallback((newDefinition: FunctionParameters) => {
+        onChange({ ...item, input_variables: newDefinition });
+    }, [onChange, item]);
+
     if (!item) {
         return <Box>No task data available.</Box>;
     }
@@ -36,14 +40,11 @@ const ApiTaskForm: React.FC<TaskFormsProps> = ({
         onChange({ ...item, [name]: value });
     };
 
-    const handleInputVariablesChange = (functionDefinition: FunctionParameters) => {
-        onChange({ ...item, input_variables: functionDefinition });
-    };
-
     const handleRequiredApisChange = (event: SelectChangeEvent<ApiType[]>) => {
         const value = event.target.value as ApiType[];
         onChange({ ...item, required_apis: value });
     };
+    
 
     return (
         <Box>

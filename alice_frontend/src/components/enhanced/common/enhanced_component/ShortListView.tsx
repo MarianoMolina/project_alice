@@ -15,7 +15,7 @@ const ListItemStyled = styled(ListItem)(({ theme }) => ({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: theme.spacing(1, 2),
+    padding: theme.spacing(1, 1),
 }));
 
 const ContentBox = styled(Box)({
@@ -28,8 +28,16 @@ const ButtonBox = styled(Box)({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    width: '48px', // Reduced width for stacked buttons
+    // width: '48px',
 });
+
+const ListItemCustom = styled(ListItemText)(({ theme }) => ({
+    margin: theme.spacing(0) + ' !important',
+}));
+
+const IconButtonCustom = styled(IconButton)(({ theme }) => ({
+    padding: theme.spacing(0.25) + ' !important',
+}));
 
 interface EnhancedShortListItemProps<T> {
     item: T;
@@ -47,34 +55,34 @@ function EnhancedShortListItem<T>({
     onInteraction
 }: EnhancedShortListItemProps<T>) {
     return (
-        <ListItemStyled>
-            <ContentBox>
-                <ListItemText
-                    primary={primaryText}
-                    secondary={
-                        <Typography component="span" variant="body2" color="textSecondary">
-                            {secondaryText}
-                        </Typography>
-                    }
-                />
-            </ContentBox>
-            <ButtonBox>
-                {onView && (
-                    <Tooltip title="View Item">
-                        <IconButton size="small" onClick={() => onView(item)}>
-                            <Visibility />
-                        </IconButton>
-                    </Tooltip>
-                )}
-                {onInteraction && (
-                    <Tooltip title="Select Item">
-                        <IconButton size="small" onClick={() => onInteraction(item)}>
-                            <PlayArrow />
-                        </IconButton>
-                    </Tooltip>
-                )}
-            </ButtonBox>
-        </ListItemStyled>
+            <ListItemStyled>
+                <ContentBox>
+                    <ListItemCustom
+                        primary={primaryText}
+                        secondary={
+                            <Typography component="span" variant="body2" color="textSecondary">
+                                {secondaryText}
+                            </Typography>
+                        }
+                    />
+                </ContentBox>
+                <ButtonBox>
+                    {onView && (
+                        <Tooltip title="View Item">
+                            <IconButtonCustom size="small" onClick={() => onView(item)}>
+                                <Visibility />
+                            </IconButtonCustom>
+                        </Tooltip>
+                    )}
+                    {onInteraction && (
+                        <Tooltip title="Select Item">
+                            <IconButtonCustom size="small" onClick={() => onInteraction(item)}>
+                                <PlayArrow />
+                            </IconButtonCustom>
+                        </Tooltip>
+                    )}
+                </ButtonBox>
+            </ListItemStyled>
     );
 }
 

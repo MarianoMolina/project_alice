@@ -51,6 +51,7 @@ const ApiCardView: React.FC<ApiComponentProps> = ({
 
     return (
         <CommonCardView
+            elementType='API'
             title={item.name ?? 'API'}
             id={item._id}
             listItems={listItems}

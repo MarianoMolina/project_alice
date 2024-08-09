@@ -7,7 +7,7 @@ const useStyles = makeStyles((theme: Theme) => ({
         wordBreak: 'break-word',
     },
     chip: {
-        margin: theme.spacing(0.5),
+        margin: theme.spacing(0.25) + ' !important',
     },
 }));
 

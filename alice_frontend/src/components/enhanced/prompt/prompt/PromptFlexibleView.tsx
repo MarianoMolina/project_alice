@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
     Typography,
     TextField,
@@ -6,9 +6,10 @@ import {
     FormControlLabel,
     Box
 } from '@mui/material';
-import FunctionDefinitionBuilder from '../../common/function_select/Function';
+import FunctionDefinitionBuilder from '../../common/function_select/FunctionDefinitionBuilder';
 import { PromptComponentProps } from '../../../../types/PromptTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
+import { FunctionParameters } from '../../../../types/ParameterTypes';
 
 const PromptFlexibleView: React.FC<PromptComponentProps> = ({
     item,
@@ -16,16 +17,20 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
     mode,
     handleSave
 }) => {
+    const handleFunctionDefinitionChange = useCallback((newDefinition: FunctionParameters) => {
+        onChange({ ...item, parameters: newDefinition });
+    }, [onChange, item]);
+
     if (!item) {
         return <Typography>No Prompt data available.</Typography>;
     }
     const isEditMode = mode === 'edit' || mode === 'create';
-
     const title = mode === 'create' ? 'Create New Prompt' : mode === 'edit' ? 'Edit Prompt' : 'Prompt Details';
     const saveButtonText = item._id ? 'Update Prompt' : 'Create Prompt';
 
     return (
         <GenericFlexibleView
+            elementType="Prompt"
             title={title}
             onSave={handleSave}
             saveButtonText={saveButtonText}
@@ -64,7 +69,7 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
                     <Typography gutterBottom>Parameters</Typography>
                     <FunctionDefinitionBuilder
                         initialParameters={item.parameters}
-                        onChange={(functionDefinition) => onChange({ ...item, parameters: functionDefinition })}
+                        onChange={handleFunctionDefinitionChange}
                         isViewOnly={!isEditMode}
                     />
                 </Box>

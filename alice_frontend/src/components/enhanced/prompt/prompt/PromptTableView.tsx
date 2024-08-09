@@ -12,15 +12,18 @@ const PromptTableView: React.FC<PromptComponentProps> = ({
   const columns = [
     {
       header: 'Prompt Name',
-      render: (prompt: Prompt) => prompt.name
+      render: (prompt: Prompt) => prompt.name,
+      sortKey: 'name'
     },
     {
       header: 'Templated',
-      render: (prompt: Prompt) => prompt.is_templated || 'N/A'
+      render: (prompt: Prompt) => prompt.is_templated || 'N/A',
+      sortKey: 'is_templated'
     },
     {
       header: 'Created At',
-      render: (prompt: Prompt) => new Date(prompt.createdAt || '').toLocaleString()
+      render: (prompt: Prompt) => new Date(prompt.createdAt || '').toLocaleString(),
+      sortKey: 'createdAt'
     }
   ];
 

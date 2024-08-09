@@ -30,6 +30,7 @@ const ParameterCardView: React.FC<ParameterComponentProps> = ({ item }) => {
 
     return (
         <CommonCardView
+            elementType='Parameter'
             title="Parameter"
             id={item._id}
             listItems={listItems}

@@ -12,15 +12,18 @@ const ParameterTableView: React.FC<ParameterComponentProps> = ({
   const columns = [
     {
       header: 'Type',
-      render: (parameter: ParameterDefinition) => parameter.type
+      render: (parameter: ParameterDefinition) => parameter.type,
+      sortKey: 'type'
     },
     {
       header: 'Description',
-      render: (parameter: ParameterDefinition) => parameter.description || 'N/A'
+      render: (parameter: ParameterDefinition) => parameter.description || 'N/A',
+      sortKey: 'description'
     },
     {
       header: 'Created At',
-      render: (parameter: ParameterDefinition) => new Date(parameter.createdAt || '').toLocaleString()
+      render: (parameter: ParameterDefinition) => new Date(parameter.createdAt || '').toLocaleString(),
+      sortKey: 'createdAt'
     }
   ];
 

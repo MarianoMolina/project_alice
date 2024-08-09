@@ -74,7 +74,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     flexDirection: 'column',
   },
   chip: {
-    margin: theme.spacing(0.5),
+    margin: theme.spacing(0.25) + ' !important',
   },
   exitCodeChip: {
     margin: theme.spacing(0.5),

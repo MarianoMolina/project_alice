@@ -13,8 +13,9 @@ import EnhancedTaskResponse from '../components/enhanced/task_response/task_resp
 import ChatInput from '../components/enhanced/chat/ChatInput';
 import useStyles from '../styles/ChatAliceStyles';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
-import EnhancedCardDialogs from '../components/enhanced/common/enhanced_card_dialogs/EnhancedCardDialogs';
-import { useConfig } from '../context/ConfigContext';
+import EnhancedCardDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
+import { useDialog } from '../context/DialogContext';
+import { CollectionElementString } from '../types/CollectionTypes';
 
 const ChatAlice: React.FC = () => {
   const classes = useStyles();
@@ -30,8 +31,8 @@ const ChatAlice: React.FC = () => {
     addTaskResultToChat,
     isTaskInChat,
   } = useChat();
+  const { selectItem } = useDialog();
 
-  const { triggerItemDialog } = useConfig();
   const [openChatCreateDialog, setOpenChatCreateDialog] = useState(false);
 
   const [activeTab, setActiveTab] = useState('Select Chat');
@@ -94,6 +95,9 @@ const ChatAlice: React.FC = () => {
       addTaskResultToChat(taskResult._id);
     }
   }
+  const triggerItemDialog = (collectionName: CollectionElementString, itemId: string) => {
+    selectItem(collectionName, itemId);
+  };
 
   const renderSidebarContent = (tabName: string) => {
     const handleProps = {
@@ -187,7 +191,7 @@ const ChatAlice: React.FC = () => {
             chatSelected={!!currentChatId}
           />
         </Box>
-        <EnhancedCardDialogs />
+        <EnhancedCardDialog />
         <Dialog open={openChatCreateDialog} onClose={() => setOpenChatCreateDialog(false)}>
           <EnhancedChat
             mode="create"

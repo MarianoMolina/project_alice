@@ -4,7 +4,9 @@ import { hexToRgba } from '../../../utils/StyleUtils';
 
 const useStyles = makeStyles((theme: Theme) => ({
   header: {
-    backgroundColor: `${hexToRgba(theme.palette.background.paper, 0.1)} !important`,
+    backgroundColor: `${hexToRgba(theme.palette.background.paper, 0.7)} !important`,
+    backgroundImage: 'none !important',
+    boxShadow: 'none !important',
   },
   toolbar: {
     display: 'flex',

@@ -1,67 +1,44 @@
 import React from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  IconButton,
-  Tooltip
-} from '@mui/material';
-import { Visibility, ChevronRight } from '@mui/icons-material';
-import { ChatComponentProps } from '../../../../types/ChatTypes';
+import { ChatComponentProps, AliceChat } from '../../../../types/ChatTypes';
+import EnhancedTableView, { Column } from '../../common/enhanced_component/TableView';
 
 const ChatTableView: React.FC<ChatComponentProps> = ({
   items,
+  item,
   isInteractable = false,
   onInteraction,
   onView,
   showHeaders = true,
 }) => {
-  if (!items) return null;
+  const columns: Column<AliceChat>[] = [
+    {
+      header: 'Chat Name',
+      render: (chat: AliceChat) => chat.name,
+      sortKey: 'name'
+    },
+    {
+      header: 'Agent',
+      render: (chat: AliceChat) => chat.alice_agent?.name || 'N/A',
+      // We can't directly sort by nested properties, so we'll omit sortKey here
+    },
+    {
+      header: 'Created At',
+      render: (chat: AliceChat) => new Date(chat.createdAt || '').toLocaleString(),
+      sortKey: 'createdAt'
+    }
+  ];
 
   return (
-    <TableContainer component={Paper}>
-      <Table>
-        {showHeaders && (
-          <TableHead>
-            <TableRow>
-              <TableCell>Chat Name</TableCell>
-              <TableCell>Agent</TableCell>
-              <TableCell>Created At</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-        )}
-        <TableBody>
-          {items.map((chat) => (
-            <TableRow key={chat._id}>
-              <TableCell>{chat.name}</TableCell>
-              <TableCell>{chat.alice_agent?.name || 'N/A'}</TableCell>
-              <TableCell>{new Date(chat.createdAt || '').toLocaleString()}</TableCell>
-              <TableCell>
-                {onView && (
-                  <Tooltip title="View Chat">
-                    <IconButton onClick={() => onView(chat)}>
-                      <Visibility />
-                    </IconButton>
-                  </Tooltip>
-                )}
-                {onInteraction && (
-                  <Tooltip title="Add Chat">
-                    <IconButton onClick={() => onInteraction(chat)}>
-                      <ChevronRight />
-                    </IconButton>
-                  </Tooltip>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <EnhancedTableView<AliceChat>
+      items={items}
+      item={item}
+      columns={columns}
+      onView={onView}
+      onInteraction={isInteractable ? onInteraction : undefined}
+      showHeaders={showHeaders}
+      interactionTooltip="Add Chat"
+      viewTooltip="View Chat"
+    />
   );
 };
 

@@ -30,6 +30,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
 
     return (
         <GenericFlexibleView
+            elementType='Model'
             title={title}
             onSave={handleSave}
             saveButtonText={saveButtonText}

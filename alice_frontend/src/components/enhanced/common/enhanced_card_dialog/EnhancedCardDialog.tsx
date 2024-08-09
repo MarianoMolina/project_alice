@@ -1,6 +1,5 @@
 import React from 'react';
 import { Dialog } from '@mui/material';
-import { useConfig } from '../../../../context/ConfigContext';
 import EnhancedTask from '../../task/task/EnhancedTask';
 import EnhancedTaskResponse from '../../task_response/task_response/EnhancedTaskResponse';
 import EnhancedChat from '../../chat/chat/EnhancedChat';
@@ -9,20 +8,10 @@ import EnhancedModel from '../../model/model/EnhancedModel';
 import EnhancedParameter from '../../parameter/parameter/EnhancedParameter';
 import EnhancedAPI from '../../api/api/EnhancedApi';
 import EnhancedAgent from '../../agent/agent/EnhancedAgent';
+import { useDialog } from '../../../../context/DialogContext';
 
-const EnhancedCardDialogs: React.FC = () => {
-  const {
-    selectedItem,
-    selectedItemType,
-    setSelectedItem,
-    setSelectedItemType,
-    triggerItemDialog
-  } = useConfig();
-
-  const handleClose = () => {
-    setSelectedItem(null);
-    setSelectedItemType(null);
-  };
+const EnhancedCardDialog: React.FC = () => {
+  const { selectedItem, selectedItemType, handleClose, selectItem } = useDialog();
 
   const renderDialogContent = () => {
     if (!selectedItem || !selectedItemType) return null;
@@ -34,12 +23,12 @@ const EnhancedCardDialogs: React.FC = () => {
     };
 
     const handleProps = {
-      handleAgentClick: (id: string) => triggerItemDialog('Agent', id),
-      handleTaskClick: (id: string) => triggerItemDialog('Task', id),
-      handleModelClick: (id: string) => triggerItemDialog('Model', id),
-      handlePromptClick: (id: string) => triggerItemDialog('Prompt', id),
-      handleParameterClick: (id: string) => triggerItemDialog('Parameter', id),
-      handleAPIClick: (id: string) => triggerItemDialog('API', id),
+      handleAgentClick: (id: string) => selectItem('Agent', id),
+      handleTaskClick: (id: string) => selectItem('Task', id),
+      handleModelClick: (id: string) => selectItem('Model', id),
+      handlePromptClick: (id: string) => selectItem('Prompt', id),
+      handleParameterClick: (id: string) => selectItem('Parameter', id),
+      handleAPIClick: (id: string) => selectItem('API', id),
     };
 
     switch (selectedItemType) {
@@ -65,10 +54,10 @@ const EnhancedCardDialogs: React.FC = () => {
   };
 
   return (
-    <Dialog open={!!selectedItem} onClose={handleClose}>
+    <Dialog open={!!selectedItem} onClose={handleClose} maxWidth='xl'>
       {renderDialogContent()}
     </Dialog>
   );
 };
 
-export default EnhancedCardDialogs;
+export default EnhancedCardDialog;

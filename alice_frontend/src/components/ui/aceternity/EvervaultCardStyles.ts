@@ -10,7 +10,7 @@ const useStyles = makeStyles((theme: Theme) => ({
         height: `${theme.spacing(7)} !important`,
     },
     markStyles: {
-        backgroundColor: `${theme.palette.warning.light} !important`,
+        backgroundColor: `${theme.palette.common.white} !important`,
     },
 }));
 

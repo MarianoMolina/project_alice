@@ -12,15 +12,18 @@ const ModelTableView: React.FC<ModelComponentProps> = ({
   const columns = [
     {
       header: 'Model Name',
-      render: (model: AliceModel) => model.model_name
+      render: (model: AliceModel) => model.model_name,
+      sortKey: 'model_name'
     },
     {
       header: 'API',
-      render: (model: AliceModel) => model.api_name || 'N/A'
+      render: (model: AliceModel) => model.api_name || 'N/A',
+      sortKey: 'api_name'
     },
     {
       header: 'Created At',
-      render: (model: AliceModel) => new Date(model.createdAt || '').toLocaleString()
+      render: (model: AliceModel) => new Date(model.createdAt || '').toLocaleString(),
+      sortKey: 'createdAt'
     }
   ];
 

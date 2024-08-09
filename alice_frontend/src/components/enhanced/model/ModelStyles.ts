@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     marginTop: theme.spacing(2),
   },
   chip: {
-    margin: theme.spacing(0.5),
+    margin: theme.spacing(0.25) + ' !important',
   },
 }));
 

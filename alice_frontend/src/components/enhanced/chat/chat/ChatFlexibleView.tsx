@@ -78,6 +78,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
 
     return (
         <GenericFlexibleView
+            elementType='Chat'
             title={title}
             onSave={handleSave}
             saveButtonText={saveButtonText}

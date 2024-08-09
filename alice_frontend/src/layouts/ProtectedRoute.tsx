@@ -5,7 +5,7 @@ import { CircularProgress, Box } from '@mui/material';
 import { ApiProvider } from '../context/ApiContext';
 import { TaskProvider } from '../context/TaskContext';
 import { ChatProvider } from '../context/ChatContext';
-import { ConfigProvider } from '../context/ConfigContext';
+import { DialogProvider } from '../context/DialogContext';
 
 interface ProtectedRouteProps {
   element: React.ReactNode;
@@ -24,13 +24,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
   }
 
   return isAuthenticated ? (
-
     <ApiProvider>
       <TaskProvider>
         <ChatProvider>
-          <ConfigProvider>
-          {element}
-          </ConfigProvider>
+          <DialogProvider>
+            {element}
+          </DialogProvider>
         </ChatProvider>
       </TaskProvider>
     </ApiProvider>

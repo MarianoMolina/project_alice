@@ -20,7 +20,6 @@ interface EnhancedAgentProps extends Omit<AgentComponentProps, 'items' | 'item' 
 }
 
 const EnhancedAgent: React.FC<EnhancedAgentProps> = (props) => {
-  console.log('EnhancedAgent props:', props);
   const renderContent = (
     items: AliceAgent[] | null,
     item: AliceAgent | null,

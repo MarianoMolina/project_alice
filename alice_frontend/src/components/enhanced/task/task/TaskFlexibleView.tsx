@@ -132,6 +132,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
 
     return (
         <GenericFlexibleView
+            elementType='Task'
             title={title}
             onSave={handleSave}
             saveButtonText={saveButtonText}

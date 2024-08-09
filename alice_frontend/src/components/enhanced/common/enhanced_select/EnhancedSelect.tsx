@@ -1,7 +1,8 @@
 import React from 'react';
-import { Box, IconButton, Accordion, AccordionSummary, AccordionDetails, Typography } from '@mui/material';
-import { Edit, Close, ExpandMore, Delete } from '@mui/icons-material';
+import { Box, IconButton, Accordion, AccordionSummary, AccordionDetails, Typography, Chip, Divider } from '@mui/material';
+import { Edit, Close, ExpandMore } from '@mui/icons-material';
 import { CollectionName, CollectionType } from '../../../../types/CollectionTypes';
+import useStyles from './EnhancedSelectStyles';
 
 interface EnhancedSelectProps<T extends CollectionType[CollectionName]> {
   componentType: CollectionName;
@@ -29,14 +30,13 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
   onView,
   accordionEntityName
 }: EnhancedSelectProps<T>) {
+  const classes = useStyles();
   const accordionName = `select-${accordionEntityName}`;
   const isExpanded = activeAccordion === accordionName;
 
   const handleToggle = () => {
     onAccordionToggle(isExpanded ? null : accordionName);
   };
-  console.log('selectedItems', selectedItems);
-  console.log()
 
   const handleDelete = (itemToDelete: T) => {
     const updatedIds = selectedItems
@@ -45,33 +45,37 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
     onSelect(updatedIds);
   };
 
+  const renderSelectedItem = (item: T) => (
+    <Chip
+      key={item._id}
+      label={<EnhancedComponent mode="shortList" itemId={item._id} fetchAll={false} />}
+      onDelete={multiple && isInteractable ? () => handleDelete(item) : undefined}
+      onClick={() => onView(item._id!)}
+      className={classes.chip}
+    />
+  );
+
   return (
-    <Box>
-      {selectedItems?.map(item => (
-        <Box key={item._id} display="flex" alignItems="center">
-          <EnhancedComponent
-            mode="shortList"
-            itemId={item._id}
-            fetchAll={false}
-            onView={() => onView(item._id!)}
-          />
-          {multiple && isInteractable && (
-            <IconButton onClick={() => handleDelete(item)} size="small">
-              <Delete />
-            </IconButton>
-          )}
-        </Box>
-      ))}
-      <IconButton onClick={handleToggle} disabled={!isInteractable}>
-        {isExpanded ? <Close /> : <Edit />}
-      </IconButton>
+    <Box className={classes.selectContainer}>
+      <Typography className={classes.label} variant="caption">{label}{multiple ? ' (multiple)' : null}</Typography>
+      <Box className={classes.chipContainer}>
+        {selectedItems?.map(renderSelectedItem)}
+        <IconButton 
+          onClick={handleToggle} 
+          disabled={!isInteractable} 
+          size="small"
+          className={classes.editButton}
+        >
+          {isExpanded ? <Close /> : <Edit />}
+        </IconButton>
+      </Box>
       <Accordion expanded={isExpanded} onChange={handleToggle}>
         <AccordionSummary expandIcon={<ExpandMore />}>
           <Typography>{label}</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <EnhancedComponent
-            mode="list"
+            mode="shortList"
             fetchAll={true}
             onInteraction={(item: T) => {
               const newSelectedIds = multiple
@@ -84,6 +88,7 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
           />
         </AccordionDetails>
       </Accordion>
+      <Divider className={classes.divider} />
     </Box>
   );
 }

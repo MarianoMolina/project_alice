@@ -28,8 +28,8 @@ export interface API {
     api_config: { [key: string]: string };
     created_by?: User;
     updated_by?: User;
-    created_at?: Date;
-    updated_at?: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 export interface LLMAPI {
     _id?: string;
@@ -43,8 +43,8 @@ export interface LLMAPI {
     api_config: { api_key: string, base_url: string  };
     created_by?: User;
     updated_by?: User;
-    created_at?: Date;
-    updated_at?: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 export const convertToAPI = (data: any): API => {
     return {
@@ -58,8 +58,8 @@ export const convertToAPI = (data: any): API => {
         api_config: data?.api_config || {},
         created_by: data?.created_by ? convertToUser(data.created_by) : undefined,
         updated_by: data?.updated_by ? convertToUser(data.updated_by) : undefined,
-        created_at: data?.created_at ? new Date(data.created_at) : undefined,
-        updated_at: data?.updated_at ? new Date(data.updated_at) : undefined,
+        createdAt: data?.createdAt ? new Date(data.createdAt) : undefined,
+        updatedAt: data?.updatedAt ? new Date(data.updatedAt) : undefined,
     };
 };
 

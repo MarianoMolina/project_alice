@@ -1,17 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { Box } from '@mui/material';
 import { Add, Person, Category, Settings, Description, Functions, Assignment, Chat, Api } from '@mui/icons-material';
-import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
+import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH, TASK_SIDEBAR_WIDTH_TABLE } from '../utils/Constants';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
-import { ComponentMode } from '../types/CollectionTypes';
-import { AliceModel } from '../types/ModelTypes';
-import { Prompt } from '../types/PromptTypes';
-import { ParameterDefinition } from '../types/ParameterTypes';
-import { AliceTask } from '../types/TaskTypes';
-import { TaskResponse } from '../types/TaskResponseTypes';
-import { AliceAgent } from '../types/AgentTypes';
-import { AliceChat } from '../types/ChatTypes';
-import { API } from '../types/ApiTypes';
+import { ComponentMode, CollectionElement, CollectionElementString } from '../types/CollectionTypes';
 import EnhancedAgent from '../components/enhanced/agent/agent/EnhancedAgent';
 import EnhancedPrompt from '../components/enhanced/prompt/prompt/EnhancedPrompt';
 import EnhancedModel from '../components/enhanced/model/model/EnhancedModel';
@@ -20,25 +12,40 @@ import EnhancedTask from '../components/enhanced/task/task/EnhancedTask';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
 import EnchancedChat from '../components/enhanced/chat/chat/EnhancedChat';
 import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
-import { useConfig, ConfigItemType } from '../context/ConfigContext';
 import useStyles from '../styles/DatabaseStyles';
 import ToggleBox from '../components/ui/toggle_box/ToggleBox';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
-import EnhancedCardDialogs from '../components/enhanced/common/enhanced_card_dialogs/EnhancedCardDialogs';
+import EnhancedCardDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
+import { useDialog } from '../context/DialogContext';
 
 const Database: React.FC = () => {
     const classes = useStyles();
-    const { selectedItem, setSelectedItem, refreshItems, triggerItemDialog } = useConfig();
-    const [activeTab, setActiveTab] = useState<ConfigItemType>('Agent');
+    const [selectedItem, setSelectedItem] = useState<CollectionElement | null>(null);
+    const { selectItem } = useDialog();
+    const [activeTab, setActiveTab] = useState<CollectionElementString>('Agent');
     const [showActiveComponent, setShowActiveComponent] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
-    const [viewMode, setViewMode] = useState<'list' | 'shortList' | 'table'>('shortList');
+    const [viewMode, setViewMode] = useState<'list' | 'shortList' | 'table'>('list');
 
     const handleCreateNew = useCallback(() => {
         console.log('Create new clicked');
         setSelectedItem(null);
         setIsCreating(true);
         setShowActiveComponent(true);
+    }, [setSelectedItem]);
+
+    const handleItemSelect = useCallback((item: CollectionElement | null) => {
+        console.log('Item selected:', item);
+        setSelectedItem(item);
+        setIsCreating(false);
+        setShowActiveComponent(true);
+    }, [setSelectedItem]);
+
+    const handleSave = useCallback(async (item: CollectionElement | null) => {
+        console.log('Saving item:', item);
+        setSelectedItem(null);
+        setIsCreating(false);
+        setShowActiveComponent(false);
     }, [setSelectedItem]);
 
     const actions = [
@@ -51,31 +58,17 @@ const Database: React.FC = () => {
     ];
 
     const tabs = [
-        { name: 'Agent' as ConfigItemType, icon: Person },
-        { name: 'Model' as ConfigItemType, icon: Category },
-        { name: 'Parameter' as ConfigItemType, icon: Settings },
-        { name: 'Prompt' as ConfigItemType, icon: Description },
-        { name: 'Task' as ConfigItemType, icon: Functions },
-        { name: 'TaskResponse' as ConfigItemType, icon: Assignment },
-        { name: 'Chat' as ConfigItemType, icon: Chat },
-        { name: 'API' as ConfigItemType, icon: Api },
+        { name: 'Agent' as CollectionElementString, icon: Person },
+        { name: 'Model' as CollectionElementString, icon: Category },
+        { name: 'Parameter' as CollectionElementString, icon: Settings },
+        { name: 'Prompt' as CollectionElementString, icon: Description },
+        { name: 'Task' as CollectionElementString, icon: Functions },
+        { name: 'TaskResponse' as CollectionElementString, icon: Assignment },
+        { name: 'Chat' as CollectionElementString, icon: Chat },
+        { name: 'API' as CollectionElementString, icon: Api },
     ];
 
-    const handleItemSelect = useCallback((item: AliceAgent | AliceModel | ParameterDefinition | Prompt | AliceTask | TaskResponse | AliceChat | API) => {
-        console.log('Item selected:', item);
-        setSelectedItem(item);
-        setIsCreating(false);
-        setShowActiveComponent(true);
-    }, [setSelectedItem]);
-
-    const handleSave = useCallback(async (item: AliceAgent | AliceModel | ParameterDefinition | Prompt | AliceTask | TaskResponse | AliceChat | API) => {
-        console.log('Saving item:', item);
-        await refreshItems();
-        setSelectedItem(null);
-        setIsCreating(false);
-        setShowActiveComponent(false);
-    }, [refreshItems, setSelectedItem]);
-
+    // Active tab logic
     const handleViewModeChange = useCallback((event: React.MouseEvent<HTMLElement>, newMode: 'list' | 'shortList' | 'table' | null) => {
         if (newMode !== null) {
             setViewMode(newMode);
@@ -89,7 +82,7 @@ const Database: React.FC = () => {
             onInteraction: handleItemSelect,
             onView: (item: any) => {
                 if (item._id) {
-                    triggerItemDialog(activeTab, item._id);
+                    selectItem(activeTab, item._id);
                 }
             },
         };
@@ -119,10 +112,10 @@ const Database: React.FC = () => {
                             return null;
                     }
                 })()}
-                <EnhancedCardDialogs />
+                <EnhancedCardDialog />
             </Box>
         );
-    }, [activeTab, handleItemSelect, viewMode, handleViewModeChange, triggerItemDialog]);
+    }, [activeTab, handleItemSelect, viewMode, handleViewModeChange, selectItem]);
 
     const renderActiveComponent = useCallback(() => {
         if (!showActiveComponent) {
@@ -165,7 +158,7 @@ const Database: React.FC = () => {
                 actions={actions}
                 tabs={tabs}
                 activeTab={activeTab}
-                onTabChange={useCallback((tab: ConfigItemType) => {
+                onTabChange={useCallback((tab: CollectionElementString) => {
                     console.log('Tab changed to:', tab);
                     setActiveTab(tab);
                     setSelectedItem(null);
@@ -173,7 +166,7 @@ const Database: React.FC = () => {
                     setShowActiveComponent(false);
                 }, [setSelectedItem])}
                 renderContent={renderActiveList}
-                expandedWidth={TASK_SIDEBAR_WIDTH}
+                expandedWidth={viewMode === 'table' ? TASK_SIDEBAR_WIDTH_TABLE : TASK_SIDEBAR_WIDTH}
                 collapsedWidth={SIDEBAR_COLLAPSED_WIDTH}
             />
             <Box className={classes.databaseContent}>

@@ -6,7 +6,8 @@ import {
     Typography,
     Box,
     IconButton,
-    Tooltip
+    Tooltip,
+    Divider
 } from '@mui/material';
 import { Visibility, ChevronRight } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
@@ -50,30 +51,33 @@ function EnhancedListItem<T>({
     viewTooltip = "View Item"
 }: EnhancedListItemProps<T>) {
     return (
-        <ListItemStyled>
-            <ContentBox>
-                <ListItemText
-                    primary={primaryText}
-                    secondary={secondaryText}
-                />
-            </ContentBox>
-            <ButtonBox>
-                {onView && (
-                    <Tooltip title={viewTooltip}>
-                        <IconButton size="small" onClick={() => onView(item)}>
-                            <Visibility />
-                        </IconButton>
-                    </Tooltip>
-                )}
-                {onInteraction && (
-                    <Tooltip title={interactionTooltip}>
-                        <IconButton size="small" onClick={() => onInteraction(item)}>
-                            <ChevronRight />
-                        </IconButton>
-                    </Tooltip>
-                )}
-            </ButtonBox>
-        </ListItemStyled>
+        <>
+            <ListItemStyled>
+                <ContentBox>
+                    <ListItemText
+                        primary={primaryText}
+                        secondary={secondaryText}
+                    />
+                </ContentBox>
+                <ButtonBox>
+                    {onView && (
+                        <Tooltip title={viewTooltip}>
+                            <IconButton size="small" onClick={() => onView(item)}>
+                                <Visibility />
+                            </IconButton>
+                        </Tooltip>
+                    )}
+                    {onInteraction && (
+                        <Tooltip title={interactionTooltip}>
+                            <IconButton size="small" onClick={() => onInteraction(item)}>
+                                <ChevronRight />
+                            </IconButton>
+                        </Tooltip>
+                    )}
+                </ButtonBox>
+            </ListItemStyled>
+            <Divider />
+        </>
     );
 }
 
@@ -116,9 +120,11 @@ function EnhancedListView<T>({
     );
 
     return (
-        <List>
-            {item ? renderItem(item) : items!.map(renderItem)}
-        </List>
+        <>
+            <List>
+                {item ? renderItem(item) : items!.map(renderItem)}
+            </List>
+        </>
     );
 }
 

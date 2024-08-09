@@ -60,7 +60,7 @@ function VerticalMenuSidebar<T extends string>({
                   <span>
                     <IconButton
                       onClick={action.action}
-                      color="warning"
+                      color="default"
                       disabled={action.disabled}
                     >
                       <action.icon />

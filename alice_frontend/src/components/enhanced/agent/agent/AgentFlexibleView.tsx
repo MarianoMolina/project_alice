@@ -85,6 +85,7 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
 
     return (
         <GenericFlexibleView
+            elementType='Agent'
             title={title}
             onSave={handleSave}
             saveButtonText={saveButtonText}
@@ -136,6 +137,17 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
                     />
                 }
                 label="Execute Code"
+            />
+            <FormControlLabel
+                control={
+                    <Switch
+                        name="has_functions"
+                        checked={form.has_functions || false}
+                        onChange={handleCheckboxChange}
+                        disabled={!isEditMode}
+                    />
+                }
+                label="Has Functions"
             />
 
             <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>

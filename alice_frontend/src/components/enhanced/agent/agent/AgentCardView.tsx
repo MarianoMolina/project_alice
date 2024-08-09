@@ -53,6 +53,7 @@ const AgentCardView: React.FC<AgentComponentProps> = ({
 
     return (
         <CommonCardView
+            elementType='Agent'
             title={item.name}
             id={item._id}
             listItems={listItems}

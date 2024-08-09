@@ -148,6 +148,7 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
 
     return (
         <CommonCardView
+            elementType='Task'
             title={item.task_name}
             subtitle={item.task_description}
             id={item._id}

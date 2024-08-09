@@ -12,15 +12,18 @@ const TaskResponseTableView: React.FC<TaskResponseComponentProps> = ({
   const columns = [
     {
       header: 'Task Name',
-      render: (task_response: TaskResponse) => task_response.task_name
+      render: (task_response: TaskResponse) => task_response.task_name,
+      sortKey: 'task_name'
     },
     {
       header: 'Status',
-      render: (task_response: TaskResponse) => task_response.status || 'N/A'
+      render: (task_response: TaskResponse) => task_response.status || 'N/A',
+      sortKey: 'status'
     },
     {
       header: 'Created At',
-      render: (task_response: TaskResponse) => new Date(task_response.createdAt || '').toLocaleString()
+      render: (task_response: TaskResponse) => new Date(task_response.createdAt || '').toLocaleString(),
+      sortKey: 'createdAt'
     }
   ];
 

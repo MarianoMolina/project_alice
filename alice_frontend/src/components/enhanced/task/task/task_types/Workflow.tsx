@@ -1,8 +1,8 @@
-import React, {useMemo} from 'react';
+import React, {useCallback, useMemo} from 'react';
 import { Box, TextField, FormControlLabel, Checkbox, FormControl, InputLabel, Select, MenuItem, Chip, SelectChangeEvent } from '@mui/material';
 import { TaskFormsProps, AliceTask } from '../../../../../types/TaskTypes';
 import EnhancedSelect from '../../../common/enhanced_select/EnhancedSelect';
-import FunctionDefinitionBuilder from '../../../common/function_select/Function';
+import FunctionDefinitionBuilder from '../../../common/function_select/FunctionDefinitionBuilder';
 import { FunctionParameters } from '../../../../../types/ParameterTypes';
 import { ApiType } from '../../../../../types/ApiTypes';
 import EnhancedTask from '../../../task/task/EnhancedTask';
@@ -24,6 +24,10 @@ const Workflow: React.FC<TaskFormsProps> = ({
     if (!apis) return [];
     return Array.from(new Set(apis.map(api => api.api_type)));
   }, [apis]);
+
+  const handleInputVariablesChange = useCallback((newDefinition: FunctionParameters) => {
+    onChange({ ...item, input_variables: newDefinition });
+  }, [onChange, item]);
   
   if (!item) {
     return <Box>No task data available.</Box>;
@@ -55,10 +59,6 @@ const Workflow: React.FC<TaskFormsProps> = ({
     } else {
       onChange({ ...item, start_task: null });
     }
-  };
-
-  const handleInputVariablesChange = (functionDefinition: FunctionParameters) => {
-    onChange({ ...item, input_variables: functionDefinition });
   };
 
   const handleRequiredApisChange = (event: SelectChangeEvent<ApiType[]>) => {

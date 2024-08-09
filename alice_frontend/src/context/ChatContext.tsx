@@ -50,7 +50,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     const fetchChats = useCallback(async () => {
         try {
             const chats = await fetchItem('chats') as AliceChat[];
-            console.log('Fetched chats:', chats);
             setPastChats(chats);
         } catch (error) {
             console.error('Error fetching chats:', error);

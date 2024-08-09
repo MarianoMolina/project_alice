@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   Box,
   TextField,
@@ -19,7 +19,7 @@ import { AliceAgent } from '../../../../../types/AgentTypes';
 import { AliceTask } from '../../../../../types/TaskTypes';
 import { ApiType } from '../../../../../types/ApiTypes';
 import { FunctionParameters } from '../../../../../types/ParameterTypes';
-import FunctionDefinitionBuilder from '../../../common/function_select/Function';
+import FunctionDefinitionBuilder from '../../../common/function_select/FunctionDefinitionBuilder';
 import { useApi } from '../../../../../context/ApiContext';
 
 const BasicAgentTask: React.FC<TaskFormsProps> = ({
@@ -38,7 +38,11 @@ const BasicAgentTask: React.FC<TaskFormsProps> = ({
     if (!apis) return [];
     return Array.from(new Set(apis.map(api => api.api_type)));
   }, [apis]);
-  
+
+  const handleInputVariablesChange = useCallback((newDefinition: FunctionParameters) => {
+    onChange({ ...item, input_variables: newDefinition });
+  }, [onChange, item]);
+
   if (!item) {
     return <Box>No task data available.</Box>;
   };
@@ -69,10 +73,6 @@ const BasicAgentTask: React.FC<TaskFormsProps> = ({
       return acc;
     }, {} as Record<string, AliceTask>);
     onChange({ ...item, tasks: tasksObject });
-  };
-
-  const handleInputVariablesChange = (functionDefinition: FunctionParameters) => {
-    onChange({ ...item, input_variables: functionDefinition });
   };
 
   const handleRequiredApisChange = (event: SelectChangeEvent<ApiType[]>) => {

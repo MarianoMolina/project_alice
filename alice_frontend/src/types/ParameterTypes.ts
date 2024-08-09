@@ -6,10 +6,10 @@ export interface FunctionParameters {
     properties: { [key: string]: ParameterDefinition };
     required: string[];
 }
-
+export type ParameterTypes = "string" | "integer" | "boolean" | "object" | "array";
 export interface ParameterDefinition {
     _id?: string;
-    type: string;
+    type: ParameterTypes;
     description: string;
     default?: any;
     created_by?: User;

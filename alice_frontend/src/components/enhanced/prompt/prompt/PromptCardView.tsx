@@ -73,6 +73,7 @@ const PromptCardView: React.FC<PromptComponentProps> = ({
 
     return (
         <CommonCardView
+            elementType='Prompt'
             title={item.name}
             id={item._id}
             listItems={listItems}

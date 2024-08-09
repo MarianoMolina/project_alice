@@ -10,8 +10,10 @@ import { RecentExecution, useTask } from '../context/TaskContext';
 import useStyles from '../styles/StartTaskStyles';
 import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
-import EnhancedCardDialogs from '../components/enhanced/common/enhanced_card_dialogs/EnhancedCardDialogs';
-import { useConfig, ConfigItemType } from '../context/ConfigContext';
+import EnhancedCardDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
+import { CollectionElementString } from '../types/CollectionTypes';
+import { useDialog } from '../context/DialogContext';
+import { API } from '../types/ApiTypes';
 
 const StartTask: React.FC = () => {
   const classes = useStyles();
@@ -23,9 +25,9 @@ const StartTask: React.FC = () => {
     setInputValues,
     setTaskById
   } = useTask();
-  const { triggerItemDialog } = useConfig();
+  const { selectItem } = useDialog();
 
-  const [activeTab, setActiveTab] = useState<ConfigItemType>('Task');
+  const [activeTab, setActiveTab] = useState<CollectionElementString>('Task');
   const [openTaskCreateDialog, setOpenTaskCreateDialog] = useState(false);
   const [listKey, setListKey] = useState(0);
 
@@ -58,11 +60,11 @@ const StartTask: React.FC = () => {
   ];
 
   const tabs = [
-    { name: 'Task' as ConfigItemType, icon: Functions },
-    { name: 'TaskResponse' as ConfigItemType, icon: Assignment },
+    { name: 'Task' as CollectionElementString, icon: Functions },
+    { name: 'TaskResponse' as CollectionElementString, icon: Assignment },
   ]
 
-  const handleTabChange = (tabName: ConfigItemType) => {
+  const handleTabChange = (tabName: CollectionElementString) => {
     setActiveTab(tabName);
     if (tabName === 'Task' || tabName === 'TaskResponse') {
       setListKey(prev => prev + 1);
@@ -74,6 +76,10 @@ const StartTask: React.FC = () => {
       handleSelectTask(task);
     }
   }
+
+  const triggerItemDialog = (collectionName: CollectionElementString, itemId: string) => {
+    selectItem(collectionName, itemId);
+  };
 
   const renderSidebarContent = () => {
     switch (activeTab) {
@@ -120,7 +126,7 @@ const StartTask: React.FC = () => {
           <Box className={classes.apiStatusContainer}>
             <Typography variant="h6" className={classes.sectionTitle}>API Status</Typography>
             <Box className={classes.apiTooltipContainer}>
-              <EnhancedAPI mode='tooltip' fetchAll={true} />
+              <EnhancedAPI mode='tooltip' fetchAll={true} onInteraction={(api: API) => api._id && triggerItemDialog('API', api._id)} />
             </Box>
           </Box>
           <Accordion
@@ -159,7 +165,7 @@ const StartTask: React.FC = () => {
           </Accordion>
         </Box>
       </Box>
-      <EnhancedCardDialogs />
+      <EnhancedCardDialog />
       <Dialog open={openTaskCreateDialog} onClose={() => setOpenTaskCreateDialog(false)}>
         <EnhancedTask mode={'create'} fetchAll={false} />
       </Dialog>

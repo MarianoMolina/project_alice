@@ -12,15 +12,18 @@ const AgentTableView: React.FC<ApiComponentProps> = ({
   const columns = [
     {
       header: 'Agent Name',
-      render: (api: API) => api.name
+      render: (api: API) => api.name,
+      sortKey: 'name'
     },
     {
       header: 'Model',
-      render: (api: API) => api.api_type || 'N/A'
+      render: (api: API) => api.api_type || 'N/A',
+      sortKey: 'api_type'
     },
     {
       header: 'Created At',
-      render: (api: API) => api.health_status
+      render: (api: API) => new Date(api.createdAt   || '').toLocaleString(),
+      sortKey: 'createdAt'
     }
   ];
 

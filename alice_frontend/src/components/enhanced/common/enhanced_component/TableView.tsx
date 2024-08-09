@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Table,
   TableBody,
@@ -8,13 +8,15 @@ import {
   TableRow,
   Paper,
   IconButton,
-  Tooltip
+  Tooltip,
+  TableSortLabel
 } from '@mui/material';
 import { Visibility, ChevronRight } from '@mui/icons-material';
 
-interface Column<T> {
+export interface Column<T> {
   header: string;
   render: (item: T) => React.ReactNode;
+  sortKey?: string;
 }
 
 interface EnhancedTableViewProps<T> {
@@ -28,6 +30,8 @@ interface EnhancedTableViewProps<T> {
   viewTooltip?: string;
 }
 
+type SortDirection = 'asc' | 'desc';
+
 function EnhancedTableView<T>({
   items,
   item,
@@ -38,6 +42,26 @@ function EnhancedTableView<T>({
   interactionTooltip = "Select Item",
   viewTooltip = "View Item",
 }: EnhancedTableViewProps<T>) {
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+
+  const handleSort = (column: Column<T>) => {
+    if (column.sortKey) {
+      const isAsc = sortColumn === column.sortKey && sortDirection === 'asc';
+      setSortDirection(isAsc ? 'desc' : 'asc');
+      setSortColumn(column.sortKey);
+    }
+  };
+
+  const sortedItems = useMemo(() => {
+    if (!items || !sortColumn) return items;
+    return [...items].sort((a: any, b: any) => {
+      if (a[sortColumn] < b[sortColumn]) return sortDirection === 'asc' ? -1 : 1;
+      if (a[sortColumn] > b[sortColumn]) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [items, sortColumn, sortDirection]);
+
   const renderItem = (itemToRender: T) => (
     <TableRow key={JSON.stringify(itemToRender)}>
       {columns.map((column, index) => (
@@ -69,14 +93,26 @@ function EnhancedTableView<T>({
           <TableHead>
             <TableRow>
               {columns.map((column, index) => (
-                <TableCell key={index}>{column.header}</TableCell>
+                <TableCell key={index}>
+                  {column.sortKey ? (
+                    <TableSortLabel
+                      active={sortColumn === column.sortKey}
+                      direction={sortColumn === column.sortKey ? sortDirection : 'asc'}
+                      onClick={() => handleSort(column)}
+                    >
+                      {column.header}
+                    </TableSortLabel>
+                  ) : (
+                    column.header
+                  )}
+                </TableCell>
               ))}
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
         )}
         <TableBody>
-          {item ? renderItem(item) : items?.map(renderItem)}
+          {item ? renderItem(item) : sortedItems?.map(renderItem)}
         </TableBody>
       </Table>
     </TableContainer>

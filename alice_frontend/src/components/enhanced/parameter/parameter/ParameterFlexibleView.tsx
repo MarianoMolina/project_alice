@@ -26,6 +26,7 @@ const ParameterFlexibleView: React.FC<ParameterComponentProps> = ({
 
     return (
         <GenericFlexibleView
+            elementType='Parameter'
             title={title}
             onSave={handleSave}
             saveButtonText={saveButtonText}
@@ -35,11 +36,11 @@ const ParameterFlexibleView: React.FC<ParameterComponentProps> = ({
                 <InputLabel>Type</InputLabel>
                 <Select
                     value={item.type || 'string'}
-                    onChange={(e) => onChange({ type: e.target.value as 'string' | 'number' })}
+                    onChange={(e) => onChange({ type: e.target.value as 'string' | 'integer' })}
                     disabled={!isEditMode}
                 >
                     <MenuItem value="string">String</MenuItem>
-                    <MenuItem value="number">Number</MenuItem>
+                    <MenuItem value="integer">Integer</MenuItem>
                 </Select>
             </FormControl>
             <TextField
@@ -54,8 +55,8 @@ const ParameterFlexibleView: React.FC<ParameterComponentProps> = ({
                 fullWidth
                 label="Default Value"
                 value={item.default || ''}
-                onChange={(e) => onChange({ default: item.type === 'number' ? Number(e.target.value) : e.target.value })}
-                type={item.type === 'number' ? 'number' : 'text'}
+                onChange={(e) => onChange({ default: item.type === 'integer' ? Number(e.target.value) : e.target.value })}
+                type={item.type === 'integer' ? 'integer' : 'text'}
                 margin="normal"
                 disabled={!isEditMode}
             />

@@ -25,6 +25,7 @@ const ModelCardView: React.FC<ModelComponentProps> = ({ item }) => {
 
     return (
         <CommonCardView
+            elementType='Model'
             title={item.short_name}
             subtitle={item.model_name}
             id={item._id}
