@@ -188,7 +188,6 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
   return (
     <Box 
       onClick={handleClick} 
-      style={{ cursor: isInteractable ? 'pointer' : 'default' }}
     >
       {content}
     </Box>

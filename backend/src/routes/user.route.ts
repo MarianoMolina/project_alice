@@ -7,6 +7,14 @@ import User from '../models/user.model';
 import { AuthRequest } from '../interfaces/auth.interface';
 import axios from 'axios';
 import mongoose from 'mongoose';
+import Agent from '../models/agent.model';
+import API from '../models/api.model';
+import Chat from '../models/chat.model';
+import Model from '../models/model.model';
+import Prompt from '../models/prompt.model';
+import Task from '../models/task.model';
+import TaskResult from '../models/taskresult.model';
+import ParameterDefinition from '../models/parameter.model';
 
 const router: Router = express.Router();
 
@@ -118,28 +126,24 @@ router.put('/:id', userSelfOrAdmin, async (req: AuthRequest, res: Response) => {
 router.post('/purge-and-reinitialize', auth, async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
+    
     if (!userId) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    // List of collections to clear
-    const collections = [
-      'apis',
-      'agents',
-      'alicechats',
-      'collections',
-      'models',
-      'prompts',
-      'taskresults',
-      'tasks',
-      'parameterdefinitions'
-    ];
+    console.log('Purging data for userId:', userId);
 
-    // Clear collections
-    for (const collectionName of collections) {
-      const collection = mongoose.connection.collection(collectionName);
-      await collection.deleteMany({ userId: userId });
+    const models = [Agent, API, Chat, Model, Prompt, Task, TaskResult, ParameterDefinition];
+    
+    for (const ModelClass of models) {
+      const modelName = ModelClass.modelName;
+      console.log(`Purging ${modelName}...`);
+      // Use type assertion to resolve the TypeScript error
+      const result = await (ModelClass as any).deleteMany({ created_by: userId });
+      console.log(`Deleted ${result.deletedCount} items from ${modelName}`);
     }
+
+    console.log('All collections purged');
 
     // Get the original authorization token from the request
     const token = req.headers.authorization;
@@ -148,7 +152,7 @@ router.post('/purge-and-reinitialize', auth, async (req: AuthRequest, res: Respo
       return res.status(401).json({ message: 'No authorization token provided' });
     }
 
-    // Call the initialize_user_database endpoint in the workflow container
+    // Reinitialize the user database
     const workflowUrl = `http://${workflow_name}:${workflow_port}/initialize_user_database`;
     await axios.post(workflowUrl, {}, {
       headers: {

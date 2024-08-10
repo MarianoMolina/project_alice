@@ -12,7 +12,7 @@ import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
 import EnhancedCardDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
 import { CollectionElementString } from '../types/CollectionTypes';
-import { useDialog } from '../context/DialogContext';
+import { useCardDialog } from '../context/CardDialogContext.tsx';
 import { API } from '../types/ApiTypes';
 
 const StartTask: React.FC = () => {
@@ -25,7 +25,7 @@ const StartTask: React.FC = () => {
     setInputValues,
     setTaskById
   } = useTask();
-  const { selectItem } = useDialog();
+  const { selectItem } = useCardDialog();
 
   const [activeTab, setActiveTab] = useState<CollectionElementString>('Task');
   const [openTaskCreateDialog, setOpenTaskCreateDialog] = useState(false);
@@ -117,7 +117,7 @@ const StartTask: React.FC = () => {
       <Box className={classes.mainContainer}>
         <Box className={classes.taskExecutionContainer}>
           {selectedTask ? (
-            <EnhancedTask mode={'execute'} itemId={selectedTask._id} fetchAll={false} onExecute={executeTask} />
+            <EnhancedTask mode={'execute'} itemId={selectedTask._id} fetchAll={false} onExecute={executeTask}  />
           ) : (
             <PlaceholderSkeleton mode="task" text='Select a task to execute.' />
           )}

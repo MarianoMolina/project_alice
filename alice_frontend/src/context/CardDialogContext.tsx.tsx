@@ -8,7 +8,7 @@ interface DialogContextType {
   handleClose: () => void;
 }
 
-const DialogContext = createContext<DialogContextType | undefined>(undefined);
+const CardDialogContext = createContext<DialogContextType | undefined>(undefined);
 
 export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const [selectedItem, setSelectedItem] = useState<{ _id: string } | null>(null);
@@ -25,14 +25,14 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
   }, []);
 
   return (
-    <DialogContext.Provider value={{ selectItem, selectedItem, selectedItemType, handleClose }}>
+    <CardDialogContext.Provider value={{ selectItem, selectedItem, selectedItemType, handleClose }}>
       {children}
-    </DialogContext.Provider>
+    </CardDialogContext.Provider>
   );
 };
 
-export const useDialog = () => {
-  const context = useContext(DialogContext);
+export const useCardDialog = () => {
+  const context = useContext(CardDialogContext);
   if (context === undefined) {
     throw new Error('useDialog must be used within a DialogProvider');
   }

@@ -5,7 +5,7 @@ import { CircularProgress, Box } from '@mui/material';
 import { ApiProvider } from '../context/ApiContext';
 import { TaskProvider } from '../context/TaskContext';
 import { ChatProvider } from '../context/ChatContext';
-import { DialogProvider } from '../context/DialogContext';
+import { DialogProvider } from '../context/CardDialogContext.tsx';
 
 interface ProtectedRouteProps {
   element: React.ReactNode;

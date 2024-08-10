@@ -36,8 +36,6 @@ const useStyles = makeStyles((theme: Theme) => ({
         marginTop: theme.spacing(3),
     },
     dangerZone: {
-        marginTop: theme.spacing(4),
-        borderTop: `1px solid ${theme.palette.divider}`,
         paddingTop: theme.spacing(2),
     },
     dangerButton: {

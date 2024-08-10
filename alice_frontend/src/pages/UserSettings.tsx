@@ -5,18 +5,22 @@ import { Person, Api, Warning } from '@mui/icons-material';
 import { useApi } from '../context/ApiContext';
 import { useAuth } from '../context/AuthContext';
 import { User } from '../types/UserTypes';
+import { useNotification } from '../context/NotificationContext';
 import { API, getDefaultApiForm } from '../types/ApiTypes';
 import { ComponentMode } from '../types/CollectionTypes';
 import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
 import useStyles from '../styles/UserSettingsStyles';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
+import { useDialog } from '../context/DialogCustomContext';
 
 interface UserSettingsProps {
     setHasUnsavedChanges: (value: boolean) => void;
 }
 
 const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => {
+    const { openDialog } = useDialog();
     const { fetchItem, updateItem, purgeAndReinitializeDatabase } = useApi();
+    const { addNotification } = useNotification();
     const [userObject, setUserObject] = useState<User | null>(null);
     const [originalUserObject, setOriginalUserObject] = useState<User | null>(null);
     const { user } = useAuth();
@@ -93,22 +97,29 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
     }, []);
 
     const handlePurgeAndReinitialize = useCallback(async () => {
-        try {
-            await purgeAndReinitializeDatabase();
-            console.log('Database successfully purged and reinitialized');
-            // You might want to refresh the user data or perform other actions here
-        } catch (error) {
-            console.error('Failed to purge and reinitialize database:', error);
-            // Handle the error, perhaps show an error message to the user
-        } finally {
-            setShowConfirmPurge(false);
-        }
-    }, [purgeAndReinitializeDatabase]);
+        openDialog({
+          title: 'Confirm Database Purge and Reinitialization',
+          content: 'Are you sure you want to purge and reinitialize your database? This action cannot be undone and will delete all your current data.',
+          confirmText: 'Confirm Purge and Reinitialize',
+          onConfirm: async () => {
+            try {
+              await purgeAndReinitializeDatabase();
+              console.log('Database successfully purged and reinitialized');
+              addNotification('Database successfully purged and reinitialized', 'success');
+            } catch (error) {
+              console.error('Failed to purge and reinitialize database:', error);
+              addNotification('Failed to purge and reinitialize database. Please try again.', 'error');
+            }
+          },
+        });
+      }, [openDialog, purgeAndReinitializeDatabase, addNotification]);
 
-    const tabs = [
+      const tabs = [
         { name: 'Personal information', icon: Person },
         { name: 'APIs', icon: Api },
+        { name: 'Danger Zone', icon: Warning },
     ];
+
 
     const renderActiveContent = useCallback(() => {
         if (!userObject) {
@@ -117,84 +128,92 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
         switch (activeTab) {
             case 'Personal information':
                 return (
-                <Box>
-                    <Card className={classes.card}>
-                        <CardContent>
-                            <Box className={classes.userInfoHeader}>
-                                <Person />
-                                <Typography variant="h5">Personal Information</Typography>
-                            </Box>
-                            <TextField
-                                label="Name"
-                                value={userObject.name || ''}
-                                onChange={(e) => handleUserUpdate({ name: e.target.value })}
-                                fullWidth
-                                margin="normal"
-                            />
-                            <TextField
-                                label="Email"
-                                value={userObject.email || ''}
-                                onChange={(e) => handleUserUpdate({ email: e.target.value })}
-                                fullWidth
-                                margin="normal"
-                            />
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={handleSaveChanges}
-                                className={classes.saveButton}
-                            >
-                                Save
-                            </Button>
-                        </CardContent>
-                    </Card>
-                    <Card className={classes.card}>
-                        <CardContent>
-                            <Box className={classes.dangerZone}>
+                    <Box>
+                        <Card className={classes.card}>
+                            <CardContent>
                                 <Box className={classes.userInfoHeader}>
-                                    <Warning color="error" />
-                                    <Typography variant="h5">Danger Zone</Typography>
+                                    <Person />
+                                    <Typography variant="h5">Personal Information</Typography>
                                 </Box>
-                                <Typography variant="body1" color="error" paragraph>
-                                    The following action will delete all your data and reinitialize your database. This cannot be undone.
-                                </Typography>
+                                <TextField
+                                    label="Name"
+                                    value={userObject.name || ''}
+                                    onChange={(e) => handleUserUpdate({ name: e.target.value })}
+                                    fullWidth
+                                    margin="normal"
+                                />
+                                <TextField
+                                    label="Email"
+                                    value={userObject.email || ''}
+                                    onChange={(e) => handleUserUpdate({ email: e.target.value })}
+                                    fullWidth
+                                    margin="normal"
+                                />
                                 <Button
                                     variant="contained"
-                                    onClick={() => setShowConfirmPurge(true)}
-                                    className={classes.dangerButton}
+                                    color="primary"
+                                    onClick={handleSaveChanges}
+                                    className={classes.saveButton}
                                 >
-                                    Purge and Reinitialize Database
+                                    Save
                                 </Button>
-                            </Box>
-                        </CardContent>
-                    </Card>
-                </Box>
+                            </CardContent>
+                        </Card>
+                    </Box>
                 );
             case 'APIs':
                 return (
-                <Box>
-                    <Box className={classes.apiConfigHeader}>
-                        <Typography variant="h5">API Configuration</Typography>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={() => handleApiSelect(getDefaultApiForm())}
-                        >
-                            Create New API
-                        </Button>
+                    <Box>
+                        <Box className={classes.apiConfigHeader}>
+                            <Typography variant="h5">API Configuration</Typography>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={() => handleApiSelect(getDefaultApiForm())}
+                            >
+                                Create New API
+                            </Button>
+                        </Box>
+                        <Paper className={classes.apiPaper}>
+                            <EnhancedAPI
+                                key={apiUpdateTrigger}
+                                mode="list"
+                                fetchAll={true}
+                                onView={handleApiSelect}
+                            />
+                        </Paper>
                     </Box>
-                    <Paper className={classes.apiPaper}>
-                        <EnhancedAPI
-                            key={apiUpdateTrigger}
-                            mode="list"
-                            fetchAll={true}
-                            onView={handleApiSelect}
-                        />
-                    </Paper>
-                </Box>
                 )
-            default:
-                return null;
+                case 'Danger Zone':
+                    return (
+                        <Card className={classes.card}>
+                            <CardContent>
+                                <Box className={classes.dangerZone}>
+                                    <Box className={classes.userInfoHeader}>
+                                        <Warning color="error" />
+                                        <Typography variant="h5">Danger Zone</Typography>
+                                    </Box>
+                                    <Typography variant="body1" color="error" paragraph>
+                                        The following action will delete all your data and reinitialize your database. This cannot be undone.
+                                    </Typography>
+                                    <Button
+                                        variant="contained"
+                                        onClick={() => openDialog({
+                                            title: 'Confirm Database Purge and Reinitialization',
+                                            content: 'Are you sure you want to purge and reinitialize your database? This action cannot be undone and will delete all your current data.',
+                                            confirmText: 'Confirm Purge and Reinitialize',
+                                            onConfirm: handlePurgeAndReinitialize,
+                                        })}
+                                        className={classes.dangerButton}
+                                    >
+                                        Purge and Reinitialize Database
+                                    </Button>
+                                </Box>
+                            </CardContent>
+                        </Card>
+                    );
+                default:
+                    return null;
         }
     }, [activeTab, userObject, handleUserUpdate, handleSaveChanges, handleApiSelect, apiUpdateTrigger, classes]);
 
@@ -217,22 +236,6 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
                     fetchAll={true}
                     onSave={handleApiCreated}
                 />
-            </Dialog>
-            <Dialog open={showConfirmPurge} onClose={() => setShowConfirmPurge(false)}>
-                <DialogTitle>Confirm Database Purge and Reinitialization</DialogTitle>
-                <DialogContent>
-                    <Typography>
-                        Are you sure you want to purge and reinitialize your database? This action cannot be undone and will delete all your current data.
-                    </Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setShowConfirmPurge(false)} color="primary">
-                        Cancel
-                    </Button>
-                    <Button onClick={handlePurgeAndReinitialize} color="error" variant="contained">
-                        Confirm Purge and Reinitialize
-                    </Button>
-                </DialogActions>
             </Dialog>
         </Box>
     );

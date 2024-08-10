@@ -36,6 +36,10 @@ const useStyles = makeStyles((theme: Theme) => ({
   taskId: {
     // You can add specific styles for taskId if needed
   },
+  viewButton: {
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(2),
+  },
 
   taskCard: {
     height: '100%',

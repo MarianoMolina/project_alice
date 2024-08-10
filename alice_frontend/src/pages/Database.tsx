@@ -16,12 +16,12 @@ import useStyles from '../styles/DatabaseStyles';
 import ToggleBox from '../components/ui/toggle_box/ToggleBox';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
 import EnhancedCardDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
-import { useDialog } from '../context/DialogContext';
+import { useCardDialog } from '../context/CardDialogContext.tsx';
 
 const Database: React.FC = () => {
     const classes = useStyles();
     const [selectedItem, setSelectedItem] = useState<CollectionElement | null>(null);
-    const { selectItem } = useDialog();
+    const { selectItem } = useCardDialog();
     const [activeTab, setActiveTab] = useState<CollectionElementString>('Agent');
     const [showActiveComponent, setShowActiveComponent] = useState(false);
     const [isCreating, setIsCreating] = useState(false);

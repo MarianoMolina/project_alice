@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect, ReactNode, useCa
 import { TaskResponse } from '../types/TaskResponseTypes';
 import { useApi } from './ApiContext';
 import { AliceTask } from '../types/TaskTypes';
+import { useNotification } from './NotificationContext';
 
 export interface RecentExecution {
   taskId: string;
@@ -25,8 +26,6 @@ interface TaskContextType {
   setInputValues: (values: { [key: string]: any }) => void;
   handleExecuteTask: () => Promise<void>;
   setSelectedResult: (result: TaskResponse | null) => void;
-  createNewTask: (task: Partial<AliceTask>) => Promise<Partial<AliceTask> | undefined>;
-  updateTask: (taskId: string, task: Partial<AliceTask>) => Promise<Partial<AliceTask> | undefined>;
   setSelectedTask: (task: AliceTask | null) => void;
   resetRecentExecutions: () => void;
   setTaskById: (taskId: string) => void;
@@ -35,7 +34,8 @@ interface TaskContextType {
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { fetchItem, createItem, updateItem, executeTask } = useApi();
+  const { addNotification } = useNotification();
+  const { fetchItem, executeTask } = useApi();
   const [tasks, setTasks] = useState<AliceTask[]>([]);
   const [selectedTask, setSelectedTask] = useState<AliceTask | null>(null);
   const [taskResults, setTaskResults] = useState<TaskResponse[]>([]);
@@ -44,7 +44,6 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [executionStatus, setExecutionStatus] = useState<'idle' | 'progress' | 'success'>('idle');
   const [recentExecutions, setRecentExecutions] = useState<RecentExecution[]>([]);
 
-  
   const fetchTasks = useCallback(async () => {
     try {
       const fetchedTasks = await fetchItem('tasks');
@@ -111,31 +110,13 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const result = await executeTask(selectedTask._id, inputValues);
       await fetchTaskResults(); // This will update recentExecutions
       console.log('Task execution result:', result);
+      addNotification('Task executed successfully', 'success');
       setSelectedResult(result);
       setExecutionStatus('success');
     } catch (error) {
       console.error('Error executing task:', error);
+      addNotification('Error executing task', 'error');
       setExecutionStatus('idle');
-    }
-  }
-
-  const createNewTask = async (task: Partial<AliceTask>) => {
-    try {
-      if (!task._id) {
-        return await createItem('tasks', task);
-      } else {
-        return await updateItem('tasks', task._id, task);
-      }
-    } catch (error) {
-      console.error('Error saving task:', error);
-    }
-  };
-
-  const updateTask = async (taskId: string, task: Partial<AliceTask>) => {
-    try {
-      return await updateItem('tasks', taskId, task);
-    } catch (error) {
-      console.error('Error updating task:', error);
     }
   }
 
@@ -157,9 +138,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     handleInputChange,
     setInputValues,
     handleExecuteTask,
-    setSelectedResult,
-    createNewTask,
-    updateTask,
+    setSelectedResult, 
     setSelectedTask,
     resetRecentExecutions,
     setTaskById,

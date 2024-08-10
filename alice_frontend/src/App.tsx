@@ -17,6 +17,10 @@ import { AuthProvider } from './context/AuthContext';
 import './assets/fonts/fonts.css';
 import { ApiProvider } from './context/ApiContext';
 import ErrorBoundary from './layouts/ErrorBoundary';
+import { NotificationProvider } from './context/NotificationContext';
+import NotificationComponent from './components/ui/notification/Notification';
+import { DialogProvider } from './context/DialogCustomContext';
+import DialogComponent from './components/ui/dialog/DialogCustom';
 
 const App: React.FC = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -31,38 +35,44 @@ const App: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <NavigationGuard
-            hasUnsavedChanges={hasUnsavedChanges}
-            onConfirmNavigation={handleConfirmNavigation}
-          >
-            <MainLayout>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={
-                  <ApiProvider>
-                    <Register />
-                  </ApiProvider>
-                } />
-                <Route path="/chat-alice" element={<ProtectedRoute element={<ChatAlice />} />} />
-                <Route path="/start-task" element={<ProtectedRoute element={<CreateWorkflow />} />} />
-                <Route path="/database" element={<ProtectedRoute element={<Database />} />} />
-                <Route
-                  path="/user-settings"
-                  element={
-                    <ProtectedRoute
-                      element={<UserSettings setHasUnsavedChanges={handleSetHasUnsavedChanges} />}
+      <NotificationProvider>
+        <DialogProvider>
+          <NotificationComponent />
+          <DialogComponent />
+          <AuthProvider>
+            <ThemeProvider theme={theme}>
+              <CssBaseline />
+              <NavigationGuard
+                hasUnsavedChanges={hasUnsavedChanges}
+                onConfirmNavigation={handleConfirmNavigation}
+              >
+                <MainLayout>
+                  <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={
+                      <ApiProvider>
+                        <Register />
+                      </ApiProvider>
+                    } />
+                    <Route path="/chat-alice" element={<ProtectedRoute element={<ChatAlice />} />} />
+                    <Route path="/start-task" element={<ProtectedRoute element={<CreateWorkflow />} />} />
+                    <Route path="/database" element={<ProtectedRoute element={<Database />} />} />
+                    <Route
+                      path="/user-settings"
+                      element={
+                        <ProtectedRoute
+                          element={<UserSettings setHasUnsavedChanges={handleSetHasUnsavedChanges} />}
+                        />
+                      }
                     />
-                  }
-                />
-              </Routes>
-            </MainLayout>
-          </NavigationGuard>
-        </ThemeProvider>
-      </AuthProvider>
+                  </Routes>
+                </MainLayout>
+              </NavigationGuard>
+            </ThemeProvider>
+          </AuthProvider>
+        </DialogProvider>
+      </NotificationProvider>
     </ErrorBoundary>
   );
 };

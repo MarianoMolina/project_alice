@@ -1,27 +1,29 @@
 import React from 'react';
 import {
-    Card, CardContent, Button, TextField, CircularProgress,
-    Typography, Accordion, AccordionSummary, AccordionDetails,
-    Alert
+    Card, CardContent, IconButton, TextField, CircularProgress,
+    Typography, Alert, Box,
+    Button
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { AliceTask, TaskComponentProps } from '../../../../types/TaskTypes';
-import useStyles from '../TaskStyles';
 import { useTask } from '../../../../context/TaskContext';
-import TaskCardView from './TaskCardView';
+import { useCardDialog } from '../../../../context/CardDialogContext.tsx';
+import useStyles from '../TaskStyles';
 
 const TaskExecuteView: React.FC<TaskComponentProps> = ({
     item,
     onExecute,
 }) => {
     const classes = useStyles();
-    const { 
-        executionStatus, 
-        inputValues, 
-        handleInputChange, 
-        setSelectedTask, 
-        setInputValues, 
+    const {
+        executionStatus,
+        inputValues,
+        handleInputChange,
+        setSelectedTask,
+        setInputValues,
     } = useTask();
+    const { selectItem } = useCardDialog();
+
     if (!item) return null;
 
     const inputVariables = item.input_variables?.properties || {};
@@ -33,20 +35,27 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
         await onExecute();
     };
 
+    const handleViewTask = () => {
+        if (item._id) {
+            selectItem('Task', item._id);
+        }
+    };
+
     return (
         <Card className={classes.taskCard}>
             <CardContent>
-                <Typography variant="h6">{item.task_name}</Typography>
-                <Typography variant="body2">{item.task_description || ''}</Typography>
-                <Accordion>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                        <Typography>Task Details</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails className={classes.accordionDetails}>
-                        <TaskCardView item={item} mode='view' items={null} onChange={() => {}} handleSave={()=>Promise.resolve()} />
-                    </AccordionDetails>
-                </Accordion>
-
+                <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                    <Typography variant="h6">{item.task_name}</Typography>
+                    <IconButton
+                        color="default"
+                        onClick={handleViewTask}
+                        size="small"
+                        aria-label="view task details"
+                    >
+                        <VisibilityIcon />
+                    </IconButton>
+                </Box>
+                <Typography variant="body2" mb={2}>{item.task_description || ''}</Typography>
                 {inputVariables && Object.entries(inputVariables).map(([key, value]) => (
                     <TextField
                         key={key}
@@ -59,23 +68,19 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
                         helperText={(value as any).description}
                     />
                 ))}
-
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => executeTask(inputValues)}
-                    className={classes.executeButton}
-                    disabled={executionStatus === 'progress'}
-                >
-                    {executionStatus === 'progress' ? 'Executing...' : 'Execute Task'}
-                </Button>
-
+                <Box className={classes.buttonContainer}>
+                    <Button
+                        color="primary"
+                        onClick={() => executeTask(inputValues)}
+                        disabled={executionStatus === 'progress'}
+                        size="large"
+                    >
+                        {executionStatus === 'progress' ? <CircularProgress size={24} /> : 'Execute'}
+                    </Button>
+                </Box>
                 <div className={classes.progressContainer}>
-                    {executionStatus === 'progress' && (
-                        <CircularProgress className={classes.progressIndicator} />
-                    )}
                     {executionStatus === 'success' && (
-                        <Alert severity="success">Task executed successfully!</Alert>
+                        <Alert severity="success" className={classes.successMessage}>Task executed successfully!</Alert>
                     )}
                 </div>
             </CardContent>

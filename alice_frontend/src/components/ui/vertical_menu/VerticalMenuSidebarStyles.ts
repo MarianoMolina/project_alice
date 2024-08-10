@@ -6,9 +6,8 @@ const useStyles = makeStyles((theme: Theme) => ({
   sidebar: {
     display: 'flex',
     height: '100%',
-    backgroundColor: hexToRgba(theme.palette.background.paper, 0.7),
+    backgroundColor: hexToRgba(theme.palette.background.paper, 0.8),
     transition: 'width 0.3s ease',
-    borderRight: `1px solid ${theme.palette.divider}`,
   },
   verticalMenu: {
     display: 'flex',
