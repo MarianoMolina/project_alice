@@ -149,10 +149,6 @@ class APITask(AliceTask):
         }
 ```
 
-# Workflow Container README
-
-[Previous content remains unchanged]
-
 ## Task Types
 
 The Workflow container supports various task types, each designed for specific purposes. Here's an overview of the major task types and their variations:
