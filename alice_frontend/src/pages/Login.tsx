@@ -28,7 +28,6 @@ const Login: React.FC = () => {
   };
 
   return (
-    <WavyBackground>
       <Container maxWidth="xs">
         <Box mt={5}>
           <Typography variant="h4" component="h1" gutterBottom>
@@ -70,7 +69,6 @@ const Login: React.FC = () => {
           </Typography>
         </Box>
       </Container>
-    </WavyBackground>
   );
 };
 

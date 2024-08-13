@@ -2,7 +2,7 @@ services:
   frontend:
     build:
       context: ./alice_frontend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT_DOCKER}"
     depends_on:
@@ -11,17 +11,17 @@ services:
       workflow:
         condition: service_healthy
     volumes:
-      - ./alice_frontend:/app:delegated
+      # - ./alice_frontend:/app:delegated
       - /app/node_modules
     environment:
-      NODE_ENV: development
-      CHOKIDAR_USEPOLLING: "true"
-      WATCHPACK_POLLING: "true"
+      NODE_ENV: production
+      # CHOKIDAR_USEPOLLING: "true"
+      # WATCHPACK_POLLING: "true"
 
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT_DOCKER}"
     depends_on:
@@ -32,7 +32,7 @@ services:
       - ./backend:/app
       - /app/node_modules
     environment:
-      - NODE_ENV=development
+      NODE_ENV: production
     command: sh -c "npm run build && nodemon --watch src --ext ts --exec 'npm run build && node dist/index.js'"
     extra_hosts:
       - "host.docker.internal:host-gateway"

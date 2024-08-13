@@ -19,5 +19,12 @@ RUN npm install -g typescript
 # Build the TypeScript code
 RUN npm run build
 
+# Expose the application port
+EXPOSE 3000
+
+# Health check to indicate when the service is ready
+HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=20 \
+  CMD curl -f http://localhost:3000/api/health || exit 1
+
 # Start the backend server
-CMD ["npm", "start"]
+CMD ["node", "dist/index.js"]

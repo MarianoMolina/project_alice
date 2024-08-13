@@ -1,7 +1,7 @@
 # Alice: Advanced Language Intelligence and Cognitive Engine
 ![Alice LOGO](./alice_frontend/public/logo_alice.ico)
 
-Alice is a sophisticated AI assistant framework that integrates task execution and intelligent chat capabilities. It provides a flexible environment for creating, managing, and deploying AI agents for various purposes, leveraging a microservices architecture with MongoDB for data persistence.
+Alice is an agentic workflow framework that integrates task execution and intelligent chat capabilities. It provides a flexible environment for creating, managing, and deploying AI agents for various purposes, leveraging a microservices architecture with MongoDB for data persistence.
 
 ## Project Structure
 
@@ -13,10 +13,10 @@ The project consists of three main components:
 
 ## The Goal
 1. Provide a tool to create, test and deploy agentic solutions
-2. A framework where 'text' is the primary input and the output of most operations, with the goal of making this tool 'human languange readable', allowing agents to not only execute complex workflows, but create new ones, and not requiring in-depth technical expertise in order to create complex and powerful workflows. 
+2. A framework where 'text' is the primary input and the output of most operations, with the goal of making this tool 'human languange readable', allowing agents to not only execute complex workflows, but create new ones, and not requiring in-depth technical expertise from users in order to create complex and powerful workflows. 
 3. Produce a framework that is model-agnostic/brand-agnostic, allowing the user to set and deploy their solutions however they want
-4. Maybe one day, this or a similar solution can offer an open-source option that helps put the control in the users hand, even in an AI-powered world. 
-5. The bet here is that in a world where agentic solutions are able to tackle more problem types and more complex ones, a key value add is to be the expert in converting expertise into automated workflows: then, knowing how to perform a task is less important than knowing how to perform a task an infinite amount of times. 
+4. In the long term, offer an open-source option that helps put the control in the users hand, even in an AI-powered world. 
+5. Elevator pitch is: in a world where agentic solutions are able to tackle more problem types and more complex ones, a key value add is going to be being the expert in converting expertise into automated workflows: then, knowing how to perform a task is less important than knowing how to perform a task an infinite amount of times. 
 
 ## How it works
 
@@ -32,7 +32,8 @@ The framework is based around 4 main components:
 ### 1. Task Execution
 - Create and execute custom tasks using predefined classes or by creating new ones in the Workflow module
 - Define new parameters, prompts/templates, and agents for task deployment
-- Execute tasks with custom parameters directly
+- Execute tasks with custom parameters
+- Run tasks directly from the frontend, or programatically with the workflow container's API
 - Supported task types include:
   - Workflow
   - API tasks: Reddit, Wikipedia, Google, Exa, and Arxiv search
@@ -45,6 +46,7 @@ The framework is based around 4 main components:
 - Add task results from the database to ongoing conversations
 - Integrate new tasks as tools for the active agent during chat
 - Support for various message types (text, image, video, audio, file)
+- Deploy these agents wherever you want, since the workflow API offers an endpoint to create chat completions. 
 
 ### 3. Extensible Framework
 - Modular architecture allowing easy addition of new components
@@ -113,6 +115,10 @@ The Alice framework provides a user-friendly frontend interface for interacting 
    - Combine multiple tasks into a sequential or conditional flow
    - Define complex processes involving multiple agents and task types, check tasks, api tasks, agents with tools, etc. 
 
+### Available APIs
+Currently, there are 2 types of APIs:
+- **LLM model**: You can use LM Studio (deploy locally), OpenAI-like endpoints and Anthropic. Any model can be added, but to add any endpoint that behaves differently, you'll need a new APIEngine class. 
+- **Search APIs**: Google, Exa, Reddit, Arxiv and Wikipedia. 
 
 ## Development
 
@@ -132,6 +138,10 @@ The Alice framework provides a user-friendly frontend interface for interacting 
 For detailed instructions on adding new API types and names, refer to the backend and workflow README files.
 
 ### Adding New Models, APIs, Tasks, Chats, Agents
+
+
+
+To add new instances: 
 
 1. Navigate to the Database page in the frontend and select the entity type you want to create and click on create new.
 2. To add new entities that will be available to new users, you can modify the workflow initialization modules:
@@ -155,11 +165,11 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
 
 ## Future Features
 
-Where is Project Alice going:
+Where Project Alice is going:
 
 1. **Workflow generator**: Improve the interface for workflow generation. Ideally, something that allows the user to handle tasks/nodes, visualize the execution of it, etc. 
 
-2. **More API engines and base tasks**: BeautifulSoup to scrap websites, vision_models, text_to_image_models, text_to_speech_models, etc. This will enable a new set of tasks to be created. 
+2. **More API engines and base tasks**: BeautifulSoup to scrap websites, vision_models, text_to_image_models, text_to_speech_models, etc. This will enable a new set of tasks to be created. This includes adding more providers, like Google, Mistral, etc. 
 
 3. **File input and type interface**: Being able to add files of any type to a conversation, which makes a conversion to text of the file (stt, itt, or simply parsing for files that can be converted to a string), allowing for the user and the agents to share any type of data. This, in turn, requires the agents to also be able to produce different types of outputs, which is where the type interface logic comes in, to convert str -> any and back. 
 

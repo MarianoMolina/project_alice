@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { memo, ReactNode, useMemo } from 'react';
 import { Box } from '@mui/material';
 import Header from '../../components/ui/header/Header';
 import useStyles from './MainLayoutStyles';
@@ -8,12 +8,17 @@ interface MainLayoutProps {
   children: ReactNode;
 }
 
+const MemoizedWavyBackground = memo(WavyBackground);
+
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const classes = useStyles();
 
-  return (
+  const backgroundProps = useMemo(() => ({
+    className: classes.canvasContainer
+  }), [classes.canvasContainer]);
 
-    <WavyBackground className={classes.canvasContainer}>
+  return (
+    <MemoizedWavyBackground {...backgroundProps}>
       <Box className={classes.mainLayout}>
         <Box className={classes.mainLayoutHeader}>
           <Header />
@@ -22,8 +27,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           {children}
         </Box>
       </Box>
-    </WavyBackground>
+    </MemoizedWavyBackground>
   );
 };
 
-export default MainLayout;
+export default memo(MainLayout);
