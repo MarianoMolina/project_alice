@@ -16,7 +16,7 @@ The project consists of three main components:
 2. A framework where 'text' is the primary input and the output of most operations, with the goal of making this tool 'human languange readable', allowing agents to not only execute complex workflows, but create new ones, and not requiring in-depth technical expertise from users in order to create complex and powerful workflows. 
 3. Produce a framework that is model-agnostic/brand-agnostic, allowing the user to set and deploy their solutions however they want
 4. In the long term, offer an open-source option that helps put the control in the users hand, even in an AI-powered world. 
-5. Elevator pitch is: in a world where agentic solutions are able to tackle more problem types and more complex ones, a key value add is going to be being the expert in converting expertise into automated workflows: then, knowing how to perform a task is less important than knowing how to perform a task an infinite amount of times. 
+5. Elevator pitch is: in a world where agentic solutions are able to tackle more and more problem types, and more and more complex problems, the key value add is going to be the expertise in converting expertise into automated workflows: then, knowing how to perform a task is less important than knowing how to perform a task an infinite amount of times. 
 
 ## How it works
 
