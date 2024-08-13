@@ -11,6 +11,8 @@ HOST = os.getenv("HOST", "localhost")
 FRONTEND_HOST = os.getenv("FRONTEND_HOST", "frontend")
 BACKEND_HOST = os.getenv("BACKEND_HOST", "backend")
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN")
+# Environment variable to control log level
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
 LOGGING_FOLDER = os.getenv("LOGGING_FOLDER", "logs")
 

@@ -209,7 +209,7 @@ class AliceAgent(BaseModel):
         code_blocks = self.collect_code_blocs(messages)
         if not code_blocks:
             LOGGER.warning(f'No code blocks found')
-            return []
+            return [], {}
 
         # Group code blocks by language
         code_by_lang = {}

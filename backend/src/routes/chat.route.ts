@@ -52,7 +52,7 @@ customRouter.patch('/:chatId/add_message', async (req: AuthRequest, res: Respons
   const message: Partial<IMessage> = req.body.message;
   const userId = req.user?.userId;
 
-  logger.info(`Received request to add message to chat ${chatId}`, { 
+  logger.debug(`Received request to add message to chat ${chatId}`, { 
     chatId, 
     userId, 
     messageContent: message.content,

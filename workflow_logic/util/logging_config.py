@@ -1,8 +1,6 @@
 import logging, os
 from logging.handlers import RotatingFileHandler
-from workflow_logic.util.const import LOGGING_FOLDER
-from dotenv import load_dotenv
-load_dotenv()
+from workflow_logic.util.const import LOGGING_FOLDER, LOG_LEVEL
 
 def setup_logging(log_level=logging.WARNING):
     # Create logs directory if it doesn't exist
@@ -34,6 +32,4 @@ def setup_logging(log_level=logging.WARNING):
 
     return logger
 
-# Environment variable to control log level
-LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 LOGGER = setup_logging(getattr(logging, LOG_LEVEL))

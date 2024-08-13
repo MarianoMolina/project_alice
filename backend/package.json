@@ -22,7 +22,10 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.4.1",
     "mongoose-schema-jsonschema": "^2.2.0",
-    "winston": "^3.13.1"
+    "openai": "^4.55.4",
+    "uuid": "^10.0.0",
+    "winston": "^3.13.1",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -31,6 +34,8 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/mongoose": "^5.11.97",
     "@types/node": "^20.14.9",
+    "@types/uuid": "^10.0.0",
+    "@types/ws": "^8.5.12",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.3"
   }

@@ -88,7 +88,7 @@ export const chatHelpers = {
     async create_message_in_chat(chatId: string, message: Partial<IMessage>, userId?: string): Promise<IMessage | null> {
         try {
             logger.info(`Creating message in chat ${chatId}`, { chatId, userId });
-            logger.info('Message object received', { message });
+            logger.debug('Message object received', { message });
 
             const newMessage: Partial<IMessageDocument> = {
                 ...message,
@@ -98,7 +98,7 @@ export const chatHelpers = {
                 updatedAt: new Date()
             };
 
-            logger.info('New message object after processing', { newMessage });
+            logger.debug('New message object after processing', { newMessage });
 
             (Object.keys(newMessage) as Array<keyof IMessageDocument>).forEach(key => {
                 if (newMessage[key] === undefined) {
@@ -128,7 +128,7 @@ export const chatHelpers = {
             }
 
             const createdMessage = updatedChat.messages[updatedChat.messages.length - 1];
-            logger.info('Message created successfully', { 
+            logger.debug('Message created successfully', { 
                 chatId, 
                 messageId: createdMessage._id,
                 hasTaskResponse: !!createdMessage.task_responses

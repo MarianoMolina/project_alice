@@ -1,17 +1,19 @@
-import { LMStudioClient, LLMDynamicHandle } from "@lmstudio/sdk";
-import Model from '../models/model.model';
+import { LLMDynamicHandle, LLMChatHistoryMessage, LLMContextOverflowPolicy, LLMStructuredPredictionSetting } from "@lmstudio/sdk";
+import dotenv from 'dotenv';
+dotenv.config();
 
 export interface LoadedModel {
     model: LLMDynamicHandle;
     lastUsed: number;
 }
+export type ChatCompletionToolChoiceOption = 'none' | 'auto' | 'required' | ChatCompletionNamedToolChoice;
 
-export function getToolSystemMessages(tools: any[], tool_choice: string): Array<{ role: string, content: string }> {
+export function getToolSystemMessages(tools: any[], tool_choice: ChatCompletionToolChoiceOption): Array<LLMChatHistoryMessage> {
     if (!tools || tools.length === 0 || tool_choice === 'none') {
         return [];
     }
 
-    const systemMessage = {
+    const systemMessage: LLMChatHistoryMessage = {
         role: 'system',
         content: `You are a function calling AI model. You are provided with function signatures within <tools></tools> XML tags. You may call one or more functions to assist with the user query. Don't make assumptions about what values to plug into functions. Here are the available tools: <tools> ${JSON.stringify(tools)} </tools> Use the following pydantic model json schema for each tool call you will make: {"properties": {"arguments": {"title": "Arguments", "type": "object"}, "name": {"title": "Name", "type": "string"}}, "required": ["arguments", "name"], "title": "FunctionCall", "type": "object"} For each function call return a json object with function name and arguments within <tool_call></tool_call> XML tags as follows:
 <tool_call>
@@ -36,81 +38,35 @@ export function mapStopReason(stopReason: string): string {
             return 'stop';
     }
 }
-// Function to unload all models
-export async function unloadAllModels(client: LMStudioClient) {
-    console.log("Unloading all previously loaded models...");
-    try {
-        const loadedModelsList = await client.llm.listLoaded();
-        for (const model of loadedModelsList) {
-            console.log(`Unloading model: ${model.identifier}`);
-            await client.llm.unload(model.identifier);
-        }
-        console.log("All models unloaded successfully.");
-    } catch (error) {
-        console.error("Error unloading models:", error);
-    }
-}
 
-// Helper function to unload inactive models
-export function unloadInactiveModels(client: LMStudioClient, loadedModels: { [key: string]: LoadedModel }, INACTIVITY_THRESHOLD: number) {
-    const now = Date.now();
-    for (const [modelId, { model, lastUsed }] of Object.entries(loadedModels)) {
-        if (now - lastUsed > INACTIVITY_THRESHOLD) {
-            console.log(`Unloading inactive model: ${modelId}`);
-            client.llm.unload(modelId);
-            delete loadedModels[modelId];
-        }
-    }
-}
+export async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+    let timeoutHandle: NodeJS.Timeout;
+    const timeoutPromise = new Promise<never>((_, reject) => {
+        timeoutHandle = setTimeout(() => reject(new Error('Operation timed out')), timeoutMs);
+    });
 
-export async function isModelAvailable(client: LMStudioClient, model_name: string) {
-    const downloadedModels = await client.system.listDownloadedModels();
-    console.log('Downloaded Models:', downloadedModels);
-    const isModelAvailable = downloadedModels.some((model: any) => model.path.includes(model_name));
-    return isModelAvailable
-}
-
-// Helper function to load a model
-export async function loadModel(modelId: string, client: LMStudioClient, loadedModels: { [key: string]: LoadedModel })  {
-    try {
-        const modelInfo = await Model.findById(modelId);
-        if (!modelInfo) {
-            throw new Error(`Model with id ${modelId} not found in the database`);
-        }
-        const isModelAv = await isModelAvailable(client, modelInfo.model_name);
-
-        if (!isModelAv) {
-            throw new Error(`Model ${modelInfo.model_name} is not available in the system`);
-        }
-        
-        console.log('Loading model with Info:', modelInfo);
-        const model: LLMDynamicHandle = await client.llm.load(modelInfo.model_name, {
-            config: {
-                gpuOffload: "max",
-                contextLength: modelInfo.ctx_size,
-            },
-            preset: process.env.LM_STUDIO_DEFAULT_PRESET || "OpenChat",
-            noHup: true,
-            verbose: true,
+    return Promise.race([promise, timeoutPromise])
+        .then((result) => {
+            clearTimeout(timeoutHandle);
+            return result;
+        })
+        .catch((error) => {
+            clearTimeout(timeoutHandle);
+            throw error;
         });
-        loadedModels[modelId] = { model, lastUsed: Date.now() };
-        return model;
+}
+
+export async function callLMStudioMethod<T>(methodName: string, method: () => Promise<T>): Promise<T> {
+    console.log(`Calling LMStudioClient method: ${methodName}`);
+    try {
+        const result = await withTimeout(method(), 90000); // 90 second timeout
+        console.log(`${methodName} completed successfully`);
+        return result;
     } catch (error) {
-        console.error(`Error loading model ${modelId}:`, error);
-        throw new Error(`Failed to load model ${modelId}`);
+        console.error(`${methodName} failed:`, error);
+        throw error;
     }
 }
-
-// Helper function to get or load a model
-export async function getOrLoadModel(modelId: string, client: LMStudioClient, loadedModels: { [key: string]: LoadedModel }) {
-    if (loadedModels[modelId]) {
-        loadedModels[modelId].lastUsed = Date.now();
-        return loadedModels[modelId].model;
-    }
-    return await loadModel(modelId, client, loadedModels);
-}
-
-// Utility function to check if content is a valid JSON object or array of objects
 export function isValidJsonContent(content: string): boolean {
     try {
         const parsed = JSON.parse(content);
@@ -118,4 +74,182 @@ export function isValidJsonContent(content: string): boolean {
     } catch (error) {
         return false;
     }
+}
+
+export interface ResponseFormatJSONObject {
+    type: 'json_object';
+}
+
+export interface ResponseFormatJSONSchema {
+    json_schema: ResponseFormatJSONSchema.JSONSchema;
+    type: 'json_schema';
+}
+
+export namespace ResponseFormatJSONSchema {
+    export interface JSONSchema {
+        name: string;
+        description?: string;
+        schema?: Record<string, unknown>;
+        strict?: boolean | null;
+    }
+}
+
+export interface ResponseFormatText {
+    type: 'text';
+}
+export interface ChatCompletionNamedToolChoice {
+    function: ChatCompletionNamedToolChoice.Function;
+
+    /**
+     * The type of the tool. Currently, only `function` is supported.
+     */
+    type: 'function';
+}
+
+export namespace ChatCompletionNamedToolChoice {
+    export interface Function {
+        /**
+         * The name of the function to call.
+         */
+        name: string;
+    }
+}
+export type FunctionParameters = Record<string, unknown>;
+export interface FunctionDefinition {
+    name: string;
+    description?: string;
+    parameters?: FunctionParameters;
+    /**
+     * Whether to enable strict schema adherence when generating the function call. If
+     * set to true, the model will follow the exact schema defined in the `parameters`
+     * field. Only a subset of JSON Schema is supported when `strict` is `true`. Learn
+     * more about Structured Outputs in the
+     * [function calling guide](docs/guides/function-calling).
+     */
+    strict?: boolean | null;
+}
+export interface ChatCompletionTool {
+    function: FunctionDefinition;
+
+    /**
+     * The type of the tool. Currently, only `function` is supported.
+     */
+    type: 'function';
+}
+export interface ChatCompletionStreamOptions {
+    /**
+     * If set, an additional chunk will be streamed before the `data: [DONE]` message.
+     * The `usage` field on this chunk shows the token usage statistics for the entire
+     * request, and the `choices` field will always be an empty array. All other chunks
+     * will also include a `usage` field, but with a null value.
+     */
+    include_usage?: boolean;
+  }
+
+export type ChatCompletionParams = {
+    messages: Array<LLMChatHistoryMessage>;
+    model: (string & {});
+    frequency_penalty?: number | null;
+    logit_bias?: Record<string, number> | null;
+    logprobs?: boolean | null;
+    max_tokens?: number | null;
+    n?: number | null;
+    parallel_tool_calls?: boolean;
+    presence_penalty?: number | null;
+    response_format?:
+    | ResponseFormatText
+    | ResponseFormatJSONObject
+    | ResponseFormatJSONSchema;
+    seed?: number | null;
+    service_tier?: 'auto' | 'default' | null;
+    stop?: string | null | Array<string>;
+    stream?: boolean | null;
+    stream_options?: ChatCompletionStreamOptions | null;
+    temperature?: number | null;
+    tool_choice?: ChatCompletionToolChoiceOption;
+    tools?: Array<ChatCompletionTool>;
+    top_logprobs?: number | null;
+    top_p?: number | null;
+    user?: string;
+}
+export declare interface LLMChatResponseOpts {
+    maxPredictedTokens?: number;
+    temperature?: number;
+    stopStrings?: Array<string>;
+    contextOverflowPolicy?: LLMContextOverflowPolicy;
+    inputPrefix?: string;
+    inputSuffix?: string;
+    structured?: LLMStructuredPredictionSetting;
+}
+export interface ChatCompletionResponse {
+    id: string;
+    object: "chat.completion";
+    created: number;
+    model: string;
+    choices: Array<{
+        index: number;
+        message: {
+            role: "assistant";
+            content: string | null;
+            tool_calls?: Array<{
+                id: string;
+                type: "function";
+                function: {
+                    name: string;
+                    arguments: string;
+                };
+            }>;
+        };
+        finish_reason: string;
+    }>;
+    usage?: {
+        prompt_tokens: number;
+        completion_tokens: number;
+        total_tokens: number;
+    };
+}
+
+export interface ToolCall {
+    id: string;
+    type: "function";
+    function: {
+        name: string;
+        arguments: string;
+    };
+}
+export type CompletionParams = {
+    prompt: string;
+    model: (string & {});
+    frequency_penalty?: number | null;
+    logit_bias?: Record<string, number> | null;
+    logprobs?: boolean | null;
+    max_tokens?: number | null;
+    n?: number | null;
+    presence_penalty?: number | null;
+    seed?: number | null;
+    service_tier?: 'auto' | 'default' | null;
+    stop?: string | null | Array<string>;
+    stream?: boolean | null;
+    temperature?: number | null;
+    top_logprobs?: number | null;
+    top_p?: number | null;
+    user?: string;
+}
+
+export interface CompletionResponse {
+    id: string;
+    object: "text_completion";
+    created: number;
+    model: string;
+    choices: Array<{
+        text: string;
+        index: number;
+        logprobs: any | null;
+        finish_reason: string;
+    }>;
+    usage?: {
+        prompt_tokens: number;
+        completion_tokens: number;
+        total_tokens: number;
+    };
 }

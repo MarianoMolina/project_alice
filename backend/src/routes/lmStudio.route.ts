@@ -1,137 +1,56 @@
 import express from 'express';
-import { LMStudioClient, OngoingPrediction, PredictionResult } from "@lmstudio/sdk";
-import Model from '../models/model.model';
-import { IModelDocument } from '../interfaces/model.interface';
-import { LoadedModel, unloadAllModels, unloadInactiveModels, isValidJsonContent, getOrLoadModel, getToolSystemMessages, mapStopReason, isModelAvailable } from '../utils/lmStudio.utils';
-import dotenv from 'dotenv';
-dotenv.config();
+import { lmStudioManager } from '../utils/lmStudioManager';
+import { Stream } from 'openai/streaming';
+import axios from 'axios';
+import { ChatCompletionParams, CompletionParams } from '../utils/lmStudio.utils';
 
 const router = express.Router();
-const client: LMStudioClient = new LMStudioClient({
-    baseUrl: "ws://host.docker.internal:1234",
-});
-
-const loadedModels: { [key: string]: LoadedModel } = {};
-
-// Call this function when the server starts
-unloadAllModels(client);
-
-const INACTIVITY_THRESHOLD = 10 * 60 * 1000; // 10 minutes in milliseconds
-const CHECK_INTERVAL = 30 * 1000; // 30 seconds in milliseconds
-
-// Periodically check and unload inactive models
-setInterval(() => unloadInactiveModels(client, loadedModels, INACTIVITY_THRESHOLD), CHECK_INTERVAL);
-
-router.post('/chat/completions', async (req, res) => {
-    const {
-        model: modelId,
-        messages,
-        max_tokens,
-        n = 1,
-        temperature = 1,
-        stop,
-        stream = false,
-        tools,
-        tool_choice = 'auto',
-    } = req.body;
+// New proxy endpoint - Just to see what is being sent to the model
+router.post('/proxy/chat/completions', async (req, res) => {
+    console.log('Received request:', {
+        headers: req.headers,
+        body: JSON.stringify(req.body)
+    });
 
     try {
-        console.log('Generating chat completion...');
-        const model = await getOrLoadModel(modelId, client, loadedModels);
-        console.log('Model loaded:', modelId);
-        
-        const toolSystemMessages = getToolSystemMessages(tools, tool_choice);
-        const updatedMessages = [...toolSystemMessages, ...messages];
+        const response = await axios.post('http://host.docker.internal:1234/v1/chat/completions', req.body, {
+            headers: req.headers,
+            responseType: 'stream'
+        });
 
-        const generateCompletion = async (index: number) => {
-            const response: OngoingPrediction = model.respond(updatedMessages, {
-                maxPredictedTokens: max_tokens,
-                temperature,
-                stopStrings: stop,
-            });
+        response.data.pipe(res);
+    } catch (error) {
+        console.error('Error forwarding request:', error);
+        res.status(500).json({ error: 'Failed to forward request' });
+    }
+});
 
-            if (stream) {
-                for await (const chunk of response) {
-                    const chunkResponse = {
-                        id: `chatcmpl-${Date.now()}`,
-                        object: "chat.completion.chunk",
-                        created: Math.floor(Date.now() / 1000),
-                        model: modelId,
-                        choices: [{
-                            index,
-                            delta: {
-                                content: chunk.trim(),
-                            },
-                            finish_reason: null,
-                        }],
-                    };
-                    res.write(`data: ${JSON.stringify(chunkResponse)}\n\n`);
-                }
-                const final_response: PredictionResult = await response.result();
-                // Final chunk with finish reason and usage
-                const finalChunk = {
-                    id: `chatcmpl-${Date.now()}`,
-                    object: "chat.completion.chunk",
-                    created: Math.floor(Date.now() / 1000),
-                    model: modelId,
-                    choices: [{
-                        index,
-                        delta: {},
-                        finish_reason: mapStopReason(final_response.stats.stopReason),
-                    }],
-                    usage: {
-                        prompt_tokens: final_response.stats.promptTokensCount,
-                        completion_tokens: final_response.stats.predictedTokensCount,
-                        total_tokens: final_response.stats.totalTokensCount,
-                    },
-                };
-                res.write(`data: ${JSON.stringify(finalChunk)}\n\n`);
-                return final_response;
-            } else {
-                return await response.result();
-            }
-        };
 
-        if (stream) {
+router.post('/chat/completions', async (req, res) => {
+    const params = req.body as ChatCompletionParams;
+    try {
+        if (!params) {
+            return res.status(400).json({ error: 'Missing required parameters' });
+        }
+        const completionResult = await lmStudioManager.generateChatCompletion(params);
+        if (params.stream) {
             res.writeHead(200, {
                 'Content-Type': 'text/event-stream',
                 'Cache-Control': 'no-cache',
                 'Connection': 'keep-alive',
             });
-
-            const completionPromises = Array(n).fill(null).map((_, index) => generateCompletion(index));
-            await Promise.all(completionPromises);
-
-            res.write('data: [DONE]\n\n');
+            if (completionResult instanceof Stream) {
+                for await (const chunk of completionResult) {
+                    res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+                }
+                res.write('data: [DONE]\n\n');
+            } else {
+                res.write(`data: ${JSON.stringify(completionResult)}\n\n`);
+                res.write('data: [DONE]\n\n');
+            }
             res.end();
         } else {
-            const completions = await Promise.all(Array(n).fill(null).map((_, index) => generateCompletion(index)));
-            const openAIResponse = {
-                id: `chatcmpl-${Date.now()}`,
-                object: "chat.completion",
-                created: Math.floor(Date.now() / 1000),
-                model: modelId,
-                choices: completions.map((final_response, index) => {
-                    if (!final_response) return null;
-                    const content = final_response.content.trim();
-                    const isJson = isValidJsonContent(content);
-                    return {
-                        index,
-                        message: {
-                            role: "assistant",
-                            content: isJson ? null : content,
-                            tool_calls: isJson ? [JSON.parse(content)] : undefined,
-                        },
-                        finish_reason: mapStopReason(final_response.stats.stopReason),
-                    };
-                }).filter(choice => choice !== null),
-                usage: completions[0] ? {
-                    prompt_tokens: completions[0].stats.promptTokensCount,
-                    completion_tokens: completions[0].stats.predictedTokensCount,
-                    total_tokens: completions[0].stats.totalTokensCount,
-                } : undefined,
-            };
-            res.json(openAIResponse);
+            res.json(completionResult);
         }
     } catch (error) {
         console.error('Error generating chat completion:', error);
@@ -139,59 +58,78 @@ router.post('/chat/completions', async (req, res) => {
     }
 });
 
-// Check model endpoint
 router.get('/models/:modelId', async (req, res) => {
     const { modelId } = req.params;
-
     try {
-        const modelInfo = await Model.findById(modelId);
-        if (!modelInfo) {
-            return res.status(404).json({ error: 'Model not found in database' });
-        }
-
-        const isModelAv = isModelAvailable(client, modelInfo.model_name);
-
-        res.json({
-            available: isModelAv,
-            loaded: !!loadedModels[modelId],
-            modelInfo: {
-                name: modelInfo.model_name,
-                type: modelInfo.model_type,
-                format: modelInfo.model_format,
-                contextSize: modelInfo.ctx_size
-            }
-        });
+        const modelInfo = await lmStudioManager.getModelInfo(modelId);
+        res.json(modelInfo);
     } catch (error) {
         console.error('Error checking model:', error);
         res.status(500).json({ error: 'Failed to check model' });
     }
 });
 
-// List available models endpoint
 router.get('/models', async (req, res) => {
     try {
-        const dbModels = await Model.find({ api_name: 'lm-studio' });
-        const downloadedModels = await client.system.listDownloadedModels();
-        console.log('Downloaded models:', downloadedModels);
-
-        const availableModels = dbModels.map((dbModel: IModelDocument) => {
-            const isDownloaded = downloadedModels.some((dm: any) => dm.path.includes(dbModel.model_name));
-            return {
-                id: dbModel._id,
-                name: dbModel.model_name,
-                shortName: dbModel.short_name,
-                type: dbModel.model_type,
-                format: dbModel.model_format,
-                contextSize: dbModel.ctx_size,
-                isDownloaded,
-                isLoaded: !!loadedModels[dbModel._id.toString()]
-            };
-        });
-
+        const availableModels = await lmStudioManager.listAvailableModels();
         res.json(availableModels);
     } catch (error) {
         console.error('Error listing models:', error);
         res.status(500).json({ error: 'Failed to list models' });
+    }
+});
+
+router.post('/models/:modelId/load', async (req, res) => {
+    const { modelId } = req.params;
+    try {
+        await lmStudioManager.getOrLoadModel(modelId);
+        res.json({ message: `Model ${modelId} loaded successfully` });
+    } catch (error) {
+        console.error('Error loading model:', error);
+        res.status(500).json({ error: 'Failed to load model' });
+    }
+});
+
+router.post('/models/:modelId/unload', async (req, res) => {
+    const { modelId } = req.params;
+    try {
+        await lmStudioManager.unloadModel(modelId);
+        res.json({ message: `Model ${modelId} unloaded successfully` });
+    } catch (error) {
+        console.error('Error unloading model:', error);
+        res.status(500).json({ error: 'Failed to unload model' });
+    }
+});
+
+router.post('/v1/completions', async (req, res) => {
+    const params = req.body as CompletionParams;
+    try {
+        if (!params) {
+            return res.status(400).json({ error: 'Missing required parameters' });
+        }
+        const completionResult = await lmStudioManager.generateCompletion(params);
+        if (params.stream) {
+            res.writeHead(200, {
+                'Content-Type': 'text/event-stream',
+                'Cache-Control': 'no-cache',
+                'Connection': 'keep-alive',
+            });
+            if (completionResult instanceof Stream) {
+                for await (const chunk of completionResult) {
+                    res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+                }
+                res.write('data: [DONE]\n\n');
+            } else {
+                res.write(`data: ${JSON.stringify(completionResult)}\n\n`);
+                res.write('data: [DONE]\n\n');
+            }
+            res.end();
+        } else {
+            res.json(completionResult);
+        }
+    } catch (error) {
+        console.error('Error generating completion:', error);
+        res.status(500).json({ error: 'Failed to generate completion' });
     }
 });
 
