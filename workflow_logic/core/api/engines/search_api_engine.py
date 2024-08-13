@@ -5,11 +5,21 @@ from googleapiclient.discovery import build
 from exa_py import Exa
 from pydantic import Field
 from typing import Dict, Any, List
-from workflow_logic.util import SearchResult, SearchOutput, ApiType
+from workflow_logic.util import SearchResult, SearchOutput, ApiType, LOGGER
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 from workflow_logic.core.api.engines.api_engine import APIEngine
 
 class APISearchEngine(APIEngine):
+    """
+    Base class for search-based API engines.
+
+    This class extends APIEngine to provide a common structure for search APIs.
+    It defines a standard set of input parameters suitable for most search operations.
+
+    Attributes:
+        input_variables (FunctionParameters): Defines the input structure for search operations,
+                                              including 'prompt' and 'max_results'.
+    """
     input_variables: FunctionParameters = Field(FunctionParameters(
     type="object",
     properties={
@@ -28,12 +38,23 @@ class APISearchEngine(APIEngine):
 ), description="This inputs this API engine takes: requires a prompt input, and optional inputs such as max_results. Default is 10.")
 
 class WikipediaSearchAPI(APISearchEngine):
+    """
+    API engine for searching Wikipedia.
+
+    This class implements the Wikipedia search functionality, utilizing the wikipedia library.
+
+    Attributes:
+        required_api (ApiType): Set to "wikipedia_search".
+
+    Note:
+        This API does not require authentication, so api_data is not used in the generate_api_response method.
+    """
     required_api: ApiType = "wikipedia_search"
 
     async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
         # Wikipedia doesn't require API keys, so we don't need to use api_data
         search_results = wikipedia.search(prompt, results=max_results, suggestion=True)
-        print(f'search_results: {search_results} type: {type(search_results)} type of search_results[0]: {type(search_results[0])}')
+        LOGGER.debug(f'search_results: {search_results} type: {type(search_results)} type of search_results[0]: {type(search_results[0])}')
         detailed_results = []
         for result in search_results[0]:
             try:
@@ -55,6 +76,17 @@ class WikipediaSearchAPI(APISearchEngine):
         ])
 
 class GoogleSearchAPI(APISearchEngine):
+    """
+    API engine for Google Custom Search.
+
+    This class implements Google Custom Search functionality.
+
+    Attributes:
+        required_api (ApiType): Set to "google_search".
+
+    Note:
+        Requires valid API key and Custom Search Engine ID in api_data.
+    """
     required_api: ApiType = "google_search"
 
     async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
@@ -74,6 +106,17 @@ class GoogleSearchAPI(APISearchEngine):
         ])
 
 class ExaSearchAPI(APISearchEngine):
+    """
+    API engine for Exa Search.
+
+    This class implements the Exa search functionality.
+
+    Attributes:
+        required_api (ApiType): Set to "exa_search".
+
+    Note:
+        Requires a valid API key in api_data.
+    """
     required_api: ApiType = "exa_search"
 
     async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
@@ -82,7 +125,7 @@ class ExaSearchAPI(APISearchEngine):
         
         exa_api = Exa(api_key=api_data['api_key'])
         exa_search = exa_api.search(query=prompt, num_results=max_results)
-        print(f'exa_search: {exa_search.results}')
+        LOGGER.debug(f'exa_search: {exa_search.results}')
         results = exa_search.results
 
         return SearchOutput(content=[
@@ -95,6 +138,17 @@ class ExaSearchAPI(APISearchEngine):
         ])
 
 class ArxivSearchAPI(APISearchEngine):
+    """
+    API engine for arXiv Search.
+
+    This class implements the arXiv search functionality.
+
+    Attributes:
+        required_api (ApiType): Set to "arxiv_search".
+
+    Note:
+        This API does not require authentication, so api_data is not used in the generate_api_response method.
+    """
     required_api: ApiType = "arxiv_search"
 
     async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
@@ -127,6 +181,21 @@ class ArxivSearchAPI(APISearchEngine):
         ])
     
 class RedditSearchAPI(APIEngine):
+    """
+    API engine for Reddit Search.
+
+    This class implements the Reddit search functionality with additional parameters
+    for sorting and filtering results.
+
+    Attributes:
+        required_api (ApiType): Set to "reddit_search".
+        input_variables (FunctionParameters): Defines the input structure for Reddit searches,
+                                              including additional parameters like 'sort',
+                                              'time_filter', and 'subreddit'.
+
+    Note:
+        Requires valid client ID and client secret in api_data.
+    """
     input_variables: FunctionParameters = Field(FunctionParameters(
         type="object",
         properties={
@@ -161,6 +230,23 @@ class RedditSearchAPI(APIEngine):
     required_api: ApiType = "reddit_search"
 
     async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, sort: str = "hot", time_filter: str = "week", subreddit: str = "all", limit: int = 10, **kwargs) -> SearchOutput:
+        """
+        Generate a response from a Reddit search.
+
+        Args:
+            api_data (Dict[str, Any]): Must contain 'client_id' and 'client_secret'.
+            prompt (str): The search query.
+            sort (str): Sort method for results. Defaults to "hot".
+            time_filter (str): Time period to filter by. Defaults to "week".
+            subreddit (str): Subreddit to search in. Defaults to "all".
+            limit (int): Maximum number of results to return. Defaults to 10.
+
+        Returns:
+            SearchOutput: A collection of SearchResult objects containing Reddit submission information.
+
+        Raises:
+            ValueError: If client ID or client secret is missing from api_data.
+        """
         if not api_data.get('client_id') or not api_data.get('client_secret'):
             raise ValueError("Reddit client ID or client secret not found in API data")
 

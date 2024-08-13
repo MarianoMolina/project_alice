@@ -49,15 +49,52 @@ def get_api_engine(api_type: ApiType, api_name: ApiName) -> type[APIEngine]:
         raise ValueError(f"No API engine found for type {api_type} and name {api_name}")
     
 class APIManager(BaseModel):
+    """
+    Manages a collection of APIs and provides methods to interact with them.
+
+    This class is responsible for storing, retrieving, and utilizing various API
+    configurations. It supports different types of APIs, including LLM (Language
+    Model) APIs and search APIs.
+
+    Attributes:
+        apis (Dict[str, API]): A dictionary storing API objects, keyed by their names.
+    """
     apis: Dict[str, API] = {}
 
     def add_api(self, api: API):
+        """
+        Add a new API to the manager.
+
+        Args:
+            api (API): The API object to be added.
+        """
         self.apis[api.api_name] = api
 
     def get_api(self, api_name: ApiName) -> Optional[API]:
+        """
+        Retrieve an API by its name.
+
+        Args:
+            api_name (ApiName): The name of the API to retrieve.
+
+        Returns:
+            Optional[API]: The API object if found, None otherwise.
+        """
         return self.apis.get(api_name)
    
     def get_api_by_type(self, api_type: ApiType, model: Optional[AliceModel] = None) -> Optional[API]:
+        """
+        Retrieve an API by its type, optionally considering a specific model.
+
+        This method handles both LLM and non-LLM API types differently.
+
+        Args:
+            api_type (ApiType): The type of API to retrieve.
+            model (Optional[AliceModel]): The model to consider for LLM APIs.
+
+        Returns:
+            Optional[API]: The appropriate API object if found, None otherwise.
+        """
         if isinstance(api_type, str):
             api_type = ApiType(api_type)
         if api_type == ApiType.LLM_MODEL:
@@ -66,18 +103,30 @@ class APIManager(BaseModel):
             return self._retrieve_non_llm_api(api_type)
     
     def _retrieve_llm_api(self, model: Optional[AliceModel] = None) -> Optional[API]:
+        """
+        Internal method to retrieve an LLM API.
+
+        This method attempts to find a matching API for the given model,
+        or returns a default LLM API if no specific model is provided.
+
+        Args:
+            model (Optional[AliceModel]): The model to match against.
+
+        Returns:
+            Optional[API]: The matching or default LLM API if found, None otherwise.
+        """
         llm_apis = [api for api in self.apis.values() if ApiType(api.api_type) == ApiType.LLM_MODEL and api.is_active]
         
         if not llm_apis:
-            print("No LLM APIs found.")
-            print(f'APIs: {self.apis}')
+            LOGGER.info("No LLM APIs found.")
+            LOGGER.info(f'APIs: {self.apis}')
             return None
         if model:
             matching_api = next((api for api in llm_apis if api.api_name == model.api_name and api.is_active), None)
             if matching_api:
                 return matching_api
             else:
-                print(f'No matching API found for model: {model} with api_name: {model.api_name}')
+                LOGGER.error(f'No matching API found for model: {model} with api_name: {model.api_name}')
 
         # If no matching API found or no model specified, use the first available LLM API
         default_api = next((api for api in llm_apis if api.default_model), None)
@@ -87,9 +136,31 @@ class APIManager(BaseModel):
         return None
     
     def _retrieve_non_llm_api(self, api_type: ApiType) -> Optional[API]:
+        """
+        Internal method to retrieve a non-LLM API by type.
+
+        Args:
+            api_type (ApiType): The type of non-LLM API to retrieve.
+
+        Returns:
+            Optional[API]: The first active API matching the given type, or None if not found.
+        """
         return next((api for api in self.apis.values() if api.api_type == api_type and api.is_active), None)
         
     def retrieve_api_data(self, api_type: ApiType, model: Optional[AliceModel] = None) -> Union[Dict[str, Any], LLMConfig]:
+        """
+        Retrieve the configuration data for a specific API type and model.
+
+        Args:
+            api_type (ApiType): The type of API to retrieve data for.
+            model (Optional[AliceModel]): The model to consider for LLM APIs.
+
+        Returns:
+            Union[Dict[str, Any], LLMConfig]: The API configuration data.
+
+        Raises:
+            ValueError: If no active API is found for the given type.
+        """
         api = self.get_api_by_type(api_type, model)
         if api is None:
             raise ValueError(f"No active API found for type: {api_type}")
@@ -99,6 +170,9 @@ class APIManager(BaseModel):
         """
         Select the appropriate API engine, validate inputs, and generate a response.
 
+        This method handles the entire process of selecting an API, retrieving its data,
+        initializing the correct engine, validating inputs, and generating a response.
+
         Args:
             api_type (ApiType): The type of API to use.
             model (Optional[AliceModel]): The preferred model to use, if applicable.
@@ -106,6 +180,9 @@ class APIManager(BaseModel):
 
         Returns:
             Union[SearchOutput, MessageDict]: The generated response from the API engine.
+
+        Raises:
+            ValueError: If no API is found or if there's an error in generating the response.
         """
         LOGGER.debug(f"Chat generate_response_with_api_engine called with api_type: {api_type}, model: {model}, kwargs: {kwargs}")
         try:
@@ -129,12 +206,23 @@ class APIManager(BaseModel):
             raise ValueError(f"Error generating response with API engine: {str(e)}")
 
     def _validate_inputs(self, api_engine: APIEngine, kwargs: Dict[str, Any]):
-        # Validate that the provided kwargs match the expected input_variables of the API engine
+        """
+        Validate the input parameters against the API engine's expected inputs.
+
+        This method checks if all required inputs are provided and if there are
+        any unexpected inputs.
+
+        Args:
+            api_engine (APIEngine): The API engine to validate against.
+            kwargs (Dict[str, Any]): The input parameters to validate.
+
+        Raises:
+            ValueError: If there are missing required inputs or unexpected inputs.
+        """
         expected_inputs = api_engine.input_variables.properties
         for key, value in kwargs.items():
             if key not in expected_inputs:
                 raise ValueError(f"Unexpected input: {key}")
-            # You might want to add more specific type checking here based on your needs
 
         # Check for missing required inputs
         for required_input in api_engine.input_variables.required:

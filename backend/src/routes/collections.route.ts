@@ -1,5 +1,6 @@
 import express, { Router, Request, Response } from 'express';
 import mongoose, { Model } from 'mongoose';
+import Logger from '../utils/logger';
 
 const router: Router = express.Router();
 
@@ -34,8 +35,8 @@ router.get('/:collectionName/schema', async (req: Request, res: Response) => {
   try {
     const modelName = modelMapping[sanitizedCollectionName];
     if (!modelName) {
-      console.log(`Models available: ${Object.keys(modelMapping)}`);
-      console.error(`Model not found for collection: ${sanitizedCollectionName}`);
+      Logger.debug(`Models available: ${Object.keys(modelMapping)}`);
+      Logger.info(`Model not found for collection: ${sanitizedCollectionName}`);
       return res.status(400).json({ error: `Model not found for collection: ${sanitizedCollectionName}` });
     }
     
@@ -52,7 +53,6 @@ router.get('/:collectionName/schema', async (req: Request, res: Response) => {
     }
     
     const jsonSchema = jsonSchemaMethod.call(model.schema);
-    console.log(`JSON Schema for ${collectionName}:`, jsonSchema);
     res.status(200).json(jsonSchema);
   } catch (error) {
     console.error('Error fetching schema:', error);

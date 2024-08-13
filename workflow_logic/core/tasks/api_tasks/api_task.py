@@ -5,11 +5,48 @@ from workflow_logic.util import TaskResponse, ApiType
 from workflow_logic.core.tasks.task import AliceTask
 
 class APITask(AliceTask):
+    """
+    Represents a task that interacts with a specific API.
+
+    This class is designed to handle tasks that require interaction with external APIs.
+    It validates the API configuration and uses the appropriate API engine for execution.
+
+    Attributes:
+        required_apis (List[ApiType]): List containing exactly one ApiType, specifying the required API.
+        api_engine (Type[APIEngine]): The class of the API engine to be used.
+
+    Class Methods:
+        validate_api_task: Validates the API task configuration.
+
+    Methods:
+        run: Execute the API task and return a TaskResponse.
+
+    Raises:
+        ValueError: If the API configuration is invalid or if required parameters are missing.
+    """
     required_apis: List[ApiType] = Field(..., min_length=1, max_length=1)
     api_engine: Type[APIEngine] = Field(None)
 
     @model_validator(mode='after')
     def validate_api_task(cls, values):
+        """
+        Validate the API task configuration.
+
+        This method ensures that:
+        1. Exactly one API is specified.
+        2. The specified API type is valid and not LLM_MODEL.
+        3. An appropriate API engine class exists for the specified API type.
+        4. The task's input variables are consistent with the API engine's requirements.
+
+        Args:
+            values: The attribute values to validate.
+
+        Returns:
+            dict: The validated values.
+
+        Raises:
+            ValueError: If any validation check fails.
+        """
         # Validate that there's exactly one required API
         required_apis = values.required_apis
         if len(required_apis) != 1:
@@ -49,6 +86,20 @@ class APITask(AliceTask):
         return values
 
     async def run(self, api_manager: APIManager, **kwargs) -> TaskResponse:
+        """
+        Execute the API task and return a TaskResponse.
+
+        This method retrieves the necessary API data, instantiates the appropriate
+        API engine, and executes the API request. It handles both successful
+        executions and errors, wrapping the result in a TaskResponse.
+
+        Args:
+            api_manager (APIManager): The API manager to use for retrieving API data.
+            **kwargs: Additional keyword arguments to pass to the API engine.
+
+        Returns:
+            TaskResponse: A response object containing the results of the API task execution.
+        """
         task_inputs = kwargs.copy()
         try:
             api_data = api_manager.retrieve_api_data(self.required_apis[0])

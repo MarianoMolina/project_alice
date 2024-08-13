@@ -12,6 +12,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.primary.contrastText,
     padding: theme.spacing(0.5),
+    height: '56px',
   },
   title: {
     fontWeight: 'bold',

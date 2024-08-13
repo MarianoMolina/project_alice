@@ -21,7 +21,6 @@ interface EnhancedApiProps extends Omit<ApiComponentProps, 'items' | 'item' | 'o
 }
 
 const EnhancedAPI: React.FC<EnhancedApiProps> = (props: EnhancedApiProps) => {
-  console.log('EnhancedAPI props:', props);
   const renderContent = (
     items: API[] | null,
     item: API | null,

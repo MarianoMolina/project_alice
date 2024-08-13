@@ -8,6 +8,20 @@ from workflow_logic.core.parameters import FunctionParameters, ParameterDefiniti
 from workflow_logic.util import MessageDict, MessageType, LOGGER, LLMConfig, ApiType
 
 class LLMEngine(APIEngine):
+    """
+    LLMEngine for generating chat completions from OpenAI-compatible endpoints.
+
+    This class can interact with any OpenAI-compatible endpoint, including Azure, OpenAI,
+    and LMStudio. It's capable of generating chat completions from any of these services.
+
+    Note: For LMStudio endpoints, the 'model' property uses the modelId instead of the
+    model_name. This parsing is handled by the API's get_api_data method.
+
+    Attributes:
+        input_variables (FunctionParameters): Defines the expected input structure for the engine.
+        required_api (ApiType): Specifies the required API type (LLM_MODEL).
+
+    """
     input_variables: FunctionParameters = Field(
         default=FunctionParameters(
             type="object",
@@ -55,7 +69,30 @@ class LLMEngine(APIEngine):
     required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
 
     async def generate_api_response(self, api_data: LLMConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[Dict[str, Any]]] = None, max_tokens: Optional[int] = None, tool_choice: Optional[str] = 'auto', n: Optional[int] = 1, **kwargs) -> MessageDict:
-        """Generates the API response for the task, using the provided API data and messages."""
+        """
+        Generates the API response for the task, using the provided API data and messages.
+
+        This method can work with any OpenAI-compatible endpoint (OpenAI, Azure, LMStudio).
+        It creates an AsyncOpenAI client with the provided configuration and generates
+        a chat completion based on the input parameters.
+
+        Args:
+            api_data (LLMConfig): Configuration for the API client.
+            messages (List[Dict[str, Any]]): List of conversation messages.
+            system (Optional[str]): System message for the conversation.
+            tools (Optional[List[Dict[str, Any]]]): List of available tools for the model.
+            max_tokens (Optional[int]): Maximum number of tokens to generate.
+            tool_choice (Optional[str]): Whether to allow tool use.
+            n (Optional[int]): Number of chat completion choices to generate.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            MessageDict: A dictionary containing the generated message and metadata.
+
+        Raises:
+            ValueError: If API key or base URL is missing from api_data.
+            Exception: For any errors during the API call.
+        """
         if not api_data.api_key:
             raise ValueError("API key not found in API data")
 
@@ -91,9 +128,9 @@ class LLMEngine(APIEngine):
             content = choice.message.content
 
             if choice.message.tool_calls:
-                print(f"Tool calls: {choice.message.tool_calls}")
-                print(f'Model dump: {choice.message.tool_calls[0].model_dump()}')
-                print(f'Tool call: {ToolCall(**choice.message.tool_calls[0].model_dump())}')
+                LOGGER.debug(f"Tool calls: {choice.message.tool_calls}")
+                LOGGER.debug(f'Model dump: {choice.message.tool_calls[0].model_dump()}')
+                LOGGER.debug(f'Tool call: {ToolCall(**choice.message.tool_calls[0].model_dump())}')
 
 
             return MessageDict(
@@ -119,7 +156,15 @@ class LLMEngine(APIEngine):
 
     @staticmethod
     def get_usage(message: MessageDict) -> Dict[str, Any]:
-        """Return usage summary of the response."""
+        """
+        Return usage summary of the response.
+
+        Args:
+            message (MessageDict): The message containing usage information.
+
+        Returns:
+            Dict[str, Any]: A dictionary summarizing token usage and cost.
+        """
         creation_metadata = message.creation_metadata
         usage = creation_metadata.get('usage', {})
         return {
@@ -131,7 +176,17 @@ class LLMEngine(APIEngine):
         }
 
     def calculate_cost(self, prompt_tokens: int, completion_tokens: int, model: str) -> float:
-        # LLM pricing (as of last update, please check for the most recent pricing)
+        """
+        Calculate the cost of the API call based on token usage and model.
+
+        Args:
+            prompt_tokens (int): Number of tokens in the prompt.
+            completion_tokens (int): Number of tokens in the completion.
+            model (str): The model used for the API call.
+
+        Returns:
+            float: The calculated cost of the API call.
+        """
         pricing = {
             'gpt-3.5-turbo': (0.0015, 0.002),  # (input_price, output_price) per 1K tokens
             'gpt-4': (0.03, 0.06),

@@ -3,11 +3,12 @@ import { lmStudioManager } from '../utils/lmStudioManager';
 import { Stream } from 'openai/streaming';
 import axios from 'axios';
 import { ChatCompletionParams, CompletionParams } from '../utils/lmStudio.utils';
+import Logger from '../utils/logger';
 
 const router = express.Router();
 // New proxy endpoint - Just to see what is being sent to the model
 router.post('/proxy/chat/completions', async (req, res) => {
-    console.log('Received request:', {
+    Logger.debug('Received request:', {
         headers: req.headers,
         body: JSON.stringify(req.body)
     });

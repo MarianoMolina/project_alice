@@ -9,7 +9,6 @@ const ChatListView: React.FC<ChatComponentProps> = ({
     onInteraction,
     onView,
 }) => {
-    console.log('ChatListView received items:', items);
     const getPrimaryText = (chat: AliceChat) => chat.name;
     const getSecondaryText = (chat: AliceChat) => (
         <Typography component="span" variant="body2" color="textSecondary">

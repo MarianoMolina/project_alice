@@ -1,5 +1,6 @@
 import { LLMDynamicHandle, LLMChatHistoryMessage, LLMContextOverflowPolicy, LLMStructuredPredictionSetting } from "@lmstudio/sdk";
 import dotenv from 'dotenv';
+import Logger from "./logger";
 dotenv.config();
 
 export interface LoadedModel {
@@ -57,10 +58,8 @@ export async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Pr
 }
 
 export async function callLMStudioMethod<T>(methodName: string, method: () => Promise<T>): Promise<T> {
-    console.log(`Calling LMStudioClient method: ${methodName}`);
     try {
-        const result = await withTimeout(method(), 90000); // 90 second timeout
-        console.log(`${methodName} completed successfully`);
+        const result = await withTimeout(method(), 120000); // 120 second timeout
         return result;
     } catch (error) {
         console.error(`${methodName} failed:`, error);

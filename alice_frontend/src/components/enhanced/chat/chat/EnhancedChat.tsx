@@ -52,7 +52,6 @@ const EnhancedChat: React.FC<EnhancedChatProps> = (props) => {
       case 'shortList':
         return <ChatShortListView {...commonProps} />;
       case 'list':
-        console.log('Data being passed to ChatListView:', commonProps.items);
         return <ChatListView {...commonProps}/>;
       case 'table':
         return <ChatTableView {...commonProps} />;

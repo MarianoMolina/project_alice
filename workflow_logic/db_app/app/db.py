@@ -99,12 +99,10 @@ class BackendAPI(BaseModel):
                 async with session.get(url, headers=headers) as response:
                     if response is None:
                         raise ValueError(f"Failed to get a response from {url}")
-                    print(f'RESPONSE :{response}')
                     response.raise_for_status()
                     prompts = await response.json()
 
                     if isinstance(prompts, list):
-                        print(f'PROMPTS: {prompts}')
                         prompts = [await self.preprocess_data(prompt) for prompt in prompts]
                         return {prompt["_id"]: Prompt(**prompt) for prompt in prompts}
                     else:
@@ -137,7 +135,7 @@ class BackendAPI(BaseModel):
                         users = await self.preprocess_data(users)
                         return {users["_id"]: User(**users)}
             except aiohttp.ClientError as e:
-                print(f"Error retrieving users: {e}")
+                LOGGER.error(f"Error retrieving users: {e}")
                 return {}
 
     async def get_agents(self, agent: Optional[str] = None) -> Dict[str, AliceAgent]:
@@ -152,7 +150,6 @@ class BackendAPI(BaseModel):
                 async with session.get(url, headers=headers) as response:
                     if response is None:
                         raise ValueError(f"Failed to get a response from {url}")
-                    print(f'RESPONSE :{response}')
                     response.raise_for_status()
                     agents = await response.json()
                     
@@ -163,7 +160,7 @@ class BackendAPI(BaseModel):
                         preprocessed_agent = await self.preprocess_data(agents)
                         return {agents["_id"]: AliceAgent(**preprocessed_agent)}
             except aiohttp.ClientError as e:
-                print(f"Error retrieving agents: {e}")
+                LOGGER.error(f"Error retrieving agents: {e}")
                 return {}
 
     async def get_tasks(self, task_id: Optional[str] = None) -> Dict[str, AliceTask]:
@@ -188,7 +185,7 @@ class BackendAPI(BaseModel):
                         tasks = await self.preprocess_data(tasks)
                         return {tasks["_id"]: await self.task_initializer(tasks)}
             except aiohttp.ClientError as e:
-                print(f"Error retrieving tasks: {e}")
+                LOGGER.error(f"Error retrieving tasks: {e}")
                 return {}
 
     async def get_models(self, model_id: Optional[str] = None) -> Dict[str, AliceModel]:
@@ -213,7 +210,7 @@ class BackendAPI(BaseModel):
                         models = await self.preprocess_data(models)
                         return {models['_id']: AliceModel(**models)}
             except aiohttp.ClientError as e:
-                print(f"Error retrieving models: {e}")
+                LOGGER.error(f"Error retrieving models: {e}")
                 return {}
             
     async def get_apis(self, api_id: Optional[str] = None) -> Dict[str, API]:
@@ -236,7 +233,7 @@ class BackendAPI(BaseModel):
                         apis = await self.preprocess_data(apis)
                         return {apis["_id"]: API(**apis)}
             except aiohttp.ClientError as e:
-                print(f"Error retrieving APIs: {e}")
+                LOGGER.error(f"Error retrieving APIs: {e}")
                 return {}
             
     async def update_api_health(self, api_id: str, health_status: str) -> bool:
@@ -250,7 +247,7 @@ class BackendAPI(BaseModel):
                     response.raise_for_status()
                     return True
             except aiohttp.ClientError as e:
-                print(f"Error updating API health: {e}")
+                LOGGER.error(f"Error updating API health: {e}")
                 return False
     
     async def task_initializer(self, task: dict) -> AliceTask:
@@ -291,7 +288,7 @@ class BackendAPI(BaseModel):
                         chats = await self.preprocess_data(chats)
                         return {chats['_id']: await self.populate_chat(chats)}
             except aiohttp.ClientError as e:
-                print(f"Error retrieving chats: {e}")
+                LOGGER.error(f"Error retrieving chats: {e}")
                 return {}
         
     async def populate_chat(self, chat: dict) -> AliceChat:
@@ -301,11 +298,11 @@ class BackendAPI(BaseModel):
                 try:
                     task = await self.task_initializer(function)
                     if not isinstance(task, AliceTask):
-                        print(f"Warning: task_initializer returned non-AliceTask object for function {function.get('task_name', 'Unknown')}")
+                        LOGGER.warning(f"Warning: task_initializer returned non-AliceTask object for function {function.get('task_name', 'Unknown')}")
                         continue
                     processed_functions.append(task)
                 except Exception as e:
-                    print(f"Error processing function {function.get('task_name', 'Unknown')}: {str(e)}")
+                    LOGGER.error(f"Error processing function {function.get('task_name', 'Unknown')}: {str(e)}")
     
             chat['functions'] = processed_functions
 
@@ -313,13 +310,11 @@ class BackendAPI(BaseModel):
         for message in chat.get('messages', []):
             if 'task_responses' not in message:
                 message['task_responses'] = []
-
-        print(f'Messages: {chat["messages"]}')
         
         try:
             return AliceChat(**chat)
         except Exception as e:
-            print(f"Error creating AliceChat object: {str(e)}")
+            LOGGER.error(f"Error creating AliceChat object: {str(e)}")
             # Might want to add more detailed error handling here
             raise
     
@@ -333,7 +328,7 @@ class BackendAPI(BaseModel):
                     response.raise_for_status()
                     return True
         except aiohttp.ClientError as e:
-            print(f"Error storing messages: {e}")
+            LOGGER.error(f"Error storing messages: {e}")
             return None
 
     async def store_task_response(self, task_response: DatabaseTaskResponse) -> DatabaseTaskResponse:
@@ -376,24 +371,24 @@ class BackendAPI(BaseModel):
                 async with session.patch(url, json={"task_response_id": result.id}, headers=headers) as response:
                     response.raise_for_status()
                     chat_result = await response.json()
-                    print(f"DatabaseTaskResponse added to chat successfully: {chat_result}")
+                    LOGGER.debug(f"DatabaseTaskResponse added to chat successfully: {chat_result}")
                     return chat_result
         except aiohttp.ClientError as e:
-            print(f"Error storing DatabaseTaskResponse on chat: {e}")
+            LOGGER.error(f"Error storing DatabaseTaskResponse on chat: {e}")
             raise
         
     def validate_token(self, token: str) -> dict:
         url = f"{self.base_url}/users/validate"
         headers = {"Authorization": f"Bearer {token}"}
-        print(f"Attempting to validate token at URL: {url}")
-        print(f"Headers: {headers}")
+        LOGGER.debug(f"Attempting to validate token at URL: {url}")
+        LOGGER.debug(f"Headers: {headers}")
         try:
             response = requests.get(url, headers=headers)
-            print(f"Token validation response: {response}")
+            LOGGER.debug(f"Token validation response: {response}")
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
-            print(f"Error validating token: {e}")
+            LOGGER.error(f"Error validating token: {e}")
             return {"valid": False, "message": str(e)}
         
     async def create_entity_in_db(self, entity_type: EntityType, entity_data: dict) -> str:
@@ -413,12 +408,12 @@ class BackendAPI(BaseModel):
                     LOGGER.info(f'Created {entity_type[:-1]}')
                     return result
             except aiohttp.ClientResponseError as e:
-                print(f"HTTP error during entity creation: {e.status} - {e.message}")
-                print(f"Entity data: {entity_data}")
+                LOGGER.error(f"HTTP error during entity creation: {e.status} - {e.message}")
+                LOGGER.error(f"Entity data: {entity_data}")
                 raise
             except Exception as e:
-                print(f"Unexpected error during entity creation: {str(e)}")
-                print(f"Entity data: {entity_data}")
+                LOGGER.error(f"Unexpected error during entity creation: {str(e)}")
+                LOGGER.error(f"Entity data: {entity_data}")
                 raise
 
     async def check_existing_data(self, max_retries=3, retry_delay=1) -> bool:
@@ -438,9 +433,9 @@ class BackendAPI(BaseModel):
                 return False
             except (ClientError, asyncio.TimeoutError) as e:
                 if attempt == max_retries - 1:
-                    print(f"Failed to check existing data after {max_retries} attempts: {str(e)}")
+                    LOGGER.error(f"Failed to check existing data after {max_retries} attempts: {str(e)}")
                     raise
-                print(f"Attempt {attempt + 1} failed, retrying in {retry_delay} seconds...")
+                LOGGER.error(f"Attempt {attempt + 1} failed, retrying in {retry_delay} seconds...")
                 await asyncio.sleep(retry_delay)
 
 def token_validation_middleware(api: BackendAPI):
@@ -453,7 +448,7 @@ def token_validation_middleware(api: BackendAPI):
         validation_response = api.validate_token(token)
         if not validation_response.get("valid"):
             return {"valid": False, "message": validation_response.get("message", "Invalid token")}
-        print('validation_response', validation_response)
+        LOGGER.error('validation_response', validation_response)
         request.state.user_id = validation_response["user"]["_id"]
         return {"valid": True}
     return middleware

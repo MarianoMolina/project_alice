@@ -31,10 +31,6 @@ const StartTask: React.FC = () => {
   const [openTaskCreateDialog, setOpenTaskCreateDialog] = useState(false);
   const [listKey, setListKey] = useState(0);
 
-  useEffect(() => {
-    console.log('Recent executions in StartTask:', recentExecutions);
-  }, [recentExecutions]);
-
   const executeTask = async () => {
     await handleExecuteTask();
   };

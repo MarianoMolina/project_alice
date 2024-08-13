@@ -65,7 +65,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     const fetchChatById = async (chatId: string): Promise<AliceChat> => {
         try {
             const chatData = await fetchItem('chats', chatId) as AliceChat;
-            console.log('Fetched chat by id:', chatData);
             return chatData;
         } catch (error) {
             console.error('Error fetching chat by id:', error);
@@ -87,9 +86,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
     const handleSelectChat = async (chatId: string) => {
         try {
-            console.log('Fetching chat with id:', chatId);
             const chatData = await fetchChatById(chatId);
-            console.log('Fetched chat data:', chatData);
             setCurrentChat(chatData);
             setMessages(chatData.messages);
             setCurrentChatId(chatId);

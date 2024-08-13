@@ -31,7 +31,6 @@ agentSchema.methods.apiRepresentation = function(this: IAgentDocument) {
 };
 
 function ensureObjectIdForSave(this: IAgentDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {
-  console.log('ensureObjectIdForSave called');
   if (this.system_message && (this.system_message as any)._id) {
     this.system_message = (this.system_message as any)._id;
   }
@@ -48,7 +47,6 @@ function ensureObjectIdForSave(this: IAgentDocument, next: mongoose.CallbackWith
 }
 
 function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
-  console.log('ensureObjectIdForUpdate called');
   const update = this.getUpdate() as any;
   if (update.system_message && update.system_message._id) {
     update.system_message = update.system_message._id;

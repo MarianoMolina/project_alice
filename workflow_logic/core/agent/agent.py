@@ -9,7 +9,6 @@ from workflow_logic.core.model import AliceModel
 from workflow_logic.core.api import APIManager
 from workflow_logic.util import MessageDict, LOGGER, ApiType, MessageType, TaskResponse, DatabaseTaskResponse
 
-
 class AliceAgent(BaseModel):
     id: Optional[str] = Field(default=None, description="The ID of the agent", alias="_id")
     name: str = Field(..., description="The name of the agent")
@@ -23,7 +22,7 @@ class AliceAgent(BaseModel):
     async def generate_response(self, api_manager: APIManager, messages: List[MessageDict], tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = [], recursion_depth: int = 0) -> List[MessageDict]:
         try:
             if recursion_depth >= self.max_consecutive_auto_reply:
-                print("Max recursion depth reached")
+                LOGGER.info("Max recursion depth reached")
                 return [MessageDict(
                     role="assistant",
                     content="Maximum recursion depth reached. Terminating response generation.",

@@ -57,7 +57,6 @@ const ChatAlice: React.FC = () => {
   };
 
   const handleCreateNew = useCallback(() => {
-    console.log('Create new clicked');
     setOpenChatCreateDialog(true);
   }, []);
 

@@ -48,7 +48,6 @@ export const updateItem = async <T extends CollectionName>(
     const url = `/${collectionName}/${itemId}`;
     console.log("Updating item with data:", JSON.stringify(itemData), collectionName, itemId);
     const response = await dbAxiosInstance.patch(url, itemData);
-    console.log("TRYING: ", response)
     const data = converters[collectionName](response.data) as CollectionType[T];
     console.log("Updated item:", data)
     return data;
@@ -83,7 +82,6 @@ export const generateChatResponse = async (chatId: string): Promise<boolean> => 
 export const executeTask = async (taskId: string, inputs: any): Promise<TaskResponse> => {
   try {
     const response = await taskAxiosInstance.post('/execute_task', { taskId, inputs });
-    console.log('Task executed:', response.data);
     return convertToTaskResponse(response.data);
   } catch (error) {
     console.error('Error executing task:', error);

@@ -12,7 +12,7 @@ import Register from './pages/Register';
 import ProtectedRoute from './layouts/ProtectedRoute';
 import Database from './pages/Database';
 import UserSettings from './pages/UserSettings';
-import NavigationGuard from './components/navigation/NavigationGuard';
+import NavigationGuard from './components/ui/navigation_guard/NavigationGuard';
 import { AuthProvider } from './context/AuthContext';
 import './assets/fonts/fonts.css';
 import { ApiProvider } from './context/ApiContext';

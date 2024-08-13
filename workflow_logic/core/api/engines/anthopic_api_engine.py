@@ -18,7 +18,38 @@ ANTHROPIC_PRICING_1k = {
 }
 
 class LLMAnthropic(LLMEngine):
+    """
+    LLMAnthropic engine for generating chat completions using Anthropic's API.
+
+    This class inherits from LLMEngine and is specifically tailored to work with
+    Anthropic's API. While it uses the same input structure as LLMEngine, it adapts
+    the inputs to fit Anthropic's specific requirements, ultimately producing
+    chat completions in a format consistent with other LLM engines.
+
+    The class handles Anthropic-specific features such as message adaptation,
+    tool parameter conversion, and cost calculation based on Anthropic's pricing.
+
+    Attributes:
+        Inherits all attributes from LLMEngine.
+
+    Note:
+        This class assumes the use of Anthropic's AsyncAnthropic client and
+        follows Anthropic's API conventions for chat completions.
+    """
     def adapt_messages(self, messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Adapt the input messages to fit Anthropic's expected format.
+
+        This method ensures that the message sequence alternates between 'user'
+        and 'assistant' roles, and starts with a 'user' message. It also handles
+        cases where messages have roles other than 'user' or 'assistant'.
+
+        Args:
+            messages (List[Dict[str, Any]]): The original list of messages.
+
+        Returns:
+            List[Dict[str, Any]]: The adapted list of messages suitable for Anthropic's API.
+        """
         adapted = []
         for i, msg in enumerate(messages):
             role = msg.get("role", "")
@@ -61,6 +92,31 @@ class LLMAnthropic(LLMEngine):
         return final_adapted
     
     async def generate_api_response(self, api_data: LLMConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[Dict[str, Any]]] = None, max_tokens: Optional[int] = None, tool_choice: str = 'auto', n: Optional[int] = 1, **kwargs) -> MessageDict:
+        """
+        Generate a chat completion response using Anthropic's API.
+
+        This method overrides the parent LLMEngine's method to work specifically
+        with Anthropic's API. It adapts the input parameters, handles Anthropic-specific
+        configurations, and processes the response to maintain consistency with
+        other LLM engines' output format.
+
+        Args:
+            api_data (LLMConfig): Configuration for the Anthropic API client.
+            messages (List[Dict[str, Any]]): List of conversation messages.
+            system (Optional[str]): System message for the conversation.
+            tools (Optional[List[Dict[str, Any]]]): List of available tools for the model.
+            max_tokens (Optional[int]): Maximum number of tokens to generate.
+            tool_choice (str): Whether to allow tool use (always 'auto' for Anthropic).
+            n (Optional[int]): Number of chat completion choices to generate (not used in Anthropic API).
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            MessageDict: A dictionary containing the generated message and metadata.
+
+        Raises:
+            ValueError: If Anthropic API key is missing from api_data.
+            Exception: For any errors during the API call.
+        """
         if not api_data.api_key:
             raise ValueError("Anthropic API key not found in API data")
 
@@ -83,9 +139,9 @@ class LLMAnthropic(LLMEngine):
         # Only add tools and tool_choice if tools are provided
         if anthropic_tools:
             api_params["tools"] = anthropic_tools
-            api_params["tool_choice"] = { 'type': tool_choice }
+            api_params["tool_choice"] = ToolChoiceToolChoiceAuto('auto')
 
-        print(f'API parameters: {api_params}')
+        LOGGER.debug(f'API parameters: {api_params}')
         
         try:
             
@@ -131,9 +187,36 @@ class LLMAnthropic(LLMEngine):
             raise
         
     def _convert_into_tool_params(self, tools: List[ToolFunction]) -> List[ToolParam]:
+        """
+        Convert the general tool functions into Anthropic-specific tool parameters.
+
+        Args:
+            tools (List[ToolFunction]): List of general tool functions.
+
+        Returns:
+            List[ToolParam]: List of Anthropic-specific tool parameters.
+        """
         return [(tool if isinstance(tool, ToolFunction) else ToolFunction(**tool)).convert_to_tool_params() for tool in tools]
 
     def calculate_cost(self, input_tokens: int, output_tokens: int, model: str) -> float:
+        """
+        Calculate the cost of the API call based on Anthropic's pricing.
+
+        This method uses Anthropic-specific pricing information to calculate
+        the cost of the API call.
+
+        Args:
+            input_tokens (int): Number of tokens in the input.
+            output_tokens (int): Number of tokens in the output.
+            model (str): The Anthropic model used for the API call.
+
+        Returns:
+            float: The calculated cost of the API call.
+
+        Note:
+            If the model is not found in the pricing information, it returns 0.0
+            and logs a warning.
+        """
         if model in ANTHROPIC_PRICING_1k:
             input_cost_per_1k, output_cost_per_1k = ANTHROPIC_PRICING_1k[model]
             input_cost = (input_tokens / 1000) * input_cost_per_1k

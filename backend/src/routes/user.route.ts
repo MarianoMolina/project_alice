@@ -15,6 +15,7 @@ import Prompt from '../models/prompt.model';
 import Task from '../models/task.model';
 import TaskResult from '../models/taskresult.model';
 import ParameterDefinition from '../models/parameter.model';
+import Logger from '../utils/logger';
 
 const router: Router = express.Router();
 
@@ -131,19 +132,15 @@ router.post('/purge-and-reinitialize', auth, async (req: AuthRequest, res: Respo
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    console.log('Purging data for userId:', userId);
+    Logger.info('Purging data for userId:', userId);
 
     const models = [Agent, API, Chat, Model, Prompt, Task, TaskResult, ParameterDefinition];
     
     for (const ModelClass of models) {
-      const modelName = ModelClass.modelName;
-      console.log(`Purging ${modelName}...`);
-      // Use type assertion to resolve the TypeScript error
-      const result = await (ModelClass as any).deleteMany({ created_by: userId });
-      console.log(`Deleted ${result.deletedCount} items from ${modelName}`);
+      await (ModelClass as any).deleteMany({ created_by: userId });
     }
 
-    console.log('All collections purged');
+    Logger.info('All collections purged');
 
     // Get the original authorization token from the request
     const token = req.headers.authorization;

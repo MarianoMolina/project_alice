@@ -17,23 +17,24 @@ import APIRoutes from './routes/api.route';
 import corsConfigMiddleware from './middleware/corsConfig.middleware';
 import loggingMiddleware from './middleware/logging.middleware';
 import lmStudioRoute from './routes/lmStudio.route';
+import Logger from './utils/logger';
 
 dotenv.config();
 
 const app = express();
 
-console.log('MongoDB URI:', process.env.MONGODB_URI);
+Logger.info('MongoDB URI:', process.env.MONGODB_URI);
 
 mongoose.connect(process.env.MONGODB_URI || "mongodb://mongo/alice_database")
     .then(() => {
-        console.log('Connected to MongoDB');
+        Logger.info('Connected to MongoDB');
     })
     .catch(err => {
-        console.error('Failed to connect to MongoDB', err);
+        Logger.error('Failed to connect to MongoDB', err);
     });
 
-// // Apply the logging middleware
-// app.use(loggingMiddleware);
+// Apply the logging middleware
+app.use(loggingMiddleware);
 
 // Apply the CORS middlewares
 app.use(corsConfigMiddleware);

@@ -93,7 +93,6 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const handleSelectTask = (task: AliceTask) => {
     setSelectedTask(task);
-    console.log('Selected task in context:', task);
     setInputValues({});
     setExecutionStatus('idle');
   };
@@ -108,8 +107,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.log('Executing task:', selectedTask._id, inputValues);
       setExecutionStatus('progress');
       const result = await executeTask(selectedTask._id, inputValues);
-      await fetchTaskResults(); // This will update recentExecutions
-      console.log('Task execution result:', result);
+      await fetchTaskResults(); 
       addNotification('Task executed successfully', 'success');
       setSelectedResult(result);
       setExecutionStatus('success');

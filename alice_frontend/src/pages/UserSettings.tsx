@@ -37,9 +37,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
         const loadUser = async () => {
             try {
                 if (user) {
-                    console.log('user:', user);
                     const userData = await fetchItem('users', user._id) as User;
-                    console.log('User data:', userData);
                     setUserObject(userData);
                     setOriginalUserObject(userData);
                 }
@@ -90,7 +88,6 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
     }, []);
 
     const handleApiSelect = useCallback((item: Partial<API>) => {
-        console.log('Item selected:', item);
         setSelectedItem(item);
         setIsCreating(false);
         setShowCreateAPI(true);

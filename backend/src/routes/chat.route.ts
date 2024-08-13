@@ -8,6 +8,7 @@ import { AuthRequest } from '../interfaces/auth.interface';
 import { createRoutes } from '../utils/routeGenerator';
 import { chatHelpers } from '../utils/chatHelpers.utils';
 import logger from '../utils/logger';
+import Logger from '../utils/logger';
 
 // Create a router using routeGenerator for common CRUD routes
 const generatedRouter = createRoutes<IAliceChatDocument, 'AliceChat'>(AliceChat, 'AliceChat');
@@ -37,8 +38,6 @@ customRouter.patch('/:id', async (req: AuthRequest, res: Response) => {
     if (chat.created_by.toString() !== user_id && user_role !== 'admin') {
       return res.status(403).json({ message: 'Unauthorized to update this chat' });
     }
-    console.log('Updating chat:', req.body);
-    console.log('Chat:', chat);
 
     const updatedChatResult = await chatHelpers.edit_chat(id, req.body, user_id);
     res.status(200).json({ message: 'Chat updated successfully', chat: updatedChatResult });
@@ -99,12 +98,12 @@ customRouter.patch('/:chatId/add_task_response', async (req: AuthRequest, res: R
     const updatedChat = await chatHelpers.add_task_result_to_chat(chatId, taskResultId, userId);
 
     if (!updatedChat) {
-      console.log('Failed to update chat:', chatId);
+      Logger.info('Failed to update chat:', chatId);
       return res.status(500).json({ message: 'Failed to update chat' });
     }
     res.status(200).json({ message: 'Task response added successfully', chat: updatedChat });
   } catch (error) {
-    console.error('Error in add_task_response route:', error);
+    Logger.info('Error in add_task_response route:', error);
     res.status(500).json({ message: (error as Error).message, stack: (error as Error).stack });
   }
 });

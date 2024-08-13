@@ -182,7 +182,7 @@ class AliceTask(BaseModel, ABC):
     
     async def a_execute(self, **kwargs) -> DatabaseTaskResponse:
         """Executes the task and returns a TaskResponse."""
-        print(f'Executing task {self.task_name}')
+        LOGGER.info(f'Executing task {self.task_name}')
         task_id = str(uuid.uuid4())
         
         # Retrieve or initialize execution history
@@ -193,7 +193,7 @@ class AliceTask(BaseModel, ABC):
         # Check for recursion
         if not self.recursive:
             if any(task["task_name"] == self.task_name for task in execution_history):
-                print(f'Error: Task {self.task_name} is already in the execution history. Execution history: {execution_history}')
+                LOGGER.error(f'Error: Task {self.task_name} is already in the execution history. Execution history: {execution_history}')
                 raise RecursionError(f"Task {self.task_name} is already in the execution history, preventing recursion.")
         
         # Add current task to execution history

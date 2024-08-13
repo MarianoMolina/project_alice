@@ -8,10 +8,8 @@ export interface LoginResponse {
 }
 
 export const loginUser = async (email: string, password: string): Promise<LoginResponse> => {
-  console.log('Attempting to log in with:', { email, password });
   try {
     const response = await dbAxiosInstance.post<LoginResponse>('/users/login', { email, password });
-    console.log('Login response:', response.data);
     return response.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
@@ -26,7 +24,6 @@ export const loginUser = async (email: string, password: string): Promise<LoginR
 export const registerUser = async (name: string, email: string, password: string): Promise<User> => {
   try {
     const response = await dbAxiosInstance.post<User>('/users/register', { name, email, password });
-    console.log('Registration response:', response.data);
     return response.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
@@ -41,7 +38,6 @@ export const registerUser = async (name: string, email: string, password: string
 export const initializeUserDatabase = async (): Promise<void> => {
   try {
     const response = await taskAxiosInstance.post(`/initialize_user_database`);
-    console.log('User database initialized:', response.data);
     return;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {

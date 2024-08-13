@@ -2,8 +2,9 @@ from datetime import datetime
 from enum import Enum
 from pydantic import BaseModel, Field, model_validator
 from typing import Optional, Literal, Dict, Any, List, Union
-from typing_extensions import Optional, Literal, Annotated
+from typing_extensions import Optional, Literal
 from workflow_logic.core.parameters import ToolCall
+from workflow_logic.util.logging_config import LOGGER
 
 class OutputInterface(BaseModel):
     content: List[Any] = Field([], description="The content of the output.")
@@ -157,7 +158,7 @@ class SearchResult(BaseModel):
                 else:
                     sanitized_metadata[key] = str(val)
             except Exception as e:
-                print(f"Error serializing value for key {key}: {val}, Exception: {e}")
+                LOGGER.error(f"Error serializing value for key {key}: {val}, Exception: {e}")
                 sanitized_metadata[key] = "Unserializable value"
         values['metadata'] = sanitized_metadata
         return values

@@ -1,5 +1,6 @@
 import * as net from 'net';
 import WebSocket from 'ws';
+import Logger from './logger';
 
 export function testConnection(host: string, port: number): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -7,7 +8,7 @@ export function testConnection(host: string, port: number): Promise<void> {
         socket.setTimeout(5000);  // 5 second timeout
 
         socket.on('connect', () => {
-            console.log(`Successfully connected to ${host}:${port}`);
+            Logger.debug(`Successfully connected to ${host}:${port}`);
             socket.destroy();
             resolve();
         });
@@ -30,7 +31,7 @@ export function testConnection(host: string, port: number): Promise<void> {
 export async function runNetworkTests(): Promise<void> {
     try {
         await testConnection('host.docker.internal', 1234);
-        console.log('LM Studio server is reachable');
+        Logger.debug('LM Studio server is reachable');
     } catch (error) {
         console.error('LM Studio server is not reachable:', error);
     }
@@ -41,14 +42,14 @@ export function testWebSocket(url: string): Promise<void> {
         const ws = new WebSocket(url);
 
         ws.on('open', () => {
-            console.log('WebSocket connection opened');
+            Logger.debug('WebSocket connection opened');
             
             // Send a test message
             ws.send(JSON.stringify({ type: 'echo', data: 'Hello, LM Studio!' }));
         });
 
         ws.on('message', (data: WebSocket.Data) => {
-            console.log('Received:', data.toString());
+            Logger.debug('Received:', data.toString());
             ws.close();
             resolve();
         });
@@ -59,7 +60,7 @@ export function testWebSocket(url: string): Promise<void> {
         });
 
         ws.on('close', (code: number, reason: string) => {
-            console.log(`WebSocket closed. Code: ${code}, Reason: ${reason}`);
+            Logger.debug(`WebSocket closed. Code: ${code}, Reason: ${reason}`);
         });
 
         // Timeout after 10 seconds

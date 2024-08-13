@@ -4,6 +4,7 @@ import { callLMStudioMethod, ChatCompletionResponse, CompletionParams, Completio
 import { runNetworkTests, testWebSocket } from './lmStudioNetworkTests';
 import { ChatCompletionParams } from "./lmStudio.utils";
 import { v4 as uuidv4 } from 'uuid';
+import Logger from "./logger";
 
 class Queue {
     private queue: (() => Promise<any>)[] = [];
@@ -70,7 +71,7 @@ export class LMStudioManager {
     }
 
     private initializeClient() {
-        console.log('Initializing LMStudioClient...');
+        Logger.info('Initializing LMStudioClient...');
         this.client = new LMStudioClient({
             baseUrl: "ws://host.docker.internal:1234",
             verboseErrorMessages: true,
@@ -81,16 +82,16 @@ export class LMStudioManager {
                 debug: (...args) => console.debug('LMStudioClient Debug:', ...args),
             },
         });
-        console.log('LMStudioClient initialized');
+        Logger.info('LMStudioClient initialized');
         this.runInitialTests();
         this.setupPeriodicTasks();
     }
 
     private async runInitialTests() {
-        console.log('Running network tests...');
+        Logger.info('Running network tests...');
         try {
             await runNetworkTests();
-            console.log('Network tests completed');
+            Logger.info('Network tests completed');
         } catch (error) {
             console.error('Network tests failed:', error);
         }
@@ -103,49 +104,49 @@ export class LMStudioManager {
         //     console.error('WebSocket test failed:', error);
         // }
 
-        console.log('Testing listDownloadedModels...');
+        Logger.debug('Testing listDownloadedModels...');
         try {
             const models = await this.client.system.listDownloadedModels();
-            console.log('Downloaded models:', models);
+            Logger.debug('Downloaded models:', models);
         } catch (error) {
             console.error('Error listing downloaded models:', error);
         }
     }
 
     private setupPeriodicTasks() {
-        console.log('Unloading all models...');
+        Logger.info('Unloading all models...');
         this.unloadAllModels().then(() => {
-            console.log('Unload all models completed');
+            Logger.info('Unload all models completed');
         }).catch(error => {
-            console.error('Error unloading all models:', error);
+            Logger.error('Error unloading all models:', error);
         });
 
-        console.log('Setting up periodic model unloading...');
+        Logger.info('Setting up periodic model unloading...');
         setInterval(() => this.unloadInactiveModels(), 30 * 1000); // Every 30 seconds
     }
 
     async getOrLoadModel(modelId: string): Promise<LLMDynamicHandle> {
         return this.queue.enqueue(async () => {
             if (this.loadedModels[modelId]) {
-                console.log(`Using already loaded model ${modelId}`);
+                Logger.info(`Using already loaded model ${modelId}`);
                 this.loadedModels[modelId].lastUsed = Date.now();
                 return this.loadedModels[modelId].model;
             }
-            console.log(`Model ${modelId} not loaded, loading now...`);
+            Logger.info(`Model ${modelId} not loaded, loading now...`);
             return await this.loadModel(modelId);
         });
     }
 
     async isModelAvailable(client: LMStudioClient, model_name: string) {
         const downloadedModels = await client.system.listDownloadedModels();
-        console.log('Downloaded Models:', downloadedModels);
+        Logger.debug('Downloaded Models:', downloadedModels);
         const isModelAvailable = downloadedModels.some((model: any) => model.path.includes(model_name));
         return isModelAvailable
     }
 
     private async loadModel(modelId: string): Promise<LLMDynamicHandle> {
         try {
-            console.log(`Loading model ${modelId}...`);
+            Logger.info(`Loading model ${modelId}...`);
             const modelInfo = await Model.findById(modelId);
             if (!modelInfo) {
                 throw new Error(`Model with id ${modelId} not found in the database`);
@@ -156,7 +157,7 @@ export class LMStudioManager {
                 throw new Error(`Model ${modelInfo.model_name} is not available in the system`);
             }
 
-            console.log('Loading model with Info:', modelInfo);
+            Logger.info('Loading model with Info:', modelInfo);
             const model: LLMDynamicHandle = await callLMStudioMethod(`load_${modelId}`, () => this.client.llm.load(modelInfo.model_name, {
                 config: {
                     gpuOffload: "max",
@@ -167,7 +168,7 @@ export class LMStudioManager {
                 verbose: true,
             }));
             this.loadedModels[modelId] = { model, lastUsed: Date.now() };
-            console.log(`Successfully loaded model ${modelId}`);
+            Logger.info(`Successfully loaded model ${modelId}`);
             return model;
         } catch (error) {
             console.error(`Error loading model ${modelId}:`, error);
@@ -180,12 +181,12 @@ export class LMStudioManager {
             const now = Date.now();
             for (const [modelId, { model, lastUsed }] of Object.entries(this.loadedModels)) {
                 if (now - lastUsed > this.inactivityThreshold) {
-                    console.log(`Unloading inactive model: ${modelId}`);
+                    Logger.info(`Unloading inactive model: ${modelId}`);
                     try {
                         const modelInfo = await this.getModelInfo(modelId);
                         await callLMStudioMethod(`unload_${modelId}`, () => this.client.llm.unload(modelInfo.modelInfo.name));
                         delete this.loadedModels[modelId];
-                        console.log(`Successfully unloaded inactive model: ${modelId}`);
+                        Logger.info(`Successfully unloaded inactive model: ${modelId}`);
                     } catch (error) {
                         console.error(`Failed to unload inactive model ${modelId}:`, error);
                     }
@@ -196,17 +197,17 @@ export class LMStudioManager {
 
     private async unloadAllModels() {
         return this.queue.enqueue(async () => {
-            console.log("Starting to unload all previously loaded models...");
+            Logger.info("Starting to unload all previously loaded models...");
             try {
                 const loadedModelsList = await callLMStudioMethod('listLoaded', () => this.client.llm.listLoaded());
-                console.log("Loaded models:", loadedModelsList);
+                Logger.debug("Loaded models:", loadedModelsList);
                 for (const model of loadedModelsList) {
-                    console.log(`Unloading model: ${model.identifier}`);
+                    Logger.debug(`Unloading model: ${model.identifier}`);
                     await callLMStudioMethod(`unload_${model.identifier}`, () => this.client.llm.unload(model.identifier));
-                    console.log(`Successfully unloaded model: ${model.identifier}`);
+                    Logger.debug(`Successfully unloaded model: ${model.identifier}`);
                 }
                 this.loadedModels = {};
-                console.log("All models unloaded successfully.");
+                Logger.info("All models unloaded successfully.");
             } catch (error) {
                 console.error("Error unloading models:", error);
             }
@@ -216,22 +217,22 @@ export class LMStudioManager {
     private retrieveToolCalls(content: string): ToolCall[] | false {
         const toolCallRegex = /<tool_call>([\s\S]*?)<\/tool_call>/g;
         const toolCalls: ToolCall[] = [];
-        console.log(`Retrieving tool calls from content:`, content);
+        Logger.debug(`Retrieving tool calls from content:`, content);
         let match;
 
         while ((match = toolCallRegex.exec(content)) !== null) {
             let rawToolCall = match[1].trim();
-            console.log('Raw tool call:', rawToolCall);
+            Logger.debug('Raw tool call:', rawToolCall);
 
             try {
                 // Attempt to unescape the JSON string if it's escaped
                 try {
                     rawToolCall = JSON.parse(`"${rawToolCall.replace(/"/g, '\\"')}"`);
                 } catch (unescapeError) {
-                    console.log('Unescaping failed, proceeding with raw string');
+                    Logger.debug('Unescaping failed, proceeding with raw string');
                 }
 
-                console.log('Unescaped/raw tool call:', rawToolCall);
+                Logger.debug('Unescaped/raw tool call:', rawToolCall);
 
                 // Parse the JSON
                 const toolCallJson = JSON.parse(rawToolCall);
@@ -266,7 +267,7 @@ export class LMStudioManager {
                     const toolCallJson = JSON.parse(correctedJson);
 
                     if (typeof toolCallJson.name === 'string' && toolCallJson.arguments !== undefined) {
-                        console.log('Successfully recovered from JSON error');
+                        Logger.debug('Successfully recovered from JSON error');
                         toolCalls.push({
                             id: uuidv4(),
                             type: "function",
@@ -286,7 +287,7 @@ export class LMStudioManager {
             }
         }
 
-        console.log('Processed tool calls:', toolCalls);
+        Logger.debug('Processed tool calls:', toolCalls);
 
         return toolCalls.length > 0 ? toolCalls : false;
     }
@@ -297,7 +298,7 @@ export class LMStudioManager {
             temperature: params.temperature ?? undefined,
             stopStrings: params.stop ? params.stop as string[] : undefined,
         };
-        console.log('Model loaded:', params.model);
+        Logger.info('Model loaded:', params.model);
 
         const prediction: OngoingPrediction = model.complete(params.prompt, opts);
 
@@ -370,7 +371,7 @@ export class LMStudioManager {
             temperature: params.temperature ?? undefined,
             stopStrings: params.stop ? params.stop as string[] : undefined,
         };
-        console.log('Model loaded:', params.model);
+        Logger.info('Model loaded:', params.model);
 
         const prediction: OngoingPrediction = model.respond(updatedMessages, opts);
 
@@ -464,9 +465,9 @@ export class LMStudioManager {
             if (this.loadedModels[modelId]) {
                 await callLMStudioMethod(`unload_${modelId}`, () => this.client.llm.unload(modelId));
                 delete this.loadedModels[modelId];
-                console.log(`Successfully unloaded model: ${modelId}`);
+                Logger.info(`Successfully unloaded model: ${modelId}`);
             } else {
-                console.log(`Model ${modelId} is not loaded`);
+                Logger.info(`Model ${modelId} is not loaded`);
             }
         });
     }

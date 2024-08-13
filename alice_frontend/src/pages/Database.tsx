@@ -159,7 +159,6 @@ const Database: React.FC = () => {
                 tabs={tabs}
                 activeTab={activeTab}
                 onTabChange={useCallback((tab: CollectionElementString) => {
-                    console.log('Tab changed to:', tab);
                     setActiveTab(tab);
                     setSelectedItem(null);
                     setIsCreating(false);

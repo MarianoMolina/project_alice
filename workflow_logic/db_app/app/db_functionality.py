@@ -3,7 +3,7 @@ from typing import get_args, Optional
 from pydantic import Field
 from tqdm import tqdm
 from workflow_logic.core import APIManager
-from workflow_logic.util import  EntityType
+from workflow_logic.util import  EntityType, LOGGER
 from workflow_logic.db_app.initialization import DBStructure, DBInitManager
 from workflow_logic.db_app.app.db import BackendAPI
 
@@ -51,7 +51,7 @@ class BackendFunctionalityAPI(BackendAPI):
                     await self.create_entities_by_type(entity_type, db_structure, pbar)
             return await self.validate_initialization(DBStructure(**db_structure_copy))
         except Exception as e:
-            print(f"Error in initialize_database: {str(e)}")
+            LOGGER.error(f"Error in initialize_database: {str(e)}")
 
     async def create_entities_by_type(self, entity_type: EntityType, db_structure: DBStructure, pbar: tqdm) -> bool:
         entities = getattr(db_structure, entity_type, [])
@@ -60,15 +60,15 @@ class BackendFunctionalityAPI(BackendAPI):
                 await self.temp_db_instance.create_entity_instance(entity_type, entity_data, self)
             except aiohttp.ClientResponseError as e:
                 if e.status == 409:
-                    print(f"Entity already exists: {entity_type} - {entity_data.get('name', entity_data.get('id', entity_data.get('_id')))}")
+                    LOGGER.error(f"Entity already exists: {entity_type} - {entity_data.get('name', entity_data.get('id', entity_data.get('_id')))}")
                 else:
-                    print(f"Error creating entity {entity_type}: {str(e)}")
-                    print(f"Entity data: {entity_data}")
+                    LOGGER.error(f"Error creating entity {entity_type}: {str(e)}")
+                    LOGGER.error(f"Entity data: {entity_data}")
                     # If you want to stop the entire process on any error, uncomment the next line
                     # raise
             except Exception as e:
-                print(f"Unexpected error creating entity {entity_type}: {str(e)}")
-                print(f"Entity data: {entity_data}")
+                LOGGER.error(f"Unexpected error creating entity {entity_type}: {str(e)}")
+                LOGGER.error(f"Entity data: {entity_data}")
                 # If you want to stop the entire process on any error, uncomment the next line
                 # raise
             pbar.update(1)
@@ -90,7 +90,7 @@ class BackendFunctionalityAPI(BackendAPI):
                         
                         
                         if len(db_entities) != len(structure_entities):
-                            print(f"Mismatch in {entity_type} count. Expected: {len(structure_entities)}, Found: {len(db_entities)}")
+                            LOGGER.error(f"Mismatch in {entity_type} count. Expected: {len(structure_entities)}, Found: {len(db_entities)}")
                             return False
                         
                         # Check for the presence of each entity by name or email
@@ -98,14 +98,14 @@ class BackendFunctionalityAPI(BackendAPI):
                             
                             identifier = entity.get('name') or entity.get('email')
                             if not any(db_entity.get('name') == identifier or db_entity.get('email') == identifier for db_entity in db_entities):
-                                print(f"Entity not found in database: {entity_type} - {identifier}")
+                                LOGGER.error(f"Entity not found in database: {entity_type} - {identifier}")
                                 return False
             
-            print("All entities validated successfully")
+            LOGGER.info("All entities validated successfully")
             return True
         
         except Exception as e:
-            print(f"Error during validation: {str(e)}")
+            LOGGER.error(f"Error during validation: {str(e)}")
             return False
         
     async def api_setter(self) -> APIManager:

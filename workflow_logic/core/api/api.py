@@ -1,7 +1,7 @@
 from bson import ObjectId
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, Union
-from workflow_logic.util import User, ApiType, ApiName, LLMConfig
+from workflow_logic.util import User, ApiType, ApiName, LLMConfig, LOGGER
 from workflow_logic.core.model import AliceModel
 
 class API(BaseModel):
@@ -46,7 +46,7 @@ class API(BaseModel):
             if not self.default_model:
                 raise ValueError("No model specified.")
             model = self.default_model
-        print(f'model: {model}')
+        LOGGER.debug(f'model: {model}')
         return LLMConfig( 
             temperature=model.temperature, 
             use_cache=model.use_cache,

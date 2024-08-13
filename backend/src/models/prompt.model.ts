@@ -48,7 +48,6 @@ promptSchema.pre('save', ensureObjectId);
 
 promptSchema.pre('findOneAndUpdate', function (this: any, next: CallbackWithoutResultAndOptionalError) {
   const update = this.getUpdate();
-  console.log('Pre-processing update object:', update);
 
   if (update.created_by) {
     update.created_by = ensureObjectIdHelper(update.created_by);
@@ -58,11 +57,8 @@ promptSchema.pre('findOneAndUpdate', function (this: any, next: CallbackWithoutR
   }
 
   if (update.parameters && update.parameters.properties) {
-    console.log('Initial properties object:', update.parameters);
     update.parameters.properties = ensureObjectIdForProperties(update.parameters.properties);
-    console.log('Post-processing update object:', update.parameters);
   }
-  console.log('Final update object:', update);
   next();
 });
 

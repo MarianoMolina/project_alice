@@ -141,13 +141,15 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
 
 We have several exciting features planned for future releases of Alice:
 
-1. **File input and type interface**: Being able to add files of any type to a conversation, which makes a conversion to text of the file (stt, itt, or simply parsing for files that can be converted to a string), allowing for the user and the agents to share any type of data. This, in turn, requires the agents to also be able to produce different types of outputs, which is where the type interface logic comes in, to convert str -> any and back. 
+1. **More API engines and base tasks**: BeautifulSoup to scrap websites, vision_models, text_to_image_models, text_to_speech_models, etc. This will enable a set of tasks to be created. 
 
-2. **Complex Agent Structures**: Implementation of more advanced agent architectures, such as ReAct agents, to enable more sophisticated reasoning and decision-making capabilities.
+2. **File input and type interface**: Being able to add files of any type to a conversation, which makes a conversion to text of the file (stt, itt, or simply parsing for files that can be converted to a string), allowing for the user and the agents to share any type of data. This, in turn, requires the agents to also be able to produce different types of outputs, which is where the type interface logic comes in, to convert str -> any and back. 
 
-3. **Work Environments**: Introduction of a feature similar to Anthropic's Artifacts, providing a more structured way to manage and interact with complex data and tools within the Alice ecosystem.
+3. **Complex Agent Structures**: Implementation of more advanced agent architectures, such as ReAct agents, to enable more sophisticated reasoning and decision-making capabilities.
 
-4. **Journals**: Development of a holistic view of conversations and interactions, enabling the creation of workflows that run periodically. This feature will support tasks such as:
+4. **Work Environments**: Introduction of a feature similar to Anthropic's Artifacts, providing a more structured way to manage and interact with complex data and tools within the Alice ecosystem.
+
+5. **Journals**: Development of a holistic view of conversations and interactions, enabling the creation of workflows that run periodically. This feature will support tasks such as:
    - Reviewing and summarizing emails
    - Tracking and updating calendar events
    - Monitoring and responding to messages across various platforms
