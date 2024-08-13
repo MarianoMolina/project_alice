@@ -97,6 +97,7 @@ The Alice framework provides a user-friendly frontend interface for interacting 
    - Combine multiple tasks into a sequential or conditional flow
    - Define complex processes involving multiple agents and task types, check tasks, api tasks, agents with tools, etc. 
 
+
 ## Development
 
 ### Adding New Task Types
@@ -106,11 +107,23 @@ The Alice framework provides a user-friendly frontend interface for interacting 
 3. Add the new task type to the `task_type` enum in the `task.model.ts` file.
 4. Update the task creation logic in the frontend to include the new task type.
 
+### Adding New API Types and API Names
+
+1. Update the `ApiType` and `ApiName` enums in the backend and workflow containers.
+2. Implement the necessary logic in the workflow container to handle the new API type.
+3. Update the frontend to support the new API type in the API management interface.
+
+For detailed instructions on adding new API types and names, refer to the backend and workflow README files.
+
 ### Adding New Models, APIs, Tasks, Chats, Agents
 
-1. Simply navigate to the Database page in the frontend and select the entity type you want to create and click on create new. 
-2. If you want to add them so that new users start with these extra entities, you can modify the workflow_manager.db_app.initialization.modules, add new modules, or remove them
-3. If you create tasks or workflows that you would like to share, let me know! If people want to share, I'll offer a way to do so. 
+1. Navigate to the Database page in the frontend and select the entity type you want to create and click on create new.
+2. To add new entities that will be available to new users, you can modify the workflow initialization modules:
+   - Locate the `workflow_logic/db_app/initialization/modules` directory in the workflow container.
+   - Create a new module file or modify existing ones to include your new entities.
+   - Update the `modular_db` in `workflow_logic/db_app/initialization/data_init.py` to include your new module.
+
+For more detailed information on creating and managing initialization modules, refer to the workflow container README.
 
 ## Contributing
 
@@ -121,6 +134,28 @@ Contributions are welcome! Please follow these steps:
 3. Make your changes and commit them: `git commit -m 'Add some feature'`
 4. Push to the branch: `git push origin feature-branch-name`
 5. Submit a pull request
+
+If you've created new tasks, workflows, or initialization modules that you'd like to share with the community, please include them in your pull request along with appropriate documentation. We're particularly interested in contributions that expand the capabilities of the workflow initialization process, allowing users to start with a richer set of pre-configured entities.
+
+## Future Features
+
+We have several exciting features planned for future releases of Alice:
+
+1. **File input and type interface**: Being able to add files of any type to a conversation, which makes a conversion to text of the file (stt, itt, or simply parsing for files that can be converted to a string), allowing for the user and the agents to share any type of data. This, in turn, requires the agents to also be able to produce different types of outputs, which is where the type interface logic comes in, to convert str -> any and back. 
+
+2. **Complex Agent Structures**: Implementation of more advanced agent architectures, such as ReAct agents, to enable more sophisticated reasoning and decision-making capabilities.
+
+3. **Work Environments**: Introduction of a feature similar to Anthropic's Artifacts, providing a more structured way to manage and interact with complex data and tools within the Alice ecosystem.
+
+4. **Journals**: Development of a holistic view of conversations and interactions, enabling the creation of workflows that run periodically. This feature will support tasks such as:
+   - Reviewing and summarizing emails
+   - Tracking and updating calendar events
+   - Monitoring and responding to messages across various platforms
+   - Reviewing and updating goal statuses
+   - Generating periodic reports and insights
+   - Updating RAG-sources
+
+These features aim to make Alice an even more powerful and versatile AI assistant framework, capable of handling complex, long-term tasks and providing more comprehensive support for users' daily activities and long-term goals.
 
 ## License
 
