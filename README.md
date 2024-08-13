@@ -94,6 +94,7 @@ The Alice framework provides a user-friendly frontend interface for interacting 
 4. View and analyze task results
 ![Task Results](./img/task_result.PNG "View task results and troubleshoot your tasks")
 5. Manage user accounts and permissions, api config, etc. 
+![User APIs](./img/user.PNG "View your user details and API configs - also you can re-set your database")
 
 ### Types of Tasks
 
@@ -164,8 +165,6 @@ Contributions are welcome! Please follow these steps:
 If you've created new tasks, workflows, or initialization modules that you'd like to share with the community, please include them in your pull request along with appropriate documentation. We're particularly interested in contributions that expand the capabilities of the workflow initialization process, allowing users to start with a richer set of pre-configured entities.
 
 ## Future Features
-
-Where Project Alice is going:
 
 1. **Workflow generator**: Improve the interface for workflow generation. Ideally, something that allows the user to handle tasks/nodes, visualize the execution of it, etc. 
 

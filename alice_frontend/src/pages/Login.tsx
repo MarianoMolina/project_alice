@@ -28,47 +28,47 @@ const Login: React.FC = () => {
   };
 
   return (
-      <Container maxWidth="xs">
-        <Box mt={5}>
-          <Typography variant="h4" component="h1" gutterBottom>
+    <Container maxWidth="xs">
+      <Box mt={5}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          Login
+        </Typography>
+        <form onSubmit={handleSubmit}>
+          <TextField
+            label="Email"
+            type="email"
+            fullWidth
+            margin="normal"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <TextField
+            label="Password"
+            type="password"
+            fullWidth
+            margin="normal"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          {error && (
+            <Alert severity="error" style={{ marginBottom: '16px' }}>
+              {error}
+            </Alert>
+          )}
+          <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mb: 2 }}>
             Login
-          </Typography>
-          <form onSubmit={handleSubmit}>
-            <TextField
-              label="Email"
-              type="email"
-              fullWidth
-              margin="normal"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <TextField
-              label="Password"
-              type="password"
-              fullWidth
-              margin="normal"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            {error && (
-              <Alert severity="error" style={{ marginBottom: '16px' }}>
-                {error}
-              </Alert>
-            )}
-            <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mb: 2 }}>
-              Login
-            </Button>
-          </form>
-          <Typography variant="body2" align="center">
-            Don't have an account?{' '}
-            <Link href="/register" underline="hover">
-              Register
-            </Link>
-          </Typography>
-        </Box>
-      </Container>
+          </Button>
+        </form>
+        <Typography variant="body2" align="center">
+          Don't have an account?{' '}
+          <Link href="/register" underline="hover">
+            Register
+          </Link>
+        </Typography>
+      </Box>
+    </Container>
   );
 };
 
