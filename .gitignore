@@ -1,6 +1,7 @@
 logs
 tmp
 .venv
+venv
 .pytest_cache
 .env
 .cache

@@ -32,8 +32,7 @@ services:
       - ./backend:/app
       - /app/node_modules
     environment:
-      NODE_ENV: production
-    command: sh -c "npm run build && nodemon --watch src --ext ts --exec 'npm run build && node dist/index.js'"
+      NODE_ENV: ${NODE_ENV:-production}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:

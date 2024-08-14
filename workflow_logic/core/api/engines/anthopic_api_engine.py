@@ -139,7 +139,7 @@ class LLMAnthropic(LLMEngine):
         # Only add tools and tool_choice if tools are provided
         if anthropic_tools:
             api_params["tools"] = anthropic_tools
-            api_params["tool_choice"] = ToolChoiceToolChoiceAuto('auto')
+            api_params["tool_choice"] = {"type": "auto"}
 
         LOGGER.debug(f'API parameters: {api_params}')
         
