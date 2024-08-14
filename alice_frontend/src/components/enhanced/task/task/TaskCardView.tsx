@@ -5,7 +5,7 @@ import {
     Chip,
     ListItemButton,
 } from '@mui/material';
-import { Category, Description, Functions, Person, Code, ApiRounded, Sos, Settings, Logout } from '@mui/icons-material';
+import { Category, Description, Functions, Person, ApiRounded, Sos, Settings, Logout } from '@mui/icons-material';
 import { TaskComponentProps } from '../../../../types/TaskTypes';
 import useStyles from '../TaskStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';

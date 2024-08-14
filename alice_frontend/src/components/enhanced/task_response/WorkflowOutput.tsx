@@ -38,7 +38,7 @@ export const WorkflowOutput: React.FC<WorkflowOutputProps> = ({ content, depth =
   console.log('WorkflowOutput content:', content);
 
   const renderContent = (item: any) => {
-    if (!item || typeof item !== 'object') {
+    if (!item || typeof item !== 'object' || !item.content) {
       return <Typography>No output content available</Typography>;
     }
 

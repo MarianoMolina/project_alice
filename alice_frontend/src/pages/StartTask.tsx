@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Box, Typography, List, Dialog, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import { Add, Functions, Assignment, ExpandMore } from '@mui/icons-material';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';

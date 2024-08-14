@@ -35,10 +35,10 @@ export const registerUser = async (name: string, email: string, password: string
   }
 };
 
-export const initializeUserDatabase = async (): Promise<void> => {
+export const initializeUserDatabase = async (): Promise<String> => {
   try {
     const response = await taskAxiosInstance.post(`/initialize_user_database`);
-    return;
+    return response.data.message;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       console.error('Initialization error:', error.response?.data);

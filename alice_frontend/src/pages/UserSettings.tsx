@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
-import { Box, TextField, Typography, Button, Dialog, Card, CardContent, Paper, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Box, TextField, Typography, Button, Dialog, Card, CardContent, Paper } from '@mui/material';
 import { Person, Api, Warning } from '@mui/icons-material';
 import { useApi } from '../context/ApiContext';
 import { useAuth } from '../context/AuthContext';

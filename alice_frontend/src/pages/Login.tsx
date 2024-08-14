@@ -2,7 +2,6 @@ import axios from 'axios';
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { TextField, Button, Container, Typography, Box, Alert, Link } from '@mui/material';
-import { WavyBackground } from '../components/ui/aceternity/WavyBackground';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
