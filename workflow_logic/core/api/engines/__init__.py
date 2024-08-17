@@ -6,7 +6,11 @@ from .beautiful_soup_engine import BeautifulSoupWebScraperEngine
 from .image_gen_engine import ImageGenerationEngine
 from .vision_model_engine import VisionModelEngine
 from .anthropic_vision_engine import AnthropicVisionEngine
+from .oai_stt_engine import OpenAISpeechToTextEngine
+from .oai_timestamped_stt_engine import OpenAIAdvancedSpeechToTextEngine
+from .text_to_speech_engine import OpenAITextToSpeechEngine
 
 __all__ = ["ArxivSearchAPI", "ExaSearchAPI", "GoogleSearchAPI", "RedditSearchAPI", "WikipediaSearchAPI", "APIEngine", 
            "LLMEngine", "LLMOpenAI", "LLMAnthropic", "BeautifulSoupWebScraperEngine", "ImageGenerationEngine", 
-           "VisionModelEngine", "AnthropicVisionEngine"]
+           "VisionModelEngine", "AnthropicVisionEngine", "OpenAISpeechToTextEngine", "OpenAIAdvancedSpeechToTextEngine",
+           "OpenAITextToSpeechEngine"]

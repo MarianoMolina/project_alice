@@ -15,6 +15,8 @@ class ApiType(str, Enum):
     IMG_VISION = 'img_vision'
     IMG_GENERATION = 'img_generation'
     WEB_SCRAPE = 'web_scrape'
+    SPEECH_TO_TEXT = 'speech_to_text'
+    TEXT_TO_SPEECH = 'text_to_speech'
 
 class ApiNameMeta(EnumMeta):
     def __new__(metacls, cls, bases, classdict):
@@ -25,6 +27,7 @@ class ApiNameMeta(EnumMeta):
         
         # Add LLM-specific API names
         classdict['OPENAI'] = 'openai'
+        classdict['OPENAI_TIMESTAMPS'] = 'openai-timestamps'
         classdict['AZURE'] = 'azure'
         classdict['ANTHROPIC'] = 'anthropic'
         classdict['LM_STUDIO'] = 'lm-studio'

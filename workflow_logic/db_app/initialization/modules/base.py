@@ -164,7 +164,100 @@ base_module = BaseModule(
                 "is_active": True,
                 "health_status": "healthy",
                 "default_model": "Llama3_8B_Hermes",
-            }
+            },
+            {
+                "key": "img_vision",
+                "api_type": "img_vision",
+                "api_name": "openai",
+                "name": "OpenAI Image Vision",
+                "api_config": {
+                    "api_key": OPENAI_API_KEY,
+                    "base_url": "https://api.openai.com/v1"
+                },
+                "is_active": True,
+                "health_status": "healthy",
+            },
+            {
+                "key": "img_vision_lm_studio",
+                "api_type": "img_vision",
+                "api_name": "lm-studio",
+                "name": "LM Studio Image Vision",
+                "api_config": {
+                    "api_key": "lm-studio",
+                    "base_url": LOCAL_LLM_API_URL
+                },
+                "is_active": True,
+                "health_status": "healthy",
+            },
+            {
+                "key": "img_vision_anthropic",
+                "api_type": "img_vision",
+                "api_name": "anthropic",
+                "name": "Anthropic Image Vision",
+                "api_config": {
+                    "api_key": ANTHROPIC_API,
+                    "base_url": "https://api.anthropic.com"
+                },
+                "is_active": True,
+                "health_status": "healthy",
+            },
+            {
+                "key": "img_generation",
+                "api_type": "img_generation",
+                "api_name": "openai",
+                "name": "Image Generation",
+                "api_config": {
+                    "api_key": OPENAI_API_KEY,
+                    "base_url": "https://api.openai.com/v1"    
+                },
+                "is_active": True,
+                "health_status": "healthy",
+            },
+            {
+                "key": "web_scrape",
+                "api_type": "web_scrape",
+                "api_name": "web_scrape",
+                "name": "Web Scrape",
+                "api_config": {},
+                "is_active": True,
+                "health_status": "healthy",
+            },
+            {
+                "key": "speech_to_text",
+                "api_type": "speech_to_text",
+                "api_name": "openai",
+                "name": "OpenAI Speech to Text",
+                "api_config": {
+                    "api_key": OPENAI_API_KEY,
+                    "base_url": "https://api.openai.com/v1"
+                },
+                "is_active": True,
+                "health_status": "healthy",
+            },
+            {
+                "key": "speech_to_text_openai_advanced",
+                "api_type": "speech_to_text",
+                "api_name": "openai-timestamps",
+                "name": "OpenAI Advanced Speech to Text",
+                "api_config": {
+                    "api_key": OPENAI_API_KEY,
+                    "base_url": "https://api.openai.com/v1"
+                },
+                "is_active": True,
+                "health_status": "healthy",                
+            },
+            {
+                "key": "text_to_speech",
+                "api_type": "text_to_speech",
+                "api_name": "openai",
+                "name": "Text to Speech",
+                "api_config": {
+                    "api_key": OPENAI_API_KEY,
+                    "base_url": "https://api.openai.com/v1"
+                },
+                "is_active": True,
+                "health_status": "healthy",
+           },
         ],
         "parameters": [
             {

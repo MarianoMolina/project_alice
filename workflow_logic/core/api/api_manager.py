@@ -3,7 +3,7 @@ from typing import Dict, Any, Union, Optional
 from workflow_logic.core.model import AliceModel
 from workflow_logic.core.api.api import API
 from workflow_logic.util import SearchOutput, MessageDict, ApiType, ApiName, LLMConfig, LOGGER
-from workflow_logic.core.api.engines import APIEngine, LLMAnthropic, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI, ExaSearchAPI, ArxivSearchAPI, LLMEngine, VisionModelEngine, ImageGenerationEngine, BeautifulSoupWebScraperEngine, AnthropicVisionEngine
+from workflow_logic.core.api.engines import APIEngine, LLMAnthropic, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI, ExaSearchAPI, ArxivSearchAPI, LLMEngine, VisionModelEngine, ImageGenerationEngine, BeautifulSoupWebScraperEngine, AnthropicVisionEngine, OpenAIAdvancedSpeechToTextEngine, OpenAISpeechToTextEngine, OpenAITextToSpeechEngine
 
 ApiEngineMap = {
     ApiType.LLM_MODEL: {
@@ -37,6 +37,13 @@ ApiEngineMap = {
     },
     ApiType.WEB_SCRAPE: {
         ApiName.BEAUTIFULSOUP: BeautifulSoupWebScraperEngine
+    },
+    ApiType.SPEECH_TO_TEXT: {
+        ApiName.OPENAI: OpenAISpeechToTextEngine,
+        ApiName.OPENAI_TIMESTAMPS: OpenAIAdvancedSpeechToTextEngine,
+    },
+    ApiType.TEXT_TO_SPEECH: {
+        ApiName.OPENAI: OpenAITextToSpeechEngine
     }
 }
 
