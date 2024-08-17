@@ -33,8 +33,8 @@ taskResultSchema.methods.apiRepresentation = function(this: ITaskResultDocument)
     task_content: this.task_content || null,
     created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
     updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,
-    created_at: this.createdAt || null,
-    updated_at: this.updatedAt || null
+    createdAt: this.createdAt || null,
+    updatedAt: this.updatedAt || null
   };
 };
 

@@ -7,7 +7,6 @@ import auth from '../middleware/auth.middleware';
 import { AuthRequest } from '../interfaces/auth.interface';
 import { createRoutes } from '../utils/routeGenerator';
 import { chatHelpers } from '../utils/chatHelpers.utils';
-import logger from '../utils/logger';
 import Logger from '../utils/logger';
 
 // Create a router using routeGenerator for common CRUD routes
@@ -51,38 +50,38 @@ customRouter.patch('/:chatId/add_message', async (req: AuthRequest, res: Respons
   const message: Partial<IMessage> = req.body.message;
   const userId = req.user?.userId;
 
-  logger.debug(`Received request to add message to chat ${chatId}`, { 
+  Logger.debug(`Received request to add message to chat ${chatId}`, { 
     chatId, 
     userId, 
     messageContent: message.content,
-    hasTaskResponse: !!message.task_responses
+    hasReferences: !!message.references
   });
 
   try {
     // Remove the _id field if it exists and is not a valid ObjectId
     if (message._id && !Types.ObjectId.isValid(message._id)) {
       delete message._id;
-      logger.info('Removed invalid _id from message');
+      Logger.info('Removed invalid _id from message');
     }
 
-    logger.debug('Message object before creating in chat', { message });
+    Logger.debug('Message object before creating in chat', { message });
 
-    const updatedChat = await chatHelpers.create_message_in_chat(chatId, message, userId);
+    const updatedChat = await chatHelpers.createMessageInChat(chatId, message, userId);
     
     if (!updatedChat) {
-      logger.error(`Chat not found: ${chatId}`);
+      Logger.error(`Chat not found: ${chatId}`);
       return res.status(404).json({ message: 'Chat not found' });
     }
 
-    logger.info('Message added successfully', { 
+    Logger.info('Message added successfully', { 
       chatId, 
       messageId: updatedChat._id,
-      hasTaskResponse: updatedChat.task_responses?.length
+      hasReferences: updatedChat.references?.length
     });
 
     res.status(200).json({ message: 'Message added successfully', chat: updatedChat });
   } catch (error) {
-    logger.error('Error in add_message route:', { 
+    Logger.error('Error in add_message route:', { 
       error: (error as Error).message, 
       stack: (error as Error).stack 
     });
@@ -95,7 +94,7 @@ customRouter.patch('/:chatId/add_task_response', async (req: AuthRequest, res: R
   const userId = req.user?.userId;
   try {
 
-    const updatedChat = await chatHelpers.add_task_result_to_chat(chatId, taskResultId, userId);
+    const updatedChat = await chatHelpers.addTaskResultToChat(chatId, taskResultId, userId);
 
     if (!updatedChat) {
       Logger.info('Failed to update chat:', chatId);

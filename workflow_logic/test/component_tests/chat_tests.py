@@ -150,7 +150,7 @@ class ChatTests(TestModule):
                 response = await chat.generate_response(api_manager, test_message)
                 self.log_response(response)
 
-            if any(msg.role == "tool" and msg.task_responses for msg in response):
+            if any(msg.role == "tool" and msg.references for msg in response):
                 return "Success"
             else:
                 return f"Failed: Function call not detected in response - {response}"

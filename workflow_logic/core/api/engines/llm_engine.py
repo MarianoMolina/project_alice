@@ -5,7 +5,7 @@ from pydantic import Field
 from typing import Dict, Any, List, Optional
 from workflow_logic.core.api.engines import APIEngine
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition, ToolCall
-from workflow_logic.util import MessageDict, MessageType, LOGGER, LLMConfig, ApiType
+from workflow_logic.util import MessageDict, ContentType, LOGGER, LLMConfig, ApiType
 
 class LLMEngine(APIEngine):
     """
@@ -139,7 +139,7 @@ class LLMEngine(APIEngine):
                 tool_calls=[ToolCall(**tool_call.model_dump()) for tool_call in choice.message.tool_calls] if choice.message.tool_calls else None,
                 function_call=choice.message.function_call.model_dump() if choice.message.function_call else None,
                 generated_by="llm",
-                type=MessageType.TEXT,
+                type=ContentType.TEXT,
                 creation_metadata={
                     "model": response.model,
                     "usage": response.usage.model_dump(),

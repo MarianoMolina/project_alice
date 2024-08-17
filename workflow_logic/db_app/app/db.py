@@ -310,6 +310,8 @@ class BackendAPI(BaseModel):
         for message in chat.get('messages', []):
             if 'task_responses' not in message:
                 message['task_responses'] = []
+            if 'references' not in message:
+                message['references'] = []
         
         try:
             return AliceChat(**chat)
@@ -437,7 +439,23 @@ class BackendAPI(BaseModel):
                     raise
                 LOGGER.error(f"Attempt {attempt + 1} failed, retrying in {retry_delay} seconds...")
                 await asyncio.sleep(retry_delay)
-
+                
+    async def retrieve_file_reference(self, file_reference_id: str): 
+        url = f"{self.base_url}/files/{file_reference_id}"
+        headers = self._get_headers()
+        
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(url, headers=headers) as response:
+                    response.raise_for_status()
+                    file = await response.json()
+                    
+                    file = await self.preprocess_data(file)
+                    return {file['_id']: await file}
+            except aiohttp.ClientError as e:
+                LOGGER.error(f"Error retrieving chats: {e}")
+                return {}
+            
 def token_validation_middleware(api: BackendAPI):
     def middleware(request) -> dict[str, bool]:
         token = request.headers.get("Authorization")

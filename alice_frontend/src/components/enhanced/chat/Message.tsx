@@ -18,7 +18,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
     const role = message.role;
     const typeMsg = message.type;
 
-    if (typeMsg === 'TaskResponse') return 'Task Response';
+    if (typeMsg === 'task_result') return 'Task Response';
     if (role === 'assistant') {
       if (assistantName) return assistantName;
       return "Assistant"
@@ -44,7 +44,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
   };
 
   const renderMessageContent = () => {
-    if (message.type === 'TaskResponse' && message.task_responses) {
+    if (message.type === 'task_result' && message.task_responses) {
       return <WorkflowOutput content={message.task_responses} />;
     } else if (message.generated_by === 'tool') {
       return <CommandLineLog content={message.content} />;

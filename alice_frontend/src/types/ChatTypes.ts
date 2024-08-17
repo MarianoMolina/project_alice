@@ -18,7 +18,7 @@ export interface AliceChat {
 }
 
 export type RoleType = 'user' | 'assistant' | 'system' | 'tool';
-export type MessageTypeType = 'text' | 'image' | 'video' | 'audio' | 'file' | 'TaskResponse';
+export type ContentType = 'text' | 'image' | 'video' | 'audio' | 'file' | 'task_result';
 
 export interface MessageType {
     role: RoleType;
@@ -27,7 +27,7 @@ export interface MessageType {
     step?: string;
     assistant_name?: string;
     context?: Record<string, any>;
-    type?: MessageTypeType;
+    type?: ContentType;
     request_type?: string | null;
     tool_calls?: ToolCall[];
     function_call?: { [key: string]: string };

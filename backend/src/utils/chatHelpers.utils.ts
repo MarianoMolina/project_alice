@@ -4,6 +4,8 @@ import TaskResult from '../models/taskresult.model';
 import { IAliceChatDocument, IMessage, IMessageDocument } from '../interfaces/chat.interface';
 import { getObjectId, ObjectWithId } from './utils';
 import logger from './logger';
+import FileReference from '../models/file.model';
+import { ContentType, IFileReference, IFileReferenceDocument } from '../interfaces/file.interface';
 
 export const chatHelpers = {
     async create_chat(chat: Partial<IAliceChatDocument>, userId?: string): Promise<IAliceChatDocument | null> {
@@ -43,11 +45,11 @@ export const chatHelpers = {
                     const existingMessageIndex = originalChat.messages.findIndex(msg => msg._id.toString() === message._id.toString());
                     if (existingMessageIndex > -1) {
                         if (!chatHelpers.messagesEqual(originalChat.messages[existingMessageIndex], message)) {
-                            const msg = await chatHelpers.edit_message_in_chat(chatId, message._id.toString(), message, userId);
+                            const msg = await chatHelpers.editMessageInChat(chatId, message._id.toString(), message, userId);
                             final_messages.push(msg);
                         }
                     } else {
-                        const msg = await chatHelpers.create_message_in_chat(chatId, message, userId);
+                        const msg = await chatHelpers.createMessageInChat(chatId, message, userId);
                         final_messages.push(msg);
                     }
                 }
@@ -85,7 +87,7 @@ export const chatHelpers = {
         }
     },
 
-    async create_message_in_chat(chatId: string, message: Partial<IMessage>, userId?: string): Promise<IMessage | null> {
+    async createMessageInChat(chatId: string, message: Partial<IMessage>, userId?: string): Promise<IMessage | null> {
         try {
             logger.info(`Creating message in chat ${chatId}`, { chatId, userId });
             logger.debug('Message object received', { message });
@@ -107,10 +109,10 @@ export const chatHelpers = {
                 }
             });
 
-            if (newMessage.task_responses && Array.isArray(newMessage.task_responses)) {
-                logger.info('Processing task responses', { count: newMessage.task_responses.length });
-                newMessage.task_responses = await chatHelpers.handleTaskResponses(newMessage.task_responses, userId);
-                logger.info('Processed task responses', { taskResponses: newMessage.task_responses });
+            if (newMessage.references && Array.isArray(newMessage.references)) {
+                logger.info('Processing references', { count: newMessage.references.length });
+                newMessage.references = await chatHelpers.handleReferences(newMessage.references, userId);
+                logger.info('Processed task responses', { taskResponses: newMessage.references });
             }
 
             const updatedChat = await AliceChat.findByIdAndUpdate(
@@ -131,7 +133,7 @@ export const chatHelpers = {
             logger.debug('Message created successfully', { 
                 chatId, 
                 messageId: createdMessage._id,
-                hasTaskResponse: !!createdMessage.task_responses
+                hasReferences: !!createdMessage.references
             });
 
             return createdMessage;
@@ -141,7 +143,7 @@ export const chatHelpers = {
         }
     },
 
-    async edit_message_in_chat(chatId: string, msgId: string, message: Partial<IMessage>, userId?: string): Promise<IMessage | null> {
+    async editMessageInChat(chatId: string, msgId: string, message: Partial<IMessage>, userId?: string): Promise<IMessage | null> {
         try {
             const updatedChat = await AliceChat.findOneAndUpdate(
                 { _id: chatId, 'messages._id': msgId },
@@ -181,10 +183,11 @@ export const chatHelpers = {
         }
     },
 
-    async add_task_result_to_chat(chatId: string, taskResultId: string, userId?: string): Promise<IMessage | null> {
+    async addTaskResultToChat(chatId: string, taskResultId: string, userId?: string): Promise<IMessage | null> {
         try {
             const taskResult = await TaskResult.findById(taskResultId);
             const chat = await AliceChat.findById(chatId);
+            
             if (!taskResult) {
                 throw new Error('Task result not found');
             }
@@ -193,9 +196,9 @@ export const chatHelpers = {
             }
             let messageToRemoveId: Types.ObjectId | null = null;
             chat.messages.forEach((message) => {
-              if (message.task_responses &&
-                message.task_responses.length === 1 &&
-                message.task_responses[0].toString() === taskResultId) {
+              if (message.references &&
+                message.references.length === 1 &&
+                message.references[0].toString() === taskResultId) {
                 messageToRemoveId = message._id;
               }
             });
@@ -205,13 +208,23 @@ export const chatHelpers = {
                 $pull: { messages: { _id: messageToRemoveId } }
               });
             }
+            const newReference: Partial<IFileReference> = {
+                filename: `Task response for ${taskResult.task_name}`,
+                type: ContentType.TASK_RESULT,
+                file_size: 0,
+                storage_path: taskResultId,
+                file_url: taskResultId, 
+                created_by: userId ? new Types.ObjectId(userId) : undefined,
+                last_accessed: new Date(),
+            }
+            const reference = await FileReference.create(newReference)
 
             const newMessage: Partial<IMessage> = {
                 role: 'assistant',
                 content: JSON.stringify(taskResult.task_outputs),
                 generated_by: 'tool',
                 type: 'TaskResponse',
-                task_responses: [new Types.ObjectId(taskResultId)],
+                references: [reference.id],
                 step: taskResult.task_name,
                 assistant_name: 'Task Executor',
                 context: null,
@@ -220,7 +233,7 @@ export const chatHelpers = {
                 created_by: userId ? new Types.ObjectId(userId) : undefined,
             };
 
-            return await this.create_message_in_chat(chatId, newMessage, userId);
+            return await this.createMessageInChat(chatId, newMessage, userId);
         } catch (error) {
             console.error('Error adding task result to chat:', error);
             return null;
@@ -259,52 +272,52 @@ export const chatHelpers = {
             return msg1[key] === msg2[key];
         });
     },
-    async handleTaskResponses(taskResponses: any[], userId?: string): Promise<Types.ObjectId[]> {
-        logger.info('Handling task responses', { count: taskResponses.length });
-        const processedTaskResponses: Types.ObjectId[] = [];
-        for (const tr of taskResponses) {
-            logger.debug('Processing task response', { tr });
-            if (typeof tr === 'string') {
-                processedTaskResponses.push(new Types.ObjectId(tr));
-                logger.debug('Processed string task response', { taskResponseId: tr });
-            } else if (typeof tr === 'object' && tr !== null) {
-                logger.debug('Processing object task response', { tr });
-                if (tr._id && tr._id !== null) {
-                    await TaskResult.findByIdAndUpdate(tr._id, {
-                        ...tr,
+    async handleReferences(references: any[], userId?: string): Promise<Types.ObjectId[]> {
+        logger.info('Handling references', { count: references.length });
+        const processedFileReferences: Types.ObjectId[] = [];
+        for (const ref of references) {
+            logger.debug('Processing references', { ref });
+            if (typeof ref === 'string') {
+                processedFileReferences.push(new Types.ObjectId(ref));
+                logger.debug('Processed string references', { taskResponseId: ref });
+            } else if (typeof ref === 'object' && ref !== null) {
+                logger.debug('Processing object references', { ref });
+                if (ref._id && ref._id !== null) {
+                    await FileReference.findByIdAndUpdate(ref._id, {
+                        ...ref,
                         updated_by: userId ? new Types.ObjectId(userId) : undefined,
                     });
-                    processedTaskResponses.push(new Types.ObjectId(tr._id));
-                    logger.debug('Updated existing task response', { taskResponseId: tr._id });
+                    processedFileReferences.push(new Types.ObjectId(ref._id));
+                    logger.debug('Updated existing references', { taskResponseId: ref._id });
                 } else {
-                    logger.debug('Attempting to create new task response', { tr });
+                    logger.debug('Attempting to create new references', { ref });
                     try {
-                        const newTaskResult = new TaskResult({
-                            ...tr,
+                        const newFileReference = new FileReference({
+                            ...ref,
                             _id: undefined,  // Ensure we're not passing null as _id
                             created_by: userId ? new Types.ObjectId(userId) : undefined,
                             updated_by: userId ? new Types.ObjectId(userId) : undefined,
                         });
-                        const savedTaskResult = await newTaskResult.save();
-                        if (savedTaskResult._id instanceof Types.ObjectId) {
-                            processedTaskResponses.push(savedTaskResult._id);
-                            logger.debug('Created new task response', { taskResponseId: savedTaskResult._id.toString() });
+                        const savedFileReference = await newFileReference.save();
+                        if (savedFileReference._id instanceof Types.ObjectId) {
+                            processedFileReferences.push(savedFileReference._id);
+                            logger.debug('Created new reference', { taskResponseId: savedFileReference._id.toString() });
                         } else {
-                            logger.error('Saved task result has invalid _id', { savedTaskResult });
+                            logger.error('Saved task result has invalid _id', { savedFileReference });
                             throw new Error('Invalid _id after saving task result');
                         }
                     } catch (error) {
-                        logger.error('Error creating new task response', { error, tr });
+                        logger.error('Error creating new reference', { error, ref });
                     }
                 }
             } else {
-                logger.warn('Invalid task response format', { tr });
+                logger.warn('Invalid reference format', { ref });
             }
         }
-        logger.info('Finished processing task responses', { 
-            count: processedTaskResponses.length, 
-            processedTaskResponses: processedTaskResponses.map(id => id.toString()) 
+        logger.info('Finished processing references', { 
+            count: processedFileReferences.length, 
+            processedFileReferences: processedFileReferences.map(id => id.toString()) 
         });
-        return processedTaskResponses;
+        return processedFileReferences;
     }
 };

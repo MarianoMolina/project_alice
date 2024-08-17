@@ -3,7 +3,7 @@ from typing import Dict, Any, Union, Optional
 from workflow_logic.core.model import AliceModel
 from workflow_logic.core.api.api import API
 from workflow_logic.util import SearchOutput, MessageDict, ApiType, ApiName, LLMConfig, LOGGER
-from workflow_logic.core.api.engines import APIEngine, LLMAnthropic, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI, ExaSearchAPI, ArxivSearchAPI, LLMEngine
+from workflow_logic.core.api.engines import APIEngine, LLMAnthropic, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI, ExaSearchAPI, ArxivSearchAPI, LLMEngine, VisionModelEngine, ImageGenerationEngine, BeautifulSoupWebScraperEngine, AnthropicVisionEngine
 
 ApiEngineMap = {
     ApiType.LLM_MODEL: {
@@ -27,6 +27,17 @@ ApiEngineMap = {
     ApiType.ARXIV_SEARCH: {
         ApiName.ARXIV_SEARCH: ArxivSearchAPI,
     },
+    ApiType.IMG_VISION: {
+        ApiName.OPENAI: VisionModelEngine,
+        ApiName.ANTHROPIC: AnthropicVisionEngine,
+        ApiName.LM_STUDIO: VisionModelEngine,
+    },
+    ApiType.IMG_GENERATION: {
+        ApiName.OPENAI: ImageGenerationEngine
+    },
+    ApiType.WEB_SCRAPE: {
+        ApiName.BEAUTIFULSOUP: BeautifulSoupWebScraperEngine
+    }
 }
 
 def get_api_engine(api_type: ApiType, api_name: ApiName) -> type[APIEngine]:

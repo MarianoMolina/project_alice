@@ -129,13 +129,9 @@ def test_api_with_user_info():
         name="Test API",
         created_by=user,
         updated_by=user,
-        created_at="2023-01-01T00:00:00Z",
-        updated_at="2023-01-02T00:00:00Z"
     )
     assert api.created_by == user
     assert api.updated_by == user
-    assert api.created_at == "2023-01-01T00:00:00Z"
-    assert api.updated_at == "2023-01-02T00:00:00Z"
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -32,8 +32,6 @@ export interface IAPI {
   api_config?: Map<string, any>;
   created_by?: Types.ObjectId;
   updated_by?: Types.ObjectId;
-  created_at: Date;
-  updated_at: Date;
 }
 
 export interface IAPIMethods {

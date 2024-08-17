@@ -37,7 +37,7 @@ const messageSchema = new Schema<IMessageDocument>({
   tool_call_id: { type: String, default: null, description: "ID of the tool call, if any" },
   request_type: { type: String, default: null, description: "Request type of the message, if any. Can be 'approval', 'confirmation', etc." },
   created_by: { type: Schema.Types.ObjectId, ref: 'User', description: "User ID used to call the endpoint" },
-  task_responses: [{ type: Schema.Types.ObjectId, ref: 'TaskResult' }],
+  references: [{ type: Schema.Types.ObjectId, ref: 'FileReference' }]
 }, { timestamps: true });
 
 messageSchema.methods.apiRepresentation = function (this: IMessageDocument) {
@@ -54,9 +54,9 @@ messageSchema.methods.apiRepresentation = function (this: IMessageDocument) {
     tool_call_id: this.tool_call_id || null,
     request_type: this.request_type || null,
     created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
-    created_at: this.createdAt || null,
-    updated_at: this.updatedAt || null,
-    task_responses: this.task_responses || []
+    createdAt: this.createdAt || null,
+    updatedAt: this.updatedAt || null,
+    references: this.references || []
   };
 };
 
@@ -80,8 +80,8 @@ aliceChatSchema.methods.apiRepresentation = function (this: IAliceChatDocument) 
     functions: this.functions.map(func => func._id || func),
     created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
     updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,
-    created_at: this.createdAt || null,
-    updated_at: this.updatedAt || null
+    createdAt: this.createdAt || null,
+    updatedAt: this.updatedAt || null
   };
 };
 
@@ -95,8 +95,8 @@ function ensureObjectIdForSave(this: IAliceChatDocument, next: mongoose.Callback
   }
 
   this.messages.forEach(message => {
-    if (message.task_responses) {
-      message.task_responses = message.task_responses.map(response => ensureObjectIdHelper(response));
+    if (message.references) {
+      message.references = message.references.map(reference => ensureObjectIdHelper(reference))
     }
   });
 
@@ -115,8 +115,8 @@ function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.
 
   if (update.messages) {
     update.messages.forEach((message: any) => {
-      if (message.task_responses) {
-        message.task_responses = message.task_responses.map((response: any) => ensureObjectIdHelper(response));
+      if (message.references) {
+        message.references = message.references.map((reference: any) => ensureObjectIdHelper(reference))
       }
     });
   }
@@ -131,9 +131,9 @@ function autoPopulate(this: mongoose.Query<any, any>) {
       model: 'Task'
     })
     .populate({
-      path: 'messages.task_responses',
-      model: 'TaskResult'
-    });
+      path: 'messages.references',
+      model: 'FileReference'
+    })
 }
 
 aliceChatSchema.pre('save', ensureObjectIdForSave);

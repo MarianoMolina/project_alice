@@ -1,6 +1,15 @@
 # Use the official Node.js image as a base image
 FROM node:16
 
+# Create a user with UID 1000
+RUN adduser --disabled-password --gecos '' --uid 1000 appuser
+
+# Set the working directory ownership
+RUN chown -R appuser:appuser /app
+
+# Switch to the new user
+USER appuser
+
 # Set the working directory
 WORKDIR /app
 

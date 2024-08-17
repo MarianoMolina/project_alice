@@ -25,8 +25,8 @@ agentSchema.methods.apiRepresentation = function(this: IAgentDocument) {
     model_id: this.model_id || null,
     created_by: this.created_by || null,
     updated_by: this.updated_by || null,
-    created_at: (this as any).createdAt || null,
-    updated_at: (this as any).updatedAt || null
+    createdAt: this.createdAt || null,
+    updatedAt: this.updatedAt || null
   };
 };
 

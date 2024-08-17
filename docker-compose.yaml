@@ -2,7 +2,7 @@ services:
   frontend:
     build:
       context: ./alice_frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT_DOCKER}"
     depends_on:
@@ -11,17 +11,18 @@ services:
       workflow:
         condition: service_healthy
     volumes:
-      # - ./alice_frontend:/app:delegated
+      - ./alice_frontend:/app:delegated
       - /app/node_modules
+      - ./.env:/app/.env
     environment:
-      NODE_ENV: production
-      # CHOKIDAR_USEPOLLING: "true"
-      # WATCHPACK_POLLING: "true"
+      NODE_ENV: ${NODE_ENV:-development}
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
 
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT_DOCKER}"
     depends_on:
@@ -31,8 +32,9 @@ services:
       - ./.env:/app/.env
       - ./backend:/app
       - /app/node_modules
+      - shared-uploads:/app/shared-uploads
     environment:
-      NODE_ENV: ${NODE_ENV:-production}
+      NODE_ENV: ${NODE_ENV:-development}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
@@ -41,6 +43,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 10s
+    user: "${UID:-1000}:${GID:-1000}"
 
   mongo:
     image: mongo:latest
@@ -56,7 +59,8 @@ services:
       - "${WORKFLOW_PORT}:${WORKFLOW_PORT_DOCKER}"
     volumes:
       - .:/app
-      - /var/run/docker.sock:/var/run/docker.sock  # Add this line
+      - /var/run/docker.sock:/var/run/docker.sock
+      - shared-uploads:/app/shared-uploads
     depends_on:
       backend:
         condition: service_healthy
@@ -71,6 +75,9 @@ services:
       timeout: 10s
       retries: 5
       start_period: 5s
+    user: "${UID:-1000}:${GID:-1000}"
 
 volumes:
   mongo_data:
+  shared-uploads:
+    driver: local

@@ -34,8 +34,8 @@ modelSchema.virtual('apiRepresentation').get(function(this: IModelDocument) {
     lm_studio_preset: this.lm_studio_preset || 'OpenChat',
     created_by: this.created_by || null,
     updated_by: this.updated_by || null,
-    created_at: this.createdAt || null,
-    updated_at: this.updatedAt || null
+    createdAt: this.createdAt || null,
+    updatedAt: this.updatedAt || null
   };
 });
 

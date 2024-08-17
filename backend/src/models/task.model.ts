@@ -59,8 +59,8 @@ taskSchema.methods.apiRepresentation = function (this: ITaskDocument) {
         api_engine: this.api_engine || null,
         created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
         updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,
-        created_at: this.createdAt || null,
-        updated_at: this.updatedAt || null
+        createdAt: this.createdAt || null,
+        updatedAt: this.updatedAt || null
     };
 };
 

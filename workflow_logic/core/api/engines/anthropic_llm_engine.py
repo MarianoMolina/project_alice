@@ -4,8 +4,8 @@ from anthropic import AsyncAnthropic
 from anthropic.types import TextBlock, ToolUseBlock, ToolParam, Message
 from anthropic.types.message_create_params import ToolChoiceToolChoiceAuto
 from workflow_logic.core.parameters import ToolCall, ToolCallConfig, ToolFunction
-from workflow_logic.core.api.engines.llm_api_engine import LLMEngine
-from workflow_logic.util import LOGGER, MessageDict, MessageType, LLMConfig
+from workflow_logic.core.api.engines.llm_engine import LLMEngine
+from workflow_logic.util import LOGGER, MessageDict, ContentType, LLMConfig
 
 ANTHROPIC_PRICING_1k = {
     "claude-3-5-sonnet-20240620": (0.003, 0.015),
@@ -171,7 +171,7 @@ class LLMAnthropic(LLMEngine):
                 content=message_text,
                 tool_calls=[tool_call for tool_call in tool_calls] if tool_calls else None,
                 generated_by="llm",
-                type=MessageType.TEXT,
+                type=ContentType.TEXT,
                 creation_metadata={
                     "model": response.model,
                     "usage": response.usage.model_dump(),

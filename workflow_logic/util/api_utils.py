@@ -12,6 +12,9 @@ class ApiType(str, Enum):
     WIKIPEDIA_SEARCH = 'wikipedia_search'
     EXA_SEARCH = 'exa_search'
     ARXIV_SEARCH = 'arxiv_search'
+    IMG_VISION = 'img_vision'
+    IMG_GENERATION = 'img_generation'
+    WEB_SCRAPE = 'web_scrape'
 
 class ApiNameMeta(EnumMeta):
     def __new__(metacls, cls, bases, classdict):
@@ -25,6 +28,7 @@ class ApiNameMeta(EnumMeta):
         classdict['AZURE'] = 'azure'
         classdict['ANTHROPIC'] = 'anthropic'
         classdict['LM_STUDIO'] = 'lm-studio'
+        classdict['BEAUTIFULSOUP'] = 'beautiful-soup'
         
         return super().__new__(metacls, cls, bases, classdict)
 

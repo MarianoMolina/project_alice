@@ -7,7 +7,7 @@ from workflow_logic.core.parameters.parameters import ensure_tool_function
 from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.model import AliceModel
 from workflow_logic.core.api import APIManager
-from workflow_logic.util import MessageDict, LOGGER, ApiType, MessageType, TaskResponse, DatabaseTaskResponse
+from workflow_logic.util import MessageDict, LOGGER, ApiType, ContentType, TaskResponse, DatabaseTaskResponse, FileReference
 
 class AliceAgent(BaseModel):
     id: Optional[str] = Field(default=None, description="The ID of the agent", alias="_id")
@@ -98,7 +98,7 @@ class AliceAgent(BaseModel):
                     content=error_msg,
                     generated_by="tool",
                     step=function_name,
-                    type=MessageType.TEXT
+                    type=ContentType.TEXT
                 ))
                 continue
 
@@ -108,7 +108,7 @@ class AliceAgent(BaseModel):
                     content=f"Error: Tool '{function_name}' not found",
                     generated_by="tool",
                     step=function_name,
-                    type=MessageType.TEXT
+                    type=ContentType.TEXT
                 ))
                 continue
             
@@ -119,7 +119,7 @@ class AliceAgent(BaseModel):
                     content=f"Error: Tool function '{function_name}' not found in tools list",
                     generated_by="tool",
                     step=function_name,
-                    type=MessageType.TEXT
+                    type=ContentType.TEXT
                 ))
                 continue
             
@@ -130,7 +130,7 @@ class AliceAgent(BaseModel):
                     content=f"Error in tool '{function_name}': {error_message}",
                     generated_by="tool",
                     step=function_name,
-                    type=MessageType.TEXT
+                    type=ContentType.TEXT
                 ))
                 continue
             
@@ -143,8 +143,8 @@ class AliceAgent(BaseModel):
                     generated_by="tool",
                     step=function_name,
                     tool_call_id=tool_call_id,
-                    type=MessageType.TASK_RESPONSE if task_result else MessageType.TEXT,
-                    task_responses=[task_result] if task_result else None
+                    type=ContentType.TASK_RESPONSE if task_result else ContentType.TEXT,
+                    references=[FileReference(type=ContentType.TASK_RESPONSE, url=task_result.id)] if task_result else None,
                 ))
             except Exception as e:
                 tool_messages.append(MessageDict(
@@ -152,7 +152,7 @@ class AliceAgent(BaseModel):
                     content=f"Error executing tool '{function_name}': {str(e)}",
                     generated_by="tool",
                     step=function_name,
-                    type=MessageType.TEXT
+                    type=ContentType.TEXT
                 ))
         
         return tool_messages

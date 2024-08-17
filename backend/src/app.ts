@@ -18,6 +18,7 @@ import corsConfigMiddleware from './middleware/corsConfig.middleware';
 import loggingMiddleware from './middleware/logging.middleware';
 import lmStudioRoute from './routes/lmStudio.route';
 import Logger from './utils/logger';
+import FileRoutes from './routes/file.route';
 
 dotenv.config();
 
@@ -57,7 +58,8 @@ app.use('/api/prompts', PromptRoutes);
 app.use('/api/taskresults', TaskResultRouter);
 app.use('/api/tasks', TaskRoutes);
 app.use('/api/users', UserRoutes);
-app.use('/lm-studio', lmStudioRoute);
 app.use('/api/parameters', ParametersRoutes);
+app.use('/api/files', FileRoutes);
+app.use('/lm-studio', lmStudioRoute);
 
 export default app;

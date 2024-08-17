@@ -1,3 +1,4 @@
+import base64, os
 from datetime import datetime
 from enum import Enum
 from pydantic import BaseModel, Field, model_validator
@@ -93,13 +94,45 @@ class DatabaseTaskResponse(TaskResponse):
             obj['task_content'] = obj['task_content'].model_dump()
         return super().model_validate(obj) 
     
-class MessageType(str, Enum):
+class ContentType(str, Enum):
     TEXT = 'text'
     IMAGE = 'image'
     VIDEO = 'video'
     AUDIO = 'audio'
     FILE = 'file'
-    TASK_RESPONSE = 'TaskResponse'
+    TASK_RESPONSE = 'task_result'
+
+class FileReference(BaseModel):
+    id: Optional[str] = Field(None, alias="_id")
+    filename: str
+    type: ContentType
+    file_size: int
+    storage_path: str
+    created_by: str 
+    last_accessed: Optional[datetime] = None
+
+    class Config:
+        populate_by_name = True
+
+SHARED_UPLOAD_DIR = '/app/shared-uploads'
+
+def image_data_from_file_reference(file_reference: FileReference) -> str:
+    """
+    Read file content from the shared volume and convert it to a base64 encoded string.
+    
+    Args:
+    file_reference (FileReference): The FileReference object containing file information.
+    
+    Returns:
+    str: Base64 encoded string of the file content.
+    """
+    try:
+        file_path = os.path.join(SHARED_UPLOAD_DIR, file_reference.storage_path.split('/')[-1])
+        with open(file_path, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+        return encoded_string
+    except Exception as e:
+        raise Exception(f"Error reading file: {str(e)}")
 
 class MessageDict(BaseModel):
     id: Optional[str] = Field(default="", description="The id of the message", alias="_id")
@@ -108,13 +141,14 @@ class MessageDict(BaseModel):
     generated_by: Literal["user", "llm", "tool"] = Field(default="user", description="Who created the message")
     step: Optional[str] = Field(default="", description="Process that is creating this message, usually the task_name or tool_name")
     assistant_name: Optional[str] = Field(default="", description="Name of the assistant")
-    context: Optional[Dict[str, Any]] = Field(default=None, description="Context of the message")
-    type: MessageType = Field(default="text", description="Type of the message")
+    type: ContentType = Field(default="text", description="Type of the message")
     tool_calls: Optional[List[ToolCall]] = Field(default=None, description="List of tool calls in the message")
     tool_call_id: Optional[str] = Field(None, description="The id of the tool call that generated this task response")
+    context: Optional[Dict[str, Any]] = Field(default=None, description="Context of the message")
     function_call: Optional[Dict[str, Any]] = Field(default=None, description="Function call in the message")
     request_type: Optional[str] = Field(default=None, description="Request type of the message, if any. Can be 'approval', 'confirmation', etc.")
     task_responses: Optional[List[TaskResponse]] = Field(default_factory=list, description="List of associated task responses")
+    references: List[FileReference] = Field(default_factory=list, description="List of references in the message")
     creation_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Metadata about the creation of the message, like cost, tokens, end reason, etc.")
     createdAt: Optional[str] = Field(default=None, description="Timestamp of the message")
     updatedAt: Optional[str] = Field(default=None, description="Timestamp of the message")
@@ -139,8 +173,16 @@ class MessageDict(BaseModel):
             data['tool_calls'] = [tool_call.model_dump(*args, **kwargs) for tool_call in self.tool_calls]
         if self.task_responses:
             data['task_responses'] = [task_response.model_dump(*args, **kwargs) for task_response in self.task_responses]
+        if self.references:
+            data['references'] = [reference.model_dump(*args, **kwargs) for reference in self.references]
         return data
+    
+    def add_reference(self, ref_type: ContentType, url: str, metadata: dict = {}):
+        self.references.append(FileReference(type=ref_type, url=url, metadata=metadata))
 
+    def get_references_by_type(self, ref_type: ContentType) -> List[FileReference]:
+        return [ref for ref in self.references if ref.type == ref_type]
+    
 class SearchResult(BaseModel):
     title: str
     url: str

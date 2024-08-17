@@ -197,7 +197,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
     const fetchAvailableTaskResults = async (): Promise<TaskResponse[]> => {
         try {
-            const taskResults = await fetchItem("taskresults") as TaskResponse | TaskResponse[];
+            const taskResults = await fetchItem("taskresults") as TaskResponse[];
             return Array.isArray(taskResults) ? taskResults : [taskResults];
         } catch (error) {
             console.error('Error fetching available task results:', error);

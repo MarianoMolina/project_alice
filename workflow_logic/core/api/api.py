@@ -21,8 +21,6 @@ class API(BaseModel):
         api_config (Optional[Dict[str, Any]]): Additional configuration parameters for the API.
         created_by (Optional[User]): The user who created this API configuration.
         updated_by (Optional[User]): The user who last updated this API configuration.
-        created_at (Optional[str]): The timestamp of when this configuration was created.
-        updated_at (Optional[str]): The timestamp of when this configuration was last updated.
     """
     id: Optional[str] = Field(default=None, alias="_id")
     api_type: ApiType
@@ -34,8 +32,6 @@ class API(BaseModel):
     api_config: Optional[Dict[str, Any]] = None
     created_by: Optional[User] = None
     updated_by: Optional[User] = None
-    created_at: Optional[str] = None
-    updated_at: Optional[str] = None
 
     class Config:
         populate_by_name = True
@@ -74,7 +70,7 @@ class API(BaseModel):
         if not self.is_active:
             raise ValueError(f"API {self.name} is not active.")
 
-        if self.api_type == ApiType.LLM_MODEL:
+        if self.api_type == ApiType.LLM_MODEL or self.api_type == ApiType.IMG_VISION or self.api_type == ApiType.IMG_GENERATION:
             return self._create_llm_config(model)
         else:
             return self.api_config if self.api_config else {}
