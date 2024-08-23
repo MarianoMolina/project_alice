@@ -6,7 +6,6 @@ const fileReferenceSchema = new Schema<IFileReferenceDocument, IFileReferenceMod
     type: { type: String, enum: Object.values(ContentType), required: true },
     file_size: { type: Number, required: true },
     storage_path: { type: String, required: true },
-    file_url: { type: String, required: true },  // Add this line
     created_by: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     last_accessed: { type: Date }
 }, { timestamps: true });
@@ -17,7 +16,7 @@ fileReferenceSchema.methods.apiRepresentation = function(this: IFileReferenceDoc
         filename: this.filename,
         type: this.type,
         file_size: this.file_size,
-        file_url: this.file_url, 
+        storage_path: this.storage_path, 
         created_by: this.created_by,
         last_accessed: this.last_accessed,
         updatedAt: this.updatedAt

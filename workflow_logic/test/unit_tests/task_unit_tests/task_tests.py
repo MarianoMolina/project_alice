@@ -1,8 +1,7 @@
 import pytest
 from unittest.mock import Mock, AsyncMock
 from workflow_logic.core.api import APIManager, API, APIEngine
-from workflow_logic.util import TaskResponse, DatabaseTaskResponse, ApiType
-from workflow_logic.core import FunctionParameters, ParameterDefinition, AliceTask
+from workflow_logic.core import FunctionParameters, ParameterDefinition, AliceTask, TaskResponse, DatabaseTaskResponse, ApiType
 from pydantic import ValidationError
 
 class ConcreteAliceTask(AliceTask):

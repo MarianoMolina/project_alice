@@ -5,7 +5,8 @@ from pydantic import Field
 from typing import Dict, Any, List, Optional
 from workflow_logic.core.api.engines import APIEngine
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition, ToolCall
-from workflow_logic.util import MessageDict, ContentType, LOGGER, LLMConfig, ApiType
+from workflow_logic.util import LOGGER
+from workflow_logic.core.data_structures import MessageDict, ContentType, LLMConfig, ApiType
 
 class LLMEngine(APIEngine):
     """

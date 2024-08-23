@@ -1,6 +1,6 @@
 from pydantic import Field
 from typing import List, Union
-from workflow_logic.util import LLMConfig, ApiType
+from workflow_logic.core.data_structures import LLMConfig, ApiType
 from workflow_logic.core.api.engines.api_engine import APIEngine
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 from openai import AsyncOpenAI

@@ -1,8 +1,7 @@
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from workflow_logic.core.api import APIManager, API, APIEngine
-from workflow_logic.core import AliceModel, FunctionParameters, ParameterDefinition
-from workflow_logic.util import SearchOutput, LLMConfig, ApiType, ApiName
+from workflow_logic.core import AliceModel, FunctionParameters, ParameterDefinition, SearchOutput, LLMConfig, ApiType, ApiName
 
 @pytest.fixture
 def sample_api():

@@ -1,8 +1,8 @@
 from bson import ObjectId
-from typing import Dict, List, Literal, Optional
+from typing import Dict, List, Optional
 from pydantic import BaseModel, Field, model_validator, ConfigDict
 from workflow_logic.util.const import model_formats
-from workflow_logic.util import ApiName, ModelType
+from workflow_logic.core.data_structures import ApiName, ModelType
 
 class AliceModel(BaseModel):
     id: Optional[str] = Field(None, title="Model ID", description="The ID of the model.", alias="_id")

@@ -5,9 +5,8 @@ from arxiv import Client, Search, SortCriterion
 from typing import Dict, Any
 from workflow_logic.test.component_tests.test_environment import TestModule
 from workflow_logic.core.api import APIManager, API
-from workflow_logic.core import AliceAgent
+from workflow_logic.core import AliceAgent, ApiType
 from workflow_logic.db_app import DBInitManager
-from workflow_logic.util import ApiType
 
 class APITests(TestModule):
     name: str = "APITests"

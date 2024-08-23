@@ -2,7 +2,8 @@ from pydantic import BaseModel
 from typing import Dict, Any, Union, Optional
 from workflow_logic.core.model import AliceModel
 from workflow_logic.core.api.api import API
-from workflow_logic.util import SearchOutput, MessageDict, ApiType, ApiName, LLMConfig, LOGGER
+from workflow_logic.core.data_structures import SearchOutput, MessageDict, ApiType, ApiName, LLMConfig
+from workflow_logic.util import LOGGER
 from workflow_logic.core.api.engines import APIEngine, LLMAnthropic, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI, ExaSearchAPI, ArxivSearchAPI, LLMEngine, VisionModelEngine, ImageGenerationEngine, BeautifulSoupWebScraperEngine, AnthropicVisionEngine, OpenAIAdvancedSpeechToTextEngine, OpenAISpeechToTextEngine, OpenAITextToSpeechEngine, OpenAIEmbeddingsEngine
 
 ApiEngineMap = {

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
-from workflow_logic.util import DatabaseTaskResponse, LOGGER
-from workflow_logic.core.tasks import AliceTask, TaskExecutionRequest
+from workflow_logic.util import LOGGER
+from workflow_logic.core import AliceTask, TaskExecutionRequest
+from workflow_logic.core import DatabaseTaskResponse
 from workflow_logic.api_app.util.utils import deep_api_check
 from workflow_logic.api_app.util.dependencies import get_db_app
 

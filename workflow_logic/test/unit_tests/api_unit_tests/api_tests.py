@@ -1,7 +1,6 @@
 import pytest
 from bson import ObjectId
-from workflow_logic.core import API, AliceModel
-from workflow_logic.util import ApiType, ApiName, LLMConfig, User
+from workflow_logic.core import API, AliceModel, User, LLMConfig, ApiType, ApiName
 
 @pytest.fixture
 def sample_api():

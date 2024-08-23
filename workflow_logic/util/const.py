@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from typing import Literal
 load_dotenv()
 
 BACKEND_PORT = os.getenv("BACKEND_PORT", 3000)
@@ -17,8 +18,8 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
 LOGGING_FOLDER = os.getenv("LOGGING_FOLDER", "logs")
 
-active_models = ["GPT4o"]
-active_vision_models = ["Llava_vision"]
+# The order of this list is used to determine which entities are created first
+EntityType = Literal["users", "models", "apis", "parameters", "prompts", "agents", "tasks", "chats", "task_responses"]
 
 const_model_definitions = [
     {

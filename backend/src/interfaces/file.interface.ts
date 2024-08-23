@@ -6,7 +6,6 @@ export enum ContentType {
     AUDIO = "audio",
     VIDEO = "video",
     FILE = "file",
-    TASK_RESULT = "task_result"
 }
 
 export interface IFileReference {

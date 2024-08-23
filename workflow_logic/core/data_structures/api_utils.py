@@ -1,9 +1,5 @@
 from enum import Enum, EnumMeta
-from typing import Literal, List, Tuple, Optional
-from pydantic import BaseModel, ConfigDict
-
-# The order of this list is used to determine which entities are created first
-EntityType = Literal["users", "models", "parameters", "prompts", "agents", "tasks", "chats", "task_responses", "apis"]
+from typing import List, Tuple
     
 class ApiType(str, Enum):
     LLM_MODEL = 'llm_api'
@@ -58,13 +54,3 @@ class ApiName(str, Enum, metaclass=ApiNameMeta):
 # Helper function to get all ApiName values
 def get_all_api_names() -> List[Tuple[str, str]]:
     return [(name, value) for name, value in ApiName.__members__.items()]
-
-class LLMConfig(BaseModel):
-    model: str
-    api_key: Optional[str]
-    base_url: Optional[str]
-    temperature: Optional[float] = 0.9
-    timeout: Optional[int] = 300
-    use_cache: Optional[bool] = False
-    tools: Optional[List[str]] = None
-    model_config = ConfigDict(protected_namespaces=())

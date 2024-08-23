@@ -5,7 +5,8 @@ from googleapiclient.discovery import build
 from exa_py import Exa
 from pydantic import Field
 from typing import Dict, Any, List
-from workflow_logic.util import SearchResult, SearchOutput, ApiType, LOGGER
+from workflow_logic.util import LOGGER
+from workflow_logic.core.data_structures import SearchResult, SearchOutput, ApiType
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 from workflow_logic.core.api.engines.api_engine import APIEngine
 

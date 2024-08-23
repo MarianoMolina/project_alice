@@ -37,7 +37,8 @@ const messageSchema = new Schema<IMessageDocument>({
   tool_call_id: { type: String, default: null, description: "ID of the tool call, if any" },
   request_type: { type: String, default: null, description: "Request type of the message, if any. Can be 'approval', 'confirmation', etc." },
   created_by: { type: Schema.Types.ObjectId, ref: 'User', description: "User ID used to call the endpoint" },
-  references: [{ type: Schema.Types.ObjectId, ref: 'FileReference' }]
+  references: [{ type: Schema.Types.ObjectId, ref: 'FileReference' }],
+  task_responses: [{ type: Schema.Types.ObjectId, ref: 'TaskResponse' }]
 }, { timestamps: true });
 
 messageSchema.methods.apiRepresentation = function (this: IMessageDocument) {

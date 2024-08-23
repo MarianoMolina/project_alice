@@ -4,6 +4,7 @@ import { AliceAgent, convertToAliceAgent } from './AgentTypes';
 import { ToolCall } from './ParameterTypes';
 import { TaskResponse } from './TaskResponseTypes';
 import { HandleClickProps } from './CollectionTypes';
+import { FileReference } from 'typescript';
 
 export interface AliceChat {
     _id: string;
@@ -33,6 +34,7 @@ export interface MessageType {
     function_call?: { [key: string]: string };
     task_responses?: TaskResponse[];
     creation_metadata?: Record<string, any>;
+    references?: FileReference[];
     created_by?: User | null;
     updated_by?: User | null;
     createdAt?: Date;

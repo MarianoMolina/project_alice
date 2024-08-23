@@ -1,7 +1,8 @@
 from bson import ObjectId
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, Union
-from workflow_logic.util import User, ApiType, ApiName, LLMConfig, LOGGER
+from workflow_logic.util import LOGGER
+from workflow_logic.core.data_structures import ApiType, ApiName, LLMConfig
 from workflow_logic.core.model import AliceModel
 
 class API(BaseModel):
@@ -19,8 +20,6 @@ class API(BaseModel):
         health_status (str): The current health status of the API ("healthy", "unhealthy", or "unknown").
         default_model (Optional[AliceModel]): The default language model associated with this API.
         api_config (Optional[Dict[str, Any]]): Additional configuration parameters for the API.
-        created_by (Optional[User]): The user who created this API configuration.
-        updated_by (Optional[User]): The user who last updated this API configuration.
     """
     id: Optional[str] = Field(default=None, alias="_id")
     api_type: ApiType
@@ -30,8 +29,6 @@ class API(BaseModel):
     health_status: str = Field("unknown", pattern="^(healthy|unhealthy|unknown)$")
     default_model: Optional[AliceModel] = None
     api_config: Optional[Dict[str, Any]] = None
-    created_by: Optional[User] = None
-    updated_by: Optional[User] = None
 
     class Config:
         populate_by_name = True

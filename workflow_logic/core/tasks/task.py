@@ -7,7 +7,8 @@ from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.agent import AliceAgent
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition, FunctionConfig, ToolFunction
 from workflow_logic.core.api import APIManager, APIEngine
-from workflow_logic.util import TaskResponse, DatabaseTaskResponse, ApiType, LOGGER
+from workflow_logic.core.data_structures import TaskResponse, DatabaseTaskResponse, ApiType
+from workflow_logic.util import LOGGER
 
 class AliceTask(BaseModel, ABC):
     """

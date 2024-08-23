@@ -7,7 +7,8 @@ from workflow_logic.core.parameters.parameters import ensure_tool_function
 from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.model import AliceModel
 from workflow_logic.core.api import APIManager
-from workflow_logic.util import MessageDict, LOGGER, ApiType, ContentType, TaskResponse, DatabaseTaskResponse, FileReference
+from workflow_logic.core.data_structures import TaskResponse, DatabaseTaskResponse, FileReference, ContentType, MessageDict, ApiType
+from workflow_logic.util import LOGGER
 
 class AliceAgent(BaseModel):
     id: Optional[str] = Field(default=None, description="The ID of the agent", alias="_id")

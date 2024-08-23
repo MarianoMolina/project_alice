@@ -1,8 +1,8 @@
-import os
-from pathlib import Path
+import base64
+import re
 from pydantic import Field
 from typing import Optional
-from workflow_logic.util import LLMConfig, ApiType, FileReference, MessageDict, ContentType
+from workflow_logic.core.data_structures import LLMConfig, ApiType, FileContentReference, MessageDict, ContentType, FileType
 from workflow_logic.core.api.engines.api_engine import APIEngine
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 from openai import AsyncOpenAI
@@ -26,9 +26,9 @@ class OpenAITextToSpeechEngine(APIEngine):
                     description="The voice to use for the speech.",
                     default="alloy"
                 ),
-                "output_path": ParameterDefinition(
+                "output_filename": ParameterDefinition(
                     type="string",
-                    description="The path where the audio file should be saved.",
+                    description="The filename for the generated audio file. If not provided, a descriptive name will be generated.",
                     default=None
                 )
             },
@@ -37,17 +37,31 @@ class OpenAITextToSpeechEngine(APIEngine):
     )
     required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
 
-    async def generate_api_response(self, api_data: LLMConfig, input: str, model: str = "tts-1", voice: str = "alloy", output_path: Optional[str] = None) -> MessageDict:
+    def generate_filename(self, input: str, model: str, voice: str) -> str:
         """
-        Converts text to speech using OpenAI's API and saves the audio file.
+        Generate a descriptive filename based on the input text, model, and voice.
+        """
+        # Sanitize and truncate the input text for the filename
+        sanitized_input = re.sub(r'[^\w\s-]', '', input.lower())
+        truncated_input = ' '.join(sanitized_input.split()[:5])  # Take first 5 words
+        
+        # Construct the filename
+        filename = f"{truncated_input}_{model}_{voice}.mp3"
+        
+        # Replace spaces with underscores and ensure it's not too long
+        filename = filename.replace(' ', '_')[:100]  # Limit to 100 characters
+        
+        return filename
 
+    async def generate_api_response(self, api_data: LLMConfig, input: str, model: str = "tts-1", voice: str = "alloy", output_filename: Optional[str] = None) -> MessageDict:
+        """
+        Converts text to speech using OpenAI's API and creates a FileContentReference.
         Args:
             api_data (LLMConfig): Configuration data for the API (e.g., API key, base URL).
             input (str): The text to convert to speech.
             model (str): The name of the text-to-speech model to use.
             voice (str): The voice to use for the speech.
-            output_path (Optional[str]): The path where the audio file should be saved. If None, a default path will be used.
-
+            output_filename (Optional[str]): The filename for the generated audio file. If None, a descriptive name will be generated.
         Returns:
             MessageDict: A message dict containing information about the generated audio file.
         """
@@ -55,35 +69,31 @@ class OpenAITextToSpeechEngine(APIEngine):
             api_key=api_data.api_key,
             base_url=api_data.base_url
         )
-
         try:
             response = await client.audio.speech.create(
                 model=model,
                 voice=voice,
                 input=input
             )
+           
+            # Get the raw audio data
+            audio_data = await response.read()
             
-            # This is a mess. Need to retrieve the raw data and pass it so the backend stores it and creates the filereference
-
-            if output_path is None:
-                output_path = Path(os.getcwd()) / "generated_speech.mp3"
-            else:
-                output_path = Path(output_path)
-
-            # Ensure the directory exists
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-
-            # Stream the response to the file
-            response.stream_to_file(output_path)
-
-            file_reference = FileReference(
-                filepath=str(output_path),
-                file_type="audio/mp3"
+            # Generate filename if not provided
+            if not output_filename:
+                output_filename = self.generate_filename(input, model, voice)
+            
+            # Create a FileContentReference
+            file_reference = FileContentReference(
+                filename=output_filename,
+                type=FileType.AUDIO,
+                content=base64.b64encode(audio_data).decode('utf-8'),
+                created_by="OpenAITextToSpeechEngine"
             )
 
             return MessageDict(
                 role="assistant",
-                content=f"Speech generated and saved to {output_path}.\nScript: {input}\nVoice: {voice}\n Model: {model}",
+                content=f"Speech generated and saved as {output_filename}.\nScript: {input}\nVoice: {voice}\nModel: {model}",
                 generated_by="tool",
                 type=ContentType.AUDIO,
                 references=[file_reference],

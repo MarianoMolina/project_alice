@@ -4,9 +4,9 @@ from bson import ObjectId
 from typing import Dict, Any, Optional, Literal
 from pydantic import BaseModel, Field, ConfigDict
 from workflow_logic.core.tasks import available_task_types
-from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, API
+from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, API, User, DatabaseTaskResponse, MessageDict
 from workflow_logic.util.const import BACKEND_PORT, HOST, ADMIN_TOKEN
-from workflow_logic.util import User, DatabaseTaskResponse, MessageDict, EntityType, LOGGER
+from workflow_logic.util import EntityType, LOGGER
 
 class BackendAPI(BaseModel):
     """

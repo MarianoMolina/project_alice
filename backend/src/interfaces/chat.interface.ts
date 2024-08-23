@@ -27,6 +27,7 @@ export interface IMessage {
     tool_call_id?: string,
     request_type?: string | null;
     references?: Types.ObjectId[];
+    task_responses?: Types.ObjectId[];
     created_by: Types.ObjectId;
 }
 
