@@ -1,6 +1,6 @@
 import { Document, Types, Model } from 'mongoose';
 
-export enum ContentType {
+export enum FileType {
     TEXT = "text",
     IMAGE = "image",
     AUDIO = "audio",
@@ -10,7 +10,7 @@ export enum ContentType {
 
 export interface IFileReference {
     filename: string;
-    type: ContentType;
+    type: FileType;
     file_size: number;
     storage_path: string;
     file_url: string; 
@@ -29,4 +29,12 @@ export interface IFileReferenceDocument extends IFileReference, Document, IFileR
 
 export interface IFileReferenceModel extends Model<IFileReferenceDocument> {
     // Add any static methods here if needed
+}
+
+export interface FileContentReference {
+    _id?: string;
+    filename: string;
+    type: FileType;
+    content: string; // base64 encoded content
+    created_by?: string;
 }

@@ -1,9 +1,9 @@
 import mongoose, { Schema } from 'mongoose';
-import { IFileReferenceDocument, IFileReferenceModel, ContentType } from '../interfaces/file.interface';
+import { IFileReferenceDocument, IFileReferenceModel, FileType } from '../interfaces/file.interface';
 
 const fileReferenceSchema = new Schema<IFileReferenceDocument, IFileReferenceModel>({
     filename: { type: String, required: true },
-    type: { type: String, enum: Object.values(ContentType), required: true },
+    type: { type: String, enum: Object.values(FileType), required: true },
     file_size: { type: Number, required: true },
     storage_path: { type: String, required: true },
     created_by: { type: Schema.Types.ObjectId, ref: 'User', required: true },

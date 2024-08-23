@@ -1,67 +1,64 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
-import { ContentType, IFileReferenceDocument } from '../interfaces/file.interface';
-import FileReference from '../models/file.model';
 import { Types } from 'mongoose';
+import FileReference from '../models/file.model';
+import { FileContentReference, FileType, IFileReferenceDocument } from '../interfaces/file.interface';
 
-const UPLOAD_DIR = process.env.UPLOAD_DIR || '/app/shared-uploads';
+const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(__dirname, '..', '..', 'shared-uploads');
 const FILE_BASE_URL = process.env.FILE_BASE_URL || 'http://localhost:3000/api/files/serve';
 
-export function inferContentType(filename: string): ContentType {
+export function inferContentType(filename: string): FileType {
     const ext = path.extname(filename).toLowerCase();
     switch (ext) {
         case '.txt':
         case '.md':
         case '.csv':
-            return ContentType.TEXT;
+            return FileType.TEXT;
         case '.jpg':
         case '.jpeg':
         case '.png':
         case '.gif':
         case '.bmp':
         case '.webp':
-            return ContentType.IMAGE;
+            return FileType.IMAGE;
         case '.mp3':
         case '.wav':
         case '.ogg':
         case '.flac':
-            return ContentType.AUDIO;
+            return FileType.AUDIO;
         case '.mp4':
         case '.avi':
         case '.mov':
         case '.wmv':
         case '.webm':
-            return ContentType.VIDEO;
+            return FileType.VIDEO;
         default:
-            return ContentType.FILE;
+            return FileType.FILE;
     }
 }
 
-export async function storeFile(file: Express.Multer.File, userId: string, contentType?: ContentType): Promise<IFileReferenceDocument> {
-    if (!fs.existsSync(UPLOAD_DIR)) {
-        fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-    }
+async function ensureUserDirectory(userId: string): Promise<string> {
+    const userDir = path.join(UPLOAD_DIR, userId);
+    await fs.mkdir(userDir, { recursive: true });
+    return userDir;
+}
 
-    const fileId = uuidv4();
-    const fileExtension = path.extname(file.originalname);
-    const fileName = `${fileId}${fileExtension}`;
-    const filePath = path.join(UPLOAD_DIR, fileName);
+export async function storeFile(fileContent: FileContentReference, userId: string): Promise<IFileReferenceDocument> {
+    const userDir = await ensureUserDirectory(userId);
+    const fileId = new Types.ObjectId();
+    const fileDir = path.join(userDir, fileId.toString());
+    await fs.mkdir(fileDir);
 
-    await fs.promises.writeFile(filePath, file.buffer);
-    
-    await fs.promises.chmod(filePath, 0o644); 
-
-    const inferredContentType = contentType || inferContentType(file.originalname);
-    const fileUrl = `${FILE_BASE_URL}/${fileId}`;
+    const fileBuffer = Buffer.from(fileContent.content, 'base64');
+    const filePath = path.join(fileDir, fileContent.filename);
+    await fs.writeFile(filePath, fileBuffer);
 
     const fileReference = new FileReference({
         _id: fileId,
-        filename: file.originalname,
-        type: inferredContentType,
-        file_size: file.size,
+        filename: fileContent.filename,
+        type: fileContent.type,
+        file_size: fileBuffer.length,
         storage_path: filePath,
-        file_url: fileUrl,
         created_by: new Types.ObjectId(userId)
     });
 
@@ -69,28 +66,73 @@ export async function storeFile(file: Express.Multer.File, userId: string, conte
     return fileReference;
 }
 
-export async function retrieveFile(fileId: string): Promise<{ file: Buffer; fileReference: IFileReferenceDocument }> {
+export async function updateFile(fileContent: FileContentReference, userId: string): Promise<IFileReferenceDocument> {
+    if (!fileContent._id) {
+        throw new Error('File ID is required for update');
+    }
+
+    const existingFile = await FileReference.findById(fileContent._id);
+    if (!existingFile) {
+        throw new Error('File not found');
+    }
+
+    if (existingFile.created_by.toString() !== userId) {
+        throw new Error('Unauthorized to update this file');
+    }
+
+    const fileDir = path.dirname(existingFile.storage_path);
+    const versionFiles = await fs.readdir(fileDir);
+    const versionNumber = versionFiles.length;
+
+    const newVersionFilename = `${path.parse(fileContent.filename).name}_v${versionNumber}${path.parse(fileContent.filename).ext}`;
+    const newVersionPath = path.join(fileDir, newVersionFilename);
+
+    const fileBuffer = Buffer.from(fileContent.content, 'base64');
+    await fs.writeFile(newVersionPath, fileBuffer);
+
+    // Update the default file
+    await fs.writeFile(existingFile.storage_path, fileBuffer);
+
+    existingFile.file_size = fileBuffer.length;
+    existingFile.type = fileContent.type;
+    await existingFile.save();
+
+    return existingFile;
+}
+
+export async function retrieveFileById(fileId: string, version?: number): Promise<{ file: Buffer; fileReference: IFileReferenceDocument }> {
     const fileReference = await FileReference.findById(fileId);
     if (!fileReference) {
         throw new Error('File not found');
     }
 
-    const file = await fs.promises.readFile(fileReference.storage_path);
+    let filePath = fileReference.storage_path;
+    if (version !== undefined) {
+        const fileDir = path.dirname(filePath);
+        const versionFilename = `${path.parse(fileReference.filename).name}_v${version}${path.parse(fileReference.filename).ext}`;
+        filePath = path.join(fileDir, versionFilename);
+    }
+
+    const file = await fs.readFile(filePath);
     fileReference.last_accessed = new Date();
     await fileReference.save();
 
     return { file, fileReference };
 }
 
-export async function retrieveFileByName(fileName: string): Promise<{ file: Buffer; fileReference: IFileReferenceDocument }> {
-    const fileReference = await FileReference.findOne({ filename: fileName });
-    if (!fileReference) {
-        throw new Error('File not found');
+export async function processMessageReferences(message: any, userId: string): Promise<any> {
+    if (message.references && Array.isArray(message.references)) {
+        const processedReferences = await Promise.all(message.references.map(async (ref: any) => {
+            if (ref.content) { // This is a FileContentReference
+                if (ref._id) {
+                    return await updateFile(ref, userId);
+                } else {
+                    return await storeFile(ref, userId);
+                }
+            }
+            return ref; // This is already a FileReference
+        }));
+        message.references = processedReferences.map(ref => ref._id);
     }
-
-    const file = await fs.promises.readFile(fileReference.storage_path);
-    fileReference.last_accessed = new Date();
-    await fileReference.save();
-
-    return { file, fileReference };
+    return message;
 }

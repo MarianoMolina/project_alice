@@ -49,14 +49,7 @@ customRouter.patch('/:chatId/add_message', async (req: AuthRequest, res: Respons
   const { chatId } = req.params;
   const message: Partial<IMessage> = req.body.message;
   const userId = req.user?.userId;
-
-  Logger.debug(`Received request to add message to chat ${chatId}`, { 
-    chatId, 
-    userId, 
-    messageContent: message.content,
-    hasReferences: !!message.references
-  });
-
+  
   try {
     // Remove the _id field if it exists and is not a valid ObjectId
     if (message._id && !Types.ObjectId.isValid(message._id)) {
@@ -88,6 +81,7 @@ customRouter.patch('/:chatId/add_message', async (req: AuthRequest, res: Respons
     res.status(500).json({ message: (error as Error).message, stack: (error as Error).stack });
   }
 });
+
 customRouter.patch('/:chatId/add_task_response', async (req: AuthRequest, res: Response) => {
   const { chatId } = req.params;
   const { taskResultId } = req.body;

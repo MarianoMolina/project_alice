@@ -1,53 +1,61 @@
-import express, { Router, Request, Response } from 'express';
-import multer from 'multer';
+import express, { Router, Response } from 'express';
 import { AuthRequest } from '../interfaces/auth.interface';
 import auth from '../middleware/auth.middleware';
-import { storeFile, retrieveFile, retrieveFileByName, inferContentType } from '../utils/file.utils';
 import FileReference from '../models/file.model';
+import { storeFile, updateFile, retrieveFileById } from '../utils/file.utils';
+import { FileContentReference } from '../interfaces/file.interface';
 
 const router: Router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() });
 
 router.use(auth);
 
-router.post('/upload', upload.single('file'), async (req: AuthRequest, res: Response) => {
+// POST /api/files/upload
+router.post('/upload', async (req: AuthRequest, res: Response) => {
     try {
-      if (!req.file) {
-        return res.status(400).json({ message: 'No file uploaded' });
-      }
-  
-      // Infer the content type from the file
-      const contentType = inferContentType(req.file.originalname);
-  
-      const fileReference = await storeFile(req.file, req.user!.userId, contentType);
-      res.status(201).json(fileReference.apiRepresentation());
+        const fileContent: FileContentReference = req.body;
+        const userId = req.user!.userId;
+
+        if (!fileContent || !fileContent.filename || !fileContent.type || !fileContent.content) {
+            return res.status(400).json({ message: 'Invalid file data' });
+        }
+
+        const fileReference = await storeFile(fileContent, userId);
+        res.status(201).json(fileReference.apiRepresentation());
     } catch (error) {
-      console.error('Error uploading file:', error);
-      res.status(500).json({ message: 'Error uploading file' });
+        console.error('Error uploading file:', error);
+        res.status(500).json({ message: 'Error uploading file' });
     }
 });
 
-router.get('/:id', async (req: Request, res: Response) => {
+// GET /api/files/:id
+router.get('/:id', async (req: AuthRequest, res: Response) => {
     try {
-        const { file, fileReference } = await retrieveFile(req.params.id);
-        res.set({
-            'Content-Type': fileReference.type,
-            'Content-Disposition': `attachment; filename="${fileReference.filename}"`
-        });
-        res.send(file);
+        const fileReference = await FileReference.findById(req.params.id);
+        if (!fileReference) {
+            return res.status(404).json({ message: 'File not found' });
+        }
+        if (fileReference.created_by.toString() !== req.user!.userId) {
+            return res.status(403).json({ message: 'Unauthorized' });
+        }
+        res.json(fileReference.apiRepresentation());
     } catch (error) {
-        console.error('Error retrieving file:', error);
-        res.status(404).json({ message: 'File not found' });
+        console.error('Error retrieving file reference:', error);
+        res.status(500).json({ message: 'Error retrieving file reference' });
     }
 });
 
-router.get('/serve/:fileName', async (req: Request, res: Response) => {
+// GET /api/files/serve/:id
+router.get('/serve/:id', async (req: AuthRequest, res: Response) => {
     try {
-        const { file, fileReference } = await retrieveFileByName(req.params.fileName);
-        res.set({
-            'Content-Type': fileReference.type,
-            'Content-Disposition': `inline; filename="${fileReference.filename}"`
-        });
+        const version = req.query.version ? parseInt(req.query.version as string) : undefined;
+        const { file, fileReference } = await retrieveFileById(req.params.id, version);
+        
+        if (fileReference.created_by.toString() !== req.user!.userId) {
+            return res.status(403).json({ message: 'Unauthorized' });
+        }
+
+        res.set('Content-Type', fileReference.type);
+        res.set('Content-Disposition', `attachment; filename="${fileReference.filename}"`);
         res.send(file);
     } catch (error) {
         console.error('Error serving file:', error);
@@ -55,6 +63,7 @@ router.get('/serve/:fileName', async (req: Request, res: Response) => {
     }
 });
 
+// GET /api/files
 router.get('/', async (req: AuthRequest, res: Response) => {
     try {
         const files = await FileReference.find({ created_by: req.user!.userId });
@@ -62,6 +71,26 @@ router.get('/', async (req: AuthRequest, res: Response) => {
     } catch (error) {
         console.error('Error listing files:', error);
         res.status(500).json({ message: 'Error listing files' });
+    }
+});
+
+// PATCH /api/files/:id
+router.patch('/:id', async (req: AuthRequest, res: Response) => {
+    try {
+        const fileContent: FileContentReference = req.body;
+        const userId = req.user!.userId;
+
+        if (!fileContent || !fileContent.filename || !fileContent.type || !fileContent.content) {
+            return res.status(400).json({ message: 'Invalid file data' });
+        }
+
+        fileContent._id = req.params.id;
+
+        const updatedFileReference = await updateFile(fileContent, userId);
+        res.json(updatedFileReference.apiRepresentation());
+    } catch (error) {
+        console.error('Error updating file:', error);
+        res.status(500).json({ message: 'Error updating file' });
     }
 });
 

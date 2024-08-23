@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional, Literal, Dict, Any, List, Union
 from workflow_logic.core.parameters import ToolCall
-from workflow_logic.core.data_structures.file_reference import FileType, FileReference, FileContentReference
+from workflow_logic.core.data_structures.file_reference import FileType, FileReference
 from workflow_logic.core.data_structures.task_response import TaskResponse
 
 class ContentType(FileType):
@@ -51,7 +51,7 @@ class MessageDict(BaseModel):
         """
         Add a reference to the message. This can be a FileReference, FileContentReference, or TaskResponse.
         """
-        if isinstance(reference, (FileReference, FileContentReference)):
+        if isinstance(reference, FileReference):
             self.references.append(reference)
         elif isinstance(reference, TaskResponse):
             self.task_responses.append(reference)
