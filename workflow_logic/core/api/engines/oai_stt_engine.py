@@ -43,7 +43,7 @@ class OpenAISpeechToTextEngine(APIEngine):
         )
 
         try:
-            with open(file_reference.filepath, "rb") as audio_file:
+            with open(file_reference.storage_path, "rb") as audio_file:
                 transcription = await client.audio.transcriptions.create(
                     model=model, 
                     file=audio_file, 
@@ -52,7 +52,7 @@ class OpenAISpeechToTextEngine(APIEngine):
 
             return MessageDict(
                 role="assistant",
-                content=transcription,
+                content=f'Transcription from sound file: {transcription.text}',
                 generated_by="speech_to_text_model",
                 type="text",
                 references=[file_reference],

@@ -50,6 +50,8 @@ class OpenAIEmbeddingsEngine(APIEngine):
 
             # Extract embeddings from the response
             embeddings = [data.embedding for data in response.data]
+            
+            # This needs to return a structured data of some type. Normally msg or searchoutput, but maybe something new
 
             return embeddings
         except Exception as e:

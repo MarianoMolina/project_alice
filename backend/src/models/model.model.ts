@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { IModelDocument, IModelModel } from '../interfaces/model.interface';
+import { IModelDocument, IModelModel, ModelType } from '../interfaces/model.interface';
 import { ApiName } from '../interfaces/api.interface';
 
 const modelSchema = new Schema<IModelDocument, IModelModel>({
@@ -7,7 +7,7 @@ const modelSchema = new Schema<IModelDocument, IModelModel>({
   model_name: { type: String, required: true },
   model_format: { type: String, required: true },
   ctx_size: { type: Number, required: true },
-  model_type: { type: String, enum: ['instruct', 'chat', 'vision'], required: true },
+  model_type: { type: String, enum: ModelType, required: true },
   api_name: { type: String, default: ApiName.LM_STUDIO },
   temperature: { type: Number, default: 0.7 },
   seed: { type: Number, default: null },

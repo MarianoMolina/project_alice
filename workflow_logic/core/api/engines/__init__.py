@@ -9,8 +9,9 @@ from .anthropic_vision_engine import AnthropicVisionEngine
 from .oai_stt_engine import OpenAISpeechToTextEngine
 from .oai_timestamped_stt_engine import OpenAIAdvancedSpeechToTextEngine
 from .text_to_speech_engine import OpenAITextToSpeechEngine
+from .embedding_engine import OpenAIEmbeddingsEngine
 
 __all__ = ["ArxivSearchAPI", "ExaSearchAPI", "GoogleSearchAPI", "RedditSearchAPI", "WikipediaSearchAPI", "APIEngine", 
            "LLMEngine", "LLMOpenAI", "LLMAnthropic", "BeautifulSoupWebScraperEngine", "ImageGenerationEngine", 
            "VisionModelEngine", "AnthropicVisionEngine", "OpenAISpeechToTextEngine", "OpenAIAdvancedSpeechToTextEngine",
-           "OpenAITextToSpeechEngine"]
+           "OpenAITextToSpeechEngine", "OpenAIEmbeddingsEngine"]

@@ -17,7 +17,8 @@ class VisionModelEngine(APIEngine):
                 ),
                 "prompt": ParameterDefinition(
                     type="string",
-                    description="A text prompt to guide the image analysis."
+                    description="A text prompt to guide the image analysis.",
+                    default="Describe this image"
                 ),
                 "max_tokens": ParameterDefinition(
                     type="integer",

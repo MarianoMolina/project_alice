@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from pydantic import Field
 from typing import Optional
-from workflow_logic.util import LLMConfig, ApiType, FileReference, MessageDict
+from workflow_logic.util import LLMConfig, ApiType, FileReference, MessageDict, ContentType
 from workflow_logic.core.api.engines.api_engine import APIEngine
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 from openai import AsyncOpenAI
@@ -62,6 +62,8 @@ class OpenAITextToSpeechEngine(APIEngine):
                 voice=voice,
                 input=input
             )
+            
+            # This is a mess. Need to retrieve the raw data and pass it so the backend stores it and creates the filereference
 
             if output_path is None:
                 output_path = Path(os.getcwd()) / "generated_speech.mp3"
@@ -81,9 +83,9 @@ class OpenAITextToSpeechEngine(APIEngine):
 
             return MessageDict(
                 role="assistant",
-                content=f"Speech generated and saved to {output_path}",
-                generated_by="text_to_speech_model",
-                type="audio",
+                content=f"Speech generated and saved to {output_path}.\nScript: {input}\nVoice: {voice}\n Model: {model}",
+                generated_by="tool",
+                type=ContentType.AUDIO,
                 references=[file_reference],
                 creation_metadata={
                     "model": model,

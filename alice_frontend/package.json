@@ -46,8 +46,8 @@
     "postcss": ">=8.4.6",
     "tailwindcss": "^3.4.4"
   },
-  "scripts": {
-    "start": "react-scripts start",
+  "scripts": {  
+    "start": "HOST=0.0.0.0 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

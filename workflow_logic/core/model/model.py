@@ -2,7 +2,7 @@ from bson import ObjectId
 from typing import Dict, List, Literal, Optional
 from pydantic import BaseModel, Field, model_validator, ConfigDict
 from workflow_logic.util.const import model_formats
-from workflow_logic.util import ApiName
+from workflow_logic.util import ApiName, ModelType
 
 class AliceModel(BaseModel):
     id: Optional[str] = Field(None, title="Model ID", description="The ID of the model.", alias="_id")
@@ -10,7 +10,7 @@ class AliceModel(BaseModel):
     model_name: str = Field(..., title="Model Name", description="The complete name of the model.")
     model_format: str = Field(..., title="Model Format", description="The format of the model.")
     ctx_size: int = Field(..., title="Context Size", description="The context size of the model.")
-    model_type: Literal["instruct", "chat", "vision"] = Field(..., title="Model Type", description="The type of the model.")
+    model_type: ModelType = Field(..., title="Model Type", description="The type of the model.")
     api_name: ApiName = Field(default='lm-studio', title="API name", description="The API to use for the model.")
     temperature: float = Field(0.7, description="The temperature setting for the model")
     seed: Optional[int] = Field(None, description="The seed for random number generation")

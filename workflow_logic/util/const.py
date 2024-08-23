@@ -11,6 +11,7 @@ HOST = os.getenv("HOST", "localhost")
 FRONTEND_HOST = os.getenv("FRONTEND_HOST", "frontend")
 BACKEND_HOST = os.getenv("BACKEND_HOST", "backend")
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN")
+SHARED_UPLOAD_DIR = os.getenv("SHARED_UPLOAD_DIR", '/app/shared-uploads')
 # Environment variable to control log level
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
@@ -127,6 +128,19 @@ const_model_definitions = [
 ]
 
 model_formats = {
+    "Base": {
+        "input_prefix": "<|im_end|><|im_start|>user<|im_end|>\n\n",
+        "input_suffix": "<|im_end|><|im_start|>assistant<|im_end|>\n\n",
+        "pre_prompt": "You are a helpful, smart, kind, and efficient AI assistant. You always fulfill the user's requests to the best of your ability.",
+        "pre_prompt_prefix": "<|im_start|>system<|im_end|>\n\n",
+        "pre_prompt_suffix": "",
+        "antiprompt": [
+            "<|im_start|>",
+            "<|im_end|>",
+            "<|eot_id|>", 
+            "<|start_header_id|>"
+        ]
+    },
     "ChatML": {
         "input_prefix": "<|im_end|>\n<|im_start|>user\n",
         "input_suffix": "<|im_end|>\n<|im_start|>assistant\n",

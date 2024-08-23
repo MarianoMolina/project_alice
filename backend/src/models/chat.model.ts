@@ -98,6 +98,7 @@ function ensureObjectIdForSave(this: IAliceChatDocument, next: mongoose.Callback
     if (message.references) {
       message.references = message.references.map(reference => ensureObjectIdHelper(reference))
     }
+    message.created_by = ensureObjectIdHelper(message.created_by)
   });
 
   next();
@@ -118,6 +119,7 @@ function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.
       if (message.references) {
         message.references = message.references.map((reference: any) => ensureObjectIdHelper(reference))
       }
+      message.created_by = ensureObjectIdHelper(message.created_by)
     });
   }
 
@@ -133,6 +135,10 @@ function autoPopulate(this: mongoose.Query<any, any>) {
     .populate({
       path: 'messages.references',
       model: 'FileReference'
+    })
+    .populate({
+      path: 'messages.created_by',
+      model: 'User'
     })
 }
 

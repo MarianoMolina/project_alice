@@ -6,6 +6,7 @@ from typing import Optional, Literal, Dict, Any, List, Union
 from typing_extensions import Optional, Literal
 from workflow_logic.core.parameters import ToolCall
 from workflow_logic.util.logging_config import LOGGER
+from workflow_logic.util.const import SHARED_UPLOAD_DIR
 
 class OutputInterface(BaseModel):
     content: List[Any] = Field([], description="The content of the output.")
@@ -106,15 +107,14 @@ class FileReference(BaseModel):
     id: Optional[str] = Field(None, alias="_id")
     filename: str
     type: ContentType
-    file_size: int
-    storage_path: str
-    created_by: str 
+    file_size: Optional[int]
+    storage_path: Optional[str]
+    b64_json: Optional[str]
+    created_by: Optional[str] 
     last_accessed: Optional[datetime] = None
 
     class Config:
         populate_by_name = True
-
-SHARED_UPLOAD_DIR = '/app/shared-uploads'
 
 def image_data_from_file_reference(file_reference: FileReference) -> str:
     """
@@ -127,6 +127,8 @@ def image_data_from_file_reference(file_reference: FileReference) -> str:
     str: Base64 encoded string of the file content.
     """
     try:
+        if file_reference.b64_json:
+            return file_reference.b64_json
         file_path = os.path.join(SHARED_UPLOAD_DIR, file_reference.storage_path.split('/')[-1])
         with open(file_path, "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read()).decode('utf-8')

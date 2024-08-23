@@ -1,5 +1,5 @@
 from pydantic import Field
-from workflow_logic.util import MessageDict, LLMConfig, FileReference
+from workflow_logic.util import MessageDict, LLMConfig, FileReference, ContentType
 from workflow_logic.core.api.engines.api_engine import APIEngine
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 from openai import AsyncOpenAI
@@ -64,12 +64,13 @@ class ImageGenerationEngine(APIEngine):
                 prompt=prompt,
                 n=n,
                 size=size,
-                quality=quality
+                quality=quality,
+                response_format='b64_json'
             )
 
             # Extract image URLs and create FileReferences
-            image_urls = [image.url for image in response.data]
-            file_references = [FileReference(url=url, file_type="image") for url in image_urls]
+            images_b64_json = [image.b64_json for image in response.data]
+            file_references = [FileReference(filename=f'{model}-{prompt[:50]}', b64_json=b64_json, type=ContentType.IMAGE) for b64_json in images_b64_json]
 
             return MessageDict(
                 role="assistant",

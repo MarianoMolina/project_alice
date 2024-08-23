@@ -59,13 +59,13 @@ const Database: React.FC = () => {
 
     const tabs = [
         { name: 'Agent' as CollectionElementString, icon: Person },
+        { name: 'API' as CollectionElementString, icon: Api },
+        { name: 'Chat' as CollectionElementString, icon: Chat },
         { name: 'Model' as CollectionElementString, icon: Category },
         { name: 'Parameter' as CollectionElementString, icon: Settings },
         { name: 'Prompt' as CollectionElementString, icon: Description },
         { name: 'Task' as CollectionElementString, icon: Functions },
         { name: 'TaskResponse' as CollectionElementString, icon: Assignment },
-        { name: 'Chat' as CollectionElementString, icon: Chat },
-        { name: 'API' as CollectionElementString, icon: Api },
     ];
 
     // Active tab logic

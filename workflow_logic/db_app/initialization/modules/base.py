@@ -26,21 +26,11 @@ base_module = BaseModule(
                 "key": "GPT4o",
                 "short_name": "GPT4o",
                 "model_format": "OpenChat",
-                "model_name": "gpt-4o-2024-05-13",
+                "model_name": "chatgpt-4o-latest",
                 "ctx_size": 128000,
                 "model_type": "chat",
                 "temperature": 0.7,
                 "api_name": "openai",
-            },
-            {
-                "key": "Llama3_8B_Instruct",
-                "short_name": "Llama3_8B_Instruct",
-                "model_name": "nisten/llama3-8b-instruct-32k-gguf",
-                "model_format": "Llama3",
-                "ctx_size": 32768,
-                "model_type": "instruct",
-                "api_name": "lm-studio",
-                "lm_studio_preset": "Llama 3 V3"
             },
             {
                 "key": "Claude3.5",
@@ -70,6 +60,51 @@ base_module = BaseModule(
                 "model_type": "instruct",
                 "api_name": "lm-studio",
                 "lm_studio_preset": "Llama 3 V3"
+            },
+            {
+                "key": "Whisper_1",
+                "short_name": "Whisper",
+                "model_name": "whisper-1", # need model name here
+                "model_format": "Base", # random value
+                "ctx_size": 2048, # random value
+                "model_type": "stt",
+                "api_name": "speech_to_text",
+            },
+            {
+                "key": "Dall-E-3",
+                "short_name": "dall-e-3",
+                "model_name": "dall-e-3",
+                "model_format": "Base", # random value
+                "ctx_size": 2048, # random value
+                "model_type": "img_gen",
+                "api_name": "img_generation",
+            },
+            {
+                "key": "tts-1",
+                "short_name": "tts-1",
+                "model_name": "tts-1",
+                "model_format": "Base", # random value
+                "ctx_size": 2048, # random value
+                "model_type": "tts",
+                "api_name": "text_to_speech",
+            },
+            {
+                "key": "oai_embedding_large",
+                "short_name": "text-embedding-large",
+                "model_name": "text-embedding-large",
+                "model_format": "Base", # random value
+                "ctx_size": 2048, # random value
+                "model_type": "embeddings",
+                "api_name": "embeddings",
+            },
+            {
+                "key": "hermes_llava_vision", 
+                "short_name": "Hermes-2-vision",
+                "model_name": "billborkowski/llava-NousResearch_Nous-Hermes-2-Vision-GGUF",
+                "model_format": "Obsidian_Vision",
+                "ctx_size": 4096,
+                "model_type": "vision",
+                "api_name": "img_vision"
             }
         ],
         "apis": [
@@ -176,6 +211,7 @@ base_module = BaseModule(
                 },
                 "is_active": True,
                 "health_status": "healthy",
+                "default_model": "GPT4o",
             },
             {
                 "key": "img_vision_lm_studio",
@@ -188,6 +224,7 @@ base_module = BaseModule(
                 },
                 "is_active": True,
                 "health_status": "healthy",
+                "default_model": "hermes_llava_vision"
             },
             {
                 "key": "img_vision_anthropic",
@@ -200,6 +237,7 @@ base_module = BaseModule(
                 },
                 "is_active": True,
                 "health_status": "healthy",
+                "default_model": "Claude3.5"
             },
             {
                 "key": "img_generation",
@@ -212,12 +250,13 @@ base_module = BaseModule(
                 },
                 "is_active": True,
                 "health_status": "healthy",
+                "default_model": "Dall-E-3"
             },
             {
                 "key": "web_scrape",
                 "api_type": "web_scrape",
-                "api_name": "web_scrape",
-                "name": "Web Scrape",
+                "api_name": "beautiful-soup",
+                "name": "Web Scrape w/ BeautifulSoup",
                 "api_config": {},
                 "is_active": True,
                 "health_status": "healthy",
@@ -228,11 +267,12 @@ base_module = BaseModule(
                 "api_name": "openai",
                 "name": "OpenAI Speech to Text",
                 "api_config": {
-                    "api_key": OPENAI_API_KEY,
+                    "api_key": OPENAI_API_KEY, # Since whisper is open source, it should probably be a local deployment
                     "base_url": "https://api.openai.com/v1"
                 },
                 "is_active": True,
                 "health_status": "healthy",
+                "default_model": "Whisper_1"
             },
             {
                 "key": "speech_to_text_openai_advanced",
@@ -244,7 +284,8 @@ base_module = BaseModule(
                     "base_url": "https://api.openai.com/v1"
                 },
                 "is_active": True,
-                "health_status": "healthy",                
+                "health_status": "healthy",      
+                "default_model": "Whisper_1"          
             },
             {
                 "key": "text_to_speech",
@@ -257,7 +298,21 @@ base_module = BaseModule(
                 },
                 "is_active": True,
                 "health_status": "healthy",
+                "default_model": "tts-1"
            },
+            {
+                "key": "embedding_api",
+                "api_type": "embeddings", 
+                "api_name": "openai",
+                "name": "OpenAI Embeddings", 
+                "api_config": {
+                    "api_key": OPENAI_API_KEY,
+                    "base_url": "https://api.openai.com/v1"                    
+                },
+                "is_active": True,
+                "health_status": "healthy",
+                "default_model": "oai_embedding_large"            
+            }
         ],
         "parameters": [
             {

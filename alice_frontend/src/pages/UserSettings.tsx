@@ -25,7 +25,6 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
     const [originalUserObject, setOriginalUserObject] = useState<User | null>(null);
     const { user } = useAuth();
     const [showCreateAPI, setShowCreateAPI] = useState(false);
-    const [showConfirmPurge, setShowConfirmPurge] = useState(false);
     const classes = useStyles();
     const isInitialMount = useRef(true);
     const [apiUpdateTrigger, setApiUpdateTrigger] = useState(0);
@@ -37,6 +36,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
         const loadUser = async () => {
             try {
                 if (user) {
+                    console.log('Loading user data');
                     const userData = await fetchItem('users', user._id) as User;
                     setUserObject(userData);
                     setOriginalUserObject(userData);
@@ -72,6 +72,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
     const handleSaveChanges = useCallback(async () => {
         if (userObject && userObject._id) {
             try {
+                console.log('Saving user changes');
                 const updated = await updateItem('users', userObject._id ?? '', userObject);
                 setUserObject(updated as User);
                 setOriginalUserObject(updated as User);
@@ -88,37 +89,41 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
     }, []);
 
     const handleApiSelect = useCallback((item: Partial<API>) => {
+        console.log('API selected:', item);
         setSelectedItem(item);
         setIsCreating(false);
         setShowCreateAPI(true);
     }, []);
 
-    const handlePurgeAndReinitialize = useCallback(async () => {
+    const handlePurgeAndReinitialize = useCallback(() => {
+        console.log('handlePurgeAndReinitialize called');
         openDialog({
-          title: 'Confirm Database Purge and Reinitialization',
-          content: 'Are you sure you want to purge and reinitialize your database? This action cannot be undone and will delete all your current data.',
-          confirmText: 'Confirm Purge and Reinitialize',
-          onConfirm: async () => {
-            try {
-              await purgeAndReinitializeDatabase();
-              console.log('Database successfully purged and reinitialized');
-              addNotification('Database successfully purged and reinitialized', 'success');
-            } catch (error) {
-              console.error('Failed to purge and reinitialize database:', error);
-              addNotification('Failed to purge and reinitialize database. Please try again.', 'error');
-            }
-          },
+            title: 'Confirm Database Purge and Reinitialization',
+            content: 'Are you sure you want to purge and reinitialize your database? This action cannot be undone and will delete all your current data.',
+            confirmText: 'Confirm Purge and Reinitialize',
+            onConfirm: async () => {
+                console.log('Dialog confirmed');
+                try {
+                    console.log('Purging db');
+                    await purgeAndReinitializeDatabase();
+                    console.log('Database successfully purged and reinitialized');
+                    addNotification('Database successfully purged and reinitialized', 'success');
+                } catch (error) {
+                    console.error('Failed to purge and reinitialize database:', error);
+                    addNotification('Failed to purge and reinitialize database. Please try again.', 'error');
+                }
+            },
         });
-      }, [openDialog, purgeAndReinitializeDatabase, addNotification]);
+    }, [openDialog, purgeAndReinitializeDatabase, addNotification]);
 
-      const tabs = [
+    const tabs = [
         { name: 'Personal information', icon: Person },
         { name: 'APIs', icon: Api },
         { name: 'Danger Zone', icon: Warning },
     ];
 
-
     const renderActiveContent = useCallback(() => {
+        console.log('Rendering active content:', activeTab);
         if (!userObject) {
             return <Typography>Loading user settings...</Typography>;
         }
@@ -180,39 +185,37 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
                             />
                         </Paper>
                     </Box>
-                )
-                case 'Danger Zone':
-                    return (
-                        <Card className={classes.card}>
-                            <CardContent>
-                                <Box className={classes.dangerZone}>
-                                    <Box className={classes.userInfoHeader}>
-                                        <Warning color="error" />
-                                        <Typography variant="h5">Danger Zone</Typography>
-                                    </Box>
-                                    <Typography variant="body1" color="error" paragraph>
-                                        The following action will delete all your data and reinitialize your database. This cannot be undone.
-                                    </Typography>
-                                    <Button
-                                        variant="contained"
-                                        onClick={() => openDialog({
-                                            title: 'Confirm Database Purge and Reinitialization',
-                                            content: 'Are you sure you want to purge and reinitialize your database? This action cannot be undone and will delete all your current data.',
-                                            confirmText: 'Confirm Purge and Reinitialize',
-                                            onConfirm: handlePurgeAndReinitialize,
-                                        })}
-                                        className={classes.dangerButton}
-                                    >
-                                        Purge and Reinitialize Database
-                                    </Button>
+                );
+            case 'Danger Zone':
+                return (
+                    <Card className={classes.card}>
+                        <CardContent>
+                            <Box className={classes.dangerZone}>
+                                <Box className={classes.userInfoHeader}>
+                                    <Warning color="error" />
+                                    <Typography variant="h5">Danger Zone</Typography>
                                 </Box>
-                            </CardContent>
-                        </Card>
-                    );
-                default:
-                    return null;
+                                <Typography variant="body1" color="error" paragraph>
+                                    The following action will delete all your data and reinitialize your database. This cannot be undone.
+                                </Typography>
+                                <Button
+                                    variant="contained"
+                                    onClick={() => {
+                                        console.log('Purge button clicked');
+                                        handlePurgeAndReinitialize();
+                                    }}
+                                    className={classes.dangerButton}
+                                >
+                                    Purge and Reinitialize Database
+                                </Button>
+                            </Box>
+                        </CardContent>
+                    </Card>
+                );
+            default:
+                return null;
         }
-    }, [activeTab, userObject, handleUserUpdate, handleSaveChanges, handleApiSelect, apiUpdateTrigger, classes]);
+    }, [activeTab, userObject, handleUserUpdate, handleSaveChanges, handleApiSelect, apiUpdateTrigger, classes, handlePurgeAndReinitialize]);
 
     return (
         <Box className={classes.root}>

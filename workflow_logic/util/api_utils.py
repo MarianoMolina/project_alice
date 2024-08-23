@@ -17,6 +17,16 @@ class ApiType(str, Enum):
     WEB_SCRAPE = 'web_scrape'
     SPEECH_TO_TEXT = 'speech_to_text'
     TEXT_TO_SPEECH = 'text_to_speech'
+    EMBEDDINGS = 'embeddings'
+    
+class ModelType(str, Enum):
+    INSTRUCT = 'instruct'
+    CHAT = 'chat'
+    VISION = 'vision'
+    STT = 'stt'
+    TTS = 'tts'
+    EMBEDDINGS = 'embeddings'
+    IMG_GEN = 'img_gen'
 
 class ApiNameMeta(EnumMeta):
     def __new__(metacls, cls, bases, classdict):

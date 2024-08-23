@@ -48,7 +48,7 @@ class OpenAIAdvancedSpeechToTextEngine(OpenAISpeechToTextEngine):
         )
 
         try:
-            with open(file_reference.filepath, "rb") as audio_file:
+            with open(file_reference.storage_path, "rb") as audio_file:
                 transcript = await client.audio.transcriptions.create(
                     file=audio_file,
                     model=model,
@@ -58,15 +58,15 @@ class OpenAIAdvancedSpeechToTextEngine(OpenAISpeechToTextEngine):
 
             return MessageDict(
                 role="assistant",
-                content=transcript.text,
+                content=f'Transcription from sound file: {transcript.text}',
                 generated_by="advanced_speech_to_text_model",
                 type="text",
                 references=[file_reference],
                 creation_metadata={
                     "model": model,
-                    "words": transcript.words,
-                    "language": transcript.language,
-                    "duration": transcript.duration
+                    "words": transcript.words, ## this is made up, they are not props in the transcript
+                    "language": transcript.language, ## this is made up, they are not props in the transcript
+                    "duration": transcript.duration ## this is made up, they are not props in the transcript
                 }
             )
         except Exception as e:

@@ -57,6 +57,8 @@ class BeautifulSoupWebScraperEngine(APIEngine):
         elements = soup.select(selector)[:max_results]
 
         results = []
+        
+        # This probably needs a new data structure that enables chunking, etc. 
         for element in elements:
             result = SearchResult(
                 title=element.get_text(strip=True)[:100],  # First 100 characters as title

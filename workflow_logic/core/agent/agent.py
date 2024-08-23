@@ -30,6 +30,35 @@ class AliceAgent(BaseModel):
                     type="text",
                     assistant_name=self.name
                 )]
+            if messages[-1].references:
+                for ref in messages[-1].references:
+                    if ref.type == ContentType.TASK_RESPONSE:
+                        pass
+                    if ref.type == ContentType.AUDIO:
+                        audio_transcribe: MessageDict = await api_manager.generate_response_with_api_engine(
+                            api_type=ApiType.SPEECH_TO_TEXT, 
+                            file_reference=ref,
+                        )
+                        messages.extend(audio_transcribe)
+                    if ref.type == ContentType.IMAGE:
+                        img_describe: MessageDict = await api_manager.generate_response_with_api_engine(
+                            api_type=ApiType.IMG_VISION, 
+                            file_references=[ref], 
+                        )
+                        messages.extend(img_describe)
+                    if ref.type == ContentType.FILE:
+                        # Create logic to parse a text file into a string
+                        pass
+                    if ref.type == ContentType.VIDEO:
+                        # Create logic for vtt
+                        pass
+                    if ref.type == ContentType.TEXT:
+                        # msg = MessageDict(
+                        #     role='user',
+                        #     generated_by='tool',
+                        #     content=ref.
+                        # )
+                        pass
 
             LOGGER.info(f"Calling generate_response_with_api_engine")
             LOGGER.debug(f'Agent: {self.model_dump()}')
@@ -316,8 +345,6 @@ class AliceAgent(BaseModel):
         }
         if message.tool_calls:
             api_message["tool_calls"] = [tool_call.model_dump() for tool_call in message.tool_calls]
-        if message.function_call:
-            api_message["function_call"] = message.function_call.model_dump()
         if message.tool_call_id:
             api_message["tool_call_id"] = str(message.tool_call_id)
         return api_message
@@ -328,8 +355,8 @@ class AliceAgent(BaseModel):
         if initial_message:
             start_messages.append(MessageDict(role="user", content=initial_message))
         all_messages = start_messages
-        for _ in range(max_turns):
-            new_messages = await self.generate_response(api_manager, all_messages, tool_map, tools_list)
+        for turn in range(max_turns):
+            new_messages = await self.generate_response(api_manager, all_messages, tool_map, tools_list, recursion_depth=turn)
             all_messages.extend(new_messages)
             gen_messages.extend(new_messages)
             
