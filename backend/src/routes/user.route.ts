@@ -13,7 +13,7 @@ import Chat from '../models/chat.model';
 import Model from '../models/model.model';
 import Prompt from '../models/prompt.model';
 import Task from '../models/task.model';
-import TaskResult from '../models/taskresult.model';
+import TaskResult from '../models/taskResult.model';
 import ParameterDefinition from '../models/parameter.model';
 import Logger from '../utils/logger';
 

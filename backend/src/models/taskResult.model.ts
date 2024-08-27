@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { ITaskResultDocument, ITaskResultModel } from '../interfaces/taskeresult.interface';
+import { ITaskResultDocument, ITaskResultModel } from '../interfaces/taskResult.interface';
 
 const taskResultSchema = new Schema<ITaskResultDocument, ITaskResultModel>({
   task_name: { type: String, required: true },

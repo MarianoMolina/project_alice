@@ -1,7 +1,7 @@
 import { createRoutes } from '../utils/routeGenerator';
-import TaskResult from '../models/taskresult.model';
+import TaskResult from '../models/taskResult.model';
 import auth from '../middleware/auth.middleware';
-import { ITaskResultDocument } from '../interfaces/taskeresult.interface';
+import { ITaskResultDocument } from '../interfaces/taskResult.interface';
 import { Router } from 'express';
 
 const router = Router();
