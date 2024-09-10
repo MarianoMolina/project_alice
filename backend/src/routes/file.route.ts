@@ -12,8 +12,11 @@ router.use(auth);
 // POST /api/files/upload
 router.post('/upload', async (req: AuthRequest, res: Response) => {
     try {
+        console.log('Received file upload request:', req);
         const fileContent: FileContentReference = req.body;
         const userId = req.user!.userId;
+
+        console.log('Received file upload request:', fileContent);
 
         if (!fileContent || !fileContent.filename || !fileContent.type || !fileContent.content) {
             return res.status(400).json({ message: 'Invalid file data' });
@@ -79,6 +82,7 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
     try {
         const fileContent: FileContentReference = req.body;
         const userId = req.user!.userId;
+        console.log('Received file update request:', fileContent);
 
         if (!fileContent || !fileContent.filename || !fileContent.type || !fileContent.content) {
             return res.status(400).json({ message: 'Invalid file data' });

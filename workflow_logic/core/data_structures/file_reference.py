@@ -1,3 +1,4 @@
+from __future__ import annotations
 import base64, io, magic, os
 from typing import Union, BinaryIO, Optional
 from pydantic import Field

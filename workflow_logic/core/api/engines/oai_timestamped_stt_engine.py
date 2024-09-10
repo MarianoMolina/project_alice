@@ -1,6 +1,6 @@
 from pydantic import Field
 from typing import List
-from workflow_logic.util import LLMConfig, FileReference, MessageDict
+from workflow_logic.core.data_structures import LLMConfig, FileReference, MessageDict
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 from .oai_stt_engine import OpenAISpeechToTextEngine
 from openai import AsyncOpenAI

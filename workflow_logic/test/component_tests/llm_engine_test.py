@@ -1,6 +1,6 @@
 import asyncio, os
 from workflow_logic.core.api.engines import LLMEngine, LLMAnthropic
-from workflow_logic.util import MessageDict, LLMConfig
+from workflow_logic.core.data_structures import MessageDict, LLMConfig
 
 async def test_llm_engines():
     # LM Studio setup

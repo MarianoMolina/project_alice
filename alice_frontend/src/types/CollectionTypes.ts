@@ -7,10 +7,11 @@ import { TaskResponse, convertToTaskResponse } from './TaskResponseTypes';
 import { ParameterDefinition, convertToParameterDefinition } from './ParameterTypes';
 import { User, convertToUser } from './UserTypes';
 import { API, convertToAPI } from './ApiTypes';
+import { convertToFileReference, FileReference } from './FileTypes';
 
-export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis';
-export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User;
-export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API';
+export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files';
+export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference;
+export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API' | 'User' | 'FileReference';
 
 export type CollectionType = {
     agents: AliceAgent;
@@ -22,24 +23,7 @@ export type CollectionType = {
     users: User;
     parameters: ParameterDefinition;
     apis: API;
-};
-
-export const convertCollectionToElementName = <T extends CollectionName>(collectionName: T): CollectionElementMap[T] => {
-    return collectionName.slice(0, -1) as CollectionElementMap[T];
-};
-
-export type ElementName = 'agent' | 'chat' | 'model' | 'task' | 'prompt' | 'taskresult' | 'user' | 'parameter' | 'api';
-
-export type CollectionElementMap = {
-    agents: 'agent';
-    chats: 'chat';
-    models: 'model';
-    tasks: 'task';
-    prompts: 'prompt';
-    taskresults: 'taskresult';
-    users: 'user';
-    parameters: 'parameter';
-    apis: 'api';
+    files: FileReference;
 };
 
 export const converters: { [K in CollectionName]: (data: any) => CollectionType[K] } = {
@@ -52,6 +36,7 @@ export const converters: { [K in CollectionName]: (data: any) => CollectionType[
     users: convertToUser,
     parameters: convertToParameterDefinition,
     apis: convertToAPI,
+    files: convertToFileReference,
 };
 
 export type ComponentMode = 'create' | 'edit' | 'view' | 'list' | 'shortList' | 'table';

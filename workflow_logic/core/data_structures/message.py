@@ -1,29 +1,31 @@
-from pydantic import BaseModel, Field
-from typing import Optional, Literal, Dict, Any, List, Union
-from workflow_logic.core.parameters import ToolCall
-from workflow_logic.core.data_structures.file_reference import FileType, FileReference
-from workflow_logic.core.data_structures.task_response import TaskResponse
+from __future__ import annotations
+from typing import Optional, Literal, Dict, Any, List, Union, TYPE_CHECKING
+from pydantic import Field, ConfigDict
+from workflow_logic.core.data_structures.base_models import BaseDataStructure, ContentType
+from workflow_logic.core.data_structures.central_types import FileReferenceType, TaskResponseType, ToolCallType, ReferenceType
 
-class ContentType(FileType):
-    TASK_RESPONSE = 'task_result'
-    MULTIPLE = 'multiple'
+if TYPE_CHECKING:
+    from workflow_logic.core.data_structures.file_reference import FileReference
+    from workflow_logic.core.data_structures.task_response import TaskResponse
+    from workflow_logic.core.data_structures.parameters import ToolCall
 
-class MessageDict(BaseModel):
-    id: Optional[str] = Field(default="", description="The id of the message", alias="_id")
+class MessageDict(BaseDataStructure):
     role: Literal["user", "assistant", "system", "tool"] = Field(default="user", description="Role of the message")
     content: Optional[str] = Field(default=None, description="Content of the message")
     generated_by: Literal["user", "llm", "tool"] = Field(default="user", description="Who created the message")
     step: Optional[str] = Field(default="", description="Process that is creating this message, usually the task_name or tool_name")
     assistant_name: Optional[str] = Field(default="", description="Name of the assistant")
-    type: ContentType = Field(default="text", description="Type of the message")
-    tool_calls: Optional[List[ToolCall]] = Field(default=None, description="List of tool calls in the message")
+    type: ContentType = Field(default=ContentType.TEXT, description="Type of the message")
+    tool_calls: Optional[List[ToolCallType]] = Field(default=None, description="List of tool calls in the message")
     tool_call_id: Optional[str] = Field(None, description="The id of the tool call that generated this task response")
     context: Optional[Dict[str, Any]] = Field(default=None, description="Context of the message")
     function_call: Optional[Dict[str, Any]] = Field(default=None, description="Function call in the message")
     request_type: Optional[str] = Field(default=None, description="Request type of the message, if any. Can be 'approval', 'confirmation', etc.")
-    task_responses: List[TaskResponse] = Field(default_factory=list, description="List of associated task responses")
-    references: List[FileReference] = Field(default_factory=list, description="List of file references in the message")
+    task_responses: List[TaskResponseType] = Field(default_factory=list, description="List of associated task responses")
+    references: List[FileReferenceType] = Field(default_factory=list, description="List of file references in the message")
     creation_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Metadata about the creation of the message, like cost, tokens, end reason, etc.")
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def __str__(self) -> str:
         role = self.role if self.role else ''
@@ -47,10 +49,13 @@ class MessageDict(BaseModel):
             data['references'] = [reference.model_dump(*args, **kwargs) for reference in self.references]
         return data
    
-    def add_reference(self, reference: Union[FileReference, TaskResponse]):
+    def add_reference(self, reference: ReferenceType):
         """
         Add a reference to the message. This can be a FileReference, FileContentReference, or TaskResponse.
         """
+        from workflow_logic.core.data_structures.file_reference import FileReference
+        from workflow_logic.core.data_structures.task_response import TaskResponse
+
         if isinstance(reference, FileReference):
             self.references.append(reference)
         elif isinstance(reference, TaskResponse):
@@ -58,7 +63,7 @@ class MessageDict(BaseModel):
         else:
             raise ValueError(f"Unsupported reference type: {type(reference)}")
 
-    def get_references_by_type(self, ref_type: ContentType) -> List[Union[FileReference, TaskResponse]]:
+    def get_references_by_type(self, ref_type: ContentType) -> List[ReferenceType]:
         """
         Get references by type. This can return FileReferences, FileContentReferences, or TaskResponses.
         If the ref_type is MULTIPLE, all references and task responses are returned.

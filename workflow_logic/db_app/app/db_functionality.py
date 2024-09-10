@@ -3,7 +3,8 @@ from typing import get_args, Optional
 from pydantic import Field
 from tqdm import tqdm
 from workflow_logic.core import APIManager
-from workflow_logic.util import  EntityType, LOGGER
+from workflow_logic.core.data_structures import EntityType
+from workflow_logic.util import LOGGER
 from workflow_logic.db_app.initialization import DBStructure, DBInitManager
 from workflow_logic.db_app.app.db import BackendAPI
 

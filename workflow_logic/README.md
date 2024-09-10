@@ -97,7 +97,7 @@ Example:
 
 ```python
 from workflow_logic.core.tasks.task import AliceTask
-from workflow_logic.util import TaskResponse
+from workflow_logic.core.data_structures import TaskResponse
 
 class NewTask(AliceTask):
     async def run(self, **kwargs) -> TaskResponse:
@@ -217,7 +217,7 @@ Example of creating a new PromptAgentTask:
 
 ```python
 from workflow_logic.core.tasks import PromptAgentTask
-from workflow_logic.util import TaskResponse
+from workflow_logic.core.data_structures import TaskResponse
 
 class MyCustomTask(PromptAgentTask):
     custom_property: str = "default_value"

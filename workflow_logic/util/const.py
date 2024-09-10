@@ -18,9 +18,6 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
 LOGGING_FOLDER = os.getenv("LOGGING_FOLDER", "logs")
 
-# The order of this list is used to determine which entities are created first
-EntityType = Literal["users", "models", "apis", "parameters", "prompts", "agents", "tasks", "chats", "task_responses"]
-
 const_model_definitions = [
     {
         "short_name": "Mistral7B_Instruct",

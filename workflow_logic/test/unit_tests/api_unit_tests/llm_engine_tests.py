@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import AsyncMock, patch, MagicMock
 from workflow_logic.core.api.engines import LLMEngine
-from workflow_logic.util import MessageDict, LLMConfig
+from workflow_logic.core.data_structures import MessageDict, LLMConfig
 
 class TestLLMEngine(unittest.IsolatedAsyncioTestCase):
     def setUp(self):

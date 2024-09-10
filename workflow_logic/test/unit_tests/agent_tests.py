@@ -2,7 +2,7 @@ import pytest
 from typing import List
 from unittest.mock import Mock, AsyncMock
 from workflow_logic.core import Prompt, AliceModel, APIManager, AliceAgent
-from workflow_logic.util import MessageDict
+from workflow_logic.core.data_structures import MessageDict
 from workflow_logic.core.parameters import ToolFunction, FunctionConfig, FunctionParameters, ParameterDefinition
 
 @pytest.fixture

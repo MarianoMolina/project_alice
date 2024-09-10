@@ -1,7 +1,13 @@
+from __future__ import annotations
 from datetime import datetime
+from typing import Dict, Any, List, TYPE_CHECKING
 from pydantic import BaseModel, Field, model_validator
-from typing import Dict, Any, List
 from workflow_logic.core.data_structures.base_models import BaseDataStructure
+from workflow_logic.core.data_structures.central_types import MessageDictType, TaskResponseType
+
+if TYPE_CHECKING:
+    from workflow_logic.core.data_structures.message import MessageDict
+    from workflow_logic.core.data_structures.task_response import TaskResponse
 
 class OutputInterface(BaseDataStructure):
     content: List[Any] = Field([], description="The content of the output.")
@@ -34,7 +40,7 @@ class StringOutput(OutputInterface):
         return "\n".join(self.content)
 
 class LLMChatOutput(OutputInterface):
-    content: List['MessageDict'] = Field([], description="List of messages in the chat conversation")
+    content: List[MessageDictType] = Field([], description="List of messages in the chat conversation")
 
     def __str__(self) -> str:
         return "\n".join(
@@ -74,15 +80,7 @@ class SearchOutput(OutputInterface):
         )
 
 class WorkflowOutput(OutputInterface):
-    content: List['TaskResponse'] = Field([], description="The task responses performed by the workflow.")
+    content: List[TaskResponseType] = Field([], description="The task responses performed by the workflow.")
 
     def __str__(self) -> str:
         return "\n".join([f"{task.task_name}: {task.task_description}\nTask Output:{str(task.task_outputs)}" for task in self.content])
-
-# Forward references
-from workflow_logic.core.data_structures.message import MessageDict
-from workflow_logic.core.data_structures.task_response import TaskResponse
-
-# Rebuild models
-LLMChatOutput.model_rebuild()
-WorkflowOutput.model_rebuild()

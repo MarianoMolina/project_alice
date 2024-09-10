@@ -14,6 +14,12 @@ services:
       - ./alice_frontend:/app:delegated
       - /app/node_modules
       - ./.env:/app/.env
+      - type: bind
+        source: ./shared-uploads
+        target: /app/shared-uploads
+      - type: bind
+        source: ./logs
+        target: /app/logs
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       CHOKIDAR_USEPOLLING: "true"
@@ -32,7 +38,12 @@ services:
       - ./.env:/app/.env
       - ./backend:/app
       - /app/node_modules
-      - shared-uploads:/app/shared-uploads
+      - type: bind
+        source: ./shared-uploads
+        target: /app/shared-uploads
+      - type: bind
+        source: ./logs
+        target: /app/logs
     environment:
       NODE_ENV: ${NODE_ENV:-development}
     extra_hosts:
@@ -43,7 +54,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 10s
-    user: "${UID:-1000}:${GID:-1000}"
 
   mongo:
     image: mongo:latest
@@ -60,7 +70,13 @@ services:
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
-      - shared-uploads:/app/shared-uploads
+      - type: bind
+        source: ./shared-uploads
+        target: /app/shared-uploads
+      - type: bind
+        source: ./logs
+        target: /app/logs
+
     depends_on:
       backend:
         condition: service_healthy
@@ -75,9 +91,18 @@ services:
       timeout: 10s
       retries: 5
       start_period: 5s
-    user: "${UID:-1000}:${GID:-1000}"
 
 volumes:
-  mongo_data:
   shared-uploads:
     driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/shared-uploads
+  logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/logs
+  mongo_data:

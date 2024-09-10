@@ -6,7 +6,8 @@ from pydantic import BaseModel, Field, ConfigDict
 from workflow_logic.core.tasks import available_task_types
 from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, API, User, DatabaseTaskResponse, MessageDict
 from workflow_logic.util.const import BACKEND_PORT, HOST, ADMIN_TOKEN
-from workflow_logic.util import EntityType, LOGGER
+from workflow_logic.core.data_structures import EntityType
+from workflow_logic.util import LOGGER
 
 class BackendAPI(BaseModel):
     """
@@ -54,7 +55,8 @@ class BackendAPI(BaseModel):
         "chats": "chats", 
         "parameters": "parameters",
         "task_responses": "taskresults",
-        "apis": "apis"
+        "apis": "apis",
+        "files": "files"
     }, description="Map of entity types to collection names")
     model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str}, arbitrary_types_allowed=True)
 

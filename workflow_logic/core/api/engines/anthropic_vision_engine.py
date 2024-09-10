@@ -1,6 +1,5 @@
 from typing import List
-from workflow_logic.util import MessageDict, LLMConfig, FileReference
-from workflow_logic.util.communication.data_structures import image_data_from_file_reference
+from workflow_logic.core.data_structures import get_file_content, MessageDict, LLMConfig, FileReference
 from workflow_logic.core.api.engines.vision_model_engine import VisionModelEngine
 from anthropic import AsyncAnthropic
 
@@ -22,7 +21,7 @@ class AnthropicVisionEngine(VisionModelEngine):
 
         content = []
         for file_ref in file_references:
-            image_data = image_data_from_file_reference(file_ref)
+            image_data = get_file_content(file_ref)
             content.append({
                 "type": "image",
                 "source": {
