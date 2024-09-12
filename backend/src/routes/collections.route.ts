@@ -20,7 +20,7 @@ const modelMapping: { [key: string]: string } = {
 // Get all collections in the database
 router.get('/', async (_req: Request, res: Response) => {
   try {
-    const collections = await mongoose.connection.db.listCollections().toArray();
+    const collections = await mongoose.connection.db?.listCollections().toArray();
     res.json(collections);
   } catch (error) {
     console.error('Error fetching collections:', error);
