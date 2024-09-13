@@ -10,16 +10,14 @@ services:
         condition: service_healthy
       workflow:
         condition: service_healthy
+      volume-init:
+        condition: service_completed_successfully
     volumes:
       - ./alice_frontend:/app:delegated
       - /app/node_modules
       - ./.env:/app/.env
-      - type: bind
-        source: ./shared-uploads
-        target: /app/shared-uploads
-      - type: bind
-        source: ./logs
-        target: /app/logs
+      - logs:/app/logs
+      - shared-uploads:/app/shared-uploads:ro
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       CHOKIDAR_USEPOLLING: "true"
@@ -34,16 +32,14 @@ services:
     depends_on:
       mongo:
         condition: service_started
+      volume-init:
+        condition: service_completed_successfully
     volumes:
       - ./.env:/app/.env
       - ./backend:/app
       - /app/node_modules
-      - type: bind
-        source: ./shared-uploads
-        target: /app/shared-uploads
-      - type: bind
-        source: ./logs
-        target: /app/logs
+      - logs:/app/logs
+      - shared-uploads:/app/shared-uploads
     environment:
       NODE_ENV: ${NODE_ENV:-development}
     extra_hosts:
@@ -70,16 +66,13 @@ services:
     volumes:
       - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
-      - type: bind
-        source: ./shared-uploads
-        target: /app/shared-uploads
-      - type: bind
-        source: ./logs
-        target: /app/logs
-
+      - logs:/app/logs
+      - shared-uploads:/app/shared-uploads:ro
     depends_on:
       backend:
         condition: service_healthy
+      volume-init:
+        condition: service_completed_successfully
     environment:
       - PYTHONPATH=/app
       - HOST=host.docker.internal
@@ -92,17 +85,37 @@ services:
       retries: 5
       start_period: 5s
 
+  volume-init:
+    image: busybox
+    volumes:
+      - ${COMPOSE_PROJECT_DIR}/logs:/logs
+      - ${COMPOSE_PROJECT_DIR}/shared-uploads:/shared-uploads
+    command: |
+      sh -c "
+        echo 'Starting volume initialization' &&
+        ls -la / &&
+        echo 'Creating directories' &&
+        mkdir -p /logs /shared-uploads &&
+        echo 'Setting permissions' &&
+        chmod -R 755 /logs &&
+        chown -R 1000:1000 /logs &&
+        chmod -R 755 /shared-uploads &&
+        chown -R 1000:1000 /shared-uploads &&
+        echo 'Finished volume initialization' &&
+        ls -la /logs /shared-uploads
+      "
+
 volumes:
-  shared-uploads:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${PWD}/shared-uploads
   logs:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ${PWD}/logs
+      device: ${COMPOSE_PROJECT_DIR}/logs
+  shared-uploads:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${COMPOSE_PROJECT_DIR}/shared-uploads
   mongo_data:

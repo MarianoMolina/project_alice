@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getToken } from '../utils/authUtils';
+import { getToken } from '../utils/AuthUtils';
 
 // const BACKEND_HOST = process.env.BACKEND_HOST || 'backend';
 // const WORKFLOW_HOST = process.env.WORKFLOW_HOST || 'workflow';
