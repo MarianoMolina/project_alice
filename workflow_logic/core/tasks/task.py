@@ -55,35 +55,37 @@ class AliceTask(BaseModel, ABC):
     id: Optional[str] = Field(default=None, description="The task ID", alias="_id")
     task_name: str = Field(..., description="The name of the task")
     task_description: str = Field(..., description="A clear, concise statement of what the task entails")
-    input_variables: FunctionParameters = Field(FunctionParameters(
+    input_variables: FunctionParameters = Field(
+        default_factory=lambda: FunctionParameters(
             type="object",
             properties={
                 "prompt": ParameterDefinition(
                     type="string",
                     description="The input prompt for the task",
                     default=None
-                )},
+                )
+            },
             required=["prompt"]
-        ), description="The input variables for the task. Default is a string prompt."
+        ),
+        description="The input variables for the task. Default is a string prompt."
     )
-    exit_codes: Dict[int, str] = Field(default={0: "Success", 1: "Failed"}, description="A dictionary of exit codes for the task, consistent with the TaskResponse structure", example={0: "Success", 1: "Failed"})
+    exit_codes: Dict[int, str] = Field(default_factory=lambda: {0: "Success", 1: "Failed"}, description="A dictionary of exit codes for the task")
     recursive: bool = Field(True, description="Whether the task can be executed recursively")
-    templates: Optional[Dict[str, Prompt]] = Field(default={}, description="A dictionary of templates for the task")
-    tasks: Optional[Dict[str, "AliceTask"]] = Field(default={}, description="A dictionary of task_id: task")
-    valid_languages: List[str] = Field([], description="A list of valid languages for the task")
-    timeout: Optional[int] = Field(None, description="The timeout for the task in seconds")
-    prompts_to_add: Optional[Dict[str, Prompt]] = Field(None, description="A dictionary of prompts to add to the task")
-    exit_code_response_map: Optional[Dict[str, int]] = Field(None, description="A dictionary mapping exit codes to responses")
-    start_task: Optional[str] = Field(None, description="The name of the starting task")
-    required_apis: Optional[List[ApiType]] = Field([], description="A list of required APIs for the task")
-    task_selection_method: Optional[Callable[[TaskResponse, List[Dict[str, Any]]], Optional[str]]] = Field(None, description="A method to select the next task based on the current task's response")
-    tasks_end_code_routing: Optional[Dict[str, Dict[Union[str, int], Tuple[Optional[str], bool]]]] = Field(None, description="A dictionary of tasks -> exit codes and the task to route to given each exit code and a bool to determine if the outcome represents an extra 'try' at the task. If a selection method is provided, this isn't used")
-    max_attempts: int = Field(3, description="The maximum number of failed task attempts before the workflow is considered failed. Default is 3.")
-    recursive: bool = Field(False, description="Whether the workflow can be executed recursively. By default, tasks are recursive but workflows are not, unless one is expected to be used within another workflow")
-    agent: Optional[AliceAgent] = Field(None, description="The agent that the task is associated with")
-    human_input: Optional[bool] = Field(default=False, description="Whether the task requires human input")
-    api_engine: Optional[APIEngine] = Field(None, description="The API engine for the task")
-
+    templates: Dict[str, Prompt] = Field(default_factory=dict, description="A dictionary of templates for the task")
+    tasks: Dict[str, "AliceTask"] = Field(default_factory=dict, description="A dictionary of task_id: task")
+    valid_languages: List[str] = Field(default_factory=list, description="A list of valid languages for the task")
+    timeout: Optional[int] = Field(default=None, description="The timeout for the task in seconds")
+    prompts_to_add: Optional[Dict[str, Prompt]] = Field(default_factory=dict, description="A dictionary of prompts to add to the task")
+    exit_code_response_map: Optional[Dict[str, int]] = Field(default=None, description="A dictionary mapping exit codes to responses")
+    start_task: Optional[str] = Field(default=None, description="The name of the starting task")
+    required_apis: List[ApiType] = Field(default_factory=list, description="A list of required APIs for the task")
+    task_selection_method: Optional[Callable[[TaskResponse, List[Dict[str, Any]]], Optional[str]]] = Field(default=None, description="A method to select the next task based on the current task's response")
+    tasks_end_code_routing: Optional[Dict[str, Dict[Union[str, int], Tuple[Optional[str], bool]]]] = Field(default=None, description="A dictionary of tasks -> exit codes and the task to route to given each exit code")
+    max_attempts: int = Field(default=3, description="The maximum number of failed task attempts before the workflow is considered failed")
+    agent: Optional[AliceAgent] = Field(default=None, description="The agent that the task is associated with")
+    human_input: bool = Field(default=False, description="Whether the task requires human input")
+    api_engine: Optional[APIEngine] = Field(default=None, description="The API engine for the task")
+    
     @property
     def task_type(self) -> str:
         return self.__class__.__name__

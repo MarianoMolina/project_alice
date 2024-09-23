@@ -37,8 +37,8 @@ def test_api_creation(sample_api):
     assert sample_api.api_config["api_key"] == "test_api_key"
     assert sample_api.default_model.model_name == "gpt-4"
 
-def test_create_llm_config(sample_api):
-    llm_config = sample_api._create_llm_config()
+def test_create_model_config(sample_api):
+    llm_config = sample_api._create_model_config()
     assert isinstance(llm_config, LLMConfig)
     assert llm_config.model == "gpt-4"
     assert llm_config.api_key == "test_api_key"
@@ -46,7 +46,7 @@ def test_create_llm_config(sample_api):
     assert llm_config.temperature == 0.7
     assert llm_config.use_cache == True
 
-def test_create_llm_config_with_custom_model(sample_api):
+def test_create_model_config_with_custom_model(sample_api):
     custom_model = AliceModel(
         _id="gpt-3.5-turbo",
         short_name="GPT-3.5",
@@ -58,15 +58,15 @@ def test_create_llm_config_with_custom_model(sample_api):
         temperature=0.5,
         use_cache=False
     )
-    llm_config = sample_api._create_llm_config(custom_model)
+    llm_config = sample_api._create_model_config(custom_model)
     assert llm_config.model == "gpt-3.5-turbo"
     assert llm_config.temperature == 0.5
     assert llm_config.use_cache == False
 
-def test_create_llm_config_no_model(sample_api):
+def test_create_model_config_no_model(sample_api):
     sample_api.default_model = None
     with pytest.raises(ValueError, match="No model specified."):
-        sample_api._create_llm_config()
+        sample_api._create_model_config()
 
 def test_get_api_data_llm(sample_api):
     api_data = sample_api.get_api_data()

@@ -18,7 +18,7 @@ interface ChatContextType {
     isGenerating: boolean;
     setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>;
     handleSelectChat: (chatId: string) => Promise<void>;
-    handleSendMessage: (messageContent: string) => Promise<void>;
+    handleSendMessage: (currentChatId: string, message: MessageType) => Promise<void>;
     generateResponse: () => Promise<void>;
     handleRegenerateResponse: () => Promise<void>;
     fetchChats: () => Promise<void>;
@@ -96,17 +96,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         }
     };
 
-    const handleSendMessage = async (messageContent: string) => {
-        if (!currentChatId) {
-            throw new Error('No chat selected');
-        }
+    const handleSendMessage = async (currentChatId: string, message: MessageType) => {
         try {
-            const message: MessageType = {
-                role: 'user',
-                content: messageContent,
-                generated_by: 'user',
-                type: 'text',
-            };
             await sendMessage(currentChatId, message);
             setMessages(prevMessages => [...prevMessages, message]);
             await generateResponse();

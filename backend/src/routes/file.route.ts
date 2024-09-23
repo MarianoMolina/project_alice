@@ -2,61 +2,53 @@ import express, { Router, Response } from 'express';
 import { AuthRequest } from '../interfaces/auth.interface';
 import auth from '../middleware/auth.middleware';
 import FileReference from '../models/file.model';
-import { storeFile, updateFile, retrieveFileById } from '../utils/file.utils';
-import { FileContentReference } from '../interfaces/file.interface';
+import { storeFileReference, updateFile, retrieveFileById } from '../utils/file.utils';
+import { IFileReference, IFileReferenceDocument } from '../interfaces/file.interface';
+import Logger from '../utils/logger';
 
 const router: Router = express.Router();
 
 router.use(auth);
 
-// POST /api/files/upload
 router.post('/upload', async (req: AuthRequest, res: Response) => {
     try {
-        console.log('Received file upload request:', req);
-        const fileContent: FileContentReference = req.body;
+        const fileContent: IFileReference = req.body;
         const userId = req.user!.userId;
-
-        console.log('Received file upload request:', fileContent);
-
         if (!fileContent || !fileContent.filename || !fileContent.type || !fileContent.content) {
             return res.status(400).json({ message: 'Invalid file data' });
         }
-
-        const fileReference = await storeFile(fileContent, userId);
-        res.status(201).json(fileReference.apiRepresentation());
+        const fileReference = await storeFileReference(fileContent, userId);
+        res.status(201).json(fileReference);
     } catch (error) {
         console.error('Error uploading file:', error);
         res.status(500).json({ message: 'Error uploading file' });
     }
 });
 
-// GET /api/files/:id
 router.get('/:id', async (req: AuthRequest, res: Response) => {
     try {
         const fileReference = await FileReference.findById(req.params.id);
         if (!fileReference) {
             return res.status(404).json({ message: 'File not found' });
         }
-        if (fileReference.created_by.toString() !== req.user!.userId) {
-            return res.status(403).json({ message: 'Unauthorized' });
+        if (fileReference.created_by._id.toString() !== req.user!.userId) {
+            return res.status(403).json({ message: 'Unauthorized userId ' + req.user!.userId + ' fileReference.created_by ' + fileReference.created_by.toString() });
         }
-        res.json(fileReference.apiRepresentation());
+        res.json(fileReference);
     } catch (error) {
         console.error('Error retrieving file reference:', error);
         res.status(500).json({ message: 'Error retrieving file reference' });
     }
 });
 
-// GET /api/files/serve/:id
 router.get('/serve/:id', async (req: AuthRequest, res: Response) => {
     try {
         const version = req.query.version ? parseInt(req.query.version as string) : undefined;
         const { file, fileReference } = await retrieveFileById(req.params.id, version);
-        
-        if (fileReference.created_by.toString() !== req.user!.userId) {
+
+        if (fileReference.created_by._id.toString() !== req.user!.userId) {
             return res.status(403).json({ message: 'Unauthorized' });
         }
-
         res.set('Content-Type', fileReference.type);
         res.set('Content-Disposition', `attachment; filename="${fileReference.filename}"`);
         res.send(file);
@@ -66,32 +58,31 @@ router.get('/serve/:id', async (req: AuthRequest, res: Response) => {
     }
 });
 
-// GET /api/files
 router.get('/', async (req: AuthRequest, res: Response) => {
     try {
         const files = await FileReference.find({ created_by: req.user!.userId });
-        res.json(files.map(file => file.apiRepresentation()));
+        res.json(files);
     } catch (error) {
         console.error('Error listing files:', error);
         res.status(500).json({ message: 'Error listing files' });
     }
 });
 
-// PATCH /api/files/:id
 router.patch('/:id', async (req: AuthRequest, res: Response) => {
     try {
-        const fileContent: FileContentReference = req.body;
+        console.log('Raw request body:', JSON.stringify(req.body, null, 2));
+        const fileId = req.params.id;
         const userId = req.user!.userId;
-        console.log('Received file update request:', fileContent);
+        const updateData: Partial<IFileReferenceDocument> = req.body;
 
-        if (!fileContent || !fileContent.filename || !fileContent.type || !fileContent.content) {
-            return res.status(400).json({ message: 'Invalid file data' });
+        if (!updateData || Object.keys(updateData).length === 0) {
+            return res.status(400).json({ message: 'No update data provided' });
         }
 
-        fileContent._id = req.params.id;
+        Logger.info(`Updating file in route: ${fileId} with data: ${JSON.stringify(updateData)}`);
 
-        const updatedFileReference = await updateFile(fileContent, userId);
-        res.json(updatedFileReference.apiRepresentation());
+        const updatedFileReference = await updateFile(fileId, updateData, userId);
+        res.json(updatedFileReference);
     } catch (error) {
         console.error('Error updating file:', error);
         res.status(500).json({ message: 'Error updating file' });

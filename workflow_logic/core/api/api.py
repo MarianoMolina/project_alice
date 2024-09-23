@@ -2,7 +2,7 @@ from bson import ObjectId
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, Union
 from workflow_logic.util import LOGGER
-from workflow_logic.core.data_structures import ApiType, ApiName, LLMConfig
+from workflow_logic.core.data_structures import ApiType, ApiName, LLMConfig, ModelApis
 from workflow_logic.core.model import AliceModel
 
 class API(BaseModel):
@@ -34,18 +34,19 @@ class API(BaseModel):
         populate_by_name = True
         json_encoders = {ObjectId: str}
 
-    def _create_llm_config(self, model: Optional[AliceModel] = None) -> LLMConfig:
+    def _create_model_config(self, model: Optional[AliceModel] = None) -> LLMConfig:
         if not model:
             if not self.default_model:
                 raise ValueError("No model specified.")
             model = self.default_model
-        LOGGER.debug(f'model: {model}')
+        LOGGER.info(f'model: {model}')
+        LOGGER.info(f'api self: {self}')
         return LLMConfig( 
             temperature=model.temperature, 
             use_cache=model.use_cache,
             api_key=self.api_config.get("api_key"),
             base_url=self.api_config.get("base_url"),
-            model=model.model_name if self.api_name != ApiName.LM_STUDIO else model.id,
+            model=model.model_name if self.api_name != ApiName.LM_STUDIO_LLM else model.id,
         )
 
     def get_api_data(self, model: Optional[AliceModel] = None) -> Union[Dict[str, Any], LLMConfig]:
@@ -67,7 +68,7 @@ class API(BaseModel):
         if not self.is_active:
             raise ValueError(f"API {self.name} is not active.")
 
-        if self.api_type == ApiType.LLM_MODEL or self.api_type == ApiType.IMG_VISION or self.api_type == ApiType.IMG_GENERATION:
-            return self._create_llm_config(model)
+        if self.api_type in ModelApis:
+            return self._create_model_config(model)
         else:
             return self.api_config if self.api_config else {}

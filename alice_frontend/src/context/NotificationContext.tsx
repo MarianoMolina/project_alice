@@ -2,15 +2,21 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 type NotificationType = 'info' | 'success' | 'warning' | 'error';
 
+interface NotificationAction {
+  label: string;
+  onClick: () => void;
+}
+
 interface Notification {
   id: number;
   message: string;
   type: NotificationType;
+  action?: NotificationAction;
 }
 
 interface NotificationContextType {
   notifications: Notification[];
-  addNotification: (message: string, type?: NotificationType, duration?: number) => void;
+  addNotification: (message: string, type?: NotificationType, duration?: number, action?: NotificationAction) => void;
   removeNotification: (id: number) => void;
 }
 
@@ -31,9 +37,9 @@ interface NotificationProviderProps {
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const addNotification = (message: string, type: NotificationType = 'info', duration = 5000) => {
+  const addNotification = (message: string, type: NotificationType = 'info', duration = 5000, action?: NotificationAction) => {
     const id = Date.now();
-    setNotifications(prev => [...prev, { id, message, type }]);
+    setNotifications(prev => [...prev, { id, message, type, action }]);
     setTimeout(() => removeNotification(id), duration);
   };
 

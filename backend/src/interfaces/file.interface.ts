@@ -1,4 +1,5 @@
 import { Document, Types, Model } from 'mongoose';
+import { IMessageDocument } from './message.interface';
 
 export enum FileType {
     TEXT = "text",
@@ -13,8 +14,10 @@ export interface IFileReference {
     type: FileType;
     file_size: number;
     storage_path: string;
-    file_url: string; 
+    transcript?: IMessageDocument;
+    content?: string;
     created_by: Types.ObjectId;
+    updated_by: Types.ObjectId;
     last_accessed?: Date;
 }
 
@@ -23,18 +26,11 @@ export interface IFileReferenceMethods {
 }
 
 export interface IFileReferenceDocument extends IFileReference, Document, IFileReferenceMethods {
+    _id: Types.ObjectId;
     createdAt: Date;
     updatedAt: Date;
 }
 
 export interface IFileReferenceModel extends Model<IFileReferenceDocument> {
     // Add any static methods here if needed
-}
-
-export interface FileContentReference {
-    _id?: string;
-    filename: string;
-    type: FileType;
-    content: string; // base64 encoded content
-    created_by?: string;
 }

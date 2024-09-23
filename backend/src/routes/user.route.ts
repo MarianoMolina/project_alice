@@ -16,6 +16,7 @@ import Task from '../models/task.model';
 import TaskResult from '../models/taskResult.model';
 import ParameterDefinition from '../models/parameter.model';
 import Logger from '../utils/logger';
+import FileReference from '../models/file.model';
 
 const router: Router = express.Router();
 
@@ -134,7 +135,7 @@ router.post('/purge-and-reinitialize', auth, async (req: AuthRequest, res: Respo
 
     Logger.info('Purging data for userId:', userId);
 
-    const models = [Agent, API, Chat, Model, Prompt, Task, TaskResult, ParameterDefinition];
+    const models = [Agent, API, Chat, Model, Prompt, Task, TaskResult, ParameterDefinition, FileReference];
     
     for (const ModelClass of models) {
       await (ModelClass as any).deleteMany({ created_by: userId });

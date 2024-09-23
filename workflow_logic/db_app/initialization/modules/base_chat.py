@@ -24,8 +24,10 @@ base_chat_module = BaseChatModule(
                 "key": "gpt_alice",
                 "name": "Alice (GPT)",
                 "system_message": "default_system_message",
-                "model_id": "GPT4o",
-                "max_consecutive_auto_reply": 2,
+                "models": {
+                    "chat": "GPT4o",
+                },
+                "max_consecutive_auto_reply": 1,
                 "has_functions": True,
                 "has_code_exec": True,
             },
@@ -33,8 +35,10 @@ base_chat_module = BaseChatModule(
                 "key": "claude_alice",
                 "name": "Alice (Claude)",
                 "system_message": "default_system_message",
-                "model_id": "Claude3.5",
-                "max_consecutive_auto_reply": 2,
+                "models": {
+                    "chat": "Claude3.5",
+                },
+                "max_consecutive_auto_reply": 1,
                 "has_functions": True,
                 "has_code_exec": True,
             },
@@ -42,8 +46,10 @@ base_chat_module = BaseChatModule(
                 "key": "lm_studio_alice",
                 "name": "Alice (LM Studio)",
                 "system_message": "default_system_message",
-                "model_id": "Llama3_1_8B",
-                "max_consecutive_auto_reply": 2,
+                "models": {
+                    "chat": "Llama3_1_8B",
+                },
+                "max_consecutive_auto_reply": 1,
                 "has_functions": True,
                 "has_code_exec": True,
             }

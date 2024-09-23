@@ -62,6 +62,9 @@ const useStyles = makeStyles((theme: Theme) => ({
       marginBottom: theme.spacing(0.5),
     },
   },
+  fileReferencesContainer: {
+    marginTop: theme.spacing(1),
+  }
 }));
 
 export default useStyles;

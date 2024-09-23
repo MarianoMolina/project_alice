@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import { AgentComponentProps, AliceAgent, getDefaultAgentForm } from '../../../../types/AgentTypes';
 import { Prompt } from '../../../../types/PromptTypes';
-import { AliceModel } from '../../../../types/ModelTypes';
+import { AliceModel, ModelType } from '../../../../types/ModelTypes';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import EnhancedModel from '../../model/model/EnhancedModel';
 import EnhancedPrompt from '../../prompt/prompt/EnhancedPrompt';
@@ -45,12 +45,14 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     };
 
     const handleModelChange = async (selectedIds: string[]) => {
-        if (selectedIds.length > 0) {
-            const model = await fetchItem('models', selectedIds[0]) as AliceModel;
-            onChange({ ...form, model_id: model });
-        } else {
-            onChange({ ...form, model_id: null });
+        const updatedModels: { [key in ModelType]?: AliceModel } = {};
+        for (const id of selectedIds) {
+            const model = await fetchItem('models', id) as AliceModel;
+            if (model && model.model_type) {
+                updatedModels[model.model_type] = model;
+            }
         }
+        onChange({ ...form, models: updatedModels });
     };
 
     const handlePromptChange = async (selectedIds: string[]) => {
@@ -82,6 +84,8 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
 
     const title = mode === 'create' ? 'Create New Agent' : mode === 'edit' ? 'Edit Agent' : 'Agent Details';
     const saveButtonText = form._id ? 'Update Agent' : 'Create Agent';
+
+    const selectedModels = form.models ? Object.values(form.models) : [];
 
     return (
         <GenericFlexibleView
@@ -117,14 +121,26 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             <EnhancedSelect<AliceModel>
                 componentType="models"
                 EnhancedComponent={EnhancedModel}
-                selectedItems={form.model_id ? [form.model_id] : []}
+                selectedItems={selectedModels}
                 onSelect={handleModelChange}
                 isInteractable={isEditMode}
-                label="Select Model"
+                label="Select Models"
                 activeAccordion={activeAccordion}
                 onAccordionToggle={handleAccordionToggle}
                 onView={(id) => handleViewDetails("model", id)}
                 accordionEntityName="model"
+                multiple={true}
+            />
+            
+            <TextField
+                fullWidth
+                name="max_consecutive_auto_reply"
+                type='number'
+                label="Max Consecutive Auto Reply"
+                value={form.max_consecutive_auto_reply || ''}
+                onChange={handleInputChange}
+                margin="normal"
+                disabled={!isEditMode}
             />
 
             <FormControlLabel

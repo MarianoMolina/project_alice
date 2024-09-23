@@ -1,4 +1,4 @@
-// FileTypes.ts
+import { MessageType } from "./ChatTypes";
 
 export enum FileType {
     TEXT = "text",
@@ -13,11 +13,12 @@ export interface FileReference {
     filename: string;
     type: FileType;
     file_size: number;
-    storage_path: string;
-    created_by: string;
+    transcript?: MessageType;
+    storage_path?: string;
+    created_by?: string;
     last_accessed?: Date;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export interface FileContentReference {
@@ -25,19 +26,7 @@ export interface FileContentReference {
     filename: string;
     type: FileType;
     content: string; // base64 encoded content
-    created_by?: string;
-}
-
-export interface ApiFileReference {
-    _id: string;
-    filename: string;
-    type: FileType;
     file_size: number;
-    storage_path: string;
-    created_by: string;
-    last_accessed?: string;
-    createdAt: string;
-    updatedAt: string;
 }
 
 export const convertToFileReference = (data: any): FileReference => {
@@ -46,11 +35,12 @@ export const convertToFileReference = (data: any): FileReference => {
         filename: data.filename,
         type: data.type,
         file_size: data.file_size,
-        storage_path: data.storage_path,
-        created_by: data.created_by,
+        transcript: data.transcript ? data.transcript : undefined,
+        storage_path: data.storage_path ? data.storage_path.toString() : undefined,
+        created_by: data.created_by ? data.created_by.toString() : undefined,
         last_accessed: data.last_accessed ? new Date(data.last_accessed) : undefined,
-        createdAt: new Date(data.createdAt),
-        updatedAt: new Date(data.updatedAt),
+        createdAt: data.createdAt ? new Date(data.createdAt) : undefined,
+        updatedAt: data.updatedAt ? new Date(data.updatedAt) : undefined,
     };
 };
 
@@ -64,4 +54,4 @@ export interface FileComponentProps {
     onInteraction?: (file: FileReference) => void;
     onView?: (file: FileReference) => void;
     showHeaders?: boolean;
-  }
+}

@@ -16,17 +16,25 @@ export enum ApiType {
 }
 
 export enum ApiName {
-  OPENAI = 'openai',
+  OPENAI = 'openai_llm',
+  OPENAI_VISION = 'openai_vision',
+  OPENAI_IMG_GENERATION = 'openai_img_gen',
+  OPENAI_EMBEDDINGS = 'openai_embeddings',
+  OPENAI_TTS = 'openai_tts',
+  OPENAI_STT = 'openai_stt',
+  OPENAI_ASTT = 'openai_adv_stt',
   AZURE = 'azure',
-  ANTHROPIC = 'anthropic',
-  LM_STUDIO = 'lm-studio',
+  ANTHROPIC = 'anthropic_llm',
+  ANTHROPIC_VISION = 'anthropic_vision',
+  LM_STUDIO = 'lm-studio_llm',
+  LM_STUDIO_VISION = 'lm-studio_vision',
   CUSTOM = 'Custom',
   GOOGLE_SEARCH = 'google_search',
   REDDIT_SEARCH = 'reddit_search',
   WIKIPEDIA_SEARCH = 'wikipedia_search',
   EXA_SEARCH = 'exa_search',
   ARXIV_SEARCH = 'arxiv_search',
-  BEAUTIFULSOUP = 'beautiful-soup'
+  BEAUTIFULSOUP = 'beautiful_soup'
 }
 
 export interface IAPI {

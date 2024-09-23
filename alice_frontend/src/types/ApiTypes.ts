@@ -4,13 +4,19 @@ import { FunctionParameters } from "./ParameterTypes";
 import { HandleClickProps } from "./CollectionTypes";
 
 export enum ApiType {
-    LLM_API = 'llm_api',
+    LLM_MODEL = 'llm_api',
+    GOOGLE_SEARCH = 'google_search',
     REDDIT_SEARCH = 'reddit_search',
     WIKIPEDIA_SEARCH = 'wikipedia_search',
-    GOOGLE_SEARCH = 'google_search',
     EXA_SEARCH = 'exa_search',
     ARXIV_SEARCH = 'arxiv_search',
-}
+    IMG_VISION = 'img_vision',
+    IMG_GENERATION = 'img_generation',
+    WEB_SCRAPE = 'web_scrape',
+    SPEECH_TO_TEXT = 'speech_to_text',
+    TEXT_TO_SPEECH = 'text_to_speech',
+    EMBEDDINGS = 'embeddings',
+  }
 export enum LlmProvider {
     OPENAI = 'openai',
     AZURE = 'azure',
@@ -34,7 +40,7 @@ export interface API {
 export interface LLMAPI {
     _id?: string;
     user: User;
-    api_type: ApiType.LLM_API;
+    api_type: ApiType.LLM_MODEL;
     api_name: LlmProvider;
     name?: string;
     is_active: boolean;
@@ -49,7 +55,7 @@ export interface LLMAPI {
 export const convertToAPI = (data: any): API => {
     return {
         _id: data?._id || undefined,
-        api_type: data?.api_type || ApiType.LLM_API,
+        api_type: data?.api_type || ApiType.LLM_MODEL,
         api_name: data?.api_name || '',
         name: data?.name || '',
         is_active: data?.is_active || false,
@@ -81,7 +87,7 @@ export interface ApiComponentProps extends HandleClickProps {
     apiType?: ApiType;
 }
 export const getDefaultApiForm = (): Partial<API> => ({
-    api_type: ApiType.LLM_API,
+    api_type: ApiType.LLM_MODEL,
     api_name: undefined,
     name: '',
     is_active: false,

@@ -1,7 +1,9 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Box, Button, TextField, Typography, CircularProgress } from '@mui/material';
 import { FileReference, FileContentReference, FileType } from '../../../types/FileTypes';
-import { createFileContentReference, getFileContent } from '../../../utils/FileUtils';
+import { createFileContentReference, selectFile } from '../../../utils/FileUtils';
+import { retrieveFile, updateFile } from '../../../services/api';
+import { useNotification } from '../../../context/NotificationContext';
 
 interface FileViewerProps {
   file: FileReference | FileContentReference;
@@ -13,44 +15,53 @@ const FileViewer: React.FC<FileViewerProps> = ({ file, editable = false, onUpdat
   const [content, setContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { addNotification } = useNotification();
+  
+  const loadContent = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      if ('content' in file) {
+        setContent(file.content);
+      } else if (file._id) {
+        const blob = await retrieveFile(file._id);
+        const reader = new FileReader();
+        reader.onloadend = () => setContent(reader.result as string);
+        reader.readAsDataURL(blob);
+      } else {
+        throw new Error('Invalid file object');
+      }
+    } catch (err) {
+      console.error('Error loading file content:', err);
+      setError('Failed to load file content. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadContent = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        console.log('Loading content for file:', file.filename, 'Type:', file.type);
-        if ('content' in file) {
-          console.log('File has content property, using it directly');
-          setContent(file.content);
-        } else {
-          console.log('Fetching file content');
-          const fileContent = await getFileContent(file);
-          setContent(fileContent);
-        }
-        console.log('Content loaded, preview:', content.substring(0, 100));
-      } catch (err) {
-        console.error('Error loading file content:', err);
-        setError('Failed to load file content. Please try again.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
     loadContent();
   }, [file]);
 
+  const handleUpdateFile = async () => {
+    const allowedTypes = [file.type as FileType];
+    const newFile = await selectFile(allowedTypes);
+    if (!newFile) return;
+    const updatedFile = await updateFile(newFile, file._id);
+    
+    if (updatedFile) {
+      console.log('File updated successfully:', updatedFile);
+      file = updatedFile;
+    } else {
+      addNotification('File upload failed or was cancelled', 'error');
+      console.log('File update failed or was cancelled');
+    }
+  };
+  
   const handleContentChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(event.target.value);
   };
 
-  const handleFileChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const newFile = event.target.files[0];
-      console.log('New file selected:', newFile.name, 'Type:', newFile.type);
-      const fileContentReference = await createFileContentReference(newFile);
-      setContent(fileContentReference.content);
-    }
-  }, []);
 
   const handleDrop = useCallback(async (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -62,16 +73,6 @@ const FileViewer: React.FC<FileViewerProps> = ({ file, editable = false, onUpdat
     }
   }, []);
 
-  const handleUpdate = useCallback(() => {
-    if (onUpdate) {
-      const updatedFile: FileContentReference = {
-        ...file,
-        content: content,
-      };
-      onUpdate(updatedFile);
-    }
-  }, [file, content, onUpdate]);
-
   if (isLoading) {
     return <CircularProgress />;
   }
@@ -80,42 +81,13 @@ const FileViewer: React.FC<FileViewerProps> = ({ file, editable = false, onUpdat
     return <Typography color="error">{error}</Typography>;
   }
 
-  const getContentUrl = () => {
-    console.log('Getting content URL for file:', file.filename, 'Type:', file.type);
-    console.log('Content preview:', content.substring(0, 100));
-    
-    if (content.startsWith('data:')) {
-      console.log('Content is already in data URL format');
-      return content;
-    }
-    
-    let mimeType;
-    switch (file.type) {
-      case FileType.IMAGE:
-        mimeType = `image/${file.filename.split('.').pop()}`;
-        break;
-      case FileType.AUDIO:
-        mimeType = `audio/${file.filename.split('.').pop()}`;
-        break;
-      case FileType.VIDEO:
-        mimeType = `video/${file.filename.split('.').pop()}`;
-        break;
-      case FileType.TEXT:
-        mimeType = 'text/plain';
-        break;
-      default:
-        mimeType = 'application/octet-stream';
-    }
-    
-    const contentUrl = `data:${mimeType};base64,${btoa(content)}`;
-    console.log('Generated content URL:', contentUrl.substring(0, 100));
-    return contentUrl;
-  };
-
   const renderContent = () => {
-    const contentUrl = getContentUrl();
     console.log('Rendering content for file:', file.filename, 'Type:', file.type);
-    console.log('Content URL preview:', contentUrl.substring(0, 100));
+    console.log('Content length:', content.length);
+
+    if (content.length === 0) {
+      return <Typography>No content available</Typography>;
+    }
 
     switch (file.type) {
       case FileType.TEXT:
@@ -132,11 +104,11 @@ const FileViewer: React.FC<FileViewerProps> = ({ file, editable = false, onUpdat
           />
         );
       case FileType.IMAGE:
-        return <img src={contentUrl} alt={file.filename} style={{ maxWidth: '100%' }} />;
+        return <img src={content} alt={file.filename} style={{ maxWidth: '100%' }} />;
       case FileType.AUDIO:
-        return <audio controls src={contentUrl} />;
+        return <audio controls src={content} />;
       case FileType.VIDEO:
-        return <video controls src={contentUrl} style={{ maxWidth: '100%' }} />;
+        return <video controls src={content} style={{ maxWidth: '100%' }} />;
       default:
         return <Typography>Unsupported file type: {file.type}</Typography>;
     }
@@ -150,24 +122,9 @@ const FileViewer: React.FC<FileViewerProps> = ({ file, editable = false, onUpdat
       {renderContent()}
       {editable && (
         <Box mt={2}>
-          <input
-            type="file"
-            onChange={handleFileChange}
-            style={{ display: 'none' }}
-            id="file-input"
-          />
-          <label htmlFor="file-input">
-            <Button variant="contained" component="span">
-              Choose New File
-            </Button>
-          </label>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleUpdate}
-            style={{ marginLeft: '1rem' }}
-          >
-            Confirm Changes
+
+          <Button variant="contained" color='primary' onClick={handleUpdateFile}>
+            Upload New File
           </Button>
         </Box>
       )}

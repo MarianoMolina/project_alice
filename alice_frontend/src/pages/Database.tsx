@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Box } from '@mui/material';
-import { Add, Person, Category, Settings, Description, Functions, Assignment, Chat, Api } from '@mui/icons-material';
+import { Add, Person, Category, Settings, Description, Functions, Assignment, Chat, Api, AttachFile } from '@mui/icons-material';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH, TASK_SIDEBAR_WIDTH_TABLE, TASK_SIDEBAR_WIDTH_COMPACT } from '../utils/Constants';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
 import { ComponentMode, CollectionElement, CollectionElementString } from '../types/CollectionTypes';
@@ -16,7 +16,8 @@ import useStyles from '../styles/DatabaseStyles';
 import ToggleBox from '../components/ui/toggle_box/ToggleBox';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
 import EnhancedCardDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
-import { useCardDialog } from '../context/CardDialogContext.tsx';
+import { useCardDialog } from '../context/CardDialogContext';
+import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
 
 const Database: React.FC = () => {
     const classes = useStyles();
@@ -61,6 +62,7 @@ const Database: React.FC = () => {
         { name: 'Agent' as CollectionElementString, icon: Person },
         { name: 'API' as CollectionElementString, icon: Api },
         { name: 'Chat' as CollectionElementString, icon: Chat },
+        { name: 'File' as CollectionElementString, icon: AttachFile },
         { name: 'Model' as CollectionElementString, icon: Category },
         { name: 'Parameter' as CollectionElementString, icon: Settings },
         { name: 'Prompt' as CollectionElementString, icon: Description },
@@ -108,6 +110,8 @@ const Database: React.FC = () => {
                             return <EnchancedChat {...commonProps} />;
                         case 'API':
                             return <EnhancedAPI {...commonProps} />;
+                        case 'File':
+                            return <EnhancedFile {...commonProps} />;
                         default:
                             return null;
                     }
@@ -147,6 +151,8 @@ const Database: React.FC = () => {
                 return <EnchancedChat {...commonProps} />;
             case 'API':
                 return <EnhancedAPI {...commonProps} fetchAll={true} />;
+            case 'File':
+                return <EnhancedFile {...commonProps} />;
             default:
                 return null;
         }

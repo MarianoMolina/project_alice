@@ -7,18 +7,33 @@ from workflow_logic.core.parameters.parameters import ensure_tool_function
 from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.model import AliceModel
 from workflow_logic.core.api import APIManager
-from workflow_logic.core.data_structures import TaskResponse, DatabaseTaskResponse, FileReference, ContentType, MessageDict, ApiType
+from workflow_logic.core.data_structures import TaskResponse, DatabaseTaskResponse, FileReference, ContentType, MessageDict, ApiType, ModelType, FileType
 from workflow_logic.util import LOGGER
 
 class AliceAgent(BaseModel):
     id: Optional[str] = Field(default=None, description="The ID of the agent", alias="_id")
     name: str = Field(..., description="The name of the agent")
     system_message: Prompt = Field(default=Prompt(name="default", content="You are an AI assistant"), description="The prompt to use for system message")
-    model_id: Optional[AliceModel] = Field(None, description="The model associated with the agent")
+    models: Dict[ModelType, Optional[AliceModel]] = Field(
+        default={
+            ModelType.CHAT: None,
+            ModelType.INSTRUCT: None,
+            ModelType.VISION: None,
+            ModelType.IMG_GEN: None,
+            ModelType.STT: None,
+            ModelType.TTS: None,
+            ModelType.EMBEDDINGS: None
+        },
+        description="Dictionary of models associated with the agent for different tasks"
+    )
     has_functions: bool = Field(default=False, description="Whether the agent can use functions")
     has_code_exec: bool = Field(default=False, description="Whether the agent can execute code")
     max_consecutive_auto_reply: int = Field(default=10, description="The maximum number of consecutive auto replies")
     model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str})
+
+    @property
+    def llm_model(self) -> AliceModel:
+        return self.models[ModelType.CHAT] or self.models[ModelType.INSTRUCT]
 
     async def generate_response(self, api_manager: APIManager, messages: List[MessageDict], tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = [], recursion_depth: int = 0) -> List[MessageDict]:
         try:
@@ -31,41 +46,13 @@ class AliceAgent(BaseModel):
                     type="text",
                     assistant_name=self.name
                 )]
-            if messages[-1].references:
-                for ref in messages[-1].references:
-                    if ref.type == ContentType.TASK_RESPONSE:
-                        pass
-                    if ref.type == ContentType.AUDIO:
-                        audio_transcribe: MessageDict = await api_manager.generate_response_with_api_engine(
-                            api_type=ApiType.SPEECH_TO_TEXT, 
-                            file_reference=ref,
-                        )
-                        messages.extend(audio_transcribe)
-                    if ref.type == ContentType.IMAGE:
-                        img_describe: MessageDict = await api_manager.generate_response_with_api_engine(
-                            api_type=ApiType.IMG_VISION, 
-                            file_references=[ref], 
-                        )
-                        messages.extend(img_describe)
-                    if ref.type == ContentType.FILE:
-                        # Create logic to parse a text file into a string
-                        pass
-                    if ref.type == ContentType.VIDEO:
-                        # Create logic for vtt
-                        pass
-                    if ref.type == ContentType.TEXT:
-                        # msg = MessageDict(
-                        #     role='user',
-                        #     generated_by='tool',
-                        #     content=ref.
-                        # )
-                        pass
 
             LOGGER.info(f"Calling generate_response_with_api_engine")
             LOGGER.debug(f'Agent: {self.model_dump()}')
+            chat_model = self.llm_model
             response: MessageDict = await api_manager.generate_response_with_api_engine(
                 api_type=ApiType.LLM_MODEL,
-                model=self.model_id,
+                model=chat_model,
                 messages=self._prepare_messages_for_api(messages),
                 system=self.system_message.format_prompt(),
                 tool_choice='auto' if self.has_functions else 'none',
@@ -74,7 +61,7 @@ class AliceAgent(BaseModel):
                 max_tokens=1000
             )
             
-            LOGGER.info(f"API response: {response}")
+            LOGGER.info(f"API response: {response.model_dump()}")
             
             new_messages = []
             content = response.content if response.content else "Using tools" if response.tool_calls else "No response from API"
@@ -89,7 +76,8 @@ class AliceAgent(BaseModel):
                 generated_by="llm",
                 tool_calls=tool_calls,
                 type="text",
-                assistant_name=self.name
+                assistant_name=self.name,
+                creation_metadata=response.creation_metadata
             ))
 
             if tool_calls and self.has_functions:
@@ -365,3 +353,88 @@ class AliceAgent(BaseModel):
                 break
         
         return gen_messages, start_messages
+
+    async def generate_vision_response(self, api_manager: APIManager, file_references: List[FileReference], prompt: str) -> MessageDict:
+        vision_model = self.models[ModelType.VISION] or api_manager.get_api_by_type(ApiType.IMG_VISION).default_model
+        if not vision_model:
+            raise ValueError("No vision model available for the agent or in the API manager")
+        
+        return await api_manager.generate_response_with_api_engine(
+            api_type=ApiType.IMG_VISION,
+            model=vision_model,
+            file_references=file_references,
+            prompt=prompt
+        )
+
+    async def generate_stt_response(self, api_manager: APIManager, file_reference: FileReference) -> MessageDict:
+        stt_model = self.models[ModelType.STT] or api_manager.get_api_by_type(ApiType.SPEECH_TO_TEXT).default_model
+        if not stt_model:
+            raise ValueError("No speech-to-text model available for the agent or in the API manager")
+        
+        return await api_manager.generate_response_with_api_engine(
+            api_type=ApiType.SPEECH_TO_TEXT,
+            model=stt_model,
+            file_reference=file_reference
+        )
+
+    async def generate_image(self, api_manager: APIManager, prompt: str) -> MessageDict:
+        img_gen_model = self.models[ModelType.IMG_GEN] or api_manager.get_api_by_type(ApiType.IMG_GENERATION)
+        if not img_gen_model:
+            raise ValueError("No image generation model available for the agent or in the API manager")
+        
+        return await api_manager.generate_response_with_api_engine(
+            api_type=ApiType.IMG_GENERATION,
+            model=img_gen_model,
+            prompt=prompt
+        )
+
+    def _prepare_messages_for_api(self, messages: List[MessageDict]) -> List[Dict[str, Any]]:
+        prepared_messages = []
+        for msg in messages:
+            prepared_msg = {
+                "role": msg.role,
+                "content": msg.content
+            }
+            
+            # Include file content using the get_content_string method
+            if msg.references:
+                file_contents = []
+                for ref in msg.references:
+                    try:
+                        content = ref.get_content_string()
+                        file_contents.append(f"File: {ref.filename}\nContent: {content}\n")
+                    except Exception as e:
+                        LOGGER.error(f"Error getting file content for {ref}: {str(e)}")
+                
+                if file_contents:
+                    prepared_msg["content"] += "\n\nAttached Files:\n" + "\n".join(file_contents)
+            
+            if msg.tool_calls:
+                prepared_msg["tool_calls"] = [tool_call.model_dump() for tool_call in msg.tool_calls]
+            if msg.tool_call_id:
+                prepared_msg["tool_call_id"] = str(msg.tool_call_id)
+            
+            prepared_messages.append(prepared_msg)
+        
+        return prepared_messages
+    
+    async def transcribe_file(self, file_ref: FileReference, api_manager: APIManager) -> MessageDict:
+        """
+        Transcribes the content of a non-text file.
+
+        Args:
+            file_ref (FileReference): The file reference to transcribe.
+            api_manager (APIManager): The API manager to use for API calls.
+
+        Returns:
+            MessageDict: A message containing the transcript.
+
+        Raises:
+            ValueError: If the file type is not supported for transcription.
+        """
+        if file_ref.type == FileType.IMAGE:
+            return await self.generate_vision_response(api_manager, [file_ref], "Describe this image in detail.")
+        elif file_ref.type == FileType.AUDIO:
+            return await self.generate_stt_response(api_manager, file_ref)
+        else:
+            raise ValueError(f"Transcription not supported for file type: {file_ref.type}")

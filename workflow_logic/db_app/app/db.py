@@ -1,10 +1,10 @@
 import requests, aiohttp, asyncio, json
 from aiohttp import ClientError
 from bson import ObjectId
-from typing import Dict, Any, Optional, Literal
+from typing import Dict, Any, Optional, Literal, Union
 from pydantic import BaseModel, Field, ConfigDict
 from workflow_logic.core.tasks import available_task_types
-from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, API, User, DatabaseTaskResponse, MessageDict
+from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, API, User, DatabaseTaskResponse, MessageDict, FileReference, FileContentReference
 from workflow_logic.util.const import BACKEND_PORT, HOST, ADMIN_TOKEN
 from workflow_logic.core.data_structures import EntityType
 from workflow_logic.util import LOGGER
@@ -442,7 +442,7 @@ class BackendAPI(BaseModel):
                 LOGGER.error(f"Attempt {attempt + 1} failed, retrying in {retry_delay} seconds...")
                 await asyncio.sleep(retry_delay)
                 
-    async def retrieve_file_reference(self, file_reference_id: str): 
+    async def get_file_reference(self, file_reference_id: str): 
         url = f"{self.base_url}/files/{file_reference_id}"
         headers = self._get_headers()
         
@@ -453,10 +453,36 @@ class BackendAPI(BaseModel):
                     file = await response.json()
                     
                     file = await self.preprocess_data(file)
-                    return {file['_id']: await file}
+                    return {file['_id']: FileReference(**file)}
             except aiohttp.ClientError as e:
                 LOGGER.error(f"Error retrieving chats: {e}")
                 return {}
+            
+    async def update_file_reference(self, file_reference: Union[FileReference, FileContentReference]): 
+        # self.debug_file_reference_serialization(file_reference)
+        url = f"{self.base_url}/files/{file_reference.id}"
+        headers = self._get_headers()
+        data = file_reference.model_dump(by_alias=True)
+        LOGGER.info(f"Updating file reference: {json.dumps(data, indent=2)}")
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.patch(url, json=data, headers=headers) as response:
+                    response.raise_for_status()
+                    return True
+        except aiohttp.ClientError as e:
+            LOGGER.error(f"Error storing messages: {e}")
+            return None
+        
+    def debug_file_reference_serialization(self, file_reference: FileReference):
+        print(f"FileReference object: {file_reference}")
+        print(f"FileReference __dict__: {file_reference.__dict__}")
+        
+        try:
+            dumped_data = file_reference.model_dump(by_alias=True)
+            print(f"model_dump() result: {json.dumps(dumped_data, indent=2)}")
+        except Exception as e:
+            print(f"model_dump() error: {str(e)}")
+
             
 def token_validation_middleware(api: BackendAPI):
     def middleware(request) -> dict[str, bool]:

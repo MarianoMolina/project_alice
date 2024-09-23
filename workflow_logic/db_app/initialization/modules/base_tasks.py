@@ -48,7 +48,9 @@ base_tasks_module = BaseTasksModule(
                 "key": "research_agent",
                 "name": "research_agent",
                 "system_message": "research_agent",
-                "model_id": "GPT4o",
+                "models": {
+                    "chat": "GPT4o",
+                },
                 "has_code_exec": False,
                 "has_functions": True,
                 "max_consecutive_auto_reply": 5,

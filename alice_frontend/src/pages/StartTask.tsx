@@ -12,7 +12,7 @@ import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
 import EnhancedCardDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
 import { CollectionElementString } from '../types/CollectionTypes';
-import { useCardDialog } from '../context/CardDialogContext.tsx';
+import { useCardDialog } from '../context/CardDialogContext';
 import { API } from '../types/ApiTypes';
 
 const StartTask: React.FC = () => {

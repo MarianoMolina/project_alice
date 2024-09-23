@@ -16,7 +16,6 @@ def sample_chat():
             system_message=Prompt(name="test", content="You are a test assistant"),
             has_functions=True,
             has_code_exec=True,
-            model_id=AliceModel(short_name="TestModel", model_name="test-model", model_format="OpenChat", ctx_size=1000, model_type="chat", deployment="test"),
         ),
     )
 

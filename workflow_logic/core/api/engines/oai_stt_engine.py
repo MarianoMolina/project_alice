@@ -1,8 +1,9 @@
 from pydantic import Field
+from openai import AsyncOpenAI
 from workflow_logic.core.data_structures import LLMConfig, ApiType, FileReference, MessageDict
 from workflow_logic.core.api.engines.api_engine import APIEngine
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
-from openai import AsyncOpenAI
+from workflow_logic.util import LOGGER
 
 class OpenAISpeechToTextEngine(APIEngine):
     input_variables: FunctionParameters = Field(
@@ -36,6 +37,8 @@ class OpenAISpeechToTextEngine(APIEngine):
         Returns:
             MessageDict: A message dict containing the transcription.
         """
+        LOGGER.info(f"Transcribing audio file {file_reference.storage_path} using OpenAI speech-to-text model {model}")
+        LOGGER.info(f"API data: {api_data}")
         client = AsyncOpenAI(
             api_key=api_data.api_key,
             base_url=api_data.base_url
@@ -51,10 +54,9 @@ class OpenAISpeechToTextEngine(APIEngine):
 
             return MessageDict(
                 role="assistant",
-                content=f'Transcription from sound file: {transcription.text}',
-                generated_by="speech_to_text_model",
+                content=f'Transcription: {transcription}',
+                generated_by="tool",
                 type="text",
-                references=[file_reference],
                 creation_metadata={
                     "model": model,
                 }

@@ -30,7 +30,7 @@ base_module = BaseModule(
                 "ctx_size": 128000,
                 "model_type": "chat",
                 "temperature": 0.7,
-                "api_name": "openai",
+                "api_name": "openai_llm",
             },
             {
                 "key": "Claude3.5",
@@ -39,7 +39,7 @@ base_module = BaseModule(
                 "model_name": "claude-3-5-sonnet-20240620",
                 "ctx_size": 200000,
                 "model_type": "chat",
-                "api_name": "anthropic",
+                "api_name": "anthropic_llm",
             },
             {
                 "key": "Llama3_8B_Hermes",
@@ -48,7 +48,7 @@ base_module = BaseModule(
                 "model_name": "NousResearch/Hermes-2-Theta-Llama-3-8B-GGUF",
                 "ctx_size": 32768,
                 "model_type": "chat",
-                "api_name": "lm-studio",
+                "api_name": "lm-studio_llm",
                 "lm_studio_preset": "Llama 3 V3"
             },
             {
@@ -58,7 +58,7 @@ base_module = BaseModule(
                 "model_name": "lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF",
                 "ctx_size": 131072,
                 "model_type": "instruct",
-                "api_name": "lm-studio",
+                "api_name": "lm-studio_llm",
                 "lm_studio_preset": "Llama 3 V3"
             },
             {
@@ -105,6 +105,15 @@ base_module = BaseModule(
                 "ctx_size": 4096,
                 "model_type": "vision",
                 "api_name": "img_vision"
+            },
+            {
+                "key": "o1_openai",
+                "short_name": "O1",
+                "model_name": "o1-preview", 
+                "model_format": "OpenChat", 
+                "ctx_size": 128000,
+                "model_type": "chat",
+                "api_name": "openai_llm"
             }
         ],
         "apis": [
@@ -162,9 +171,9 @@ base_module = BaseModule(
                 "health_status": "healthy",
             },
             {
-                "key": "openai",
+                "key": "openai_llm",
                 "api_type": "llm_api",
-                "api_name": "openai",
+                "api_name": "openai_llm",
                 "name": "OpenAI API",
                 "api_config": {
                     "api_key": OPENAI_API_KEY,
@@ -177,7 +186,7 @@ base_module = BaseModule(
             {
                 "key": "anthropic",
                 "api_type": "llm_api",
-                "api_name": "anthropic",
+                "api_name": "anthropic_llm",
                 "name": "Anthropic API",
                 "api_config": {
                     "api_key": ANTHROPIC_API,
@@ -190,7 +199,7 @@ base_module = BaseModule(
             {
                 "key": "local_lm_studio",
                 "api_type": "llm_api",
-                "api_name": "lm-studio",
+                "api_name": "lm-studio_llm",
                 "name": "LM Studio API",
                 "api_config": {
                     "api_key": "lm-studio",
@@ -203,7 +212,7 @@ base_module = BaseModule(
             {
                 "key": "img_vision",
                 "api_type": "img_vision",
-                "api_name": "openai",
+                "api_name": "openai_vision",
                 "name": "OpenAI Image Vision",
                 "api_config": {
                     "api_key": OPENAI_API_KEY,
@@ -216,7 +225,7 @@ base_module = BaseModule(
             {
                 "key": "img_vision_lm_studio",
                 "api_type": "img_vision",
-                "api_name": "lm-studio",
+                "api_name": "lm-studio_vision",
                 "name": "LM Studio Image Vision",
                 "api_config": {
                     "api_key": "lm-studio",
@@ -229,7 +238,7 @@ base_module = BaseModule(
             {
                 "key": "img_vision_anthropic",
                 "api_type": "img_vision",
-                "api_name": "anthropic",
+                "api_name": "anthropic_vision",
                 "name": "Anthropic Image Vision",
                 "api_config": {
                     "api_key": ANTHROPIC_API,
@@ -242,7 +251,7 @@ base_module = BaseModule(
             {
                 "key": "img_generation",
                 "api_type": "img_generation",
-                "api_name": "openai",
+                "api_name": "openai_img_gen",
                 "name": "Image Generation",
                 "api_config": {
                     "api_key": OPENAI_API_KEY,
@@ -255,7 +264,7 @@ base_module = BaseModule(
             {
                 "key": "web_scrape",
                 "api_type": "web_scrape",
-                "api_name": "beautiful-soup",
+                "api_name": "beautiful_soup",
                 "name": "Web Scrape w/ BeautifulSoup",
                 "api_config": {},
                 "is_active": True,
@@ -264,7 +273,7 @@ base_module = BaseModule(
             {
                 "key": "speech_to_text",
                 "api_type": "speech_to_text",
-                "api_name": "openai",
+                "api_name": "openai_stt",
                 "name": "OpenAI Speech to Text",
                 "api_config": {
                     "api_key": OPENAI_API_KEY, # Since whisper is open source, it should probably be a local deployment
@@ -277,7 +286,7 @@ base_module = BaseModule(
             {
                 "key": "speech_to_text_openai_advanced",
                 "api_type": "speech_to_text",
-                "api_name": "openai-timestamps",
+                "api_name": "openai_adv_stt",
                 "name": "OpenAI Advanced Speech to Text",
                 "api_config": {
                     "api_key": OPENAI_API_KEY,
@@ -290,7 +299,7 @@ base_module = BaseModule(
             {
                 "key": "text_to_speech",
                 "api_type": "text_to_speech",
-                "api_name": "openai",
+                "api_name": "openai_tts",
                 "name": "Text to Speech",
                 "api_config": {
                     "api_key": OPENAI_API_KEY,
@@ -303,7 +312,7 @@ base_module = BaseModule(
             {
                 "key": "embedding_api",
                 "api_type": "embeddings", 
-                "api_name": "openai",
+                "api_name": "openai_embeddings",
                 "name": "OpenAI Embeddings", 
                 "api_config": {
                     "api_key": OPENAI_API_KEY,

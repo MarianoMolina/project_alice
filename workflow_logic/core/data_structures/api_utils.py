@@ -14,6 +14,8 @@ class ApiType(str, Enum):
     SPEECH_TO_TEXT = 'speech_to_text'
     TEXT_TO_SPEECH = 'text_to_speech'
     EMBEDDINGS = 'embeddings'
+
+ModelApis: List[ApiType] = [ApiType.LLM_MODEL, ApiType.IMG_VISION, ApiType.IMG_GENERATION, ApiType.SPEECH_TO_TEXT, ApiType.TEXT_TO_SPEECH, ApiType.EMBEDDINGS]
     
 class ModelType(str, Enum):
     INSTRUCT = 'instruct'
@@ -32,12 +34,19 @@ class ApiNameMeta(EnumMeta):
                 classdict[name] = value.value
         
         # Add LLM-specific API names
-        classdict['OPENAI'] = 'openai'
-        classdict['OPENAI_TIMESTAMPS'] = 'openai-timestamps'
+        classdict['OPENAI_LLM'] = 'openai_llm'
+        classdict['OPENAI_VISION'] = 'openai_vision'
+        classdict['OPENAI_STT'] = 'openai_stt'
+        classdict['OPENAI_ASTT'] = 'openai_adv_stt'
+        classdict['OPENAI_TTS'] = 'openai_tts'
+        classdict['OPENAI_EMBEDDINGS'] = 'openai_embeddings'
+        classdict['OPENAI_IMG_GEN'] = 'openai_img_gen'
         classdict['AZURE'] = 'azure'
-        classdict['ANTHROPIC'] = 'anthropic'
-        classdict['LM_STUDIO'] = 'lm-studio'
-        classdict['BEAUTIFULSOUP'] = 'beautiful-soup'
+        classdict['ANTHROPIC_LLM'] = 'anthropic_llm'
+        classdict['ANTHROPIC_VISION'] = 'anthropic_vision'
+        classdict['LM_STUDIO_LLM'] = 'lm-studio_llm'
+        classdict['LM_STUDIO_VISION'] = 'lm-studio_vision'
+        classdict['BEAUTIFULSOUP'] = 'beautiful_soup'
         
         return super().__new__(metacls, cls, bases, classdict)
 

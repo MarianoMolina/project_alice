@@ -8,7 +8,7 @@ export interface ApiTypeConfig {
 }
 
 export const API_TYPE_CONFIGS: Record<ApiType, ApiTypeConfig> = {
-  [ApiType.LLM_API]: {
+  [ApiType.LLM_MODEL]: {
     api_name: 'llm_api',
     apiConfig: {
       api_key: '',
@@ -43,6 +43,45 @@ export const API_TYPE_CONFIGS: Record<ApiType, ApiTypeConfig> = {
     api_name: 'arxiv_search',
     apiConfig: {},
   },
+  [ApiType.IMG_VISION]: {
+    api_name: 'img_vision',
+    apiConfig: {
+      api_key: '',
+      base_url: '',
+    },
+  },
+  [ApiType.IMG_GENERATION]: {
+    api_name: 'img_generation',
+    apiConfig: {
+      api_key: '',
+      base_url: '',
+    },
+  },
+  [ApiType.WEB_SCRAPE]: {
+    api_name: 'web_scrape',
+    apiConfig: {},
+  },
+  [ApiType.SPEECH_TO_TEXT]: {
+    api_name: 'speech_to_text',
+    apiConfig: {
+      api_key: '',
+      base_url: '',
+    },
+  },
+  [ApiType.TEXT_TO_SPEECH]: {
+    api_name: 'text_to_speech',
+    apiConfig: {
+      api_key: '',
+      base_url: '',
+    },
+  },
+  [ApiType.EMBEDDINGS]: {
+    api_name: 'embeddings',
+    apiConfig: {
+      api_key: '',
+      base_url: '',
+    },
+  },
 };
 
 export const LLM_PROVIDERS = {
@@ -63,12 +102,12 @@ export const LLM_PROVIDERS = {
     baseUrl: `http://${BACKEND_HOST}:${BACKEND_PORT}/chat/completions`,
   },
 };
-
-export const isLlmApi = (apiType: ApiType): boolean => apiType === ApiType.LLM_API;
+export const modelApis = [ApiType.LLM_MODEL, ApiType.IMG_VISION, ApiType.IMG_GENERATION, ApiType.SPEECH_TO_TEXT, ApiType.TEXT_TO_SPEECH, ApiType.EMBEDDINGS];
+export const isModelApi = (apiType: ApiType): boolean => modelApis.includes(apiType);
 
 export const getAvailableApiTypes = (existingApis: API[]): ApiType[] => {
   const existingTypes = new Set(existingApis.map(api => api.api_type));
   return Object.values(ApiType).filter(type => 
-    type === ApiType.LLM_API || !existingTypes.has(type)
+    type === ApiType.LLM_MODEL || !existingTypes.has(type)
   );
 };

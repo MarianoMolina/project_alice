@@ -1,16 +1,22 @@
 import React from 'react';
 import { AnimatedTooltip } from '../../../ui/aceternity/AnimatedTooltip';
 import { API, ApiComponentProps, ApiType } from '../../../../types/ApiTypes';
-import { LaptopMac, Reddit, Google, Search, Book } from '@mui/icons-material';
+import { LaptopMac, Reddit, Google, Search, Book, RemoveRedEye, Brush, CloudDownload, Hearing, RecordVoiceOver, Tag, EditNote } from '@mui/icons-material';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 
 const apiIcons: Record<ApiType, React.ReactElement> = {
-  [ApiType.LLM_API]: <LaptopMac />,
+  [ApiType.LLM_MODEL]: <EditNote />,
   [ApiType.REDDIT_SEARCH]: <Reddit />,
   [ApiType.WIKIPEDIA_SEARCH]: <AutoStoriesIcon />,
   [ApiType.GOOGLE_SEARCH]: <Google />,
   [ApiType.EXA_SEARCH]: <Search />,
   [ApiType.ARXIV_SEARCH]: <Book />,
+  [ApiType.IMG_VISION]: <RemoveRedEye />,
+  [ApiType.IMG_GENERATION]: <Brush />,
+  [ApiType.WEB_SCRAPE]: <CloudDownload />,
+  [ApiType.SPEECH_TO_TEXT]: <Hearing />,
+  [ApiType.TEXT_TO_SPEECH]: <RecordVoiceOver />,
+  [ApiType.EMBEDDINGS]: <Tag />,
 };
 
 const getBackgroundColor = (healthStatus: API['health_status']) => {

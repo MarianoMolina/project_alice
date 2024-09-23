@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional, Literal, Dict, Any, List, Union, TYPE_CHECKING
+from typing import Optional, Literal, Dict, Any, List, TYPE_CHECKING
 from pydantic import Field, ConfigDict
 from workflow_logic.core.data_structures.base_models import BaseDataStructure, ContentType
 from workflow_logic.core.data_structures.central_types import FileReferenceType, TaskResponseType, ToolCallType, ReferenceType

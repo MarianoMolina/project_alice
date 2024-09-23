@@ -1,5 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { IAgentDocument, IAgentModel } from '../interfaces/agent.interface';
+import { ensureObjectIdHelper } from '../utils/utils';
 
 const agentSchema = new Schema<IAgentDocument, IAgentModel>({
   name: { type: String, required: true },
@@ -7,7 +8,7 @@ const agentSchema = new Schema<IAgentDocument, IAgentModel>({
   max_consecutive_auto_reply: { type: Number, default: 10 },
   has_code_exec: { type: Boolean, default: false },
   has_functions: { type: Boolean, default: false },
-  model_id: { type: Schema.Types.ObjectId, ref: 'Model', default: null },
+  models: { type: Map, of: Schema.Types.ObjectId, ref: 'Model', default: {} },
   created_by: { type: Schema.Types.ObjectId, ref: 'User' },
   updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
 }, {
@@ -22,7 +23,7 @@ agentSchema.methods.apiRepresentation = function(this: IAgentDocument) {
     has_functions: this.has_functions || false,
     has_code_exec: this.has_code_exec || false,
     max_consecutive_auto_reply: this.max_consecutive_auto_reply || 10,
-    model_id: this.model_id || null,
+    models: this.models || {},
     created_by: this.created_by || null,
     updated_by: this.updated_by || null,
     createdAt: this.createdAt || null,
@@ -40,9 +41,12 @@ function ensureObjectIdForSave(this: IAgentDocument, next: mongoose.CallbackWith
   if (this.updated_by && (this.updated_by as any)._id) {
     this.updated_by = (this.updated_by as any)._id;
   }
-  if (this.model_id && (this.model_id as any)._id) {
-    this.model_id = (this.model_id as any)._id;
-  }
+
+  if (this.models) {
+    for (const [key, value] of this.models.entries()) {
+        this.models.set(key, ensureObjectIdHelper(value));
+    }
+}
   next();
 }
 
@@ -57,14 +61,20 @@ function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.
   if (update.updated_by && update.updated_by._id) {
     update.updated_by = update.updated_by._id;
   }
-  if (update.model_id && update.model_id._id) {
-    update.model_id = update.model_id._id;
-  }
+  if (update.models) {
+    update.models = Object.fromEntries(
+        Object.entries(update.models).map(([key, value]) => [key, ensureObjectIdHelper(value)])
+    );
+}
   next();
 }
 
 function autoPopulate(this: mongoose.Query<any, any>) {
-  this.populate('system_message updated_by created_by model_id');
+  this.populate('system_message updated_by created_by');
+  this.populate({
+    path: 'models',
+    options: { strictPopulate: false }
+});
 }
 
 agentSchema.pre('save', ensureObjectIdForSave);

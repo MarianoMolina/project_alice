@@ -2,7 +2,7 @@ import { Response, Router } from 'express';
 import { IAliceChatDocument } from '../interfaces/chat.interface';
 import AliceChat from '../models/chat.model';
 import { Types } from 'mongoose';
-import { IMessage } from '../interfaces/chat.interface';
+import { IMessage } from '../interfaces/message.interface';
 import auth from '../middleware/auth.middleware';
 import { AuthRequest } from '../interfaces/auth.interface';
 import { createRoutes } from '../utils/routeGenerator';

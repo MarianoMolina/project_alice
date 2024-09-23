@@ -2,7 +2,7 @@ import React from 'react';
 import { Typography, Box } from '@mui/material';
 import { FileComponentProps } from '../../../../types/FileTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { InsertDriveFile, CalendarToday, AccessTime } from '@mui/icons-material';
+import { InsertDriveFile, CalendarToday, AccessTime, TextSnippet } from '@mui/icons-material';
 import FileViewer from '../FileViewer';
 import useStyles from '../FileStyles';
 
@@ -28,6 +28,11 @@ const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
             icon: <CalendarToday />,
             primary_text: "Last Accessed",
             secondary_text: item.last_accessed ? new Date(item.last_accessed).toLocaleString() : 'Never'
+        },
+        {
+            icon: <TextSnippet />,
+            primary_text: "Transcript",
+            secondary_text: item.transcript ? item.transcript.content : 'N/A'
         }
     ];
 

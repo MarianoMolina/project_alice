@@ -166,6 +166,7 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
   };
 
   const handleChange = (newItem: Partial<T>) => {
+    console.log('handleChange', newItem);
     setItem(prevItem => ({ ...prevItem, ...newItem } as T));
   };
 

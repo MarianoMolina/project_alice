@@ -7,7 +7,7 @@ import {
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { AliceTask, TaskComponentProps } from '../../../../types/TaskTypes';
 import { useTask } from '../../../../context/TaskContext';
-import { useCardDialog } from '../../../../context/CardDialogContext.tsx';
+import { useCardDialog } from '../../../../context/CardDialogContext';
 import useStyles from '../TaskStyles';
 
 const TaskExecuteView: React.FC<TaskComponentProps> = ({

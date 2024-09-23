@@ -9,7 +9,7 @@ import {
     Dialog,
 } from '@mui/material';
 import { ApiComponentProps, API, ApiType, getDefaultApiForm, LlmProvider } from '../../../../types/ApiTypes';
-import { API_TYPE_CONFIGS, LLM_PROVIDERS, isLlmApi, getAvailableApiTypes } from '../../../../utils/ApiUtils';
+import { API_TYPE_CONFIGS, LLM_PROVIDERS, isModelApi, getAvailableApiTypes } from '../../../../utils/ApiUtils';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import EnhancedModel from '../../model/model/EnhancedModel';
 import { AliceModel } from '../../../../types/ModelTypes';
@@ -41,7 +41,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
     useEffect(() => {
         if (item) {
             setForm({ ...getDefaultApiForm(), ...item });
-            if (isLlmApi(item.api_type) && item.api_config && item.api_config.base_url) {
+            if (isModelApi(item.api_type) && item.api_config && item.api_config.base_url) {
                 const provider = Object.entries(LLM_PROVIDERS).find(([_, config]) => config.baseUrl === item.api_config.base_url);
                 setLlmProvider(provider ? provider[0] : 'Custom');
             }
@@ -132,7 +132,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                 </FormControl>
             )}
 
-            {form.api_type && isLlmApi(form.api_type) && isCreateMode && (
+            {form.api_type && isModelApi(form.api_type) && isCreateMode && (
                 <FormControl fullWidth margin="normal">
                     <InputLabel>LLM Provider</InputLabel>
                     <Select
@@ -154,7 +154,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                 value={form.api_name || ''}
                 onChange={handleInputChange}
                 margin="normal"
-                disabled={!isEditMode || (form.api_type && (isLlmApi(form.api_type) && llmProvider !== 'Custom'))}
+                disabled={!isEditMode || (form.api_type && (isModelApi(form.api_type) && llmProvider !== 'Custom'))}
             />
 
             {form.api_config && Object.entries(form.api_config).map(([key, value]) => (
@@ -166,10 +166,10 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                     value={value || ''}
                     onChange={(e) => handleApiConfigChange(key, e.target.value)}
                     margin="normal"
-                    disabled={!isEditMode || (key === 'base_url' && form.api_type && isLlmApi(form.api_type) && llmProvider !== 'Custom')}
+                    disabled={!isEditMode || (key === 'base_url' && form.api_type && isModelApi(form.api_type) && llmProvider !== 'Custom')}
                 />
             ))}
-            {form.api_type && isLlmApi(form.api_type) && (
+            {form.api_type && isModelApi(form.api_type) && (
                 <EnhancedSelect<AliceModel>
                     componentType="models"
                     EnhancedComponent={EnhancedModel}

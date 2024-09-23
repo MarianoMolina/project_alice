@@ -128,7 +128,9 @@ coding_workflow_module = CodingWorkflowModule(
                 "key": "coding_planner_agent",
                 "name": "coding_planner_agent",
                 "system_message": "planner_agent",
-                "model_id": "GPT4o",
+                "models": {
+                    "chat": "GPT4o",
+                },
                 "max_consecutive_auto_reply": 1,
                 "has_functions": False,
                 "has_code_exec": False,                
@@ -137,7 +139,9 @@ coding_workflow_module = CodingWorkflowModule(
                 "key": "coding_agent",
                 "name": "coding_agent",
                 "system_message": "coding_agent",
-                "model_id": "GPT4o",
+                "models": {
+                    "chat": "GPT4o",
+                },
                 "max_consecutive_auto_reply": 1,
                 "has_functions": False,
                 "has_code_exec": False,                
@@ -146,7 +150,9 @@ coding_workflow_module = CodingWorkflowModule(
                 "key": "unit_tester_agent",
                 "name": "unit_tester_agent",
                 "system_message": "unit_tester_agent",
-                "model_id": "GPT4o",
+                "models": {
+                    "chat": "GPT4o",
+                },
                 "max_consecutive_auto_reply": 1,
                 "has_functions": False,
                 "has_code_exec": False,                
@@ -155,7 +161,9 @@ coding_workflow_module = CodingWorkflowModule(
                 "key": "unit_test_check_agent",
                 "name": "unit_test_check_agent",
                 "system_message": "unit_test_check_agent",
-                "model_id": "GPT4o",
+                "models": {
+                    "chat": "GPT4o",
+                },
                 "max_consecutive_auto_reply": 1,
                 "has_functions": False,
                 "has_code_exec": False,

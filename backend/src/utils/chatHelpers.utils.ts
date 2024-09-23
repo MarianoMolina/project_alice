@@ -1,11 +1,12 @@
 import { Types } from 'mongoose';
 import AliceChat from '../models/chat.model';
 import TaskResult from '../models/taskResult.model';
-import { IAliceChatDocument, IMessage, IMessageDocument } from '../interfaces/chat.interface';
+import { IAliceChatDocument } from '../interfaces/chat.interface';
+import { IMessage, IMessageDocument } from '../interfaces/message.interface';
 import { getObjectId, ObjectWithId } from './utils';
 import logger from './logger';
-import { FileContentReference, FileType } from '../interfaces/file.interface';
-import { storeFile, updateFile } from './file.utils';
+import { FileType, IFileReference, IFileReferenceDocument } from '../interfaces/file.interface';
+import { storeFileReference, updateFile } from './file.utils';
 
 const ContentType = {
     ...FileType,
@@ -95,7 +96,7 @@ export const chatHelpers = {
         }
     },
 
-    async createMessageInChat(chatId: string, message: Partial<IMessage>, userId?: string): Promise<IMessage | null> {
+    async createMessageInChat(chatId: string, message: Partial<IMessageDocument>, userId?: string): Promise<IMessage | null> {
         try {
             logger.info(`Creating message in chat ${chatId}`, { chatId, userId });
             logger.debug('Message object received', { message });
@@ -223,7 +224,7 @@ export const chatHelpers = {
                 });
             }
 
-            const newMessage: Partial<IMessage> = {
+            const newMessage: Partial<IMessageDocument> = {
                 role: 'assistant',
                 content: JSON.stringify(taskResult.task_outputs),
                 generated_by: 'tool',
@@ -254,7 +255,7 @@ export const chatHelpers = {
                 if ('_id' in ref && ref._id) {
                     if (userId) {
                         if ('content' in ref) {
-                            const updatedRef = await updateFile(ref as FileContentReference, userId);
+                            const updatedRef = await updateFile(ref._id, ref as Partial<IFileReferenceDocument>, userId);
                             processedReferences.push(this.ensureObjectId(updatedRef._id));
                         } else {
                             logger.warn('Attempted to update file reference without content');
@@ -266,7 +267,7 @@ export const chatHelpers = {
                     }
                 } else {
                     if (userId) {
-                        const newRef = await storeFile(ref as FileContentReference, userId);
+                        const newRef = await storeFileReference(ref as IFileReference, userId);
                         processedReferences.push(this.ensureObjectId(newRef._id));
                     } else {
                         logger.warn('Attempted to create file reference without userId');

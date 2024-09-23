@@ -106,9 +106,15 @@ function EnhancedListView<T>({
         return <Typography>No data available.</Typography>;
     }
 
+    const generateUniqueKey = (item: T): string => {
+        const primaryText = getPrimaryText(item);
+        const randomSuffix = Math.random().toString(36).substring(2, 15);
+        return `${primaryText}-${randomSuffix}`;
+    };
+
     const renderItem = (itemToRender: T) => (
         <EnhancedListItem
-            key={getPrimaryText(itemToRender)}
+            key={generateUniqueKey(itemToRender)}
             item={itemToRender}
             primaryText={getPrimaryText(itemToRender)}
             secondaryText={getSecondaryText(itemToRender)}
@@ -120,11 +126,9 @@ function EnhancedListView<T>({
     );
 
     return (
-        <>
-            <List>
-                {item ? renderItem(item) : items!.map(renderItem)}
-            </List>
-        </>
+        <List>
+            {item ? renderItem(item) : items!.map(renderItem)}
+        </List>
     );
 }
 

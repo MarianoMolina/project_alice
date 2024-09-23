@@ -4,7 +4,7 @@ import { AuthRequest } from '../interfaces/auth.interface';
 import adminOnly from '../middleware/admin.middleware';
 
 type RouteHandler = (req: AuthRequest, res: Response) => Promise<void>;
-type ModelName = 'Agent' | 'Model' | 'Task' | 'Prompt' | 'TaskResult' | 'AliceChat' | 'API' | 'ParameterDefinition' | 'User';
+type ModelName = 'Agent' | 'Model' | 'Task' | 'Prompt' | 'TaskResult' | 'AliceChat' | 'API' | 'ParameterDefinition' | 'User' | 'FileReference';
 
 export function createRoutes<T extends Document, K extends ModelName>(
   model: Model<T>,

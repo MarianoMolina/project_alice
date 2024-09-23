@@ -30,7 +30,7 @@ from contextlib import asynccontextmanager
 from concurrent.futures import ThreadPoolExecutor
 from workflow_logic.db_app import ContainerAPI, DB_STRUCTURE
 from workflow_logic.api_app.middleware import add_cors_middleware, auth_middleware
-from workflow_logic.api_app.routes import health_route, task_execute, chat_response, db_init
+from workflow_logic.api_app.routes import health_route, task_execute, chat_response, db_init, file_transcript
 from workflow_logic.test.component_tests import TestEnvironment, DBTests, APITests
 from workflow_logic.util import LOGGER
 
@@ -70,3 +70,4 @@ WORKFLOW_APP.include_router(health_route)
 WORKFLOW_APP.include_router(task_execute)
 WORKFLOW_APP.include_router(chat_response)
 WORKFLOW_APP.include_router(db_init)
+WORKFLOW_APP.include_router(file_transcript)

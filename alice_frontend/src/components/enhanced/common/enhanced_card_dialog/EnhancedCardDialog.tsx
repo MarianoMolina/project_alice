@@ -8,7 +8,8 @@ import EnhancedModel from '../../model/model/EnhancedModel';
 import EnhancedParameter from '../../parameter/parameter/EnhancedParameter';
 import EnhancedAPI from '../../api/api/EnhancedApi';
 import EnhancedAgent from '../../agent/agent/EnhancedAgent';
-import { useCardDialog } from '../../../../context/CardDialogContext.tsx';
+import EnhancedFile from '../../file/file/EnhancedFile';
+import { useCardDialog } from '../../../../context/CardDialogContext';
 
 const EnhancedCardDialog: React.FC = () => {
   const { selectedItem, selectedItemType, handleClose, selectItem } = useCardDialog();
@@ -29,6 +30,7 @@ const EnhancedCardDialog: React.FC = () => {
       handlePromptClick: (id: string) => selectItem('Prompt', id),
       handleParameterClick: (id: string) => selectItem('Parameter', id),
       handleAPIClick: (id: string) => selectItem('API', id),
+      handleFileClick: (id: string) => selectItem('File', id),
     };
 
     switch (selectedItemType) {
@@ -48,6 +50,8 @@ const EnhancedCardDialog: React.FC = () => {
         return <EnhancedParameter {...commonProps} {...handleProps} />;
       case 'API':
         return <EnhancedAPI {...commonProps} {...handleProps} />;
+      case 'File':
+        return <EnhancedFile {...commonProps} {...handleProps} />;
       default:
         return null;
     }

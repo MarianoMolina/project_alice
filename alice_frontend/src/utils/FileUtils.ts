@@ -1,4 +1,26 @@
-import { FileContentReference, FileReference, FileType  } from '../types/FileTypes';
+import { FileContentReference, FileType } from '../types/FileTypes';
+
+export const FileTypeExtensionsMap: Record<FileType, string[]> = {
+    [FileType.TEXT]: ['txt', 'md', 'csv', 'json'],
+    [FileType.IMAGE]: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'],
+    [FileType.AUDIO]: ['mp3', 'wav', 'ogg', 'flac'],
+    [FileType.VIDEO]: ['mp4', 'avi', 'mov', 'wmv', 'webm'],
+    [FileType.FILE]: []
+};
+
+
+export const inferFileType = (filename: string): FileType => {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    if (!ext) return FileType.FILE;
+
+    for (const [fileType, extensions] of Object.entries(FileTypeExtensionsMap)) {
+        if (extensions.includes(ext)) {
+            return fileType as FileType;
+        }
+    }
+
+    return FileType.FILE;
+};
 
 export const createFileContentReference = async (file: File): Promise<FileContentReference> => {
     return new Promise((resolve, reject) => {
@@ -9,7 +31,8 @@ export const createFileContentReference = async (file: File): Promise<FileConten
                 resolve({
                     filename: file.name,
                     type: inferFileType(file.name),
-                    content: base64Content
+                    content: base64Content,
+                    file_size: file.size,
                 });
             } else {
                 reject(new Error('Failed to read file'));
@@ -20,58 +43,106 @@ export const createFileContentReference = async (file: File): Promise<FileConten
     });
 };
 
-export const inferFileType = (filename: string): FileType => {
-    const ext = filename.split('.').pop()?.toLowerCase();
+export const getMimeType = (filename: string): string => {
+    const ext = filename.split('.').pop()?.toLowerCase() || '';
+
+    // Check against our FileTypeExtensionsMap first
+    for (const [fileType, extensions] of Object.entries(FileTypeExtensionsMap)) {
+        if (extensions.includes(ext)) {
+            switch (fileType) {
+                case FileType.TEXT:
+                    return getMimeTypeForText(ext);
+                case FileType.IMAGE:
+                    return `image/${ext}`;
+                case FileType.AUDIO:
+                    return `audio/${ext}`;
+                case FileType.VIDEO:
+                    return `video/${ext}`;
+            }
+        }
+    }
+
+    // If not found in our map, use a more extensive list of MIME types
     switch (ext) {
-        case 'txt':
-        case 'md':
-        case 'csv':
-            return FileType.TEXT;
-        case 'jpg':
-        case 'jpeg':
-        case 'png':
-        case 'gif':
-        case 'bmp':
-        case 'webp':
-            return FileType.IMAGE;
-        case 'mp3':
-        case 'wav':
-        case 'ogg':
-        case 'flac':
-            return FileType.AUDIO;
-        case 'mp4':
-        case 'avi':
-        case 'mov':
-        case 'wmv':
-        case 'webm':
-            return FileType.VIDEO;
-        default:
-            return FileType.FILE;
+        // Images
+        case 'svg': return 'image/svg+xml';
+        case 'webp': return 'image/webp';
+        case 'tiff': return 'image/tiff';
+        case 'ico': return 'image/x-icon';
+
+        // Audio
+        case 'midi': case 'mid': return 'audio/midi';
+        case 'weba': return 'audio/webm';
+        case 'aac': return 'audio/aac';
+
+        // Video
+        case 'webm': return 'video/webm';
+        case '3gp': return 'video/3gpp';
+        case 'ts': return 'video/mp2t';
+
+        // Documents
+        case 'pdf': return 'application/pdf';
+        case 'doc': return 'application/msword';
+        case 'docx': return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        case 'xls': return 'application/vnd.ms-excel';
+        case 'xlsx': return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        case 'ppt': return 'application/vnd.ms-powerpoint';
+        case 'pptx': return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+
+        // Archives
+        case 'zip': return 'application/zip';
+        case 'rar': return 'application/x-rar-compressed';
+        case '7z': return 'application/x-7z-compressed';
+        case 'tar': return 'application/x-tar';
+        case 'gz': return 'application/gzip';
+
+        // Code
+        case 'js': return 'application/javascript';
+        case 'html': return 'text/html';
+        case 'css': return 'text/css';
+        case 'xml': return 'application/xml';
+
+        default: return 'application/octet-stream';
     }
 };
 
-export const getFileContent = async (file: FileReference): Promise<string> => {
-    try {
-        console.log('Fetching file:', file.filename, 'from:', file.storage_path);
-        const response = await fetch(file.storage_path);
-        if (!response.ok) {
-            throw new Error(`Failed to fetch file: ${response.status} ${response.statusText}`);
-        }
-        const blob = await response.blob();
-        console.log('Blob type:', blob.type, 'size:', blob.size);
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const result = reader.result as string;
-                console.log('FileReader result type:', typeof result);
-                console.log('FileReader result preview:', result.substring(0, 100));
-                resolve(result);
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-        });
-    } catch (error) {
-        console.error('Error fetching file content:', error);
-        throw new Error('Failed to fetch file content');
+const getMimeTypeForText = (ext: string): string => {
+    switch (ext) {
+        case 'txt': return 'text/plain';
+        case 'html': return 'text/html';
+        case 'css': return 'text/css';
+        case 'csv': return 'text/csv';
+        case 'json': return 'application/json';
+        case 'xml': return 'application/xml';
+        case 'md': return 'text/markdown';
+        default: return 'text/plain';
     }
+};
+
+export const selectFile = async (
+    allowedTypes: FileType[] = Object.values(FileType)
+): Promise<File | null> => {
+    return new Promise((resolve) => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        const allowedExtensions = allowedTypes.flatMap(type => FileTypeExtensionsMap[type]);
+        if (allowedExtensions.length > 0) {
+            input.accept = allowedExtensions.map(ext => `.${ext}`).join(',');
+        }
+        input.onchange = async (event) => {
+            const file = (event.target as HTMLInputElement).files?.[0];
+            if (!file) {
+                resolve(null);
+                return;
+            }
+            const fileType = inferFileType(file.name);
+            if (!allowedTypes.includes(fileType)) {
+                console.error('File type not allowed');
+                resolve(null);
+                return;
+            }
+            resolve(file);
+        };
+        input.click();
+    });
 };

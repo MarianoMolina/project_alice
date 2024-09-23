@@ -81,7 +81,7 @@ class AliceChat(BaseModel):
             if not self.messages: self.messages = []
             if new_message: self.messages.append(MessageDict(role="user", content=new_message, generated_by="user", type="text"))
             
-            new_messages = await self.alice_agent.chat(
+            new_messages, start_messages = await self.alice_agent.chat(
                 api_manager=api_manager, 
                 messages=self.messages, 
                 tool_map=self.tool_map(api_manager), 
@@ -107,7 +107,7 @@ class AliceChat(BaseModel):
         
         # Check LLM API
         try:
-            data = api_manager.retrieve_api_data("llm_api", self.alice_agent.model_id)
+            data = api_manager.retrieve_api_data("llm_api", self.alice_agent.llm_model)
             if not data:
                 result["status"] = "warning"
                 result["llm_api"] = "not_found"

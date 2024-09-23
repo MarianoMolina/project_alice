@@ -1,4 +1,5 @@
 import { Model, Types, Document } from 'mongoose';
+import { IMessageDocument } from './message.interface';
 
 // ChangeHistory interfaces
 export interface IChangeHistory {
@@ -11,30 +12,6 @@ export interface IChangeHistory {
 }
 
 export interface IChangeHistoryDocument extends IChangeHistory, Document {
-    apiRepresentation: () => any;
-}
-
-export interface IMessage {
-    _id?: Types.ObjectId;
-    content: string;
-    role: 'user' | 'assistant' | 'system' | 'tool';
-    generated_by: 'user' | 'llm' | 'tool';
-    step: string;
-    assistant_name?: string;
-    context?: any;
-    type: string;
-    tool_calls?: any[];
-    tool_call_id?: string,
-    request_type?: string | null;
-    references?: Types.ObjectId[];
-    task_responses?: Types.ObjectId[];
-    created_by: Types.ObjectId;
-}
-
-export interface IMessageDocument extends IMessage, Document {
-    _id: Types.ObjectId;  // This ensures _id is always present in IMessageDocument
-    createdAt: Date;
-    updatedAt: Date;
     apiRepresentation: () => any;
 }
 

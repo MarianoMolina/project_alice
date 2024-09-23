@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, Tooltip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import { Box, Typography, Tooltip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, Chip } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import EditIcon from '@mui/icons-material/Edit';
 import useStyles from './MessageStyles';
@@ -7,10 +7,15 @@ import { MessageType, MessageProps } from '../../../types/ChatTypes';
 import { WorkflowOutput } from '../task_response/WorkflowOutput';
 import { CommandLineLog } from '../task_response/CommandLog';
 import { BackgroundBeams } from '../../ui/aceternity/BackgroundBeams';
+import EnhancedFile from '../file/file/EnhancedFile';
+import { FileReference } from '../../../types/FileTypes';
+import { Visibility } from '@mui/icons-material';
 
 const Message: React.FC<MessageProps> = ({ message }) => {
   const classes = useStyles();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedFileReference, setSelectedFileReference] = useState<FileReference | null>(null);
+  const [isFileDialogOpen, setIsFileDialogOpen] = useState(false);
 
   const getCreatorName = (message: MessageType) => {
     const createdBy = message.created_by;
@@ -63,6 +68,39 @@ const Message: React.FC<MessageProps> = ({ message }) => {
     setIsDialogOpen(false);
   };
 
+  const renderFileReferences = () => {
+    console.log('Message references:', message.references);
+    if (!message.references || message.references.length === 0) return null;
+
+    return (
+      <Box className={classes.fileReferencesContainer}>
+        <Typography variant="subtitle2">Referenced Files:</Typography>
+        <Box display="flex" flexWrap="wrap" gap={1}>
+          {message.references.map((reference, index) => (
+            <Chip
+              key={index}
+              label={reference.filename}
+              onDelete={() => handleViewFile(reference)}
+              deleteIcon={<Visibility />}
+              variant="outlined"
+            />
+          ))}
+        </Box>
+      </Box>
+    );
+  };
+
+  const handleViewFile = (reference: FileReference) => {
+    setSelectedFileReference(reference);
+    setIsFileDialogOpen(true);
+  };
+
+  const handleCloseFileDialog = () => {
+    setIsFileDialogOpen(false);
+    setSelectedFileReference(null);
+  };
+
+
   return (
     <Box className={`${classes.message} ${getMessageClass()}`}>
       <BackgroundBeams className="absolute inset-0 w-full h-full" />
@@ -73,8 +111,8 @@ const Message: React.FC<MessageProps> = ({ message }) => {
               {message.assistant_name || getCreatorName(message)}
             </Typography>
           </Tooltip>
-          <IconButton 
-            size="small" 
+          <IconButton
+            size="small"
             onClick={handleEditClick}
             className={classes.editButton}
           >
@@ -82,6 +120,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
           </IconButton>
         </Box>
         {renderMessageContent()}
+        {renderFileReferences()}
         <Box className={classes.metadataContainer}>
           {message.step && (
             <Tooltip title="Task or source that produced this message" arrow>
@@ -107,6 +146,15 @@ const Message: React.FC<MessageProps> = ({ message }) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={isFileDialogOpen} onClose={handleCloseFileDialog} maxWidth="md" fullWidth>
+        {selectedFileReference && (
+          <EnhancedFile itemId={selectedFileReference._id} mode="card" fetchAll={false} />
+        )}
+        <DialogActions>
+          <Button onClick={handleCloseFileDialog}>Close</Button>
         </DialogActions>
       </Dialog>
     </Box>
