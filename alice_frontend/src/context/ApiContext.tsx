@@ -12,6 +12,7 @@ import {
     updateFile as apiUpdateFile,
     retrieveFile as apiRetrieveFile,
     requestFileTranscript as apiRequestFileTranscript,
+    updateMessageInChat as apiUpdateMessageInChat
 } from '../services/api';
 import { useNotification } from './NotificationContext';
 import { useCardDialog } from './CardDialogContext';
@@ -34,6 +35,7 @@ interface ApiContextType {
     updateFile: typeof apiUpdateFile;
     retrieveFile: typeof apiRetrieveFile;
     requestFileTranscript: typeof apiRequestFileTranscript;
+    updateMessageInChat: typeof apiUpdateMessageInChat;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -225,6 +227,17 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     }, [addNotification, openDialog]);
 
+    const updateMessageInChat = useCallback(async (chatId: string, message: MessageType): Promise<MessageType> => {
+        try {
+            const result = await apiUpdateMessageInChat(chatId, message);
+            addNotification('Message updated successfully', 'success');
+            return result;
+        } catch (error) {
+            addNotification('Error updating message', 'error');
+            throw error;
+        }
+    }, [addNotification]);
+
     const value: ApiContextType = {
         fetchItem: apiFetchItem,
         createItem,
@@ -238,6 +251,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         updateFile,
         retrieveFile: apiRetrieveFile,
         requestFileTranscript,
+        updateMessageInChat
     };
 
     return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>;

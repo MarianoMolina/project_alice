@@ -79,7 +79,8 @@ export const convertToAliceChat = (data: any): AliceChat => {
 };
 
 export interface MessageProps {
-    message: MessageType
+    message: MessageType,
+    chatId?: string,
 }
 
 export interface ChatComponentProps extends HandleClickProps {

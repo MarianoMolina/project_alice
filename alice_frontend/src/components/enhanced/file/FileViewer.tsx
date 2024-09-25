@@ -17,31 +17,32 @@ const FileViewer: React.FC<FileViewerProps> = ({ file, editable = false, onUpdat
   const [error, setError] = useState<string | null>(null);
   const { addNotification } = useNotification();
   
-  const loadContent = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      if ('content' in file) {
-        setContent(file.content);
-      } else if (file._id) {
-        const blob = await retrieveFile(file._id);
-        const reader = new FileReader();
-        reader.onloadend = () => setContent(reader.result as string);
-        reader.readAsDataURL(blob);
-      } else {
-        throw new Error('Invalid file object');
-      }
-    } catch (err) {
-      console.error('Error loading file content:', err);
-      setError('Failed to load file content. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const loadContent = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        if ('content' in file) {
+          setContent(file.content);
+        } else if (file._id) {
+          const blob = await retrieveFile(file._id);
+          const reader = new FileReader();
+          reader.onloadend = () => setContent(reader.result as string);
+          reader.readAsDataURL(blob);
+        } else {
+          throw new Error('Invalid file object');
+        }
+      } catch (err) {
+        console.error('Error loading file content:', err);
+        setError('Failed to load file content. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
     loadContent();
   }, [file]);
+  
 
   const handleUpdateFile = async () => {
     const allowedTypes = [file.type as FileType];

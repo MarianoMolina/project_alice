@@ -1,8 +1,11 @@
-import React, { ChangeEvent, KeyboardEvent, useState, forwardRef, useImperativeHandle } from 'react';
+import { ChangeEvent, KeyboardEvent, useState, forwardRef, useImperativeHandle } from 'react';
 import { Box, Button, TextField, Chip } from '@mui/material';
 import { MessageType } from '../../../types/ChatTypes';
 import { FileReference, FileType } from '../../../types/FileTypes';
-import { selectFile } from '../../../utils/FileUtils';
+import { createFileContentReference, selectFile } from '../../../utils/FileUtils';
+import { useApi } from '../../../context/ApiContext';
+import { useNotification } from '../../../context/NotificationContext';
+import { TaskResponse } from '../../../types/TaskResponseTypes';
 
 interface ChatInputProps {
   sendMessage: (chatId: string, message: MessageType) => Promise<void>;
@@ -13,6 +16,7 @@ interface ChatInputProps {
 
 export interface ChatInputRef {
   addFileReference: (file: FileReference) => void;
+  addTaskResponse: (taskResponse: TaskResponse) => void;
 }
 
 const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ 
@@ -21,12 +25,15 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
   chatSelected, 
   lastMessage 
 }, ref) => {
+  const { addNotification } = useNotification();
+  const { uploadFileContentReference } = useApi();
   const [newMessage, setNewMessage] = useState<MessageType>({
     role: 'user',
     content: '',
     generated_by: 'user',
     type: 'text',
     references: [],
+    task_responses: [],
   });
 
   useImperativeHandle(ref, () => ({
@@ -34,6 +41,12 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
       setNewMessage(prev => ({
         ...prev,
         references: [...(prev.references || []), file],
+      }));
+    },
+    addTaskResponse: (taskResponse: TaskResponse) => {
+      setNewMessage(prev => ({
+        ...prev,
+        task_responses: [...(prev.task_responses || []), taskResponse],
       }));
     },
   }));
@@ -44,19 +57,19 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
 
   const handleAddFile = async () => {
     const allowedTypes: FileType[] = [FileType.IMAGE, FileType.TEXT, FileType.AUDIO, FileType.VIDEO];
-    const file = await selectFile(allowedTypes);
-    if (!file) return;
-    // Here you would typically upload the file and get a FileReference back
-    // For now, we'll create a mock FileReference
-    const mockFileReference: FileReference = {
-      _id: Date.now().toString(),
-      filename: file.name,
-      type: file.type as FileType,
-      file_size: file.size,
-    };
+    const selectedFile = await selectFile(allowedTypes);
+    if (!selectedFile) return;
+    
+    const fileContentReference = await createFileContentReference(selectedFile);
+    const file = await uploadFileContentReference(fileContentReference);
+    if (!file) {
+        addNotification('File upload failed or was cancelled', 'error');
+        console.log('File upload failed or was cancelled');
+        return;
+    }
     setNewMessage(prev => ({
       ...prev,
-      references: [...(prev.references || []), mockFileReference],
+      references: [...(prev.references || []), file],
     }));
   };
 
@@ -68,7 +81,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
   };
 
   const handleSend = () => {
-    if (currentChatId && (newMessage.content.trim() || (newMessage.references && newMessage.references.length > 0))) {
+    if (currentChatId && (newMessage.content.trim() || (newMessage.references && newMessage.references.length > 0) || (newMessage.task_responses && newMessage.task_responses.length > 0))) {
       sendMessage(currentChatId, newMessage);
       setNewMessage({
         role: 'user',
@@ -76,6 +89,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
         generated_by: 'user',
         type: 'text',
         references: [],
+        task_responses: [],
       });
     }
   };
@@ -84,6 +98,13 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
     setNewMessage(prev => ({
       ...prev,
       references: prev.references?.filter(ref => ref._id !== fileId) || [],
+    }));
+  };
+
+  const handleRemoveTaskResponse = (taskResponseId: string) => {
+    setNewMessage(prev => ({
+      ...prev,
+      task_responses: prev.task_responses?.filter(response => response._id !== taskResponseId) || [],
     }));
   };
 
@@ -106,7 +127,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
           variant="contained"
           sx={{ ml: 2, alignSelf: 'flex-end' }}
           onClick={handleSend}
-          disabled={!chatSelected || (!newMessage.content.trim() && newMessage.references && newMessage.references.length === 0)}
+          disabled={!chatSelected || (!newMessage.content.trim() && newMessage.references?.length === 0 && newMessage.task_responses?.length === 0)}
         >
           Send
         </Button>
@@ -121,6 +142,13 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
               key={file._id}
               label={file.filename}
               onDelete={() => handleRemoveFile(file._id)}
+            />
+          ))}
+          {newMessage.task_responses?.map((taskResponse) => (
+            <Chip
+              key={taskResponse._id}
+              label={`Task: ${taskResponse.task_name}`}
+              onDelete={() => taskResponse._id ? handleRemoveTaskResponse(taskResponse._id) : undefined}
             />
           ))}
         </Box>

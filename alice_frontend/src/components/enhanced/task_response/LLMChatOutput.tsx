@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box } from '@mui/material';
-import Message from '../chat/Message';
+import Message from '../common/message/Message';
 import { MessageType } from '../../../types/ChatTypes';
 
 interface LLMChatOutputProps {

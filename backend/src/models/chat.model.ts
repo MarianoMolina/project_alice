@@ -1,7 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { IChangeHistoryDocument, IAliceChatDocument, IAliceChatModel } from '../interfaces/chat.interface';
 import { ensureObjectIdHelper } from '../utils/utils';
-import { messageSchema } from './message.model';
 
 // ChangeHistory schema
 const changeHistorySchema = new Schema<IChangeHistoryDocument>({
@@ -28,7 +27,7 @@ changeHistorySchema.methods.apiRepresentation = function (this: IChangeHistoryDo
 // AliceChat schema
 const aliceChatSchema = new Schema<IAliceChatDocument, IAliceChatModel>({
   name: { type: String, default: "New Chat", description: "Name of the chat" },
-  messages: [messageSchema],
+  messages: [{ type: Schema.Types.ObjectId, ref: 'Message' }], 
   changeHistory: [{ type: changeHistorySchema, default: [], description: "List of changes in the chat conversation" }],
   alice_agent: { type: Schema.Types.ObjectId, ref: 'Agent', required: true, description: "The Alice agent object" },
   functions: [{ type: Schema.Types.ObjectId, ref: 'Task', default: [], description: "List of functions to be registered with the agent" }],
@@ -39,54 +38,54 @@ const aliceChatSchema = new Schema<IAliceChatDocument, IAliceChatModel>({
 aliceChatSchema.methods.apiRepresentation = function (this: IAliceChatDocument) {
   return {
     id: this._id,
-    messages: this.messages.map(message => message.apiRepresentation()),
-    changeHistory: this.changeHistory.map(change => change.apiRepresentation()),
+    messages: this.messages.map((message) => message.apiRepresentation()),
+    changeHistory: this.changeHistory.map((change) => change.apiRepresentation()),
     alice_agent: this.alice_agent ? (this.alice_agent._id || this.alice_agent) : null,
-    functions: this.functions.map(func => func._id || func),
+    functions: this.functions.map((func) => func._id || func),
     created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
     updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,
     createdAt: this.createdAt || null,
-    updatedAt: this.updatedAt || null
+    updatedAt: this.updatedAt || null,
   };
 };
 
-function ensureObjectIdForSave(this: IAliceChatDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {
+function ensureObjectIdForSave(
+  this: IAliceChatDocument,
+  next: mongoose.CallbackWithoutResultAndOptionalError
+) {
   if (this.alice_agent) this.alice_agent = ensureObjectIdHelper(this.alice_agent);
   if (this.created_by) this.created_by = ensureObjectIdHelper(this.created_by);
   if (this.updated_by) this.updated_by = ensureObjectIdHelper(this.updated_by);
   if (this.functions) {
-    this.functions = this.functions.map(func => ensureObjectIdHelper(func));
+    this.functions = this.functions.map((func) => ensureObjectIdHelper(func));
   }
-  // if (this.messages) {
-  //   this.messages = this.messages.map(message => ensureObjectIdHelper(message));
-  // }
+  if (this.messages) {
+    this.messages = this.messages.map((message) => ensureObjectIdHelper(message));
+  }
   next();
 }
 
-function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
+function ensureObjectIdForUpdate(
+  this: mongoose.Query<any, any>,
+  next: mongoose.CallbackWithoutResultAndOptionalError
+) {
   const update = this.getUpdate() as any;
-  update.alice_agent = ensureObjectIdHelper(update.alice_agent);
-  update.created_by = ensureObjectIdHelper(update.created_by);
-  update.updated_by = ensureObjectIdHelper(update.updated_by);
+  if (update.alice_agent) update.alice_agent = ensureObjectIdHelper(update.alice_agent);
+  if (update.created_by) update.created_by = ensureObjectIdHelper(update.created_by);
+  if (update.updated_by) update.updated_by = ensureObjectIdHelper(update.updated_by);
   if (update.functions) {
     update.functions = update.functions.map((func: any) => ensureObjectIdHelper(func));
   }
-  // if (update.messages) {
-  //   update.messages = update.messages.map((message: any) => ensureObjectIdHelper(message));
-  // }
+  if (update.messages) {
+    update.messages = update.messages.map((message: any) => ensureObjectIdHelper(message));
+  }
   next();
 }
 
 function autoPopulate(this: mongoose.Query<any, any>) {
   this.populate('alice_agent created_by updated_by')
-    .populate({
-      path: 'functions',
-      model: 'Task'
-    })
-    // .populate({
-    //   path: 'messages',
-    //   model: 'Message'
-    // });
+    .populate('functions')
+    .populate('messages'); // Only need to populate messages at the top level
 }
 
 aliceChatSchema.pre('save', ensureObjectIdForSave);

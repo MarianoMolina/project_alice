@@ -50,6 +50,13 @@ const useStyles = makeStyles((theme: Theme) => ({
       fontSize: '0.875rem',
     },
   },
+  viewButton: {
+    padding: theme.spacing(0.5),
+    marginRight: theme.spacing(1),
+    '& svg': {
+      fontSize: '0.875rem',
+    },
+  },
   metadataContainer: {
     display: 'flex',
     flexDirection: 'column',
@@ -64,7 +71,32 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   fileReferencesContainer: {
     marginTop: theme.spacing(1),
-  }
+  },
+  // New styles for MessageDetail
+  messageDetail: {
+    padding: theme.spacing(2),
+  },
+  chipContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: theme.spacing(1),
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(1),
+  },
+  jsonDisplay: {
+    backgroundColor: theme.palette.background.default,
+    padding: theme.spacing(1),
+    borderRadius: theme.shape.borderRadius,
+    overflowX: 'auto',
+    fontFamily: 'monospace',
+    fontSize: '0.875rem',
+  },
+  buttonContainer: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: theme.spacing(1),
+    marginTop: theme.spacing(2),
+  },
 }));
 
 export default useStyles;

@@ -107,6 +107,10 @@ const ChatAlice: React.FC = () => {
     chatInputRef.current?.addFileReference(file);
   };
 
+  const addTaskResponse = (taskResponse: TaskResponse) => {
+    chatInputRef.current?.addTaskResponse(taskResponse);
+  }
+
   const renderSidebarContent = (tabName: string) => {
     const handleProps = {
       handleAgentClick: (id: string) => triggerItemDialog('Agent', id),
@@ -155,7 +159,7 @@ const ChatAlice: React.FC = () => {
             mode={'list'}
             fetchAll={true}
             onView={(taskResult) => taskResult._id && triggerItemDialog('TaskResponse', taskResult._id)}
-            onInteraction={checkAndAddTaskResult}
+            onInteraction={addTaskResponse}
             {...handleProps}
           />
         );

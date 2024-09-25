@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Box, Button } from '@mui/material';
 import { ChatComponentProps } from '../../../../types/ChatTypes';
-import Message from '../Message';
+import Message from '../../common/message/Message';
 import useStyles from '../ChatStyles';
 import { useChat } from '../../../../context/ChatContext';
 import PlaceholderSkeleton from '../../../ui/placeholder_skeleton/PlaceholderSkeleton';
@@ -47,7 +47,7 @@ const ChatFullView: React.FC<ChatFullViewProps> = ({
       <Box className={classes.messagesContainer}>
         {item.messages && item.messages.length > 0 ? (
           item.messages.map((message, index) => (
-            <Message key={index} message={message} />
+            <Message key={index} message={message} chatId={item._id}/>
           ))
         ) : (
           <Box className={classes.emptyMessagesContainer}>

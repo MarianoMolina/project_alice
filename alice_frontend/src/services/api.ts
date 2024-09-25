@@ -71,8 +71,13 @@ export const sendMessage = async (chatId: string, message: MessageType): Promise
           if ('transcript' in reference && reference.transcript) {
             console.log('Reference already has a transcript:', reference);
           }
-          const transcript = await requestFileTranscript(reference._id, undefined, chatId);
-          console.log('Retrieved transcript:', transcript, "for reference:", reference);
+          else {
+            const transcript = await requestFileTranscript(reference._id, undefined, chatId);
+            console.log('Retrieved transcript:', transcript, "for reference:", reference);
+          }
+        }
+        else {
+          console.log('Reference does not have an _id:', reference); // Upload this reference?
         }
       }
     }
@@ -185,6 +190,17 @@ export const retrieveFile = async (fileId: string): Promise<Blob> => {
     return response.data;
   } catch (error) {
     console.error('Error retrieving file:', error);
+    throw error;
+  }
+};
+
+
+export const updateMessageInChat = async (chatId: string, updatedMessage: MessageType): Promise<MessageType> => {
+  try {
+    const response = await dbAxiosInstance.patch(`/chats/${chatId}/update_message`, { message: updatedMessage });
+    return response.data.message;
+  } catch (error) {
+    console.error('Error updating message in chat:', error);
     throw error;
   }
 };

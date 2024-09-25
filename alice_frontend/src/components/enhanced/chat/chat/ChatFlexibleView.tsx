@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
     TextField,
-    Dialog
+    Dialog,
+    DialogContent,
+    DialogActions,
+    Button,
+    Box,
 } from '@mui/material';
-import { ChatComponentProps, AliceChat, getDefaultChatForm } from '../../../../types/ChatTypes';
+import { ChatComponentProps, AliceChat, getDefaultChatForm, MessageType } from '../../../../types/ChatTypes';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import EnhancedModel from '../../model/model/EnhancedModel';
 import EnhancedAgent from '../../agent/agent/EnhancedAgent';
@@ -12,6 +16,8 @@ import { AliceAgent } from '../../../../types/AgentTypes';
 import { AliceTask } from '../../../../types/TaskTypes';
 import { useApi } from '../../../../context/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
+import MessageListView from '../../common/message/MessageList';
+import MessageDetail from '../../common/message/MessageDetail';
 
 const ChatFlexibleView: React.FC<ChatComponentProps> = ({ 
     item,
@@ -19,11 +25,13 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     mode,
     handleSave
 }) => {
-    const { fetchItem } = useApi();
+    const { fetchItem, updateMessageInChat } = useApi();
     const [form, setForm] = useState<Partial<AliceChat>>(getDefaultChatForm());
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogContent, setDialogContent] = useState<React.ReactNode | null>(null);
+    const [selectedMessage, setSelectedMessage] = useState<MessageType | null>(null);
+    const [messageDialogMode, setMessageDialogMode] = useState<'view' | 'edit' | null>(null);
 
     useEffect(() => {
         if (item) {
@@ -73,6 +81,37 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
         setDialogOpen(true);
     };
 
+    const handleViewMessage = (message: MessageType) => {
+        setSelectedMessage(message);
+        setMessageDialogMode('view');
+    };
+
+    const handleEditMessage = (message: MessageType) => {
+        setSelectedMessage(message);
+        setMessageDialogMode('edit');
+    };
+
+    const handleCloseMessageDialog = () => {
+        setSelectedMessage(null);
+        setMessageDialogMode(null);
+    };
+
+    const handleUpdateMessage = async (updatedMessage: MessageType) => {
+        if (form._id && updatedMessage._id) {
+            try {
+                const updated = await updateMessageInChat(form._id, updatedMessage);
+                const updatedMessages = form.messages?.map(msg => 
+                    msg._id === updated._id ? updated : msg
+                ) || [];
+                onChange({ ...form, messages: updatedMessages });
+                handleCloseMessageDialog();
+            } catch (error) {
+                console.error('Error updating message:', error);
+                // Handle error (e.g., show an error message to the user)
+            }
+        }
+    };
+
     const title = mode === 'create' ? 'Create New Chat' : mode === 'edit' ? 'Edit Chat' : 'Chat Details';
     const saveButtonText = form._id ? 'Update Chat' : 'Create Chat';
 
@@ -117,8 +156,31 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                 onView={(id) => handleViewDetails("task", id)}
                 accordionEntityName="functions"
             />
+            <Box mt={2}>
+                <MessageListView 
+                    messages={form.messages || []}
+                    onView={handleViewMessage}
+                    onEdit={isEditMode ? handleEditMessage : undefined}
+                />
+            </Box>
             <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
                 {dialogContent}
+            </Dialog>
+            <Dialog open={!!selectedMessage} onClose={handleCloseMessageDialog} maxWidth="md" fullWidth>
+                {selectedMessage && (
+                    <DialogContent>
+                        <MessageDetail
+                            message={selectedMessage}
+                            chatId={form._id}
+                            mode={messageDialogMode || 'view'}
+                            onUpdate={handleUpdateMessage}
+                            onClose={handleCloseMessageDialog}
+                        />
+                    </DialogContent>
+                )}
+                <DialogActions>
+                    <Button onClick={handleCloseMessageDialog}>Close</Button>
+                </DialogActions>
             </Dialog>
         </GenericFlexibleView>
     );

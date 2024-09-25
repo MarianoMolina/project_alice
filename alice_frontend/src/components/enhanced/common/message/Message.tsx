@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
-import { Box, Typography, Tooltip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, Chip } from '@mui/material';
+import { Box, Typography, Tooltip, IconButton, Dialog, DialogContent, DialogActions, Button, Chip } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import EditIcon from '@mui/icons-material/Edit';
 import useStyles from './MessageStyles';
-import { MessageType, MessageProps } from '../../../types/ChatTypes';
-import { WorkflowOutput } from '../task_response/WorkflowOutput';
-import { CommandLineLog } from '../task_response/CommandLog';
-import { BackgroundBeams } from '../../ui/aceternity/BackgroundBeams';
-import EnhancedFile from '../file/file/EnhancedFile';
-import { FileReference } from '../../../types/FileTypes';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Visibility } from '@mui/icons-material';
+import { MessageProps, MessageType } from '../../../../types/ChatTypes';
+import { WorkflowOutput } from '../../task_response/WorkflowOutput';
+import { CommandLineLog } from '../../task_response/CommandLog';
+import { BackgroundBeams } from '../../../ui/aceternity/BackgroundBeams';
+import EnhancedFile from '../../file/file/EnhancedFile';
+import { FileReference } from '../../../../types/FileTypes';
+import MessageDetail from './MessageDetail';
 
-const Message: React.FC<MessageProps> = ({ message }) => {
+const Message: React.FC<MessageProps> = ({ message, chatId }) => {
   const classes = useStyles();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [detailMode, setDetailMode] = useState<'view' | 'edit'>('view');
   const [selectedFileReference, setSelectedFileReference] = useState<FileReference | null>(null);
   const [isFileDialogOpen, setIsFileDialogOpen] = useState(false);
 
@@ -60,14 +63,6 @@ const Message: React.FC<MessageProps> = ({ message }) => {
 
   const hasNonEmptyContext = message.context && Object.keys(message.context).length > 0;
 
-  const handleEditClick = () => {
-    setIsDialogOpen(true);
-  };
-
-  const handleCloseDialog = () => {
-    setIsDialogOpen(false);
-  };
-
   const renderFileReferences = () => {
     console.log('Message references:', message.references);
     if (!message.references || message.references.length === 0) return null;
@@ -99,7 +94,24 @@ const Message: React.FC<MessageProps> = ({ message }) => {
     setIsFileDialogOpen(false);
     setSelectedFileReference(null);
   };
+  const handleViewDetails = () => {
+    setDetailMode('view');
+    setIsDetailDialogOpen(true);
+  };
 
+  const handleEditDetails = () => {
+    setDetailMode('edit');
+    setIsDetailDialogOpen(true);
+  };
+
+  const handleCloseDetailDialog = () => {
+    setIsDetailDialogOpen(false);
+  };
+
+  const handleMessageUpdate = (updatedMessage: MessageType) => {
+    // Handle the updated message (e.g., update the state in the parent component)
+    console.log('Message updated:', updatedMessage);
+  };
 
   return (
     <Box className={`${classes.message} ${getMessageClass()}`}>
@@ -111,13 +123,24 @@ const Message: React.FC<MessageProps> = ({ message }) => {
               {message.assistant_name || getCreatorName(message)}
             </Typography>
           </Tooltip>
-          <IconButton
-            size="small"
-            onClick={handleEditClick}
-            className={classes.editButton}
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
+          <Box>
+            <IconButton
+              size="small"
+              onClick={handleViewDetails}
+              className={classes.viewButton}
+            >
+              <VisibilityIcon fontSize="small" />
+            </IconButton>
+            {chatId && (
+              <IconButton
+                size="small"
+                onClick={handleEditDetails}
+                className={classes.editButton}
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
+            )}
+          </Box>
         </Box>
         {renderMessageContent()}
         {renderFileReferences()}
@@ -139,14 +162,16 @@ const Message: React.FC<MessageProps> = ({ message }) => {
         </Box>
       </Box>
 
-      <Dialog open={isDialogOpen} onClose={handleCloseDialog}>
-        <DialogTitle>Edit Message</DialogTitle>
+      <Dialog open={isDetailDialogOpen} onClose={handleCloseDetailDialog} maxWidth="md" fullWidth>
         <DialogContent>
-          <Typography>Placeholder for message editing functionality</Typography>
+          <MessageDetail 
+            message={message} 
+            chatId={chatId} 
+            mode={detailMode}
+            onUpdate={handleMessageUpdate}
+            onClose={handleCloseDetailDialog}
+          />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Close</Button>
-        </DialogActions>
       </Dialog>
 
       <Dialog open={isFileDialogOpen} onClose={handleCloseFileDialog} maxWidth="md" fullWidth>
