@@ -1,9 +1,8 @@
-import React, { ChangeEvent, KeyboardEvent, useState } from 'react';
+import React, { ChangeEvent, KeyboardEvent, useState, forwardRef, useImperativeHandle } from 'react';
 import { Box, Button, TextField, Chip } from '@mui/material';
 import { MessageType } from '../../../types/ChatTypes';
-import { useApi } from '../../../context/ApiContext';
 import { FileReference, FileType } from '../../../types/FileTypes';
-import { createFileContentReference, selectFile } from '../../../utils/FileUtils';
+import { selectFile } from '../../../utils/FileUtils';
 
 interface ChatInputProps {
   sendMessage: (chatId: string, message: MessageType) => Promise<void>;
@@ -12,8 +11,16 @@ interface ChatInputProps {
   chatSelected: boolean;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ sendMessage, currentChatId, chatSelected, lastMessage }) => {
-  const { uploadFileContentReference } = useApi();
+export interface ChatInputRef {
+  addFileReference: (file: FileReference) => void;
+}
+
+const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ 
+  sendMessage, 
+  currentChatId, 
+  chatSelected, 
+  lastMessage 
+}, ref) => {
   const [newMessage, setNewMessage] = useState<MessageType>({
     role: 'user',
     content: '',
@@ -21,6 +28,15 @@ const ChatInput: React.FC<ChatInputProps> = ({ sendMessage, currentChatId, chatS
     type: 'text',
     references: [],
   });
+
+  useImperativeHandle(ref, () => ({
+    addFileReference: (file: FileReference) => {
+      setNewMessage(prev => ({
+        ...prev,
+        references: [...(prev.references || []), file],
+      }));
+    },
+  }));
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setNewMessage(prev => ({ ...prev, content: e.target.value }));
@@ -30,24 +46,18 @@ const ChatInput: React.FC<ChatInputProps> = ({ sendMessage, currentChatId, chatS
     const allowedTypes: FileType[] = [FileType.IMAGE, FileType.TEXT, FileType.AUDIO, FileType.VIDEO];
     const file = await selectFile(allowedTypes);
     if (!file) return;
-    const fileContentReference = await createFileContentReference(file);
-    const uploadedFile = await uploadFileContentReference(fileContentReference);
-
-    if (uploadedFile) {
-      console.log('File uploaded successfully:', uploadedFile);
-      const fileReference: FileReference = {
-        _id: uploadedFile._id,
-        filename: uploadedFile.filename,
-        type: uploadedFile.type,
-        file_size: uploadedFile.file_size,
-      };
-      setNewMessage(prev => ({
-        ...prev,
-        references: [...(prev.references || []), fileReference],
-      }));
-    } else {
-      console.log('File upload failed or was cancelled');
-    }
+    // Here you would typically upload the file and get a FileReference back
+    // For now, we'll create a mock FileReference
+    const mockFileReference: FileReference = {
+      _id: Date.now().toString(),
+      filename: file.name,
+      type: file.type as FileType,
+      file_size: file.size,
+    };
+    setNewMessage(prev => ({
+      ...prev,
+      references: [...(prev.references || []), mockFileReference],
+    }));
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
@@ -58,7 +68,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ sendMessage, currentChatId, chatS
   };
 
   const handleSend = () => {
-    if (currentChatId && newMessage.content.trim()) {
+    if (currentChatId && (newMessage.content.trim() || (newMessage.references && newMessage.references.length > 0))) {
       sendMessage(currentChatId, newMessage);
       setNewMessage({
         role: 'user',
@@ -96,7 +106,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ sendMessage, currentChatId, chatS
           variant="contained"
           sx={{ ml: 2, alignSelf: 'flex-end' }}
           onClick={handleSend}
-          disabled={!chatSelected || !newMessage.content.trim()}
+          disabled={!chatSelected || (!newMessage.content.trim() && newMessage.references && newMessage.references.length === 0)}
         >
           Send
         </Button>
@@ -127,6 +137,6 @@ const ChatInput: React.FC<ChatInputProps> = ({ sendMessage, currentChatId, chatS
       </Box>
     </Box>
   );
-};
+});
 
 export default ChatInput;

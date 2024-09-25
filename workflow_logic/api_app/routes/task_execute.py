@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends
 from workflow_logic.util import LOGGER
-from workflow_logic.core import AliceTask, TaskExecutionRequest
+from workflow_logic.core import AliceTask
+from workflow_logic.api_app.util import TaskExecutionRequest
 from workflow_logic.core import DatabaseTaskResponse
 from workflow_logic.api_app.util.utils import deep_api_check
 from workflow_logic.api_app.util.dependencies import get_db_app
+from workflow_logic.api_app.util.reference_utils import check_task_response_references
 
 router = APIRouter()
 
@@ -57,10 +59,18 @@ async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(ge
         LOGGER.debug(f'task type: {type(task)}')
        
         result = await task.a_execute(api_manager=api_manager, **inputs)
-       
-        LOGGER.info(f'task_result: {result.model_dump()}')
+
+        # Process and update file content references
+        LOGGER.debug(f'task_result: {result.model_dump()}')
+        task_response = result.retrieve_task_response()
+        task_response = await check_task_response_references(task_response, db_app)
+
+        result = DatabaseTaskResponse(**task_response.model_dump(by_alias=True))
+
+        LOGGER.debug(f'result after checking references: {result.model_dump()}')
         LOGGER.debug(f'type: {type(result)}')
         db_result = await db_app.store_task_response(result)
+
         LOGGER.debug(f'db_result: {db_result.model_dump(by_alias=True)}')
         return db_result.model_dump(by_alias=True)
     except Exception as e:

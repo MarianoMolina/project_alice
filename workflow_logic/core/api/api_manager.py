@@ -220,9 +220,7 @@ class APIManager(BaseModel):
             # Validate inputs against the API engine's input_variables
             self._validate_inputs(api_engine, kwargs)
 
-            # Generate response using the API engine
-            response = await api_engine.generate_api_response(api_data, **kwargs)
-            return response
+            return await api_engine.generate_api_response(api_data, **kwargs)
 
         except Exception as e:
             import traceback

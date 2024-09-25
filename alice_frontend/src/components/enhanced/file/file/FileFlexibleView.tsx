@@ -13,7 +13,7 @@ import { FileComponentProps, FileContentReference, FileReference, FileType } fro
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import FileViewer from '../FileViewer';
 import Transcript from '../Transcript';
-import { createFileContentReference, selectFile } from '../../../../utils/FileUtils';
+import { bytesToMB, createFileContentReference, selectFile } from '../../../../utils/FileUtils';
 import { useApi } from '../../../../context/ApiContext';
 import { MessageType } from '../../../../types/ChatTypes';
 import { useNotification } from '../../../../context/NotificationContext';
@@ -113,7 +113,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
                     disabled={!isEditMode}
                 />
                 <Typography variant="body1">File Type: {item?.type}</Typography>
-                <Typography variant="body1">File Size: {item?.file_size} bytes</Typography>
+                <Typography variant="body1">{bytesToMB(item?.file_size ?? 0)}</Typography>
                 <Typography variant="body1">
                     Last Accessed: {item?.last_accessed ? new Date(item.last_accessed).toLocaleString() : 'Never'}
                 </Typography>

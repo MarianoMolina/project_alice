@@ -25,6 +25,7 @@ class TaskResponse(BaseDataStructure):
     
     def model_dump(self, *args, **kwargs):
         data = super().model_dump(*args, **kwargs)
+        from workflow_logic.core.data_structures.output_interfaces import OutputInterface
         if self.task_content and isinstance(self.task_content, OutputInterface):
             data['task_content'] = self.task_content.model_dump(*args, **kwargs)
         return data
@@ -32,9 +33,10 @@ class TaskResponse(BaseDataStructure):
 class DatabaseTaskResponse(TaskResponse):
     task_content: Optional[Dict[str, Any]] = Field(None, description="The content of the task output, represents the model_dump of the OutputInterface used")
     
-    def retrieve_task_outputs(self) -> OutputInterfaceType:
+    def retrieve_task_content(self) -> OutputInterfaceType:
         if not self.task_content:
             return StringOutput([self.task_outputs])
+        from workflow_logic.core.data_structures.output_interfaces import StringOutput, LLMChatOutput, SearchOutput, WorkflowOutput
         output_type = self.task_content.get("output_type")
         if output_type == "StringOutput":
             return StringOutput(**self.task_content)
@@ -54,7 +56,8 @@ class DatabaseTaskResponse(TaskResponse):
             task_description=self.task_description,
             status=self.status,
             result_code=self.result_code,
-            task_outputs=self.retrieve_task_outputs(),
+            task_outputs=self.task_outputs,
+            task_content=self.retrieve_task_content(),
             result_diagnostic=self.result_diagnostic,
             task_inputs=self.task_inputs,
             usage_metrics=self.usage_metrics,

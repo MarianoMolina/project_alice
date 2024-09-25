@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Optional, Literal, Dict, Any, List, TYPE_CHECKING
-from pydantic import Field, ConfigDict
+from pydantic import Field, ConfigDict, field_validator
 from workflow_logic.core.data_structures.base_models import BaseDataStructure, ContentType
 from workflow_logic.core.data_structures.central_types import FileReferenceType, TaskResponseType, ToolCallType, ReferenceType
 
@@ -27,6 +27,35 @@ class MessageDict(BaseDataStructure):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
+    @field_validator('task_responses')
+    def validate_task_responses(cls, v):
+        from workflow_logic.core.data_structures.task_response import TaskResponse
+        return [TaskResponse(**item) if not isinstance(item, TaskResponse) else item for item in v]
+
+    @field_validator('references')
+    def validate_references(cls, v):
+        from workflow_logic.core.data_structures.file_reference import FileReference, FileContentReference
+        
+        def cast_reference(item):
+            if isinstance(item, (FileReference, FileContentReference)):
+                return item
+            elif isinstance(item, dict):
+                if 'content' in item:
+                    return FileContentReference(**item)
+                else:
+                    return FileReference(**item)
+            else:
+                raise ValueError(f"Invalid reference type: {type(item)}")
+        
+        return [cast_reference(item) for item in v]
+
+    @field_validator('tool_calls')
+    def validate_tool_calls(cls, v):
+        from workflow_logic.core.data_structures.parameters import ToolCall
+        if v is not None:
+            return [ToolCall(**item) if not isinstance(item, ToolCall) else item for item in v]
+        return v
+    
     def __str__(self) -> str:
         role = self.role if self.role else ''
         content = self.content if self.content else ''

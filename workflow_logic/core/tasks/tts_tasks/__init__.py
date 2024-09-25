@@ -1,3 +1,3 @@
+from .tts_task import TextToSpeechTask
 
-
-__all__ = []
+__all__ = ['TextToSpeechTask']

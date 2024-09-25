@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { Box, Dialog } from '@mui/material';
-import { Add, Chat, Info, Functions, Assignment } from '@mui/icons-material';
+import { Add, Chat, Info, Functions, Assignment, AttachFile } from '@mui/icons-material';
 import { TaskResponse } from '../types/TaskResponseTypes';
 import { AliceTask } from '../types/TaskTypes';
 import { AliceChat } from '../types/ChatTypes';
@@ -10,12 +10,14 @@ import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSide
 import EnhancedChat from '../components/enhanced/chat/chat/EnhancedChat';
 import EnhancedTask from '../components/enhanced/task/task/EnhancedTask';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
-import ChatInput from '../components/enhanced/chat/ChatInput';
+import ChatInput, { ChatInputRef } from '../components/enhanced/chat/ChatInput';
 import useStyles from '../styles/ChatAliceStyles';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
 import EnhancedCardDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
 import { useCardDialog } from '../context/CardDialogContext';
 import { CollectionElementString } from '../types/CollectionTypes';
+import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
+import { FileReference } from '../types/FileTypes';
 
 const ChatAlice: React.FC = () => {
   const classes = useStyles();
@@ -34,9 +36,10 @@ const ChatAlice: React.FC = () => {
   const { selectItem } = useCardDialog();
 
   const [openChatCreateDialog, setOpenChatCreateDialog] = useState(false);
-
   const [activeTab, setActiveTab] = useState('Select Chat');
   const [listKey, setListKey] = useState(0);
+
+  const chatInputRef = useRef<ChatInputRef>(null);
 
   const lastMessage = messages[messages.length - 1];
 
@@ -81,6 +84,7 @@ const ChatAlice: React.FC = () => {
     { name: 'Current Chat', icon: Info, disabled: !currentChatId },
     { name: 'Add Functions', icon: Functions, disabled: !currentChatId },
     { name: 'Add TaskResults', icon: Assignment, disabled: !currentChatId },
+    { name: 'Add File Reference', icon: AttachFile, disabled: !currentChatId },
   ];
 
   const checkAndAddTask = (task: AliceTask) => {
@@ -94,8 +98,13 @@ const ChatAlice: React.FC = () => {
       addTaskResultToChat(taskResult._id);
     }
   }
+
   const triggerItemDialog = (collectionName: CollectionElementString, itemId: string) => {
     selectItem(collectionName, itemId);
+  };
+
+  const addFileReference = (file: FileReference) => {
+    chatInputRef.current?.addFileReference(file);
   };
 
   const renderSidebarContent = (tabName: string) => {
@@ -150,6 +159,16 @@ const ChatAlice: React.FC = () => {
             {...handleProps}
           />
         );
+      case 'Add File Reference':
+        return (
+          <EnhancedFile
+            mode={'list'}
+            fetchAll={true}
+            onView={(file) => file._id && triggerItemDialog('File', file._id)}
+            onInteraction={addFileReference}
+            {...handleProps}
+          />
+        );
       default:
         return null;
     }
@@ -185,6 +204,7 @@ const ChatAlice: React.FC = () => {
         </Box>
         <Box className={classes.chatAliceInput}>
           <ChatInput
+            ref={chatInputRef}
             sendMessage={handleSendMessage}
             lastMessage={lastMessage}
             currentChatId={currentChatId}

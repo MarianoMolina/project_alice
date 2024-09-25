@@ -25,7 +25,7 @@ class OpenAISpeechToTextEngine(APIEngine):
     )
     required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
 
-    async def generate_api_response(self, api_data: LLMConfig, file_reference: FileReference, model: str = "whisper-1") -> MessageDict:
+    async def generate_api_response(self, api_data: LLMConfig, file_reference: FileReference) -> MessageDict:
         """
         Transcribes speech to text using OpenAI's API.
 
@@ -43,6 +43,7 @@ class OpenAISpeechToTextEngine(APIEngine):
             api_key=api_data.api_key,
             base_url=api_data.base_url
         )
+        model = api_data.model
 
         try:
             with open(file_reference.storage_path, "rb") as audio_file:

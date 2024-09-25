@@ -1,3 +1,3 @@
+from .gen_img_task import GenerateImageTask
 
-
-__all__ = []
+__all__ = ['GenerateImageTask']

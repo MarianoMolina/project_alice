@@ -151,7 +151,7 @@ export const uploadFileContentReference = async (
   itemData: Partial<FileContentReference>
 ): Promise<FileReference> => {
   try {
-    const url = `/files/upload`;
+    const url = `/files/`;
     console.log('Creating file with data:', JSON.stringify(itemData));
     const response = await dbAxiosInstance.post(url, itemData);
     return converters['files'](response.data) as FileReference;

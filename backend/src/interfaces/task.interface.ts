@@ -10,6 +10,10 @@ export enum TaskType {
   CheckTask = "CheckTask",
   CodeGenerationLLMTask = "CodeGenerationLLMTask",
   CodeExecutionLLMTask = "CodeExecutionLLMTask",
+  EmbeddingTask = "EmbeddingTask",
+  GenerateImageTask = "GenerateImageTask",
+  TextToSpeechTask = "TextToSpeechTask",
+  WebScrapeBeautifulSoupTask = "WebScrapeBeautifulSoupTask"
 }
 
 export interface ITask {

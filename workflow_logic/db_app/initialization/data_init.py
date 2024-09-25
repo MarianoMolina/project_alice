@@ -1,6 +1,6 @@
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
-from workflow_logic.db_app.initialization.modules import InitializationModule, base, base_chat, base_tasks, coding_workflow, advanced_chat
+from workflow_logic.db_app.initialization.modules import InitializationModule, base, base_chat, base_tasks, coding_workflow, advanced_chat, adv_tasks
 
 class ModularDBStructure(BaseModel):
     modules: Dict[str, InitializationModule] = Field(default_factory=dict)
@@ -60,6 +60,7 @@ modular_db.add_module(base_tasks.base_tasks_module)
 modular_db.add_module(base_chat.base_chat_module)
 modular_db.add_module(coding_workflow.coding_workflow_module)
 modular_db.add_module(advanced_chat.advanced_chat_module)
+modular_db.add_module(adv_tasks.adv_tasks_module)
 
 # Validate dependencies
 validation_result = modular_db.validate_dependencies()

@@ -146,3 +146,7 @@ export const selectFile = async (
         input.click();
     });
 };
+export const bytesToMB = (bytes: number): string => {
+    const mb = bytes / (1024 * 1024);
+    return mb.toPrecision(3) + ' MB';
+};

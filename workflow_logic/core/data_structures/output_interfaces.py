@@ -1,7 +1,7 @@
 from __future__ import annotations
 from datetime import datetime
 from typing import Dict, Any, List, TYPE_CHECKING
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, field_validator
 from workflow_logic.core.data_structures.base_models import BaseDataStructure
 from workflow_logic.core.data_structures.central_types import MessageDictType, TaskResponseType
 
@@ -38,6 +38,10 @@ class StringOutput(OutputInterface):
 
     def __str__(self) -> str:
         return "\n".join(self.content)
+    
+    @field_validator('content')
+    def validate_content(cls, v):
+        return [str(item) for item in v]
 
 class LLMChatOutput(OutputInterface):
     content: List[MessageDictType] = Field([], description="List of messages in the chat conversation")
@@ -47,6 +51,11 @@ class LLMChatOutput(OutputInterface):
             [f"{message.role}: " + (f"{message.assistant_name}\n" if message.assistant_name else "\n") + message.content
              for message in self.content]
         )
+    
+    @field_validator('content')
+    def validate_content(cls, v):
+        from workflow_logic.core.data_structures.message import MessageDict
+        return [MessageDict(**item) if not isinstance(item, MessageDict) else item for item in v]
 
 class SearchResult(BaseDataStructure):
     title: str
@@ -73,6 +82,10 @@ class SearchResult(BaseDataStructure):
 class SearchOutput(OutputInterface):
     content: List[SearchResult] = Field([], description="List of search results")
 
+    @field_validator('content')
+    def validate_content(cls, v):
+        return [SearchResult(**item) if not isinstance(item, SearchResult) else item for item in v]
+    
     def __str__(self) -> str:
         return "\n".join(
             [f"Title: {result.title} \nURL: {result.url} \n Content: {result.content}\n"
@@ -84,3 +97,8 @@ class WorkflowOutput(OutputInterface):
 
     def __str__(self) -> str:
         return "\n".join([f"{task.task_name}: {task.task_description}\nTask Output:{str(task.task_outputs)}" for task in self.content])
+    
+    @field_validator('content')
+    def validate_content(cls, v):
+        from workflow_logic.core.data_structures.task_response import TaskResponse
+        return [TaskResponse(**item) if not isinstance(item, TaskResponse) else item for item in v]

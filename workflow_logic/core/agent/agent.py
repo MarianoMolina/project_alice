@@ -1,7 +1,7 @@
 import docker, os, tempfile, json, traceback
 from bson import ObjectId
 from pydantic import BaseModel, Field, ConfigDict
-from typing import Dict, Any, List, Optional, Tuple, Callable
+from typing import Dict, Any, List, Optional, Tuple, Callable, Union
 from workflow_logic.core.parameters import ToolFunction, ToolCall
 from workflow_logic.core.parameters.parameters import ensure_tool_function
 from workflow_logic.core.prompt import Prompt
@@ -377,15 +377,42 @@ class AliceAgent(BaseModel):
             file_reference=file_reference
         )
 
-    async def generate_image(self, api_manager: APIManager, prompt: str) -> MessageDict:
-        img_gen_model = self.models[ModelType.IMG_GEN] or api_manager.get_api_by_type(ApiType.IMG_GENERATION)
+    async def generate_image(self, api_manager: APIManager, prompt: str, n: int = 1, size: str = "1024x1024", quality: str = "standard") -> MessageDict:
+        img_gen_model = self.models[ModelType.IMG_GEN] or api_manager.get_api_by_type(ApiType.IMG_GENERATION).default_model
         if not img_gen_model:
             raise ValueError("No image generation model available for the agent or in the API manager")
         
         return await api_manager.generate_response_with_api_engine(
             api_type=ApiType.IMG_GENERATION,
             model=img_gen_model,
-            prompt=prompt
+            prompt=prompt,
+            n=n,
+            size=size,
+            quality=quality
+        )
+    
+    async def generate_speech(self, api_manager: APIManager, input: str, voice: str = "nova", speed: float = 1.0) -> MessageDict:
+        tts_model = self.models[ModelType.TTS] or api_manager.get_api_by_type(ApiType.TEXT_TO_SPEECH).default_model
+        if not tts_model:
+            raise ValueError("No text-to-speech model available for the agent or in the API manager")
+        
+        return await api_manager.generate_response_with_api_engine(
+            api_type=ApiType.TEXT_TO_SPEECH,
+            model=tts_model,
+            input=input,
+            voice=voice,
+            speed=speed
+        )
+    
+    async def generate_embeddings(self, api_manager: APIManager, input: Union[str, List[str]]) -> MessageDict:
+        embeddings_model = self.models[ModelType.EMBEDDINGS] or api_manager.get_api_by_type(ApiType.EMBEDDINGS).default_model
+        if not embeddings_model:
+            raise ValueError("No embeddings model available for the agent or in the API manager")
+        
+        return await api_manager.generate_response_with_api_engine(
+            api_type=ApiType.EMBEDDINGS,
+            model=embeddings_model,
+            input=input
         )
 
     def _prepare_messages_for_api(self, messages: List[MessageDict]) -> List[Dict[str, Any]]:

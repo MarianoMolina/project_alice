@@ -5,6 +5,7 @@ import CommonCardView from '../../common/enhanced_component/CardView';
 import { InsertDriveFile, CalendarToday, AccessTime, TextSnippet } from '@mui/icons-material';
 import FileViewer from '../FileViewer';
 import useStyles from '../FileStyles';
+import { bytesToMB } from '../../../../utils/FileUtils';
 
 const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
     const classes = useStyles();
@@ -22,7 +23,7 @@ const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
         {
             icon: <AccessTime />,
             primary_text: "File Size",
-            secondary_text: `${item.file_size} bytes`
+            secondary_text: bytesToMB(item.file_size)
         },
         {
             icon: <CalendarToday />,

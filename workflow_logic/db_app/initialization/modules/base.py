@@ -90,8 +90,8 @@ base_module = BaseModule(
             },
             {
                 "key": "oai_embedding_large",
-                "short_name": "text-embedding-large",
-                "model_name": "text-embedding-large",
+                "short_name": "text-embedding-3-large",
+                "model_name": "text-embedding-3-large",
                 "model_format": "Base", # random value
                 "ctx_size": 2048, # random value
                 "model_type": "embeddings",

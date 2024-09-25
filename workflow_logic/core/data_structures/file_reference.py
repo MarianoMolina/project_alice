@@ -1,7 +1,7 @@
 from __future__ import annotations
 import base64, io, magic, os
 from typing import Union, BinaryIO, Optional
-from pydantic import Field
+from pydantic import Field, field_validator
 from PIL import Image
 from workflow_logic.core.data_structures.base_models import BaseDataStructure, FileType
 from workflow_logic.core.data_structures.message import MessageDict
@@ -14,12 +14,22 @@ class FileReference(BaseDataStructure):
     storage_path: str = Field(..., description="The path to the file in the shared volume")
     transcript: Optional[MessageDict] = Field(None, description="The transcript of the file content")
 
+    @field_validator('transcript')
+    def validate_transcript(cls, v):
+        if v is None:
+            return v
+        if isinstance(v, MessageDict):
+            return v
+        if isinstance(v, dict):
+            return MessageDict(**v)
+        raise ValueError(f"Invalid type for transcript: {type(v)}. Expected MessageDict, dict, or None.")
+    
     def model_dump(self, *args, **kwargs):
         data = super().model_dump(*args, **kwargs)
-        LOGGER.info(f"Data after super().model_dump: {data}")
+        LOGGER.debug(f"Data after super().model_dump: {data}")
         if self.transcript:
             data['transcript'] = self.transcript.model_dump(*args, **kwargs)
-        LOGGER.info(f"Data after processing transcript: {data}")
+        LOGGER.debug(f"Data after processing transcript: {data}")
         return data
 
     class Config:

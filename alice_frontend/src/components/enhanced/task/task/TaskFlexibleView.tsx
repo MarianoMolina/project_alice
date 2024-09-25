@@ -30,7 +30,11 @@ const taskTypes: TaskType[] = [
     "CodeGenerationLLMTask",
     "CodeExecutionLLMTask",
     "Workflow",
-    "APITask"
+    "APITask",
+    "EmbeddingTask",
+    "GenerateImageTask",
+    "TextToSpeechTask",
+    "WebScrapeBeautifulSoupTask"
 ];
 
 const TaskFlexibleView: React.FC<TaskComponentProps> = ({

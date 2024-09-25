@@ -3,7 +3,7 @@ from aiohttp import ClientError
 from bson import ObjectId
 from typing import Dict, Any, Optional, Literal, Union
 from pydantic import BaseModel, Field, ConfigDict
-from workflow_logic.core.tasks import available_task_types
+from workflow_logic.db_app.utils import available_task_types
 from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, API, User, DatabaseTaskResponse, MessageDict, FileReference, FileContentReference
 from workflow_logic.util.const import BACKEND_PORT, HOST, ADMIN_TOKEN
 from workflow_logic.core.data_structures import EntityType
@@ -336,7 +336,7 @@ class BackendAPI(BaseModel):
             return None
 
     async def store_task_response(self, task_response: DatabaseTaskResponse) -> DatabaseTaskResponse:
-        url = f"{self.base_url}/taskResults"
+        url = f"{self.base_url}/taskresults"
         headers = self._get_headers()
         headers['Content-Type'] = 'application/json'
         
@@ -395,7 +395,7 @@ class BackendAPI(BaseModel):
             LOGGER.error(f"Error validating token: {e}")
             return {"valid": False, "message": str(e)}
         
-    async def create_entity_in_db(self, entity_type: EntityType, entity_data: dict) -> str:
+    async def create_entity_in_db(self, entity_type: EntityType, entity_data: dict) -> Dict[str, Any]:
         collection_name = self.collection_map[entity_type]
         url = f"{self.base_url}/{collection_name}"
         headers = self._get_headers()
@@ -409,7 +409,7 @@ class BackendAPI(BaseModel):
                     
                     response.raise_for_status()
                     result = await response.json()
-                    LOGGER.info(f'Created {entity_type[:-1]}')
+                    LOGGER.info(f'Created {entity_type} with ID: {result["_id"]}')
                     return result
             except aiohttp.ClientResponseError as e:
                 LOGGER.error(f"HTTP error during entity creation: {e.status} - {e.message}")

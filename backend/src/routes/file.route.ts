@@ -10,7 +10,7 @@ const router: Router = express.Router();
 
 router.use(auth);
 
-router.post('/upload', async (req: AuthRequest, res: Response) => {
+router.post('/', async (req: AuthRequest, res: Response) => {
     try {
         const fileContent: IFileReference = req.body;
         const userId = req.user!.userId;

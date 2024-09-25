@@ -33,7 +33,7 @@ base_tasks_module = BaseTasksModule(
                 "type": "string",
                 "description": "The subreddit to search",
                 "default": "all"
-            },
+            }
         ],
         "prompts": [
             {
