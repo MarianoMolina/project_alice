@@ -19,6 +19,7 @@ import loggingMiddleware from './middleware/logging.middleware';
 import lmStudioRoute from './routes/lmStudio.route';
 import Logger from './utils/logger';
 import FileRoutes from './routes/file.route';
+import './models';
 
 dotenv.config();
 

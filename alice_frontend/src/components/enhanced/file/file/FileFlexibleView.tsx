@@ -15,7 +15,7 @@ import FileViewer from '../FileViewer';
 import Transcript from '../Transcript';
 import { bytesToMB, createFileContentReference, selectFile } from '../../../../utils/FileUtils';
 import { useApi } from '../../../../context/ApiContext';
-import { MessageType } from '../../../../types/ChatTypes';
+import { MessageType } from '../../../../types/MessageTypes';
 import { useNotification } from '../../../../context/NotificationContext';
 
 const FileFlexibleView: React.FC<FileComponentProps> = ({
@@ -43,7 +43,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
 
     const handleFileSelect = async () => {
         try {
-            const allowedTypes: FileType[] = [FileType.IMAGE, FileType.TEXT, FileType.AUDIO, FileType.VIDEO];
+            const allowedTypes: FileType[] = [FileType.IMAGE, FileType.AUDIO, FileType.VIDEO];
             const file = await selectFile(allowedTypes);
             if (file) {
                 setSelectedFile(file);

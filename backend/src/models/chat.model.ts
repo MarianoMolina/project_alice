@@ -38,7 +38,7 @@ const aliceChatSchema = new Schema<IAliceChatDocument, IAliceChatModel>({
 aliceChatSchema.methods.apiRepresentation = function (this: IAliceChatDocument) {
   return {
     id: this._id,
-    messages: this.messages.map((message) => message.apiRepresentation()),
+    messages: this.messages.map((message) => message._id || message),
     changeHistory: this.changeHistory.map((change) => change.apiRepresentation()),
     alice_agent: this.alice_agent ? (this.alice_agent._id || this.alice_agent) : null,
     functions: this.functions.map((func) => func._id || func),

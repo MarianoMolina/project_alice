@@ -6,6 +6,7 @@ import { StringOutput } from './StringOutput';
 import { LLMChatOutput } from './LLMChatOutput';
 import { SearchOutput } from './SearchOutput';
 import useStyles from './TaskResponseStyles';
+import { FileOutput } from './FileOutput';
 
 interface WorkflowOutputProps {
   content: TaskResponse | TaskResponse[];
@@ -56,6 +57,8 @@ export const WorkflowOutput: React.FC<WorkflowOutputProps> = ({ content, depth =
                   return <SearchOutput result={subItem} />;
                 case 'WorkflowOutput':
                   return <WorkflowOutput content={subItem} depth={depth + 1} />;
+                case 'FileOutput':
+                  return <FileOutput file={subItem} />;
                 default:
                   return <Typography>Unknown output type: {item.output_type}</Typography>;
               }

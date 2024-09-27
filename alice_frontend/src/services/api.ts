@@ -1,5 +1,6 @@
 import { dbAxiosInstance, taskAxiosInstance } from './axiosInstance';
-import { AliceChat, convertToAliceChat, MessageType } from '../types/ChatTypes';
+import { AliceChat, convertToAliceChat } from '../types/ChatTypes';
+import { MessageType } from '../types/MessageTypes';
 import { TaskResponse, convertToTaskResponse } from '../types/TaskResponseTypes';
 import { CollectionName, CollectionType, converters } from '../types/CollectionTypes';
 import { FileReference, FileContentReference } from '../types/FileTypes';
@@ -133,8 +134,21 @@ export const executeTask = async (taskId: string, inputs: any): Promise<TaskResp
 export const addTaskResponse = async (chatId: string, taskResultId: string): Promise<AliceChat> => {
   try {
     console.log('Adding task response to chatId:', chatId, 'with taskResultId:', taskResultId);
-    const response = await dbAxiosInstance.patch(`/chats/${chatId}/add_task_response`, { taskResultId });
-    return convertToAliceChat(response.data.chat);
+    
+    // Fetch the task result
+    const taskResult = await fetchItem('taskresults', taskResultId) as TaskResponse;
+    
+    // Create a message object with the task result's output
+    const message: MessageType = {
+      role: 'assistant',
+      content: JSON.stringify(taskResult.task_outputs),
+      generated_by: 'tool',
+      type: 'task_result',
+      task_responses: [taskResult],
+    };
+
+    // Send the message to the chat
+    return await sendMessage(chatId, message);
   } catch (error) {
     console.error('Error adding task response:', error);
     throw error;

@@ -7,7 +7,8 @@ import {
     Button,
     Box,
 } from '@mui/material';
-import { ChatComponentProps, AliceChat, getDefaultChatForm, MessageType } from '../../../../types/ChatTypes';
+import { ChatComponentProps, AliceChat, getDefaultChatForm } from '../../../../types/ChatTypes';
+import { MessageType } from '../../../../types/MessageTypes';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import EnhancedModel from '../../model/model/EnhancedModel';
 import EnhancedAgent from '../../agent/agent/EnhancedAgent';

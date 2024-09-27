@@ -1,10 +1,13 @@
-import fs from 'fs/promises';
-import path from 'path';
-import { Types } from 'mongoose';
-import FileReference from '../models/file.model';
-import { FileType, IFileReferenceDocument, IFileReference } from '../interfaces/file.interface';
+import { FileType, IFileReference, IFileReferenceDocument } from '../interfaces/file.interface';
 import { IMessageDocument } from '../interfaces/message.interface';
+import FileReference from '../models/file.model';
+import Message from '../models/message.model';
+import { updateMessage, messagesEqual } from './message.utils';
 import Logger from './logger';
+import { Types } from 'mongoose';
+import path from 'path';
+import fs from 'fs/promises';
+import { getObjectId } from './utils';
 
 const UPLOAD_DIR = process.env.SHARED_UPLOAD_DIR || '/app/shared-uploads';
 
@@ -16,7 +19,7 @@ export function inferContentType(filename: string): FileType {
         case '.txt':
         case '.md':
         case '.csv':
-            return FileType.TEXT;
+            return FileType.FILE;
         case '.jpg':
         case '.jpeg':
         case '.png':
@@ -52,62 +55,6 @@ async function ensureUserDirectory(userId: string): Promise<string> {
     return userDir;
 }
 
-export async function updateFileTranscript(
-    fileId: string | Types.ObjectId,
-    message: Partial<IMessageDocument>,
-    userId: string
-): Promise<IFileReferenceDocument> {
-    const fileReference = await FileReference.findById(fileId);
-    if (!fileReference) {
-        throw new Error('File not found');
-    }
-    Logger.info(`Handling file transcript for file: ${fileId} with data: ${JSON.stringify(message)}`);
-
-    const transcript: IMessageDocument = createTranscriptMessage(message, userId);
-
-    try {
-        Logger.info(`Preparing to save file transcript: ${JSON.stringify(transcript)}`);
-        Logger.info(`File reference before update: ${JSON.stringify(fileReference.toObject())}`);
-
-        await FileReference.updateOne(
-            { _id: fileId },
-            { 
-                $set: { 
-                    transcript: transcript, 
-                    updated_by: new Types.ObjectId(userId) 
-                } 
-            }
-        );
-
-        const updatedFileReference = await FileReference.findById(fileId);
-        Logger.info(`File reference after update: ${JSON.stringify(updatedFileReference?.toObject())}`);
-
-        if (!updatedFileReference) {
-            throw new Error('Failed to retrieve updated file reference');
-        }
-
-        return updatedFileReference;
-    } catch (error) {
-        Logger.error(`Error saving file transcript: ${error}`);
-        throw error;
-    }
-}
-
-export function createTranscriptMessage(message: Partial<IMessageDocument>, userId: string): IMessageDocument {
-    const transcript: IMessageDocument = {
-        ...message,
-        _id: new Types.ObjectId(),
-        content: message.content || '',
-        role: message.role || 'assistant',
-        generated_by: message.generated_by || 'tool',
-        type: message.type || 'text',
-        created_by: new Types.ObjectId(userId),
-        createdAt: new Date(),
-        updatedAt: new Date()
-    } as IMessageDocument;
-    return transcript;
-}
-
 export function getFileStorageName(filename: string, version?: string): string {
     if (version) {
         const filePureName = filename.split('.')[0];
@@ -141,6 +88,7 @@ export async function storeFile(userId: string, fileContent: string, filename: s
         bufferLength: fileBuffer.length
     };
 }
+
 export async function retrieveFileById(fileId: string, version?: number): Promise<{ file: Buffer; fileReference: IFileReferenceDocument }> {
     try {
         const fileReference = await FileReference.findById(fileId);
@@ -153,7 +101,7 @@ export async function retrieveFileById(fileId: string, version?: number): Promis
             Logger.debug(`Retrieving file version: ${version} from path: ${fileReference.storage_path}`);
             const file = await fs.readFile(fileReference.storage_path)
             Logger.debug(`File retrieved successfully: ${fileReference.storage_path}`);
-            return { file, fileReference};
+            return { file, fileReference };
         } else {
             const filePath = fileReference.storage_path;
             const directoryPath = filePath.substring(0, filePath.lastIndexOf('/'));
@@ -168,91 +116,6 @@ export async function retrieveFileById(fileId: string, version?: number): Promis
         console.error('Error retrieving file:', error);
         throw error;
     }
-}
-
-export async function storeFileReference(fileContent: IFileReference, userId: string): Promise<IFileReferenceDocument> {
-    try {
-        if (!fileContent.content) {
-            Logger.error('File content is missing from fileContent', fileContent);
-            throw new Error('File content is missing');
-        }
-        const { filePath, fileId, bufferLength } = await storeFile(userId, fileContent.content, fileContent.filename, 0);
-
-        const fileReference = new FileReference({
-            _id: fileId,
-            filename: fileContent.filename,
-            type: fileContent.type,
-            file_size: bufferLength,
-            storage_path: filePath,
-            created_by: new Types.ObjectId(userId),
-            updated_by: new Types.ObjectId(userId),
-        });
-
-        await fileReference.save();
-
-        if (fileContent.transcript && fileContent.transcript.content) {
-            return await updateFileTranscript(fileReference._id, fileContent.transcript, userId);
-        }
-
-        return fileReference;
-    } catch (error) {
-        console.error('Error storing file:', error);
-        throw error;
-    }
-}
-
-export async function updateFile(
-    fileId: string,
-    updateData: Partial<IFileReferenceDocument>,
-    userId: string
-): Promise<IFileReferenceDocument> {
-    Logger.info(`Inside updateFile, received data: ${JSON.stringify(updateData)}`);
-    const existingFile = await FileReference.findById(fileId);
-    if (!existingFile) {
-        throw new Error('File not found');
-    }
-
-    if (existingFile.created_by._id.toString() !== userId) {
-        Logger.error(`Unauthorized to update file: ${fileId} userId: ${userId}`);
-        throw new Error('Unauthorized to update this file');
-    }
-
-    if (updateData.content) {
-        const version = existingFile.__v + 1
-        const { filePath, fileId, bufferLength } = await storeFile(userId, updateData.content, existingFile.filename, version, existingFile._id.toString());
-        existingFile.storage_path = filePath;
-        existingFile.file_size = bufferLength;
-    }
-
-    if (updateData.type) {
-        existingFile.type = updateData.type;
-    }
-
-    if (updateData.filename) {
-        existingFile.filename = updateData.filename;
-    }
-
-    existingFile.updated_by = new Types.ObjectId(userId);
-
-    try {
-        Logger.info(`Updating file in util: ${fileId} with data: ${JSON.stringify(existingFile)}`);
-        await existingFile.save();
-    } catch (error) {
-        Logger.error(`Error saving updated file: ${error}`);
-        throw error;
-    }
-
-    if (updateData.transcript && updateData.transcript.content) {
-        try {
-            Logger.info(`Updating file transcript in util: ${fileId} with data: ${JSON.stringify(updateData.transcript)}`);
-            return await updateFileTranscript(existingFile._id, updateData.transcript, userId);
-        } catch (error) {
-            Logger.error(`Error handling file transcript: ${error}`);
-            throw error;
-        }
-    }
-
-    return existingFile;
 }
 
 export async function deleteFile(fileId: string, userId: string): Promise<void> {
@@ -289,6 +152,252 @@ export async function deleteFile(fileId: string, userId: string): Promise<void> 
         Logger.info(`File deleted successfully: ${fileReference.storage_path}`);
     } catch (error) {
         console.error('Error deleting file:', error);
+        throw error;
+    }
+}
+
+export async function updateFileTranscript(
+    fileId: string | Types.ObjectId,
+    messageData: Partial<IMessageDocument>,
+    userId: string
+): Promise<IFileReferenceDocument> {
+    const fileReference = await FileReference.findById(fileId).populate('transcript');
+    if (!fileReference) {
+        throw new Error('File not found');
+    }
+    Logger.info(`Handling file transcript for file: ${fileId}`);
+
+    let transcriptMessage: IMessageDocument;
+
+    if (fileReference.transcript) {
+        // Transcript exists, compare and update if necessary
+        const existingTranscript = fileReference.transcript as IMessageDocument;
+        if (!messagesEqual(existingTranscript, messageData)) {
+            // Update the transcript message
+            const updatedTranscript = await updateMessage(
+                existingTranscript._id.toString(),
+                messageData,
+                userId
+            );
+            transcriptMessage = updatedTranscript!;
+        } else {
+            // No changes, use existing transcript
+            transcriptMessage = existingTranscript;
+        }
+    } else {
+        // No transcript, create a new one
+        transcriptMessage = await createTranscriptMessage(messageData, userId);
+    }
+
+    try {
+        await FileReference.updateOne(
+            { _id: fileId },
+            {
+                $set: {
+                    transcript: transcriptMessage._id,
+                    updated_by: new Types.ObjectId(userId),
+                    updatedAt: new Date(),
+                },
+            }
+        );
+
+        const updatedFileReference = await FileReference.findById(fileId).populate('transcript');
+
+        if (!updatedFileReference) {
+            throw new Error('Failed to retrieve updated file reference');
+        }
+
+        return updatedFileReference;
+    } catch (error) {
+        Logger.error(`Error saving file transcript: ${error}`);
+        throw error;
+    }
+}
+
+export async function createTranscriptMessage(
+    messageData: Partial<IMessageDocument>,
+    userId: string
+): Promise<IMessageDocument> {
+    const transcriptData: Partial<IMessageDocument> = {
+        ...messageData,
+        content: messageData.content || '',
+        role: messageData.role || 'assistant',
+        generated_by: messageData.generated_by || 'tool',
+        type: messageData.type || 'text',
+        created_by: new Types.ObjectId(userId),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    };
+
+    const transcriptMessage = new Message(transcriptData);
+    await transcriptMessage.save();
+    return transcriptMessage;
+}
+
+export async function updateFile(
+    fileId: string,
+    updateData: Partial<IFileReferenceDocument>,
+    userId: string
+): Promise<IFileReferenceDocument> {
+    Logger.info(`Inside updateFile, received data: ${JSON.stringify(updateData)}`);
+    const existingFile = await FileReference.findById(fileId).populate('transcript');
+    if (!existingFile) {
+        throw new Error('File not found');
+    }
+
+    if (getObjectId(existingFile.created_by).toString() !== userId.toString()) {
+        Logger.error(`Unauthorized to update file: ${getObjectId(existingFile.created_by).toString()} userId: ${userId}`);
+        throw new Error('Unauthorized to update this file');
+    }
+
+    let transcriptUpdated = false;
+    if (updateData.transcript && 'content' in updateData.transcript && updateData.transcript.content) {
+        Logger.info(`Updating file transcript for file: ${fileId}`);
+        await updateFileTranscript(existingFile._id, updateData.transcript, userId);
+        transcriptUpdated = true;
+    }
+
+    // Check if file reference needs updating
+    const isEqual = fileReferencesEqual(existingFile, updateData);
+    if (isEqual && !updateData.content && !transcriptUpdated) {
+        Logger.info('No changes detected in file reference, returning existing file.');
+        return existingFile;
+    }
+
+    // Proceed to update file reference
+    if (updateData.content) {
+        const version = existingFile.__v + 1;
+        const { filePath, bufferLength } = await storeFile(
+            userId,
+            updateData.content,
+            existingFile.filename,
+            version,
+            existingFile._id.toString()
+        );
+        existingFile.storage_path = filePath;
+        existingFile.file_size = bufferLength;
+    }
+
+    if (updateData.type) {
+        existingFile.type = updateData.type;
+    }
+
+    if (updateData.filename) {
+        existingFile.filename = updateData.filename;
+    }
+
+    existingFile.updated_by = new Types.ObjectId(userId);
+    existingFile.updatedAt = new Date();
+
+    try {
+        await existingFile.save();
+    } catch (error) {
+        Logger.error(`Error saving updated file: ${error}`);
+        throw error;
+    }
+
+    // Re-fetch the updated file to ensure the latest data
+    const updatedFile = await FileReference.findById(fileId).populate('transcript');
+    if (!updatedFile) {
+        throw new Error('Failed to retrieve updated file reference');
+    }
+
+    return updatedFile;
+}
+
+export function fileReferencesEqual(
+    fileRef1: IFileReferenceDocument,
+    fileRef2: Partial<IFileReferenceDocument>
+): boolean {
+    // If content is present in fileRef2, an update is necessary
+    if (fileRef2.content) {
+        return false;
+    }
+
+    const keys: (keyof IFileReferenceDocument)[] = [
+        'filename',
+        'type',
+        'file_size',
+        'storage_path',
+    ];
+
+    for (const key of keys) {
+        if (fileRef2[key] !== undefined && fileRef1[key] !== fileRef2[key]) {
+            return false;
+        }
+    }
+
+    // Compare 'transcript'
+    if (fileRef2.transcript) {
+        if (!fileRef1.transcript) {
+            // Existing file has no transcript, but new data has one
+            return false;
+        } else {
+            // Both have transcripts, compare them
+            if (
+                !messagesEqual(
+                    fileRef1.transcript as IMessageDocument,
+                    fileRef2.transcript as Partial<IMessageDocument>
+                )
+            ) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+export async function storeFileReference(
+    fileContent: IFileReference,
+    userId: string
+): Promise<IFileReferenceDocument> {
+    try {
+        if ('_id' in fileContent) {
+            Logger.warn(`Removing _id from fileContent: ${fileContent._id}`);
+            delete fileContent._id;
+        }
+        if (!fileContent.content) {
+            Logger.error('File content is missing from fileContent', fileContent);
+            throw new Error('File content is missing');
+        }
+
+        const { filePath, fileId, bufferLength } = await storeFile(
+            userId,
+            fileContent.content,
+            fileContent.filename,
+            0
+        );
+
+        const fileReferenceData: Partial<IFileReferenceDocument> = {
+            _id: new Types.ObjectId(fileId),
+            filename: fileContent.filename,
+            type: fileContent.type,
+            file_size: bufferLength,
+            storage_path: filePath,
+            created_by: new Types.ObjectId(userId),
+            updated_by: new Types.ObjectId(userId),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        };
+
+        const fileReference = new FileReference(fileReferenceData);
+        await fileReference.save();
+
+        // Handle transcript if present
+        if (fileContent.transcript && 'content' in fileContent.transcript && fileContent.transcript.content) {
+            await updateFileTranscript(fileReference._id, fileContent.transcript, userId);
+        }
+
+        // Re-fetch the file reference to include the transcript
+        const storedFileReference = await FileReference.findById(fileReference._id).populate('transcript');
+        if (!storedFileReference) {
+            throw new Error('Failed to retrieve stored file reference');
+        }
+
+        return storedFileReference;
+    } catch (error) {
+        Logger.error('Error storing file:', error);
         throw error;
     }
 }

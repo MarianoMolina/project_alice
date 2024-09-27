@@ -32,20 +32,26 @@ const messageSchema = new Schema<IMessageDocument>({
     type: Schema.Types.ObjectId,
     ref: 'User',
     description: "User ID used to call the endpoint",
-    autopopulate: true, // Enable autopopulation
+    autopopulate: true, 
+  },
+  updated_by: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    description: "User ID used to update the endpoint",
+    autopopulate: true, 
   },
   references: [
     {
       type: Schema.Types.ObjectId,
       ref: 'FileReference',
-      autopopulate: true, // Enable autopopulation
+      autopopulate: true, 
     },
   ],
   task_responses: [
     {
       type: Schema.Types.ObjectId,
       ref: 'TaskResult',
-      autopopulate: true, // Enable autopopulation
+      autopopulate: true, 
     },
   ],
   creation_metadata: {
@@ -73,6 +79,7 @@ messageSchema.methods.apiRepresentation = function (this: IMessageDocument) {
     request_type: this.request_type || null,
     creation_metadata: this.creation_metadata || {},
     created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
+    updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,
     createdAt: this.createdAt || null,
     updatedAt: this.updatedAt || null,
     references: this.references || [],
@@ -93,6 +100,7 @@ function ensureObjectIdForMessage(
     );
   }
   this.created_by = ensureObjectIdHelper(this.created_by);
+  this.updated_by = ensureObjectIdHelper(this.updated_by);
   next();
 }
 
@@ -112,6 +120,7 @@ function ensureObjectIdForUpdate(
     );
   }
   update.created_by = ensureObjectIdHelper(update.created_by);
+  update.updated_by = ensureObjectIdHelper(update.updated_by);
   next();
 }
 

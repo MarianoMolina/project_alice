@@ -83,17 +83,11 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             icon: <Output />,
             primary_text: "Output",
             secondary_text: (
-                <AccordionSection
-                    title="Output"
-                    content={
-                        item.task_content ? (
-                            <WorkflowOutput content={item} />
-                        ) : (
-                            <Typography>No output content available</Typography>
-                        )
-                    }
-                    disabled={!item.task_content}
-                />
+                item.task_content ? (
+                    <WorkflowOutput content={item} />
+                ) : (
+                    <Typography>No output content available</Typography>
+                )
             )
         },
         {

@@ -1,11 +1,10 @@
 import { FileContentReference, FileType } from '../types/FileTypes';
 
 export const FileTypeExtensionsMap: Record<FileType, string[]> = {
-    [FileType.TEXT]: ['txt', 'md', 'csv', 'json'],
     [FileType.IMAGE]: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'],
     [FileType.AUDIO]: ['mp3', 'wav', 'ogg', 'flac'],
     [FileType.VIDEO]: ['mp4', 'avi', 'mov', 'wmv', 'webm'],
-    [FileType.FILE]: []
+    [FileType.FILE]: ['txt', 'md', 'csv', 'json'],
 };
 
 
@@ -50,7 +49,7 @@ export const getMimeType = (filename: string): string => {
     for (const [fileType, extensions] of Object.entries(FileTypeExtensionsMap)) {
         if (extensions.includes(ext)) {
             switch (fileType) {
-                case FileType.TEXT:
+                case FileType.FILE:
                     return getMimeTypeForText(ext);
                 case FileType.IMAGE:
                     return `image/${ext}`;

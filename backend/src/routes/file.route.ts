@@ -2,9 +2,10 @@ import express, { Router, Response } from 'express';
 import { AuthRequest } from '../interfaces/auth.interface';
 import auth from '../middleware/auth.middleware';
 import FileReference from '../models/file.model';
-import { storeFileReference, updateFile, retrieveFileById } from '../utils/file.utils';
+import { storeFileReference, updateFile, retrieveFileById, deleteFile } from '../utils/file.utils';
 import { IFileReference, IFileReferenceDocument } from '../interfaces/file.interface';
 import Logger from '../utils/logger';
+import { getObjectId } from '../utils/utils';
 
 const router: Router = express.Router();
 
@@ -31,7 +32,7 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
         if (!fileReference) {
             return res.status(404).json({ message: 'File not found' });
         }
-        if (fileReference.created_by._id.toString() !== req.user!.userId) {
+        if (getObjectId(fileReference.created_by).toString() !== req.user!.userId) {
             return res.status(403).json({ message: 'Unauthorized userId ' + req.user!.userId + ' fileReference.created_by ' + fileReference.created_by.toString() });
         }
         res.json(fileReference);
@@ -46,7 +47,7 @@ router.get('/serve/:id', async (req: AuthRequest, res: Response) => {
         const version = req.query.version ? parseInt(req.query.version as string) : undefined;
         const { file, fileReference } = await retrieveFileById(req.params.id, version);
 
-        if (fileReference.created_by._id.toString() !== req.user!.userId) {
+        if (getObjectId(fileReference.created_by).toString() !== req.user!.userId) {
             return res.status(403).json({ message: 'Unauthorized' });
         }
         res.set('Content-Type', fileReference.type);
@@ -86,6 +87,22 @@ router.patch('/:id', async (req: AuthRequest, res: Response) => {
     } catch (error) {
         console.error('Error updating file:', error);
         res.status(500).json({ message: 'Error updating file' });
+    }
+});
+
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
+    try {
+        const fileId = req.params.id;
+        const userId = req.user!.userId;
+        const fileReference = await FileReference.findById(fileId);
+        if (!fileReference) {
+            return res.status(404).json({ message: 'File not found' });
+        }
+        const deletedFile = await deleteFile(fileId, userId);
+        res.json(deletedFile);
+    } catch (error) {
+        console.error('Error deleting file:', error);
+        res.status(500).json({ message: 'Error deleting file' });
     }
 });
 

@@ -1,5 +1,6 @@
 import  { Document, Types, Model } from 'mongoose';
 import { ApiName } from './api.interface';
+import { IUserDocument } from './user.interface';
 
 export enum ModelType {
     INSTRUCT = 'instruct',
@@ -21,8 +22,8 @@ export interface IModel extends Document {
     seed: number | null;
     use_cache: boolean;
     lm_studio_preset: string;
-    created_by: Types.ObjectId;
-    updated_by: Types.ObjectId;
+    created_by: Types.ObjectId | IUserDocument;
+    updated_by: Types.ObjectId | IUserDocument;
 }
 
 export interface IModelMethods {

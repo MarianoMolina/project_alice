@@ -36,7 +36,7 @@ class DatabaseTaskResponse(TaskResponse):
     def retrieve_task_content(self) -> OutputInterfaceType:
         if not self.task_content:
             return StringOutput([self.task_outputs])
-        from workflow_logic.core.data_structures.output_interfaces import StringOutput, LLMChatOutput, SearchOutput, WorkflowOutput
+        from workflow_logic.core.data_structures.output_interfaces import StringOutput, LLMChatOutput, SearchOutput, WorkflowOutput, FileOutput
         output_type = self.task_content.get("output_type")
         if output_type == "StringOutput":
             return StringOutput(**self.task_content)
@@ -46,6 +46,8 @@ class DatabaseTaskResponse(TaskResponse):
             return SearchOutput(**self.task_content)
         elif output_type == "WorkflowOutput":
             return WorkflowOutput(**self.task_content)
+        elif output_type == "FileOutput":
+            return FileOutput(**self.task_content)
         else:
             return StringOutput([self.task_outputs])
     

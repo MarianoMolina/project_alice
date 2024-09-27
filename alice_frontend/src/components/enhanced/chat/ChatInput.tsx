@@ -1,6 +1,6 @@
 import { ChangeEvent, KeyboardEvent, useState, forwardRef, useImperativeHandle } from 'react';
 import { Box, Button, TextField, Chip } from '@mui/material';
-import { MessageType } from '../../../types/ChatTypes';
+import { MessageType } from '../../../types/MessageTypes';
 import { FileReference, FileType } from '../../../types/FileTypes';
 import { createFileContentReference, selectFile } from '../../../utils/FileUtils';
 import { useApi } from '../../../context/ApiContext';
@@ -56,8 +56,9 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
   };
 
   const handleAddFile = async () => {
-    const allowedTypes: FileType[] = [FileType.IMAGE, FileType.TEXT, FileType.AUDIO, FileType.VIDEO];
+    const allowedTypes: FileType[] = [FileType.IMAGE, FileType.AUDIO, FileType.VIDEO];
     const selectedFile = await selectFile(allowedTypes);
+    console.log('File selected')
     if (!selectedFile) return;
     
     const fileContentReference = await createFileContentReference(selectedFile);

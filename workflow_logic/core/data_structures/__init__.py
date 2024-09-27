@@ -1,6 +1,6 @@
 from .message import MessageDict
 from .file_reference import FileReference, FileContentReference, generate_file_content_reference, get_file_content
-from .output_interfaces import OutputInterface, StringOutput, LLMChatOutput, SearchResult, WorkflowOutput, SearchOutput
+from .output_interfaces import OutputInterface, StringOutput, LLMChatOutput, SearchResult, WorkflowOutput, SearchOutput, FileOutput
 from .task_response import TaskResponse, DatabaseTaskResponse
 from .user import User, UserRoles
 from .llm_config import LLMConfig
@@ -32,4 +32,4 @@ ToolFunction.model_rebuild()
 __all__ = ['FileReference', 'ContentType', 'FileType', 'FileContentReference', 'generate_file_content_reference', 'get_file_content', 'MessageDict', 'OutputInterface', 'LLMConfig',
            'StringOutput', 'LLMChatOutput', 'SearchResult', 'WorkflowOutput', 'SearchOutput', 'TaskResponse', 'DatabaseTaskResponse', 'User', 'UserRoles',
            'ApiName', 'ApiType', 'get_all_api_names', 'ModelType', 'ParameterDefinition', 'FunctionConfig', 'FunctionParameters', 'ToolCall', 'ToolCallConfig',
-           'ToolFunction', 'ensure_tool_function', 'EntityType', 'ModelApis']
+           'ToolFunction', 'ensure_tool_function', 'EntityType', 'ModelApis', 'FileOutput']

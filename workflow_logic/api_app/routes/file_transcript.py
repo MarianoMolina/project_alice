@@ -26,8 +26,6 @@ async def generate_file_transcript(
     LOGGER.info(f"File reference retrieved in generate_file_transcript: {file_ref}")
 
     # Check if file is not a text file and doesn't have an existing transcript
-    if file_ref.type == FileType.TEXT:
-        raise HTTPException(status_code=400, detail="Transcripts are not generated for text files")
     if file_ref.transcript:
         # raise HTTPException(status_code=400, detail="File already has a transcript")
         LOGGER.info(f"File already has a transcript: {file_ref.transcript}")

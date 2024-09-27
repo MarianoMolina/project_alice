@@ -3,11 +3,12 @@ from datetime import datetime
 from typing import Dict, Any, List, TYPE_CHECKING
 from pydantic import BaseModel, Field, model_validator, field_validator
 from workflow_logic.core.data_structures.base_models import BaseDataStructure
-from workflow_logic.core.data_structures.central_types import MessageDictType, TaskResponseType
+from workflow_logic.core.data_structures.central_types import MessageDictType, TaskResponseType, FileContentReferenceType
 
 if TYPE_CHECKING:
     from workflow_logic.core.data_structures.message import MessageDict
     from workflow_logic.core.data_structures.task_response import TaskResponse
+    from workflow_logic.core.data_structures.file_reference import FileContentReference
 
 class OutputInterface(BaseDataStructure):
     content: List[Any] = Field([], description="The content of the output.")
@@ -102,3 +103,19 @@ class WorkflowOutput(OutputInterface):
     def validate_content(cls, v):
         from workflow_logic.core.data_structures.task_response import TaskResponse
         return [TaskResponse(**item) if not isinstance(item, TaskResponse) else item for item in v]
+    
+class FileOutput(OutputInterface):
+    content: List[FileContentReferenceType | FileContentReferenceType] = Field([], description="The file content references.")
+
+    def __str__(self) -> str:
+        return "\n".join([f"File: {file_ref.file_name}:\nTranscript: {file_ref.transcript.content}" for file_ref in self.content])
+    
+    @field_validator('content')
+    def validate_content(cls, v):
+        from workflow_logic.core.data_structures.file_reference import FileContentReference, FileReference
+        # Validate the content as either FileContentReference or FileReference
+        # If no content, its FileReference, else FileContentReference
+        return [
+            item if isinstance(item, FileReference) else FileContentReference(**item) if 'content' in item else FileReference(**item)
+            for item in v
+        ]

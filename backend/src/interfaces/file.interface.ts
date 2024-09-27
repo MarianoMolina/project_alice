@@ -1,8 +1,8 @@
 import { Document, Types, Model } from 'mongoose';
 import { IMessageDocument } from './message.interface';
+import { IUserDocument } from './user.interface';
 
 export enum FileType {
-    TEXT = "text",
     IMAGE = "image",
     AUDIO = "audio",
     VIDEO = "video",
@@ -14,10 +14,10 @@ export interface IFileReference {
     type: FileType;
     file_size: number;
     storage_path: string;
-    transcript?: IMessageDocument;
+    transcript?: Types.ObjectId | IMessageDocument;
     content?: string;
-    created_by: Types.ObjectId;
-    updated_by: Types.ObjectId;
+    created_by: Types.ObjectId | IUserDocument;
+    updated_by: Types.ObjectId | IUserDocument;
     last_accessed?: Date;
 }
 

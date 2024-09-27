@@ -1,4 +1,5 @@
 import { Document, Types, Model } from 'mongoose';
+import { IUserDocument } from './user.interface';
 
 export interface ITaskResult {
     task_name: string;
@@ -12,8 +13,8 @@ export interface ITaskResult {
     usage_metrics: Map<string, string> | null;
     execution_history: Map<string, any>[];
     task_content: Map<string, any> | null;
-    created_by: Types.ObjectId;
-    updated_by: Types.ObjectId;
+    created_by: Types.ObjectId | IUserDocument;
+    updated_by: Types.ObjectId | IUserDocument;
 }
 
 export interface ITaskResultMethods {
@@ -21,6 +22,7 @@ export interface ITaskResultMethods {
 }
 
 export interface ITaskResultDocument extends ITaskResult, Document, ITaskResultMethods {
+    _id: Types.ObjectId; 
     createdAt: Date;
     updatedAt: Date;
 }

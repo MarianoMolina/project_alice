@@ -2,7 +2,8 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useCa
 import { TaskResponse } from '../types/TaskResponseTypes';
 import { AliceAgent } from '../types/AgentTypes';
 import { AliceTask } from '../types/TaskTypes';
-import { MessageType, AliceChat } from '../types/ChatTypes';
+import { AliceChat } from '../types/ChatTypes';
+import { MessageType } from '../types/MessageTypes';
 import { useAuth } from '../context/AuthContext';
 import { useApi } from './ApiContext';
 

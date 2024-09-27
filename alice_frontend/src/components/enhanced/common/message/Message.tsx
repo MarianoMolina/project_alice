@@ -5,7 +5,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import useStyles from './MessageStyles';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Visibility } from '@mui/icons-material';
-import { MessageProps, MessageType } from '../../../../types/ChatTypes';
+import { MessageProps, MessageType } from '../../../../types/MessageTypes';
 import { WorkflowOutput } from '../../task_response/WorkflowOutput';
 import { CommandLineLog } from '../../task_response/CommandLog';
 import { BackgroundBeams } from '../../../ui/aceternity/BackgroundBeams';

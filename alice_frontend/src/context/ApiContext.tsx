@@ -17,7 +17,8 @@ import {
 import { useNotification } from './NotificationContext';
 import { useCardDialog } from './CardDialogContext';
 import { CollectionName, CollectionType, CollectionElementString } from '../types/CollectionTypes';
-import { AliceChat, MessageType } from '../types/ChatTypes';
+import { AliceChat } from '../types/ChatTypes';
+import { MessageType } from '../types/MessageTypes';
 import { TaskResponse } from '../types/TaskResponseTypes';
 import { FileReference, FileContentReference } from '../types/FileTypes';
 import { useDialog } from './DialogCustomContext';

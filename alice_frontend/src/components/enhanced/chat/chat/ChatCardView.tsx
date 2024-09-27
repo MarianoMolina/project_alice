@@ -11,7 +11,8 @@ import {
   Button,
 } from '@mui/material';
 import { Person, Functions, Message as MessageIcon } from '@mui/icons-material';
-import { ChatComponentProps, MessageType } from '../../../../types/ChatTypes';
+import { ChatComponentProps } from '../../../../types/ChatTypes';
+import { MessageType } from '../../../../types/MessageTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import MessageListView from '../../common/message/MessageList';
 import MessageDetail from '../../common/message/MessageDetail';

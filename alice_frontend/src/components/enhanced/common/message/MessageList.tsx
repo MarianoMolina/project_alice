@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { Visibility, Edit } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
-import { MessageType } from '../../../../types/ChatTypes';
+import { MessageType } from '../../../../types/MessageTypes';
 
 const ListItemStyled = styled(ListItem)(({ theme }) => ({
     display: 'flex',

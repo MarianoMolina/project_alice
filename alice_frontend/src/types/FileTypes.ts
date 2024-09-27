@@ -1,7 +1,6 @@
-import { MessageType } from "./ChatTypes";
+import { MessageType } from "./MessageTypes";
 
 export enum FileType {
-    TEXT = "text",
     IMAGE = "image",
     AUDIO = "audio",
     VIDEO = "video",

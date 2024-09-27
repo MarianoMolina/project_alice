@@ -1,9 +1,9 @@
-from pydantic import Field
+from pydantic import Field, BaseModel
 from typing import List, Dict, Optional, Callable, Tuple, Union
 from workflow_logic.core.api import APIManager
 from workflow_logic.core.agent.agent import AliceAgent
 from workflow_logic.core.tasks.task import AliceTask
-from workflow_logic.core.data_structures import LLMChatOutput, MessageDict, TaskResponse, ApiType
+from workflow_logic.core.data_structures import LLMChatOutput, MessageDict, TaskResponse, ApiType, FileOutput, ContentType, FileReference, FileType
 from workflow_logic.util import LOGGER
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition, FunctionConfig
 
@@ -85,3 +85,21 @@ class BasicAgentTask(AliceTask):
     
     def get_exit_code(self, chat_output: List[MessageDict], response_code: bool) -> int:
         return 0 if (chat_output and chat_output[-1].content) else 1
+    
+class FileTask(BasicAgentTask):
+    async def run(self, api_manager: APIManager, **kwargs) -> TaskResponse:     
+        taskresponse: TaskResponse = await super().run(api_manager, **kwargs)
+        # Retrieve the msg with the file reference, and 
+        if not isinstance(taskresponse, TaskResponse):
+            raise ValueError(f"Task response is not of type TaskResponse: {taskresponse}")
+        if isinstance(taskresponse.task_content, LLMChatOutput) and len(taskresponse.task_content.content) > 0:
+            file_references: List[FileReference] = []
+            msg: MessageDict = taskresponse.task_content.content[0]
+            for msg in taskresponse.task_content.content:
+                if isinstance(msg, MessageDict) and msg.type in [e.value for e in FileType]:
+                    for ref in msg.references:
+                        if isinstance(ref, FileReference):
+                            file_references.append(ref)
+            output = FileOutput(content=file_references)
+            taskresponse.task_content = output
+        return taskresponse

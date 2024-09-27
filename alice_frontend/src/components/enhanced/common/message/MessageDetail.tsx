@@ -12,11 +12,11 @@ import {
   Dialog,
   SelectChangeEvent,
 } from '@mui/material';
-import { ContentType, MessageType, RoleType } from '../../../../types/ChatTypes';
+import { MessageType, ContentType, RoleType } from '../../../../types/MessageTypes';
 import useStyles from './MessageStyles';
-import { FileReference } from '../../../../types/FileTypes';
 import EnhancedFile from '../../file/file/EnhancedFile';
 import { useApi } from '../../../../context/ApiContext';
+import { FileReference } from '../../../../types/FileTypes';
 
 interface MessageDetailProps {
   message?: MessageType;

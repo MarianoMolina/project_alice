@@ -5,7 +5,6 @@ from enum import Enum
 EntityType = Literal["users", "models", "apis", "parameters", "prompts", "agents", "tasks", "chats", "task_responses", "files"]
 
 class FileType(str, Enum):
-    TEXT = 'text'
     IMAGE = 'image'
     AUDIO = 'audio'
     VIDEO = 'video'
@@ -26,7 +25,8 @@ class ContentType(str, Enum):
         # Add new ContentType-specific members
         members.update({
             'TASK_RESPONSE': 'task_response',
-            'MULTIPLE': 'multiple'
+            'MULTIPLE': 'multiple',
+            'TEXT': 'text',
         })
         return Enum(cls.__name__, members, type=str)
 

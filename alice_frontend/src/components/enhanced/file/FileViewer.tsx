@@ -91,7 +91,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ file, editable = false, onUpdat
     }
 
     switch (file.type) {
-      case FileType.TEXT:
+      case FileType.FILE:
         return (
           <TextField
             multiline

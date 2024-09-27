@@ -20,7 +20,7 @@ fileReferenceSchema.methods.apiRepresentation = function (this: IFileReferenceDo
     type: this.type,
     file_size: this.file_size,
     storage_path: this.storage_path,
-    transcript: this.transcript ? (this.transcript.apiRepresentation ? this.transcript.apiRepresentation() : this.transcript) : null,
+    transcript: this.transcript ? (this.transcript._id || this.transcript) : null,
     created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
     updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,
     last_accessed: this.last_accessed,

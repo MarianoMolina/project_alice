@@ -101,7 +101,7 @@ class ImageGenerationEngine(APIEngine):
 
             return MessageDict(
                 role="assistant",
-                content=f"Generated {n} image(s) based on the prompt: '{prompt}'",
+                content=f"Generated {n} image(s) based on the prompt.",
                 generated_by="tool",
                 type=ContentType.IMAGE,
                 references=file_references,

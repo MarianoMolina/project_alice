@@ -50,7 +50,7 @@ class FileReference(BaseDataStructure):
         """
         file_info = f"File: {self.filename}\nType: {self.type.value}\n"
         
-        if self.type == FileType.TEXT:
+        if self.type == FileType.FILE:
             try:
                 with open(self.storage_path, 'r') as file:
                     content = file.read(max_chars)
@@ -87,9 +87,7 @@ def generate_file_content_reference(file: Union[BinaryIO, io.BytesIO], filename:
 
     # Determine content type based on MIME type
     content_type = FileType.FILE
-    if file_mime.startswith('text/'):
-        content_type = FileType.TEXT
-    elif file_mime.startswith('image/'):
+    if file_mime.startswith('image/'):
         content_type = FileType.IMAGE
     elif file_mime.startswith('audio/'):
         content_type = FileType.AUDIO
@@ -187,7 +185,7 @@ def get_file_content(file_reference: FileReference, max_pixels: int = 1024*1024,
             raise ValueError(f"File size ({len(content)} bytes) exceeds the maximum allowed size of {max_file_size} bytes")
 
         # Return content based on file type
-        if file_reference.type in [FileType.TEXT, FileType.FILE]:
+        if file_reference.type == FileType.FILE:
             return content.decode('utf-8')
         else:
             return content
