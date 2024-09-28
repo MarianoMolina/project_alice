@@ -37,7 +37,7 @@ base_tasks_module = BaseTasksModule(
         ],
         "prompts": [
             {
-                "key": "research_agent",
+                "key": "research_agent_prompt",
                 "name": "Research Agent",
                 "content": get_prompt_file("research_agent.prompt"),
                 "is_templated": False
@@ -47,9 +47,9 @@ base_tasks_module = BaseTasksModule(
             {
                 "key": "research_agent",
                 "name": "research_agent",
-                "system_message": "research_agent",
+                "system_message": "research_agent_prompt",
                 "models": {
-                    "chat": "GPT4o",
+                    "chat": "GPT4-turbo",
                 },
                 "has_code_exec": False,
                 "has_functions": True,

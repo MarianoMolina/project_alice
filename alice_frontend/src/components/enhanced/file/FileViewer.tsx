@@ -3,7 +3,7 @@ import { Box, Button, TextField, Typography, CircularProgress } from '@mui/mater
 import { FileReference, FileContentReference, FileType } from '../../../types/FileTypes';
 import { createFileContentReference, selectFile } from '../../../utils/FileUtils';
 import { retrieveFile, updateFile } from '../../../services/api';
-import { useNotification } from '../../../context/NotificationContext';
+import { useNotification } from '../../../contexts/NotificationContext';
 
 interface FileViewerProps {
   file: FileReference | FileContentReference;

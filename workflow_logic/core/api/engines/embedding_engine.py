@@ -52,12 +52,16 @@ class OpenAIEmbeddingsEngine(APIEngine):
             embeddings_json = json.dumps(embeddings)
             embeddings_b64 = base64.b64encode(embeddings_json.encode('utf-8')).decode('utf-8')
 
+            creation_metadata = {
+                    "model": model,
+                    "usage": self.get_usage(response)
+                }
             # Create FileContentReference
             file_reference = FileContentReference(
                 filename=f"embeddings_{model}.json",
                 type=FileType.FILE,
                 content=embeddings_b64,
-                created_by="OpenAIEmbeddingsEngine"
+                transcript=MessageDict(role='user', content=input, generated_by='user', type=ContentType.TEXT, creation_metadata=creation_metadata)
             )
 
             # Create and return MessageDict
@@ -67,10 +71,7 @@ class OpenAIEmbeddingsEngine(APIEngine):
                 generated_by="tool",
                 type=ContentType.FILE,
                 references=[file_reference],
-                creation_metadata={
-                    "model": model,
-                    "usage": self.get_usage(response)
-                }
+                creation_metadata=creation_metadata
             )
         except Exception as e:
             LOGGER.error(f"Error in OpenAI embeddings API call: {str(e)}")

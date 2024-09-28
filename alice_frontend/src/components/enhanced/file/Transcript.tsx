@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@mui/material';
 import { MessageType } from '../../../types/MessageTypes';
 import Message from '../common/message/Message';
-import { useApi } from '../../../context/ApiContext';
+import { useApi } from '../../../contexts/ApiContext';
 
 interface TranscriptProps {
   fileId: string;

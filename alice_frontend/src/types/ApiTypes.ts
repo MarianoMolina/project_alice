@@ -16,17 +16,41 @@ export enum ApiType {
     SPEECH_TO_TEXT = 'speech_to_text',
     TEXT_TO_SPEECH = 'text_to_speech',
     EMBEDDINGS = 'embeddings',
-  }
-export enum LlmProvider {
-    OPENAI = 'openai',
-    AZURE = 'azure',
-    ANTHROPIC = 'anthropic',
-    LM_STUDIO = 'lm-studio',
 }
+
+export enum ApiName {
+    OPENAI = 'openai_llm',
+    OPENAI_VISION = 'openai_vision',
+    OPENAI_IMG_GENERATION = 'openai_img_gen',
+    OPENAI_EMBEDDINGS = 'openai_embeddings',
+    OPENAI_TTS = 'openai_tts',
+    OPENAI_STT = 'openai_stt',
+    OPENAI_ASTT = 'openai_adv_stt',
+    AZURE = 'azure',
+    ANTHROPIC = 'anthropic_llm',
+    ANTHROPIC_VISION = 'anthropic_vision',
+    LM_STUDIO = 'lm-studio_llm',
+    LM_STUDIO_VISION = 'lm-studio_vision',
+    CUSTOM = 'Custom',
+    GOOGLE_SEARCH = 'google_search',
+    REDDIT_SEARCH = 'reddit_search',
+    WIKIPEDIA_SEARCH = 'wikipedia_search',
+    EXA_SEARCH = 'exa_search',
+    ARXIV_SEARCH = 'arxiv_search',
+    BEAUTIFULSOUP = 'beautiful_soup'
+}
+
+export enum LlmProvider {
+    OPENAI = ApiName.OPENAI,
+    AZURE = ApiName.AZURE,
+    ANTHROPIC = ApiName.ANTHROPIC,
+    LM_STUDIO = ApiName.LM_STUDIO,
+}
+
 export interface API {
     _id?: string;
     api_type: ApiType;
-    api_name: ApiType | LlmProvider | undefined;
+    api_name: ApiName;
     name?: string;
     is_active: boolean;
     health_status: 'healthy' | 'unhealthy' | 'unknown';
@@ -37,6 +61,7 @@ export interface API {
     createdAt?: Date;
     updatedAt?: Date;
 }
+
 export interface LLMAPI {
     _id?: string;
     user: User;
@@ -46,7 +71,7 @@ export interface LLMAPI {
     is_active: boolean;
     health_status: 'healthy' | 'unhealthy' | 'unknown';
     default_model?: AliceModel;
-    api_config: { api_key: string, base_url: string  };
+    api_config: { api_key: string, base_url: string };
     created_by?: User;
     updated_by?: User;
     createdAt?: Date;
@@ -84,7 +109,6 @@ export interface ApiComponentProps extends HandleClickProps {
     onView?: (api: API) => void;
     onInteraction?: (api: API) => void;
     showHeaders?: boolean;
-    apiType?: ApiType;
 }
 export const getDefaultApiForm = (): Partial<API> => ({
     api_type: ApiType.LLM_MODEL,

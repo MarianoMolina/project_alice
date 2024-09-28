@@ -3,7 +3,7 @@ import { Box, Button } from '@mui/material';
 import { ChatComponentProps } from '../../../../types/ChatTypes';
 import Message from '../../common/message/Message';
 import useStyles from '../ChatStyles';
-import { useChat } from '../../../../context/ChatContext';
+import { useChat } from '../../../../contexts/ChatContext';
 import PlaceholderSkeleton from '../../../ui/placeholder_skeleton/PlaceholderSkeleton';
 
 interface ChatFullViewProps extends ChatComponentProps {

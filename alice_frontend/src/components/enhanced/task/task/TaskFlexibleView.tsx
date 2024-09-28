@@ -20,7 +20,7 @@ import CodeExecutionLLMTask from './task_types/CodeExecutionLLMTask';
 import Workflow from './task_types/Workflow';
 import ApiTask from './task_types/ApiTask';
 import { API } from '../../../../types/ApiTypes';
-import { useApi } from '../../../../context/ApiContext';
+import { useApi } from '../../../../contexts/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 
 const taskTypes: TaskType[] = [

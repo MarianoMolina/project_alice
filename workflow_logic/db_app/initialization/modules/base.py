@@ -33,6 +33,16 @@ base_module = BaseModule(
                 "api_name": "openai_llm",
             },
             {
+                "key": "GPT4-turbo",
+                "short_name": "GPT4-turbo",
+                "model_format": "OpenChat",
+                "model_name": "gpt-4-turbo",
+                "ctx_size": 128000,
+                "model_type": "chat",
+                "temperature": 0.7,
+                "api_name": "openai_llm",
+            },
+            {
                 "key": "Claude3.5",
                 "short_name": "Claude3.5",
                 "model_format": "OpenChat",
@@ -68,7 +78,7 @@ base_module = BaseModule(
                 "model_format": "Base", # random value
                 "ctx_size": 2048, # random value
                 "model_type": "stt",
-                "api_name": "speech_to_text",
+                "api_name": "openai_stt",
             },
             {
                 "key": "Dall-E-3",
@@ -77,7 +87,7 @@ base_module = BaseModule(
                 "model_format": "Base", # random value
                 "ctx_size": 2048, # random value
                 "model_type": "img_gen",
-                "api_name": "img_generation",
+                "api_name": "openai_img_gen",
             },
             {
                 "key": "tts-1",
@@ -86,7 +96,7 @@ base_module = BaseModule(
                 "model_format": "Base", # random value
                 "ctx_size": 2048, # random value
                 "model_type": "tts",
-                "api_name": "text_to_speech",
+                "api_name": "openai_tts",
             },
             {
                 "key": "oai_embedding_large",
@@ -95,7 +105,7 @@ base_module = BaseModule(
                 "model_format": "Base", # random value
                 "ctx_size": 2048, # random value
                 "model_type": "embeddings",
-                "api_name": "embeddings",
+                "api_name": "openai_embeddings",
             },
             {
                 "key": "hermes_llava_vision", 
@@ -104,7 +114,7 @@ base_module = BaseModule(
                 "model_format": "Obsidian_Vision",
                 "ctx_size": 4096,
                 "model_type": "vision",
-                "api_name": "img_vision"
+                "api_name": "lm-studio_vision"
             },
             {
                 "key": "o1_openai",

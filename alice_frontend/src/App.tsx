@@ -13,13 +13,13 @@ import ProtectedRoute from './layouts/ProtectedRoute';
 import Database from './pages/Database';
 import UserSettings from './pages/UserSettings';
 import NavigationGuard from './components/ui/navigation_guard/NavigationGuard';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
 import './assets/fonts/fonts.css';
-import { ApiProvider } from './context/ApiContext';
+import { ApiProvider } from './contexts/ApiContext';
 import ErrorBoundary from './layouts/ErrorBoundary';
-import { NotificationProvider } from './context/NotificationContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import NotificationComponent from './components/ui/notification/Notification';
-import { DialogProvider } from './context/DialogCustomContext';
+import { DialogProvider } from './contexts/DialogCustomContext';
 import DialogComponent from './components/ui/dialog/DialogCustom';
 
 const App: React.FC = () => {

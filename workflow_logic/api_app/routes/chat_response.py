@@ -1,8 +1,11 @@
+from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 from workflow_logic.api_app.util.utils import deep_api_check
 from workflow_logic.api_app.util.dependencies import get_db_app
 from workflow_logic.db_app.app import BackendAPI
 from workflow_logic.util import LOGGER
+from workflow_logic.api_app.util.reference_utils import check_task_response_references
+from workflow_logic.core import DatabaseTaskResponse, TaskResponse
 
 router = APIRouter()
 
@@ -52,6 +55,13 @@ async def chat_response(chat_id: str, db_app: BackendAPI = Depends(get_db_app)) 
     # Store messages and task results in order
     if responses:
         for response in responses:
+            if response.task_responses:
+                task_response_list: List[TaskResponse | DatabaseTaskResponse] = []
+                for task_response in response.task_responses:
+                    task_response = task_response.retrieve_task_response() if isinstance(task_response, DatabaseTaskResponse) else task_response
+                    tsk_rsp = await check_task_response_references(task_response, db_app)
+                    task_response_list.append(tsk_rsp)
+                response.task_responses = task_response_list
             stored_chat = await db_app.store_chat_message(chat_id, response)
             if not stored_chat:
                 LOGGER.error(f"Failed to store message: {response} in chat_id {chat_id}")

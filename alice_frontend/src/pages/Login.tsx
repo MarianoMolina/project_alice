@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { TextField, Button, Container, Typography, Box, Alert, Link } from '@mui/material';
 
 const Login: React.FC = () => {

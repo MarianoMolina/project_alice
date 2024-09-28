@@ -8,9 +8,9 @@ from workflow_logic.core.api.engines import APIEngine, LLMAnthropic, GoogleSearc
 
 ApiEngineMap = {
     ApiType.LLM_MODEL: {
-        ApiName.OPENAI_LLM: LLMEngine,
-        ApiName.ANTHROPIC_LLM: LLMAnthropic,
-        ApiName.LM_STUDIO_LLM: LLMEngine,
+        ApiName.OPENAI: LLMEngine,
+        ApiName.ANTHROPIC: LLMAnthropic,
+        ApiName.LM_STUDIO: LLMEngine,
         ApiName.AZURE: LLMEngine,
     },
     ApiType.GOOGLE_SEARCH: {
@@ -34,7 +34,7 @@ ApiEngineMap = {
         ApiName.LM_STUDIO_VISION: VisionModelEngine,
     },
     ApiType.IMG_GENERATION: {
-        ApiName.OPENAI_IMG_GEN: ImageGenerationEngine
+        ApiName.OPENAI_IMG_GENERATION: ImageGenerationEngine
     },
     ApiType.WEB_SCRAPE: {
         ApiName.BEAUTIFULSOUP: BeautifulSoupWebScraperEngine

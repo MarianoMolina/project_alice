@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { Model, Types, Document } from 'mongoose';
 import { IFileReferenceDocument } from "./file.interface";
 import { ITaskResultDocument } from "./taskResult.interface";
 import { IUserDocument } from "./user.interface";
@@ -23,9 +23,16 @@ export interface IMessage {
     updated_by: Types.ObjectId | IUserDocument;
 }
 
-export interface IMessageDocument extends IMessage, Document {
+export interface IMessageMethods {
+    apiRepresentation(): any;
+}
+
+export interface IMessageDocument extends IMessage, Document, IMessageMethods {
     _id: Types.ObjectId; 
     createdAt: Date;
     updatedAt: Date;
-    apiRepresentation: () => any;
+}
+
+export interface IMessageModel extends Model<IMessageDocument> {
+    // Add any static methods here if needed
 }

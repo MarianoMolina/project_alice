@@ -8,6 +8,7 @@ export async function createTaskResult(
   userId: string
 ): Promise<ITaskResultDocument | null> {
   try {
+    Logger.debug('taskResultData received in createTaskResult:', taskResultData);
     if ('_id' in taskResultData) {
       Logger.warn(`Removing _id from taskResultData: ${taskResultData._id}`);
       delete taskResultData._id;
@@ -34,6 +35,7 @@ export async function updateTaskResult(
   userId: string
 ): Promise<ITaskResultDocument | null> {
   try {
+    Logger.info('taskResultData received in updateTaskResult:', taskResultData);
     const existingTaskResult = await TaskResult.findById(taskResultId);
     if (!existingTaskResult) {
       throw new Error('Task result not found');

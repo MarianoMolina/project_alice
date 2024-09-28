@@ -3,7 +3,7 @@ import { AppBar, Toolbar, IconButton, Box, Tooltip, Button, Typography } from '@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { SettingsApplications, Storage, Chat, Task, Home } from '@mui/icons-material';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import useStyles from './HeaderStyles';
 
 const Header: React.FC = () => {

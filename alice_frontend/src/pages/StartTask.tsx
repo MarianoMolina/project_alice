@@ -6,13 +6,13 @@ import { AliceTask } from '../types/TaskTypes';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
 import EnhancedTask from '../components/enhanced/task/task/EnhancedTask';
-import { RecentExecution, useTask } from '../context/TaskContext';
+import { RecentExecution, useTask } from '../contexts/TaskContext';
 import useStyles from '../styles/StartTaskStyles';
 import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
 import EnhancedCardDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
 import { CollectionElementString } from '../types/CollectionTypes';
-import { useCardDialog } from '../context/CardDialogContext';
+import { useCardDialog } from '../contexts/CardDialogContext';
 import { API } from '../types/ApiTypes';
 
 const StartTask: React.FC = () => {

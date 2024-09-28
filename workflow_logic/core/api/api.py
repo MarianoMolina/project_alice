@@ -46,7 +46,7 @@ class API(BaseModel):
             use_cache=model.use_cache,
             api_key=self.api_config.get("api_key"),
             base_url=self.api_config.get("base_url"),
-            model=model.model_name if self.api_name != ApiName.LM_STUDIO_LLM else model.id,
+            model=model.model_name if self.api_name != ApiName.LM_STUDIO else model.id,
         )
 
     def get_api_data(self, model: Optional[AliceModel] = None) -> Union[Dict[str, Any], LLMConfig]:

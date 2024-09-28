@@ -17,7 +17,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { ParameterDefinition, FunctionParameters } from '../../../../types/ParameterTypes';
 import EnhancedParameter from '../../parameter/parameter/EnhancedParameter';
-import { useApi } from '../../../../context/ApiContext';
+import { useApi } from '../../../../contexts/ApiContext';
 import useStyles from './FunctionStyles';
 import * as FunctionUtils from './FunctionUtils';
 

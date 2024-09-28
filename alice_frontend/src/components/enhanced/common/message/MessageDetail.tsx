@@ -9,14 +9,14 @@ import {
   Typography,
   Button,
   Chip,
-  Dialog,
   SelectChangeEvent,
 } from '@mui/material';
 import { MessageType, ContentType, RoleType } from '../../../../types/MessageTypes';
 import useStyles from './MessageStyles';
-import EnhancedFile from '../../file/file/EnhancedFile';
-import { useApi } from '../../../../context/ApiContext';
+import { useApi } from '../../../../contexts/ApiContext';
 import { FileReference } from '../../../../types/FileTypes';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { TaskResponse } from '../../../../types/TaskResponseTypes';
 
 interface MessageDetailProps {
   message?: MessageType;
@@ -29,6 +29,7 @@ interface MessageDetailProps {
 const MessageDetail: React.FC<MessageDetailProps> = ({ message, chatId, mode, onUpdate, onClose }) => {
   const { updateMessageInChat, sendMessage } = useApi();
   const classes = useStyles();
+  const { selectItem } = useCardDialog();
   const [editableMessage, setEditableMessage] = useState<MessageType>(
     message || {
       role: 'user',
@@ -37,8 +38,6 @@ const MessageDetail: React.FC<MessageDetailProps> = ({ message, chatId, mode, on
       type: 'text',
     } as MessageType
   );
-  const [selectedFileReference, setSelectedFileReference] = useState<FileReference | null>(null);
-  const [isFileDialogOpen, setIsFileDialogOpen] = useState(false);
 
   useEffect(() => {
     if (message) {
@@ -91,17 +90,25 @@ const MessageDetail: React.FC<MessageDetailProps> = ({ message, chatId, mode, on
   };
 
   const handleViewFile = (reference: FileReference) => {
-    setSelectedFileReference(reference);
-    setIsFileDialogOpen(true);
+    selectItem('File', reference._id);
   };
 
-  const handleCloseFileDialog = () => {
-    setIsFileDialogOpen(false);
-    setSelectedFileReference(null);
+  const handleViewTaskResponse = (taskResponse: TaskResponse) => {
+    if (taskResponse._id) {
+      selectItem('TaskResponse', taskResponse._id);
+    } else {
+      console.error('TaskResponse ID is undefined', taskResponse);
+    }
+  };
+
+  const handleRemoveTaskResponse = (taskResponse: TaskResponse) => {
+    setEditableMessage(prev => ({
+      ...prev,
+      task_responses: prev.task_responses?.filter(tr => tr._id !== taskResponse._id)
+    }));
   };
 
   const isEditable = mode === 'edit' || mode === 'create';
-
   return (
     <Box className={classes.messageDetail}>
       <Typography variant="h6">{mode === 'create' ? 'Create Message' : 'Message Details'}</Typography>
@@ -186,6 +193,18 @@ const MessageDetail: React.FC<MessageDetailProps> = ({ message, chatId, mode, on
         disabled={!isEditable}
         margin="normal"
       />
+      <Typography variant="subtitle1" gutterBottom>Task Responses:</Typography>
+      <Box className={classes.chipContainer}>
+        {editableMessage.task_responses?.map((taskResponse, index) => (
+          <Chip
+            key={index}
+            label={`Task: ${taskResponse.task_name}`}
+            onClick={() => handleViewTaskResponse(taskResponse)}
+            onDelete={isEditable ? () => handleRemoveTaskResponse(taskResponse) : undefined}
+            className={classes.chip}
+          />
+        ))}
+      </Box>
       <Typography variant="subtitle1" gutterBottom>File References:</Typography>
       <Box className={classes.chipContainer}>
         {editableMessage.references?.map((reference, index) => (
@@ -223,11 +242,6 @@ const MessageDetail: React.FC<MessageDetailProps> = ({ message, chatId, mode, on
           {isEditable ? 'Cancel' : 'Close'}
         </Button>
       </Box>
-      <Dialog open={isFileDialogOpen} onClose={handleCloseFileDialog} maxWidth="md" fullWidth>
-        {selectedFileReference && (
-          <EnhancedFile itemId={selectedFileReference._id} mode="card" fetchAll={false} />
-        )}
-      </Dialog>
     </Box>
   );
 };

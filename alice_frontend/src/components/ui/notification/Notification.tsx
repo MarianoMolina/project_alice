@@ -1,6 +1,6 @@
 import React from 'react';
 import { Alert, Snackbar, Button } from '@mui/material';
-import { useNotification } from '../../../context/NotificationContext';
+import { useNotification } from '../../../contexts/NotificationContext';
 
 const NotificationComponent: React.FC = () => {
   const { notifications, removeNotification } = useNotification();

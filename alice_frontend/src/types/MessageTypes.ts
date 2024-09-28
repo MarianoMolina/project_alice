@@ -1,3 +1,4 @@
+import { HandleClickProps } from "./CollectionTypes";
 import { FileReference } from "./FileTypes";
 import { ToolCall } from "./ParameterTypes";
 import { TaskResponse } from "./TaskResponseTypes";
@@ -50,7 +51,30 @@ export const convertToMessageType = (data: any): MessageType => {
     };
 };
 
-export interface MessageProps {
-    message: MessageType,
-    chatId?: string,
+export interface MessageComponentProps extends HandleClickProps {
+    items: MessageType[] | null;
+    item: MessageType | null;
+    onChange: (newItem: Partial<MessageType>) => void;
+    mode: 'create' | 'view' | 'edit';
+    handleSave: () => Promise<void>;
+    isInteractable?: boolean;
+    onInteraction?: (message: MessageType) => void;
+    onView?: (message: MessageType) => void;
+    showHeaders?: boolean;
+    chatId?: string;
 }
+
+export const getDefaultMessageForm = (): Partial<MessageType> => ({
+    role: 'user',
+    content: '',
+    generated_by: 'user',
+    context: {},
+    type: 'text',
+    tool_calls: [],
+    function_call: {},
+    task_responses: [],
+    references: [],
+    creation_metadata: {},
+    created_by: null,
+    updated_by: null,
+});

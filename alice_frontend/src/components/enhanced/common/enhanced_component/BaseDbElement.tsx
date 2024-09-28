@@ -29,7 +29,7 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import { CircularProgress, Box } from '@mui/material';
-import { useApi } from '../../../../context/ApiContext';
+import { useApi } from '../../../../contexts/ApiContext';
 import { CollectionName, CollectionType } from '../../../../types/CollectionTypes';
 
 export interface BaseDbElementProps<T extends CollectionType[CollectionName]> {

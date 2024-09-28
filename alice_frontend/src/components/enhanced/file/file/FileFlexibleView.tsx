@@ -14,9 +14,9 @@ import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import FileViewer from '../FileViewer';
 import Transcript from '../Transcript';
 import { bytesToMB, createFileContentReference, selectFile } from '../../../../utils/FileUtils';
-import { useApi } from '../../../../context/ApiContext';
+import { useApi } from '../../../../contexts/ApiContext';
 import { MessageType } from '../../../../types/MessageTypes';
-import { useNotification } from '../../../../context/NotificationContext';
+import { useNotification } from '../../../../contexts/NotificationContext';
 
 const FileFlexibleView: React.FC<FileComponentProps> = ({
     item,

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box, Alert, Stepper, Step, StepLabel, StepContent } from '@mui/material';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ApiSetup from '../components/ui/registration/ApiSetup';
 import RegistrationComplete from '../components/ui/registration/RegistrationComplete';

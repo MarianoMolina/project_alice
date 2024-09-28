@@ -28,7 +28,7 @@ base_chat_module = BaseChatModule(
                     "chat": "GPT4o",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": True,
+                "has_functions": False,
                 "has_code_exec": True,
             },
             {

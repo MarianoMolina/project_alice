@@ -8,10 +8,12 @@ import {
     Slider,
     Switch,
     FormControlLabel,
-    Typography
+    Typography,
+    Box,
+    Chip
 } from '@mui/material';
 import { ModelComponentProps, ModelType } from '../../../../types/ModelTypes';
-import { LlmProvider } from '../../../../types/ApiTypes';
+import { ApiName } from '../../../../types/ApiTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 
 const ModelFlexibleView: React.FC<ModelComponentProps> = ({
@@ -54,35 +56,43 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
             />
             <FormControl fullWidth margin="normal">
                 <InputLabel>Model Type</InputLabel>
-                <Select
+                <Select<ModelType>
                     value={item.model_type || ''}
                     onChange={(e) => onChange({ model_type: e.target.value as ModelType })}
+                    renderValue={(selected) => (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                            <Chip key={selected} label={selected} />
+                        </Box>
+                    )}
                     disabled={!isEditMode}
                 >
-                    <MenuItem value="chat">Chat</MenuItem>
-                    <MenuItem value="instruct">Instruct</MenuItem>
-                    <MenuItem value="vision">Vision</MenuItem>
-                    <MenuItem value="stt">Speech-to-texth</MenuItem>
-                    <MenuItem value="tts">Text-to-speech</MenuItem>
-                    <MenuItem value="embeddings">Embeddings</MenuItem>
-                    <MenuItem value="img_gen">Image Generation</MenuItem>
+                    {Object.values(ModelType).map((modelType) => (
+                        <MenuItem key={modelType} value={modelType}>
+                            {modelType}
+                        </MenuItem>
+                    ))}
                 </Select>
             </FormControl>
             <FormControl fullWidth margin="normal">
-                <InputLabel>API Type</InputLabel>
+                <InputLabel>API Name</InputLabel>
                 <Select
                     value={item.api_name || ''}
-                    onChange={(e) => onChange({ api_name: e.target.value as LlmProvider })}
+                    onChange={(e) => onChange({ api_name: e.target.value as ApiName })}
+                    renderValue={(selected) => (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                            <Chip key={selected} label={selected} />
+                        </Box>
+                    )}
                     disabled={!isEditMode}
                 >
-                    <MenuItem value="openai">OpenAI</MenuItem>
-                    <MenuItem value="azure">Azure</MenuItem>
-                    <MenuItem value="anthropic">Anthropic</MenuItem>
-                    <MenuItem value="lm-studio">LM Studio</MenuItem>
-                    <MenuItem value="custom">Custom</MenuItem>
+                    {Object.values(ApiName).map((apiName) => (
+                        <MenuItem key={apiName} value={apiName}>
+                            {apiName}
+                        </MenuItem>
+                    ))}
                 </Select>
             </FormControl>
-            
+
             <TextField
                 fullWidth
                 label="Model Format"
@@ -91,7 +101,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                 margin="normal"
                 disabled={!isEditMode}
             />
-            
+
             <Typography gutterBottom>Temperature</Typography>
             <Slider
                 value={item.temperature || 0.7}
@@ -102,7 +112,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                 valueLabelDisplay="auto"
                 disabled={!isEditMode}
             />
-            
+
             <TextField
                 fullWidth
                 label="Seed"
@@ -112,7 +122,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                 margin="normal"
                 disabled={!isEditMode}
             />
-            
+
             <TextField
                 fullWidth
                 label="Context size"
@@ -122,7 +132,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                 margin="normal"
                 disabled={!isEditMode}
             />
-            
+
             <FormControlLabel
                 control={
                     <Switch

@@ -3,7 +3,6 @@ import { IAliceChatDocument } from '../interfaces/chat.interface';
 import AliceChat from '../models/chat.model';
 import { updateMessage, createMessage } from './message.utils';
 import { getObjectId } from './utils';
-import Message from '../models/message.model';
 import Logger from './logger';
 import { IMessageDocument } from '../interfaces/message.interface';
 
@@ -15,7 +14,7 @@ export async function createChat(
         const messageIds: Types.ObjectId[] = [];
         if (chatData.messages && Array.isArray(chatData.messages)) {
             for (const msg of chatData.messages) {
-                const message = await createMessage(msg, userId);
+                const message = await createMessage(msg as IMessageDocument, userId);
                 if (message) {
                     messageIds.push(message._id);
                 } else {

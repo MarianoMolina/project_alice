@@ -118,7 +118,7 @@ export async function retrieveFileById(fileId: string, version?: number): Promis
     }
 }
 
-export async function deleteFile(fileId: string, userId: string): Promise<void> {
+export async function deleteFile(fileId: string, userId: string): Promise<null> {
     try {
         const fileReference = await FileReference.findById(fileId);
         if (!fileReference) {
@@ -150,6 +150,7 @@ export async function deleteFile(fileId: string, userId: string): Promise<void> 
         await FileReference.findByIdAndDelete(fileId);
 
         Logger.info(`File deleted successfully: ${fileReference.storage_path}`);
+        return null;
     } catch (error) {
         console.error('Error deleting file:', error);
         throw error;
@@ -353,6 +354,7 @@ export async function storeFileReference(
     userId: string
 ): Promise<IFileReferenceDocument> {
     try {
+        Logger.info(`Storing file for user: ${userId}`);
         if ('_id' in fileContent) {
             Logger.warn(`Removing _id from fileContent: ${fileContent._id}`);
             delete fileContent._id;

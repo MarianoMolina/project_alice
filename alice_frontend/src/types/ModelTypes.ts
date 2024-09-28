@@ -1,5 +1,5 @@
 import { User, convertToUser } from "./UserTypes";
-import { LlmProvider } from "./ApiTypes";
+import { ApiName } from "./ApiTypes";
 import { HandleClickProps } from "./CollectionTypes";
 
 export enum ModelType {
@@ -18,7 +18,7 @@ export interface AliceModel {
     model_format?: string;
     ctx_size?: number;
     model_type: ModelType;
-    api_name: LlmProvider;
+    api_name: ApiName;
     temperature?: number;
     seed?: number | null;
     use_cache?: boolean;
@@ -65,7 +65,7 @@ export const getDefaultModelForm = (): Partial<AliceModel> => ({
     model_format: '',
     ctx_size: 0,
     model_type: ModelType.CHAT,
-    api_name: LlmProvider.OPENAI,
+    api_name: ApiName.OPENAI,
     temperature: 0.7,
     use_cache: true
 });

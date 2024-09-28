@@ -11,7 +11,7 @@ export async function createMessage(
 ): Promise<IMessageDocument | null> {
   try {
 
-    Logger.info('messageData received in createMessageInChat:', messageData);
+    Logger.debug('messageData received in createMessage:', messageData);
     // Remove _id if present in messageData to ensure Mongoose generates a new one
     if ('_id' in messageData) {
       Logger.warn(`Removing _id from messageData: ${messageData._id}`);
@@ -77,22 +77,44 @@ export async function createMessage(
       messageData.task_responses = processedTaskResponses;
     }
 
+    Logger.debug('Processed message data:', JSON.stringify(messageData, null, 2));
+
+    // Validate userId
+    if (!Types.ObjectId.isValid(userId)) {
+      Logger.error('Invalid userId:', userId);
+      throw new Error('Invalid userId');
+    }
+
     // Set created_by and timestamps
     messageData.created_by = new Types.ObjectId(userId);
     messageData.createdAt = new Date();
     messageData.updatedAt = new Date();
 
-    // Create and save the message
-    const message = new Message(messageData);
-    const savedMessage = await message.save();
-    Logger.info('Message saved:', savedMessage);
+    Logger.debug('Final message data before creating Message object:', JSON.stringify(messageData, null, 2));
 
-    // Log the saved message ID
-    Logger.info(`Message created with ID: ${savedMessage._id}`);
+    // Create the Message object
+    let message: IMessageDocument;
+    try {
+      message = new Message(messageData);
+    } catch (error) {
+      Logger.error('Error creating Message object:', error);
+      throw error;
+    }
+
+    Logger.debug('Message object created, data:', JSON.stringify(message.toObject(), null, 2));
+
+    // Save the message
+    const savedMessage = await message.save();
+    
+    Logger.debug('Message saved successfully:', JSON.stringify(savedMessage.toObject(), null, 2));
+    Logger.debug(`Message created with ID: ${savedMessage._id}`);
 
     return savedMessage;
   } catch (error) {
-    Logger.error('Error creating message:', error);
+    Logger.error('Error in createMessage:', error);
+    if (error instanceof Error) {
+      Logger.error('Error stack:', error.stack);
+    }
     return null;
   }
 }

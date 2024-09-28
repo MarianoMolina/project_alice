@@ -56,7 +56,8 @@ class BackendAPI(BaseModel):
         "parameters": "parameters",
         "task_responses": "taskresults",
         "apis": "apis",
-        "files": "files"
+        "files": "files",
+        "messages": "messages"
     }, description="Map of entity types to collection names")
     model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str}, arbitrary_types_allowed=True)
 
@@ -418,6 +419,30 @@ class BackendAPI(BaseModel):
             except Exception as e:
                 LOGGER.error(f"Unexpected error during entity creation: {str(e)}")
                 LOGGER.error(f"Entity data: {entity_data}")
+                raise
+        
+    async def update_entity_in_db(self, entity_type: EntityType, entity_id: str, entity_data: dict) -> Dict[str, Any]:
+        collection_name = self.collection_map[entity_type]
+        url = f"{self.base_url}/{collection_name}/{entity_id}"
+        headers = self._get_headers()
+        
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.patch(url, json=entity_data, headers=headers) as response:
+                    if response.status == 400:
+                        error_data = await response.json()
+                        raise ValueError(f"Bad request when updating {entity_type}: {error_data}")
+                    response.raise_for_status()
+                    result = await response.json()
+                    LOGGER.info(f'Updated {entity_type} with ID: {entity_id}')
+                    return result
+            except aiohttp.ClientError as e:
+                LOGGER.error(f"HTTP error during entity creation: {e.status} - {e.message}")
+                LOGGER.error(f"Error updating entity: {e}")
+                raise
+            except Exception as e:
+                LOGGER.error(f"Unexpected error during entity creation: {str(e)}")
+                LOGGER.error(f"Unexpected error updating entity: {e}")
                 raise
 
     async def check_existing_data(self, max_retries=3, retry_delay=1) -> bool:

@@ -16,9 +16,10 @@ import HealthRoutes from './routes/health.route';
 import APIRoutes from './routes/api.route';
 import corsConfigMiddleware from './middleware/corsConfig.middleware';
 import loggingMiddleware from './middleware/logging.middleware';
-import lmStudioRoute from './routes/lmStudio.route';
+import LmStudioRoute from './routes/lmStudio.route';
 import Logger from './utils/logger';
 import FileRoutes from './routes/file.route';
+import MessageRoutes from './routes/message.route';
 import './models';
 
 dotenv.config();
@@ -61,6 +62,7 @@ app.use('/api/tasks', TaskRoutes);
 app.use('/api/users', UserRoutes);
 app.use('/api/parameters', ParametersRoutes);
 app.use('/api/files', FileRoutes);
-app.use('/lm-studio', lmStudioRoute);
+app.use('/lm-studio', LmStudioRoute);
+app.use('/api/messages', MessageRoutes);
 
 export default app;

@@ -1,11 +1,11 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { CircularProgress, Box } from '@mui/material';
-import { ApiProvider } from '../context/ApiContext';
-import { TaskProvider } from '../context/TaskContext';
-import { ChatProvider } from '../context/ChatContext';
-import { DialogProvider } from '../context/CardDialogContext';
+import { ApiProvider } from '../contexts/ApiContext';
+import { TaskProvider } from '../contexts/TaskContext';
+import { ChatProvider } from '../contexts/ChatContext';
+import { DialogProvider } from '../contexts/CardDialogContext';
 
 interface ProtectedRouteProps {
   element: React.ReactNode;

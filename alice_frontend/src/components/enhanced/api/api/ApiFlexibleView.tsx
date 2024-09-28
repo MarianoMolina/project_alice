@@ -8,48 +8,74 @@ import {
     TextField,
     Dialog,
 } from '@mui/material';
-import { ApiComponentProps, API, ApiType, getDefaultApiForm, LlmProvider } from '../../../../types/ApiTypes';
-import { API_TYPE_CONFIGS, LLM_PROVIDERS, isModelApi, getAvailableApiTypes } from '../../../../utils/ApiUtils';
+import { ApiComponentProps, API, ApiType, ApiName, getDefaultApiForm } from '../../../../types/ApiTypes';
+import { API_TYPE_CONFIGS, LLM_PROVIDERS } from '../../../../utils/ApiUtils';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import EnhancedModel from '../../model/model/EnhancedModel';
 import { AliceModel } from '../../../../types/ModelTypes';
-import { useApi } from '../../../../context/ApiContext';
+import { useApi } from '../../../../contexts/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 
+const getLlmProviderBaseUrl = (apiName: ApiName): string => {
+    for (const provider of Object.values(LLM_PROVIDERS)) {
+        if (provider.api_name.includes(apiName)) {
+            return provider.baseUrl;
+        }
+    }
+    return '';
+};
+
 const ApiFlexibleView: React.FC<ApiComponentProps> = ({
-    items,
     item,
     onChange,
     mode,
     handleSave,
-    apiType
 }) => {
     const { fetchItem } = useApi();
     const [form, setForm] = useState<Partial<API>>(getDefaultApiForm());
-    const [availableApiTypes, setAvailableApiTypes] = useState<ApiType[]>([]);
-    const [llmProvider, setLlmProvider] = useState<string>('');
+    const [availableApiNames, setAvailableApiNames] = useState<ApiName[]>([]);
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogContent, setDialogContent] = useState<React.ReactNode | null>(null);
 
     useEffect(() => {
-        if (items) {
-            setAvailableApiTypes(getAvailableApiTypes(items));
-        }
-    }, [items]);
-
-    useEffect(() => {
         if (item) {
             setForm({ ...getDefaultApiForm(), ...item });
-            if (isModelApi(item.api_type) && item.api_config && item.api_config.base_url) {
-                const provider = Object.entries(LLM_PROVIDERS).find(([_, config]) => config.baseUrl === item.api_config.base_url);
-                setLlmProvider(provider ? provider[0] : 'Custom');
-            }
+            updateAvailableApiNames(item.api_type);
         }
     }, [item]);
 
+    useEffect(() => {
+        if (form.api_type) {
+            updateAvailableApiNames(form.api_type);
+        }
+    }, [form.api_type]);
+
+    useEffect(() => {
+        if (form.api_name) {
+            const baseUrl = getLlmProviderBaseUrl(form.api_name);
+            if (baseUrl) {
+                setForm(prevForm => ({
+                    ...prevForm,
+                    api_config: {
+                        ...prevForm.api_config,
+                        base_url: baseUrl,
+                    },
+                }));
+            }
+        }
+    }, [form.api_name]);
+
     const isEditMode = mode === 'edit' || mode === 'create';
     const isCreateMode = mode === 'create';
+
+    const updateAvailableApiNames = (apiType: ApiType | undefined) => {
+        if (apiType && API_TYPE_CONFIGS[apiType]) {
+            setAvailableApiNames(API_TYPE_CONFIGS[apiType].api_name);
+        } else {
+            setAvailableApiNames([]);
+        }
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -58,28 +84,25 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
 
     const handleApiTypeChange = (newApiType: ApiType) => {
         const config = API_TYPE_CONFIGS[newApiType];
+        updateAvailableApiNames(newApiType);
         onChange({
             ...form,
             api_type: newApiType,
             api_config: config.apiConfig,
-            api_name: config.api_name as LlmProvider,
+            api_name: config.api_name[0],
         });
-        setLlmProvider('');
     };
 
-    const handleLlmProviderChange = (provider: string) => {
-        setLlmProvider(provider);
-        if (provider !== 'Custom' && provider in LLM_PROVIDERS) {
-            onChange({
-                ...form,
-                api_config: {
-                    ...form.api_config,
-                    base_url: LLM_PROVIDERS[provider as keyof typeof LLM_PROVIDERS].baseUrl,
-                    api_key: '',
-                },
-                api_name: LLM_PROVIDERS[provider as keyof typeof LLM_PROVIDERS].api_name,
-            });
-        }
+    const handleApiNameChange = (newApiName: ApiName) => {
+        onChange({
+            ...form,
+            api_name: newApiName,
+            api_config: {
+                ...form.api_config,
+                base_url: getLlmProviderBaseUrl(newApiName),
+                api_key: '',
+            },
+        });
     };
 
     const handleApiConfigChange = (key: string, value: string) => {
@@ -125,24 +148,24 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                         value={form.api_type || ''}
                         onChange={(e) => handleApiTypeChange(e.target.value as ApiType)}
                     >
-                        {availableApiTypes.map((type) => (
-                            <MenuItem key={type} value={type}>{API_TYPE_CONFIGS[type].api_name}</MenuItem>
+                        {Object.values(ApiType).map((type) => (
+                            <MenuItem key={type} value={type}>{type}</MenuItem>
                         ))}
                     </Select>
                 </FormControl>
             )}
 
-            {form.api_type && isModelApi(form.api_type) && isCreateMode && (
+            {form.api_type && (
                 <FormControl fullWidth margin="normal">
-                    <InputLabel>LLM Provider</InputLabel>
+                    <InputLabel>API Name</InputLabel>
                     <Select
-                        value={llmProvider}
-                        onChange={(e) => handleLlmProviderChange(e.target.value)}
+                        value={form.api_name || ''}
+                        onChange={(e) => handleApiNameChange(e.target.value as ApiName)}
+                        disabled={!isEditMode}
                     >
-                        {Object.entries(LLM_PROVIDERS).map(([key, config]) => (
-                            <MenuItem key={key} value={key}>{config.api_name}</MenuItem>
+                        {availableApiNames.map((name) => (
+                            <MenuItem key={name} value={name}>{name}</MenuItem>
                         ))}
-                        <MenuItem value="Custom">Custom</MenuItem>
                     </Select>
                 </FormControl>
             )}
@@ -150,11 +173,11 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
             <TextField
                 fullWidth
                 name="name"
-                label="API Name"
-                value={form.api_name || ''}
+                label="API Display Name"
+                value={form.name || ''}
                 onChange={handleInputChange}
                 margin="normal"
-                disabled={!isEditMode || (form.api_type && (isModelApi(form.api_type) && llmProvider !== 'Custom'))}
+                disabled={!isEditMode}
             />
 
             {form.api_config && Object.entries(form.api_config).map(([key, value]) => (
@@ -166,10 +189,11 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                     value={value || ''}
                     onChange={(e) => handleApiConfigChange(key, e.target.value)}
                     margin="normal"
-                    disabled={!isEditMode || (key === 'base_url' && form.api_type && isModelApi(form.api_type) && llmProvider !== 'Custom')}
+                    disabled={!isEditMode}
                 />
             ))}
-            {form.api_type && isModelApi(form.api_type) && (
+
+            {form.api_type === ApiType.LLM_MODEL && (
                 <EnhancedSelect<AliceModel>
                     componentType="models"
                     EnhancedComponent={EnhancedModel}

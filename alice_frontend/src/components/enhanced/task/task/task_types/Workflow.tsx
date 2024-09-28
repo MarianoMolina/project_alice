@@ -6,7 +6,7 @@ import FunctionDefinitionBuilder from '../../../common/function_select/FunctionD
 import { FunctionParameters } from '../../../../../types/ParameterTypes';
 import { ApiType } from '../../../../../types/ApiTypes';
 import EnhancedTask from '../../../task/task/EnhancedTask';
-import { useApi } from '../../../../../context/ApiContext';
+import { useApi } from '../../../../../contexts/ApiContext';
 
 const Workflow: React.FC<TaskFormsProps> = ({
   item,

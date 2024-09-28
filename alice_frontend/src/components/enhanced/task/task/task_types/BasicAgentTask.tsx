@@ -20,7 +20,7 @@ import { AliceTask } from '../../../../../types/TaskTypes';
 import { ApiType } from '../../../../../types/ApiTypes';
 import { FunctionParameters } from '../../../../../types/ParameterTypes';
 import FunctionDefinitionBuilder from '../../../common/function_select/FunctionDefinitionBuilder';
-import { useApi } from '../../../../../context/ApiContext';
+import { useApi } from '../../../../../contexts/ApiContext';
 
 const BasicAgentTask: React.FC<TaskFormsProps> = ({
   item,

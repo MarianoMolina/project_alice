@@ -1,24 +1,29 @@
 import React, { useState } from 'react';
-import { Box, Typography, Tooltip, IconButton, Dialog, DialogContent, DialogActions, Button, Chip } from '@mui/material';
+import { Box, Typography, Tooltip, IconButton, Dialog, DialogContent, Chip } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import EditIcon from '@mui/icons-material/Edit';
 import useStyles from './MessageStyles';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Visibility } from '@mui/icons-material';
-import { MessageProps, MessageType } from '../../../../types/MessageTypes';
+import { MessageType } from '../../../../types/MessageTypes';
 import { WorkflowOutput } from '../../task_response/WorkflowOutput';
 import { CommandLineLog } from '../../task_response/CommandLog';
 import { BackgroundBeams } from '../../../ui/aceternity/BackgroundBeams';
-import EnhancedFile from '../../file/file/EnhancedFile';
 import { FileReference } from '../../../../types/FileTypes';
 import MessageDetail from './MessageDetail';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { TaskResponse } from '../../../../types/TaskResponseTypes';
+
+interface MessageProps {
+  message: MessageType;
+  chatId?: string;
+}
 
 const Message: React.FC<MessageProps> = ({ message, chatId }) => {
   const classes = useStyles();
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [detailMode, setDetailMode] = useState<'view' | 'edit'>('view');
-  const [selectedFileReference, setSelectedFileReference] = useState<FileReference | null>(null);
-  const [isFileDialogOpen, setIsFileDialogOpen] = useState(false);
+  const { selectItem } = useCardDialog();
 
   const getCreatorName = (message: MessageType) => {
     const createdBy = message.created_by;
@@ -85,15 +90,35 @@ const Message: React.FC<MessageProps> = ({ message, chatId }) => {
     );
   };
 
-  const handleViewFile = (reference: FileReference) => {
-    setSelectedFileReference(reference);
-    setIsFileDialogOpen(true);
+  const renderTaskResponses = () => {
+    if (!message.task_responses || message.task_responses.length === 0) return null;
+
+    return (
+      <Box className={classes.taskResponsesContainer}>
+        <Typography variant="subtitle2">Task Responses:</Typography>
+        <Box display="flex" flexWrap="wrap" gap={1}>
+          {message.task_responses.map((taskResponse, index) => (
+            <Chip
+              key={index}
+              label={`Task: ${taskResponse.task_name}`}
+              onDelete={() => handleViewTaskResponse(taskResponse)}
+              deleteIcon={<Visibility />}
+              variant="outlined"
+            />
+          ))}
+        </Box>
+      </Box>
+    );
   };
 
-  const handleCloseFileDialog = () => {
-    setIsFileDialogOpen(false);
-    setSelectedFileReference(null);
+  const handleViewFile = (reference: FileReference) => {
+    selectItem('File', reference._id ?? null, reference);
   };
+
+  const handleViewTaskResponse = (taskResponse: TaskResponse) => {
+    selectItem('TaskResponse', taskResponse._id ?? '', taskResponse);
+  };
+
   const handleViewDetails = () => {
     setDetailMode('view');
     setIsDetailDialogOpen(true);
@@ -112,6 +137,7 @@ const Message: React.FC<MessageProps> = ({ message, chatId }) => {
     // Handle the updated message (e.g., update the state in the parent component)
     console.log('Message updated:', updatedMessage);
   };
+
 
   return (
     <Box className={`${classes.message} ${getMessageClass()}`}>
@@ -144,6 +170,7 @@ const Message: React.FC<MessageProps> = ({ message, chatId }) => {
         </Box>
         {renderMessageContent()}
         {renderFileReferences()}
+        {renderTaskResponses()}
         <Box className={classes.metadataContainer}>
           {message.step && (
             <Tooltip title="Task or source that produced this message" arrow>
@@ -164,23 +191,14 @@ const Message: React.FC<MessageProps> = ({ message, chatId }) => {
 
       <Dialog open={isDetailDialogOpen} onClose={handleCloseDetailDialog} maxWidth="md" fullWidth>
         <DialogContent>
-          <MessageDetail 
-            message={message} 
-            chatId={chatId} 
+          <MessageDetail
+            message={message}
+            chatId={chatId}
             mode={detailMode}
             onUpdate={handleMessageUpdate}
             onClose={handleCloseDetailDialog}
           />
         </DialogContent>
-      </Dialog>
-
-      <Dialog open={isFileDialogOpen} onClose={handleCloseFileDialog} maxWidth="md" fullWidth>
-        {selectedFileReference && (
-          <EnhancedFile itemId={selectedFileReference._id} mode="card" fetchAll={false} />
-        )}
-        <DialogActions>
-          <Button onClick={handleCloseFileDialog}>Close</Button>
-        </DialogActions>
       </Dialog>
     </Box>
   );

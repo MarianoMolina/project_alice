@@ -5,7 +5,7 @@ import { Box } from '@mui/material';
 import EnhancedSelect from '../../../common/enhanced_select/EnhancedSelect';
 import EnhancedPrompt from '../../../prompt/prompt/EnhancedPrompt';
 import { Prompt } from '../../../../../types/PromptTypes';
-import { useApi } from '../../../../../context/ApiContext';
+import { useApi } from '../../../../../contexts/ApiContext';
 
 const PromptAgentTask: React.FC<TaskFormsProps> = ({ item, onChange, mode, handleAccordionToggle, handleViewDetails, activeAccordion, handleSave, apis }) => {
   const { fetchItem } = useApi();

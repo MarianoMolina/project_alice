@@ -15,7 +15,7 @@ import EnhancedAgent from '../../agent/agent/EnhancedAgent';
 import EnhancedTask from '../../task/task/EnhancedTask';
 import { AliceAgent } from '../../../../types/AgentTypes';
 import { AliceTask } from '../../../../types/TaskTypes';
-import { useApi } from '../../../../context/ApiContext';
+import { useApi } from '../../../../contexts/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import MessageListView from '../../common/message/MessageList';
 import MessageDetail from '../../common/message/MessageDetail';

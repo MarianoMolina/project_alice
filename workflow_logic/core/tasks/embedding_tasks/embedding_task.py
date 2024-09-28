@@ -23,8 +23,8 @@ class EmbeddingTask(BasicAgentTask):
 
     async def generate_response(self, api_manager: APIManager, **kwargs) -> Tuple[List[MessageDict], int, Optional[Union[List[MessageDict], Dict[str, str]]]]:
         input_text: str = kwargs.get('input', "")
-        new_messages, start_messages = await self.agent.generate_embeddings(api_manager=api_manager, input=input_text)
+        new_messages = await self.agent.generate_embeddings(api_manager=api_manager, input=input_text)
         if not new_messages:
             LOGGER.error("No messages returned from agent.")
-            return [], 1, start_messages if start_messages else []
-        return new_messages, 0, None
+            return [], 1, None
+        return [new_messages], 0, None

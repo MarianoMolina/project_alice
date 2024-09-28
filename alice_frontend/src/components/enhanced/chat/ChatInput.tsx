@@ -3,8 +3,8 @@ import { Box, Button, TextField, Chip } from '@mui/material';
 import { MessageType } from '../../../types/MessageTypes';
 import { FileReference, FileType } from '../../../types/FileTypes';
 import { createFileContentReference, selectFile } from '../../../utils/FileUtils';
-import { useApi } from '../../../context/ApiContext';
-import { useNotification } from '../../../context/NotificationContext';
+import { useApi } from '../../../contexts/ApiContext';
+import { useNotification } from '../../../contexts/NotificationContext';
 import { TaskResponse } from '../../../types/TaskResponseTypes';
 
 interface ChatInputProps {
@@ -128,7 +128,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
           variant="contained"
           sx={{ ml: 2, alignSelf: 'flex-end' }}
           onClick={handleSend}
-          disabled={!chatSelected || (!newMessage.content.trim() && newMessage.references?.length === 0 && newMessage.task_responses?.length === 0)}
+          disabled={!chatSelected || !newMessage.content.trim()}
         >
           Send
         </Button>

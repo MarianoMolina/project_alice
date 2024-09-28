@@ -2,16 +2,16 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
 import { Box, TextField, Typography, Button, Dialog, Card, CardContent, Paper } from '@mui/material';
 import { Person, Api, Warning } from '@mui/icons-material';
-import { useApi } from '../context/ApiContext';
-import { useAuth } from '../context/AuthContext';
+import { useApi } from '../contexts/ApiContext';
+import { useAuth } from '../contexts/AuthContext';
 import { User } from '../types/UserTypes';
-import { useNotification } from '../context/NotificationContext';
+import { useNotification } from '../contexts/NotificationContext';
 import { API, getDefaultApiForm } from '../types/ApiTypes';
 import { ComponentMode } from '../types/CollectionTypes';
 import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
 import useStyles from '../styles/UserSettingsStyles';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
-import { useDialog } from '../context/DialogCustomContext';
+import { useDialog } from '../contexts/DialogCustomContext';
 
 interface UserSettingsProps {
     setHasUnsavedChanges: (value: boolean) => void;

@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { CollectionElementString } from '../types/CollectionTypes';
+import { CollectionElementString, CollectionElement } from '../types/CollectionTypes';
 
 interface DialogContextType {
-  selectItem: (itemType: CollectionElementString, itemId: string) => void;
-  selectedItem: { _id: string } | null;
+  selectItem: (itemType: CollectionElementString, itemId?: string, item?: CollectionElement) => void;
+  selectedItem: CollectionElement | null;
   selectedItemType: CollectionElementString | null;
   handleClose: () => void;
 }
@@ -11,12 +11,18 @@ interface DialogContextType {
 const CardDialogContext = createContext<DialogContextType | undefined>(undefined);
 
 export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
-  const [selectedItem, setSelectedItem] = useState<{ _id: string } | null>(null);
+  const [selectedItem, setSelectedItem] = useState<CollectionElement | null>(null);
   const [selectedItemType, setSelectedItemType] = useState<CollectionElementString | null>(null);
 
-  const selectItem = useCallback((itemType: CollectionElementString, itemId: string) => {
+  const selectItem = useCallback((itemType: CollectionElementString, itemId?: string, item?: CollectionElement) => {
     setSelectedItemType(itemType);
-    setSelectedItem({ _id: itemId });
+    if (item) {
+      setSelectedItem(item);
+    } else if (itemId) {
+      setSelectedItem({ _id: itemId } as CollectionElement);
+    } else {
+      setSelectedItem(null);
+    }
   }, []);
 
   const handleClose = useCallback(() => {

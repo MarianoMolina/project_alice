@@ -11,7 +11,7 @@ import { AliceModel, ModelType } from '../../../../types/ModelTypes';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import EnhancedModel from '../../model/model/EnhancedModel';
 import EnhancedPrompt from '../../prompt/prompt/EnhancedPrompt';
-import { useApi } from '../../../../context/ApiContext';
+import { useApi } from '../../../../contexts/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 
 const AgentFlexibleView: React.FC<AgentComponentProps> = ({

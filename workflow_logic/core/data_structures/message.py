@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Optional, Literal, Dict, Any, List, TYPE_CHECKING
-from pydantic import Field, ConfigDict, field_validator
+from pydantic import Field, ConfigDict, field_validator, BaseModel
 from workflow_logic.core.data_structures.base_models import BaseDataStructure, ContentType
 from workflow_logic.core.data_structures.central_types import FileReferenceType, TaskResponseType, ToolCallType, ReferenceType
 
@@ -52,9 +52,21 @@ class MessageDict(BaseDataStructure):
     @field_validator('tool_calls')
     def validate_tool_calls(cls, v):
         from workflow_logic.core.data_structures.parameters import ToolCall
-        if v is not None:
-            return [ToolCall(**item) if not isinstance(item, ToolCall) else item for item in v]
-        return v
+        if v is None:
+            return v
+        
+        validated_tool_calls = []
+        for item in v:
+            if isinstance(item, ToolCall):
+                validated_tool_calls.append(item)
+            elif isinstance(item, dict):
+                validated_tool_calls.append(ToolCall(**item))
+            elif isinstance(item, BaseModel):
+                validated_tool_calls.append(ToolCall(**item.model_dump()))
+            else:
+                raise ValueError(f"Invalid tool call type: {type(item)}")
+        
+        return validated_tool_calls
     
     def __str__(self) -> str:
         role = self.role if self.role else ''

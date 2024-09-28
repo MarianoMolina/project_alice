@@ -1,6 +1,6 @@
 // src/pages/HomePage.tsx
 import React from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import Dashboard from '../components/ui/dashboard/Dashboard';
 import Landing from '../components/ui/landing/Landing';
 

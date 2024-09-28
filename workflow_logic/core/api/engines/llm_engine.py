@@ -129,9 +129,9 @@ class LLMEngine(APIEngine):
             content = choice.message.content
 
             if choice.message.tool_calls:
-                LOGGER.debug(f"Tool calls: {choice.message.tool_calls}")
-                LOGGER.debug(f'Model dump: {choice.message.tool_calls[0].model_dump()}')
-                LOGGER.debug(f'Tool call: {ToolCall(**choice.message.tool_calls[0].model_dump())}')
+                LOGGER.info(f"Tool calls: {choice.message.tool_calls}")
+                LOGGER.info(f'Model dump: {choice.message.tool_calls[0].model_dump()}')
+                LOGGER.info(f'Tool call: {ToolCall(**choice.message.tool_calls[0].model_dump())}')
 
 
             return MessageDict(

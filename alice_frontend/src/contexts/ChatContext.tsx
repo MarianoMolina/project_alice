@@ -4,7 +4,7 @@ import { AliceAgent } from '../types/AgentTypes';
 import { AliceTask } from '../types/TaskTypes';
 import { AliceChat } from '../types/ChatTypes';
 import { MessageType } from '../types/MessageTypes';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from './AuthContext';
 import { useApi } from './ApiContext';
 
 interface ChatContextType {

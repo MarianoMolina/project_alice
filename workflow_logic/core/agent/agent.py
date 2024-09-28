@@ -63,7 +63,7 @@ class AliceAgent(BaseModel):
             
             LOGGER.info(f"API response: {response.model_dump()}")
             
-            new_messages = []
+            new_messages: List[MessageDict] = []
             content = response.content if response.content else "Using tools" if response.tool_calls else "No response from API"
             tool_calls = response.tool_calls if self.has_functions else None
             
@@ -84,7 +84,11 @@ class AliceAgent(BaseModel):
                 LOGGER.debug("Processing tool calls")
                 tool_messages = await self._process_tool_calls(tool_calls, tool_map, tools_list)
                 if tool_messages:
-                    new_messages.extend(tool_messages)
+                    if isinstance(tool_messages[0], MessageDict):
+                        if tool_messages[0].type == ContentType.TASK_RESPONSE:
+                            new_messages[-1].task_responses.extend(tool_messages[0].task_responses)
+                        else:
+                            new_messages.extend(tool_messages)
             
             if self.has_code_exec:
                 LOGGER.debug("Processing code execution")
@@ -100,8 +104,8 @@ class AliceAgent(BaseModel):
             LOGGER.error(f"Error in agent.generating response: {str(e)}")
             raise
         
-    async def _process_tool_calls(self, tool_calls: List[ToolCall] = [], tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []):
-        tool_messages = []
+    async def _process_tool_calls(self, tool_calls: List[ToolCall] = [], tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []) -> List[MessageDict]:
+        tool_messages: List[MessageDict] = []
         for tool_call in tool_calls:
             tool_call_id = tool_call.id
             function_name = tool_call.function.name
@@ -162,7 +166,7 @@ class AliceAgent(BaseModel):
                     step=function_name,
                     tool_call_id=tool_call_id,
                     type=ContentType.TASK_RESPONSE if task_result else ContentType.TEXT,
-                    references=[FileReference(type=ContentType.TASK_RESPONSE, url=task_result.id)] if task_result else None,
+                    task_responses= [task_result] if task_result else None,
                 ))
             except Exception as e:
                 tool_messages.append(MessageDict(
