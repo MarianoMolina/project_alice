@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Dict, Any, Union, Optional
 from workflow_logic.core.model import AliceModel
 from workflow_logic.core.api.api import API
-from workflow_logic.core.data_structures import SearchOutput, MessageDict, ApiType, ApiName, LLMConfig, ModelApis
+from workflow_logic.core.data_structures import References, ApiType, ApiName, ModelConfig, ModelApis
 from workflow_logic.util import LOGGER
 from workflow_logic.core.api.engines import APIEngine, LLMAnthropic, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI, ExaSearchAPI, ArxivSearchAPI, LLMEngine, VisionModelEngine, ImageGenerationEngine, BeautifulSoupWebScraperEngine, AnthropicVisionEngine, OpenAIAdvancedSpeechToTextEngine, OpenAISpeechToTextEngine, OpenAITextToSpeechEngine, OpenAIEmbeddingsEngine
 
@@ -170,7 +170,7 @@ class APIManager(BaseModel):
         """
         return next((api for api in self.apis.values() if api.api_type == api_type and api.is_active), None)
         
-    def retrieve_api_data(self, api_type: ApiType, model: Optional[AliceModel] = None) -> Union[Dict[str, Any], LLMConfig]:
+    def retrieve_api_data(self, api_type: ApiType, model: Optional[AliceModel] = None) -> Union[Dict[str, Any], ModelConfig]:
         """
         Retrieve the configuration data for a specific API type and model.
 
@@ -179,7 +179,7 @@ class APIManager(BaseModel):
             model (Optional[AliceModel]): The model to consider for LLM APIs.
 
         Returns:
-            Union[Dict[str, Any], LLMConfig]: The API configuration data.
+            Union[Dict[str, Any], ModelConfig]: The API configuration data.
 
         Raises:
             ValueError: If no active API is found for the given type.
@@ -189,7 +189,7 @@ class APIManager(BaseModel):
             raise ValueError(f"No active API found for type: {api_type}")
         return api.get_api_data(model)
 
-    async def generate_response_with_api_engine(self, api_type: ApiType, model: Optional[AliceModel] = None, **kwargs) -> Union[SearchOutput, MessageDict]:
+    async def generate_response_with_api_engine(self, api_type: ApiType, model: Optional[AliceModel] = None, **kwargs) -> References:
         """
         Select the appropriate API engine, validate inputs, and generate a response.
 
@@ -202,7 +202,7 @@ class APIManager(BaseModel):
             **kwargs: Additional arguments to pass to the API engine.
 
         Returns:
-            Union[SearchOutput, MessageDict]: The generated response from the API engine.
+            References: The generated response from the API engine.
 
         Raises:
             ValueError: If no API is found or if there's an error in generating the response.

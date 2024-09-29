@@ -2,7 +2,7 @@ import aiohttp
 from bs4 import BeautifulSoup
 from typing import Dict, Any
 from pydantic import Field
-from workflow_logic.core.data_structures import SearchResult, SearchOutput
+from workflow_logic.core.data_structures import SearchResult, References
 from workflow_logic.core.api.engines.api_engine import APIEngine
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 
@@ -29,7 +29,7 @@ class BeautifulSoupWebScraperEngine(APIEngine):
         )
     )
 
-    async def generate_api_response(self, api_data: Dict[str, Any], url: str, selector: str, max_results: int = 10) -> SearchOutput:
+    async def generate_api_response(self, api_data: Dict[str, Any], url: str, selector: str, max_results: int = 10) -> References:
         """
         Scrapes content from a webpage using BeautifulSoup.
 
@@ -40,7 +40,7 @@ class BeautifulSoupWebScraperEngine(APIEngine):
             max_results (int): Maximum number of results to return.
 
         Returns:
-            SearchOutput: Scraped content wrapped in a SearchOutput object.
+            References: Scraped content wrapped in a References object.
         """
         headers = {
             "User-Agent": api_data.get("user_agent", "Alice Web Scraper 1.0")
@@ -71,4 +71,4 @@ class BeautifulSoupWebScraperEngine(APIEngine):
             )
             results.append(result)
 
-        return SearchOutput(content=results)
+        return References(search_results=results)

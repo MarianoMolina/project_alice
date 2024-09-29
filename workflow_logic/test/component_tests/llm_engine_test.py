@@ -1,11 +1,11 @@
 import asyncio, os
 from workflow_logic.core.api.engines import LLMEngine, LLMAnthropic
-from workflow_logic.core.data_structures import MessageDict, LLMConfig
+from workflow_logic.core.data_structures import MessageDict, ModelConfig
 
 async def test_llm_engines():
     # LM Studio setup
     lm_studio_engine = LLMEngine()
-    lm_studio_config = LLMConfig(
+    lm_studio_config = ModelConfig(
         api_key="lm-studio",  # LM Studio doesn't require an API key
         base_url="http://localhost:3000/lm-studio",
         model="66a81f4e540cb0193b86bb93" 
@@ -13,7 +13,7 @@ async def test_llm_engines():
 
     # OpenAI setup
     openai_engine = LLMEngine()
-    openai_config = LLMConfig(
+    openai_config = ModelConfig(
         api_key=os.environ.get("OPENAI_API_KEY"),
         base_url="https://api.openai.com/v1",
         model="gpt-3.5-turbo"
@@ -21,7 +21,7 @@ async def test_llm_engines():
 
     # Anthropic setup
     anthropic_engine = LLMAnthropic()
-    anthropic_config = LLMConfig(
+    anthropic_config = ModelConfig(
         api_key=os.environ.get("ANTHROPIC_API"),
         base_url="https://api.anthropic.com",
         model="claude-3-haiku-20240307"

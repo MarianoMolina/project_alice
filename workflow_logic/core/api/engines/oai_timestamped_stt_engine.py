@@ -1,6 +1,6 @@
 from pydantic import Field
 from typing import List
-from workflow_logic.core.data_structures import LLMConfig, FileReference, MessageDict
+from workflow_logic.core.data_structures import ModelConfig, FileReference, MessageDict, References
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 from .oai_stt_engine import OpenAISpeechToTextEngine
 from openai import AsyncOpenAI
@@ -29,18 +29,18 @@ class OpenAIAdvancedSpeechToTextEngine(OpenAISpeechToTextEngine):
         )
     )
 
-    async def generate_api_response(self, api_data: LLMConfig, file_reference: FileReference, model: str = "whisper-1", timestamp_granularities: List[str] = ["word"]) -> MessageDict:
+    async def generate_api_response(self, api_data: ModelConfig, file_reference: FileReference, model: str = "whisper-1", timestamp_granularities: List[str] = ["word"]) -> References:
         """
         Transcribes speech to text with detailed information using OpenAI's API.
 
         Args:
-            api_data (LLMConfig): Configuration data for the API (e.g., API key, base URL).
+            api_data (ModelConfig): Configuration data for the API (e.g., API key, base URL).
             file_reference (FileReference): FileReference object for the audio file to transcribe.
             model (str): The name of the speech-to-text model to use.
             timestamp_granularities (List[str]): List of timestamp granularities to include.
 
         Returns:
-            MessageDict: A message dict containing the detailed transcription.
+            References: A message dict containing the detailed transcription.
         """
         client = AsyncOpenAI(
             api_key=api_data.api_key,
@@ -56,7 +56,7 @@ class OpenAIAdvancedSpeechToTextEngine(OpenAISpeechToTextEngine):
                     timestamp_granularities=timestamp_granularities
                 )
 
-            return MessageDict(
+            msg = MessageDict(
                 role="assistant",
                 content=f'Transcription from sound file: {transcript.text}',
                 generated_by="advanced_speech_to_text_model",
@@ -69,5 +69,6 @@ class OpenAIAdvancedSpeechToTextEngine(OpenAISpeechToTextEngine):
                     "duration": transcript.duration ## this is made up, they are not props in the transcript
                 }
             )
+            return References(messages=[msg])
         except Exception as e:
             raise Exception(f"Error in OpenAI advanced speech-to-text API call: {str(e)}")

@@ -4,7 +4,7 @@ from anthropic import AsyncAnthropic
 from anthropic.types import TextBlock, ToolUseBlock, ToolParam, Message
 from workflow_logic.core.parameters import ToolCall, ToolCallConfig, ToolFunction
 from workflow_logic.core.api.engines.llm_engine import LLMEngine
-from workflow_logic.core.data_structures import MessageDict, ContentType, LLMConfig
+from workflow_logic.core.data_structures import MessageDict, ContentType, ModelConfig, References
 from workflow_logic.util import LOGGER
 
 ANTHROPIC_PRICING_1k = {
@@ -91,7 +91,7 @@ class LLMAnthropic(LLMEngine):
 
         return final_adapted
     
-    async def generate_api_response(self, api_data: LLMConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[Dict[str, Any]]] = None, max_tokens: Optional[int] = None, tool_choice: str = 'auto', n: Optional[int] = 1, **kwargs) -> MessageDict:
+    async def generate_api_response(self, api_data: ModelConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[Dict[str, Any]]] = None, max_tokens: Optional[int] = None, tool_choice: str = 'auto', n: Optional[int] = 1, **kwargs) -> References:
         """
         Generate a chat completion response using Anthropic's API.
 
@@ -101,7 +101,7 @@ class LLMAnthropic(LLMEngine):
         other LLM engines' output format.
 
         Args:
-            api_data (LLMConfig): Configuration for the Anthropic API client.
+            api_data (ModelConfig): Configuration for the Anthropic API client.
             messages (List[Dict[str, Any]]): List of conversation messages.
             system (Optional[str]): System message for the conversation.
             tools (Optional[List[Dict[str, Any]]]): List of available tools for the model.
@@ -166,7 +166,7 @@ class LLMAnthropic(LLMEngine):
 
             cost = self.calculate_cost(response.usage.input_tokens, response.usage.output_tokens, response.model)
 
-            return MessageDict(
+            msg = MessageDict(
                 role="assistant",
                 content=message_text,
                 tool_calls=[tool_call for tool_call in tool_calls] if tool_calls else None,
@@ -180,6 +180,7 @@ class LLMAnthropic(LLMEngine):
                     "cost": cost
                 }
             )
+            return References(messages=[msg])
         
         except Exception as e:
             LOGGER.error(f"Error in Anthropic API call: {str(e)}")

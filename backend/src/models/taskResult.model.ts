@@ -1,5 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { ITaskResultDocument, ITaskResultModel } from '../interfaces/taskResult.interface';
+import referencesSchema from './reference.model';
 
 const taskResultSchema = new Schema<ITaskResultDocument, ITaskResultModel>({
   task_name: { type: String, required: true },
@@ -12,7 +13,7 @@ const taskResultSchema = new Schema<ITaskResultDocument, ITaskResultModel>({
   result_diagnostic: { type: String, default: null },
   usage_metrics: { type: Map, of: String, default: null },
   execution_history: [{ type: Map, of: Schema.Types.Mixed, default: null }],
-  task_content: { type: Map, of: Schema.Types.Mixed, default: null },
+  references: { type: referencesSchema, default: {}, description: "References associated with the task result" },
   created_by: { type: Schema.Types.ObjectId, ref: 'User' },
   updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
@@ -30,7 +31,7 @@ taskResultSchema.methods.apiRepresentation = function(this: ITaskResultDocument)
     result_diagnostic: this.result_diagnostic || null,
     usage_metrics: this.usage_metrics || null,
     execution_history: this.execution_history || [],
-    task_content: this.task_content || null,
+    references: this.references || null,
     created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
     updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,
     createdAt: this.createdAt || null,

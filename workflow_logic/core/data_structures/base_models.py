@@ -11,26 +11,13 @@ class FileType(str, Enum):
     FILE = 'file'
 
 class ContentType(str, Enum):
-    @classmethod
-    def _missing_(cls, value):
-        try:
-            return FileType(value)
-        except ValueError:
-            raise ValueError(f"{value} is not a valid {cls.__name__}")
-
-    @classmethod
-    def _create_contenttype(cls):
-        # Start with all FileType members
-        members = {name: value.value for name, value in FileType.__members__.items()}
-        # Add new ContentType-specific members
-        members.update({
-            'TASK_RESPONSE': 'task_response',
-            'MULTIPLE': 'multiple',
-            'TEXT': 'text',
-        })
-        return Enum(cls.__name__, members, type=str)
-
-ContentType = ContentType._create_contenttype()
+    IMAGE = FileType.IMAGE
+    AUDIO = FileType.AUDIO
+    VIDEO = FileType.VIDEO
+    FILE = FileType.FILE
+    TEXT = 'text'
+    TASK_RESPONSE = 'task_response'
+    MULTIPLE = 'multiple'
 
 class BaseDataStructure(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")

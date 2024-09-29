@@ -3,13 +3,14 @@ import MessageFlexibleView from './MessageFlexibleView';
 import MessageListView from './MessageListView';
 import MessageTableView from './MessageTableView';
 import MessageCardView from './MessageCardView';
+import MessageDetailView from './MessageDetailView';
 import MessageShortListView from './MessageShortListView';
 import { MessageType } from '../../../../types/MessageTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
 import { MessageComponentProps } from '../../../../types/MessageTypes';
 
 type BaseMessageMode = BaseDbElementProps<MessageType>['mode'];
-type ExtendedMessageMode = 'list' | 'shortList' | 'card' | 'table';
+type ExtendedMessageMode = 'list' | 'shortList' | 'card' | 'table' | 'detail';
 type EnhancedMessageMode = BaseMessageMode | ExtendedMessageMode;
 
 interface EnhancedMessageProps extends Omit<MessageComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
@@ -45,14 +46,16 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = (props) => {
       case 'edit':
       case 'view':
         return <MessageFlexibleView {...commonProps} />;
-      case 'shortList':
-        return <MessageShortListView {...commonProps} />;
       case 'list':
         return <MessageListView {...commonProps}/>;
+      case 'shortList':
+        return <MessageShortListView {...commonProps} />;
       case 'table':
         return <MessageTableView {...commonProps} />;
       case 'card':
         return <MessageCardView {...commonProps} />;
+      case 'detail':
+        return <MessageDetailView {...commonProps} />;
       default:
         return null;
     }

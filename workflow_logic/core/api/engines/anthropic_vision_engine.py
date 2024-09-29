@@ -1,15 +1,15 @@
 from typing import List
-from workflow_logic.core.data_structures import get_file_content, MessageDict, LLMConfig, FileReference
+from workflow_logic.core.data_structures import get_file_content, MessageDict, ModelConfig, FileReference, References
 from workflow_logic.core.api.engines.vision_model_engine import VisionModelEngine
 from anthropic import AsyncAnthropic
 
 class AnthropicVisionEngine(VisionModelEngine):
-    async def generate_api_response(self, api_data: LLMConfig, file_references: List[FileReference], prompt: str, max_tokens: int = 300) -> MessageDict:
+    async def generate_api_response(self, api_data: ModelConfig, file_references: List[FileReference], prompt: str, max_tokens: int = 300) -> References:
         """
         Analyzes images using Anthropic's Claude vision model.
 
         Args:
-            api_data (LLMConfig): Configuration data for the API (e.g., API key, model).
+            api_data (ModelConfig): Configuration data for the API (e.g., API key, model).
             file_references (List[FileReference]): List of FileReference objects for the images to analyze.
             prompt (str): A text prompt to guide the image analysis.
             max_tokens (int): The maximum number of tokens to generate.
@@ -48,7 +48,7 @@ class AnthropicVisionEngine(VisionModelEngine):
                 ],
             )
 
-            return MessageDict(
+            msg = MessageDict(
                 role="assistant",
                 content=response.content[0].text,
                 generated_by="anthropic_vision_model",
@@ -63,5 +63,6 @@ class AnthropicVisionEngine(VisionModelEngine):
                     "finish_reason": response.stop_reason,
                 }
             )
+            return References(messages=[msg])
         except Exception as e:
             raise Exception(f"Error in Anthropic vision model API call: {str(e)}")

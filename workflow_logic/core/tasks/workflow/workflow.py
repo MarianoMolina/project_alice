@@ -1,6 +1,6 @@
 from typing import Dict, Any, Optional, List, Callable, Union, Tuple
 from pydantic import Field
-from workflow_logic.core.data_structures import TaskResponse, WorkflowOutput
+from workflow_logic.core.data_structures import TaskResponse, References
 from workflow_logic.util import LOGGER
 from workflow_logic.core.tasks.task import AliceTask
 
@@ -165,14 +165,16 @@ class Workflow(AliceTask):
     def create_workflow_response(self, tasks_performed: List[TaskResponse], status: str, diagnostic: str, **kwargs) -> TaskResponse:
         exec_history = kwargs.pop("execution_history", None)
         kwargs.pop("api_manager", None)
+        ref = References(task_responses=tasks_performed)
+        str_output = ref.detailed_summary()
         return TaskResponse(
             task_id=self.id if self.id else '',
             task_name=self.task_name,
             task_description=self.task_description,
             status=status,
             result_code=1 if status == "failed" else 0,
-            task_outputs=str(WorkflowOutput(content=tasks_performed)),
-            task_content=WorkflowOutput(content=tasks_performed),
+            task_outputs=str_output,
+            references=ref,
             task_inputs=kwargs,
             result_diagnostic=diagnostic,
             execution_history=exec_history

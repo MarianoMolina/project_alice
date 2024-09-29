@@ -2,7 +2,7 @@ import base64
 import json
 from pydantic import Field
 from typing import List, Union
-from workflow_logic.core.data_structures import LLMConfig, ApiType, MessageDict, FileContentReference, FileType, ContentType
+from workflow_logic.core.data_structures import ModelConfig, ApiType, MessageDict, FileContentReference, FileType, ContentType, References
 from workflow_logic.core.api.engines.api_engine import APIEngine
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 from openai import AsyncOpenAI
@@ -23,11 +23,11 @@ class OpenAIEmbeddingsEngine(APIEngine):
     )
     required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
 
-    async def generate_api_response(self, api_data: LLMConfig, input: Union[str, List[str]]) -> MessageDict:
+    async def generate_api_response(self, api_data: ModelConfig, input: Union[str, List[str]]) -> References:
         """
         Generates embeddings for the given input using OpenAI's API.
         Args:
-            api_data (LLMConfig): Configuration data for the API (e.g., API key, base URL).
+            api_data (ModelConfig): Configuration data for the API (e.g., API key, base URL).
             input (Union[str, List[str]]): The input text(s) to get embeddings for.
             model (str): The name of the embedding model to use.
         Returns:
@@ -64,15 +64,7 @@ class OpenAIEmbeddingsEngine(APIEngine):
                 transcript=MessageDict(role='user', content=input, generated_by='user', type=ContentType.TEXT, creation_metadata=creation_metadata)
             )
 
-            # Create and return MessageDict
-            return MessageDict(
-                role="assistant",
-                content=f"Generated embeddings for the given input using model: {model}",
-                generated_by="tool",
-                type=ContentType.FILE,
-                references=[file_reference],
-                creation_metadata=creation_metadata
-            )
+            return References(files=[file_reference])
         except Exception as e:
             LOGGER.error(f"Error in OpenAI embeddings API call: {str(e)}")
             raise Exception(f"Error in OpenAI embeddings API call: {str(e)}")

@@ -6,7 +6,7 @@ from typing import Dict, Any, List, Optional
 from workflow_logic.core.api.engines import APIEngine
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition, ToolCall
 from workflow_logic.util import LOGGER
-from workflow_logic.core.data_structures import MessageDict, ContentType, LLMConfig, ApiType
+from workflow_logic.core.data_structures import MessageDict, ContentType, ModelConfig, ApiType, References
 
 class LLMEngine(APIEngine):
     """
@@ -69,7 +69,7 @@ class LLMEngine(APIEngine):
     )
     required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
 
-    async def generate_api_response(self, api_data: LLMConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[Dict[str, Any]]] = None, max_tokens: Optional[int] = None, tool_choice: Optional[str] = 'auto', n: Optional[int] = 1, **kwargs) -> MessageDict:
+    async def generate_api_response(self, api_data: ModelConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[Dict[str, Any]]] = None, max_tokens: Optional[int] = None, tool_choice: Optional[str] = 'auto', n: Optional[int] = 1, **kwargs) -> References:
         """
         Generates the API response for the task, using the provided API data and messages.
 
@@ -78,7 +78,7 @@ class LLMEngine(APIEngine):
         a chat completion based on the input parameters.
 
         Args:
-            api_data (LLMConfig): Configuration for the API client.
+            api_data (ModelConfig): Configuration for the API client.
             messages (List[Dict[str, Any]]): List of conversation messages.
             system (Optional[str]): System message for the conversation.
             tools (Optional[List[Dict[str, Any]]]): List of available tools for the model.
@@ -88,7 +88,7 @@ class LLMEngine(APIEngine):
             **kwargs: Additional keyword arguments.
 
         Returns:
-            MessageDict: A dictionary containing the generated message and metadata.
+            References: A dictionary containing the generated message and metadata.
 
         Raises:
             ValueError: If API key or base URL is missing from api_data.
@@ -134,7 +134,7 @@ class LLMEngine(APIEngine):
                 LOGGER.info(f'Tool call: {ToolCall(**choice.message.tool_calls[0].model_dump())}')
 
 
-            return MessageDict(
+            msg = MessageDict(
                 role="assistant",
                 content=content,
                 tool_calls=[ToolCall(**tool_call.model_dump()) for tool_call in choice.message.tool_calls] if choice.message.tool_calls else None,
@@ -149,6 +149,7 @@ class LLMEngine(APIEngine):
                     "cost": self.calculate_cost(response.usage.prompt_tokens, response.usage.completion_tokens, response.model)
                 }
             )
+            return References(messages=[msg])
 
         except Exception as e:
             LOGGER.error(f"Error in LLM API call: {str(e)}")

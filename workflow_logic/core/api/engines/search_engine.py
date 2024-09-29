@@ -6,7 +6,7 @@ from exa_py import Exa
 from pydantic import Field
 from typing import Dict, Any, List
 from workflow_logic.util import LOGGER
-from workflow_logic.core.data_structures import SearchResult, SearchOutput, ApiType
+from workflow_logic.core.data_structures import SearchResult, References, ApiType
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 from workflow_logic.core.api.engines.api_engine import APIEngine
 
@@ -52,7 +52,7 @@ class WikipediaSearchAPI(APISearchEngine):
     """
     required_api: ApiType = "wikipedia_search"
 
-    async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
+    async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> References:
         # Wikipedia doesn't require API keys, so we don't need to use api_data
         search_results = wikipedia.search(prompt, results=max_results, suggestion=True)
         LOGGER.debug(f'search_results: {search_results} type: {type(search_results)} type of search_results[0]: {type(search_results[0])}')
@@ -67,7 +67,7 @@ class WikipediaSearchAPI(APISearchEngine):
                     pass
         if not detailed_results:
             raise ValueError("No results found")
-        return SearchOutput(content=[
+        return References(search_results=[
             SearchResult(
                 title=result.title,
                 url=result.url,
@@ -90,14 +90,14 @@ class GoogleSearchAPI(APISearchEngine):
     """
     required_api: ApiType = "google_search"
 
-    async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
+    async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> References:
         if not api_data.get('api_key') or not api_data.get('cse_id'):
             raise ValueError("Google Search API key or CSE ID not found in API data")
         
         service = build("customsearch", "v1", developerKey=api_data['api_key'])
         res = service.cse().list(q=prompt, cx=api_data['cse_id'], num=max_results).execute()
         results = res.get('items', [])
-        return SearchOutput(content=[
+        return References(search_results=[
             SearchResult(
                 title=result['title'],
                 url=result['link'],
@@ -120,7 +120,7 @@ class ExaSearchAPI(APISearchEngine):
     """
     required_api: ApiType = "exa_search"
 
-    async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
+    async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> References:
         if not api_data.get('api_key'):
             raise ValueError("Exa API key not found in API data")
         
@@ -129,7 +129,7 @@ class ExaSearchAPI(APISearchEngine):
         LOGGER.debug(f'exa_search: {exa_search.results}')
         results = exa_search.results
 
-        return SearchOutput(content=[
+        return References(search_results=[
             SearchResult(
                 title=result.title,
                 url=result.url,
@@ -152,7 +152,7 @@ class ArxivSearchAPI(APISearchEngine):
     """
     required_api: ApiType = "arxiv_search"
 
-    async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> SearchOutput:
+    async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> References:
         # arXiv doesn't require API keys, so we don't need to use api_data
         client = Client(page_size=20)
         search = Search(
@@ -164,7 +164,7 @@ class ArxivSearchAPI(APISearchEngine):
         if not results:
             raise ValueError("No results found")
 
-        return SearchOutput(content=[
+        return References(search_results=[
             SearchResult(
                 title=result.title,
                 url=result.pdf_url,
@@ -230,7 +230,7 @@ class RedditSearchAPI(APIEngine):
     ), description="This inputs this API engine takes: requires a prompt input, and optional inputs such as sort, time_filter, subreddit, and limit. Default is 'hot', 'week', 'all', and 10.")
     required_api: ApiType = "reddit_search"
 
-    async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, sort: str = "hot", time_filter: str = "week", subreddit: str = "all", limit: int = 10, **kwargs) -> SearchOutput:
+    async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, sort: str = "hot", time_filter: str = "week", subreddit: str = "all", limit: int = 10, **kwargs) -> References:
         """
         Generate a response from a Reddit search.
 
@@ -243,7 +243,7 @@ class RedditSearchAPI(APIEngine):
             limit (int): Maximum number of results to return. Defaults to 10.
 
         Returns:
-            SearchOutput: A collection of SearchResult objects containing Reddit submission information.
+            References: A collection of SearchResult objects containing Reddit submission information.
 
         Raises:
             ValueError: If client ID or client secret is missing from api_data.
@@ -279,4 +279,4 @@ class RedditSearchAPI(APIEngine):
                 }
             ) for submission in submissions
         ]
-        return SearchOutput(content=search_result_list)
+        return References(search_results=search_result_list)

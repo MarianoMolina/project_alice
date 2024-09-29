@@ -2,7 +2,7 @@ from bson import ObjectId
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, Union
 from workflow_logic.util import LOGGER
-from workflow_logic.core.data_structures import ApiType, ApiName, LLMConfig, ModelApis
+from workflow_logic.core.data_structures import ApiType, ApiName, ModelConfig, ModelApis
 from workflow_logic.core.model import AliceModel
 
 class API(BaseModel):
@@ -34,14 +34,14 @@ class API(BaseModel):
         populate_by_name = True
         json_encoders = {ObjectId: str}
 
-    def _create_model_config(self, model: Optional[AliceModel] = None) -> LLMConfig:
+    def _create_model_config(self, model: Optional[AliceModel] = None) -> ModelConfig:
         if not model:
             if not self.default_model:
                 raise ValueError("No model specified.")
             model = self.default_model
         LOGGER.info(f'model: {model}')
         LOGGER.info(f'api self: {self}')
-        return LLMConfig( 
+        return ModelConfig( 
             temperature=model.temperature, 
             use_cache=model.use_cache,
             api_key=self.api_config.get("api_key"),
@@ -49,10 +49,10 @@ class API(BaseModel):
             model=model.model_name if self.api_name != ApiName.LM_STUDIO else model.id,
         )
 
-    def get_api_data(self, model: Optional[AliceModel] = None) -> Union[Dict[str, Any], LLMConfig]:
+    def get_api_data(self, model: Optional[AliceModel] = None) -> Union[Dict[str, Any], ModelConfig]:
         """
         Returns the appropriate API data based on the API type.
-        For LLM models, it returns an LLMConfig object.
+        For LLM models, it returns an ModelConfig object.
         For other API types, it returns the api_config dictionary.
 
         Args:
@@ -60,7 +60,7 @@ class API(BaseModel):
                                           the default model will be used.
 
         Returns:
-            Union[Dict[str, Any], LLMConfig]: The API data or LLMConfig object.
+            Union[Dict[str, Any], ModelConfig]: The API data or ModelConfig object.
 
         Raises:
             ValueError: If the API is not active or if no model is specified for LLM APIs.

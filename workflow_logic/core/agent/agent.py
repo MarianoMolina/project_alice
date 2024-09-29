@@ -7,7 +7,7 @@ from workflow_logic.core.parameters.parameters import ensure_tool_function
 from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.model import AliceModel
 from workflow_logic.core.api import APIManager
-from workflow_logic.core.data_structures import TaskResponse, DatabaseTaskResponse, FileReference, ContentType, MessageDict, ApiType, ModelType, FileType
+from workflow_logic.core.data_structures import TaskResponse, FileReference, ContentType, MessageDict, ApiType, ModelType, FileType, References, FileContentReference
 from workflow_logic.util import LOGGER
 
 class AliceAgent(BaseModel):
@@ -50,7 +50,7 @@ class AliceAgent(BaseModel):
             LOGGER.info(f"Calling generate_response_with_api_engine")
             LOGGER.debug(f'Agent: {self.model_dump()}')
             chat_model = self.llm_model
-            response: MessageDict = await api_manager.generate_response_with_api_engine(
+            response_ref: References = await api_manager.generate_response_with_api_engine(
                 api_type=ApiType.LLM_MODEL,
                 model=chat_model,
                 messages=self._prepare_messages_for_api(messages),
@@ -58,12 +58,23 @@ class AliceAgent(BaseModel):
                 tool_choice='auto' if self.has_functions else 'none',
                 tools=tools_list,
                 temperature=0.7,
-                max_tokens=1000
+                max_tokens=1000 # TODO: Make this configurable
             )
+
+            if not response_ref or not response_ref.messages[0]:
+                LOGGER.error("No response from API")
+                return [MessageDict(
+                    role="assistant",
+                    content="No response from API",
+                    generated_by="llm",
+                    type="text",
+                    assistant_name=self.name
+                )]
             
+            response = response_ref.messages[0]
             LOGGER.info(f"API response: {response.model_dump()}")
             
-            new_messages: List[MessageDict] = []
+            new_messages = []
             content = response.content if response.content else "Using tools" if response.tool_calls else "No response from API"
             tool_calls = response.tool_calls if self.has_functions else None
             
@@ -84,11 +95,7 @@ class AliceAgent(BaseModel):
                 LOGGER.debug("Processing tool calls")
                 tool_messages = await self._process_tool_calls(tool_calls, tool_map, tools_list)
                 if tool_messages:
-                    if isinstance(tool_messages[0], MessageDict):
-                        if tool_messages[0].type == ContentType.TASK_RESPONSE:
-                            new_messages[-1].task_responses.extend(tool_messages[0].task_responses)
-                        else:
-                            new_messages.extend(tool_messages)
+                    new_messages.extend(tool_messages)
             
             if self.has_code_exec:
                 LOGGER.debug("Processing code execution")
@@ -158,7 +165,7 @@ class AliceAgent(BaseModel):
             
             try:
                 result = await tool_map[function_name](**arguments)
-                task_result = result if isinstance(result, TaskResponse) or isinstance(result, DatabaseTaskResponse) else None
+                task_result = result if isinstance(result, TaskResponse) else None
                 tool_messages.append(MessageDict(
                     role="tool",
                     content=str(result),
@@ -166,7 +173,7 @@ class AliceAgent(BaseModel):
                     step=function_name,
                     tool_call_id=tool_call_id,
                     type=ContentType.TASK_RESPONSE if task_result else ContentType.TEXT,
-                    task_responses= [task_result] if task_result else None,
+                    references=References(task_responses=[task_result] if task_result else None),
                 ))
             except Exception as e:
                 tool_messages.append(MessageDict(
@@ -363,30 +370,36 @@ class AliceAgent(BaseModel):
         if not vision_model:
             raise ValueError("No vision model available for the agent or in the API manager")
         
-        return await api_manager.generate_response_with_api_engine(
+        refs: References = await api_manager.generate_response_with_api_engine(
             api_type=ApiType.IMG_VISION,
             model=vision_model,
             file_references=file_references,
             prompt=prompt
         )
+        if not refs or not refs.messages:
+            raise ValueError("No response from the vision API")
+        return refs.messages[0]
 
     async def generate_stt_response(self, api_manager: APIManager, file_reference: FileReference) -> MessageDict:
         stt_model = self.models[ModelType.STT] or api_manager.get_api_by_type(ApiType.SPEECH_TO_TEXT).default_model
         if not stt_model:
             raise ValueError("No speech-to-text model available for the agent or in the API manager")
         
-        return await api_manager.generate_response_with_api_engine(
+        refs: References = await api_manager.generate_response_with_api_engine(
             api_type=ApiType.SPEECH_TO_TEXT,
             model=stt_model,
             file_reference=file_reference
         )
+        if not refs or not refs.messages:
+            raise ValueError("No response from the speech-to-text API")
+        return refs.messages[0]
 
-    async def generate_image(self, api_manager: APIManager, prompt: str, n: int = 1, size: str = "1024x1024", quality: str = "standard") -> MessageDict:
+    async def generate_image(self, api_manager: APIManager, prompt: str, n: int = 1, size: str = "1024x1024", quality: str = "standard") -> FileContentReference:
         img_gen_model = self.models[ModelType.IMG_GEN] or api_manager.get_api_by_type(ApiType.IMG_GENERATION).default_model
         if not img_gen_model:
             raise ValueError("No image generation model available for the agent or in the API manager")
         
-        return await api_manager.generate_response_with_api_engine(
+        refs: References = api_manager.generate_response_with_api_engine(
             api_type=ApiType.IMG_GENERATION,
             model=img_gen_model,
             prompt=prompt,
@@ -394,37 +407,46 @@ class AliceAgent(BaseModel):
             size=size,
             quality=quality
         )
+        if not refs.files or not refs.files[0]:
+            raise ValueError("No image generated by the API")
+        return refs.files[0]
     
-    async def generate_speech(self, api_manager: APIManager, input: str, voice: str = "nova", speed: float = 1.0) -> MessageDict:
+    async def generate_speech(self, api_manager: APIManager, input: str, voice: str = "nova", speed: float = 1.0) -> FileContentReference:
         tts_model = self.models[ModelType.TTS] or api_manager.get_api_by_type(ApiType.TEXT_TO_SPEECH).default_model
         if not tts_model:
             raise ValueError("No text-to-speech model available for the agent or in the API manager")
         
-        return await api_manager.generate_response_with_api_engine(
+        refs: References = await api_manager.generate_response_with_api_engine(
             api_type=ApiType.TEXT_TO_SPEECH,
             model=tts_model,
             input=input,
             voice=voice,
             speed=speed
         )
+        if not refs.files or not refs.files[0]:
+            raise ValueError("No speech generated by the API")
+        return refs.files[0]
     
-    async def generate_embeddings(self, api_manager: APIManager, input: Union[str, List[str]]) -> MessageDict:
+    async def generate_embeddings(self, api_manager: APIManager, input: Union[str, List[str]]) -> FileContentReference:
         embeddings_model = self.models[ModelType.EMBEDDINGS] or api_manager.get_api_by_type(ApiType.EMBEDDINGS).default_model
         if not embeddings_model:
             raise ValueError("No embeddings model available for the agent or in the API manager")
         
-        return await api_manager.generate_response_with_api_engine(
+        refs: References = await api_manager.generate_response_with_api_engine(
             api_type=ApiType.EMBEDDINGS,
             model=embeddings_model,
             input=input
         )
+        if not refs.files or not refs.files[0]:
+            raise ValueError("No embeddings generated by the API")
+        return refs.files[0]
 
     def _prepare_messages_for_api(self, messages: List[MessageDict]) -> List[Dict[str, Any]]:
         prepared_messages = []
         for msg in messages:
             prepared_msg = {
                 "role": msg.role,
-                "content": msg.content
+                "content": str(msg)
             }
             
             # Include file content using the get_content_string method

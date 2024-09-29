@@ -9,7 +9,6 @@ import EnhancedParameter from '../../parameter/parameter/EnhancedParameter';
 import EnhancedAPI from '../../api/api/EnhancedApi';
 import EnhancedAgent from '../../agent/agent/EnhancedAgent';
 import EnhancedFile from '../../file/file/EnhancedFile';
-import Message from '../message/Message';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import { CollectionType } from '../../../../types/CollectionTypes';
 import AgentCardView from '../../agent/agent/AgentCardView';
@@ -21,6 +20,16 @@ import ModelCardView from '../../model/model/ModelCardView';
 import ParameterCardView from '../../parameter/parameter/ParameterCardView';
 import FileCardView from '../../file/file/FileCardView';
 import ApiCardView from '../../api/api/ApiCardView';
+import EnhancedMessage from '../../message/message/EnhancedMessage';
+import MessageCardView from '../../message/message/MessageCardView';
+import { AliceAgent } from '../../../../types/AgentTypes';
+import { AliceTask } from '../../../../types/TaskTypes';
+import { AliceModel } from '../../../../types/ModelTypes';
+import { Prompt } from '../../../../types/PromptTypes';
+import { ParameterDefinition } from '../../../../types/ParameterTypes';
+import { API } from '../../../../types/ApiTypes';
+import { MessageType } from '../../../../types/MessageTypes';
+import { FileReference } from '../../../../types/FileTypes';
 
 const EnhancedCardDialog: React.FC = () => {
   const { selectedItem, selectedItemType, handleClose, selectItem } = useCardDialog();
@@ -29,14 +38,14 @@ const EnhancedCardDialog: React.FC = () => {
     if (!selectedItem || !selectedItemType) return null;
 
     const handleProps = {
-      handleAgentClick: (id: string) => selectItem('Agent', id),
-      handleTaskClick: (id: string) => selectItem('Task', id),
-      handleModelClick: (id: string) => selectItem('Model', id),
-      handlePromptClick: (id: string) => selectItem('Prompt', id),
-      handleParameterClick: (id: string) => selectItem('Parameter', id),
-      handleAPIClick: (id: string) => selectItem('API', id),
-      handleFileClick: (id: string) => selectItem('File', id),
-      handleMessageClick: (id: string) => selectItem('Message', id),
+      handleAgentClick: (id: string, item?: AliceAgent) => selectItem('Agent', id, item),
+      handleTaskClick: (id: string, item?: AliceTask) => selectItem('Task', id, item),
+      handleModelClick: (id: string, item?: AliceModel) => selectItem('Model', id, item),
+      handlePromptClick: (id: string, item?: Prompt) => selectItem('Prompt', id, item),
+      handleParameterClick: (id: string, item?: ParameterDefinition) => selectItem('Parameter', id, item),
+      handleAPIClick: (id: string, item?: API) => selectItem('API', id, item),
+      handleFileClick: (id: string, item?: FileReference) => selectItem('File', id, item),
+      handleMessageClick: (id: string, item?: MessageType) => selectItem('Message', id, item),
     };
 
     const commonProps = {
@@ -73,6 +82,8 @@ const EnhancedCardDialog: React.FC = () => {
           return <EnhancedAPI itemId={selectedItem._id} {...commonProps} />;
         case 'File':
           return <EnhancedFile itemId={selectedItem._id} {...commonProps} />;
+        case 'Message':
+          return <EnhancedMessage itemId={selectedItem._id} {...commonProps} />;
         default:
           return null;
       }
@@ -97,7 +108,7 @@ const EnhancedCardDialog: React.FC = () => {
         case 'File':
           return <FileCardView item={selectedItem as CollectionType['files']} {...cardViewProps} />;
         case 'Message':
-          return <Message message={selectedItem as CollectionType['messages']} />;
+          return <MessageCardView item={selectedItem as CollectionType['messages']} {...cardViewProps} />;
         default:
           return null;
       }

@@ -1,7 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel, ConfigDict
 
-class LLMConfig(BaseModel):
+class ModelConfig(BaseModel):
     model: str
     api_key: Optional[str]
     base_url: Optional[str]

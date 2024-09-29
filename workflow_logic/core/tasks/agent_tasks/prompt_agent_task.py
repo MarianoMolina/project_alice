@@ -3,7 +3,7 @@ from pydantic import Field
 from typing import List, Dict, Any, Tuple, Optional
 from workflow_logic.core.api import APIManager
 from workflow_logic.util import LOGGER
-from workflow_logic.core.data_structures import TaskResponse, MessageDict, ApiType
+from workflow_logic.core.data_structures import TaskResponse, MessageDict, ApiType, References
 from workflow_logic.util.utils import json_to_python_type_mapping
 from workflow_logic.core.agent.agent import AliceAgent
 from workflow_logic.core.tasks.agent_tasks.agent_task import BasicAgentTask
@@ -201,7 +201,7 @@ class CodeExecutionLLMTask(PromptAgentTask):
 
     Methods:
         get_exit_code: Determines the exit code based on the success of code execution.
-        generate_response: Handles the extraction and execution of code from the input messages.
+        generate_agent_response: Handles the extraction and execution of code from the input messages.
     """
     agent: AliceAgent = Field(..., description="The agent to use for the task")
     task_name: str = Field("execute_code", description="The name of the task")
@@ -217,12 +217,12 @@ class CodeExecutionLLMTask(PromptAgentTask):
             return 1
         return 0
     
-    async def generate_response(self, api_manager: APIManager, **kwargs) -> Tuple[List[MessageDict], int, Optional[Dict[str, str]]]:    
+    async def generate_agent_response(self, api_manager: APIManager, **kwargs) -> Tuple[Optional[References], int, Optional[Dict[str, str]]]:    
         if not kwargs.get('messages'):
             LOGGER.warning(f"No messages to execute code from in task {self.task_name}")
-            return [], self.get_exit_code([], False)
+            return {}, self.get_exit_code([], False)
 
         # Process and execute the code blocks
         code_execs, code_blocks = await self.agent._process_code_execution(kwargs.get('messages'))
         
-        return code_execs, self.get_exit_code(code_execs, True), code_blocks
+        return References(messages=code_execs), self.get_exit_code(code_execs, True), code_blocks

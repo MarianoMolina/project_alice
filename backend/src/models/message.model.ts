@@ -1,9 +1,10 @@
 import mongoose, { Schema } from 'mongoose';
-import { IMessageDocument } from '../interfaces/message.interface';
+import { IMessageDocument, IMessageModel, ContentType } from '../interfaces/message.interface';
 import { ensureObjectIdHelper } from '../utils/utils';
 import mongooseAutopopulate from 'mongoose-autopopulate';
+import referencesSchema from './reference.model';
 
-const messageSchema = new Schema<IMessageDocument>({
+const messageSchema = new Schema<IMessageDocument, IMessageModel>({
   content: { type: String, description: "Content of the message" },
   role: {
     type: String,
@@ -20,7 +21,12 @@ const messageSchema = new Schema<IMessageDocument>({
   step: { type: String, default: "", description: "Process that is creating this message" },
   assistant_name: { type: String, default: "", description: "Name of the assistant" },
   context: { type: Schema.Types.Mixed, default: null, description: "Context of the message" },
-  type: { type: String, default: "text", description: "Type of the message" },
+  type: { 
+    type: String, 
+    enum: Object.values(ContentType),
+    default: ContentType.TEXT, 
+    description: "Type of the message" 
+  },
   tool_calls: { type: Schema.Types.Mixed, default: [], description: "List of tool calls in the message" },
   tool_call_id: { type: String, default: null, description: "ID of the tool call, if any" },
   request_type: {
@@ -28,40 +34,26 @@ const messageSchema = new Schema<IMessageDocument>({
     default: null,
     description: "Request type of the message, if any. Can be 'approval', 'confirmation', etc.",
   },
-  created_by: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    description: "User ID used to call the endpoint",
-    autopopulate: true, 
-  },
-  updated_by: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    description: "User ID used to update the endpoint",
-    autopopulate: true, 
-  },
-  references: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'FileReference',
-      autopopulate: true, 
-    },
-  ],
-  task_responses: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'TaskResult',
-      autopopulate: true, 
-    },
-  ],
+  references: { type: referencesSchema, default: {}, description: "References associated with the message" },
   creation_metadata: {
     type: Schema.Types.Mixed,
     default: {},
     description: "Metadata about the creation of the message",
   },
+  created_by: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    description: "User ID used to call the endpoint",
+    autopopulate: true,
+  },
+  updated_by: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    description: "User ID used to update the endpoint",
+    autopopulate: true,
+  },
 }, { timestamps: true });
 
-// Apply the mongoose-autopopulate plugin to the schema
 messageSchema.plugin(mongooseAutopopulate);
 
 messageSchema.methods.apiRepresentation = function (this: IMessageDocument) {
@@ -82,8 +74,7 @@ messageSchema.methods.apiRepresentation = function (this: IMessageDocument) {
     updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,
     createdAt: this.createdAt || null,
     updatedAt: this.updatedAt || null,
-    references: this.references || [],
-    task_responses: this.task_responses || [],
+    references: this.references || {},
   };
 };
 
@@ -92,12 +83,15 @@ function ensureObjectIdForMessage(
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
   if (this.references) {
-    this.references = this.references.map((reference) => ensureObjectIdHelper(reference));
-  }
-  if (this.task_responses) {
-    this.task_responses = this.task_responses.map((taskResponse) =>
-      ensureObjectIdHelper(taskResponse)
-    );
+    if (this.references.messages) {
+      this.references.messages = this.references.messages.map(message => ensureObjectIdHelper(message));
+    }
+    if (this.references.files) {
+      this.references.files = this.references.files.map(file => ensureObjectIdHelper(file));
+    }
+    if (this.references.task_responses) {
+      this.references.task_responses = this.references.task_responses.map(taskResponse => ensureObjectIdHelper(taskResponse));
+    }
   }
   this.created_by = ensureObjectIdHelper(this.created_by);
   this.updated_by = ensureObjectIdHelper(this.updated_by);
@@ -110,14 +104,15 @@ function ensureObjectIdForUpdate(
 ) {
   const update = this.getUpdate() as any;
   if (update.references) {
-    update.references = update.references.map((reference: any) =>
-      ensureObjectIdHelper(reference)
-    );
-  }
-  if (update.task_responses) {
-    update.task_responses = update.task_responses.map((taskResponse: any) =>
-      ensureObjectIdHelper(taskResponse)
-    );
+    if (update.references.messages) {
+      update.references.messages = update.references.messages.map((message: any) => ensureObjectIdHelper(message));
+    }
+    if (update.references.files) {
+      update.references.files = update.references.files.map((file: any) => ensureObjectIdHelper(file));
+    }
+    if (update.references.task_responses) {
+      update.references.task_responses = update.references.task_responses.map((taskResponse: any) => ensureObjectIdHelper(taskResponse));
+    }
   }
   update.created_by = ensureObjectIdHelper(update.created_by);
   update.updated_by = ensureObjectIdHelper(update.updated_by);
@@ -127,6 +122,6 @@ function ensureObjectIdForUpdate(
 messageSchema.pre('save', ensureObjectIdForMessage);
 messageSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
 
-const Message = mongoose.model<IMessageDocument>('Message', messageSchema);
+const Message = mongoose.model<IMessageDocument, IMessageModel>('Message', messageSchema);
 
 export default Message;

@@ -4,7 +4,7 @@ from unittest.mock import patch, AsyncMock
 from typing import Dict, Any, List, Optional
 from workflow_logic.test.component_tests.test_environment import TestModule
 from workflow_logic.db_app import DBInitManager
-from workflow_logic.core import AliceModel, AliceChat, APIManager, DatabaseTaskResponse, MessageDict, ApiType
+from workflow_logic.core import AliceModel, AliceChat, APIManager, TaskResponse, MessageDict, ApiType
 
 class ChatTests(TestModule):
     name: str = "ChatTests"
@@ -108,7 +108,7 @@ class ChatTests(TestModule):
         try:
             # Mock function for testing
             async def mock_function(**kwargs):
-                return DatabaseTaskResponse(
+                return TaskResponse(
                     task_id="mock_task_id",
                     task_name="mock_function",
                     task_description="A mock function for testing",

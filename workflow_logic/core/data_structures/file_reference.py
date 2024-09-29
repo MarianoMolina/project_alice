@@ -12,7 +12,7 @@ class FileReference(BaseDataStructure):
     filename: str = Field(..., description="The name of the file reference")
     type: FileType = Field(..., description="The type of the file reference")
     storage_path: str = Field(..., description="The path to the file in the shared volume")
-    transcript: Optional[MessageDict] = Field(None, description="The transcript of the file content")
+    transcript: Optional[MessageDict] = Field(None, description="The transcript / description of the file content")
 
     @field_validator('transcript')
     def validate_transcript(cls, v):
@@ -34,6 +34,9 @@ class FileReference(BaseDataStructure):
 
     class Config:
         populate_by_name = True
+        
+    def __str__(self) -> str:
+        return self.get_content_string()
 
     def get_content_string(self, max_chars: int = 1000) -> str:
         """

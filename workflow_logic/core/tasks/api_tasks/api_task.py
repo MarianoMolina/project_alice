@@ -106,15 +106,16 @@ class APITask(AliceTask):
             # if not api_data:
             #     raise ValueError(f"API data not found for {self.required_apis[0]}")
             api_engine = self.api_engine()  # Instantiate the API engine
-            task_outputs = await api_engine.generate_api_response(api_data=api_data, **kwargs)
+            references = await api_engine.generate_api_response(api_data=api_data, **kwargs)
+            str_outputs = references.detailed_summary() if references else None
             return TaskResponse(
                 task_id=self.id if self.id else '',
                 task_name=self.task_name,
                 task_description=self.task_description,
                 status="complete",
                 result_code=0,
-                task_outputs=str(task_outputs),
-                task_content=task_outputs,
+                task_outputs=str_outputs,
+                references=references,
                 task_inputs=task_inputs,
                 result_diagnostic="",
                 execution_history=kwargs.get("execution_history", [])

@@ -4,7 +4,7 @@ from typing import get_type_hints, get_origin, get_args, Dict, Any, Union, Optio
 from pydantic import BaseModel, Field, ConfigDict, ValidationError
 from workflow_logic.db_app.app import BackendAPI
 from workflow_logic.util.logging_config import LOGGER
-from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, ParameterDefinition, FunctionParameters, API, DatabaseTaskResponse, User
+from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, ParameterDefinition, FunctionParameters, API, TaskResponse, User
 from workflow_logic.core.data_structures import EntityType
 from workflow_logic.db_app.utils import available_task_types
 
@@ -67,7 +67,7 @@ class DBInitManager(BaseModel):
         "tasks": AliceTask,
         "users": User,
         "parameters": ParameterDefinition, 
-        "task_responses": DatabaseTaskResponse,
+        "task_responses": TaskResponse,
         "apis": API
     }, description="Map of entity types to Pydantic model classes")
     model_config = ConfigDict(arbitrary_types_allowed=True)

@@ -59,12 +59,13 @@ export const converters: { [K in CollectionName]: (data: any) => CollectionType[
 export type ComponentMode = 'create' | 'edit' | 'view' | 'list' | 'shortList' | 'table';
 
 export interface HandleClickProps {
-    handleModelClick?: (modelId: string) => void;
-    handleAgentClick?: (agentId: string) => void;
-    handleTaskClick?: (taskId: string) => void;
-    handlePromptClick?: (promptId: string) => void;
-    handleParameterClick?: (paramId: string) => void;
-    handleApiClick?: (apiId: string) => void;
-    handleTaskResultClick?: (taskResultId: string) => void;
-    handleFileClick?: (fileId: string) => void;
+    handleModelClick?: (modelId: string, item?: AliceModel) => void;
+    handleAgentClick?: (agentId: string, item?: AliceAgent) => void;
+    handleTaskClick?: (taskId: string, item?: AliceTask) => void;
+    handlePromptClick?: (promptId: string, item?: Prompt) => void;
+    handleParameterClick?: (paramId: string, item?: ParameterDefinition) => void;
+    handleApiClick?: (apiId: string, item?: API) => void;
+    handleTaskResultClick?: (taskResultId: string, item?: TaskResponse) => void;
+    handleFileClick?: (fileId: string, item?: FileReference) => void;
+    handleMessageClick?: (messageId: string, item?: MessageType) => void;
 }

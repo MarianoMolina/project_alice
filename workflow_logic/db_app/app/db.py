@@ -4,7 +4,7 @@ from bson import ObjectId
 from typing import Dict, Any, Optional, Literal, Union
 from pydantic import BaseModel, Field, ConfigDict
 from workflow_logic.db_app.utils import available_task_types
-from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, API, User, DatabaseTaskResponse, MessageDict, FileReference, FileContentReference
+from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, API, User, TaskResponse, MessageDict, FileReference, FileContentReference
 from workflow_logic.util.const import BACKEND_PORT, HOST, ADMIN_TOKEN
 from workflow_logic.core.data_structures import EntityType
 from workflow_logic.util import LOGGER
@@ -34,7 +34,7 @@ class BackendAPI(BaseModel):
         update_api_health(api_id: str, health_status: str) -> bool: Updates API health status.
         get_chats(chat_id: Optional[str] = None) -> Dict[str, AliceChat]: Retrieves chats.
         store_chat_message(chat_id: str, message: MessageDict) -> AliceChat: Stores a chat message.
-        store_task_response(task_response: DatabaseTaskResponse) -> DatabaseTaskResponse: Stores a task response.
+        store_task_response(task_response: TaskResponse) -> TaskResponse: Stores a task response.
         validate_token(token: str) -> dict: Validates an authentication token.
         create_entity_in_db(entity_type: EntityType, entity_data: dict) -> str: Creates an entity in the database.
         check_existing_data(max_retries=3, retry_delay=1) -> bool: Checks for existing data in the database.
@@ -336,7 +336,7 @@ class BackendAPI(BaseModel):
             LOGGER.error(f"Error storing messages: {e}")
             return None
 
-    async def store_task_response(self, task_response: DatabaseTaskResponse) -> DatabaseTaskResponse:
+    async def store_task_response(self, task_response: TaskResponse) -> TaskResponse:
         url = f"{self.base_url}/taskresults"
         headers = self._get_headers()
         headers['Content-Type'] = 'application/json'
@@ -359,15 +359,15 @@ class BackendAPI(BaseModel):
                         LOGGER.info(f"Response content: {response_text}")
                         raise
                     result = await response.json()
-                    return DatabaseTaskResponse(**result)
+                    return TaskResponse(**result)
         except aiohttp.ClientError as e:
-            LOGGER.error(f"Error storing DatabaseTaskResponse: {e}")
+            LOGGER.error(f"Error storing TaskResponse: {e}")
             raise
         except Exception as e:
             LOGGER.error(f"Unexpected error: {e}")
             raise      
 
-    async def store_task_response_on_chat(self, task_response: DatabaseTaskResponse, chat_id: str) -> Dict[str, Any]:
+    async def store_task_response_on_chat(self, task_response: TaskResponse, chat_id: str) -> Dict[str, Any]:
         url = f"{self.base_url}/chats/{chat_id}/add_task_response"
         headers = self._get_headers()
         try:
@@ -376,10 +376,10 @@ class BackendAPI(BaseModel):
                 async with session.patch(url, json={"task_response_id": result.id}, headers=headers) as response:
                     response.raise_for_status()
                     chat_result = await response.json()
-                    LOGGER.debug(f"DatabaseTaskResponse added to chat successfully: {chat_result}")
+                    LOGGER.debug(f"TaskResponse added to chat successfully: {chat_result}")
                     return chat_result
         except aiohttp.ClientError as e:
-            LOGGER.error(f"Error storing DatabaseTaskResponse on chat: {e}")
+            LOGGER.error(f"Error storing TaskResponse on chat: {e}")
             raise
         
     def validate_token(self, token: str) -> dict:

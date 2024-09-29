@@ -1,6 +1,6 @@
 from pydantic import Field
 from openai import AsyncOpenAI
-from workflow_logic.core.data_structures import LLMConfig, ApiType, FileReference, MessageDict
+from workflow_logic.core.data_structures import ModelConfig, ApiType, FileReference, MessageDict, References
 from workflow_logic.core.api.engines.api_engine import APIEngine
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 from workflow_logic.util import LOGGER
@@ -25,17 +25,17 @@ class OpenAISpeechToTextEngine(APIEngine):
     )
     required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
 
-    async def generate_api_response(self, api_data: LLMConfig, file_reference: FileReference) -> MessageDict:
+    async def generate_api_response(self, api_data: ModelConfig, file_reference: FileReference) -> References:
         """
         Transcribes speech to text using OpenAI's API.
 
         Args:
-            api_data (LLMConfig): Configuration data for the API (e.g., API key, base URL).
+            api_data (ModelConfig): Configuration data for the API (e.g., API key, base URL).
             file_reference (FileReference): FileReference object for the audio file to transcribe.
             model (str): The name of the speech-to-text model to use.
 
         Returns:
-            MessageDict: A message dict containing the transcription.
+            References: A message dict containing the transcription.
         """
         LOGGER.info(f"Transcribing audio file {file_reference.storage_path} using OpenAI speech-to-text model {model}")
         LOGGER.info(f"API data: {api_data}")
@@ -53,7 +53,7 @@ class OpenAISpeechToTextEngine(APIEngine):
                     response_format="text"
                 )
 
-            return MessageDict(
+            msg = MessageDict(
                 role="assistant",
                 content=f'Transcription: {transcription}',
                 generated_by="tool",
@@ -62,5 +62,6 @@ class OpenAISpeechToTextEngine(APIEngine):
                     "model": model,
                 }
             )
+            return References(messages=[msg])
         except Exception as e:
             raise Exception(f"Error in OpenAI speech-to-text API call: {str(e)}")

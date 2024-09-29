@@ -1,9 +1,17 @@
 import { Model, Types, Document } from 'mongoose';
-import { IFileReferenceDocument } from "./file.interface";
-import { ITaskResultDocument } from "./taskResult.interface";
 import { IUserDocument } from "./user.interface";
+import { References } from './references.interface';
+import { FileType } from './file.interface';
 
-export type ContentType = 'text' | 'image' | 'video' | 'audio' | 'file' | 'task_result';
+export enum ContentType {
+    TEXT = 'text',
+    IMAGE = FileType.IMAGE,
+    VIDEO = FileType.VIDEO,
+    AUDIO = FileType.AUDIO,
+    FILE = FileType.FILE,
+    TASK_RESULT = 'task_result',
+    MULTIPLE = 'multiple',
+}
 
 export interface IMessage {
     content?: string;
@@ -16,8 +24,7 @@ export interface IMessage {
     tool_calls?: any[];
     tool_call_id?: string,
     request_type?: string | null;
-    references?: Types.ObjectId[] | IFileReferenceDocument[];
-    task_responses?: Types.ObjectId[] | ITaskResultDocument[];
+    references?: References;
     creation_metadata?: Record<string, any>;
     created_by: Types.ObjectId | IUserDocument;
     updated_by: Types.ObjectId | IUserDocument;

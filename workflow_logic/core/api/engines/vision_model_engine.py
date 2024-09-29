@@ -1,7 +1,7 @@
 import base64
 from pydantic import Field
 from typing import List, Union, Optional
-from workflow_logic.core.data_structures import MessageDict, LLMConfig, FileReference, get_file_content, ApiType
+from workflow_logic.core.data_structures import MessageDict, ModelConfig, FileReference, get_file_content, ApiType, References
 from workflow_logic.core.api.engines.api_engine import APIEngine
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 from openai import AsyncOpenAI
@@ -32,18 +32,18 @@ class VisionModelEngine(APIEngine):
     )
     required_api: ApiType = Field(ApiType.IMG_VISION, title="The API engine required")
         
-    async def generate_api_response(self, api_data: LLMConfig, file_references: List[FileReference], prompt: str, max_tokens: int = 300) -> MessageDict:
+    async def generate_api_response(self, api_data: ModelConfig, file_references: List[FileReference], prompt: str, max_tokens: int = 300) -> References:
         """
         Analyzes images using OpenAI's vision model.
 
         Args:
-            api_data (LLMConfig): Configuration data for the API (e.g., model name, API key).
+            api_data (ModelConfig): Configuration data for the API (e.g., model name, API key).
             file_references (List[FileReference]): List of FileReference objects for the images to analyze.
             prompt (str): A text prompt to guide the image analysis.
             max_tokens (int): The maximum number of tokens to generate.
 
         Returns:
-            MessageDict: Analysis results wrapped in a MessageDict object.
+            References: Analysis results wrapped in a References object.
         """
         client = AsyncOpenAI(
             api_key=api_data.api_key,
@@ -75,7 +75,7 @@ class VisionModelEngine(APIEngine):
                 max_tokens=max_tokens
             )
             response_content = response.choices[0].message.content
-            return MessageDict(
+            msg = MessageDict(
                 role="assistant",
                 content=response_content,
                 generated_by="llm",
@@ -86,6 +86,7 @@ class VisionModelEngine(APIEngine):
                     "finish_reason": response.choices[0].finish_reason
                 }
             )
+            return References(messages=[msg])
         except Exception as e:
             raise Exception(f"Error in vision model API call: {str(e)}")
 

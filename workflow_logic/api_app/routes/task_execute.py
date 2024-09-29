@@ -2,14 +2,14 @@ from fastapi import APIRouter, Depends
 from workflow_logic.util import LOGGER
 from workflow_logic.core import AliceTask
 from workflow_logic.api_app.util import TaskExecutionRequest
-from workflow_logic.core import DatabaseTaskResponse
+from workflow_logic.core import TaskResponse
 from workflow_logic.api_app.util.utils import deep_api_check
 from workflow_logic.api_app.util.dependencies import get_db_app
 from workflow_logic.api_app.util.reference_utils import check_task_response_references
 
 router = APIRouter()
 
-@router.post("/execute_task", response_model=DatabaseTaskResponse)
+@router.post("/execute_task", response_model=TaskResponse)
 async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(get_db_app)) -> dict:
     """
     Execute a specific task and store its response.
@@ -59,13 +59,12 @@ async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(ge
         LOGGER.debug(f'task type: {type(task)}')
        
         result = await task.a_execute(api_manager=api_manager, **inputs)
+        if not result:
+            raise ValueError(f"Task execution failed for task ID {taskId}")
 
         # Process and update file content references
         LOGGER.debug(f'task_result: {result.model_dump()}')
-        task_response = result.retrieve_task_response()
-        task_response = await check_task_response_references(task_response, db_app)
-
-        result = DatabaseTaskResponse(**task_response.model_dump(by_alias=True))
+        result = await check_task_response_references(result, db_app)
 
         LOGGER.debug(f'result after checking references: {result.model_dump()}')
         LOGGER.debug(f'type: {type(result)}')
@@ -76,7 +75,7 @@ async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(ge
     except Exception as e:
         import traceback
         LOGGER.error(f'Error: {e}\nTraceback: {traceback.format_exc()}')
-        result = DatabaseTaskResponse(
+        result = TaskResponse(
             task_id=taskId,
             task_name=task.task_name if task else "Unknown",
             task_description=task.task_description if task else "Task execution failed",

@@ -8,7 +8,6 @@ import { WorkflowOutput } from '../../task_response/WorkflowOutput';
 import { CommandLineLog } from '../../task_response/CommandLog';
 import { BackgroundBeams } from '../../../ui/aceternity/BackgroundBeams';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
-import MessageFlexibleView from './MessageFlexibleView';
 import EnhancedMessage from './EnhancedMessage';
 
 const MessageDetailView: React.FC<MessageComponentProps> = ({ item: message, chatId, onChange, handleSave }) => {

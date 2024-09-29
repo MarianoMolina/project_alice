@@ -1,5 +1,6 @@
 import { Document, Types, Model } from 'mongoose';
 import { IUserDocument } from './user.interface';
+import { References } from './references.interface';
 
 export interface ITaskResult {
     task_name: string;
@@ -12,7 +13,7 @@ export interface ITaskResult {
     result_diagnostic: string | null;
     usage_metrics: Map<string, string> | null;
     execution_history: Map<string, any>[];
-    task_content: Map<string, any> | null;
+    references?: References;
     created_by: Types.ObjectId | IUserDocument;
     updated_by: Types.ObjectId | IUserDocument;
 }

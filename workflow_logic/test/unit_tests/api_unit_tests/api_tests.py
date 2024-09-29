@@ -1,6 +1,6 @@
 import pytest
 from bson import ObjectId
-from workflow_logic.core import API, AliceModel, User, LLMConfig, ApiType, ApiName
+from workflow_logic.core import API, AliceModel, User, ModelConfig, ApiType, ApiName
 
 @pytest.fixture
 def sample_api():
@@ -39,7 +39,7 @@ def test_api_creation(sample_api):
 
 def test_create_model_config(sample_api):
     llm_config = sample_api._create_model_config()
-    assert isinstance(llm_config, LLMConfig)
+    assert isinstance(llm_config, ModelConfig)
     assert llm_config.model == "gpt-4"
     assert llm_config.api_key == "test_api_key"
     assert llm_config.base_url == "https://api.openai.com/v1"
@@ -70,7 +70,7 @@ def test_create_model_config_no_model(sample_api):
 
 def test_get_api_data_llm(sample_api):
     api_data = sample_api.get_api_data()
-    assert isinstance(api_data, LLMConfig)
+    assert isinstance(api_data, ModelConfig)
     assert api_data.model == "gpt-4"
     assert api_data.api_key == "test_api_key"
 
@@ -115,7 +115,7 @@ def test_get_api_data_lm_studio():
         )
     )
     api_data = lm_studio_api.get_api_data()
-    assert isinstance(api_data, LLMConfig)
+    assert isinstance(api_data, ModelConfig)
     assert api_data.model == "local-model"
     assert api_data.api_key == "lm_studio_key"
     assert api_data.base_url == "http://localhost:1234/v1"
