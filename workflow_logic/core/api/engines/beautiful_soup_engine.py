@@ -2,7 +2,7 @@ import aiohttp
 from bs4 import BeautifulSoup
 from typing import Dict, Any
 from pydantic import Field
-from workflow_logic.core.data_structures import SearchResult, References
+from workflow_logic.core.data_structures import URLReference, References
 from workflow_logic.core.api.engines.api_engine import APIEngine
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 
@@ -60,7 +60,7 @@ class BeautifulSoupWebScraperEngine(APIEngine):
         
         # This probably needs a new data structure that enables chunking, etc. 
         for element in elements:
-            result = SearchResult(
+            result = URLReference(
                 title=element.get_text(strip=True)[:100],  # First 100 characters as title
                 url=url,
                 content=element.get_text(strip=True),

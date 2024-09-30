@@ -6,7 +6,7 @@ from exa_py import Exa
 from pydantic import Field
 from typing import Dict, Any, List
 from workflow_logic.util import LOGGER
-from workflow_logic.core.data_structures import SearchResult, References, ApiType
+from workflow_logic.core.data_structures import URLReference, References, ApiType
 from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 from workflow_logic.core.api.engines.api_engine import APIEngine
 
@@ -68,7 +68,7 @@ class WikipediaSearchAPI(APISearchEngine):
         if not detailed_results:
             raise ValueError("No results found")
         return References(search_results=[
-            SearchResult(
+            URLReference(
                 title=result.title,
                 url=result.url,
                 content=result.summary,
@@ -98,7 +98,7 @@ class GoogleSearchAPI(APISearchEngine):
         res = service.cse().list(q=prompt, cx=api_data['cse_id'], num=max_results).execute()
         results = res.get('items', [])
         return References(search_results=[
-            SearchResult(
+            URLReference(
                 title=result['title'],
                 url=result['link'],
                 content=result['snippet'],
@@ -130,7 +130,7 @@ class ExaSearchAPI(APISearchEngine):
         results = exa_search.results
 
         return References(search_results=[
-            SearchResult(
+            URLReference(
                 title=result.title,
                 url=result.url,
                 content=f'Score: {result.score} - Published Date: {result.published_date} - Author: {result.author}',
@@ -165,7 +165,7 @@ class ArxivSearchAPI(APISearchEngine):
             raise ValueError("No results found")
 
         return References(search_results=[
-            SearchResult(
+            URLReference(
                 title=result.title,
                 url=result.pdf_url,
                 content=result.summary,
@@ -243,7 +243,7 @@ class RedditSearchAPI(APIEngine):
             limit (int): Maximum number of results to return. Defaults to 10.
 
         Returns:
-            References: A collection of SearchResult objects containing Reddit submission information.
+            References: A collection of URLReference objects containing Reddit submission information.
 
         Raises:
             ValueError: If client ID or client secret is missing from api_data.
@@ -264,7 +264,7 @@ class RedditSearchAPI(APIEngine):
         submissions: List[Submission] = [submission for submission in search_results]
 
         search_result_list = [
-            SearchResult(
+            URLReference(
                 title=submission.title,
                 url=submission.url,
                 content=submission.selftext,

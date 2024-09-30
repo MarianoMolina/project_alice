@@ -1,5 +1,5 @@
 import { AliceModel, convertToAliceModel } from "./ModelTypes";
-import { convertToUser, User } from "./UserTypes";
+import { BaseDataseObject, convertToUser, User } from "./UserTypes";
 import { FunctionParameters } from "./ParameterTypes";
 import { HandleClickProps } from "./CollectionTypes";
 
@@ -47,7 +47,7 @@ export enum LlmProvider {
     LM_STUDIO = ApiName.LM_STUDIO,
 }
 
-export interface API {
+export interface API extends BaseDataseObject{
     _id?: string;
     api_type: ApiType;
     api_name: ApiName;
@@ -56,13 +56,9 @@ export interface API {
     health_status: 'healthy' | 'unhealthy' | 'unknown';
     default_model?: AliceModel;
     api_config: { [key: string]: string };
-    created_by?: User;
-    updated_by?: User;
-    createdAt?: Date;
-    updatedAt?: Date;
 }
 
-export interface LLMAPI {
+export interface LLMAPI extends BaseDataseObject {
     _id?: string;
     user: User;
     api_type: ApiType.LLM_MODEL;
@@ -72,10 +68,6 @@ export interface LLMAPI {
     health_status: 'healthy' | 'unhealthy' | 'unknown';
     default_model?: AliceModel;
     api_config: { api_key: string, base_url: string };
-    created_by?: User;
-    updated_by?: User;
-    createdAt?: Date;
-    updatedAt?: Date;
 }
 export const convertToAPI = (data: any): API => {
     return {

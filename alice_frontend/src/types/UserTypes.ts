@@ -7,6 +7,13 @@ export interface User {
     updatedAt?: Date;
 }
 
+export interface BaseDataseObject {
+  created_by?: User;
+  updated_by?: User;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 export const convertToUser = (data: any): User => {
     return {
         _id: data?._id || undefined,

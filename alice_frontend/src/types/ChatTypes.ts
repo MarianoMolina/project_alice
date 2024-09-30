@@ -1,19 +1,15 @@
-import { User } from './UserTypes';
+import { BaseDataseObject, User } from './UserTypes';
 import { AliceTask, convertToAliceTask } from './TaskTypes';
 import { AliceAgent, convertToAliceAgent } from './AgentTypes';
 import { HandleClickProps } from './CollectionTypes';
 import { convertToMessageType, MessageType } from './MessageTypes';
 
-export interface AliceChat {
+export interface AliceChat extends BaseDataseObject {
     _id: string;
     name: string;
     messages: MessageType[];
     alice_agent: AliceAgent;
     functions?: AliceTask[];
-    created_by?: User;
-    updated_by?: User;
-    createdAt?: Date;
-    updatedAt?: Date;
 }
 
 export const convertToAliceChat = (data: any): AliceChat => {

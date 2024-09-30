@@ -3,7 +3,7 @@ from workflow_logic.core.data_structures.references import References
 from workflow_logic.core.data_structures.file_reference import FileReference, FileContentReference
 from workflow_logic.core.data_structures.task_response import TaskResponse
 from workflow_logic.core.data_structures.message import MessageDict
-from workflow_logic.core.data_structures.search_result import SearchResult
+from workflow_logic.core.data_structures.url_reference import URLReference
 from workflow_logic.db_app.app import BackendAPI
 from workflow_logic.util import LOGGER
 
@@ -40,7 +40,7 @@ async def create_or_update_message(db_app: BackendAPI, message: MessageDict) -> 
         LOGGER.info(f'Created new message: {new_message}')
         return MessageDict(**new_message)
 
-async def process_search_result(db_app: BackendAPI, search_result: SearchResult) -> SearchResult:
+async def process_search_result(db_app: BackendAPI, search_result: URLReference) -> URLReference:
     # For now, we'll assume search results don't need to be stored separately
     return search_result
 
@@ -51,7 +51,7 @@ async def process_string_output(db_app: BackendAPI, string_output: str) -> str:
 async def check_references(references: References, db_app: BackendAPI) -> References:
     LOGGER.info(f'Checking references')
 
-    async def process_reference(ref: Union[MessageDict, FileReference, FileContentReference, TaskResponse, SearchResult, str]):
+    async def process_reference(ref: Union[MessageDict, FileReference, FileContentReference, TaskResponse, URLReference, str]):
         if isinstance(ref, FileContentReference):
             return await create_or_update_file_reference(db_app, ref)
         elif isinstance(ref, TaskResponse):
@@ -62,7 +62,7 @@ async def check_references(references: References, db_app: BackendAPI) -> Refere
             ref.references = await check_references(ref.references, db_app)
             processed_message = await create_or_update_message(db_app, ref)
             return processed_message
-        elif isinstance(ref, SearchResult):
+        elif isinstance(ref, URLReference):
             return await process_search_result(db_app, ref)
         elif isinstance(ref, str):
             return await process_string_output(db_app, ref)

@@ -1,9 +1,9 @@
-import { User } from "./UserTypes";
+import { BaseDataseObject } from "./UserTypes";
 import { AliceModel, ModelType } from "./ModelTypes";
 import { Prompt } from "./PromptTypes";
 import { HandleClickProps } from "./CollectionTypes";
 
-export interface AliceAgent {
+export interface AliceAgent extends BaseDataseObject {
   _id?: string;
   name: string;
   system_message: Prompt;
@@ -11,10 +11,6 @@ export interface AliceAgent {
   has_code_exec: boolean;
   max_consecutive_auto_reply?: number;
   models?: { [key in ModelType]?: AliceModel };
-  created_by?: User;
-  updated_by?: User;
-  createdAt?: Date;
-  updatedAt?: Date;
 }
 
 export const convertToAliceAgent = (data: any): AliceAgent => {

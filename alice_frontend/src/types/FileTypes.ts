@@ -1,4 +1,5 @@
 import { MessageType } from "./MessageTypes";
+import { BaseDataseObject, User } from "./UserTypes";
 
 export enum FileType {
     IMAGE = "image",
@@ -7,17 +8,14 @@ export enum FileType {
     FILE = "file",
 }
 
-export interface FileReference {
+export interface FileReference extends BaseDataseObject{
     _id: string;
     filename: string;
     type: FileType;
     file_size: number;
     transcript?: MessageType;
     storage_path?: string;
-    created_by?: string;
     last_accessed?: Date;
-    createdAt?: Date;
-    updatedAt?: Date;
 }
 
 export interface FileContentReference {

@@ -3,13 +3,13 @@ from pydantic import BaseModel, Field
 from workflow_logic.core.data_structures.message import MessageDict
 from workflow_logic.core.data_structures.file_reference import FileReference, FileContentReference
 from workflow_logic.core.data_structures.task_response import TaskResponse
-from workflow_logic.core.data_structures.search_result import SearchResult
+from workflow_logic.core.data_structures.url_reference import URLReference
 
 class References(BaseModel):
     messages: Optional[List[MessageDict]] = Field(default=None, description="List of message references")
     files: Optional[List[Union[FileReference, FileContentReference]]] = Field(default=None, description="List of file references")
     task_responses: Optional[List[TaskResponse]] = Field(default=None, description="List of task response references")
-    search_results: Optional[List[SearchResult]] = Field(default=None, description="List of search result references")
+    search_results: Optional[List[URLReference]] = Field(default=None, description="List of search result references")
     string_outputs: Optional[List[str]] = Field(default=None, description="List of string output references")
 
     def model_dump(self, *args, **kwargs) -> Dict[str, Any]:
@@ -19,7 +19,7 @@ class References(BaseModel):
                 data[key] = [item.model_dump(*args, **kwargs) for item in getattr(self, key)]
         return data
 
-    def add_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, SearchResult, str]):
+    def add_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, URLReference, str]):
         """Add a reference to the appropriate list based on its type."""
         if isinstance(reference, MessageDict):
             if self.messages is None:
@@ -33,7 +33,7 @@ class References(BaseModel):
             if self.task_responses is None:
                 self.task_responses = []
             self.task_responses.append(reference)
-        elif isinstance(reference, SearchResult):
+        elif isinstance(reference, URLReference):
             if self.search_results is None:
                 self.search_results = []
             self.search_results.append(reference)
@@ -61,7 +61,7 @@ class References(BaseModel):
             }
         return getattr(self, ref_type, None)
 
-    def remove_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, SearchResult, str]) -> bool:
+    def remove_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, URLReference, str]) -> bool:
         """Remove a specific reference."""
         for attr in ['messages', 'files', 'task_responses', 'search_results', 'string_outputs', 'search_outputs']:
             ref_list = getattr(self, attr)
@@ -124,7 +124,7 @@ class References(BaseModel):
                 complete_refs.add_reference(ref)
                 if hasattr(ref, 'transcript') and ref.transcript:
                     collect_nested_references(ref.transcript)
-            elif isinstance(ref, (SearchResult, str)):
+            elif isinstance(ref, (URLReference, str)):
                 complete_refs.add_reference(ref)
 
         for ref_list in self.__dict__.values():

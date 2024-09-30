@@ -1,13 +1,13 @@
 import { HandleClickProps } from "./CollectionTypes";
-import { FileReference } from "./FileTypes";
 import { ToolCall } from "./ParameterTypes";
-import { TaskResponse } from "./TaskResponseTypes";
-import { User } from "./UserTypes";
+import { References } from "./ReferenceTypes";
+import { BaseDataseObject } from "./UserTypes";
 
 export type RoleType = 'user' | 'assistant' | 'system' | 'tool';
 export type ContentType = 'text' | 'image' | 'video' | 'audio' | 'file' | 'task_result';
 
-export interface MessageType {
+export interface MessageType extends BaseDataseObject {
+    _id?: string;
     role: RoleType;
     content: string;
     generated_by: 'user' | 'llm' | 'tool';
@@ -18,14 +18,8 @@ export interface MessageType {
     request_type?: string | null;
     tool_calls?: ToolCall[];
     function_call?: { [key: string]: string };
-    task_responses?: TaskResponse[];
     creation_metadata?: Record<string, any>;
-    references?: FileReference[];
-    created_by?: User | null;
-    updated_by?: User | null;
-    createdAt?: Date;
-    updatedAt?: Date;
-    _id?: string;
+    references?: References;
 }
 
 export const convertToMessageType = (data: any): MessageType => {
@@ -40,8 +34,7 @@ export const convertToMessageType = (data: any): MessageType => {
         request_type: data?.request_type || null,
         tool_calls: data?.tool_calls || [],
         function_call: data?.function_call || {},
-        task_responses: data?.task_responses || [],
-        references: (data?.references || []).map((ref: any) => ref),
+        references: data?.references || {} as References,
         creation_metadata: data?.creation_metadata || {},
         created_by: data?.created_by || null,
         updated_by: data?.updated_by || null,
@@ -72,9 +65,8 @@ export const getDefaultMessageForm = (): Partial<MessageType> => ({
     type: 'text',
     tool_calls: [],
     function_call: {},
-    task_responses: [],
-    references: [],
+    references: {},
     creation_metadata: {},
-    created_by: null,
-    updated_by: null,
+    created_by: undefined,
+    updated_by: undefined,
 });

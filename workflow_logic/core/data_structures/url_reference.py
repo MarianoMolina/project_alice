@@ -3,7 +3,7 @@ from typing import Dict, Any, Optional
 from pydantic import Field, model_validator
 from workflow_logic.core.data_structures.base_models import BaseDataStructure
 
-class SearchResult(BaseDataStructure):
+class URLReference(BaseDataStructure):
     id: Optional[str] = Field(None, description="The id of the search result", alias="_id")
     title: str = Field(..., description="The title of the search result")
     url: str = Field(..., description="The URL of the search result")

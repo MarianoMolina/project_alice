@@ -1,5 +1,5 @@
 import { HandleClickProps } from "./CollectionTypes";
-import { User, convertToUser } from "./UserTypes";
+import { BaseDataseObject, User, convertToUser } from "./UserTypes";
 
 export interface FunctionParameters {
     type: "object";
@@ -7,15 +7,11 @@ export interface FunctionParameters {
     required: string[];
 }
 export type ParameterTypes = "string" | "integer" | "boolean" | "object" | "array";
-export interface ParameterDefinition {
+export interface ParameterDefinition extends BaseDataseObject {
     _id?: string;
     type: ParameterTypes;
     description: string;
     default?: any;
-    created_by?: User;
-    updated_by?: User;
-    createdAt?: Date;
-    updatedAt?: Date;
 }
 export const convertToParameterDefinition = (data: any): ParameterDefinition => {
     return {

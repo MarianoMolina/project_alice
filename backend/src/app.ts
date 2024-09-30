@@ -20,6 +20,7 @@ import LmStudioRoute from './routes/lmStudio.route';
 import Logger from './utils/logger';
 import FileRoutes from './routes/file.route';
 import MessageRoutes from './routes/message.route';
+import URLReferenceRoutes from './routes/urlReference.route';
 import './models';
 
 dotenv.config();
@@ -64,5 +65,6 @@ app.use('/api/parameters', ParametersRoutes);
 app.use('/api/files', FileRoutes);
 app.use('/lm-studio', LmStudioRoute);
 app.use('/api/messages', MessageRoutes);
+app.use('/api/urlreferences', URLReferenceRoutes)
 
 export default app;

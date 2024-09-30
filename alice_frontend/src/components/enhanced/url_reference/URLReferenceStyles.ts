@@ -1,0 +1,54 @@
+import { Theme } from '@mui/material/styles';
+import { makeStyles } from '@mui/styles';
+
+const useStyles = makeStyles((theme: Theme) => ({
+  urlReferenceCard: {
+    padding: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+    border: `1px solid ${theme.palette.divider}`,
+    borderRadius: theme.shape.borderRadius,
+    transition: 'box-shadow 0.3s ease-in-out',
+    '&:hover': {
+      boxShadow: theme.shadows[3],
+    },
+  },
+  urlReferenceContent: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  sectionLabel: {
+    fontWeight: 'bold',
+    color: theme.palette.text.secondary,
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(0.5),
+  },
+  urlReferenceTitle: {
+    marginBottom: theme.spacing(1),
+  },
+  urlReferenceUrl: {
+    color: theme.palette.text.secondary,
+    marginBottom: theme.spacing(1),
+    wordBreak: 'break-all',
+  },
+  urlReferenceBody: {
+    marginBottom: theme.spacing(1),
+    padding: theme.spacing(1),
+    backgroundColor: theme.palette.background.default,
+    borderRadius: theme.shape.borderRadius,
+  },
+  urlReferenceMetadata: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: theme.spacing(0.5),
+    marginTop: theme.spacing(1),
+  },
+  metadataChip: {
+    backgroundColor: theme.palette.background.paper,
+    border: `1px solid ${theme.palette.divider}`,
+  },
+  outputInterfaceList: {
+    overflowX: 'auto',
+  }
+}));
+
+export default useStyles;
