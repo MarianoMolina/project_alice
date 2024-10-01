@@ -1,5 +1,5 @@
 import { MessageType } from "./MessageTypes";
-import { BaseDataseObject, User } from "./UserTypes";
+import { BaseDataseObject } from "./UserTypes";
 
 export enum FileType {
     IMAGE = "image",

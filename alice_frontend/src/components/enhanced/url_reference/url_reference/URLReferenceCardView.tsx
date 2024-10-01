@@ -49,7 +49,7 @@ const URLReferenceCardView: React.FC<URLReferenceComponentProps> = ({
         <CommonCardView
             elementType='URL Reference'
             title={item.title}
-            id={item.id}
+            id={item._id}
             listItems={listItems}
         >
             <Box mt={2}>

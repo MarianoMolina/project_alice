@@ -1,4 +1,4 @@
-import { BaseDataseObject, User } from './UserTypes';
+import { BaseDataseObject } from './UserTypes';
 import { AliceTask, convertToAliceTask } from './TaskTypes';
 import { AliceAgent, convertToAliceAgent } from './AgentTypes';
 import { HandleClickProps } from './CollectionTypes';

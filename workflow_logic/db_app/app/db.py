@@ -47,17 +47,18 @@ class BackendAPI(BaseModel):
     user_token: str = Field(ADMIN_TOKEN, description="The admin token for the backend API")
     available_task_types: list[AliceTask] = Field(available_task_types, frozen=True, description="The available task types")
     collection_map: Dict[EntityType, str] = Field(default_factory=lambda: {
+        "agents": "agents",
+        "apis": "apis",
         "users": "users",
         "models": "models",
         "prompts": "prompts",
-        "agents": "agents",
         "tasks": "tasks",
         "chats": "chats", 
         "parameters": "parameters",
         "task_responses": "taskresults",
-        "apis": "apis",
         "files": "files",
-        "messages": "messages"
+        "messages": "messages",
+        "urlreferences": "urlreferences"
     }, description="Map of entity types to collection names")
     model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str}, arbitrary_types_allowed=True)
 
@@ -335,52 +336,6 @@ class BackendAPI(BaseModel):
         except aiohttp.ClientError as e:
             LOGGER.error(f"Error storing messages: {e}")
             return None
-
-    async def store_task_response(self, task_response: TaskResponse) -> TaskResponse:
-        url = f"{self.base_url}/taskresults"
-        headers = self._get_headers()
-        headers['Content-Type'] = 'application/json'
-        
-        # Use model_dump_json() to get a JSON string
-        json_str = task_response.model_dump_json(by_alias=True)
-        # Parse the JSON string back into a Python object
-        data = json.loads(json_str)
-        
-        LOGGER.debug(f"Data after parsing: {str(data)}...") 
-        
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(url, json=data, headers=headers) as response:                
-                    try:
-                        response.raise_for_status()
-                    except aiohttp.ClientResponseError as e:
-                        LOGGER.info(f"Response status: {response.status}")
-                        response_text = await response.text()
-                        LOGGER.info(f"Response content: {response_text}")
-                        raise
-                    result = await response.json()
-                    return TaskResponse(**result)
-        except aiohttp.ClientError as e:
-            LOGGER.error(f"Error storing TaskResponse: {e}")
-            raise
-        except Exception as e:
-            LOGGER.error(f"Unexpected error: {e}")
-            raise      
-
-    async def store_task_response_on_chat(self, task_response: TaskResponse, chat_id: str) -> Dict[str, Any]:
-        url = f"{self.base_url}/chats/{chat_id}/add_task_response"
-        headers = self._get_headers()
-        try:
-            result = await self.store_task_response(task_response)
-            async with aiohttp.ClientSession() as session:
-                async with session.patch(url, json={"task_response_id": result.id}, headers=headers) as response:
-                    response.raise_for_status()
-                    chat_result = await response.json()
-                    LOGGER.debug(f"TaskResponse added to chat successfully: {chat_result}")
-                    return chat_result
-        except aiohttp.ClientError as e:
-            LOGGER.error(f"Error storing TaskResponse on chat: {e}")
-            raise
         
     def validate_token(self, token: str) -> dict:
         url = f"{self.base_url}/users/validate"
@@ -458,6 +413,7 @@ class BackendAPI(BaseModel):
                             if response.status == 200:
                                 data = await response.json()
                                 if data:
+                                    LOGGER.warning(f"Existing data found in collection: {collection} - {data}")
                                     return True
                 return False
             except (ClientError, asyncio.TimeoutError) as e:
@@ -492,8 +448,9 @@ class BackendAPI(BaseModel):
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.patch(url, json=data, headers=headers) as response:
-                    response.raise_for_status()
-                    return True
+                    file = response.raise_for_status()
+                    file = await self.preprocess_data(file)
+                    return {file['_id']: FileReference(**file)}
         except aiohttp.ClientError as e:
             LOGGER.error(f"Error storing messages: {e}")
             return None

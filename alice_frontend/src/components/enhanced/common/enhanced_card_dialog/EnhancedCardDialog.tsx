@@ -30,6 +30,9 @@ import { ParameterDefinition } from '../../../../types/ParameterTypes';
 import { API } from '../../../../types/ApiTypes';
 import { MessageType } from '../../../../types/MessageTypes';
 import { FileReference } from '../../../../types/FileTypes';
+import { URLReference } from '../../../../types/URLReferenceTypes';
+import URLReferenceCardView from '../../url_reference/url_reference/URLReferenceCardView';
+import EnhancedURLReference from '../../url_reference/url_reference/EnhancedURLReference';
 
 const EnhancedCardDialog: React.FC = () => {
   const { selectedItem, selectedItemType, handleClose, selectItem } = useCardDialog();
@@ -46,6 +49,7 @@ const EnhancedCardDialog: React.FC = () => {
       handleAPIClick: (id: string, item?: API) => selectItem('API', id, item),
       handleFileClick: (id: string, item?: FileReference) => selectItem('File', id, item),
       handleMessageClick: (id: string, item?: MessageType) => selectItem('Message', id, item),
+      handleURLReferenceClick: (id: string, item?: URLReference) => selectItem('URLReference', id, item),
     };
 
     const commonProps = {
@@ -84,6 +88,8 @@ const EnhancedCardDialog: React.FC = () => {
           return <EnhancedFile itemId={selectedItem._id} {...commonProps} />;
         case 'Message':
           return <EnhancedMessage itemId={selectedItem._id} {...commonProps} />;
+        case 'URLReference':
+          return <EnhancedURLReference itemId={selectedItem._id} {...commonProps} />;
         default:
           return null;
       }
@@ -109,6 +115,8 @@ const EnhancedCardDialog: React.FC = () => {
           return <FileCardView item={selectedItem as CollectionType['files']} {...cardViewProps} />;
         case 'Message':
           return <MessageCardView item={selectedItem as CollectionType['messages']} {...cardViewProps} />;
+        case 'URLReference':
+          return <URLReferenceCardView item={selectedItem as CollectionType['urlreferences']} {...cardViewProps} />;
         default:
           return null;
       }

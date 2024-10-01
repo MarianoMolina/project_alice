@@ -10,10 +10,10 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
 import { CommandLineLog } from '../CommandLog';
 import { CodeBlock } from '../CodeBlock';
-import { WorkflowOutput } from '../WorkflowOutput';
 import { styled } from '@mui/material/styles';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { AccessTime, CheckCircle, Error, Warning, Output, Code, BugReport, DataObject, Analytics } from '@mui/icons-material';
+import ReferencesViewer from '../../common/references/ReferencesViewer';
 
 const ExitCodeChip = styled(Chip)(({ theme }) => ({
     fontWeight: 'bold',
@@ -83,8 +83,8 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             icon: <Output />,
             primary_text: "Output",
             secondary_text: (
-                item.task_content ? (
-                    <WorkflowOutput content={item} />
+                item.references ? (
+                    <ReferencesViewer references={item.references} />
                 ) : (
                     <Typography>No output content available</Typography>
                 )

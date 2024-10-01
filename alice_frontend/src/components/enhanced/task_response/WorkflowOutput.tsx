@@ -2,11 +2,11 @@ import React from 'react';
 import { Box, List, ListItem, Typography, Paper, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TaskResponse } from '../../../types/TaskResponseTypes';
-import { StringOutput } from './StringOutput';
 import { LLMChatOutput } from './LLMChatOutput';
 import { SearchOutput } from './SearchOutput';
 import useStyles from './TaskResponseStyles';
 import { FileOutput } from './FileOutput';
+import CustomMarkdown from '../common/markdown/customMarkdown';
 
 interface WorkflowOutputProps {
   content: TaskResponse | TaskResponse[];
@@ -50,7 +50,7 @@ export const WorkflowOutput: React.FC<WorkflowOutputProps> = ({ content, depth =
             {(() => {
               switch (item.output_type) {
                 case 'StringOutput':
-                  return <StringOutput content={subItem} />;
+                  return <CustomMarkdown children={subItem} />;
                 case 'LLMChatOutput':
                   return <LLMChatOutput message={subItem} />;
                 case 'SearchOutput':
@@ -72,7 +72,7 @@ export const WorkflowOutput: React.FC<WorkflowOutputProps> = ({ content, depth =
   const renderTaskResponse = (taskResponse: TaskResponse) => (
     <Box className={classes.taskResponseContainer}>
       <Typography variant="body2">{taskResponse.task_description}</Typography>
-      {taskResponse.task_content && renderContent(taskResponse.task_content)}
+      {taskResponse.references && renderContent(taskResponse.references)}
     </Box>
   );
 

@@ -1,24 +1,24 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import ReactMarkdown from 'react-markdown';
-import Message from '../message/Message';
 import { References } from '../../../../types/ReferenceTypes';
 import FileViewer from '../../file/FileViewer';
 import { WorkflowOutput } from '../../task_response/WorkflowOutput';
 import { SearchOutput } from '../../task_response/SearchOutput';
+import EnhancedMessage from '../../message/message/EnhancedMessage';
+import CustomMarkdown from '../markdown/customMarkdown';
 
-interface ReferencesFullProps {
+interface ReferencesViewerProps {
   references: References;
 }
 
-const ReferencesFull: React.FC<ReferencesFullProps> = ({ references }) => {
+const ReferencesViewer: React.FC<ReferencesViewerProps> = ({ references }) => {
   return (
     <Box>
       {references.messages && references.messages.length > 0 && (
         <Box mb={2}>
           <Typography variant="h6">Messages</Typography>
           {references.messages.map((message, index) => (
-            <Message key={index} message={message} />
+            <EnhancedMessage mode={'detail'} fetchAll={false} itemId={message._id} />
           ))}
         </Box>
       )}
@@ -55,7 +55,7 @@ const ReferencesFull: React.FC<ReferencesFullProps> = ({ references }) => {
           <Typography variant="h6">String Outputs</Typography>
           {references.string_outputs.map((output, index) => (
             <Box key={index} mb={1}>
-              <ReactMarkdown>{output}</ReactMarkdown>
+              <CustomMarkdown>{output}</CustomMarkdown>
             </Box>
           ))}
         </Box>
@@ -64,4 +64,4 @@ const ReferencesFull: React.FC<ReferencesFullProps> = ({ references }) => {
   );
 };
 
-export default ReferencesFull;
+export default ReferencesViewer;

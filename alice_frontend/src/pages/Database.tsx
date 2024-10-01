@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Box } from '@mui/material';
-import { Add, Person, Category, Settings, Description, Functions, Assignment, Chat, Api, AttachFile } from '@mui/icons-material';
+import { Add, Person, Category, Settings, Description, Functions, Assignment, Api, AttachFile, Message, QuestionAnswer } from '@mui/icons-material';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH, TASK_SIDEBAR_WIDTH_TABLE, TASK_SIDEBAR_WIDTH_COMPACT } from '../utils/Constants';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
 import { ComponentMode, CollectionElement, CollectionElementString } from '../types/CollectionTypes';
@@ -15,9 +15,10 @@ import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
 import useStyles from '../styles/DatabaseStyles';
 import ToggleBox from '../components/ui/toggle_box/ToggleBox';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
-import EnhancedCardDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
 import { useCardDialog } from '../contexts/CardDialogContext';
 import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
+import EnhancedMessage from '../components/enhanced/message/message/EnhancedMessage';
+import EnhancedURLReference from '../components/enhanced/url_reference/url_reference/EnhancedURLReference';
 
 const Database: React.FC = () => {
     const classes = useStyles();
@@ -59,15 +60,17 @@ const Database: React.FC = () => {
     ];
 
     const tabs = [
-        { name: 'Agent' as CollectionElementString, icon: Person },
-        { name: 'API' as CollectionElementString, icon: Api },
-        { name: 'Chat' as CollectionElementString, icon: Chat },
-        { name: 'File' as CollectionElementString, icon: AttachFile },
-        { name: 'Model' as CollectionElementString, icon: Category },
-        { name: 'Parameter' as CollectionElementString, icon: Settings },
-        { name: 'Prompt' as CollectionElementString, icon: Description },
-        { name: 'Task' as CollectionElementString, icon: Functions },
-        { name: 'TaskResponse' as CollectionElementString, icon: Assignment },
+        { name: 'Agent' as CollectionElementString, icon: Person, group: 'Core' },
+        { name: 'API' as CollectionElementString, icon: Api, group: 'Core' },
+        { name: 'Chat' as CollectionElementString, icon: QuestionAnswer, group: 'Core' },
+        { name: 'File' as CollectionElementString, icon: AttachFile, group: 'Ref' },
+        { name: 'Message' as CollectionElementString, icon: Message, group: 'Ref' },
+        { name: 'Model' as CollectionElementString, icon: Category, group: 'Core' },
+        { name: 'Parameter' as CollectionElementString, icon: Settings, group: 'Core' },
+        { name: 'Prompt' as CollectionElementString, icon: Description, group: 'Core' },
+        { name: 'Task' as CollectionElementString, icon: Functions, group: 'Core' },
+        { name: 'TaskResponse' as CollectionElementString, icon: Assignment, group: 'Ref' },
+        { name: 'URLReference' as CollectionElementString, icon: Description, group: 'Ref' },
     ];
 
     // Active tab logic
@@ -83,6 +86,7 @@ const Database: React.FC = () => {
             fetchAll: true,
             onInteraction: handleItemSelect,
             onView: (item: any) => {
+                console.log('Viewing item:', item);
                 if (item._id) {
                     selectItem(activeTab, item._id);
                 }
@@ -112,11 +116,14 @@ const Database: React.FC = () => {
                             return <EnhancedAPI {...commonProps} />;
                         case 'File':
                             return <EnhancedFile {...commonProps} />;
+                        case 'Message':
+                            return <EnhancedMessage {...commonProps} />;
+                        case 'URLReference':
+                            return <EnhancedURLReference {...commonProps} />;
                         default:
                             return null;
                     }
                 })()}
-                <EnhancedCardDialog />
             </Box>
         );
     }, [activeTab, handleItemSelect, viewMode, handleViewModeChange, selectItem]);
@@ -153,6 +160,10 @@ const Database: React.FC = () => {
                 return <EnhancedAPI {...commonProps} fetchAll={true} />;
             case 'File':
                 return <EnhancedFile {...commonProps} />;
+            case 'Message':
+                return <EnhancedMessage {...commonProps} />;
+            case 'URLReference':
+                return <EnhancedURLReference {...commonProps} />;
             default:
                 return null;
         }

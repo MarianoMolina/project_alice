@@ -3,7 +3,7 @@ import MessageFlexibleView from './MessageFlexibleView';
 import MessageListView from './MessageListView';
 import MessageTableView from './MessageTableView';
 import MessageCardView from './MessageCardView';
-import MessageDetailView from './MessageDetailView';
+import MessageFullView from './MessageFullView';
 import MessageShortListView from './MessageShortListView';
 import { MessageType } from '../../../../types/MessageTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
@@ -36,6 +36,10 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = (props) => {
       handleSave,
       isInteractable: props.isInteractable,
       onInteraction: props.onInteraction,
+      handleFileClick: props.handleFileClick,
+      handleURLReferenceClick: props.handleURLReferenceClick,
+      handleTaskResultClick: props.handleTaskResultClick,
+      handleMessageClick: props.handleMessageClick,
       onView: props.onView,
       showHeaders: props.showHeaders,
       chatId: props.chatId,
@@ -55,7 +59,7 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = (props) => {
       case 'card':
         return <MessageCardView {...commonProps} />;
       case 'detail':
-        return <MessageDetailView {...commonProps} />;
+        return <MessageFullView {...commonProps} />;
       default:
         return null;
     }

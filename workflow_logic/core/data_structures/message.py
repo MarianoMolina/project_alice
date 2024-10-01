@@ -8,6 +8,10 @@ if TYPE_CHECKING:
     from workflow_logic.core.data_structures.parameters import ToolCall
     from workflow_logic.core.data_structures.references import References
 
+def get_default_references():
+    from workflow_logic.core.data_structures.references import References
+    return References()
+
 class MessageDict(BaseDataStructure):
     role: Literal["user", "assistant", "system", "tool"] = Field(default="user", description="Role of the message")
     content: Optional[str] = Field(default=None, description="Content of the message")
@@ -20,7 +24,7 @@ class MessageDict(BaseDataStructure):
     context: Optional[Dict[str, Any]] = Field(default=None, description="Context of the message")
     function_call: Optional[Dict[str, Any]] = Field(default=None, description="Function call in the message")
     request_type: Optional[str] = Field(default=None, description="Request type of the message, if any. Can be 'approval', 'confirmation', etc.")
-    references: Optional[ReferencesType] = Field(default_factory=lambda: References(), description="References associated with this message")
+    references: Optional[ReferencesType] = Field(default_factory=get_default_references, description="References associated with this message")
     creation_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Metadata about the creation of the message, like cost, tokens, end reason, etc.")
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -41,6 +45,16 @@ class MessageDict(BaseDataStructure):
                 raise ValueError(f"Invalid tool call type: {type(item)}")
         
         return validated_tool_calls
+    
+    @field_validator('references')
+    def validate_references(cls, v):
+        from workflow_logic.core.data_structures.references import References
+        if isinstance(v, References):
+            return v
+        elif isinstance(v, dict):
+            return References(**v)
+        else:
+            return References()
     
     def __str__(self) -> str:
         role = self.role if self.role else ''
@@ -67,6 +81,11 @@ class MessageDict(BaseDataStructure):
             task_responses = self.references.get_references('task_responses')
             if task_responses:
                 message_parts.extend([str(task_response) for task_response in task_responses])
+        elif msg_type == ContentType.URL_REFERENCE:
+            message_parts.append(f"{role}: {content}")
+            url_refs = self.references.get_references('url_references')
+            if url_refs:
+                message_parts.extend([str(url_ref) for url_ref in url_refs])
         elif msg_type == ContentType.MULTIPLE:
             message_parts.append(f"{role}{f' ({assistant_name})' if assistant_name else ''}: {content}")
             message_parts.append(self.references.detailed_summary())

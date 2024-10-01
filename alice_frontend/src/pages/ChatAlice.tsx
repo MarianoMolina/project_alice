@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { Box, Dialog } from '@mui/material';
-import { Add, Chat, Info, Functions, Assignment, AttachFile } from '@mui/icons-material';
+import { Add, Chat, Info, Functions, Assignment, AttachFile, Description, Message } from '@mui/icons-material';
 import { TaskResponse } from '../types/TaskResponseTypes';
 import { AliceTask } from '../types/TaskTypes';
 import { AliceChat } from '../types/ChatTypes';
@@ -10,14 +10,14 @@ import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSide
 import EnhancedChat from '../components/enhanced/chat/chat/EnhancedChat';
 import EnhancedTask from '../components/enhanced/task/task/EnhancedTask';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
-import ChatInput, { ChatInputRef } from '../components/enhanced/chat/ChatInput';
+import ChatInput, { ChatInputRef } from '../components/enhanced/common/chat_input/ChatInput';
 import useStyles from '../styles/ChatAliceStyles';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
-import EnhancedCardDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
 import { useCardDialog } from '../contexts/CardDialogContext';
-import { CollectionElementString } from '../types/CollectionTypes';
 import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
 import { FileReference } from '../types/FileTypes';
+import EnhancedURLReference from '../components/enhanced/url_reference/url_reference/EnhancedURLReference';
+import EnhancedMessage from '../components/enhanced/message/message/EnhancedMessage';
 
 const ChatAlice: React.FC = () => {
   const classes = useStyles();
@@ -79,11 +79,13 @@ const ChatAlice: React.FC = () => {
   ];
 
   const tabs = [
-    { name: 'Select Chat', icon: Chat },
-    { name: 'Current Chat', icon: Info, disabled: !currentChatId },
-    { name: 'Add Functions', icon: Functions, disabled: !currentChatId },
-    { name: 'Add TaskResults', icon: Assignment, disabled: !currentChatId },
-    { name: 'Add File Reference', icon: AttachFile, disabled: !currentChatId },
+    { name: 'Select Chat', icon: Chat, group: 'Chat' },
+    { name: 'Current Chat', icon: Info, disabled: !currentChatId, group: 'Info'},
+    { name: 'Add Functions', icon: Functions, disabled: !currentChatId, group: 'Info' },
+    { name: 'Add File Reference', icon: AttachFile, disabled: !currentChatId, group: 'Ref' },
+    { name: 'Add Message Reference', icon: Message, disabled: !currentChatId, group: 'Ref' },
+    { name: 'Add Task Results', icon: Assignment, disabled: !currentChatId, group: 'Ref' },
+    { name: 'Add URL Reference', icon: Description, disabled: !currentChatId, group: 'Ref' },
   ];
 
   const checkAndAddTask = (task: AliceTask) => {
@@ -91,10 +93,6 @@ const ChatAlice: React.FC = () => {
       addTaskToChat(task._id);
     }
   }
-
-  const triggerItemDialog = (collectionName: CollectionElementString, itemId: string) => {
-    selectItem(collectionName, itemId);
-  };
 
   const addFileReference = (file: FileReference) => {
     chatInputRef.current?.addFileReference(file);
@@ -104,14 +102,24 @@ const ChatAlice: React.FC = () => {
     chatInputRef.current?.addTaskResponse(taskResponse);
   }
 
+  const addURLReference = (urlReference: any) => {
+    chatInputRef.current?.addURLReference(urlReference);
+  }
+
+  const addMessageReference = (message: any) => {
+    chatInputRef.current?.addMessageReference(message);
+  }
+
   const renderSidebarContent = (tabName: string) => {
     const handleProps = {
-      handleAgentClick: (id: string) => triggerItemDialog('Agent', id),
-      handleTaskClick: (id: string) => triggerItemDialog('Task', id),
-      handleModelClick: (id: string) => triggerItemDialog('Model', id),
-      handlePromptClick: (id: string) => triggerItemDialog('Prompt', id),
-      handleParameterClick: (id: string) => triggerItemDialog('Parameter', id),
-      handleAPIClick: (id: string) => triggerItemDialog('API', id),
+      handleAgentClick: (id: string) => selectItem('Agent', id),
+      handleTaskClick: (id: string) => selectItem('Task', id),
+      handleModelClick: (id: string) => selectItem('Model', id),
+      handlePromptClick: (id: string) => selectItem('Prompt', id),
+      handleParameterClick: (id: string) => selectItem('Parameter', id),
+      handleAPIClick: (id: string) => selectItem('API', id),
+      handleMessageClick: (id: string) => selectItem('Message', id),
+      handleURLReferenceClick: (id: string) => selectItem('URLReference', id),
     };
 
     switch (tabName) {
@@ -120,7 +128,7 @@ const ChatAlice: React.FC = () => {
           <EnhancedChat
             key={listKey}
             mode="shortList"
-            onView={(chat) => triggerItemDialog('Chat', chat._id)}
+            onView={(chat) => selectItem('Chat', chat._id)}
             onInteraction={selectChatId}
             fetchAll={true}
             isInteractable={true}
@@ -142,16 +150,16 @@ const ChatAlice: React.FC = () => {
             mode={'list'}
             fetchAll={true}
             onInteraction={checkAndAddTask}
-            onView={(task) => task._id && triggerItemDialog('Task', task._id)}
+            onView={(task) => task._id && selectItem('Task', task._id)}
             {...handleProps}
           />
         );
-      case 'Add TaskResults':
+      case 'Add Task Results':
         return (
           <EnhancedTaskResponse
             mode={'list'}
             fetchAll={true}
-            onView={(taskResult) => taskResult._id && triggerItemDialog('TaskResponse', taskResult._id)}
+            onView={(taskResult) => taskResult._id && selectItem('TaskResponse', taskResult._id)}
             onInteraction={addTaskResponse}
             {...handleProps}
           />
@@ -161,8 +169,28 @@ const ChatAlice: React.FC = () => {
           <EnhancedFile
             mode={'list'}
             fetchAll={true}
-            onView={(file) => file._id && triggerItemDialog('File', file._id)}
+            onView={(file) => file._id && selectItem('File', file._id)}
             onInteraction={addFileReference}
+            {...handleProps}
+          />
+        );
+      case 'Add URL Reference':
+        return (
+          <EnhancedURLReference
+            mode={'list'}
+            fetchAll={true}
+            onView={(urlReference) => urlReference._id && selectItem('URLReference', urlReference._id)}
+            onInteraction={addURLReference}
+            {...handleProps}
+          />
+        );
+      case 'Add Message Reference':
+        return (
+          <EnhancedMessage
+            mode={'list'}
+            fetchAll={true}
+            onView={(message) => message._id && selectItem('Message', message._id)}
+            onInteraction={addMessageReference}
             {...handleProps}
           />
         );
@@ -208,7 +236,6 @@ const ChatAlice: React.FC = () => {
             chatSelected={!!currentChatId}
           />
         </Box>
-        <EnhancedCardDialog />
         <Dialog open={openChatCreateDialog} onClose={() => setOpenChatCreateDialog(false)}>
           <EnhancedChat
             mode="create"

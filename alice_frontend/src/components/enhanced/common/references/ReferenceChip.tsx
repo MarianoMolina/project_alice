@@ -11,7 +11,7 @@ import { CollectionElementString, CollectionTypeString } from '../../../../types
 
 type ReferenceType = MessageType | FileReference | FileContentReference | TaskResponse | URLReference | string;
 
-interface ReferencesChipProps {
+interface ReferenceChipProps {
   reference: ReferenceType;
   type: CollectionTypeString[keyof CollectionTypeString] | 'string_output';
   view?: boolean;
@@ -20,7 +20,7 @@ interface ReferencesChipProps {
   onDelete?: () => void;
 }
 
-const ReferencesChip: React.FC<ReferencesChipProps> = ({ 
+const ReferenceChip: React.FC<ReferenceChipProps> = ({ 
   reference, 
   type, 
   view = false, 
@@ -96,4 +96,4 @@ const ReferencesChip: React.FC<ReferencesChipProps> = ({
   );
 };
 
-export default ReferencesChip;
+export default ReferenceChip;

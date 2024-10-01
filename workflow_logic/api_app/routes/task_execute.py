@@ -5,7 +5,7 @@ from workflow_logic.api_app.util import TaskExecutionRequest
 from workflow_logic.core import TaskResponse
 from workflow_logic.api_app.util.utils import deep_api_check
 from workflow_logic.api_app.util.dependencies import get_db_app
-from workflow_logic.api_app.util.reference_utils import check_task_response_references
+from workflow_logic.api_app.util.reference_utils import check_references
 
 router = APIRouter()
 
@@ -63,15 +63,17 @@ async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(ge
             raise ValueError(f"Task execution failed for task ID {taskId}")
 
         # Process and update file content references
-        LOGGER.debug(f'task_result: {result.model_dump()}')
-        result = await check_task_response_references(result, db_app)
+        LOGGER.info(f'task_result: {result.model_dump()}')
+        # if result.references:
+        #     result.references = await check_references(result.references, db_app)
 
-        LOGGER.debug(f'result after checking references: {result.model_dump()}')
+        # LOGGER.debug(f'result after checking references: {result.model_dump()}')
+        LOGGER.debug(f'References: {result.references.model_dump()}')
         LOGGER.debug(f'type: {type(result)}')
-        db_result = await db_app.store_task_response(result)
+        db_result = await db_app.create_entity_in_db('task_responses', result.model_dump(exclude={'id'}))
 
-        LOGGER.debug(f'db_result: {db_result.model_dump(by_alias=True)}')
-        return db_result.model_dump(by_alias=True)
+        LOGGER.debug(f'db_result: {db_result}')
+        return db_result
     except Exception as e:
         import traceback
         LOGGER.error(f'Error: {e}\nTraceback: {traceback.format_exc()}')
@@ -87,5 +89,5 @@ async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(ge
             usage_metrics=None,
             execution_history=None
         )
-        db_result = await db_app.store_task_response(result)
-        return db_result.model_dump(by_alias=True)
+        db_result = await db_app.create_entity_in_db('task_responses', result.model_dump(exclude={'id'}))
+        return db_result

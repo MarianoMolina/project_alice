@@ -1,4 +1,4 @@
-import { BaseDataseObject, User, convertToUser } from "./UserTypes";
+import { BaseDataseObject, convertToUser } from "./UserTypes";
 import { ApiName } from "./ApiTypes";
 import { HandleClickProps } from "./CollectionTypes";
 

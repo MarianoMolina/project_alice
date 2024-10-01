@@ -1,5 +1,5 @@
 import { HandleClickProps } from "./CollectionTypes";
-import { BaseDataseObject, User, convertToUser } from "./UserTypes";
+import { BaseDataseObject, convertToUser } from "./UserTypes";
 
 export interface FunctionParameters {
     type: "object";

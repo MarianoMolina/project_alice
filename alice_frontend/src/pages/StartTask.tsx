@@ -10,7 +10,6 @@ import { RecentExecution, useTask } from '../contexts/TaskContext';
 import useStyles from '../styles/StartTaskStyles';
 import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
-import EnhancedCardDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
 import { CollectionElementString } from '../types/CollectionTypes';
 import { useCardDialog } from '../contexts/CardDialogContext';
 import { API } from '../types/ApiTypes';
@@ -56,8 +55,8 @@ const StartTask: React.FC = () => {
   ];
 
   const tabs = [
-    { name: 'Task' as CollectionElementString, icon: Functions },
-    { name: 'TaskResponse' as CollectionElementString, icon: Assignment },
+    { name: 'Task' as CollectionElementString, icon: Functions, group: 'Task' },
+    { name: 'TaskResponse' as CollectionElementString, icon: Assignment, group: 'Out' },
   ]
 
   const handleTabChange = (tabName: CollectionElementString) => {
@@ -161,7 +160,6 @@ const StartTask: React.FC = () => {
           </Accordion>
         </Box>
       </Box>
-      <EnhancedCardDialog />
       <Dialog open={openTaskCreateDialog} onClose={() => setOpenTaskCreateDialog(false)}>
         <EnhancedTask mode={'create'} fetchAll={false} />
       </Dialog>

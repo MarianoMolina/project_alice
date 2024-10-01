@@ -6,7 +6,6 @@ import {
     executeTask as apiExecuteTask,
     generateChatResponse as apiGenerateChatResponse,
     sendMessage as apiSendMessage,
-    addTaskResponse as apiAddTaskResponse,
     purgeAndReinitializeDatabase as apiPurgeAndReinitializeDatabase,
     uploadFileContentReference as apiUploadFileContentReference,
     updateFile as apiUpdateFile,
@@ -30,7 +29,6 @@ interface ApiContextType {
     executeTask: typeof apiExecuteTask;
     generateChatResponse: typeof apiGenerateChatResponse;
     sendMessage: typeof apiSendMessage;
-    addTaskResponse: typeof apiAddTaskResponse;
     purgeAndReinitializeDatabase: typeof apiPurgeAndReinitializeDatabase;
     uploadFileContentReference: typeof apiUploadFileContentReference;
     updateFile: typeof apiUpdateFile;
@@ -135,20 +133,6 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     }, [addNotification]);
 
-    const addTaskResponse = useCallback(async (chatId: string, taskResultId: string): Promise<AliceChat> => {
-        try {
-            const result = await apiAddTaskResponse(chatId, taskResultId);
-            addNotification('Task response added successfully', 'success', 5000, {
-                label: 'View Chat',
-                onClick: () => selectItem('Chat', chatId)
-            });
-            return result;
-        } catch (error) {
-            addNotification('Error adding task response', 'error');
-            throw error;
-        }
-    }, [addNotification, selectItem]);
-
     const purgeAndReinitializeDatabase = useCallback(async (): Promise<void> => {
         try {
             await apiPurgeAndReinitializeDatabase();
@@ -246,7 +230,6 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         executeTask,
         generateChatResponse,
         sendMessage,
-        addTaskResponse,
         purgeAndReinitializeDatabase,
         uploadFileContentReference,
         updateFile,

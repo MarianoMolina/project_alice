@@ -51,6 +51,7 @@ app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 // Health route should be registered before other routes
+app.use('/lm-studio', LmStudioRoute);
 app.use('/api/health', HealthRoutes);
 app.use('/api/apis', APIRoutes);
 app.use('/api/agents', AgentRoutes);
@@ -63,7 +64,6 @@ app.use('/api/tasks', TaskRoutes);
 app.use('/api/users', UserRoutes);
 app.use('/api/parameters', ParametersRoutes);
 app.use('/api/files', FileRoutes);
-app.use('/lm-studio', LmStudioRoute);
 app.use('/api/messages', MessageRoutes);
 app.use('/api/urlreferences', URLReferenceRoutes)
 

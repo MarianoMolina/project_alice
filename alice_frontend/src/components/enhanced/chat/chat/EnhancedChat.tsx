@@ -41,6 +41,7 @@ const EnhancedChat: React.FC<EnhancedChatProps> = (props) => {
       handleTaskClick: props.handleTaskClick,
       handleTaskResultClick: props.handleTaskResultClick,
       handleAgentClick: props.handleAgentClick,
+      handleMessageClick: props.handleMessageClick,
       showHeaders: props.showHeaders,
     };
 

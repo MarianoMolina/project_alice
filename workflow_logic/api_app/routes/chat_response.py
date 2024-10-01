@@ -4,8 +4,7 @@ from workflow_logic.api_app.util.utils import deep_api_check
 from workflow_logic.api_app.util.dependencies import get_db_app
 from workflow_logic.db_app.app import BackendAPI
 from workflow_logic.util import LOGGER
-from workflow_logic.api_app.util.reference_utils import check_task_response_references, check_message_references
-from workflow_logic.core import TaskResponse
+from workflow_logic.api_app.util.reference_utils import check_references
 
 router = APIRouter()
 
@@ -55,8 +54,8 @@ async def chat_response(chat_id: str, db_app: BackendAPI = Depends(get_db_app)) 
     # Store messages and task results in order
     if responses:
         for response in responses:
-            if response.references:
-                response = await check_message_references(response, db_app)
+            # if response.references:
+            #     response.references = await check_references(response.references, db_app)
             stored_chat = await db_app.store_chat_message(chat_id, response)
             if not stored_chat:
                 LOGGER.error(f"Failed to store message: {response} in chat_id {chat_id}")

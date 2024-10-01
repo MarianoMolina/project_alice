@@ -14,7 +14,7 @@ class References(BaseModel):
 
     def model_dump(self, *args, **kwargs) -> Dict[str, Any]:
         data = super().model_dump(*args, **kwargs)
-        for key in ['messages', 'files', 'task_responses', 'search_results', 'search_outputs']:
+        for key in ['messages', 'files', 'task_responses', 'search_results', 'string_outputs']:
             if getattr(self, key) is not None:
                 data[key] = [item.model_dump(*args, **kwargs) for item in getattr(self, key)]
         return data
@@ -41,10 +41,6 @@ class References(BaseModel):
             if self.string_outputs is None:
                 self.string_outputs = []
             self.string_outputs.append(reference)
-        elif isinstance(reference, SearchOutput):
-            if self.search_outputs is None:
-                self.search_outputs = []
-            self.search_outputs.append(reference)
         else:
             raise ValueError(f"Unsupported reference type: {type(reference)}")
 
@@ -57,13 +53,12 @@ class References(BaseModel):
                 "task_responses": self.task_responses,
                 "search_results": self.search_results,
                 "string_outputs": self.string_outputs,
-                "search_outputs": self.search_outputs
             }
         return getattr(self, ref_type, None)
 
     def remove_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, URLReference, str]) -> bool:
         """Remove a specific reference."""
-        for attr in ['messages', 'files', 'task_responses', 'search_results', 'string_outputs', 'search_outputs']:
+        for attr in ['messages', 'files', 'task_responses', 'search_results', 'string_outputs']:
             ref_list = getattr(self, attr)
             if ref_list is not None and reference in ref_list:
                 ref_list.remove(reference)
@@ -78,7 +73,6 @@ class References(BaseModel):
             self.task_responses = None
             self.search_results = None
             self.string_outputs = None
-            self.search_outputs = None
         else:
             setattr(self, ref_type, None)
 

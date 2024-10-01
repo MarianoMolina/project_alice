@@ -1,10 +1,21 @@
 import { HandleClickProps } from "./CollectionTypes";
+import { FileType } from "./FileTypes";
 import { ToolCall } from "./ParameterTypes";
 import { References } from "./ReferenceTypes";
 import { BaseDataseObject } from "./UserTypes";
 
 export type RoleType = 'user' | 'assistant' | 'system' | 'tool';
-export type ContentType = 'text' | 'image' | 'video' | 'audio' | 'file' | 'task_result';
+
+export enum ContentType {
+    TEXT = 'text',
+    IMAGE = FileType.IMAGE,
+    VIDEO = FileType.VIDEO,
+    AUDIO = FileType.AUDIO,
+    FILE = FileType.FILE,
+    TASK_RESULT = 'task_result',
+    MULTIPLE = 'multiple',
+    URL_REFERENCE = 'url_reference'
+}
 
 export interface MessageType extends BaseDataseObject {
     _id?: string;
@@ -57,12 +68,12 @@ export interface MessageComponentProps extends HandleClickProps {
     chatId?: string;
 }
 
-export const getDefaultMessageForm = (): Partial<MessageType> => ({
+export const getDefaultMessageForm = (): MessageType => ({
     role: 'user',
     content: '',
     generated_by: 'user',
     context: {},
-    type: 'text',
+    type: ContentType.TEXT,
     tool_calls: [],
     function_call: {},
     references: {},

@@ -1,5 +1,5 @@
 import { AliceModel, convertToAliceModel } from "./ModelTypes";
-import { BaseDataseObject, convertToUser, User } from "./UserTypes";
+import { BaseDataseObject, convertToUser } from "./UserTypes";
 import { FunctionParameters } from "./ParameterTypes";
 import { HandleClickProps } from "./CollectionTypes";
 
@@ -60,7 +60,6 @@ export interface API extends BaseDataseObject{
 
 export interface LLMAPI extends BaseDataseObject {
     _id?: string;
-    user: User;
     api_type: ApiType.LLM_MODEL;
     api_name: LlmProvider;
     name?: string;

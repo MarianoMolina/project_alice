@@ -45,7 +45,6 @@ customRouter.patch('/:chatId/add_message', async (req: AuthRequest, res: Respons
     Logger.debug('Message added successfully', {
       chatId,
       messageId: updatedChat._id,
-      hasReferences: updatedChat.references?.length
     });
     res.status(200).json({ message: 'Message added successfully', chat: updatedChat });
   } catch (error) {

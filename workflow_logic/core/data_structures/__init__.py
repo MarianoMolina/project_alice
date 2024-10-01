@@ -29,7 +29,7 @@ FunctionParameters.model_rebuild()
 ToolCall.model_rebuild()
 ToolCallConfig.model_rebuild()
 ToolFunction.model_rebuild()
-
+References.model_rebuild()
 
 __all__ = ['FileReference', 'ContentType', 'FileType', 'FileContentReference', 'generate_file_content_reference', 'get_file_content', 'MessageDict', 'ModelConfig',
            'URLReference', 'TaskResponse', 'User', 'UserRoles',

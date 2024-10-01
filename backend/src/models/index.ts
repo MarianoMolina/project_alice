@@ -9,3 +9,4 @@ import './prompt.model';
 import './task.model';
 import './taskResult.model';
 import './user.model';
+import './urlReference.model';

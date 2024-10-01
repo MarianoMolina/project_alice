@@ -7,7 +7,9 @@ const urlReferenceSchema = new Schema<IURLReferenceDocument, IURLReferenceModel>
     title: { type: String, required: true },
     url: { type: String, required: true },
     content: { type: String, required: true },
-    metadata: { type: Map, of: String }
+    metadata: { type: Map, of: String },
+    created_by: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    updated_by: { type: Schema.Types.ObjectId, ref: 'User', required: true }
 }, { timestamps: true });
 
 urlReferenceSchema.methods.apiRepresentation = function (this: IURLReferenceDocument) {
@@ -52,6 +54,6 @@ urlReferenceSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
 urlReferenceSchema.pre('find', autoPopulate);
 urlReferenceSchema.pre('findOne', autoPopulate);
 
-const Prompt = mongoose.model<IURLReferenceDocument, IURLReferenceModel>('URLReference', urlReferenceSchema);
+const URLReference = mongoose.model<IURLReferenceDocument, IURLReferenceModel>('URLReference', urlReferenceSchema);
 
-export default Prompt;
+export default URLReference;

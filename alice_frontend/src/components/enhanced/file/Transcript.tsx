@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@mui/material';
 import { MessageType } from '../../../types/MessageTypes';
-import Message from '../common/message/Message';
 import { useApi } from '../../../contexts/ApiContext';
+import EnhancedMessage from '../message/message/EnhancedMessage';
 
 interface TranscriptProps {
   fileId: string;
@@ -31,8 +31,8 @@ const Transcript: React.FC<TranscriptProps> = ({ fileId, transcript, onTranscrip
   return (
     <Box>
       <Typography variant="h6">Transcript</Typography>
-      {transcript ? (
-        <Message message={transcript} />
+      {transcript ? (        
+        <EnhancedMessage mode={'detail'} fetchAll={false} itemId={transcript._id} />
       ) : (
         <Typography>No transcript available</Typography>
       )}

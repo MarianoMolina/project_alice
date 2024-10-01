@@ -2,7 +2,7 @@ import { HandleClickProps } from "./CollectionTypes";
 import { BaseDataseObject } from "./UserTypes";
 
 export interface URLReference extends BaseDataseObject {
-    id?: string;
+    _id?: string;
     title: string;
     url: string;
     content: string;
@@ -11,7 +11,7 @@ export interface URLReference extends BaseDataseObject {
 
 export const convertToURLReference = (data: any): URLReference => {
     return {
-        id: data?.id || undefined,
+        _id: data?._id || undefined,
         title: data?.title || '',
         url: data?.url || '',
         content: data?.content || '',

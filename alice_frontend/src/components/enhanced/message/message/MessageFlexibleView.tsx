@@ -6,23 +6,28 @@ import {
     Select,
     MenuItem,
     Dialog,
-    SelectChangeEvent
+    SelectChangeEvent,
+    Typography
 } from '@mui/material';
 import { MessageComponentProps, MessageType, getDefaultMessageForm } from '../../../../types/MessageTypes';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import EnhancedFile from '../../file/file/EnhancedFile';
 import EnhancedTaskResponse from '../../task_response/task_response/EnhancedTaskResponse';
+import EnhancedMessage from '../message/EnhancedMessage';
+import EnhancedURLReference from '../../url_reference/url_reference/EnhancedURLReference';
 import { useApi } from '../../../../contexts/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import { FileReference } from '../../../../types/FileTypes';
 import { TaskResponse } from '../../../../types/TaskResponseTypes';
+import { URLReference } from '../../../../types/URLReferenceTypes';
+import { CollectionName, CollectionElementString } from '../../../../types/CollectionTypes';
+import { References } from '../../../../types/ReferenceTypes';
 
 const MessageFlexibleView: React.FC<MessageComponentProps> = ({
     item,
     onChange,
     mode,
-    handleSave,
-    chatId
+    handleSave
 }) => {
     const { fetchItem } = useApi();
     const [form, setForm] = useState<Partial<MessageType>>(getDefaultMessageForm());
@@ -48,28 +53,46 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
         onChange({ ...form, [name as string]: value });
     };
 
-    const handleFileReferencesChange = async (selectedIds: string[]) => {
-        const references = await Promise.all(selectedIds.map(id => fetchItem('files', id))) as FileReference[];
-        onChange({ ...form, references });
-    };
+    const handleReferencesChange = async (type: CollectionName, selectedIds: string[]) => {
+        const fetchedItems = await Promise.all(selectedIds.map(id => fetchItem(type, id)));
+        let updatedReferences: References = { ...form.references };
 
-    const handleTaskResponsesChange = async (selectedIds: string[]) => {
-        const taskResponses = await Promise.all(selectedIds.map(id => fetchItem('taskresults', id))) as TaskResponse[];
-        onChange({ ...form, task_responses: taskResponses });
+        switch (type) {
+            case 'messages':
+                updatedReferences.messages = fetchedItems as MessageType[];
+                break;
+            case 'files':
+                updatedReferences.files = fetchedItems as FileReference[];
+                break;
+            case 'taskresults':
+                updatedReferences.task_responses = fetchedItems as TaskResponse[];
+                break;
+            case 'urlreferences':
+                updatedReferences.search_results = fetchedItems as URLReference[];
+                break;
+        }
+
+        onChange({ ...form, references: updatedReferences });
     };
 
     const handleAccordionToggle = (accordion: string | null) => {
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
     };
 
-    const handleViewDetails = (type: 'file' | 'taskResponse', itemId: string) => {
+    const handleViewDetails = (type: CollectionElementString, itemId: string) => {
         let content;
         switch (type) {
-            case 'file':
+            case 'File':
                 content = <EnhancedFile mode="card" itemId={itemId} fetchAll={false} />;
                 break;
-            case 'taskResponse':
+            case 'TaskResponse':
                 content = <EnhancedTaskResponse mode="card" itemId={itemId} fetchAll={false} />;
+                break;
+            case 'Message':
+                content = <EnhancedMessage mode="card" itemId={itemId} fetchAll={false} />;
+                break;
+            case 'URLReference':
+                content = <EnhancedURLReference mode="card" itemId={itemId} fetchAll={false} />;
                 break;
         }
         setDialogContent(content);
@@ -128,32 +151,62 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
                 </Select>
             </FormControl>
 
+            <Typography variant="h6" gutterBottom>References</Typography>
+
+            <EnhancedSelect<MessageType>
+                componentType="messages"
+                EnhancedComponent={EnhancedMessage}
+                selectedItems={form.references?.messages || []}
+                onSelect={(ids) => handleReferencesChange('messages', ids)}
+                isInteractable={isEditMode}
+                multiple
+                label="Referenced Messages"
+                activeAccordion={activeAccordion}
+                onAccordionToggle={handleAccordionToggle}
+                onView={(id) => handleViewDetails("Message", id)}
+                accordionEntityName="referenced-messages"
+            />
+
             <EnhancedSelect<FileReference>
                 componentType="files"
                 EnhancedComponent={EnhancedFile}
-                selectedItems={form.references || []}
-                onSelect={handleFileReferencesChange}
+                selectedItems={form.references?.files as FileReference[] || []}
+                onSelect={(ids) => handleReferencesChange('files', ids)}
                 isInteractable={isEditMode}
                 multiple
                 label="File References"
                 activeAccordion={activeAccordion}
                 onAccordionToggle={handleAccordionToggle}
-                onView={(id) => handleViewDetails("file", id)}
+                onView={(id) => handleViewDetails("File", id)}
                 accordionEntityName="file-references"
             />
 
             <EnhancedSelect<TaskResponse>
                 componentType="taskresults"
                 EnhancedComponent={EnhancedTaskResponse}
-                selectedItems={form.task_responses || []}
-                onSelect={handleTaskResponsesChange}
+                selectedItems={form.references?.task_responses || []}
+                onSelect={(ids) => handleReferencesChange('taskresults', ids)}
                 isInteractable={isEditMode}
                 multiple
                 label="Task Responses"
                 activeAccordion={activeAccordion}
                 onAccordionToggle={handleAccordionToggle}
-                onView={(id) => handleViewDetails("taskResponse", id)}
+                onView={(id) => handleViewDetails("TaskResponse", id)}
                 accordionEntityName="task-responses"
+            />
+
+            <EnhancedSelect<URLReference>
+                componentType="urlreferences"
+                EnhancedComponent={EnhancedURLReference}
+                selectedItems={form.references?.search_results || []}
+                onSelect={(ids) => handleReferencesChange('urlreferences', ids)}
+                isInteractable={isEditMode}
+                multiple
+                label="Search Results"
+                activeAccordion={activeAccordion}
+                onAccordionToggle={handleAccordionToggle}
+                onView={(id) => handleViewDetails("URLReference", id)}
+                accordionEntityName="search-results"
             />
 
             <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>

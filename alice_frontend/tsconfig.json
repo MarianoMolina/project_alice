@@ -20,7 +20,7 @@
   "include": [
     "src/**/*.ts", 
     "src/**/*.tsx",
-    "src/types/**/*.ts",
+    "src/types/**/*.ts", "../tmp/Message.tsx",
     ],
   "exclude": ["node_modules", "build"]
 }

@@ -113,16 +113,22 @@ class LLMEngine(APIEngine):
             messages = [{"role": "system", "content": system}] + messages
 
         try:
-            response: ChatCompletion = await client.chat.completions.create(
-                model=api_data.model,
-                messages=messages,
-                max_tokens=max_tokens,
-                temperature=api_data.temperature,
-                tools=tools if tools else None,
-                tool_choice=tool_choice if tools else None,
-                n=n, 
-                stream=False
-            )
+            # Prepare the API call parameters
+            api_params = {
+                "model": api_data.model,
+                "messages": messages,
+                "max_tokens": max_tokens,
+                "temperature": api_data.temperature,
+                "n": n, 
+                "stream": False
+            }
+
+            # Only add tools and tool_choice if tools are provided
+            if tools:
+                api_params["tools"] = tools
+                api_params["tool_choice"] = tool_choice
+
+            response: ChatCompletion = await client.chat.completions.create(**api_params)
 
             # We'll use the first choice for the MessageDict
             choice = response.choices[0]

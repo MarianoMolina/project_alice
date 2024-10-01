@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Optional, Literal
 from enum import Enum
 # The order of this list is used to determine which entities are created first
-EntityType = Literal["users", "models", "apis", "parameters", "prompts", "agents", "tasks", "chats", "task_responses", "files", "messages"]
+EntityType = Literal["users", "models", "apis", "parameters", "prompts", "agents", "tasks", "chats", "task_responses", "files", "messages", "urlreferences"]
 
 class FileType(str, Enum):
     IMAGE = 'image'
@@ -17,6 +17,7 @@ class ContentType(str, Enum):
     FILE = FileType.FILE
     TEXT = 'text'
     TASK_RESPONSE = 'task_response'
+    URL_REFERENCE = 'url_reference'
     MULTIPLE = 'multiple'
 
 class BaseDataStructure(BaseModel):

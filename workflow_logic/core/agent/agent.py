@@ -58,7 +58,7 @@ class AliceAgent(BaseModel):
                 tool_choice='auto' if self.has_functions else 'none',
                 tools=tools_list,
                 temperature=0.7,
-                max_tokens=1000 # TODO: Make this configurable
+                max_tokens=5000 # TODO: Make this configurable
             )
 
             if not response_ref or not response_ref.messages[0]:
@@ -399,7 +399,7 @@ class AliceAgent(BaseModel):
         if not img_gen_model:
             raise ValueError("No image generation model available for the agent or in the API manager")
         
-        refs: References = api_manager.generate_response_with_api_engine(
+        refs: References = await api_manager.generate_response_with_api_engine(
             api_type=ApiType.IMG_GENERATION,
             model=img_gen_model,
             prompt=prompt,

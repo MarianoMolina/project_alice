@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography, Link, Paper, Chip } from '@mui/material';
-import { StringOutput } from './StringOutput';
 import useStyles from './TaskResponseStyles';
+import CustomMarkdown from '../common/markdown/customMarkdown';
 
 interface SearchResult {
   title: string;
@@ -32,7 +32,7 @@ export const SearchOutput: React.FC<SearchOutputProps> = ({ result }) => {
 
         <Typography variant="subtitle1" className={classes.sectionLabel}>CONTENT:</Typography>
         <Box className={classes.searchResultBody}>
-          <StringOutput content={result.content} />
+          <CustomMarkdown children={result.content} />
         </Box>
 
         {result.metadata && Object.keys(result.metadata).length > 0 && (

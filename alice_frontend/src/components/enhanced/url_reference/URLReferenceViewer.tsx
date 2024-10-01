@@ -1,8 +1,8 @@
 import React from 'react';
 import { Box, Typography, Link, Paper, Chip } from '@mui/material';
 import useStyles from './URLReferenceStyles';
-import ReactMarkdown from 'react-markdown';
 import { URLReference } from '../../../types/URLReferenceTypes';
+import CustomMarkdown from '../common/markdown/customMarkdown';
 
 interface URLReferenceViewerProps {
   result: URLReference;
@@ -26,7 +26,7 @@ export const SearchOutput: React.FC<URLReferenceViewerProps> = ({ result }) => {
 
         <Typography variant="subtitle1" className={classes.sectionLabel}>CONTENT:</Typography>
         <Box className={classes.urlReferenceBody}>
-            <ReactMarkdown>{result.content}</ReactMarkdown>
+            <CustomMarkdown>{result.content}</CustomMarkdown>
         </Box>
 
         {result.metadata && Object.keys(result.metadata).length > 0 && (

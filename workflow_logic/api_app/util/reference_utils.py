@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Any
 from workflow_logic.core.data_structures.references import References
 from workflow_logic.core.data_structures.file_reference import FileReference, FileContentReference
 from workflow_logic.core.data_structures.task_response import TaskResponse
@@ -10,8 +10,8 @@ from workflow_logic.util import LOGGER
 async def create_or_update_file_reference(db_app: BackendAPI, file_ref: FileContentReference) -> FileReference:
     if file_ref.id:
         # Update existing file reference
-        updated_ref = await db_app.update_file_reference(file_ref)
-        return FileReference(**{**file_ref.model_dump(exclude={'content'}), 'id': updated_ref.id})
+        updated_ref: dict[Any, FileReference] = await db_app.update_entity_in_db('files', file_ref)
+        return FileReference(**updated_ref)
     else:
         # Create new file reference
         new_ref = await db_app.create_entity_in_db('files', file_ref.model_dump(exclude={'id'}))
@@ -21,19 +21,19 @@ async def create_or_update_file_reference(db_app: BackendAPI, file_ref: FileCont
 async def create_or_update_task_response(db_app: BackendAPI, task_response: TaskResponse) -> TaskResponse:
     if task_response.id:
         # Update existing task response
-        updated_response = await db_app.update_task_response(task_response)
-        return updated_response
+        updated_response = await db_app.update_entity_in_db('task_responses', task_response)
+        return TaskResponse(**updated_response)
     else:
         # Create new task response
-        new_response = await db_app.store_task_response(task_response)
+        new_response = await db_app.create_entity_in_db('task_responses', task_response.model_dump(exclude={'id'}))
         LOGGER.info(f'Created new task response: {new_response}')
         return new_response.retrieve_task_response()
 
 async def create_or_update_message(db_app: BackendAPI, message: MessageDict) -> MessageDict:
     if message.id:
         # Update existing message
-        updated_message = await db_app.update_message(message)
-        return updated_message
+        updated_message = await db_app.update_entity_in_db('messages', message)
+        return MessageDict(**updated_message)
     else:
         # Create new message
         new_message = await db_app.create_entity_in_db('messages', message.model_dump(exclude={'id'}))
@@ -41,8 +41,15 @@ async def create_or_update_message(db_app: BackendAPI, message: MessageDict) -> 
         return MessageDict(**new_message)
 
 async def process_search_result(db_app: BackendAPI, search_result: URLReference) -> URLReference:
-    # For now, we'll assume search results don't need to be stored separately
-    return search_result
+    if search_result.id:
+        # Update existing search result
+        updated_search_result = await db_app.update_entity_in_db('urlreferences', search_result)
+        return URLReference(**updated_search_result)
+    else:
+        # Create new search result
+        new_search_result = await db_app.create_entity_in_db('urlreferences', search_result.model_dump(exclude={'id'}))
+        LOGGER.info(f'Created new search result: {new_search_result}')
+        return URLReference(**new_search_result)
 
 async def process_string_output(db_app: BackendAPI, string_output: str) -> str:
     # For now, we'll assume string outputs don't need special processing
@@ -63,11 +70,12 @@ async def check_references(references: References, db_app: BackendAPI) -> Refere
             processed_message = await create_or_update_message(db_app, ref)
             return processed_message
         elif isinstance(ref, URLReference):
+            LOGGER.info(f'URL reference detected: {ref}')
             return await process_search_result(db_app, ref)
         elif isinstance(ref, str):
             return await process_string_output(db_app, ref)
         elif isinstance(ref, FileReference):
-            LOGGER.info(f'File reference detected: {ref.id}')
+            LOGGER.info(f'File reference detected: {ref}')
             return ref
         else:
             LOGGER.warning(f'Unknown reference type: {type(ref)}')
@@ -83,20 +91,3 @@ async def check_references(references: References, db_app: BackendAPI) -> Refere
 
     return references
 
-# Main function to check task response references
-async def check_task_response_references(task_response: TaskResponse, db_app: BackendAPI) -> TaskResponse:
-    LOGGER.info(f'Checking references for task response: {task_response.task_name}')
-   
-    # Process the references
-    task_response.references = await check_references(task_response.references, db_app)
-   
-    return task_response
-
-async def check_message_references(message: MessageDict, db_app: BackendAPI) -> MessageDict:
-    LOGGER.info(f'Checking references for message: {message.id}')
-   
-    # Process the references
-    message.references = await check_references(message.references, db_app)
-   
-    # Create or update the message with complete references
-    return message

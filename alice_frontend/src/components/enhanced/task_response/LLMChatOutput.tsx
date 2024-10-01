@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
-import Message from '../common/message/Message';
 import { MessageType } from '../../../types/MessageTypes';
+import EnhancedMessage from '../message/message/EnhancedMessage';
 
 interface LLMChatOutputProps {
   message: MessageType;
@@ -9,6 +9,6 @@ interface LLMChatOutputProps {
 
 export const LLMChatOutput: React.FC<LLMChatOutputProps> = ({ message }) => (
   <Box>
-    <Message message={message} />
+    <EnhancedMessage mode={'detail'} fetchAll={false} itemId={message._id} />
   </Box>
 );

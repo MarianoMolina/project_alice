@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
-import { Box, Typography, Tooltip, IconButton, Dialog, DialogContent, Chip } from '@mui/material';
-import ReactMarkdown from 'react-markdown';
+import { Box, Typography, Tooltip, IconButton, Dialog } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import useStyles from '../MessageStyles';
 import { MessageComponentProps } from '../../../../types/MessageTypes';
-import { WorkflowOutput } from '../../task_response/WorkflowOutput';
-import { CommandLineLog } from '../../task_response/CommandLog';
 import { BackgroundBeams } from '../../../ui/aceternity/BackgroundBeams';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import EnhancedMessage from './EnhancedMessage';
+import { hasAnyReferences } from '../../../../types/ReferenceTypes';
+import ReferenceChip from '../../common/references/ReferenceChip';
+import { Visibility } from '@mui/icons-material';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import CustomMarkdown from '../../common/markdown/customMarkdown';
 
-const MessageDetailView: React.FC<MessageComponentProps> = ({ item: message, chatId, onChange, handleSave }) => {
+const MessageFullView: React.FC<MessageComponentProps> = ({ item: message, chatId, onChange, handleSave }) => {
     const classes = useStyles();
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const { selectItem } = useCardDialog();
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
     if (!message) {
         return <Typography>No message data available.</Typography>;
@@ -43,47 +44,30 @@ const MessageDetailView: React.FC<MessageComponentProps> = ({ item: message, cha
     };
 
     const renderMessageContent = () => {
-        if (message.type === 'task_result' && message.task_responses) {
-            return <WorkflowOutput content={message.task_responses} />;
-        } else if (message.generated_by === 'tool') {
-            return <CommandLineLog content={message.content} />;
-        } else {
-            return <ReactMarkdown className={classes.markdownText}>{message.content}</ReactMarkdown>;
-        }
+        return <CustomMarkdown className={classes.markdownText}>{message.content}</CustomMarkdown>;
     };
 
-    const renderFileReferences = () => {
-        if (!message.references || message.references.length === 0) return null;
+    const renderReferences = () => {
+        if (!message.references || !hasAnyReferences(message.references)) return null;
+
         return (
-            <Box className={classes.fileReferencesContainer}>
-                <Typography variant="subtitle2">Referenced Files:</Typography>
+            <Box className={classes.referencesContainer}>
+                <Typography variant="subtitle2">References:</Typography>
                 <Box display="flex" flexWrap="wrap" gap={1}>
-                    {message.references.map((reference, index) => (
-                        <Chip
-                            key={index}
-                            label={reference.filename}
-                            onClick={() => selectItem('File', reference._id ?? null)}
-                            variant="outlined"
-                        />
+                    {message.references.messages?.map((msg, index) => (
+                        <ReferenceChip key={`msg-${index}`} reference={msg} type="Message" view />
                     ))}
-                </Box>
-            </Box>
-        );
-    };
-
-    const renderTaskResponses = () => {
-        if (!message.task_responses || message.task_responses.length === 0) return null;
-        return (
-            <Box className={classes.taskResponsesContainer}>
-                <Typography variant="subtitle2">Task Responses:</Typography>
-                <Box display="flex" flexWrap="wrap" gap={1}>
-                    {message.task_responses.map((taskResponse, index) => (
-                        <Chip
-                            key={index}
-                            label={`Task: ${taskResponse.task_name}`}
-                            onClick={() => selectItem('TaskResponse', taskResponse._id ?? '')}
-                            variant="outlined"
-                        />
+                    {message.references.files?.map((file, index) => (
+                        <ReferenceChip key={`file-${index}`} reference={file} type="File" view />
+                    ))}
+                    {message.references.task_responses?.map((task, index) => (
+                        <ReferenceChip key={`task-${index}`} reference={task} type="TaskResponse" view />
+                    ))}
+                    {message.references.search_results?.map((url, index) => (
+                        <ReferenceChip key={`url-${index}`} reference={url} type="URLReference" view />
+                    ))}
+                    {message.references.string_outputs?.map((str, index) => (
+                        <ReferenceChip key={`str-${index}`} reference={str} type="string_output" view />
                     ))}
                 </Box>
             </Box>
@@ -100,7 +84,14 @@ const MessageDetailView: React.FC<MessageComponentProps> = ({ item: message, cha
                             {getCreatorName()}
                         </Typography>
                     </Tooltip>
-                    {chatId && (
+                    <Box>
+                        <IconButton
+                            size="small"
+                            onClick={() => selectItem('Message', message._id || '', message)}
+                            className={classes.viewButton}
+                        >
+                            <Visibility fontSize="small" />
+                        </IconButton>
                         <IconButton
                             size="small"
                             onClick={() => setIsEditDialogOpen(true)}
@@ -108,11 +99,11 @@ const MessageDetailView: React.FC<MessageComponentProps> = ({ item: message, cha
                         >
                             <EditIcon fontSize="small" />
                         </IconButton>
-                    )}
+
+                    </Box>
                 </Box>
                 {renderMessageContent()}
-                {renderFileReferences()}
-                {renderTaskResponses()}
+                {renderReferences()}
                 <Box className={classes.metadataContainer}>
                     {message.step && (
                         <Tooltip title="Task or source that produced this message" arrow>
@@ -131,21 +122,19 @@ const MessageDetailView: React.FC<MessageComponentProps> = ({ item: message, cha
                 </Box>
             </Box>
             <Dialog open={isEditDialogOpen} onClose={() => setIsEditDialogOpen(false)} maxWidth="md" fullWidth>
-                <DialogContent>
-                    <EnhancedMessage
-                        itemId={message._id}
-                        mode={'edit'}
-                        onSave={async () => {
-                            await handleSave();
-                            setIsEditDialogOpen(false);
-                        }}
-                        chatId={chatId}
-                        fetchAll={false}
-                    />
-                </DialogContent>
+                <EnhancedMessage
+                    itemId={message._id}
+                    mode={'edit'}
+                    onSave={async () => {
+                        await handleSave();
+                        setIsEditDialogOpen(false);
+                    }}
+                    chatId={chatId}
+                    fetchAll={false}
+                />
             </Dialog>
         </Box>
     );
 };
 
-export default MessageDetailView;
+export default MessageFullView;

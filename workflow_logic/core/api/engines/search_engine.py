@@ -131,7 +131,7 @@ class ExaSearchAPI(APISearchEngine):
 
         return References(search_results=[
             URLReference(
-                title=result.title,
+                title=result.title if hasattr(result, 'title') and result.title else result.url,
                 url=result.url,
                 content=f'Score: {result.score} - Published Date: {result.published_date} - Author: {result.author}',
                 metadata={key: value for key, value in result.__dict__.items() if key not in {"title", "url", "score", "published_date", "author"}}

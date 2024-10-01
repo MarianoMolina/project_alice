@@ -19,7 +19,7 @@ const URLReferenceFlexibleView: React.FC<URLReferenceComponentProps> = ({
     }
     const isEditMode = mode === 'edit' || mode === 'create';
     const title = mode === 'create' ? 'Create New URL Reference' : mode === 'edit' ? 'Edit URL Reference' : 'URL Reference Details';
-    const saveButtonText = item.id ? 'Update URL Reference' : 'Create URL Reference';
+    const saveButtonText = item._id ? 'Update URL Reference' : 'Create URL Reference';
 
     return (
         <GenericFlexibleView

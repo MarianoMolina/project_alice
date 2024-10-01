@@ -1,40 +1,33 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Typography,
   ListItemButton,
   ListItemText,
   List,
   Box,
-  Dialog,
-  DialogContent,
-  DialogActions,
-  Button,
 } from '@mui/material';
 import { Person, Functions, Message as MessageIcon } from '@mui/icons-material';
 import { ChatComponentProps } from '../../../../types/ChatTypes';
-import { MessageType } from '../../../../types/MessageTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import MessageListView from '../../common/message/MessageList';
-import MessageDetail from '../../common/message/MessageDetail';
+import MessageListView from '../../message/message/MessageListView';
+import { MessageType } from '../../../../types/MessageTypes';
 
 const ChatCardView: React.FC<ChatComponentProps> = ({
   item,
   handleAgentClick,
   handleTaskClick,
+  handleMessageClick,
 }) => {
-  const [selectedMessage, setSelectedMessage] = useState<MessageType | null>(null);
 
   if (!item) {
     return <Typography>No chat data available.</Typography>;
   }
 
-  const handleViewMessage = (message: MessageType) => {
-    setSelectedMessage(message);
-  };
-
-  const handleCloseMessageDetail = () => {
-    setSelectedMessage(null);
-  };
+  const checkIfViewClicked = (message: MessageType) => {
+    console.log('View clicked', message);
+    console.log('handleMessageClick', handleMessageClick);
+    return handleMessageClick && handleMessageClick(message._id ?? '', message)
+  }
 
   const listItems = [
     {
@@ -69,10 +62,13 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
       secondary_text: (
         <Box>
           <Typography variant="body2">Total: {item.messages.length}</Typography>
-          <MessageListView 
-            messages={item.messages}
-            onView={handleViewMessage}
-            // Note: We don't pass onEdit here as this is a view-only component
+          <MessageListView
+            items={item.messages || []}
+            item={null}
+            onChange={() => { }}
+            mode={'view'}
+            handleSave={async () => { }}
+            onView={checkIfViewClicked}//(message) => handleMessageClick && handleMessageClick(message._id ?? '', message)}
           />
         </Box>
       )
@@ -87,21 +83,6 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
         id={item._id}
         listItems={listItems}
       />
-      <Dialog open={!!selectedMessage} onClose={handleCloseMessageDetail} maxWidth="md" fullWidth>
-        {selectedMessage && (
-          <DialogContent>
-            <MessageDetail
-              message={selectedMessage}
-              chatId={item._id}
-              mode="view"
-              onClose={handleCloseMessageDetail}
-            />
-          </DialogContent>
-        )}
-        <DialogActions>
-          <Button onClick={handleCloseMessageDetail}>Close</Button>
-        </DialogActions>
-      </Dialog>
     </>
   );
 };

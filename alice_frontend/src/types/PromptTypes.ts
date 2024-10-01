@@ -1,4 +1,4 @@
-import { BaseDataseObject, User, convertToUser } from './UserTypes';
+import { BaseDataseObject, convertToUser } from './UserTypes';
 import { FunctionParameters } from './ParameterTypes';
 import { HandleClickProps } from './CollectionTypes';
 

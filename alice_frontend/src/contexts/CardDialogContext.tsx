@@ -15,6 +15,7 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
   const [selectedItemType, setSelectedItemType] = useState<CollectionElementString | null>(null);
 
   const selectItem = useCallback((itemType: CollectionElementString, itemId?: string, item?: CollectionElement) => {
+    console.log('Selecting item:', itemType, itemId, item);
     setSelectedItemType(itemType);
     if (item) {
       setSelectedItem(item);

@@ -66,9 +66,9 @@ export const sendMessage = async (chatId: string, message: MessageType): Promise
     console.log('Sending message to chatId:', chatId);
 
     // Check if the message contains file references
-    if (message.references && message.references.length > 0) {
-      for (const reference of message.references) {
-        if ('_id' in reference) {
+    if (message.references && message.references.files && message.references.files.length > 0) {
+      for (const reference of  message.references.files) {
+        if ('_id' in reference && reference._id) {
           if ('transcript' in reference && reference.transcript) {
             console.log('Reference already has a transcript:', reference);
           }
@@ -127,30 +127,6 @@ export const executeTask = async (taskId: string, inputs: any): Promise<TaskResp
     return convertToTaskResponse(response.data);
   } catch (error) {
     console.error('Error executing task:', error);
-    throw error;
-  }
-};
-
-export const addTaskResponse = async (chatId: string, taskResultId: string): Promise<AliceChat> => {
-  try {
-    console.log('Adding task response to chatId:', chatId, 'with taskResultId:', taskResultId);
-    
-    // Fetch the task result
-    const taskResult = await fetchItem('taskresults', taskResultId) as TaskResponse;
-    
-    // Create a message object with the task result's output
-    const message: MessageType = {
-      role: 'assistant',
-      content: JSON.stringify(taskResult.task_outputs),
-      generated_by: 'tool',
-      type: 'task_result',
-      task_responses: [taskResult],
-    };
-
-    // Send the message to the chat
-    return await sendMessage(chatId, message);
-  } catch (error) {
-    console.error('Error adding task response:', error);
     throw error;
   }
 };
