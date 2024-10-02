@@ -22,7 +22,7 @@ export async function createURLReference(
     // Create and save the task result
     const urlReference = new URLReference(urlReferenceData);
     await urlReference.save();
-    return urlReference;
+    return await URLReference.findById(urlReference._id);
   } catch (error) {
     Logger.error('Error creating task result:', error);
     return null;

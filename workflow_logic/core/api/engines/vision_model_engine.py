@@ -1,10 +1,9 @@
 import base64
 from pydantic import Field
 from typing import List, Union, Optional
-from workflow_logic.core.data_structures import MessageDict, ModelConfig, FileReference, get_file_content, ApiType, References
-from workflow_logic.core.api.engines.api_engine import APIEngine
-from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 from openai import AsyncOpenAI
+from workflow_logic.core.data_structures import MessageDict, ModelConfig, FileReference, get_file_content, ApiType, References, FunctionParameters, ParameterDefinition
+from workflow_logic.core.api.engines.api_engine import APIEngine
 from workflow_logic.util import LOGGER
 
 class VisionModelEngine(APIEngine):

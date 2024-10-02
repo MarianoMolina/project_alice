@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo} from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Box, TextField, FormControlLabel, Checkbox, FormControl, InputLabel, Select, MenuItem, Chip, SelectChangeEvent } from '@mui/material';
 import { TaskFormsProps, AliceTask } from '../../../../../types/TaskTypes';
 import EnhancedSelect from '../../../common/enhanced_select/EnhancedSelect';
@@ -13,7 +13,6 @@ const Workflow: React.FC<TaskFormsProps> = ({
   onChange,
   mode,
   handleAccordionToggle,
-  handleViewDetails,
   activeAccordion,
   apis
 }) => {
@@ -28,7 +27,7 @@ const Workflow: React.FC<TaskFormsProps> = ({
   const handleInputVariablesChange = useCallback((newDefinition: FunctionParameters) => {
     onChange({ ...item, input_variables: newDefinition });
   }, [onChange, item]);
-  
+
   if (!item) {
     return <Box>No task data available.</Box>;
   }
@@ -107,8 +106,8 @@ const Workflow: React.FC<TaskFormsProps> = ({
         label="Select Tasks"
         activeAccordion={activeAccordion}
         onAccordionToggle={handleAccordionToggle}
-        onView={(id) => handleViewDetails("task", id)}
         accordionEntityName="tasks"
+        showCreateButton={true}
       />
 
       <EnhancedSelect<AliceTask>
@@ -120,8 +119,8 @@ const Workflow: React.FC<TaskFormsProps> = ({
         label="Select Start Task"
         activeAccordion={activeAccordion}
         onAccordionToggle={handleAccordionToggle}
-        onView={(id) => handleViewDetails("task", id)}
         accordionEntityName="start-task"
+        showCreateButton={true}
       />
 
 

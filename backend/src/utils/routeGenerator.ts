@@ -40,7 +40,8 @@ export function createRoutes<T extends Document, K extends ModelName>(
           updated_by: req.user?.userId
         });
         item._id = new Types.ObjectId();
-        saved_item = await item.save();
+        await item.save();
+        saved_item = await model.findById(item._id);
       }
       if (!saved_item) {
         res.status(400).json({ error: `Failed to create ${modelName.toLowerCase()}` });

@@ -28,7 +28,7 @@ export async function createTaskResult(
     // Create and save the task result
     const taskResult = new TaskResult(taskResultData);
     await taskResult.save();
-    return taskResult;
+    return await TaskResult.findById(taskResult._id);
   } catch (error) {
     Logger.error('Error creating task result:', error);
     return null;

@@ -6,7 +6,6 @@ import {
     MenuItem,
     Switch,
     TextField,
-    Dialog,
 } from '@mui/material';
 import { ApiComponentProps, API, ApiType, ApiName, getDefaultApiForm } from '../../../../types/ApiTypes';
 import { API_TYPE_CONFIGS, LLM_PROVIDERS } from '../../../../utils/ApiUtils';
@@ -35,8 +34,6 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
     const [form, setForm] = useState<Partial<API>>(getDefaultApiForm());
     const [availableApiNames, setAvailableApiNames] = useState<ApiName[]>([]);
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [dialogContent, setDialogContent] = useState<React.ReactNode | null>(null);
 
     useEffect(() => {
         if (item) {
@@ -125,11 +122,6 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
     };
 
-    const handleViewDetails = (type: 'model', itemId: string) => {
-        setDialogContent(<EnhancedModel mode="card" itemId={itemId} fetchAll={false} />);
-        setDialogOpen(true);
-    };
-
     const title = mode === 'create' ? 'Create New API' : mode === 'edit' ? 'Edit API' : 'API Details';
     const saveButtonText = form._id ? 'Update API' : 'Create API';
 
@@ -203,8 +195,8 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                     label="Select Default Model"
                     activeAccordion={activeAccordion}
                     onAccordionToggle={handleAccordionToggle}
-                    onView={(id) => handleViewDetails("model", id)}
                     accordionEntityName="default-model"
+                    showCreateButton={true}
                 />
             )}
 
@@ -217,9 +209,6 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                 />
             </FormControl>
 
-            <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-                {dialogContent}
-            </Dialog>
         </GenericFlexibleView>
     );
 };

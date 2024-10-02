@@ -45,6 +45,21 @@ export type CollectionTypeString = {
     urlreferences: 'URLReference';
 };
 
+export const collectionNameToElementString: Record<CollectionName, CollectionElementString> = {
+    agents: 'Agent',
+    chats: 'Chat',
+    models: 'Model',
+    tasks: 'Task',
+    prompts: 'Prompt',
+    taskresults: 'TaskResponse',
+    users: 'User',
+    parameters: 'Parameter',
+    apis: 'API',
+    files: 'File',
+    messages: 'Message',
+    urlreferences: 'URLReference'
+  };
+
 export const converters: { [K in CollectionName]: (data: any) => CollectionType[K] } = {
     agents: convertToAliceAgent,
     chats: convertToAliceChat,

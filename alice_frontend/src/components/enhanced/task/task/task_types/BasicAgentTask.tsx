@@ -27,7 +27,6 @@ const BasicAgentTask: React.FC<TaskFormsProps> = ({
   onChange,
   mode,
   handleAccordionToggle,
-  handleViewDetails,
   activeAccordion,
   apis
 }) => {
@@ -114,8 +113,8 @@ const BasicAgentTask: React.FC<TaskFormsProps> = ({
         label="Select Agent"
         activeAccordion={activeAccordion}
         onAccordionToggle={handleAccordionToggle}
-        onView={(id) => handleViewDetails("agent", id)}
         accordionEntityName="agent"
+        showCreateButton={true}
       />
 
       <EnhancedSelect<AliceTask>
@@ -128,8 +127,8 @@ const BasicAgentTask: React.FC<TaskFormsProps> = ({
         label="Select Tasks"
         activeAccordion={activeAccordion}
         onAccordionToggle={handleAccordionToggle}
-        onView={(id) => handleViewDetails("task", id)}
         accordionEntityName="tasks"
+        showCreateButton={true}
       />
 
 

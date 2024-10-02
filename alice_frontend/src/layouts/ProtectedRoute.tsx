@@ -7,6 +7,7 @@ import { TaskProvider } from '../contexts/TaskContext';
 import { ChatProvider } from '../contexts/ChatContext';
 import { DialogProvider } from '../contexts/CardDialogContext';
 import EnhancedCardDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
+import EnhancedFlexibleDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedFlexibleDialog';
 
 interface ProtectedRouteProps {
   element: React.ReactNode;
@@ -30,6 +31,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
         <TaskProvider>
           <ChatProvider>
             <EnhancedCardDialog />
+            <EnhancedFlexibleDialog />
             {element}
           </ChatProvider>
         </TaskProvider>

@@ -49,7 +49,7 @@ export async function createMessage(
     Logger.debug('Message saved successfully:', JSON.stringify(savedMessage.toObject(), null, 2));
     Logger.debug(`Message created with ID: ${savedMessage._id}`);
 
-    return savedMessage;
+    return await Message.findById(savedMessage._id);
   } catch (error) {
     Logger.error('Error in createMessage:', error);
     if (error instanceof Error) {

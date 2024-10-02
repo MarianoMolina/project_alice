@@ -23,7 +23,7 @@ import EnhancedURLReference from '../components/enhanced/url_reference/url_refer
 const Database: React.FC = () => {
     const classes = useStyles();
     const [selectedItem, setSelectedItem] = useState<CollectionElement | null>(null);
-    const { selectItem } = useCardDialog();
+    const { selectCardItem } = useCardDialog();
     const [activeTab, setActiveTab] = useState<CollectionElementString>('Agent');
     const [showActiveComponent, setShowActiveComponent] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
@@ -88,7 +88,7 @@ const Database: React.FC = () => {
             onView: (item: any) => {
                 console.log('Viewing item:', item);
                 if (item._id) {
-                    selectItem(activeTab, item._id);
+                    selectCardItem(activeTab, item._id);
                 }
             },
         };
@@ -126,7 +126,7 @@ const Database: React.FC = () => {
                 })()}
             </Box>
         );
-    }, [activeTab, handleItemSelect, viewMode, handleViewModeChange, selectItem]);
+    }, [activeTab, handleItemSelect, viewMode, handleViewModeChange, selectCardItem]);
 
     const renderActiveComponent = useCallback(() => {
         if (!showActiveComponent) {

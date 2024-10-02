@@ -85,7 +85,6 @@ export interface TaskComponentProps extends HandleClickProps {
 export interface TaskFormsProps extends TaskComponentProps {
   handleAccordionToggle: (accordion: string | null) => void;
   activeAccordion: string | null;
-  handleViewDetails: (type: 'agent' | 'task' | 'api' | 'template' | 'prompt', item_id: string) => void;
   apis: API[];
 }
 

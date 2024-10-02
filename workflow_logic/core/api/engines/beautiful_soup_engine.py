@@ -2,9 +2,8 @@ import aiohttp
 from bs4 import BeautifulSoup
 from typing import Dict, Any
 from pydantic import Field
-from workflow_logic.core.data_structures import URLReference, References
+from workflow_logic.core.data_structures import URLReference, References, FunctionParameters, ParameterDefinition
 from workflow_logic.core.api.engines.api_engine import APIEngine
-from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 
 class BeautifulSoupWebScraperEngine(APIEngine):
     input_variables: FunctionParameters = Field(

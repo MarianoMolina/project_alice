@@ -351,6 +351,21 @@ class BackendAPI(BaseModel):
             LOGGER.error(f"Error validating token: {e}")
             return {"valid": False, "message": str(e)}
         
+    async def get_entity_from_db(self, entity_type: EntityType, entity_id: str) -> Dict[str, Any]:
+        collection_name = self.collection_map[entity_type]
+        url = f"{self.base_url}/{collection_name}/{entity_id}"
+        headers = self._get_headers()
+        
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(url, headers=headers) as response:
+                    response.raise_for_status()
+                    result = await response.json()
+                    return result
+            except aiohttp.ClientError as e:
+                LOGGER.error(f"Error retrieving entity: {e}")
+                return {}
+        
     async def create_entity_in_db(self, entity_type: EntityType, entity_data: dict) -> Dict[str, Any]:
         collection_name = self.collection_map[entity_type]
         url = f"{self.base_url}/{collection_name}"

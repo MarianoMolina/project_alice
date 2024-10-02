@@ -1,8 +1,7 @@
 from typing import List, Tuple, Union, Dict, Optional
 from pydantic import Field
 from workflow_logic.core.tasks.agent_tasks import BasicAgentTask
-from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
-from workflow_logic.core.data_structures import MessageDict, ApiType, References
+from workflow_logic.core.data_structures import FunctionParameters, ParameterDefinition, MessageDict, ApiType, References
 from workflow_logic.core.api import APIManager
 from workflow_logic.util import LOGGER
 

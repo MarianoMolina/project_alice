@@ -5,7 +5,6 @@ import {
     InputLabel,
     Select,
     MenuItem,
-    Dialog,
     SelectChangeEvent,
     Typography
 } from '@mui/material';
@@ -20,7 +19,7 @@ import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import { FileReference } from '../../../../types/FileTypes';
 import { TaskResponse } from '../../../../types/TaskResponseTypes';
 import { URLReference } from '../../../../types/URLReferenceTypes';
-import { CollectionName, CollectionElementString } from '../../../../types/CollectionTypes';
+import { CollectionName } from '../../../../types/CollectionTypes';
 import { References } from '../../../../types/ReferenceTypes';
 
 const MessageFlexibleView: React.FC<MessageComponentProps> = ({
@@ -32,8 +31,6 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
     const { fetchItem } = useApi();
     const [form, setForm] = useState<Partial<MessageType>>(getDefaultMessageForm());
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [dialogContent, setDialogContent] = useState<React.ReactNode | null>(null);
 
     useEffect(() => {
         if (item) {
@@ -79,25 +76,6 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
     };
 
-    const handleViewDetails = (type: CollectionElementString, itemId: string) => {
-        let content;
-        switch (type) {
-            case 'File':
-                content = <EnhancedFile mode="card" itemId={itemId} fetchAll={false} />;
-                break;
-            case 'TaskResponse':
-                content = <EnhancedTaskResponse mode="card" itemId={itemId} fetchAll={false} />;
-                break;
-            case 'Message':
-                content = <EnhancedMessage mode="card" itemId={itemId} fetchAll={false} />;
-                break;
-            case 'URLReference':
-                content = <EnhancedURLReference mode="card" itemId={itemId} fetchAll={false} />;
-                break;
-        }
-        setDialogContent(content);
-        setDialogOpen(true);
-    };
 
     const title = mode === 'create' ? 'Create New Message' : mode === 'edit' ? 'Edit Message' : 'Message Details';
     const saveButtonText = form._id ? 'Update Message' : 'Create Message';
@@ -163,7 +141,6 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
                 label="Referenced Messages"
                 activeAccordion={activeAccordion}
                 onAccordionToggle={handleAccordionToggle}
-                onView={(id) => handleViewDetails("Message", id)}
                 accordionEntityName="referenced-messages"
             />
 
@@ -177,7 +154,6 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
                 label="File References"
                 activeAccordion={activeAccordion}
                 onAccordionToggle={handleAccordionToggle}
-                onView={(id) => handleViewDetails("File", id)}
                 accordionEntityName="file-references"
             />
 
@@ -191,7 +167,6 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
                 label="Task Responses"
                 activeAccordion={activeAccordion}
                 onAccordionToggle={handleAccordionToggle}
-                onView={(id) => handleViewDetails("TaskResponse", id)}
                 accordionEntityName="task-responses"
             />
 
@@ -205,13 +180,8 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
                 label="Search Results"
                 activeAccordion={activeAccordion}
                 onAccordionToggle={handleAccordionToggle}
-                onView={(id) => handleViewDetails("URLReference", id)}
                 accordionEntityName="search-results"
             />
-
-            <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-                {dialogContent}
-            </Dialog>
         </GenericFlexibleView>
     );
 };

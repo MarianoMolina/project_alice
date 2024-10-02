@@ -1,8 +1,9 @@
 import React from 'react';
 import { Box, IconButton, Accordion, AccordionSummary, AccordionDetails, Typography, Chip, Divider } from '@mui/material';
-import { Edit, Close, ExpandMore } from '@mui/icons-material';
-import { CollectionName, CollectionType } from '../../../../types/CollectionTypes';
+import { Edit, Close, ExpandMore, Add } from '@mui/icons-material';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import useStyles from './EnhancedSelectStyles';
+import { CollectionName, CollectionType, CollectionElementString, collectionNameToElementString } from '../../../../types/CollectionTypes';
 
 interface EnhancedSelectProps<T extends CollectionType[CollectionName]> {
   componentType: CollectionName;
@@ -14,11 +15,13 @@ interface EnhancedSelectProps<T extends CollectionType[CollectionName]> {
   label: string;
   activeAccordion: string | null;
   onAccordionToggle: (accordionName: string | null) => void;
-  onView: (id: string) => void;
+  onView?: (id: string) => void;
   accordionEntityName: string;
+  showCreateButton?: boolean;
 }
 
 function EnhancedSelect<T extends CollectionType[CollectionName]>({
+  componentType,
   EnhancedComponent,
   selectedItems,
   onSelect,
@@ -27,10 +30,12 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
   label,
   activeAccordion,
   onAccordionToggle,
-  onView,
-  accordionEntityName
+  accordionEntityName,
+  showCreateButton = false
 }: EnhancedSelectProps<T>) {
   const classes = useStyles();
+  const { selectFlexibleItem,selectCardItem } = useCardDialog();
+
   const accordionName = `select-${accordionEntityName}`;
   const isExpanded = activeAccordion === accordionName;
 
@@ -45,12 +50,18 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
     onSelect(updatedIds);
   };
 
+  const collectionElementString = collectionNameToElementString[componentType] as CollectionElementString;
+
+  const handleCreate = () => {
+    selectFlexibleItem(collectionElementString, 'create');
+  };
+
   const renderSelectedItem = (item: T) => (
     <Chip
       key={item._id}
       label={<EnhancedComponent mode="shortList" itemId={item._id} fetchAll={false} />}
       onDelete={multiple && isInteractable ? () => handleDelete(item) : undefined}
-      onClick={() => onView(item._id!)}
+      onClick={() => selectCardItem(collectionElementString, item._id!)}
       className={classes.chip}
     />
   );
@@ -60,14 +71,26 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
       <Typography className={classes.label} variant="caption">{label}{multiple ? ' (multiple)' : null}</Typography>
       <Box className={classes.chipContainer}>
         {selectedItems?.map(renderSelectedItem)}
-        <IconButton 
-          onClick={handleToggle} 
-          disabled={!isInteractable} 
-          size="small"
-          className={classes.editButton}
-        >
-          {isExpanded ? <Close /> : <Edit />}
-        </IconButton>
+        <Box className={classes.buttonContainer}>
+          <IconButton
+            onClick={handleToggle}
+            disabled={!isInteractable}
+            size="small"
+            className={classes.editButton}
+          >
+            {isExpanded ? <Close /> : <Edit />}
+          </IconButton>
+          {showCreateButton && (
+            <IconButton
+              onClick={handleCreate}
+              disabled={!isInteractable}
+              size="small"
+              className={classes.createButton}
+            >
+              <Add />
+            </IconButton>
+          )}
+        </Box>
       </Box>
       <Accordion expanded={isExpanded} onChange={handleToggle}>
         <AccordionSummary expandIcon={<ExpandMore />}>
@@ -83,7 +106,7 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
                 : [item._id!];
               onSelect(newSelectedIds);
             }}
-            onView={(item: T) => onView(item._id!)}
+            onView={(item: T) => selectCardItem(collectionElementString, item._id!)}
             isInteractable={isInteractable}
           />
         </AccordionDetails>

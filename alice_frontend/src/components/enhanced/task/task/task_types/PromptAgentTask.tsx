@@ -7,14 +7,14 @@ import EnhancedPrompt from '../../../prompt/prompt/EnhancedPrompt';
 import { Prompt } from '../../../../../types/PromptTypes';
 import { useApi } from '../../../../../contexts/ApiContext';
 
-const PromptAgentTask: React.FC<TaskFormsProps> = ({ item, onChange, mode, handleAccordionToggle, handleViewDetails, activeAccordion, handleSave, apis }) => {
+const PromptAgentTask: React.FC<TaskFormsProps> = ({ item, onChange, mode, handleAccordionToggle, activeAccordion, handleSave, apis }) => {
   const { fetchItem } = useApi();
   const isEditMode = mode === 'edit' || mode === 'create';
 
   if (!item) {
     return <Box>No task data available.</Box>;
   }
-  
+
   const handleTemplateChange = async (selectedIds: string[]) => {
     if (selectedIds.length > 0) {
       const prompt = await fetchItem('prompts', selectedIds[0]) as Prompt;
@@ -32,7 +32,7 @@ const PromptAgentTask: React.FC<TaskFormsProps> = ({ item, onChange, mode, handl
 
   return (
     <Box>
-      <BasicAgentTask 
+      <BasicAgentTask
         apis={apis}
         handleSave={handleSave}
         items={null}
@@ -40,22 +40,21 @@ const PromptAgentTask: React.FC<TaskFormsProps> = ({ item, onChange, mode, handl
         onChange={onChange}
         mode={mode}
         handleAccordionToggle={handleAccordionToggle}
-        handleViewDetails={handleViewDetails}
         activeAccordion={activeAccordion}
-        />
-      <Box>
-      <EnhancedSelect<Prompt>
-        componentType="prompts"
-        EnhancedComponent={EnhancedPrompt}
-        selectedItems={item.templates?.task_template ? [item.templates.task_template!] : []}
-        onSelect={handleTemplateChange}
-        isInteractable={isEditMode}
-        label="Select Prompt"
-        activeAccordion={activeAccordion}
-        onAccordionToggle={handleAccordionToggle}
-        onView={(id) => handleViewDetails("prompt", id)}
-        accordionEntityName="prompts"
       />
+      <Box>
+        <EnhancedSelect<Prompt>
+          componentType="prompts"
+          EnhancedComponent={EnhancedPrompt}
+          selectedItems={item.templates?.task_template ? [item.templates.task_template!] : []}
+          onSelect={handleTemplateChange}
+          isInteractable={isEditMode}
+          label="Select Prompt"
+          activeAccordion={activeAccordion}
+          onAccordionToggle={handleAccordionToggle}
+          accordionEntityName="prompts"
+          showCreateButton={true}
+        />
       </Box>
     </Box>
   );

@@ -6,8 +6,7 @@ from exa_py import Exa
 from pydantic import Field
 from typing import Dict, Any, List
 from workflow_logic.util import LOGGER
-from workflow_logic.core.data_structures import URLReference, References, ApiType
-from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
+from workflow_logic.core.data_structures import URLReference, References, ApiType, FunctionParameters, ParameterDefinition
 from workflow_logic.core.api.engines.api_engine import APIEngine
 
 class APISearchEngine(APIEngine):

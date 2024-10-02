@@ -1,7 +1,6 @@
 from abc import abstractmethod
 from pydantic import BaseModel, Field
-from workflow_logic.core.data_structures import References, ApiType
-from workflow_logic.core.parameters import FunctionParameters
+from workflow_logic.core.data_structures import References, ApiType, FunctionParameters
 from typing import Dict, Any
 
 class APIEngine(BaseModel):

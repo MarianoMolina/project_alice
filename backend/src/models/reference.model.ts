@@ -6,13 +6,7 @@ export const referencesSchema = new Schema<References>({
     messages: [{ type: Schema.Types.ObjectId, ref: 'Message', autopopulate: true }],
     files: [{ type: Schema.Types.ObjectId, ref: 'FileReference', autopopulate: true }],
     task_responses: [{ type: Schema.Types.ObjectId, ref: 'TaskResult', autopopulate: true }],
-    search_results: [{
-        id: String,
-        title: String,
-        url: String,
-        content: String,
-        metadata: { type: Map, of: String }
-    }],
+    search_results: [{ type: Schema.Types.ObjectId, ref: 'URLReference', autopopulate: true }],
     string_outputs: [String]
 });
 

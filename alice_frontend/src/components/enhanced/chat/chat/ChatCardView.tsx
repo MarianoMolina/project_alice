@@ -10,7 +10,6 @@ import { Person, Functions, Message as MessageIcon } from '@mui/icons-material';
 import { ChatComponentProps } from '../../../../types/ChatTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import MessageListView from '../../message/message/MessageListView';
-import { MessageType } from '../../../../types/MessageTypes';
 
 const ChatCardView: React.FC<ChatComponentProps> = ({
   item,
@@ -21,12 +20,6 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
 
   if (!item) {
     return <Typography>No chat data available.</Typography>;
-  }
-
-  const checkIfViewClicked = (message: MessageType) => {
-    console.log('View clicked', message);
-    console.log('handleMessageClick', handleMessageClick);
-    return handleMessageClick && handleMessageClick(message._id ?? '', message)
   }
 
   const listItems = [
@@ -68,7 +61,7 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
             onChange={() => { }}
             mode={'view'}
             handleSave={async () => { }}
-            onView={checkIfViewClicked}//(message) => handleMessageClick && handleMessageClick(message._id ?? '', message)}
+            onView={(message) => handleMessageClick && handleMessageClick(message._id ?? '', message)}
           />
         </Box>
       )

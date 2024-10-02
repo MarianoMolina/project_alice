@@ -49,7 +49,7 @@ export const useApi = () => {
 
 export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { addNotification } = useNotification();
-    const { selectItem } = useCardDialog();
+    const { selectCardItem } = useCardDialog();
     const { openDialog } = useDialog();
 
     const createItem = useCallback(async <T extends CollectionName>(
@@ -64,7 +64,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 5000,
                 {
                     label: 'View',
-                    onClick: () => selectItem(collectionName as CollectionElementString, createdItem._id as string)
+                    onClick: () => selectCardItem(collectionName as CollectionElementString, createdItem._id as string)
                 }
             );
             return createdItem;
@@ -72,7 +72,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             addNotification(`Error creating ${collectionName}`, 'error');
             throw error;
         }
-    }, [addNotification, selectItem]);
+    }, [addNotification, selectCardItem]);
 
     const updateItem = useCallback(async <T extends CollectionName>(
         collectionName: T,
@@ -87,7 +87,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 5000,
                 {
                     label: 'View',
-                    onClick: () => selectItem(collectionName as CollectionElementString, itemId)
+                    onClick: () => selectCardItem(collectionName as CollectionElementString, itemId)
                 }
             );
             return updatedItem;
@@ -95,21 +95,21 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             addNotification(`Error updating ${collectionName}`, 'error');
             throw error;
         }
-    }, [addNotification, selectItem]);
+    }, [addNotification, selectCardItem]);
 
     const executeTask = useCallback(async (taskId: string, inputs: any): Promise<TaskResponse> => {
         try {
             const result = await apiExecuteTask(taskId, inputs);
             addNotification('Task executed successfully', 'success', 5000, {
                 label: 'View Result',
-                onClick: () => selectItem('TaskResponse', result._id as string)
+                onClick: () => selectCardItem('TaskResponse', result._id as string)
             });
             return result;
         } catch (error) {
             addNotification('Error executing task', 'error');
             throw error;
         }
-    }, [addNotification, selectItem]);
+    }, [addNotification, selectCardItem]);
 
     const generateChatResponse = useCallback(async (chatId: string): Promise<boolean> => {
         try {
@@ -148,28 +148,28 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             const result = await apiUploadFileContentReference(itemData);
             addNotification('File uploaded successfully', 'success', 5000, {
                 label: 'View File',
-                onClick: () => selectItem('File', result._id as string)
+                onClick: () => selectCardItem('File', result._id as string)
             });
             return result;
         } catch (error) {
             addNotification('Error uploading file', 'error');
             throw error;
         }
-    }, [addNotification, selectItem]);
+    }, [addNotification, selectCardItem]);
 
     const updateFile = useCallback(async (file: File, fileId?: string): Promise<FileReference> => {
         try {
             const result = await apiUpdateFile(file, fileId);
             addNotification('File updated successfully', 'success', 5000, {
                 label: 'View File',
-                onClick: () => selectItem('File', result._id as string)
+                onClick: () => selectCardItem('File', result._id as string)
             });
             return result;
         } catch (error) {
             addNotification('Error updating file', 'error');
             throw error;
         }
-    }, [addNotification, selectItem]);
+    }, [addNotification, selectCardItem]);
 
     const requestFileTranscript = useCallback(async (fileId: string, agentId?: string, chatId?: string): Promise<MessageType> => {
         try {

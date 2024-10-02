@@ -4,9 +4,8 @@ from openai.types.chat import ChatCompletion
 from pydantic import Field
 from typing import Dict, Any, List, Optional
 from workflow_logic.core.api.engines import APIEngine
-from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition, ToolCall
 from workflow_logic.util import LOGGER
-from workflow_logic.core.data_structures import MessageDict, ContentType, ModelConfig, ApiType, References
+from workflow_logic.core.data_structures import MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall
 
 class LLMEngine(APIEngine):
     """
@@ -137,13 +136,14 @@ class LLMEngine(APIEngine):
             if choice.message.tool_calls:
                 LOGGER.info(f"Tool calls: {choice.message.tool_calls}")
                 LOGGER.info(f'Model dump: {choice.message.tool_calls[0].model_dump()}')
-                LOGGER.info(f'Tool call: {ToolCall(**choice.message.tool_calls[0].model_dump())}')
+                for tool_call in choice.message.tool_calls:
+                    LOGGER.info(f'Tool call: {ToolCall(**tool_call.model_dump())}')
 
-
+            tool_calls = [ToolCall(**tool_call.model_dump()) for tool_call in choice.message.tool_calls] if choice.message.tool_calls else None
             msg = MessageDict(
                 role="assistant",
                 content=content,
-                tool_calls=[ToolCall(**tool_call.model_dump()) for tool_call in choice.message.tool_calls] if choice.message.tool_calls else None,
+                tool_calls=tool_calls,
                 function_call=choice.message.function_call.model_dump() if choice.message.function_call else None,
                 generated_by="llm",
                 type=ContentType.TEXT,

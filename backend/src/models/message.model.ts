@@ -54,7 +54,6 @@ const messageSchema = new Schema<IMessageDocument, IMessageModel>({
   },
 }, { timestamps: true });
 
-messageSchema.plugin(mongooseAutopopulate);
 
 messageSchema.methods.apiRepresentation = function (this: IMessageDocument) {
   return {
@@ -78,7 +77,7 @@ messageSchema.methods.apiRepresentation = function (this: IMessageDocument) {
   };
 };
 
-function ensureObjectIdForMessage(
+function ensureObjectIdForSave(
   this: IMessageDocument,
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
@@ -91,6 +90,9 @@ function ensureObjectIdForMessage(
     }
     if (this.references.task_responses) {
       this.references.task_responses = this.references.task_responses.map(taskResponse => ensureObjectIdHelper(taskResponse));
+    }
+    if (this.references.search_results) {
+      this.references.search_results = this.references.search_results.map(searchResult => ensureObjectIdHelper(searchResult));
     }
   }
   this.created_by = ensureObjectIdHelper(this.created_by);
@@ -113,13 +115,17 @@ function ensureObjectIdForUpdate(
     if (update.references.task_responses) {
       update.references.task_responses = update.references.task_responses.map((taskResponse: any) => ensureObjectIdHelper(taskResponse));
     }
+    if (update.references.search_results) {
+      update.references.search_results = update.references.search_results.map((searchResult: any) => ensureObjectIdHelper(searchResult));
+    }
   }
   update.created_by = ensureObjectIdHelper(update.created_by);
   update.updated_by = ensureObjectIdHelper(update.updated_by);
   next();
 }
 
-messageSchema.pre('save', ensureObjectIdForMessage);
+messageSchema.plugin(mongooseAutopopulate);
+messageSchema.pre('save', ensureObjectIdForSave);
 messageSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
 
 const Message = mongoose.model<IMessageDocument, IMessageModel>('Message', messageSchema);

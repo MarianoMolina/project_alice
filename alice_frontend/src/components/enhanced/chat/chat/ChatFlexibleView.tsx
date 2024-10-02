@@ -12,17 +12,16 @@ import { AliceTask } from '../../../../types/TaskTypes';
 import { useApi } from '../../../../contexts/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import MessageListView from '../../message/message/MessageListView';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
 
 const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     item,
     onChange,
     mode,
     handleSave,
-    handleAgentClick,
-    handleTaskClick,
-    handleMessageClick,
 }) => {
     const { fetchItem } = useApi();
+    const { selectCardItem } = useCardDialog();
     const [form, setForm] = useState<Partial<AliceChat>>(getDefaultChatForm());
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
 
@@ -85,8 +84,8 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                 label="Select Agent"
                 activeAccordion={activeAccordion}
                 onAccordionToggle={handleAccordionToggle}
-                onView={(id) => handleAgentClick && handleAgentClick(id)}
                 accordionEntityName="agent"
+                showCreateButton={true}
             />
             <EnhancedSelect<AliceTask>
                 componentType="tasks"
@@ -98,8 +97,8 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                 label="Select Functions"
                 activeAccordion={activeAccordion}
                 onAccordionToggle={handleAccordionToggle}
-                onView={(id) => handleTaskClick && handleTaskClick(id)}
                 accordionEntityName="functions"
+                showCreateButton={true}
             />
             <Box mt={2}>
                 <MessageListView
@@ -108,7 +107,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                     onChange={() => { }}
                     mode={'view'}
                     handleSave={async () => { }}
-                    onView={(message) => handleMessageClick && handleMessageClick(message._id ?? '', message)}
+                    onView={(message) => selectCardItem && selectCardItem('Message', message._id ?? '', message)}
                 />
             </Box>
         </GenericFlexibleView>

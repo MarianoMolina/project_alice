@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { Box, Typography, List, Dialog, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Typography, List, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import { Add, Functions, Assignment, ExpandMore } from '@mui/icons-material';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
 import { AliceTask } from '../types/TaskTypes';
@@ -24,10 +24,9 @@ const StartTask: React.FC = () => {
     setInputValues,
     setTaskById
   } = useTask();
-  const { selectItem } = useCardDialog();
+  const { selectCardItem, selectFlexibleItem } = useCardDialog();
 
   const [activeTab, setActiveTab] = useState<CollectionElementString>('Task');
-  const [openTaskCreateDialog, setOpenTaskCreateDialog] = useState(false);
   const [listKey, setListKey] = useState(0);
 
   const executeTask = async () => {
@@ -40,16 +39,11 @@ const StartTask: React.FC = () => {
     await handleExecuteTask();
   }
 
-  const handleCreateNew = useCallback(() => {
-    console.log('Create new clicked');
-    setOpenTaskCreateDialog(true);
-  }, []);
-
   const actions = [
     {
       name: `Create task`,
       icon: Add,
-      action: handleCreateNew,
+      action: () => selectFlexibleItem('Task', 'create'),
       disabled: activeTab === 'TaskResponse'
     }
   ];
@@ -73,7 +67,7 @@ const StartTask: React.FC = () => {
   }
 
   const triggerItemDialog = (collectionName: CollectionElementString, itemId: string) => {
-    selectItem(collectionName, itemId);
+    selectCardItem(collectionName, itemId);
   };
 
   const renderSidebarContent = () => {
@@ -160,9 +154,6 @@ const StartTask: React.FC = () => {
           </Accordion>
         </Box>
       </Box>
-      <Dialog open={openTaskCreateDialog} onClose={() => setOpenTaskCreateDialog(false)}>
-        <EnhancedTask mode={'create'} fetchAll={false} />
-      </Dialog>
     </Box>
   );
 };

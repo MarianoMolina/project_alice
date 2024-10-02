@@ -35,21 +35,21 @@ import URLReferenceCardView from '../../url_reference/url_reference/URLReference
 import EnhancedURLReference from '../../url_reference/url_reference/EnhancedURLReference';
 
 const EnhancedCardDialog: React.FC = () => {
-  const { selectedItem, selectedItemType, handleClose, selectItem } = useCardDialog();
+  const { selectedCardItem, selectedCardItemType, handleClose, selectCardItem } = useCardDialog();
 
   const renderDialogContent = () => {
-    if (!selectedItem || !selectedItemType) return null;
+    if (!selectedCardItem || !selectedCardItemType) return null;
 
     const handleProps = {
-      handleAgentClick: (id: string, item?: AliceAgent) => selectItem('Agent', id, item),
-      handleTaskClick: (id: string, item?: AliceTask) => selectItem('Task', id, item),
-      handleModelClick: (id: string, item?: AliceModel) => selectItem('Model', id, item),
-      handlePromptClick: (id: string, item?: Prompt) => selectItem('Prompt', id, item),
-      handleParameterClick: (id: string, item?: ParameterDefinition) => selectItem('Parameter', id, item),
-      handleAPIClick: (id: string, item?: API) => selectItem('API', id, item),
-      handleFileClick: (id: string, item?: FileReference) => selectItem('File', id, item),
-      handleMessageClick: (id: string, item?: MessageType) => selectItem('Message', id, item),
-      handleURLReferenceClick: (id: string, item?: URLReference) => selectItem('URLReference', id, item),
+      handleAgentClick: (id: string, item?: AliceAgent) => selectCardItem('Agent', id, item),
+      handleTaskClick: (id: string, item?: AliceTask) => selectCardItem('Task', id, item),
+      handleModelClick: (id: string, item?: AliceModel) => selectCardItem('Model', id, item),
+      handlePromptClick: (id: string, item?: Prompt) => selectCardItem('Prompt', id, item),
+      handleParameterClick: (id: string, item?: ParameterDefinition) => selectCardItem('Parameter', id, item),
+      handleAPIClick: (id: string, item?: API) => selectCardItem('API', id, item),
+      handleFileClick: (id: string, item?: FileReference) => selectCardItem('File', id, item),
+      handleMessageClick: (id: string, item?: MessageType) => selectCardItem('Message', id, item),
+      handleURLReferenceClick: (id: string, item?: URLReference) => selectCardItem('URLReference', id, item),
     };
 
     const commonProps = {
@@ -66,57 +66,57 @@ const EnhancedCardDialog: React.FC = () => {
       ...handleProps,
     };
 
-    if ('_id' in selectedItem && typeof selectedItem._id === 'string') {
-      switch (selectedItemType) {
+    if ('_id' in selectedCardItem && typeof selectedCardItem._id === 'string') {
+      switch (selectedCardItemType) {
         case 'Agent':
-          return <EnhancedAgent itemId={selectedItem._id} {...commonProps} />;
+          return <EnhancedAgent itemId={selectedCardItem._id} {...commonProps} />;
         case 'Task':
-          return <EnhancedTask itemId={selectedItem._id} {...commonProps} />;
+          return <EnhancedTask itemId={selectedCardItem._id} {...commonProps} />;
         case 'TaskResponse':
-          return <EnhancedTaskResponse itemId={selectedItem._id} {...commonProps} />;
+          return <EnhancedTaskResponse itemId={selectedCardItem._id} {...commonProps} />;
         case 'Chat':
-          return <EnhancedChat itemId={selectedItem._id} {...commonProps} />;
+          return <EnhancedChat itemId={selectedCardItem._id} {...commonProps} />;
         case 'Prompt':
-          return <EnhancedPrompt itemId={selectedItem._id} {...commonProps} />;
+          return <EnhancedPrompt itemId={selectedCardItem._id} {...commonProps} />;
         case 'Model':
-          return <EnhancedModel itemId={selectedItem._id} {...commonProps} />;
+          return <EnhancedModel itemId={selectedCardItem._id} {...commonProps} />;
         case 'Parameter':
-          return <EnhancedParameter itemId={selectedItem._id} {...commonProps} />;
+          return <EnhancedParameter itemId={selectedCardItem._id} {...commonProps} />;
         case 'API':
-          return <EnhancedAPI itemId={selectedItem._id} {...commonProps} />;
+          return <EnhancedAPI itemId={selectedCardItem._id} {...commonProps} />;
         case 'File':
-          return <EnhancedFile itemId={selectedItem._id} {...commonProps} />;
+          return <EnhancedFile itemId={selectedCardItem._id} {...commonProps} />;
         case 'Message':
-          return <EnhancedMessage itemId={selectedItem._id} {...commonProps} />;
+          return <EnhancedMessage itemId={selectedCardItem._id} {...commonProps} />;
         case 'URLReference':
-          return <EnhancedURLReference itemId={selectedItem._id} {...commonProps} />;
+          return <EnhancedURLReference itemId={selectedCardItem._id} {...commonProps} />;
         default:
           return null;
       }
     } else {
-      switch (selectedItemType) {
+      switch (selectedCardItemType) {
         case 'Agent':
-          return <AgentCardView item={selectedItem as CollectionType['agents']} {...cardViewProps} />;
+          return <AgentCardView item={selectedCardItem as CollectionType['agents']} {...cardViewProps} />;
         case 'Task':
-          return <TaskCardView item={selectedItem as CollectionType['tasks']} {...cardViewProps} />;
+          return <TaskCardView item={selectedCardItem as CollectionType['tasks']} {...cardViewProps} />;
         case 'TaskResponse':
-          return <TaskResponseCardView item={selectedItem as CollectionType['taskresults']} {...cardViewProps} />;
+          return <TaskResponseCardView item={selectedCardItem as CollectionType['taskresults']} {...cardViewProps} />;
         case 'Chat':
-          return <ChatCardView item={selectedItem as CollectionType['chats']} {...cardViewProps} />;
+          return <ChatCardView item={selectedCardItem as CollectionType['chats']} {...cardViewProps} />;
         case 'Prompt':
-          return <PromptCardView item={selectedItem as CollectionType['prompts']} {...cardViewProps} />;
+          return <PromptCardView item={selectedCardItem as CollectionType['prompts']} {...cardViewProps} />;
         case 'Model':
-          return <ModelCardView item={selectedItem as CollectionType['models']} {...cardViewProps} />;
+          return <ModelCardView item={selectedCardItem as CollectionType['models']} {...cardViewProps} />;
         case 'Parameter':
-          return <ParameterCardView item={selectedItem as CollectionType['parameters']} {...cardViewProps} />;
+          return <ParameterCardView item={selectedCardItem as CollectionType['parameters']} {...cardViewProps} />;
         case 'API':
-          return <ApiCardView item={selectedItem as CollectionType['apis']} {...cardViewProps} />;
+          return <ApiCardView item={selectedCardItem as CollectionType['apis']} {...cardViewProps} />;
         case 'File':
-          return <FileCardView item={selectedItem as CollectionType['files']} {...cardViewProps} />;
+          return <FileCardView item={selectedCardItem as CollectionType['files']} {...cardViewProps} />;
         case 'Message':
-          return <MessageCardView item={selectedItem as CollectionType['messages']} {...cardViewProps} />;
+          return <MessageCardView item={selectedCardItem as CollectionType['messages']} {...cardViewProps} />;
         case 'URLReference':
-          return <URLReferenceCardView item={selectedItem as CollectionType['urlreferences']} {...cardViewProps} />;
+          return <URLReferenceCardView item={selectedCardItem as CollectionType['urlreferences']} {...cardViewProps} />;
         default:
           return null;
       }
@@ -124,7 +124,7 @@ const EnhancedCardDialog: React.FC = () => {
   };
 
   return (
-    <Dialog open={!!selectedItem} onClose={handleClose} maxWidth='xl'>
+    <Dialog open={!!selectedCardItem} onClose={handleClose} maxWidth='xl'>
       {renderDialogContent()}
     </Dialog>
   );

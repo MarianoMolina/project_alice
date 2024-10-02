@@ -162,7 +162,7 @@ export async function updateFileTranscript(
     messageData: Partial<IMessageDocument>,
     userId: string
 ): Promise<IFileReferenceDocument> {
-    const fileReference = await FileReference.findById(fileId).populate('transcript');
+    const fileReference = await FileReference.findById(fileId);
     if (!fileReference) {
         throw new Error('File not found');
     }
@@ -202,7 +202,7 @@ export async function updateFileTranscript(
             }
         );
 
-        const updatedFileReference = await FileReference.findById(fileId).populate('transcript');
+        const updatedFileReference = await FileReference.findById(fileId);
 
         if (!updatedFileReference) {
             throw new Error('Failed to retrieve updated file reference');
@@ -241,7 +241,7 @@ export async function updateFile(
     userId: string
 ): Promise<IFileReferenceDocument> {
     Logger.info(`Inside updateFile, received data: ${JSON.stringify(updateData)}`);
-    const existingFile = await FileReference.findById(fileId).populate('transcript');
+    const existingFile = await FileReference.findById(fileId);
     if (!existingFile) {
         throw new Error('File not found');
     }
@@ -298,7 +298,7 @@ export async function updateFile(
     }
 
     // Re-fetch the updated file to ensure the latest data
-    const updatedFile = await FileReference.findById(fileId).populate('transcript');
+    const updatedFile = await FileReference.findById(fileId);
     if (!updatedFile) {
         throw new Error('Failed to retrieve updated file reference');
     }
@@ -392,7 +392,7 @@ export async function storeFileReference(
         }
 
         // Re-fetch the file reference to include the transcript
-        const storedFileReference = await FileReference.findById(fileReference._id).populate('transcript');
+        const storedFileReference = await FileReference.findById(fileReference._id);
         if (!storedFileReference) {
             throw new Error('Failed to retrieve stored file reference');
         }

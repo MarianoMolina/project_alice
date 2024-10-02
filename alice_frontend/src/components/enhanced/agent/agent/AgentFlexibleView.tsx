@@ -3,7 +3,6 @@ import {
     TextField,
     FormControlLabel,
     Switch,
-    Dialog
 } from '@mui/material';
 import { AgentComponentProps, AliceAgent, getDefaultAgentForm } from '../../../../types/AgentTypes';
 import { Prompt } from '../../../../types/PromptTypes';
@@ -23,8 +22,6 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     const { fetchItem } = useApi();
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [form, setForm] = useState<Partial<AliceAgent>>(getDefaultAgentForm());
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [dialogContent, setDialogContent] = useState<React.ReactNode | null>(null);
 
     useEffect(() => {
         if (item) {
@@ -68,19 +65,6 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
     };
 
-    const handleViewDetails = (type: 'model' | 'prompt', itemId: string) => {
-        let content;
-        switch (type) {
-            case 'model':
-                content = <EnhancedModel mode="card" itemId={itemId} fetchAll={false} />;
-                break;
-            case 'prompt':
-                content = <EnhancedPrompt mode="card" itemId={itemId} fetchAll={false} />;
-                break;
-        }
-        setDialogContent(content);
-        setDialogOpen(true);
-    };
 
     const title = mode === 'create' ? 'Create New Agent' : mode === 'edit' ? 'Edit Agent' : 'Agent Details';
     const saveButtonText = form._id ? 'Update Agent' : 'Create Agent';
@@ -114,8 +98,8 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
                 label="Select System Message"
                 activeAccordion={activeAccordion}
                 onAccordionToggle={handleAccordionToggle}
-                onView={(id) => handleViewDetails("prompt", id)}
                 accordionEntityName="system-message"
+                showCreateButton={true}
             />
 
             <EnhancedSelect<AliceModel>
@@ -127,9 +111,9 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
                 label="Select Models"
                 activeAccordion={activeAccordion}
                 onAccordionToggle={handleAccordionToggle}
-                onView={(id) => handleViewDetails("model", id)}
                 accordionEntityName="model"
                 multiple={true}
+                showCreateButton={true}
             />
             
             <TextField
@@ -165,10 +149,6 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
                 }
                 label="Has Functions"
             />
-
-            <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-                {dialogContent}
-            </Dialog>
         </GenericFlexibleView>
     );
 };

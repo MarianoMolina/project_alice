@@ -2,8 +2,7 @@ import docker, os, tempfile, json, traceback
 from bson import ObjectId
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Dict, Any, List, Optional, Tuple, Callable, Union
-from workflow_logic.core.parameters import ToolFunction, ToolCall
-from workflow_logic.core.parameters.parameters import ensure_tool_function
+from workflow_logic.core.data_structures import ToolFunction, ToolCall, ensure_tool_function
 from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.model import AliceModel
 from workflow_logic.core.api import APIManager
@@ -58,7 +57,7 @@ class AliceAgent(BaseModel):
                 tool_choice='auto' if self.has_functions else 'none',
                 tools=tools_list,
                 temperature=0.7,
-                max_tokens=5000 # TODO: Make this configurable
+                max_tokens=4096 # TODO: Make this configurable
             )
 
             if not response_ref or not response_ref.messages[0]:

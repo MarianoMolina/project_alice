@@ -1,20 +1,18 @@
-import React, { useState } from 'react';
-import { Box, Typography, Tooltip, IconButton, Dialog } from '@mui/material';
+import React from 'react';
+import { Box, Typography, Tooltip, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import useStyles from '../MessageStyles';
 import { MessageComponentProps } from '../../../../types/MessageTypes';
 import { BackgroundBeams } from '../../../ui/aceternity/BackgroundBeams';
-import EnhancedMessage from './EnhancedMessage';
 import { hasAnyReferences } from '../../../../types/ReferenceTypes';
 import ReferenceChip from '../../common/references/ReferenceChip';
 import { Visibility } from '@mui/icons-material';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import CustomMarkdown from '../../common/markdown/customMarkdown';
 
-const MessageFullView: React.FC<MessageComponentProps> = ({ item: message, chatId, onChange, handleSave }) => {
+const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => {
     const classes = useStyles();
-    const { selectItem } = useCardDialog();
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const { selectCardItem, selectFlexibleItem } = useCardDialog();
 
     if (!message) {
         return <Typography>No message data available.</Typography>;
@@ -87,14 +85,14 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message, chatI
                     <Box>
                         <IconButton
                             size="small"
-                            onClick={() => selectItem('Message', message._id || '', message)}
+                            onClick={() => selectCardItem('Message', message._id || '', message)}
                             className={classes.viewButton}
                         >
                             <Visibility fontSize="small" />
                         </IconButton>
                         <IconButton
                             size="small"
-                            onClick={() => setIsEditDialogOpen(true)}
+                            onClick={() => selectFlexibleItem('Chat', 'edit', message._id, message )}
                             className={classes.editButton}
                         >
                             <EditIcon fontSize="small" />
@@ -121,18 +119,6 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message, chatI
                     )}
                 </Box>
             </Box>
-            <Dialog open={isEditDialogOpen} onClose={() => setIsEditDialogOpen(false)} maxWidth="md" fullWidth>
-                <EnhancedMessage
-                    itemId={message._id}
-                    mode={'edit'}
-                    onSave={async () => {
-                        await handleSave();
-                        setIsEditDialogOpen(false);
-                    }}
-                    chatId={chatId}
-                    fetchAll={false}
-                />
-            </Dialog>
         </Box>
     );
 };

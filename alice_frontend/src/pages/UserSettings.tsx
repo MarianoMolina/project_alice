@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
-import { Box, TextField, Typography, Button, Dialog, Card, CardContent, Paper } from '@mui/material';
+import { Box, TextField, Typography, Button, Card, CardContent, Paper } from '@mui/material';
 import { Person, Api, Warning } from '@mui/icons-material';
 import { useApi } from '../contexts/ApiContext';
 import { useAuth } from '../contexts/AuthContext';
 import { User } from '../types/UserTypes';
 import { useNotification } from '../contexts/NotificationContext';
-import { API, getDefaultApiForm } from '../types/ApiTypes';
-import { ComponentMode } from '../types/CollectionTypes';
+import { API } from '../types/ApiTypes';
 import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
 import useStyles from '../styles/UserSettingsStyles';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
 import { useDialog } from '../contexts/DialogCustomContext';
+import { useCardDialog } from '../contexts/CardDialogContext';
 
 interface UserSettingsProps {
     setHasUnsavedChanges: (value: boolean) => void;
@@ -19,17 +19,14 @@ interface UserSettingsProps {
 
 const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => {
     const { openDialog } = useDialog();
+    const { selectFlexibleItem } = useCardDialog();
     const { fetchItem, updateItem, purgeAndReinitializeDatabase } = useApi();
     const { addNotification } = useNotification();
     const [userObject, setUserObject] = useState<User | null>(null);
     const [originalUserObject, setOriginalUserObject] = useState<User | null>(null);
     const { user } = useAuth();
-    const [showCreateAPI, setShowCreateAPI] = useState(false);
     const classes = useStyles();
     const isInitialMount = useRef(true);
-    const [apiUpdateTrigger, setApiUpdateTrigger] = useState(0);
-    const [selectedItem, setSelectedItem] = useState<Partial<API> | null>(null);
-    const [isCreating, setIsCreating] = useState(false);
     const [activeTab, setActiveTab] = useState('Personal information');
 
     useEffect(() => {
@@ -83,17 +80,10 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
         }
     }, [userObject, updateItem, setHasUnsavedChanges]);
 
-    const handleApiCreated = useCallback(async (api: API) => {
-        setShowCreateAPI(false);
-        setApiUpdateTrigger(prev => prev + 1);
-    }, []);
-
     const handleApiSelect = useCallback((item: Partial<API>) => {
         console.log('API selected:', item);
-        setSelectedItem(item);
-        setIsCreating(false);
-        setShowCreateAPI(true);
-    }, []);
+        selectFlexibleItem('API', 'edit', item._id, item as API);
+    }, [selectFlexibleItem]);
 
     const handlePurgeAndReinitialize = useCallback(() => {
         console.log('handlePurgeAndReinitialize called');
@@ -171,14 +161,14 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
                             <Button
                                 variant="contained"
                                 color="primary"
-                                onClick={() => handleApiSelect(getDefaultApiForm())}
+                                onClick={() => selectFlexibleItem('API', 'create')}
                             >
                                 Create New API
                             </Button>
                         </Box>
                         <Paper className={classes.apiPaper}>
                             <EnhancedAPI
-                                key={apiUpdateTrigger}
+                                key={0}
                                 mode="list"
                                 fetchAll={true}
                                 onView={handleApiSelect}
@@ -215,7 +205,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
             default:
                 return null;
         }
-    }, [activeTab, userObject, handleUserUpdate, handleSaveChanges, handleApiSelect, apiUpdateTrigger, classes, handlePurgeAndReinitialize]);
+    }, [activeTab, userObject, handleUserUpdate, handleSaveChanges, handleApiSelect, classes, handlePurgeAndReinitialize, selectFlexibleItem]);
 
     return (
         <Box className={classes.root}>
@@ -229,14 +219,6 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
             <Box flexGrow={1} p={3}>
                 {renderActiveContent()}
             </Box>
-            <Dialog open={showCreateAPI} onClose={() => setShowCreateAPI(false)}>
-                <EnhancedAPI
-                    itemId={selectedItem?._id}
-                    mode={(isCreating ? 'create' : 'edit') as ComponentMode}
-                    fetchAll={true}
-                    onSave={handleApiCreated}
-                />
-            </Dialog>
         </Box>
     );
 };

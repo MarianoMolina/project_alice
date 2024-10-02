@@ -31,7 +31,7 @@ class MessageDict(BaseDataStructure):
 
     @field_validator('tool_calls')
     def validate_tool_calls(cls, v):
-        from workflow_logic.core.data_structures.parameters import ToolCall
+        from workflow_logic.core.data_structures import ToolCall
         if v is None:
             return v
         
@@ -48,7 +48,7 @@ class MessageDict(BaseDataStructure):
     
     @field_validator('references')
     def validate_references(cls, v):
-        from workflow_logic.core.data_structures.references import References
+        from workflow_logic.core.data_structures import References
         if isinstance(v, References):
             return v
         elif isinstance(v, dict):

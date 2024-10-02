@@ -63,7 +63,7 @@ async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(ge
             raise ValueError(f"Task execution failed for task ID {taskId}")
 
         # Process and update file content references
-        LOGGER.info(f'task_result: {result.model_dump()}')
+        LOGGER.debug(f'task_result: {result.model_dump()}')
         # if result.references:
         #     result.references = await check_references(result.references, db_app)
 
@@ -72,8 +72,10 @@ async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(ge
         LOGGER.debug(f'type: {type(result)}')
         db_result = await db_app.create_entity_in_db('task_responses', result.model_dump(exclude={'id'}))
 
+        updated_ref = await db_app.get_entity_from_db('task_responses', db_result['_id'])
+
         LOGGER.debug(f'db_result: {db_result}')
-        return db_result
+        return TaskResponse(**updated_ref)
     except Exception as e:
         import traceback
         LOGGER.error(f'Error: {e}\nTraceback: {traceback.format_exc()}')

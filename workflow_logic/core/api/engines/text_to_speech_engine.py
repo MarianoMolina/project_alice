@@ -1,9 +1,8 @@
 import base64, re
 from pydantic import Field
 from openai import AsyncOpenAI
-from workflow_logic.core.data_structures import ModelConfig, ApiType, FileContentReference, MessageDict, ContentType, FileType, References
+from workflow_logic.core.data_structures import ModelConfig, ApiType, FileContentReference, MessageDict, ContentType, FileType, References, FunctionParameters, ParameterDefinition
 from workflow_logic.core.api.engines.api_engine import APIEngine
-from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
 from workflow_logic.util import LOGGER
 
 class OpenAITextToSpeechEngine(APIEngine):

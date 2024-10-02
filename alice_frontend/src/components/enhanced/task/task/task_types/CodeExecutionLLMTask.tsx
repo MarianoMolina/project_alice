@@ -4,7 +4,7 @@ import PromptAgentTask from './PromptAgentTask';
 import { TaskFormsProps } from '../../../../../types/TaskTypes';
 
 const CodeExecutionLLMTask: React.FC<TaskFormsProps> = ({
-  item, onChange, mode, handleAccordionToggle, handleViewDetails, activeAccordion, handleSave, apis
+  item, onChange, mode, handleAccordionToggle, activeAccordion, handleSave, apis
 }) => {
   const isEditMode = mode === 'edit' || mode === 'create';
 
@@ -39,7 +39,6 @@ const CodeExecutionLLMTask: React.FC<TaskFormsProps> = ({
         onChange={onChange}
         mode={mode}
         handleAccordionToggle={handleAccordionToggle}
-        handleViewDetails={handleViewDetails}
         activeAccordion={activeAccordion}
       />
 

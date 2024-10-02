@@ -28,7 +28,7 @@ const ReferenceChip: React.FC<ReferenceChipProps> = ({
   delete: deleteOption = false, 
   onDelete 
 }) => {
-  const { selectItem } = useCardDialog();
+  const { selectCardItem } = useCardDialog();
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
   const getLabel = () => {
@@ -52,7 +52,7 @@ const ReferenceChip: React.FC<ReferenceChipProps> = ({
     if (type === 'string_output') {
       setDialogOpen(true);
     } else if (typeof reference === 'object' && '_id' in reference) {
-      selectItem(type as CollectionElementString, reference._id);
+      selectCardItem(type as CollectionElementString, reference._id);
     }
   };
 

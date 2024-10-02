@@ -24,6 +24,7 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
     if (!item) {
         return <Typography>No Prompt data available.</Typography>;
     }
+    console.log('PromptFlexibleView render:', { item, mode });
     const isEditMode = mode === 'edit' || mode === 'create';
     const title = mode === 'create' ? 'Create New Prompt' : mode === 'edit' ? 'Edit Prompt' : 'Prompt Details';
     const saveButtonText = item._id ? 'Update Prompt' : 'Create Prompt';

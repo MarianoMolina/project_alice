@@ -22,7 +22,7 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
         setSelectedTask,
         setInputValues,
     } = useTask();
-    const { selectItem } = useCardDialog();
+    const { selectCardItem } = useCardDialog();
 
     if (!item) return null;
 
@@ -37,7 +37,7 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
 
     const handleViewTask = () => {
         if (item._id) {
-            selectItem('Task', item._id);
+            selectCardItem('Task', item._id);
         }
     };
 

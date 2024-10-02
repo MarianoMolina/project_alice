@@ -8,7 +8,7 @@ from workflow_logic.util.utils import json_to_python_type_mapping
 from workflow_logic.core.agent.agent import AliceAgent
 from workflow_logic.core.tasks.agent_tasks.agent_task import BasicAgentTask
 from workflow_logic.core.prompt import Prompt
-from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition
+from workflow_logic.core.data_structures import FunctionParameters, ParameterDefinition
     
 class PromptAgentTask(BasicAgentTask):
     """
