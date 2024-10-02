@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import useStyles from './TaskResponseStyles';
+import useStyles from '../../task_response/TaskResponseStyles';
 
 interface CommandLineLogProps {
   content: string;

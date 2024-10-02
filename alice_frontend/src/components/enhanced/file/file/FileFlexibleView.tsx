@@ -17,6 +17,7 @@ import { bytesToMB, createFileContentReference, selectFile } from '../../../../u
 import { useApi } from '../../../../contexts/ApiContext';
 import { MessageType } from '../../../../types/MessageTypes';
 import { useNotification } from '../../../../contexts/NotificationContext';
+import Logger from '../../../../utils/Logger';
 
 const FileFlexibleView: React.FC<FileComponentProps> = ({
     item,
@@ -49,11 +50,11 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
                 setSelectedFile(file);
                 setIsDialogOpen(true);
             } else {
-                console.log('No file selected or file type not allowed');
+                Logger.info('No file selected or file type not allowed');
                 addNotification('No file selected or file type not allowed', 'info');
             }
         } catch (error) {
-            console.error('Error selecting file:', error);
+            Logger.error('Error selecting file:', error);
             addNotification(`Error selecting file: ${error}`, 'error');
         }
     };
@@ -65,7 +66,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
             const file = await uploadFileContentReference(fileContentReference);
             if (!file) {
                 addNotification('File upload failed or was cancelled', 'error');
-                console.log('File upload failed or was cancelled');
+                Logger.info('File upload failed or was cancelled');
                 return;
             }
             onChange(file);

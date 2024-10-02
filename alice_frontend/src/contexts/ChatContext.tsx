@@ -6,6 +6,7 @@ import { AliceChat } from '../types/ChatTypes';
 import { MessageType } from '../types/MessageTypes';
 import { useAuth } from './AuthContext';
 import { useApi } from './ApiContext';
+import Logger from '../utils/Logger';
 
 interface ChatContextType {
     messages: MessageType[];
@@ -51,7 +52,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             const chats = await fetchItem('chats') as AliceChat[];
             setPastChats(chats);
         } catch (error) {
-            console.error('Error fetching chats:', error);
+            Logger.error('Error fetching chats:', error);
         }
     }, [fetchItem]);
 
@@ -66,7 +67,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             const chatData = await fetchItem('chats', chatId) as AliceChat;
             return chatData;
         } catch (error) {
-            console.error('Error fetching chat by id:', error);
+            Logger.error('Error fetching chat by id:', error);
             throw error;
         }
     };
@@ -79,7 +80,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             setMessages(chatData.messages);
             setAgents([chatData.alice_agent]);
         } catch (error) {
-            console.error('Error fetching current chat:', error);
+            Logger.error('Error fetching current chat:', error);
         }
     }
 
@@ -91,7 +92,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             setCurrentChatId(chatId);
             setAgents([chatData.alice_agent]);
         } catch (error) {
-            console.error('Error fetching chat:', error);
+            Logger.error('Error fetching chat:', error);
         }
     };
 
@@ -101,7 +102,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             setMessages(prevMessages => [...prevMessages, message]);
             await generateResponse();
         } catch (error) {
-            console.error('Error sending message or generating response:', error);
+            Logger.error('Error sending message or generating response:', error);
         }
     };
 
@@ -114,7 +115,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
                 await fetchCurrentChat();
             }
         } catch (error) {
-            console.error('Error generating response:', error);
+            Logger.error('Error generating response:', error);
         } finally {
             setIsGenerating(false);
         }
@@ -131,7 +132,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             setMessages(newMessages);
             await generateResponse();
         } catch (error) {
-            console.error('Error regenerating response:', error);
+            Logger.error('Error regenerating response:', error);
         }
     };
     const isTaskInChat = (taskId: string): boolean => {
@@ -142,15 +143,15 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         if (!currentChatId || !currentChat) return;
         try {
             const task = await fetchItem("tasks", taskId) as AliceTask;
-            if (!task) return console.error('Task not found', taskId);
-            if (isTaskInChat(taskId)) return console.log('Task already in chat');
+            if (!task) return Logger.error('Task not found', taskId);
+            if (isTaskInChat(taskId)) return Logger.warn('Task already in chat');
             const updatedFunctions = [
                 ...(currentChat.functions || []), task
             ];
             await updateItem("chats", currentChatId, { functions: updatedFunctions });
             await handleSelectChat(currentChatId);
         } catch (error) {
-            console.error('Error adding tasks to chat:', error);
+            Logger.error('Error adding tasks to chat:', error);
         }
     };
 
@@ -159,7 +160,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             const tasks = await fetchItem("tasks") as AliceTask | AliceTask[];
             return Array.isArray(tasks) ? tasks : [tasks];
         } catch (error) {
-            console.error('Error fetching available tasks:', error);
+            Logger.error('Error fetching available tasks:', error);
             return [];
         }
     };
@@ -169,7 +170,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             const taskResults = await fetchItem("taskresults") as TaskResponse[];
             return Array.isArray(taskResults) ? taskResults : [taskResults];
         } catch (error) {
-            console.error('Error fetching available task results:', error);
+            Logger.error('Error fetching available task results:', error);
             return [];
         }
     };

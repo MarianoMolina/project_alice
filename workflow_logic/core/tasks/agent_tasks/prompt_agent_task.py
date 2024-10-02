@@ -74,6 +74,7 @@ class PromptAgentTask(BasicAgentTask):
                 raise ValueError(f"Template {self.task_name} is not a valid prompt configuration: {e}")
         sanitized_inputs = self.update_inputs(**kwargs)
         input_string = template.format_prompt(**sanitized_inputs)
+        LOGGER.info(f"Input string for task {self.task_name}: {input_string}")
         return [MessageDict(content=input_string, role="user", generated_by="user", step=self.task_name)]
 
     async def run(self, api_manager: APIManager, **kwargs) -> TaskResponse:

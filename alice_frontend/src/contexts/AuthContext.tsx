@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useNavigate } from 'react-router-dom';
 import { loginUser, registerUser, LoginResponse, initializeUserDatabase } from '../services/authService';
 import { User } from '../types/UserTypes';
+import Logger from '../utils/Logger';
 
 interface AuthContextProps {
   isAuthenticated: boolean;
@@ -28,15 +29,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     try {
       const savedUser = localStorage.getItem('user');
-      console.log('token:', localStorage.getItem('token'));
+      Logger.debug('token:', localStorage.getItem('token'));
       if (savedUser) {
-        if (savedUser === 'null') console.log('savedUser is null');
+        if (savedUser === 'null') Logger.warn('savedUser is null');
         const parsedUser = JSON.parse(savedUser);
         setUser(parsedUser);
         setIsAuthenticated(true);
       }
     } catch (error) {
-      console.error('Failed to parse user data from localStorage:', error);
+      Logger.error('Failed to parse user data from localStorage:', error);
       localStorage.removeItem('user');
     } finally {
       setLoading(false);
@@ -50,7 +51,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(userData.user);
       setIsAuthenticated(true);
     } catch (error) {
-      console.error('Error saving user data:', error);
+      Logger.error('Error saving user data:', error);
     }
   };
 
@@ -59,7 +60,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userData = await loginUser(email, password);
       saveUserData(userData);
     } catch (error) {
-      console.error('Login failed:', error);
+      Logger.error('Login failed:', error);
       throw error;
     }
   };
@@ -69,7 +70,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await login(email, password)
       navigate('/chat-alice');
     } catch (error) {
-      console.error('Login failed:', error);
+      Logger.error('Login failed:', error);
       throw error;
     }
   }
@@ -80,7 +81,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await login(email, password);
       await initializeUserDatabase();
     } catch (error) {
-      console.error('Registration failed:', error);
+      Logger.error('Registration failed:', error);
       throw error;
     }
   };

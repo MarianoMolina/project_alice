@@ -17,7 +17,7 @@ export enum ContentType {
 export interface IMessage {
     content?: string;
     role: 'user' | 'assistant' | 'system' | 'tool';
-    generated_by: 'user' | 'llm' | 'tool';
+    generated_by: 'user' | 'llm' | 'tool' | 'system';
     step: string;
     assistant_name?: string;
     context?: any;

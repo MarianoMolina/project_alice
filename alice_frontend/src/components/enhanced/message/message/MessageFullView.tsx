@@ -92,7 +92,7 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => 
                         </IconButton>
                         <IconButton
                             size="small"
-                            onClick={() => selectFlexibleItem('Chat', 'edit', message._id, message )}
+                            onClick={() => selectFlexibleItem('Message', 'edit', message._id, message )}
                             className={classes.editButton}
                         >
                             <EditIcon fontSize="small" />

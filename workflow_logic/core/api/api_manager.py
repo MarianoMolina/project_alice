@@ -207,7 +207,7 @@ class APIManager(BaseModel):
         Raises:
             ValueError: If no API is found or if there's an error in generating the response.
         """
-        LOGGER.info(f"Chat generate_response_with_api_engine called with api_type: {api_type}, model: {model}, kwargs: {kwargs}")
+        LOGGER.debug(f"Chat generate_response_with_api_engine called with api_type: {api_type}, model: {model}, kwargs: {kwargs}")
         try:
             api = self.get_api_by_type(api_type, model)
             if not api:

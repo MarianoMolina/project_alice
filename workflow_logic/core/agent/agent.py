@@ -71,7 +71,7 @@ class AliceAgent(BaseModel):
                 )]
             
             response = response_ref.messages[0]
-            LOGGER.info(f"API response: {response.model_dump()}")
+            LOGGER.debug(f"API response: {response.model_dump()}")
             
             new_messages = []
             content = response.content if response.content else "Using tools" if response.tool_calls else "No response from API"
@@ -85,7 +85,7 @@ class AliceAgent(BaseModel):
                 content=content,
                 generated_by="llm",
                 tool_calls=tool_calls,
-                type="text",
+                type=ContentType.TEXT,
                 assistant_name=self.name,
                 creation_metadata=response.creation_metadata
             ))
@@ -171,7 +171,7 @@ class AliceAgent(BaseModel):
                     generated_by="tool",
                     step=function_name,
                     tool_call_id=tool_call_id,
-                    type=ContentType.TASK_RESPONSE if task_result else ContentType.TEXT,
+                    type=ContentType.TASK_RESULT if task_result else ContentType.TEXT,
                     references=References(task_responses=[task_result] if task_result else None),
                 ))
             except Exception as e:
@@ -347,23 +347,41 @@ class AliceAgent(BaseModel):
         if message.tool_call_id:
             api_message["tool_call_id"] = str(message.tool_call_id)
         return api_message
-
+    
     async def chat(self, api_manager: APIManager, messages: Optional[List[MessageDict]] = [], initial_message: Optional[str] = None, max_turns: int = 1, tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []) -> Tuple[List[MessageDict], List[MessageDict]]:
         start_messages = messages if messages else []
         gen_messages = []
         if initial_message:
             start_messages.append(MessageDict(role="user", content=initial_message))
-        all_messages = start_messages
+        all_messages = start_messages.copy()
+
         for turn in range(max_turns):
-            new_messages = await self.generate_response(api_manager, all_messages, tool_map, tools_list, recursion_depth=turn)
-            all_messages.extend(new_messages)
-            gen_messages.extend(new_messages)
-            
-            if any("TERMINATE" in msg.content for msg in new_messages):
+            try:
+                new_messages = await self.generate_response(api_manager, all_messages, tool_map, tools_list, recursion_depth=turn)
+                all_messages.extend(new_messages)
+                gen_messages.extend(new_messages)
+                
+                if any("TERMINATE" in msg.content for msg in new_messages):
+                    break
+            except Exception as e:
+                error_message = f"Error in agent chat occurred during turn {turn + 1}: {str(e)}"
+                LOGGER.error(error_message)
+                LOGGER.error(f"Traceback: {traceback.format_exc()}")
+                
+                # Create an error message
+                error_msg = MessageDict(
+                    role="assistant",
+                    content=error_message,
+                    generated_by="system",
+                    type=ContentType.TEXT,
+                    assistant_name=self.name
+                )
+                gen_messages.append(error_msg)                
+                # Break the loop as an error occurred
                 break
         
         return gen_messages, start_messages
-
+    
     async def generate_vision_response(self, api_manager: APIManager, file_references: List[FileReference], prompt: str) -> MessageDict:
         vision_model = self.models[ModelType.VISION] or api_manager.get_api_by_type(ApiType.IMG_VISION).default_model
         if not vision_model:
@@ -449,9 +467,9 @@ class AliceAgent(BaseModel):
             }
             
             # Include file content using the get_content_string method
-            if msg.references:
+            if msg.references and msg.references.files:
                 file_contents = []
-                for ref in msg.references:
+                for ref in msg.references.files:
                     try:
                         content = ref.get_content_string()
                         file_contents.append(f"File: {ref.filename}\nContent: {content}\n")

@@ -43,6 +43,16 @@ base_module = BaseModule(
                 "api_name": "openai_llm",
             },
             {
+                "key": "gpt-4o-mini",
+                "short_name": "GPT4o-mini",
+                "model_format": "OpenChat",
+                "model_name": "gpt-4o-mini",
+                "ctx_size": 128000,
+                "model_type": "chat",
+                "temperature": 0.7,
+                "api_name": "openai_llm",
+            },
+            {
                 "key": "Claude3.5",
                 "short_name": "Claude3.5",
                 "model_format": "OpenChat",

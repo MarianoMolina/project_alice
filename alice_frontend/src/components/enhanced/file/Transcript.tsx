@@ -3,6 +3,7 @@ import { Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typogra
 import { MessageType } from '../../../types/MessageTypes';
 import { useApi } from '../../../contexts/ApiContext';
 import EnhancedMessage from '../message/message/EnhancedMessage';
+import Logger from '../../../utils/Logger';
 
 interface TranscriptProps {
   fileId: string;
@@ -21,7 +22,7 @@ const Transcript: React.FC<TranscriptProps> = ({ fileId, transcript, onTranscrip
       const newTranscript = await requestFileTranscript(fileId);
       onTranscriptUpdate(newTranscript);
     } catch (error) {
-      console.error('Error requesting transcript:', error);
+      Logger.error('Error requesting transcript:', error);
     } finally {
       setIsRequesting(false);
       setIsDialogOpen(false);

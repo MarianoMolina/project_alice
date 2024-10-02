@@ -21,6 +21,7 @@ import { MessageType } from '../types/MessageTypes';
 import { TaskResponse } from '../types/TaskResponseTypes';
 import { FileReference, FileContentReference } from '../types/FileTypes';
 import { useDialog } from './DialogCustomContext';
+import Logger from '../utils/Logger';
 
 interface ApiContextType {
     fetchItem: typeof apiFetchItem;
@@ -173,7 +174,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     const requestFileTranscript = useCallback(async (fileId: string, agentId?: string, chatId?: string): Promise<MessageType> => {
         try {
-            console.log(`Requesting transcript for file: ${fileId}`);
+            Logger.info(`Requesting transcript for file: ${fileId}`);
             const fileData = await apiFetchItem('files', fileId) as FileReference;
 
             if (fileData.transcript) {

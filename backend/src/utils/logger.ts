@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 enum LogLevel {
   ERROR = 0,
   WARN = 1,
@@ -6,50 +9,72 @@ enum LogLevel {
 }
 
 class Logger {
-  private static level: LogLevel = Logger.getLogLevelFromEnv();
+  private static instance: Logger;
+  private logDir: string;
+  private logFile: string;
+  private level: LogLevel;
 
-  private static getLogLevelFromEnv(): LogLevel {
-    const envLogLevel = process.env.LOG_LEVEL?.toUpperCase();
-    switch (envLogLevel) {
-      case 'ERROR':
-        return LogLevel.ERROR;
-      case 'WARN':
-        return LogLevel.WARN;
-      case 'INFO':
-        return LogLevel.INFO;
-      case 'DEBUG':
-        return LogLevel.DEBUG;
-      default:
-        return LogLevel.INFO;
+  private constructor(component: 'frontend' | 'backend') {
+    this.logDir = path.join('/app/logs', component);
+    this.logFile = path.join(this.logDir, 'app.log');
+    this.level = this.getLogLevelFromEnv();
+    this.initializeLogDirectory();
+  }
+
+  public static getInstance(component: 'frontend' | 'backend'): Logger {
+    if (!Logger.instance) {
+      Logger.instance = new Logger(component);
+    }
+    return Logger.instance;
+  }
+
+  private initializeLogDirectory() {
+    if (!fs.existsSync(this.logDir)) {
+      fs.mkdirSync(this.logDir, { recursive: true });
     }
   }
 
-  static setLogLevel(level: LogLevel) {
+  private getLogLevelFromEnv(): LogLevel {
+    const envLogLevel = process.env.LOG_LEVEL?.toUpperCase();
+    switch (envLogLevel) {
+      case 'ERROR': return LogLevel.ERROR;
+      case 'WARN': return LogLevel.WARN;
+      case 'INFO': return LogLevel.INFO;
+      case 'DEBUG': return LogLevel.DEBUG;
+      default: return LogLevel.INFO;
+    }
+  }
+
+  public setLogLevel(level: LogLevel) {
     this.level = level;
   }
 
-  private static log(level: LogLevel, message: string, ...args: any[]) {
+  private log(level: LogLevel, message: string, ...args: any[]) {
     if (level <= this.level) {
       const timestamp = new Date().toISOString();
-      console.log(`[${timestamp}] ${LogLevel[level]}: ${message}`, ...args);
+      const logMessage = `[${timestamp}] ${LogLevel[level]}: ${message}`;
+      console.log(logMessage, ...args);
+      fs.appendFileSync(this.logFile, logMessage + '\n');
     }
   }
 
-  static error(message: string, ...args: any[]) {
+  public error(message: string, ...args: any[]) {
     this.log(LogLevel.ERROR, message, ...args);
   }
 
-  static warn(message: string, ...args: any[]) {
+  public warn(message: string, ...args: any[]) {
     this.log(LogLevel.WARN, message, ...args);
   }
 
-  static info(message: string, ...args: any[]) {
+  public info(message: string, ...args: any[]) {
     this.log(LogLevel.INFO, message, ...args);
   }
 
-  static debug(message: string, ...args: any[]) {
+  public debug(message: string, ...args: any[]) {
     this.log(LogLevel.DEBUG, message, ...args);
   }
 }
 
-export default Logger;
+const logger = Logger.getInstance('backend');
+
+export default logger;

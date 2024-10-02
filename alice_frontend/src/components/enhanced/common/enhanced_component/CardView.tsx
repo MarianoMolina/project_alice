@@ -7,7 +7,6 @@ import {
     List,
     ListItem,
     ListItemIcon,
-    ListItemText,
 } from '@mui/material';
 import { Theme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
@@ -52,7 +51,32 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
     listItem: {
         width: '100%',
-    }
+        display: 'flex',
+        alignItems: 'flex-start',
+        marginBottom: theme.spacing(2),
+    },
+    listItemContent: {
+        display: 'flex',
+        flexDirection: 'column',
+        flexGrow: 1,
+        marginLeft: theme.spacing(2),
+    },
+    listItemIcon: {
+        minWidth: 'auto',
+        marginRight: theme.spacing(2),
+        marginTop: theme.spacing(1),
+    },
+    primaryText: {
+        fontWeight: 600,
+        fontSize: '1.1rem',
+        color: theme.palette.text.primary,
+        marginBottom: theme.spacing(0.5),
+    },
+    secondaryText: {
+        width: '100%',
+        color: theme.palette.text.secondary,
+        fontSize: '0.9rem',
+    },
 }));
 
 interface ListItemData {
@@ -70,13 +94,13 @@ interface CommonCardViewProps {
     children?: React.ReactNode;
 }
 
-const CommonCardView: React.FC<CommonCardViewProps> = ({ 
-    title, 
-    elementType, 
-    subtitle, 
-    id, 
-    listItems, 
-    children 
+const CommonCardView: React.FC<CommonCardViewProps> = ({
+    title,
+    elementType,
+    subtitle,
+    id,
+    listItems,
+    children
 }) => {
     const classes = useStyles();
 
@@ -105,11 +129,13 @@ const CommonCardView: React.FC<CommonCardViewProps> = ({
                     <List className={classes.list}>
                         {listItems.map((item, index) => (
                             <ListItem key={index} className={classes.listItem}>
-                                <ListItemIcon>{item.icon}</ListItemIcon>
-                                <ListItemText
-                                    primary={item.primary_text}
-                                    secondary={item.secondary_text}
-                                />
+                                <ListItemIcon className={classes.listItemIcon}>{item.icon}</ListItemIcon>
+                                <Box className={classes.listItemContent}>
+                                    <Typography className={classes.primaryText}>
+                                        {item.primary_text}
+                                    </Typography>
+                                    <Box className={classes.secondaryText}>{item.secondary_text}</Box>
+                                </Box>
                             </ListItem>
                         ))}
                     </List>

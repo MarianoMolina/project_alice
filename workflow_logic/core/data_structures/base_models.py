@@ -16,7 +16,7 @@ class ContentType(str, Enum):
     VIDEO = FileType.VIDEO
     FILE = FileType.FILE
     TEXT = 'text'
-    TASK_RESPONSE = 'task_response'
+    TASK_RESULT = 'task_result'
     URL_REFERENCE = 'url_reference'
     MULTIPLE = 'multiple'
 

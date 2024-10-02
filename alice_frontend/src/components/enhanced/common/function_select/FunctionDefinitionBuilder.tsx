@@ -4,7 +4,6 @@ import {
     Typography,
     List,
     ListItem,
-    ListItemText,
     Checkbox,
     TextField,
     FormControlLabel,
@@ -23,6 +22,7 @@ import { useApi } from '../../../../contexts/ApiContext';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import useStyles from './FunctionStyles';
 import * as FunctionUtils from './FunctionUtils';
+import Logger from '../../../../utils/Logger';
 
 interface FunctionDefinitionBuilderProps {
     initialParameters?: FunctionParameters;
@@ -101,7 +101,7 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
                 onChange(functionDefinition);
                 previousFunctionDefinition.current = functionDefinition;
             } else {
-                console.log('Function definition unchanged, skipping onChange');
+                Logger.info('Function definition unchanged, skipping onChange');
             }
         }
     }, [functionDefinition, onChange, isViewOnly]);
@@ -154,32 +154,28 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
                             <List>
                                 {activeParameters.filter(param => param.isActive).map((param) => (
                                     <ListItem key={param._id}>
-                                        <ListItemText
-                                            primary={
-                                                <TextField
-                                                    label="Parameter Name"
-                                                    value={param.name}
-                                                    onChange={(e) => handleNameChange(param._id!, e.target.value)}
-                                                    error={param.name.trim() === ''}
-                                                    helperText={param.name.trim() === '' ? 'Name is required' : ''}
-                                                    fullWidth
-                                                    margin="normal"
-                                                    disabled={isViewOnly}
-                                                />
-                                            }
-                                            secondary={
-                                                <FormControlLabel
-                                                    control={
-                                                        <Checkbox
-                                                            checked={param.isRequired}
-                                                            onChange={() => handleRequiredToggle(param._id!)}
-                                                            disabled={isViewOnly}
-                                                        />
-                                                    }
-                                                    label="Required"
-                                                />
-                                            }
+                                        <TextField
+                                            label="Parameter Name"
+                                            value={param.name}
+                                            onChange={(e) => handleNameChange(param._id!, e.target.value)}
+                                            error={param.name.trim() === ''}
+                                            helperText={param.name.trim() === '' ? 'Name is required' : ''}
+                                            fullWidth
+                                            margin="normal"
+                                            disabled={isViewOnly}
                                         />
+                                        <Box>
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        checked={param.isRequired}
+                                                        onChange={() => handleRequiredToggle(param._id!)}
+                                                        disabled={isViewOnly}
+                                                    />
+                                                }
+                                                label="Required"
+                                            />
+                                        </Box>
                                         {!isViewOnly && (
                                             <Tooltip title="Deactivate">
                                                 <IconButton

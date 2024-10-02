@@ -8,7 +8,7 @@ interface URLReferenceViewerProps {
   result: URLReference;
 }
 
-export const SearchOutput: React.FC<URLReferenceViewerProps> = ({ result }) => {
+export const URLReferenceViewer: React.FC<URLReferenceViewerProps> = ({ result }) => {
   const classes = useStyles();
 
   return (

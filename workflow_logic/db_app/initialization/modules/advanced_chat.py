@@ -15,7 +15,7 @@ advanced_chat_module = AdvancedChatModule(
                 "name": "GPT Alice (turbo)",
                 "system_message": "default_system_message",
                 "models": {
-                    "chat": "GPT4-turbo",
+                    "chat": "gpt-4o-mini",
                     "img_gen": "Dall-E-3",
                     "embeddings": "oai_embedding_large",
                     "tts": "tts-1",

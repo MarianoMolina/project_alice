@@ -47,7 +47,12 @@ const ChatFullView: React.FC<ChatFullViewProps> = ({
       <Box className={classes.messagesContainer}>
         {item.messages && item.messages.length > 0 ? (
           item.messages.map((message, index) => (
-            <EnhancedMessage mode={'detail'} fetchAll={false} itemId={message._id} />
+            <EnhancedMessage 
+              key={message._id || index} 
+              mode={'detail'} 
+              fetchAll={false} 
+              itemId={message._id} 
+            />
           ))
         ) : (
           <Box className={classes.emptyMessagesContainer}>

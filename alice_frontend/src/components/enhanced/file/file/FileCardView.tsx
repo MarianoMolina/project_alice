@@ -6,6 +6,7 @@ import { InsertDriveFile, CalendarToday, AccessTime, TextSnippet } from '@mui/ic
 import FileViewer from '../FileViewer';
 import useStyles from '../FileStyles';
 import { bytesToMB } from '../../../../utils/FileUtils';
+import CustomMarkdown from '../../common/markdown/customMarkdown';
 
 const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
     const classes = useStyles();
@@ -33,7 +34,7 @@ const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
         {
             icon: <TextSnippet />,
             primary_text: "Transcript",
-            secondary_text: item.transcript ? item.transcript.content : 'N/A'
+            secondary_text: item.transcript ? <CustomMarkdown className={`${classes.messageSmall} ${classes.toolMessage}`}>{item.transcript.content}</CustomMarkdown> : 'N/A'
         }
     ];
 

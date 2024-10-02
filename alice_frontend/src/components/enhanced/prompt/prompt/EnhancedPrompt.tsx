@@ -27,7 +27,6 @@ const EnhancedPrompt: React.FC<EnhancedPromptProps> = (props) => {
     mode: BasePromptMode,
     handleSave: () => Promise<void>
   ) => {
-    console.log('EnhancedPrompt render:', { items, item, mode });
     const commonProps: PromptComponentProps = {
       items,
       item,

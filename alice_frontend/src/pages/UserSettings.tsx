@@ -12,6 +12,7 @@ import useStyles from '../styles/UserSettingsStyles';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
 import { useDialog } from '../contexts/DialogCustomContext';
 import { useCardDialog } from '../contexts/CardDialogContext';
+import Logger from '../utils/Logger';
 
 interface UserSettingsProps {
     setHasUnsavedChanges: (value: boolean) => void;
@@ -33,13 +34,13 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
         const loadUser = async () => {
             try {
                 if (user) {
-                    console.log('Loading user data');
+                    Logger.info('Loading user data');
                     const userData = await fetchItem('users', user._id) as User;
                     setUserObject(userData);
                     setOriginalUserObject(userData);
                 }
             } catch (error) {
-                console.error('Error loading user data:', error);
+                Logger.error('Error loading user data:', error);
             }
         };
         loadUser();
@@ -69,37 +70,37 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
     const handleSaveChanges = useCallback(async () => {
         if (userObject && userObject._id) {
             try {
-                console.log('Saving user changes');
+                Logger.info('Saving user changes');
                 const updated = await updateItem('users', userObject._id ?? '', userObject);
                 setUserObject(updated as User);
                 setOriginalUserObject(updated as User);
                 setHasUnsavedChanges(false);
             } catch (error) {
-                console.error('Error updating user:', error);
+                Logger.error('Error updating user:', error);
             }
         }
     }, [userObject, updateItem, setHasUnsavedChanges]);
 
     const handleApiSelect = useCallback((item: Partial<API>) => {
-        console.log('API selected:', item);
+        Logger.debug('API selected:', item);
         selectFlexibleItem('API', 'edit', item._id, item as API);
     }, [selectFlexibleItem]);
 
     const handlePurgeAndReinitialize = useCallback(() => {
-        console.log('handlePurgeAndReinitialize called');
+        Logger.info('handlePurgeAndReinitialize called');
         openDialog({
             title: 'Confirm Database Purge and Reinitialization',
             content: 'Are you sure you want to purge and reinitialize your database? This action cannot be undone and will delete all your current data.',
             confirmText: 'Confirm Purge and Reinitialize',
             onConfirm: async () => {
-                console.log('Dialog confirmed');
+                Logger.debug('Dialog confirmed');
                 try {
-                    console.log('Purging db');
+                    Logger.info('Purging db');
                     await purgeAndReinitializeDatabase();
-                    console.log('Database successfully purged and reinitialized');
+                    Logger.info('Database successfully purged and reinitialized');
                     addNotification('Database successfully purged and reinitialized', 'success');
                 } catch (error) {
-                    console.error('Failed to purge and reinitialize database:', error);
+                    Logger.error('Failed to purge and reinitialize database:', error);
                     addNotification('Failed to purge and reinitialize database. Please try again.', 'error');
                 }
             },
@@ -113,7 +114,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
     ];
 
     const renderActiveContent = useCallback(() => {
-        console.log('Rendering active content:', activeTab);
+        Logger.debug('Rendering active content:', activeTab);
         if (!userObject) {
             return <Typography>Loading user settings...</Typography>;
         }
@@ -191,7 +192,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
                                 <Button
                                     variant="contained"
                                     onClick={() => {
-                                        console.log('Purge button clicked');
+                                        Logger.debug('Purge button clicked');
                                         handlePurgeAndReinitialize();
                                     }}
                                     className={classes.dangerButton}

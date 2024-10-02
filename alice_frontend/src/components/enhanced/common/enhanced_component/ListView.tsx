@@ -2,7 +2,6 @@ import React from 'react';
 import {
     List,
     ListItem,
-    ListItemText,
     Typography,
     Box,
     IconButton,
@@ -54,10 +53,8 @@ function EnhancedListItem<T>({
         <>
             <ListItemStyled>
                 <ContentBox>
-                    <ListItemText
-                        primary={primaryText}
-                        secondary={secondaryText}
-                    />
+                    <Typography variant="body1">{primaryText}</Typography>
+                    <Box>{secondaryText}</Box>
                 </ContentBox>
                 <ButtonBox>
                     {onView && (

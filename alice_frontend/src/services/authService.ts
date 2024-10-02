@@ -1,6 +1,7 @@
 import { dbAxiosInstance, taskAxiosInstance } from './axiosInstance';
 import axios from 'axios';
 import { User } from '../types/UserTypes';
+import Logger from '../utils/Logger';
 
 export interface LoginResponse {
   token: string;
@@ -13,9 +14,9 @@ export const loginUser = async (email: string, password: string): Promise<LoginR
     return response.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
-      console.error('Login error:', error.response?.data);
+      Logger.error('Login error:', error.response?.data);
     } else {
-      console.error('Unexpected error:', error);
+      Logger.error('Unexpected error:', error);
     }
     throw error;
   }
@@ -27,9 +28,9 @@ export const registerUser = async (name: string, email: string, password: string
     return response.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
-      console.error('Registration error:', error.response?.data);
+      Logger.error('Registration error:', error.response?.data);
     } else {
-      console.error('Unexpected error:', error);
+      Logger.error('Unexpected error:', error);
     }
     throw error;
   }
@@ -41,9 +42,9 @@ export const initializeUserDatabase = async (): Promise<String> => {
     return response.data.message;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
-      console.error('Initialization error:', error.response?.data);
+      Logger.error('Initialization error:', error.response?.data);
     } else {
-      console.error('Unexpected error:', error);
+      Logger.error('Unexpected error:', error);
     }
     throw error;
   }

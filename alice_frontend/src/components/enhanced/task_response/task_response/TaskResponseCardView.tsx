@@ -8,8 +8,8 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
-import { CommandLineLog } from '../CommandLog';
-import { CodeBlock } from '../CodeBlock';
+import { CommandLineLog } from '../../common/markdown/CommandLog';
+import { CodeBlock } from '../../common/markdown/CodeBlock';
 import { styled } from '@mui/material/styles';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { AccessTime, CheckCircle, Error, Warning, Output, Code, BugReport, DataObject, Analytics } from '@mui/icons-material';

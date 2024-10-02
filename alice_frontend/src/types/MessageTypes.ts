@@ -21,7 +21,7 @@ export interface MessageType extends BaseDataseObject {
     _id?: string;
     role: RoleType;
     content: string;
-    generated_by: 'user' | 'llm' | 'tool';
+    generated_by: 'user' | 'llm' | 'tool' | 'system';
     step?: string;
     assistant_name?: string;
     context?: Record<string, any>;

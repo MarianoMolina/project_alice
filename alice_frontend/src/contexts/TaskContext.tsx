@@ -3,6 +3,7 @@ import { TaskResponse } from '../types/TaskResponseTypes';
 import { useApi } from './ApiContext';
 import { AliceTask } from '../types/TaskTypes';
 import { useNotification } from './NotificationContext';
+import Logger from '../utils/Logger';
 
 export interface RecentExecution {
   taskId: string;
@@ -49,13 +50,12 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const fetchedTasks = await fetchItem('tasks');
       setTasks(fetchedTasks as AliceTask[]);
     } catch (error) {
-      console.error('Error fetching tasks:', error);
+      Logger.error('Error fetching tasks:', error);
     }
   }, [fetchItem]);
 
   const fetchTaskResults = useCallback(async () => {
     try {
-      console.log('Fetching task results');
       const fetchedResults = await fetchItem('taskresults');
       setTaskResults(fetchedResults as TaskResponse[]);
      
@@ -75,7 +75,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }));
       setRecentExecutions(latestExecutions);
     } catch (error) {
-      console.error('Error fetching task results:', error);
+      Logger.error('Error fetching task results:', error);
     }
   }, [fetchItem]);
 
@@ -104,7 +104,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const handleExecuteTask = async () => {
     if (!selectedTask || !selectedTask._id) return;
     try {
-      console.log('Executing task:', selectedTask._id, inputValues);
+      Logger.debug('Executing task:', selectedTask._id, inputValues);
       setExecutionStatus('progress');
       const result = await executeTask(selectedTask._id, inputValues);
       await fetchTaskResults(); 
@@ -112,7 +112,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setSelectedResult(result);
       setExecutionStatus('success');
     } catch (error) {
-      console.error('Error executing task:', error);
+      Logger.error('Error executing task:', error);
       addNotification('Error executing task', 'error');
       setExecutionStatus('idle');
     }

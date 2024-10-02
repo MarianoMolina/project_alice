@@ -7,6 +7,7 @@ import RegistrationComplete from '../components/ui/registration/RegistrationComp
 import { API } from '../types/ApiTypes';
 import { fetchItem } from '../services/api';
 import useStyles from '../styles/RegisterStyles';
+import Logger from '../utils/Logger';
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -40,7 +41,7 @@ const Register = () => {
 
   const handleComplete = async () => {
     try {
-      console.log('Completing registration...');
+      Logger.info('Completing registration...');
       navigate('/chat-alice');
     } catch (error) {
       setError('Failed to complete registration. Please try again.');

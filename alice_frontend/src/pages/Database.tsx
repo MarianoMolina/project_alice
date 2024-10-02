@@ -19,6 +19,7 @@ import { useCardDialog } from '../contexts/CardDialogContext';
 import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
 import EnhancedMessage from '../components/enhanced/message/message/EnhancedMessage';
 import EnhancedURLReference from '../components/enhanced/url_reference/url_reference/EnhancedURLReference';
+import Logger from '../utils/Logger';
 
 const Database: React.FC = () => {
     const classes = useStyles();
@@ -30,21 +31,21 @@ const Database: React.FC = () => {
     const [viewMode, setViewMode] = useState<'list' | 'shortList' | 'table'>('list');
 
     const handleCreateNew = useCallback(() => {
-        console.log('Create new clicked');
+        Logger.debug('Create new clicked');
         setSelectedItem(null);
         setIsCreating(true);
         setShowActiveComponent(true);
     }, [setSelectedItem]);
 
     const handleItemSelect = useCallback((item: CollectionElement | null) => {
-        console.log('Item selected:', item);
+        Logger.debug('Item selected:', item);
         setSelectedItem(item);
         setIsCreating(false);
         setShowActiveComponent(true);
     }, [setSelectedItem]);
 
     const handleSave = useCallback(async (item: CollectionElement | null) => {
-        console.log('Saving item:', item);
+        Logger.debug('Saving item:', item);
         setSelectedItem(null);
         setIsCreating(false);
         setShowActiveComponent(false);
@@ -86,7 +87,7 @@ const Database: React.FC = () => {
             fetchAll: true,
             onInteraction: handleItemSelect,
             onView: (item: any) => {
-                console.log('Viewing item:', item);
+                Logger.debug('Viewing item:', item);
                 if (item._id) {
                     selectCardItem(activeTab, item._id);
                 }

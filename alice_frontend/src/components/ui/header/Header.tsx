@@ -5,6 +5,7 @@ import { SettingsApplications, Storage, Chat, Task, Home } from '@mui/icons-mate
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuth } from '../../../contexts/AuthContext';
 import useStyles from './HeaderStyles';
+import Logger from '../../../utils/Logger';
 
 const Header: React.FC = () => {
   const classes = useStyles();
@@ -17,7 +18,7 @@ const Header: React.FC = () => {
   };
 
   const handleLogout = () => {
-    console.log('Logging out');
+    Logger.info('Logging out');
     logout();
     navigate('/login');
   };

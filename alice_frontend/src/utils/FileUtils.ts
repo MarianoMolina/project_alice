@@ -1,4 +1,5 @@
 import { FileContentReference, FileType } from '../types/FileTypes';
+import Logger from './Logger';
 
 export const FileTypeExtensionsMap: Record<FileType, string[]> = {
     [FileType.IMAGE]: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'],
@@ -136,7 +137,7 @@ export const selectFile = async (
             }
             const fileType = inferFileType(file.name);
             if (!allowedTypes.includes(fileType)) {
-                console.error('File type not allowed');
+                Logger.error('File type not allowed');
                 resolve(null);
                 return;
             }

@@ -73,19 +73,19 @@ const StartTask: React.FC = () => {
   const renderSidebarContent = () => {
     switch (activeTab) {
       case 'TaskResponse':
-        return <EnhancedTaskResponse 
-          key={listKey} 
-          onView={(taskResult) => taskResult._id && triggerItemDialog('TaskResponse', taskResult._id)} 
-          mode={'shortList'} 
-          fetchAll={true} 
+        return <EnhancedTaskResponse
+          key={listKey}
+          onView={(taskResult) => taskResult._id && triggerItemDialog('TaskResponse', taskResult._id)}
+          mode={'list'}
+          fetchAll={true}
         />;
       case 'Task':
-        return <EnhancedTask 
-          key={listKey} 
-          mode={'shortList'} 
-          fetchAll={true} 
-          onView={(task) => task._id && triggerItemDialog('Task', task._id)} 
-          onInteraction={handleTabWhenTaskSelect} 
+        return <EnhancedTask
+          key={listKey}
+          mode={'shortList'}
+          fetchAll={true}
+          onView={(task) => task._id && triggerItemDialog('Task', task._id)}
+          onInteraction={handleTabWhenTaskSelect}
         />;
       default:
         return null;
@@ -106,7 +106,7 @@ const StartTask: React.FC = () => {
       <Box className={classes.mainContainer}>
         <Box className={classes.taskExecutionContainer}>
           {selectedTask ? (
-            <EnhancedTask mode={'execute'} itemId={selectedTask._id} fetchAll={false} onExecute={executeTask}  />
+            <EnhancedTask mode={'execute'} itemId={selectedTask._id} fetchAll={false} onExecute={executeTask} />
           ) : (
             <PlaceholderSkeleton mode="task" text='Select a task to execute.' />
           )}
@@ -134,22 +134,24 @@ const StartTask: React.FC = () => {
               <Typography variant="h6" className={classes.sectionTitle}>Recent Executions</Typography>
             </AccordionSummary>
             <AccordionDetails className={classes.recentExecutionsAccordionDetails}>
-              <List className={classes.recentExecutionsList}>
-                {recentExecutions.map((execution, index) => (
-                  <EnhancedTaskResponse
-                    key={index}
-                    itemId={execution.result._id}
-                    mode={'list'}
-                    fetchAll={false}
-                    onView={() => execution.result._id && triggerItemDialog('TaskResponse', execution.result._id)}
-                    onInteraction={
-                      selectedTask && execution.taskId === selectedTask._id
-                        ? () => setAndRunTaskFromExecution(execution)
-                        : undefined
-                    }
-                  />
-                ))}
-              </List>
+              <Box component="div">
+                <List className={classes.recentExecutionsList}>
+                  {recentExecutions.map((execution, index) => (
+                    <EnhancedTaskResponse
+                      key={index}
+                      itemId={execution.result._id}
+                      mode={'list'}
+                      fetchAll={false}
+                      onView={() => execution.result._id && triggerItemDialog('TaskResponse', execution.result._id)}
+                      onInteraction={
+                        selectedTask && execution.taskId === selectedTask._id
+                          ? () => setAndRunTaskFromExecution(execution)
+                          : undefined
+                      }
+                    />
+                  ))}
+                </List>
+              </Box>
             </AccordionDetails>
           </Accordion>
         </Box>

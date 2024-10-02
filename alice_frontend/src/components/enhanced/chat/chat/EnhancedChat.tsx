@@ -59,11 +59,7 @@ const EnhancedChat: React.FC<EnhancedChatProps> = (props) => {
       case 'card':
         return <ChatCardView {...commonProps} />;
       case 'full':
-        return (
-          <ChatFullView
-            {...commonProps}
-          />
-        );
+        return <ChatFullView {...commonProps}/>;
       default:
         return null;
     }

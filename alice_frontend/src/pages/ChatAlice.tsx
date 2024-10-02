@@ -18,6 +18,7 @@ import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
 import { FileReference } from '../types/FileTypes';
 import EnhancedURLReference from '../components/enhanced/url_reference/url_reference/EnhancedURLReference';
 import EnhancedMessage from '../components/enhanced/message/message/EnhancedMessage';
+import Logger from '../utils/Logger';
 
 const ChatAlice: React.FC = () => {
   const classes = useStyles();
@@ -44,7 +45,7 @@ const ChatAlice: React.FC = () => {
   }, [messages]);
 
   const selectChatId = async (chat: AliceChat) => {
-    console.log('Selected chat:', chat);
+    Logger.debug('Selected chat:', chat);
     await handleSelectChat(chat._id);
     setActiveTab('Current Chat');
   };

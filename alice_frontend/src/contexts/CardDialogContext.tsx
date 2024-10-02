@@ -36,7 +36,6 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
   const [activeDialog, setActiveDialog] = useState<'card' | 'flexible' | null>(null);
 
   const selectCardItem = useCallback((itemType: CollectionElementString, itemId?: string, item?: CollectionElement) => {
-    console.log('Selecting card item:', itemType, itemId, item);
     setSelectedCardItemType(itemType);
     if (item) {
       setSelectedCardItem(item);
@@ -55,7 +54,6 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
     itemId?: string, 
     item?: CollectionElement
   ) => {
-    console.log('Opening flexible dialog:', { itemType, mode, itemId, item });
     setSelectedFlexibleItemType(itemType);
     setFlexibleDialogMode(mode);
     if (mode === 'edit') {
@@ -71,13 +69,6 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
     }
     setIsDialogOpen(true);
     setActiveDialog('flexible');
-    console.log('selectFlexibleItem state updated:', {
-      selectedFlexibleItemType: itemType,
-      flexibleDialogMode: mode,
-      selectedFlexibleItem: mode === 'edit' ? (item || { _id: itemId }) : null,
-      isDialogOpen: true,
-      activeDialog: 'flexible'
-    });
   }, []);
 
   const handleClose = useCallback(() => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     FormControl,
     InputLabel,
@@ -14,6 +14,7 @@ import EnhancedModel from '../../model/model/EnhancedModel';
 import { AliceModel } from '../../../../types/ModelTypes';
 import { useApi } from '../../../../contexts/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
+import Logger from '../../../../utils/Logger';
 
 const getLlmProviderBaseUrl = (apiName: ApiName): string => {
     for (const provider of Object.values(LLM_PROVIDERS)) {
@@ -37,12 +38,14 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
 
     useEffect(() => {
         if (item) {
+            Logger.info('item useEffect', item);
             setForm({ ...getDefaultApiForm(), ...item });
             updateAvailableApiNames(item.api_type);
         }
     }, [item]);
 
     useEffect(() => {
+        Logger.info('apitype useEffect', form.api_type, form);
         if (form.api_type) {
             updateAvailableApiNames(form.api_type);
         }
@@ -67,6 +70,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
     const isCreateMode = mode === 'create';
 
     const updateAvailableApiNames = (apiType: ApiType | undefined) => {
+        Logger.info('updateAvailableApiNames', apiType);
         if (apiType && API_TYPE_CONFIGS[apiType]) {
             setAvailableApiNames(API_TYPE_CONFIGS[apiType].api_name);
         } else {
@@ -79,17 +83,6 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
         onChange({ ...form, [name]: value });
     };
 
-    const handleApiTypeChange = (newApiType: ApiType) => {
-        const config = API_TYPE_CONFIGS[newApiType];
-        updateAvailableApiNames(newApiType);
-        onChange({
-            ...form,
-            api_type: newApiType,
-            api_config: config.apiConfig,
-            api_name: config.api_name[0],
-        });
-    };
-
     const handleApiNameChange = (newApiName: ApiName) => {
         onChange({
             ...form,
@@ -99,6 +92,17 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                 base_url: getLlmProviderBaseUrl(newApiName),
                 api_key: '',
             },
+        });
+    };
+
+    const handleApiTypeChange = (newApiType: ApiType) => {
+        const config = API_TYPE_CONFIGS[newApiType];
+        updateAvailableApiNames(newApiType);
+        onChange({
+            ...form,
+            api_type: newApiType,
+            api_config: config.apiConfig,
+            api_name: config.api_name[0],
         });
     };
 
@@ -147,7 +151,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                 </FormControl>
             )}
 
-            {form.api_type && (
+            {form.api_name && (
                 <FormControl fullWidth margin="normal">
                     <InputLabel>API Name</InputLabel>
                     <Select

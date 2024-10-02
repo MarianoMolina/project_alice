@@ -64,9 +64,14 @@ function EnhancedTableView<T>({
 
   const renderItem = (itemToRender: T) => (
     <TableRow key={JSON.stringify(itemToRender)}>
-      {columns.map((column, index) => (
-        <TableCell key={index}>{column.render(itemToRender)}</TableCell>
-      ))}
+      {columns.map((column, index) => {
+        const cellContent = column.render(itemToRender);
+        return (
+          <TableCell key={index}>
+            {cellContent !== undefined && cellContent !== null ? cellContent : ''}
+          </TableCell>
+        );
+      })}
       <TableCell>
         {onView && (
           <Tooltip title={viewTooltip}>
@@ -112,7 +117,7 @@ function EnhancedTableView<T>({
           </TableHead>
         )}
         <TableBody>
-          {item ? renderItem(item) : sortedItems?.map(renderItem)}
+          {item ? renderItem(item) : sortedItems?.map(renderItem) ?? null}
         </TableBody>
       </Table>
     </TableContainer>

@@ -266,7 +266,7 @@ class RedditSearchAPI(APIEngine):
             URLReference(
                 title=submission.title,
                 url=submission.url,
-                content=submission.selftext,
+                content=submission.selftext if submission.selftext else '[No content]',
                 metadata={
                     "author": submission.author.name,
                     "created_utc": submission.created_utc,

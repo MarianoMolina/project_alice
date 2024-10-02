@@ -1,11 +1,13 @@
-import logging, os
+import logging
+import os
 from logging.handlers import RotatingFileHandler
 from workflow_logic.util.const import LOGGING_FOLDER, LOG_LEVEL
 
 def setup_logging(log_level=logging.WARNING):
     # Create logs directory if it doesn't exist
-    if not os.path.exists(LOGGING_FOLDER):
-        os.makedirs(LOGGING_FOLDER)
+    workflow_log_dir = os.path.join(LOGGING_FOLDER, 'workflow')
+    if not os.path.exists(workflow_log_dir):
+        os.makedirs(workflow_log_dir)
 
     # Set up root logger
     logger = logging.getLogger()
@@ -17,7 +19,9 @@ def setup_logging(log_level=logging.WARNING):
 
     # File handler
     file_handler = RotatingFileHandler(
-        'logs/app.log', maxBytes=10*1024*1024, backupCount=5
+        os.path.join(workflow_log_dir, 'app.log'),
+        maxBytes=10*1024*1024,
+        backupCount=5
     )
     file_handler.setLevel(log_level)
 

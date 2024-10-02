@@ -10,6 +10,7 @@ import CommonCardView from '../../common/enhanced_component/CardView';
 import { CollectionElementString } from '../../../../types/CollectionTypes';
 import { References } from '../../../../types/ReferenceTypes';
 import useStyles from '../MessageStyles';
+import CustomMarkdown from '../../common/markdown/customMarkdown';
 
 interface ReferenceChipProps {
     reference: any;
@@ -133,20 +134,11 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
         }
     };
 
-    const renderContent = () => {
-        // returns a component to display the text and make it look like a message
-        return (
-            <Box>
-                <Typography variant="body1" className={`${classes.messageSmall} ${getMessageClass()}`}>{item.content}</Typography>
-            </Box>
-        );
-    }
-
     const listItems = [
         {
             icon: <TextSnippet />,
             primary_text: "Content",
-            secondary_text: renderContent()
+            secondary_text: <CustomMarkdown className={`${classes.messageSmall} ${getMessageClass()}`}>{item.content}</CustomMarkdown>
         },
         {
             icon: <Person />,

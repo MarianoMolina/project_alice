@@ -49,11 +49,11 @@ base_tasks_module = BaseTasksModule(
                 "name": "research_agent",
                 "system_message": "research_agent_prompt",
                 "models": {
-                    "chat": "GPT4-turbo",
+                    "chat": "gpt-4o-mini",
                 },
                 "has_code_exec": False,
                 "has_functions": True,
-                "max_consecutive_auto_reply": 5,
+                "max_consecutive_auto_reply": 2,
             },
         ],
         "tasks": [

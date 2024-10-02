@@ -46,9 +46,41 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: theme.palette.background.paper,
     border: `1px solid ${theme.palette.divider}`,
   },
-  outputInterfaceList: {
-    overflowX: 'auto',
-  }
+  searchResultCard: {
+    padding: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+    border: `1px solid ${theme.palette.divider}`,
+    borderRadius: theme.shape.borderRadius,
+    transition: 'box-shadow 0.3s ease-in-out',
+    '&:hover': {
+      boxShadow: theme.shadows[3],
+    },
+  },
+  searchResultContent: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  searchResultTitle: {
+    marginBottom: theme.spacing(1),
+  },
+  searchResultUrl: {
+    color: theme.palette.text.secondary,
+    marginBottom: theme.spacing(1),
+    wordBreak: 'break-all',
+  },
+  searchResultBody: {
+    marginBottom: theme.spacing(1),
+    padding: theme.spacing(1),
+    backgroundColor: theme.palette.background.default,
+    borderRadius: theme.shape.borderRadius,
+  },
+  searchResultMetadata: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: theme.spacing(0.5),
+    marginTop: theme.spacing(1),
+  },
+
 }));
 
 export default useStyles;

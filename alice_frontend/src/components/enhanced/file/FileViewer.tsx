@@ -4,6 +4,7 @@ import { FileReference, FileContentReference, FileType } from '../../../types/Fi
 import { createFileContentReference, selectFile } from '../../../utils/FileUtils';
 import { retrieveFile, updateFile } from '../../../services/api';
 import { useNotification } from '../../../contexts/NotificationContext';
+import Logger from '../../../utils/Logger';
 
 interface FileViewerProps {
   file: FileReference | FileContentReference;
@@ -33,7 +34,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ file, editable = false, onUpdat
           throw new Error('Invalid file object');
         }
       } catch (err) {
-        console.error('Error loading file content:', err);
+        Logger.error('Error loading file content:', err);
         setError('Failed to load file content. Please try again.');
       } finally {
         setIsLoading(false);
@@ -51,11 +52,11 @@ const FileViewer: React.FC<FileViewerProps> = ({ file, editable = false, onUpdat
     const updatedFile = await updateFile(newFile, file._id);
     
     if (updatedFile) {
-      console.log('File updated successfully:', updatedFile);
+      Logger.info('File updated successfully:', updatedFile);
       file = updatedFile;
     } else {
       addNotification('File upload failed or was cancelled', 'error');
-      console.log('File update failed or was cancelled');
+      Logger.info('File update failed or was cancelled');
     }
   };
   
@@ -68,7 +69,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ file, editable = false, onUpdat
     event.preventDefault();
     if (event.dataTransfer.files && event.dataTransfer.files[0]) {
       const newFile = event.dataTransfer.files[0];
-      console.log('File dropped:', newFile.name, 'Type:', newFile.type);
+      Logger.info('File dropped:', newFile.name, 'Type:', newFile.type);
       const fileContentReference = await createFileContentReference(newFile);
       setContent(fileContentReference.content);
     }
@@ -83,9 +84,6 @@ const FileViewer: React.FC<FileViewerProps> = ({ file, editable = false, onUpdat
   }
 
   const renderContent = () => {
-    console.log('Rendering content for file:', file.filename, 'Type:', file.type);
-    console.log('Content length:', content.length);
-
     if (content.length === 0) {
       return <Typography>No content available</Typography>;
     }

@@ -16,6 +16,7 @@ export async function createURLReference(
 
     // Set created_by and timestamps
     urlReferenceData.created_by = userId ? new Types.ObjectId(userId) : undefined;
+    urlReferenceData.updated_by = userId ? new Types.ObjectId(userId) : undefined;
     urlReferenceData.createdAt = new Date();
     urlReferenceData.updatedAt = new Date();
 

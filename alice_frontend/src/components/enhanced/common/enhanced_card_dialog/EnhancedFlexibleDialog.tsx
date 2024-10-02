@@ -24,20 +24,9 @@ const EnhancedFlexibleDialog: React.FC = () => {
     isDialogOpen,
     activeDialog
   } = useCardDialog();
-  console.log('EnhancedFlexibleDialog render:', {
-    selectedFlexibleItem,
-    selectedFlexibleItemType,
-    flexibleDialogMode,
-    isDialogOpen,
-    activeDialog
-  });
+
   const renderDialogContent = () => {
     if (!selectedFlexibleItemType || !flexibleDialogMode || activeDialog !== 'flexible') return null;
-    console.log('Rendering flexible dialog content:', {
-      selectedFlexibleItemType,
-      flexibleDialogMode,
-      isCreateMode: flexibleDialogMode === 'create'
-    });
 
     const handleProps = {
       handleAgentClick: (id: string) => selectCardItem('Agent', id),
@@ -96,7 +85,6 @@ const EnhancedFlexibleDialog: React.FC = () => {
         case 'Chat':
           return <EnhancedChat {...commonProps} />;
         case 'Prompt':
-          console.log('Rendering EnhancedPrompt in create mode:', commonProps);
           return <EnhancedPrompt {...commonProps} />;
         case 'Model':
           return <EnhancedModel {...commonProps} />;

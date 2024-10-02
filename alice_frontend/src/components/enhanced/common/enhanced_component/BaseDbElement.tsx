@@ -31,6 +31,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { CircularProgress, Box } from '@mui/material';
 import { useApi } from '../../../../contexts/ApiContext';
 import { CollectionName, CollectionType } from '../../../../types/CollectionTypes';
+import Logger from '../../../../utils/Logger';
 
 export interface BaseDbElementProps<T extends CollectionType[CollectionName]> {
   /**
@@ -111,7 +112,7 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
       setError(null);
     } catch (err) {
       setError('Failed to fetch items');
-      console.error(err);
+      Logger.error(err as string);
     } finally {
       setLoading(false);
     }
@@ -125,7 +126,7 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
       setError(null);
     } catch (err) {
       setError('Failed to fetch item');
-      console.error(err);
+      Logger.error(err as string);
     } finally {
       setLoading(false);
     }
@@ -159,14 +160,13 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
       }
     } catch (err) {
       setError('Failed to save item');
-      console.error(err);
+      Logger.error(err as string);
     } finally {
       setLoading(false);
     }
   };
 
   const handleChange = (newItem: Partial<T>) => {
-    console.log('handleChange', newItem);
     setItem(prevItem => ({ ...prevItem, ...newItem } as T));
   };
 

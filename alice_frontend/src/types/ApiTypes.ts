@@ -102,7 +102,7 @@ export interface ApiComponentProps extends HandleClickProps {
     showHeaders?: boolean;
 }
 export const getDefaultApiForm = (): Partial<API> => ({
-    api_type: ApiType.LLM_MODEL,
+    api_type: undefined,
     api_name: undefined,
     name: '',
     is_active: false,
