@@ -8,7 +8,7 @@ import { hasAnyReferences } from '../../../../types/ReferenceTypes';
 import ReferenceChip from '../../common/references/ReferenceChip';
 import { Visibility } from '@mui/icons-material';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
-import CustomMarkdown from '../../common/markdown/customMarkdown';
+import CustomMarkdown from '../../common/markdown/customMarkdown2';
 
 const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => {
     const classes = useStyles();

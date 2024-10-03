@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
     TextField,
     FormControlLabel,
@@ -26,9 +26,16 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     const [form, setForm] = useState<Partial<AliceAgent>>(item || getDefaultAgentForm());
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogContent, setDialogContent] = useState<React.ReactNode | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
 
+    useEffect(() => {
+        if (isSaving) {
+            handleSave();
+            setIsSaving(false);
+        }
+    }, [isSaving, handleSave]);
+    
     const isEditMode = mode === 'edit' || mode === 'create';
-
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         if (name === 'max_consecutive_auto_reply') {
@@ -40,7 +47,7 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
         } else {
             setForm(prevForm => ({ ...prevForm, [name]: value }));
         }
-    }, []);    
+    }, []);
 
     const handleCheckboxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, checked } = e.target;
@@ -86,8 +93,8 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
 
     const handleLocalSave = useCallback(() => {
         onChange(form);
-        handleSave();
-    }, [form, onChange, handleSave]);
+        setIsSaving(true);
+    }, [form, onChange]);
 
     const title = mode === 'create' ? 'Create New Agent' : mode === 'edit' ? 'Edit Agent' : 'Agent Details';
     const saveButtonText = form._id ? 'Update Agent' : 'Create Agent';

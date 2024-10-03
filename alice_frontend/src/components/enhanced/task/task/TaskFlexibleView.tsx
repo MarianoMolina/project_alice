@@ -44,7 +44,14 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     const [form, setForm] = useState<AliceTask>(() => item || getDefaultTaskForm(taskType));
     const [apis, setApis] = useState<API[]>([]);
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
 
+    useEffect(() => {
+        if (isSaving) {
+            handleSave();
+            setIsSaving(false);
+        }
+    }, [isSaving, handleSave]);
     useEffect(() => {
         fetchItem('apis').then((data) => setApis(data as API[]));
     }, [fetchItem]);
@@ -65,8 +72,8 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
 
     const handleLocalSave = useCallback(async () => {
         onChange(form);
-        await handleSave();
-    }, [form, onChange, handleSave]);
+        setIsSaving(true);
+    }, [form, onChange]);
 
     const renderTaskForm = () => {
         const commonProps = {

@@ -10,7 +10,7 @@ import CommonCardView from '../../common/enhanced_component/CardView';
 import { CollectionElementString } from '../../../../types/CollectionTypes';
 import { References } from '../../../../types/ReferenceTypes';
 import useStyles from '../MessageStyles';
-import CustomMarkdown from '../../common/markdown/customMarkdown';
+import CustomMarkdown from '../../common/markdown/customMarkdown2';
 
 interface ReferenceChipProps {
     reference: any;

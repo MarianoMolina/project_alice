@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography, Link, Paper, Chip } from '@mui/material';
 import useStyles from './URLReferenceStyles';
 import { URLReference } from '../../../types/URLReferenceTypes';
-import CustomMarkdown from '../common/markdown/customMarkdown';
+import CustomMarkdown from '../common/markdown/customMarkdown2';
 
 interface URLReferenceViewerProps {
   result: URLReference;

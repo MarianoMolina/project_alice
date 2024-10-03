@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
     TextField,
     FormControl,
@@ -31,6 +31,14 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
     const { fetchItem } = useApi();
     const [form, setForm] = useState<Partial<MessageType>>(item || getDefaultMessageForm());
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        if (isSaving) {
+            handleSave();
+            setIsSaving(false);
+        }
+    }, [isSaving, handleSave]);
 
     const isEditMode = mode === 'edit' || mode === 'create';
 
@@ -72,8 +80,8 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
 
     const handleLocalSave = useCallback(() => {
         onChange(form);
-        handleSave();
-    }, [form, onChange, handleSave]);
+        setIsSaving(true);
+    }, [form, onChange]);
 
     const title = mode === 'create' ? 'Create New Message' : mode === 'edit' ? 'Edit Message' : 'Message Details';
     const saveButtonText = form._id ? 'Update Message' : 'Create Message';

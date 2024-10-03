@@ -38,7 +38,15 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
 
     const isEditMode = mode === 'edit' || mode === 'create';
     const isCreateMode = mode === 'create';
+    const [isSaving, setIsSaving] = useState(false);
 
+    useEffect(() => {
+        if (isSaving) {
+            handleSave();
+            setIsSaving(false);
+        }
+    }, [isSaving, handleSave]);
+    
     useEffect(() => {
         if (form.api_type) {
             updateAvailableApiNames(form.api_type);
@@ -119,8 +127,8 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
 
     const handleLocalSave = useCallback(() => {
         onChange(form);
-        handleSave();
-    }, [form, onChange, handleSave]);
+        setIsSaving(true);
+    }, [form, onChange]);
 
     const title = mode === 'create' ? 'Create New API' : mode === 'edit' ? 'Edit API' : 'API Details';
     const saveButtonText = form._id ? 'Update API' : 'Create API';

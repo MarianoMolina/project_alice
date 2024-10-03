@@ -10,7 +10,7 @@ import { Code, ExpandMore, Assignment, QueryBuilder, Settings } from '@mui/icons
 import { PromptComponentProps } from '../../../../types/PromptTypes';
 import useStyles from '../PromptStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import CustomMarkdown from '../../common/markdown/customMarkdown';
+import CustomMarkdown from '../../common/markdown/customMarkdown2';
 
 const PromptCardView: React.FC<PromptComponentProps> = ({
     item,

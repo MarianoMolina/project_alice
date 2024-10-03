@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
     Typography,
     TextField,
@@ -18,6 +18,14 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
     handleSave
 }) => {
     const [form, setForm] = useState<Partial<Prompt>>(item || {});
+    const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        if (isSaving) {
+            handleSave();
+            setIsSaving(false);
+        }
+    }, [isSaving, handleSave]);
 
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -35,8 +43,8 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
 
     const handleLocalSave = useCallback(() => {
         onChange(form);
-        handleSave();
-    }, [form, onChange, handleSave]);
+        setIsSaving(true);
+    }, [form, onChange]);
 
     if (!form) {
         return <Typography>No Prompt data available.</Typography>;
