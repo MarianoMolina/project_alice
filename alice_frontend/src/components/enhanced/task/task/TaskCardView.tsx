@@ -9,6 +9,7 @@ import { Category, Description, Functions, Person, ApiRounded, Sos, Settings, Lo
 import { TaskComponentProps } from '../../../../types/TaskTypes';
 import useStyles from '../TaskStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
 
 interface ChipItem {
     _id?: string;
@@ -19,13 +20,9 @@ type ChipRecord = Record<string, ChipItem | null>;
 
 const TaskCardView: React.FC<TaskComponentProps> = ({
     item,
-    handleAgentClick,
-    handleTaskClick,
-    handlePromptClick,
-    handleModelClick,
-    handleParameterClick,
 }) => {
     const classes = useStyles();
+    const { selectCardItem } = useCardDialog();
 
     if (!item) {
         return <Typography>No task data available.</Typography>;
@@ -62,7 +59,7 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
             icon: <Person />,
             primary_text: "Agent",
             secondary_text: (item.agent?.name ?
-                <ListItemButton onClick={() => item.agent?._id && handleAgentClick && handleAgentClick(item.agent._id)}>
+                <ListItemButton onClick={() => item.agent?._id && selectCardItem && selectCardItem('Agent', item.agent._id, item.agent)}>
                     {item.agent?.name}
                 </ListItemButton> : <Typography variant="body2" color="textSecondary">No agent</Typography>
                 )
@@ -70,17 +67,17 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
         {
             icon: <Description />,
             primary_text: "Templates",
-            secondary_text: renderChips(item.templates as ChipRecord, (id) => handlePromptClick && handlePromptClick(id), "No templates available")
+            secondary_text: renderChips(item.templates as ChipRecord, (id) => selectCardItem && selectCardItem('Prompt', id), "No templates available")
         },
         {
             icon: <Description />,
             primary_text: "Prompts to Add",
-            secondary_text: renderChips(item.prompts_to_add as ChipRecord, (id) => handlePromptClick && handlePromptClick(id), "No prompts to add")
+            secondary_text: renderChips(item.prompts_to_add as ChipRecord, (id) => selectCardItem && selectCardItem('Prompt', id), "No prompts to add")
         },
         {
             icon: <Functions />,
             primary_text: "Subtasks",
-            secondary_text: renderChips(item.tasks as ChipRecord, (id) => handleTaskClick && handleTaskClick(id), "No subtasks available")
+            secondary_text: renderChips(item.tasks as ChipRecord, (id) => selectCardItem && selectCardItem('Task', id), "No subtasks available")
         },
         {
             icon: <ApiRounded />,
@@ -101,8 +98,8 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                if (handleParameterClick && param._id) {
-                                    handleParameterClick(param._id);
+                                if (selectCardItem && param._id) {
+                                    selectCardItem('Parameter', param._id, param);
                                 }
                             }}
                             className={classes.chip}
@@ -149,4 +146,4 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
     );
 };
 
-export default TaskCardView;
+export default TaskCardView; 

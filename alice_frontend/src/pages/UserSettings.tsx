@@ -217,7 +217,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
                 collapsedWidth={SIDEBAR_COLLAPSED_WIDTH}
                 expandedWidth={SIDEBAR_COLLAPSED_WIDTH}
             />
-            <Box flexGrow={1} p={3}>
+            <Box flexGrow={1} p={3} className={classes.mainContainer}>
                 {renderActiveContent()}
             </Box>
         </Box>

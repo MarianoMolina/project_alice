@@ -10,7 +10,7 @@ import {
 import { ApiComponentProps, API, ApiType, ApiName, getDefaultApiForm } from '../../../../types/ApiTypes';
 import { API_TYPE_CONFIGS, LLM_PROVIDERS } from '../../../../utils/ApiUtils';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
-import EnhancedModel from '../../model/model/EnhancedModel';
+import ModelShortListView from '../../model/model/ModelShortListView';
 import { AliceModel } from '../../../../types/ModelTypes';
 import { useApi } from '../../../../contexts/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
@@ -46,12 +46,21 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
             setIsSaving(false);
         }
     }, [isSaving, handleSave]);
-    
+
+    const updateAvailableApiNames = useCallback((apiType: ApiType | undefined) => {
+        Logger.info('updateAvailableApiNames', apiType);
+        if (apiType && API_TYPE_CONFIGS[apiType]) {
+            setAvailableApiNames(API_TYPE_CONFIGS[apiType].api_name);
+        } else {
+            setAvailableApiNames([]);
+        }
+    }, []);
+
     useEffect(() => {
         if (form.api_type) {
             updateAvailableApiNames(form.api_type);
         }
-    }, [form.api_type]);
+    }, [form.api_type, updateAvailableApiNames]);
 
     useEffect(() => {
         if (form.api_name) {
@@ -67,15 +76,6 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
             }
         }
     }, [form.api_name]);
-
-    const updateAvailableApiNames = useCallback((apiType: ApiType | undefined) => {
-        Logger.info('updateAvailableApiNames', apiType);
-        if (apiType && API_TYPE_CONFIGS[apiType]) {
-            setAvailableApiNames(API_TYPE_CONFIGS[apiType].api_name);
-        } else {
-            setAvailableApiNames([]);
-        }
-    }, []);
 
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -155,20 +155,18 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                 </FormControl>
             )}
 
-            {form.api_name && (
-                <FormControl fullWidth margin="normal">
-                    <InputLabel>API Name</InputLabel>
-                    <Select
-                        value={form.api_name || ''}
-                        onChange={(e) => handleApiNameChange(e.target.value as ApiName)}
-                        disabled={!isEditMode}
-                    >
-                        {availableApiNames.map((name) => (
-                            <MenuItem key={name} value={name}>{name}</MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-            )}
+            <FormControl fullWidth margin="normal">
+                <InputLabel>API Name</InputLabel>
+                <Select
+                    value={form.api_name || ''}
+                    onChange={(e) => handleApiNameChange(e.target.value as ApiName)}
+                    disabled={!isEditMode}
+                >
+                    {availableApiNames.map((name) => (
+                        <MenuItem key={name} value={name}>{name}</MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
 
             <TextField
                 fullWidth
@@ -196,7 +194,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
             {form.api_type === ApiType.LLM_MODEL && (
                 <EnhancedSelect<AliceModel>
                     componentType="models"
-                    EnhancedComponent={EnhancedModel}
+                    EnhancedView={ModelShortListView}
                     selectedItems={form.default_model ? [form.default_model] : []}
                     onSelect={handleDefaultModelChange}
                     isInteractable={isEditMode}

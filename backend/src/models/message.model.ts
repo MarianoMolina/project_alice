@@ -14,7 +14,7 @@ const messageSchema = new Schema<IMessageDocument, IMessageModel>({
   },
   generated_by: {
     type: String,
-    enum: ["user", "llm", "tool"],
+    enum: ["user", "llm", "tool", "system"],
     default: "user",
     description: "Source that generated the message",
   },

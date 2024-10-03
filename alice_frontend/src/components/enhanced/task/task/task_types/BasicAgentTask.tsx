@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import {
   Box,
   TextField,
@@ -11,9 +11,8 @@ import {
   MenuItem,
   Chip,
 } from '@mui/material';
-import EnhancedSelect from '../../../common/enhanced_select/EnhancedSelect';
-import EnhancedAgent from '../../../agent/agent/EnhancedAgent';
-import EnhancedTask from '../../../task/task/EnhancedTask';
+import AgentShortListView from '../../../agent/agent/AgentShortListView';
+import TaskShortListView from '../../../task/task/TaskShortListView';
 import { TaskFormsProps } from '../../../../../types/TaskTypes';
 import { AliceAgent } from '../../../../../types/AgentTypes';
 import { AliceTask } from '../../../../../types/TaskTypes';
@@ -21,6 +20,7 @@ import { ApiType } from '../../../../../types/ApiTypes';
 import { FunctionParameters } from '../../../../../types/ParameterTypes';
 import FunctionDefinitionBuilder from '../../../common/function_select/FunctionDefinitionBuilder';
 import { useApi } from '../../../../../contexts/ApiContext';
+import EnhancedSelect from '../../../common/enhanced_select/EnhancedSelect';
 
 const BasicAgentTask: React.FC<TaskFormsProps> = ({
   item,
@@ -33,51 +33,101 @@ const BasicAgentTask: React.FC<TaskFormsProps> = ({
   const { fetchItem } = useApi();
   const isEditMode = mode === 'edit' || mode === 'create';
 
+  const itemRef = useRef(item);
+  const onChangeRef = useRef(onChange);
+
+  // Update refs when props change
+  itemRef.current = item;
+  onChangeRef.current = onChange;
+
   const availableApiTypes = useMemo(() => {
     if (!apis) return [];
     return Array.from(new Set(apis.map(api => api.api_type)));
   }, [apis]);
 
   const handleInputVariablesChange = useCallback((newDefinition: FunctionParameters) => {
-    onChange({ ...item, input_variables: newDefinition });
-  }, [onChange, item]);
+    const currentItem = itemRef.current;
+    if (currentItem) onChangeRef.current({ ...currentItem, input_variables: newDefinition });
+  }, []);
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const currentItem = itemRef.current;
+    if (currentItem) {
+      const { name, value } = e.target;
+      onChangeRef.current({ ...currentItem, [name]: value });
+    }
+  }, []);
+
+  const handleCheckboxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const currentItem = itemRef.current;
+    if (currentItem) {
+      const { name, checked } = e.target;
+      onChangeRef.current({ ...currentItem, [name]: checked });
+    }
+  }, []);
+
+  const handleRequiredApisChange = useCallback((event: SelectChangeEvent<ApiType[]>) => {
+    const currentItem = itemRef.current;
+    if (currentItem) {
+      const value = event.target.value as ApiType[];
+      onChangeRef.current({ ...currentItem, required_apis: value });
+    }
+  }, []);
+
+  const memoizedAgentSelect = useMemo(() => (
+    <EnhancedSelect<AliceAgent>
+      componentType="agents"
+      EnhancedView={AgentShortListView}
+      selectedItems={itemRef.current?.agent ? [itemRef.current.agent] : []}
+      onSelect={async (selectedIds: string[]) => {
+        const currentItem = itemRef.current;
+        if (currentItem) {
+          if (selectedIds.length > 0) {
+            const agent = await fetchItem('agents', selectedIds[0]) as AliceAgent;
+            onChangeRef.current({ ...currentItem, agent: agent });
+          } else {
+            onChangeRef.current({ ...currentItem, agent: null });
+          }
+        }
+      }}
+      isInteractable={isEditMode}
+      label="Select Agent"
+      activeAccordion={activeAccordion}
+      onAccordionToggle={handleAccordionToggle}
+      accordionEntityName="agent"
+      showCreateButton={true}
+    />
+  ), [item?.agent, isEditMode, activeAccordion, handleAccordionToggle, fetchItem]);
+
+  const memoizedTaskSelect = useMemo(() => (
+    <EnhancedSelect<AliceTask>
+      componentType="tasks"
+      EnhancedView={TaskShortListView}
+      selectedItems={Object.values(itemRef.current?.tasks || {})}
+      onSelect={async (selectedIds: string[]) => {
+        const currentItem = itemRef.current;
+        if (currentItem) {
+          const tasks = await Promise.all(selectedIds.map(id => fetchItem('tasks', id) as Promise<AliceTask>));
+          const tasksObject = tasks.reduce((acc, task) => {
+            acc[task.task_name] = task;
+            return acc;
+          }, {} as Record<string, AliceTask>);
+          onChangeRef.current({ ...currentItem, tasks: tasksObject });
+        }
+      }}
+      isInteractable={isEditMode}
+      multiple
+      label="Select Tasks"
+      activeAccordion={activeAccordion}
+      onAccordionToggle={handleAccordionToggle}
+      accordionEntityName="tasks"
+      showCreateButton={true}
+    />
+  ), [item?.tasks, isEditMode, activeAccordion, handleAccordionToggle, fetchItem]);
 
   if (!item) {
     return <Box>No task data available.</Box>;
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    onChange({ ...item, [name]: value });
-  };
-
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    onChange({ ...item, [name]: checked });
-  };
-
-  const handleAgentChange = async (selectedIds: string[]) => {
-    if (selectedIds.length > 0) {
-      const agent = await fetchItem('agents', selectedIds[0]) as AliceAgent;
-      onChange({ ...item, agent: agent });
-    } else {
-      onChange({ ...item, agent: null });
-    }
-  };
-
-  const handleTasksChange = async (selectedIds: string[]) => {
-    const tasks = await Promise.all(selectedIds.map(id => fetchItem('tasks', id) as Promise<AliceTask>));
-    const tasksObject = tasks.reduce((acc, task) => {
-      acc[task.task_name] = task;
-      return acc;
-    }, {} as Record<string, AliceTask>);
-    onChange({ ...item, tasks: tasksObject });
-  };
-
-  const handleRequiredApisChange = (event: SelectChangeEvent<ApiType[]>) => {
-    const value = event.target.value as ApiType[];
-    onChange({ ...item, required_apis: value });
-  };
+  }
 
   return (
     <Box>
@@ -103,35 +153,8 @@ const BasicAgentTask: React.FC<TaskFormsProps> = ({
         required
         disabled={!isEditMode}
       />
-
-      <EnhancedSelect<AliceAgent>
-        componentType="agents"
-        EnhancedComponent={EnhancedAgent}
-        selectedItems={item.agent ? [item.agent] : []}
-        onSelect={handleAgentChange}
-        isInteractable={isEditMode}
-        label="Select Agent"
-        activeAccordion={activeAccordion}
-        onAccordionToggle={handleAccordionToggle}
-        accordionEntityName="agent"
-        showCreateButton={true}
-      />
-
-      <EnhancedSelect<AliceTask>
-        componentType="tasks"
-        EnhancedComponent={EnhancedTask}
-        selectedItems={Object.values(item.tasks || {})}
-        onSelect={handleTasksChange}
-        isInteractable={isEditMode}
-        multiple
-        label="Select Tasks"
-        activeAccordion={activeAccordion}
-        onAccordionToggle={handleAccordionToggle}
-        accordionEntityName="tasks"
-        showCreateButton={true}
-      />
-
-
+      {memoizedAgentSelect}
+      {memoizedTaskSelect}
       <FormControl fullWidth margin="normal">
         <InputLabel>Required API Types</InputLabel>
         <Select
@@ -176,4 +199,4 @@ const BasicAgentTask: React.FC<TaskFormsProps> = ({
   );
 };
 
-export default BasicAgentTask;
+export default React.memo(BasicAgentTask);

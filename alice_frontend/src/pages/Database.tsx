@@ -158,7 +158,7 @@ const Database: React.FC = () => {
             case 'Chat':
                 return <EnchancedChat {...commonProps} />;
             case 'API':
-                return <EnhancedAPI {...commonProps} fetchAll={true} />;
+                return <EnhancedAPI {...commonProps}/>;
             case 'File':
                 return <EnhancedFile {...commonProps} />;
             case 'Message':

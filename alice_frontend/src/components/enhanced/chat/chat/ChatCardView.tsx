@@ -10,14 +10,13 @@ import { Person, Functions, Message as MessageIcon } from '@mui/icons-material';
 import { ChatComponentProps } from '../../../../types/ChatTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import MessageListView from '../../message/message/MessageListView';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
 
 const ChatCardView: React.FC<ChatComponentProps> = ({
   item,
-  handleAgentClick,
-  handleTaskClick,
-  handleMessageClick,
 }) => {
 
+  const { selectCardItem } = useCardDialog();
   if (!item) {
     return <Typography>No chat data available.</Typography>;
   }
@@ -27,7 +26,7 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
       icon: <Person />,
       primary_text: "Alice Agent",
       secondary_text: (
-        <ListItemButton onClick={() => item.alice_agent?._id && handleAgentClick && handleAgentClick(item.alice_agent._id)}>
+        <ListItemButton onClick={() => item.alice_agent?._id && selectCardItem && selectCardItem('Agent', item.alice_agent._id, item.alice_agent)}>
           {item.alice_agent?.name || 'N/A'}
         </ListItemButton>
       )
@@ -39,7 +38,7 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
         <List>
           {item.functions && item.functions.length > 0 ? (
             item.functions.map((func, index) => (
-              <ListItemButton key={index} onClick={() => func._id && handleTaskClick && handleTaskClick(func._id)}>
+              <ListItemButton key={index} onClick={() => func._id && selectCardItem && selectCardItem('Task', func._id, func)}>
                 <ListItemText primary={func.task_name} />
               </ListItemButton>
             ))
@@ -61,7 +60,7 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
             onChange={() => { }}
             mode={'view'}
             handleSave={async () => { }}
-            onView={(message) => handleMessageClick && handleMessageClick(message._id ?? '', message)}
+            onView={(message) => selectCardItem && selectCardItem('Message', message._id ?? '', message)}
           />
         </Box>
       )

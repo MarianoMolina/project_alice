@@ -1,5 +1,5 @@
 import { ChangeEvent, KeyboardEvent, useState, forwardRef, useImperativeHandle, useCallback } from 'react';
-import { Box, Button, TextField, Chip } from '@mui/material';
+import { Box, Button, TextField, Chip, Tooltip } from '@mui/material';
 import { ContentType, getDefaultMessageForm, MessageType } from '../../../../types/MessageTypes';
 import { FileReference, FileType } from '../../../../types/FileTypes';
 import { createFileContentReference, selectFile } from '../../../../utils/FileUtils';
@@ -8,11 +8,11 @@ import { useNotification } from '../../../../contexts/NotificationContext';
 import { TaskResponse } from '../../../../types/TaskResponseTypes';
 import { URLReference } from '../../../../types/URLReferenceTypes';
 import { References } from '../../../../types/ReferenceTypes';
+import { AttachFile } from '@mui/icons-material';
 
 interface ChatInputProps {
   sendMessage: (chatId: string, message: MessageType) => Promise<void>;
   currentChatId: string | null;
-  lastMessage?: MessageType;
   chatSelected: boolean;
 }
 
@@ -27,7 +27,6 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
   sendMessage,
   currentChatId,
   chatSelected,
-  lastMessage
 }, ref) => {
   const { addNotification } = useNotification();
   const { uploadFileContentReference } = useApi();
@@ -152,7 +151,12 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ display: 'flex', mb: 1 }}>
+      <Box sx={{ display: 'flex' }}>
+        <Tooltip title="Upload an image, video, sound or text file to give your assistant access to it">
+          <Button sx={{ mr: 1, minWidth: 36 }} variant="outlined" onClick={handleAddFile} disabled={!chatSelected}>
+            <AttachFile />
+          </Button>
+        </Tooltip>
         <TextField
           variant="outlined"
           fullWidth
@@ -173,7 +177,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
         />
         <Button
           variant="contained"
-          sx={{ ml: 2, alignSelf: 'flex-end' }}
+          sx={{ ml: 1, mt: 'auto', mb: 'auto', alignSelf: 'flex-end' }}
           onClick={handleSend}
           disabled={!chatSelected || (!newMessage.content.trim() && !hasReferences(newMessage.references))}
         >
@@ -181,22 +185,9 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
         </Button>
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-        <Button variant="outlined" onClick={handleAddFile} disabled={!chatSelected}>
-          Add File
-        </Button>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
           {renderReferenceChips()}
         </Box>
-        {lastMessage && lastMessage.request_type === 'approval' && (
-          <Box>
-            <Button variant="contained" color="success" sx={{ mr: 2 }}>
-              Approve
-            </Button>
-            <Button variant="contained" color="error">
-              Reject
-            </Button>
-          </Box>
-        )}
       </Box>
     </Box>
   );

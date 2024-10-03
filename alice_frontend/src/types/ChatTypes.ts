@@ -40,7 +40,6 @@ export interface ChatComponentProps extends HandleClickProps {
     isInteractable?: boolean;
     onInteraction?: (chat: AliceChat) => void;
     onView?: (chat: AliceChat) => void;
-    showRegenerate?: boolean;
     showHeaders?: boolean;
 }
 

@@ -80,17 +80,6 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             secondary_text: item.createdAt ? new Date(item.createdAt).toLocaleString() : 'N/A'
         },
         {
-            icon: <Output />,
-            primary_text: "Output",
-            secondary_text: (
-                item.references ? (
-                    <ReferencesViewer references={item.references} />
-                ) : (
-                    <Typography>No output content available</Typography>
-                )
-            )
-        },
-        {
             icon: <Code />,
             primary_text: "Inputs",
             secondary_text: (
@@ -99,6 +88,17 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
                     content={<CodeBlock language="json" code={JSON.stringify(item.task_inputs, null, 2)} />}
                     disabled={!item.task_inputs}
                 />
+            )
+        },
+        {
+            icon: <Output />,
+            primary_text: "Output",
+            secondary_text: (
+                item.references ? (
+                    <ReferencesViewer references={item.references} />
+                ) : (
+                    <Typography>No output content available</Typography>
+                )
             )
         },
         {

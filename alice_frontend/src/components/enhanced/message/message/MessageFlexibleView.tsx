@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
     TextField,
     FormControl,
@@ -10,10 +10,10 @@ import {
 } from '@mui/material';
 import { MessageComponentProps, MessageType, getDefaultMessageForm } from '../../../../types/MessageTypes';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
-import EnhancedFile from '../../file/file/EnhancedFile';
-import EnhancedTaskResponse from '../../task_response/task_response/EnhancedTaskResponse';
-import EnhancedMessage from '../message/EnhancedMessage';
-import EnhancedURLReference from '../../url_reference/url_reference/EnhancedURLReference';
+import URLReferenceShortListView from '../../url_reference/url_reference/URLReferenceShortListView';
+import FileShortListView from '../../file/file/FileShortListView';
+import TaskResponseShortListView from '../../task_response/task_response/TaskResponseShortListView';
+import MessageShortListView from './MessageShortListView';
 import { useApi } from '../../../../contexts/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import { FileReference } from '../../../../types/FileTypes';
@@ -86,6 +86,66 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
     const title = mode === 'create' ? 'Create New Message' : mode === 'edit' ? 'Edit Message' : 'Message Details';
     const saveButtonText = form._id ? 'Update Message' : 'Create Message';
 
+    const memoizedMessageSelect = useMemo(() => (
+        <EnhancedSelect<MessageType>
+            componentType="messages"
+            EnhancedView={MessageShortListView}
+            selectedItems={form.references?.messages || []}
+            onSelect={(ids) => handleReferencesChange('messages', ids)}
+            isInteractable={isEditMode}
+            multiple
+            label="Referenced Messages"
+            activeAccordion={activeAccordion}
+            onAccordionToggle={handleAccordionToggle}
+            accordionEntityName="referenced-messages"
+        />
+    ), [form.references?.messages, handleReferencesChange, isEditMode, activeAccordion, handleAccordionToggle]);
+
+    const memoizedFileSelect = useMemo(() => (
+        <EnhancedSelect<FileReference>
+            componentType="files"
+            EnhancedView={FileShortListView}
+            selectedItems={form.references?.files as FileReference[] || []}
+            onSelect={(ids) => handleReferencesChange('files', ids)}
+            isInteractable={isEditMode}
+            multiple
+            label="File References"
+            activeAccordion={activeAccordion}
+            onAccordionToggle={handleAccordionToggle}
+            accordionEntityName="file-references"
+        />
+    ), [form.references?.files, handleReferencesChange, isEditMode, activeAccordion, handleAccordionToggle]);
+
+    const memoizedTaskResponseSelect = useMemo(() => (
+        <EnhancedSelect<TaskResponse>
+            componentType="taskresults"
+            EnhancedView={TaskResponseShortListView}
+            selectedItems={form.references?.task_responses || []}
+            onSelect={(ids) => handleReferencesChange('taskresults', ids)}
+            isInteractable={isEditMode}
+            multiple
+            label="Task Responses"
+            activeAccordion={activeAccordion}
+            onAccordionToggle={handleAccordionToggle}
+            accordionEntityName="task-responses"
+        />
+    ), [form.references?.task_responses, handleReferencesChange, isEditMode, activeAccordion, handleAccordionToggle]);
+
+    const memoizedURLReferenceSelect = useMemo(() => (
+        <EnhancedSelect<URLReference>
+            componentType="urlreferences"
+            EnhancedView={URLReferenceShortListView}
+            selectedItems={form.references?.search_results || []}
+            onSelect={(ids) => handleReferencesChange('urlreferences', ids)}
+            isInteractable={isEditMode}
+            multiple
+            label="Search Results"
+            activeAccordion={activeAccordion}
+            onAccordionToggle={handleAccordionToggle}
+            accordionEntityName="search-results"
+        />
+    ), [form.references?.search_results, handleReferencesChange, isEditMode, activeAccordion, handleAccordionToggle]);
+
     return (
         <GenericFlexibleView
             elementType='Message'
@@ -137,57 +197,10 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
 
             <Typography variant="h6" gutterBottom>References</Typography>
 
-            <EnhancedSelect<MessageType>
-                componentType="messages"
-                EnhancedComponent={EnhancedMessage}
-                selectedItems={form.references?.messages || []}
-                onSelect={(ids) => handleReferencesChange('messages', ids)}
-                isInteractable={isEditMode}
-                multiple
-                label="Referenced Messages"
-                activeAccordion={activeAccordion}
-                onAccordionToggle={handleAccordionToggle}
-                accordionEntityName="referenced-messages"
-            />
-
-            <EnhancedSelect<FileReference>
-                componentType="files"
-                EnhancedComponent={EnhancedFile}
-                selectedItems={form.references?.files as FileReference[] || []}
-                onSelect={(ids) => handleReferencesChange('files', ids)}
-                isInteractable={isEditMode}
-                multiple
-                label="File References"
-                activeAccordion={activeAccordion}
-                onAccordionToggle={handleAccordionToggle}
-                accordionEntityName="file-references"
-            />
-
-            <EnhancedSelect<TaskResponse>
-                componentType="taskresults"
-                EnhancedComponent={EnhancedTaskResponse}
-                selectedItems={form.references?.task_responses || []}
-                onSelect={(ids) => handleReferencesChange('taskresults', ids)}
-                isInteractable={isEditMode}
-                multiple
-                label="Task Responses"
-                activeAccordion={activeAccordion}
-                onAccordionToggle={handleAccordionToggle}
-                accordionEntityName="task-responses"
-            />
-
-            <EnhancedSelect<URLReference>
-                componentType="urlreferences"
-                EnhancedComponent={EnhancedURLReference}
-                selectedItems={form.references?.search_results || []}
-                onSelect={(ids) => handleReferencesChange('urlreferences', ids)}
-                isInteractable={isEditMode}
-                multiple
-                label="Search Results"
-                activeAccordion={activeAccordion}
-                onAccordionToggle={handleAccordionToggle}
-                accordionEntityName="search-results"
-            />
+            {memoizedMessageSelect}
+            {memoizedFileSelect}
+            {memoizedTaskResponseSelect}
+            {memoizedURLReferenceSelect}
         </GenericFlexibleView>
     );
 };

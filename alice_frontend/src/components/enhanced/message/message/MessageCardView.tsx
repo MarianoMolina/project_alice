@@ -11,6 +11,8 @@ import { CollectionElementString } from '../../../../types/CollectionTypes';
 import { References } from '../../../../types/ReferenceTypes';
 import useStyles from '../MessageStyles';
 import CustomMarkdown from '../../common/markdown/CustomMarkdown';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { FileReference } from '../../../../types/FileTypes';
 
 interface ReferenceChipProps {
     reference: any;
@@ -60,17 +62,12 @@ const hasAnyReferences = (references: References | undefined): boolean => {
 
 const MessageCardView: React.FC<MessageComponentProps> = ({
     item,
-    handleMessageClick,
-    handleFileClick,
-    handleTaskResultClick,
-    handleURLReferenceClick,
 }) => {
     const classes = useStyles();
+    const { selectCardItem } = useCardDialog();
     if (!item) {
         return <Typography>No message data available.</Typography>;
     }
-
-
 
     const renderReferences = () => {
         if (!item.references || !hasAnyReferences(item.references)) return 'No references';
@@ -83,7 +80,7 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
                             key={`msg-${index}`} 
                             reference={msg} 
                             type="Message" 
-                            view={() => handleMessageClick && handleMessageClick(msg._id!)}
+                            view={() => selectCardItem && selectCardItem('Message', msg._id!, msg)}
                         />
                     ))}
                     {item.references.files?.map((file, index) => (
@@ -91,7 +88,7 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
                             key={`file-${index}`} 
                             reference={file} 
                             type="File" 
-                            view={() => handleFileClick && handleFileClick(file._id!)}
+                            view={() => selectCardItem && selectCardItem('File', file._id!, file as FileReference)}
                         />
                     ))}
                     {item.references.task_responses?.map((task, index) => (
@@ -99,7 +96,7 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
                             key={`task-${index}`} 
                             reference={task} 
                             type="TaskResponse" 
-                            view={() => handleTaskResultClick && handleTaskResultClick(task._id!)}
+                            view={() => selectCardItem && selectCardItem('Task', task._id!, task)}
                         />
                     ))}
                     {item.references.search_results?.map((url, index) => (
@@ -107,7 +104,7 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
                             key={`url-${index}`} 
                             reference={url} 
                             type="URLReference" 
-                            view={() => handleURLReferenceClick && handleURLReferenceClick(url._id!)}
+                            view={() => selectCardItem && selectCardItem('URLReference', url._id!, url)}
                         />
                     ))}
                     {item.references.string_outputs?.map((str, index) => (

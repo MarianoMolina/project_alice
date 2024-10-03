@@ -30,6 +30,7 @@ interface TaskContextType {
   setSelectedTask: (task: AliceTask | null) => void;
   resetRecentExecutions: () => void;
   setTaskById: (taskId: string) => void;
+  getTaskResultsById: (taskId: string) => TaskResponse[];
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -122,6 +123,10 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setRecentExecutions([]);
   };
 
+  const getTaskResultsById = (taskId: string): TaskResponse[] => {
+    return taskResults.filter(result => result.task_id === taskId);
+  };
+
   const value: TaskContextType = {
     tasks,
     selectedTask,
@@ -140,6 +145,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setSelectedTask,
     resetRecentExecutions,
     setTaskById,
+    getTaskResultsById
   };
 
   return <TaskContext.Provider value={value}>{children}</TaskContext.Provider>;

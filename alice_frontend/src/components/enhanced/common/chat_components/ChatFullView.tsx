@@ -1,38 +1,45 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { Box, Button, Tooltip } from '@mui/material';
-import { ChatComponentProps } from '../../../../types/ChatTypes';
-import useStyles from '../ChatStyles';
+import useStyles from '../../chat/ChatStyles';
 import { useChat } from '../../../../contexts/ChatContext';
 import PlaceholderSkeleton from '../../../ui/placeholder_skeleton/PlaceholderSkeleton';
-import EnhancedMessage from '../../message/message/EnhancedMessage';
+import MessageFullView from '../../message/message/MessageFullView';
+import { MessageType } from '../../../../types/MessageTypes';
 
-interface ChatFullViewProps extends ChatComponentProps {
-  isGenerating?: boolean;
-  generateResponse?: () => void;
-  handleRegenerateResponse?: () => void;
+interface ChatFullViewProps {
+  messages: MessageType[];
+  showRegenerate?: boolean;
 }
 
-const ChatFullView: React.FC<ChatFullViewProps> = ({
-  item,
+const ChatFullView: React.FC<ChatFullViewProps> = React.memo(({
+  messages,
   showRegenerate,
 }) => {
   const classes = useStyles();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [shouldScroll, setShouldScroll] = useState(false);
   const { isGenerating, generateResponse, handleRegenerateResponse } = useChat();
 
+  const scrollToBottom = useCallback(() => {
+    if (shouldScroll) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      setShouldScroll(false);
+    }
+  }, [shouldScroll]);
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [item?.messages]);
+    setShouldScroll(true);
+  }, [messages]);
 
-  if (!item) {
-    return null;
-  }
+  useEffect(() => {
+    scrollToBottom();
+  }, [scrollToBottom]);
 
-  const renderActionButton = () => {
+  const renderActionButton = useCallback(() => {
     if (isGenerating) {
       return <Button disabled>Generating...</Button>;
     }
-    const lastMessage = item.messages[item.messages.length - 1];
+    const lastMessage = messages[messages.length - 1];
     if (lastMessage && lastMessage.role === 'user' && generateResponse) {
       return (
         <Tooltip title="Request a new response from the assistant based on the last message">
@@ -48,34 +55,42 @@ const ChatFullView: React.FC<ChatFullViewProps> = ({
       );
     }
     return null;
-  };
+  }, [isGenerating, messages, generateResponse, handleRegenerateResponse]);
+
+  const memoizedMessages = useMemo(() => (
+    messages.map((message) => (
+      <MessageFullView
+        key={message._id}
+        mode={'view'}
+        item={message}
+        items={null}
+        onChange={() => {}}
+        handleSave={async () => undefined}
+      />
+    ))
+  ), [messages]);
 
   return (
     <Box className={classes.fullChatView}>
       <Box className={classes.messagesContainer}>
-        {item.messages && item.messages.length > 0 ? (
-          item.messages.map((message, index) => (
-            <EnhancedMessage 
-              key={message._id || index} 
-              mode={'detail'} 
-              fetchAll={false} 
-              itemId={message._id} 
-            />
-          ))
+        {messages.length > 0 ? (
+          memoizedMessages
         ) : (
           <Box className={classes.emptyMessagesContainer}>
             <PlaceholderSkeleton mode="chat" text='No messages yet. Send your first message to start the conversation.' className={classes.skeletonContainer} />
           </Box>
         )}
+        <div ref={messagesEndRef} />
       </Box>
       {showRegenerate &&
         <Box className={classes.actionButtonContainer}>
           {renderActionButton()}
         </Box>
       }
-      <div ref={messagesEndRef} />
     </Box>
   );
-};
+});
+
+ChatFullView.displayName = 'ChatFullView';
 
 export default ChatFullView;

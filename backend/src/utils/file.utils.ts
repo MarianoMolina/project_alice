@@ -125,7 +125,7 @@ export async function deleteFile(fileId: string, userId: string): Promise<null> 
             throw new Error('File not found');
         }
 
-        if (fileReference.created_by.toString() !== userId) {
+        if (getObjectId(fileReference.created_by).toString() !== userId) {
             throw new Error('Unauthorized to delete this file');
         }
 

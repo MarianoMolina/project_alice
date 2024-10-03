@@ -84,6 +84,31 @@ const useStyles = makeStyles((theme: Theme) => ({
     margin: theme.spacing(0.5),
     backgroundColor: theme.palette.grey[200],
   },
+  dialogTitleContainer: {
+    position: 'relative',
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+    padding: theme.spacing(2),
+    borderRadius: theme.shape.borderRadius,
+  },
+
+  dialogTitleText: {
+    fontSize: '0.75rem',
+    padding: '0 4px',
+    backgroundColor: theme.palette.primary.main,
+    borderRadius: 4,
+  },
+
+  dialogContent: {
+    padding: '0 !important',
+    '& ul': {
+      padding: '0 !important',
+    },
+  },
+  noResultsText: {
+    textAlign: 'center',
+    padding: theme.spacing(2),
+  }
 }));
 
 export default useStyles;

@@ -8,12 +8,13 @@ import {
 import { ApiComponentProps } from '../../../../types/ApiTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { Api, Category, HealthAndSafety, PowerSettingsNew } from '@mui/icons-material';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
 
 const ApiCardView: React.FC<ApiComponentProps> = ({
     item,
     onChange,
-    handleModelClick
 }) => {
+    const { selectCardItem } = useCardDialog();
     if (!item) {
         return <Typography>No API data available.</Typography>;
     }
@@ -53,7 +54,7 @@ const ApiCardView: React.FC<ApiComponentProps> = ({
             icon: <Category />,
             primary_text: "Default Model",
             secondary_text: (item.default_model ?
-                <ListItemButton onClick={() => item.default_model?._id && handleModelClick && handleModelClick(item.default_model._id)}>
+                <ListItemButton onClick={() => item.default_model?._id && selectCardItem && selectCardItem('Model', item.default_model._id, item.default_model)}>
                     {item.default_model?.model_name || 'N/A'}
                 </ListItemButton>
                 : "N/A"

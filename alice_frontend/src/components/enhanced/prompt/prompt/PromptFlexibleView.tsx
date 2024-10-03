@@ -10,6 +10,7 @@ import FunctionDefinitionBuilder from '../../common/function_select/FunctionDefi
 import { PromptComponentProps, Prompt } from '../../../../types/PromptTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import { FunctionParameters } from '../../../../types/ParameterTypes';
+import Logger from '../../../../utils/Logger';
 
 const PromptFlexibleView: React.FC<PromptComponentProps> = ({
     item,
@@ -19,6 +20,8 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
 }) => {
     const [form, setForm] = useState<Partial<Prompt>>(item || {});
     const [isSaving, setIsSaving] = useState(false);
+
+    Logger.debug('PromptFlexibleView', 'form', form);
 
     useEffect(() => {
         if (isSaving) {

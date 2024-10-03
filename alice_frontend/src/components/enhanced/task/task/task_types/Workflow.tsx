@@ -1,12 +1,7 @@
-import React, { useCallback, useMemo } from 'react';
-import { Box, TextField, FormControlLabel, Checkbox, FormControl, InputLabel, Select, MenuItem, Chip, SelectChangeEvent } from '@mui/material';
-import { TaskFormsProps, AliceTask } from '../../../../../types/TaskTypes';
-import EnhancedSelect from '../../../common/enhanced_select/EnhancedSelect';
-import FunctionDefinitionBuilder from '../../../common/function_select/FunctionDefinitionBuilder';
-import { FunctionParameters } from '../../../../../types/ParameterTypes';
-import { ApiType } from '../../../../../types/ApiTypes';
-import EnhancedTask from '../../../task/task/EnhancedTask';
-import { useApi } from '../../../../../contexts/ApiContext';
+import React, { useMemo, useRef } from 'react';
+import { Box, TextField, FormControlLabel, Checkbox } from '@mui/material';
+import { TaskFormsProps } from '../../../../../types/TaskTypes';
+import PromptAgentTask from './PromptAgentTask';
 
 const Workflow: React.FC<TaskFormsProps> = ({
   item,
@@ -14,19 +9,31 @@ const Workflow: React.FC<TaskFormsProps> = ({
   mode,
   handleAccordionToggle,
   activeAccordion,
+  handleSave,
   apis
 }) => {
-  const { fetchItem } = useApi();
   const isEditMode = mode === 'edit' || mode === 'create';
 
-  const availableApiTypes = useMemo(() => {
-    if (!apis) return [];
-    return Array.from(new Set(apis.map(api => api.api_type)));
-  }, [apis]);
+  const itemRef = useRef(item);
+  const onChangeRef = useRef(onChange);
 
-  const handleInputVariablesChange = useCallback((newDefinition: FunctionParameters) => {
-    onChange({ ...item, input_variables: newDefinition });
-  }, [onChange, item]);
+  // Update refs when props change
+  itemRef.current = item;
+  onChangeRef.current = onChange;
+
+  const memoizedBasicAgentTask = useMemo(() => (
+    <PromptAgentTask
+      apis={apis}
+      handleSave={handleSave}
+      items={null}
+      item={itemRef.current}
+      onChange={onChangeRef.current}
+      mode={mode}
+      handleAccordionToggle={handleAccordionToggle}
+      activeAccordion={activeAccordion}
+    />
+  ), [mode, handleSave, handleAccordionToggle, activeAccordion, apis]);
+
 
   if (!item) {
     return <Box>No task data available.</Box>;
@@ -41,112 +48,9 @@ const Workflow: React.FC<TaskFormsProps> = ({
     const { name, checked } = e.target;
     onChange({ ...item, [name]: checked });
   };
-
-  const handleTasksChange = async (selectedIds: string[]) => {
-    const tasks = await Promise.all(selectedIds.map(id => fetchItem('tasks', id) as Promise<AliceTask>));
-    const tasksObject = tasks.reduce((acc, task) => {
-      acc[task.task_name] = task;
-      return acc;
-    }, {} as Record<string, AliceTask>);
-    onChange({ ...item, tasks: tasksObject });
-  };
-
-  const handleStartTaskChange = async (selectedIds: string[]) => {
-    if (selectedIds.length > 0) {
-      const task = await fetchItem('tasks', selectedIds[0]) as AliceTask;
-      onChange({ ...item, start_task: task.task_name });
-    } else {
-      onChange({ ...item, start_task: null });
-    }
-  };
-
-  const handleRequiredApisChange = (event: SelectChangeEvent<ApiType[]>) => {
-    const value = event.target.value as ApiType[];
-    onChange({ ...item, required_apis: value });
-  };
-
   return (
     <Box>
-      <TextField
-        fullWidth
-        margin="normal"
-        name="task_name"
-        label="Workflow Name"
-        value={item.task_name || ''}
-        onChange={handleInputChange}
-        required
-        disabled={!isEditMode}
-      />
-      <TextField
-        fullWidth
-        margin="normal"
-        name="task_description"
-        label="Workflow Description"
-        value={item.task_description || ''}
-        onChange={handleInputChange}
-        multiline
-        rows={3}
-        required
-        disabled={!isEditMode}
-      />
-
-      <FunctionDefinitionBuilder
-        initialParameters={item.input_variables || undefined}
-        onChange={handleInputVariablesChange}
-        isViewOnly={!isEditMode}
-      />
-
-      <EnhancedSelect<AliceTask>
-        componentType="tasks"
-        EnhancedComponent={EnhancedTask}
-        selectedItems={Object.values(item.tasks || {})}
-        onSelect={handleTasksChange}
-        isInteractable={isEditMode}
-        multiple
-        label="Select Tasks"
-        activeAccordion={activeAccordion}
-        onAccordionToggle={handleAccordionToggle}
-        accordionEntityName="tasks"
-        showCreateButton={true}
-      />
-
-      <EnhancedSelect<AliceTask>
-        componentType="tasks"
-        EnhancedComponent={EnhancedTask}
-        selectedItems={item.start_task ? [item.tasks[item.start_task]] : []}
-        onSelect={handleStartTaskChange}
-        isInteractable={isEditMode}
-        label="Select Start Task"
-        activeAccordion={activeAccordion}
-        onAccordionToggle={handleAccordionToggle}
-        accordionEntityName="start-task"
-        showCreateButton={true}
-      />
-
-
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Required API Types</InputLabel>
-        <Select
-          multiple
-          value={item.required_apis || []}
-          onChange={handleRequiredApisChange}
-          renderValue={(selected) => (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {(selected as ApiType[]).map((value) => (
-                <Chip key={value} label={value} />
-              ))}
-            </Box>
-          )}
-          disabled={!isEditMode}
-        >
-          {availableApiTypes.map((apiType) => (
-            <MenuItem key={apiType} value={apiType}>
-              {apiType}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-
+      {memoizedBasicAgentTask}
       <TextField
         fullWidth
         margin="normal"
@@ -158,7 +62,6 @@ const Workflow: React.FC<TaskFormsProps> = ({
         inputProps={{ min: 1 }}
         disabled={!isEditMode}
       />
-
       <FormControlLabel
         control={
           <Checkbox

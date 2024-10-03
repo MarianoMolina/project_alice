@@ -1,6 +1,7 @@
 import React from 'react';
 import { FileReference, FileComponentProps } from '../../../../types/FileTypes';
 import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
+import { bytesToMB } from '../../../../utils/FileUtils';
 
 const FileShortListView: React.FC<FileComponentProps> = ({
     items,
@@ -9,7 +10,7 @@ const FileShortListView: React.FC<FileComponentProps> = ({
     onView,
 }) => {
     const getPrimaryText = (file: FileReference) => file.filename;
-    const getSecondaryText = (file: FileReference) => `${file.type} - ${file.file_size} bytes`;
+    const getSecondaryText = (file: FileReference) => `${file.type} - ${bytesToMB(file.file_size)}`;
 
     return (
         <EnhancedShortListView<FileReference>

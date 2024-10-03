@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   Table,
   TableBody,
@@ -9,9 +9,10 @@ import {
   Paper,
   IconButton,
   Tooltip,
-  TableSortLabel
+  TableSortLabel,
 } from '@mui/material';
 import { Visibility, ChevronRight } from '@mui/icons-material';
+import { styled } from '@mui/material/styles';
 
 export interface Column<T> {
   header: string;
@@ -32,6 +33,14 @@ interface EnhancedTableViewProps<T> {
 
 type SortDirection = 'asc' | 'desc';
 
+const StyledTableCell = styled(TableCell)({
+  maxWidth: 200,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  padding: '8px',
+});
+
 function EnhancedTableView<T>({
   items,
   item,
@@ -39,56 +48,74 @@ function EnhancedTableView<T>({
   onView,
   onInteraction,
   showHeaders = true,
-  interactionTooltip = "Select Item",
-  viewTooltip = "View Item",
+  interactionTooltip = 'Select Item',
+  viewTooltip = 'View Item',
 }: EnhancedTableViewProps<T>) {
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
-  const handleSort = (column: Column<T>) => {
-    if (column.sortKey) {
-      const isAsc = sortColumn === column.sortKey && sortDirection === 'asc';
-      setSortDirection(isAsc ? 'desc' : 'asc');
-      setSortColumn(column.sortKey);
-    }
-  };
+  const handleSort = useCallback(
+    (column: Column<T>) => {
+      if (column.sortKey) {
+        const isAsc = sortColumn === column.sortKey && sortDirection === 'asc';
+        setSortDirection(isAsc ? 'desc' : 'asc');
+        setSortColumn(column.sortKey);
+      }
+    },
+    [sortColumn, sortDirection]
+  );
 
   const sortedItems = useMemo(() => {
-    if (!items || !sortColumn) return items;
+    if (!items) return [];
+    if (!sortColumn) return items;
     return [...items].sort((a: any, b: any) => {
-      if (a[sortColumn] < b[sortColumn]) return sortDirection === 'asc' ? -1 : 1;
-      if (a[sortColumn] > b[sortColumn]) return sortDirection === 'asc' ? 1 : -1;
-      return 0;
+      const aValue = a[sortColumn];
+      const bValue = b[sortColumn];
+
+      if (aValue === bValue) return 0;
+      if (aValue == null) return 1;
+      if (bValue == null) return -1;
+
+      return aValue < bValue
+        ? sortDirection === 'asc'
+          ? -1
+          : 1
+        : sortDirection === 'asc'
+        ? 1
+        : -1;
     });
   }, [items, sortColumn, sortDirection]);
 
-  const renderItem = (itemToRender: T) => (
-    <TableRow key={JSON.stringify(itemToRender)}>
-      {columns.map((column, index) => {
-        const cellContent = column.render(itemToRender);
-        return (
-          <TableCell key={index}>
-            {cellContent !== undefined && cellContent !== null ? cellContent : ''}
-          </TableCell>
-        );
-      })}
-      <TableCell>
-        {onView && (
-          <Tooltip title={viewTooltip}>
-            <IconButton onClick={() => onView(itemToRender)}>
-              <Visibility />
-            </IconButton>
-          </Tooltip>
-        )}
-        {onInteraction && (
-          <Tooltip title={interactionTooltip}>
-            <IconButton onClick={() => onInteraction(itemToRender)}>
-              <ChevronRight />
-            </IconButton>
-          </Tooltip>
-        )}
-      </TableCell>
-    </TableRow>
+  const renderItem = useCallback(
+    (itemToRender: T, index: number) => (
+      <TableRow key={index}>
+        {columns.map((column, colIndex) => {
+          const cellContent = column.render(itemToRender);
+          return (
+            <StyledTableCell key={colIndex}>
+              {cellContent !== undefined && cellContent !== null ? cellContent : ''}
+            </StyledTableCell>
+          );
+        })}
+        <StyledTableCell>
+          {onView && (
+            <Tooltip title={viewTooltip}>
+              <IconButton onClick={() => onView(itemToRender)}>
+                <Visibility />
+              </IconButton>
+            </Tooltip>
+          )}
+          {onInteraction && (
+            <Tooltip title={interactionTooltip}>
+              <IconButton onClick={() => onInteraction(itemToRender)}>
+                <ChevronRight />
+              </IconButton>
+            </Tooltip>
+          )}
+        </StyledTableCell>
+      </TableRow>
+    ),
+    [columns, onView, onInteraction, viewTooltip, interactionTooltip]
   );
 
   return (
@@ -98,7 +125,7 @@ function EnhancedTableView<T>({
           <TableHead>
             <TableRow>
               {columns.map((column, index) => (
-                <TableCell key={index}>
+                <StyledTableCell key={index}>
                   {column.sortKey ? (
                     <TableSortLabel
                       active={sortColumn === column.sortKey}
@@ -110,14 +137,16 @@ function EnhancedTableView<T>({
                   ) : (
                     column.header
                   )}
-                </TableCell>
+                </StyledTableCell>
               ))}
-              <TableCell>Actions</TableCell>
+              <StyledTableCell>Actions</StyledTableCell>
             </TableRow>
           </TableHead>
         )}
         <TableBody>
-          {item ? renderItem(item) : sortedItems?.map(renderItem) ?? null}
+          {item
+            ? renderItem(item, 0)
+            : sortedItems.map((itemToRender, index) => renderItem(itemToRender, index))}
         </TableBody>
       </Table>
     </TableContainer>

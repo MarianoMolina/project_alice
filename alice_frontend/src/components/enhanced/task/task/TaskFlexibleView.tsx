@@ -17,6 +17,7 @@ import ApiTask from './task_types/ApiTask';
 import { API } from '../../../../types/ApiTypes';
 import { useApi } from '../../../../contexts/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
+import Logger from '../../../../utils/Logger';
 
 const taskTypes: TaskType[] = [
     "BasicAgentTask",
@@ -46,12 +47,15 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
+    Logger.debug('TaskFlexibleView', { item, mode, taskType, form, apis, activeAccordion, isSaving });
+
     useEffect(() => {
         if (isSaving) {
             handleSave();
             setIsSaving(false);
         }
     }, [isSaving, handleSave]);
+    
     useEffect(() => {
         fetchItem('apis').then((data) => setApis(data as API[]));
     }, [fetchItem]);

@@ -11,19 +11,19 @@ import { Category, LibraryBooks, Code, Build, ChatBubbleOutline } from '@mui/ico
 import { AgentComponentProps } from '../../../../types/AgentTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { ModelType } from '../../../../types/ModelTypes';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
 
 const AgentCardView: React.FC<AgentComponentProps> = ({
     item,
-    handleModelClick,
-    handlePromptClick,
 }) => {
+    const { selectCardItem } = useCardDialog();
     if (!item) {
         return <Typography>No agent data available.</Typography>;
     }
 
     const modelListItems = item.models ? Object.entries(item.models).map(([modelType, model]) => (
         <ListItem key={modelType} disablePadding>
-            <ListItemButton onClick={() => model._id && handleModelClick && handleModelClick(model._id)}>
+            <ListItemButton onClick={() => model._id && selectCardItem && selectCardItem('Model', model._id, model)}>
                 <ListItemIcon>
                     <Category />
                 </ListItemIcon>
@@ -64,7 +64,7 @@ const AgentCardView: React.FC<AgentComponentProps> = ({
             icon: <LibraryBooks />,
             primary_text: "System message",
             secondary_text: (
-                <ListItemButton onClick={() => item.system_message?._id && handlePromptClick && handlePromptClick(item.system_message._id)}>
+                <ListItemButton onClick={() => item.system_message?._id && selectCardItem && selectCardItem('Prompt', item.system_message._id, item.system_message)}>
                     {item.system_message?.content || 'N/A'}
                 </ListItemButton>
             )
