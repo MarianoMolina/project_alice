@@ -4,7 +4,7 @@ import { References } from '../../../../types/ReferenceTypes';
 import FileViewer from '../../file/FileViewer';
 import { URLReferenceViewer } from '../../url_reference/URLReferenceViewer';
 import EnhancedMessage from '../../message/message/EnhancedMessage';
-import CustomMarkdown from '../markdown/customMarkdown2';
+import CustomMarkdown from '../markdown/CustomMarkdown';
 
 interface ReferencesViewerProps {
   references: References;
