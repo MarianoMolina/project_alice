@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
     FormControl,
     InputLabel,
@@ -32,20 +32,14 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
     handleSave,
 }) => {
     const { fetchItem } = useApi();
-    const [form, setForm] = useState<Partial<API>>(getDefaultApiForm());
+    const [form, setForm] = useState<Partial<API>>(() => item || getDefaultApiForm());
     const [availableApiNames, setAvailableApiNames] = useState<ApiName[]>([]);
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (item) {
-            Logger.info('item useEffect', item);
-            setForm({ ...getDefaultApiForm(), ...item });
-            updateAvailableApiNames(item.api_type);
-        }
-    }, [item]);
+    const isEditMode = mode === 'edit' || mode === 'create';
+    const isCreateMode = mode === 'create';
 
     useEffect(() => {
-        Logger.info('apitype useEffect', form.api_type, form);
         if (form.api_type) {
             updateAvailableApiNames(form.api_type);
         }
@@ -66,65 +60,67 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
         }
     }, [form.api_name]);
 
-    const isEditMode = mode === 'edit' || mode === 'create';
-    const isCreateMode = mode === 'create';
-
-    const updateAvailableApiNames = (apiType: ApiType | undefined) => {
+    const updateAvailableApiNames = useCallback((apiType: ApiType | undefined) => {
         Logger.info('updateAvailableApiNames', apiType);
         if (apiType && API_TYPE_CONFIGS[apiType]) {
             setAvailableApiNames(API_TYPE_CONFIGS[apiType].api_name);
         } else {
             setAvailableApiNames([]);
         }
-    };
+    }, []);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        onChange({ ...form, [name]: value });
-    };
+        setForm(prevForm => ({ ...prevForm, [name]: value }));
+    }, []);
 
-    const handleApiNameChange = (newApiName: ApiName) => {
-        onChange({
-            ...form,
+    const handleApiNameChange = useCallback((newApiName: ApiName) => {
+        setForm(prevForm => ({
+            ...prevForm,
             api_name: newApiName,
             api_config: {
-                ...form.api_config,
+                ...prevForm.api_config,
                 base_url: getLlmProviderBaseUrl(newApiName),
                 api_key: '',
             },
-        });
-    };
+        }));
+    }, []);
 
-    const handleApiTypeChange = (newApiType: ApiType) => {
+    const handleApiTypeChange = useCallback((newApiType: ApiType) => {
         const config = API_TYPE_CONFIGS[newApiType];
         updateAvailableApiNames(newApiType);
-        onChange({
-            ...form,
+        setForm(prevForm => ({
+            ...prevForm,
             api_type: newApiType,
             api_config: config.apiConfig,
             api_name: config.api_name[0],
-        });
-    };
+        }));
+    }, [updateAvailableApiNames]);
 
-    const handleApiConfigChange = (key: string, value: string) => {
-        onChange({
-            ...form,
-            api_config: { ...form.api_config, [key]: value }
-        });
-    };
+    const handleApiConfigChange = useCallback((key: string, value: string) => {
+        setForm(prevForm => ({
+            ...prevForm,
+            api_config: { ...prevForm.api_config, [key]: value }
+        }));
+    }, []);
 
-    const handleDefaultModelChange = async (selectedIds: string[]) => {
+    const handleDefaultModelChange = useCallback(async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {
             const model = await fetchItem('models', selectedIds[0]) as AliceModel;
-            onChange({ ...form, default_model: model });
+            setForm(prevForm => ({ ...prevForm, default_model: model }));
         } else {
-            onChange({ ...form, default_model: undefined });
+            setForm(prevForm => ({ ...prevForm, default_model: undefined }));
         }
-    };
+    }, [fetchItem]);
 
-    const handleAccordionToggle = (accordion: string | null) => {
+    const handleAccordionToggle = useCallback((accordion: string | null) => {
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
-    };
+    }, []);
+
+    const handleLocalSave = useCallback(() => {
+        onChange(form);
+        handleSave();
+    }, [form, onChange, handleSave]);
 
     const title = mode === 'create' ? 'Create New API' : mode === 'edit' ? 'Edit API' : 'API Details';
     const saveButtonText = form._id ? 'Update API' : 'Create API';
@@ -133,7 +129,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
         <GenericFlexibleView
             elementType='API'
             title={title}
-            onSave={handleSave}
+            onSave={handleLocalSave}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
         >

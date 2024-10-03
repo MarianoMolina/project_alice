@@ -80,7 +80,23 @@ const useStyles = makeStyles((theme: Theme) => ({
     gap: theme.spacing(0.5),
     marginTop: theme.spacing(1),
   },
-
+  messageSmall: {
+    marginBottom: theme.spacing(1),
+    padding: theme.spacing(1),
+    borderRadius: theme.shape.borderRadius,
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+  },
+  userMessage: {
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+  },
+  toolMessage: {
+    backgroundColor: theme.palette.secondary.dark,
+    color: theme.palette.primary.dark,
+  },
 }));
 
 export default useStyles;

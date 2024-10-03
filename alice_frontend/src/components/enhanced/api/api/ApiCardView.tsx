@@ -67,6 +67,8 @@ const ApiCardView: React.FC<ApiComponentProps> = ({
             title={item.name ?? 'API'}
             id={item._id}
             listItems={listItems}
+            item={item}
+            itemType='apis'
         />
     );
 };

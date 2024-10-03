@@ -77,6 +77,8 @@ const AgentCardView: React.FC<AgentComponentProps> = ({
             title={item.name}
             id={item._id}
             listItems={listItems}
+            item={item}
+            itemType='agents'
         />
     );
 };

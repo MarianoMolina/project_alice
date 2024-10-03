@@ -147,6 +147,8 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             subtitle={item.task_description}
             id={item._id}
             listItems={listItems}
+            item={item}
+            itemType='taskresults'
         />
     );
 };

@@ -13,6 +13,7 @@ import EnhancedMessage from '../../message/message/EnhancedMessage';
 import EnhancedURLReference from '../../url_reference/url_reference/EnhancedURLReference';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import { ComponentMode } from '../../../../types/CollectionTypes';
+import Logger from '../../../../utils/Logger';
 
 const EnhancedFlexibleDialog: React.FC = () => {
   const { 
@@ -27,6 +28,7 @@ const EnhancedFlexibleDialog: React.FC = () => {
 
   const renderDialogContent = () => {
     if (!selectedFlexibleItemType || !flexibleDialogMode || activeDialog !== 'flexible') return null;
+    Logger.debug('renderDialogContent', selectedFlexibleItemType, flexibleDialogMode);
 
     const handleProps = {
       handleAgentClick: (id: string) => selectCardItem('Agent', id),

@@ -30,6 +30,8 @@ const ModelCardView: React.FC<ModelComponentProps> = ({ item }) => {
             subtitle={item.model_name}
             id={item._id}
             listItems={listItems}
+            item={item}
+            itemType='models'
         >
             <Box className={classes.chipContainer}>
                 <Chip

@@ -52,7 +52,7 @@ async def generate_file_transcript(
 
         # Update the file reference with the new transcript
         file_ref.transcript = transcript
-        await db_app.update_entity_in_db('files', file_ref.model_dump(by_alias=True))
+        await db_app.update_entity_in_db('files', file_ref.id, file_ref.model_dump(by_alias=True))
 
         return {"message": "Transcript generated successfully", "transcript": transcript.model_dump()}
     except Exception as e:

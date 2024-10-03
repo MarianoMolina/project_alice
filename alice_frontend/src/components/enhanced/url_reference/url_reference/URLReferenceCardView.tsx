@@ -1,14 +1,13 @@
 import React from 'react';
 import {
     Typography,
-    Chip,
     Link,
-    Box
 } from '@mui/material';
-import { Language, Description, QueryBuilder } from '@mui/icons-material';
+import { Language, Description, QueryBuilder, DataObject } from '@mui/icons-material';
 import { URLReferenceComponentProps } from '../../../../types/URLReferenceTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import useStyles from '../URLReferenceStyles';
+import { CodeBlock } from '../../common/markdown/CodeBlock';
 
 const URLReferenceCardView: React.FC<URLReferenceComponentProps> = ({
     item
@@ -42,6 +41,11 @@ const URLReferenceCardView: React.FC<URLReferenceComponentProps> = ({
                     {item.content.substring(0, 100)}...
                 </Typography>
             )
+        },
+        {
+            icon: <DataObject />,
+            primary_text: "Metadata",
+            secondary_text: <CodeBlock language="json" code={JSON.stringify(item.metadata, null, 2)} />
         }
     ];
 
@@ -51,17 +55,9 @@ const URLReferenceCardView: React.FC<URLReferenceComponentProps> = ({
             title={item.title}
             id={item._id}
             listItems={listItems}
+            item={item}
+            itemType='urlreferences'
         >
-            <Box mt={2}>
-                <Typography variant="subtitle1" gutterBottom>Metadata</Typography>
-                {Object.entries(item.metadata || {}).map(([key, value]) => (
-                    <Chip
-                        key={key}
-                        label={`${key}: ${value}`}
-                        className={classes.metadataChip}
-                    />
-                ))}
-            </Box>
         </CommonCardView>
     );
 };

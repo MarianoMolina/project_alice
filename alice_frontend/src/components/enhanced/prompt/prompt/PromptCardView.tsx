@@ -10,6 +10,7 @@ import { Code, ExpandMore, Assignment, QueryBuilder, Settings } from '@mui/icons
 import { PromptComponentProps } from '../../../../types/PromptTypes';
 import useStyles from '../PromptStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
+import CustomMarkdown from '../../common/markdown/customMarkdown';
 
 const PromptCardView: React.FC<PromptComponentProps> = ({
     item,
@@ -77,6 +78,8 @@ const PromptCardView: React.FC<PromptComponentProps> = ({
             title={item.name}
             id={item._id}
             listItems={listItems}
+            item={item}
+            itemType='prompts'
         >
             <Accordion>
                 <AccordionSummary
@@ -87,9 +90,9 @@ const PromptCardView: React.FC<PromptComponentProps> = ({
                     <Typography>Prompt Content</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                    <Typography variant="body2" className={classes.content}>
+                    <CustomMarkdown className={`${classes.messageSmall} ${classes.assistantMessage}`}>
                         {item.content}
-                    </Typography>
+                    </CustomMarkdown>
                 </AccordionDetails>
             </Accordion>
         </CommonCardView>

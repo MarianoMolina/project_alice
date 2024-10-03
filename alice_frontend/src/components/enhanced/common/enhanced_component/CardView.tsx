@@ -10,6 +10,8 @@ import {
 } from '@mui/material';
 import { Theme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
+import { DownloadEntity } from '../download_entity/DownloadEntity';
+import { CollectionName, CollectionType } from '../../../../types/CollectionTypes';
 
 const useStyles = makeStyles((theme: Theme) => ({
     card: {
@@ -77,6 +79,15 @@ const useStyles = makeStyles((theme: Theme) => ({
         color: theme.palette.text.secondary,
         fontSize: '0.9rem',
     },
+    titleContent: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    downloadButton: {
+        marginLeft: theme.spacing(2),
+        color: theme.palette.secondary.light,
+    },
 }));
 
 interface ListItemData {
@@ -85,23 +96,27 @@ interface ListItemData {
     secondary_text: React.ReactNode;
 }
 
-interface CommonCardViewProps {
+interface CommonCardViewProps<T extends CollectionName> {
     title: string;
     elementType?: string;
     subtitle?: string;
     id?: string;
     listItems?: ListItemData[];
     children?: React.ReactNode;
+    item?: CollectionType[T];
+    itemType?: T;
 }
 
-const CommonCardView: React.FC<CommonCardViewProps> = ({
+const CommonCardView = <T extends CollectionName>({
     title,
     elementType,
     subtitle,
     id,
     listItems,
-    children
-}) => {
+    children,
+    item,
+    itemType
+}: CommonCardViewProps<T>) => {
     const classes = useStyles();
 
     return (
@@ -113,9 +128,16 @@ const CommonCardView: React.FC<CommonCardViewProps> = ({
                             {elementType}
                         </Typography>
                     )}
-                    <Typography variant="h5" className={classes.title}>
-                        {title}
-                    </Typography>
+                    <Box className={classes.titleContent}>
+                        <Typography variant="h5" className={classes.title}>
+                            {title}
+                        </Typography>
+                        {item && itemType && (
+                            <Box className={classes.downloadButton}>
+                                <DownloadEntity item={item} itemType={itemType} />
+                            </Box>
+                        )}
+                    </Box>
                 </Box>
                 {subtitle && (
                     <Typography variant="subtitle1" className={classes.subtitle}>{subtitle}</Typography>

@@ -143,6 +143,8 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
             subtitle={item.task_description}
             id={item._id}
             listItems={listItems}
+            item={item}
+            itemType='tasks'
         />
     );
 };

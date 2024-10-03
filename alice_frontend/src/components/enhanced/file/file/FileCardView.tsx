@@ -1,8 +1,8 @@
 import React from 'react';
-import { Typography, Box } from '@mui/material';
+import { Typography } from '@mui/material';
 import { FileComponentProps } from '../../../../types/FileTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { InsertDriveFile, CalendarToday, AccessTime, TextSnippet } from '@mui/icons-material';
+import { InsertDriveFile, CalendarToday, AccessTime, TextSnippet, AttachFile } from '@mui/icons-material';
 import FileViewer from '../FileViewer';
 import useStyles from '../FileStyles';
 import { bytesToMB } from '../../../../utils/FileUtils';
@@ -35,6 +35,11 @@ const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
             icon: <TextSnippet />,
             primary_text: "Transcript",
             secondary_text: item.transcript ? <CustomMarkdown className={`${classes.messageSmall} ${classes.toolMessage}`}>{item.transcript.content}</CustomMarkdown> : 'N/A'
+        },
+        {
+            icon: <AttachFile />,
+            primary_text: "File Preview",
+            secondary_text: <FileViewer file={item} editable={false} />
         }
     ];
 
@@ -44,14 +49,9 @@ const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
             title={item.filename}
             id={item._id}
             listItems={listItems}
+            item={item}
+            itemType='files'
         >
-            <Box className={classes.filePreviewContainer}>
-                <Typography variant="h6" className={classes.previewTitle}>File Preview</Typography>
-                <FileViewer
-                    file={item}
-                    editable={false}
-                />
-            </Box>
         </CommonCardView>
     );
 };

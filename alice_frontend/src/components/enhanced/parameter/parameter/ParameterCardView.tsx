@@ -34,6 +34,8 @@ const ParameterCardView: React.FC<ParameterComponentProps> = ({ item }) => {
             title="Parameter"
             id={item._id}
             listItems={listItems}
+            item={item}
+            itemType='parameters'
         />
     );
 };

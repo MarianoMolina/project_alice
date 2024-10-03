@@ -58,7 +58,7 @@ export const collectionNameToElementString: Record<CollectionName, CollectionEle
     files: 'File',
     messages: 'Message',
     urlreferences: 'URLReference'
-  };
+};
 
 export const converters: { [K in CollectionName]: (data: any) => CollectionType[K] } = {
     agents: convertToAliceAgent,

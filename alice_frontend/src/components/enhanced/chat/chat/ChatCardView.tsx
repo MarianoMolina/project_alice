@@ -75,6 +75,8 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
         title={item.name}
         id={item._id}
         listItems={listItems}
+        item={item}
+        itemType='chats'
       />
     </>
   );

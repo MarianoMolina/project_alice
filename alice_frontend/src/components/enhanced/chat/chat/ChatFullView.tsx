@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Box, Button } from '@mui/material';
+import { Box, Button, Tooltip } from '@mui/material';
 import { ChatComponentProps } from '../../../../types/ChatTypes';
 import useStyles from '../ChatStyles';
 import { useChat } from '../../../../contexts/ChatContext';
@@ -34,10 +34,18 @@ const ChatFullView: React.FC<ChatFullViewProps> = ({
     }
     const lastMessage = item.messages[item.messages.length - 1];
     if (lastMessage && lastMessage.role === 'user' && generateResponse) {
-      return <Button onClick={generateResponse}>Request Response</Button>;
+      return (
+        <Tooltip title="Request a new response from the assistant based on the last message">
+          <Button onClick={generateResponse}>Request Response</Button>
+        </Tooltip>
+      );
     }
     if (lastMessage && lastMessage.role === 'assistant' && handleRegenerateResponse) {
-      return <Button onClick={handleRegenerateResponse}>Regenerate Response</Button>;
+      return (
+        <Tooltip title="Remove the last assistant reply and generate a new response">
+          <Button onClick={handleRegenerateResponse}>Regenerate Response</Button>
+        </Tooltip>
+      );
     }
     return null;
   };

@@ -179,6 +179,8 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
             subtitle={`Type: ${item.type}`}
             id={item._id}
             listItems={listItems}
+            item={item}
+            itemType='messages'
         />
     );
 };

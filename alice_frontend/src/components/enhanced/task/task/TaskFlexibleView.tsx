@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
     FormControl,
     InputLabel,
@@ -41,34 +41,32 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     const { fetchItem } = useApi();
     const isEditMode = mode === 'edit' || mode === 'create';
     const [taskType, setTaskType] = useState<TaskType>(item?.task_type || "BasicAgentTask");
-    const [form, setForm] = useState<AliceTask>(getDefaultTaskForm(taskType));
+    const [form, setForm] = useState<AliceTask>(() => item || getDefaultTaskForm(taskType));
     const [apis, setApis] = useState<API[]>([]);
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
-
-    useEffect(() => {
-        if (item) {
-            setForm({ ...getDefaultTaskForm(item.task_type), ...item });
-        }
-    }, [item]);
 
     useEffect(() => {
         fetchItem('apis').then((data) => setApis(data as API[]));
     }, [fetchItem]);
 
-    const handleTaskTypeChange = (event: SelectChangeEvent<TaskType>) => {
+    const handleTaskTypeChange = useCallback((event: SelectChangeEvent<TaskType>) => {
         const newType = event.target.value as TaskType;
         setTaskType(newType);
-        const newForm = getDefaultTaskForm(newType);
-        onChange(newForm);
-    };
+        setForm(getDefaultTaskForm(newType));
+    }, []);
 
-    const handleFormChange = (newFormData: Partial<AliceTask>) => {
-        onChange(newFormData);
-    };
+    const handleFormChange = useCallback((newFormData: Partial<AliceTask>) => {
+        setForm(prevForm => ({ ...prevForm, ...newFormData }));
+    }, []);
 
-    const handleAccordionToggle = (accordion: string | null) => {
+    const handleAccordionToggle = useCallback((accordion: string | null) => {
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
-    };
+    }, []);
+
+    const handleLocalSave = useCallback(async () => {
+        onChange(form);
+        await handleSave();
+    }, [form, onChange, handleSave]);
 
     const renderTaskForm = () => {
         const commonProps = {
@@ -76,7 +74,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             item: form,
             onChange: handleFormChange,
             mode,
-            handleSave,
+            handleSave: handleLocalSave,
             handleAccordionToggle,
             activeAccordion,
             apis
@@ -109,7 +107,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
         <GenericFlexibleView
             elementType='Task'
             title={title}
-            onSave={handleSave}
+            onSave={handleLocalSave}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
         >

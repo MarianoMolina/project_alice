@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
     TextField,
     FormControl,
@@ -29,53 +29,51 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
     handleSave
 }) => {
     const { fetchItem } = useApi();
-    const [form, setForm] = useState<Partial<MessageType>>(getDefaultMessageForm());
+    const [form, setForm] = useState<Partial<MessageType>>(item || getDefaultMessageForm());
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
-
-    useEffect(() => {
-        if (item) {
-            setForm({ ...getDefaultMessageForm(), ...item });
-        }
-    }, [item]);
 
     const isEditMode = mode === 'edit' || mode === 'create';
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        onChange({ ...form, [name]: value });
-    };
+        setForm(prevForm => ({ ...prevForm, [name]: value }));
+    }, []);
 
-    const handleSelectChange = (e: SelectChangeEvent<string>) => {
+    const handleSelectChange = useCallback((e: SelectChangeEvent<string>) => {
         const { name, value } = e.target;
-        onChange({ ...form, [name as string]: value });
-    };
+        setForm(prevForm => ({ ...prevForm, [name]: value }));
+    }, []);
 
-    const handleReferencesChange = async (type: CollectionName, selectedIds: string[]) => {
+    const handleReferencesChange = useCallback(async (type: CollectionName, selectedIds: string[]) => {
         const fetchedItems = await Promise.all(selectedIds.map(id => fetchItem(type, id)));
-        let updatedReferences: References = { ...form.references };
+        setForm(prevForm => {
+            let updatedReferences: References = { ...prevForm.references };
+            switch (type) {
+                case 'messages':
+                    updatedReferences.messages = fetchedItems as MessageType[];
+                    break;
+                case 'files':
+                    updatedReferences.files = fetchedItems as FileReference[];
+                    break;
+                case 'taskresults':
+                    updatedReferences.task_responses = fetchedItems as TaskResponse[];
+                    break;
+                case 'urlreferences':
+                    updatedReferences.search_results = fetchedItems as URLReference[];
+                    break;
+            }
+            return { ...prevForm, references: updatedReferences };
+        });
+    }, [fetchItem]);
 
-        switch (type) {
-            case 'messages':
-                updatedReferences.messages = fetchedItems as MessageType[];
-                break;
-            case 'files':
-                updatedReferences.files = fetchedItems as FileReference[];
-                break;
-            case 'taskresults':
-                updatedReferences.task_responses = fetchedItems as TaskResponse[];
-                break;
-            case 'urlreferences':
-                updatedReferences.search_results = fetchedItems as URLReference[];
-                break;
-        }
-
-        onChange({ ...form, references: updatedReferences });
-    };
-
-    const handleAccordionToggle = (accordion: string | null) => {
+    const handleAccordionToggle = useCallback((accordion: string | null) => {
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
-    };
+    }, []);
 
+    const handleLocalSave = useCallback(() => {
+        onChange(form);
+        handleSave();
+    }, [form, onChange, handleSave]);
 
     const title = mode === 'create' ? 'Create New Message' : mode === 'edit' ? 'Edit Message' : 'Message Details';
     const saveButtonText = form._id ? 'Update Message' : 'Create Message';
@@ -84,7 +82,7 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
         <GenericFlexibleView
             elementType='Message'
             title={title}
-            onSave={handleSave}
+            onSave={handleLocalSave}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
         >

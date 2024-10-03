@@ -158,12 +158,18 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
           fullWidth
           multiline
           minRows={1}
-          maxRows={4}
+          maxRows={8}
           value={newMessage.content}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           disabled={!chatSelected}
-          sx={{ flexGrow: 1 }}
+          sx={{
+            flexGrow: 1,
+            '& .MuiInputBase-root': {
+              maxHeight: '200px',
+              overflowY: 'auto',
+            },
+          }}
         />
         <Button
           variant="contained"

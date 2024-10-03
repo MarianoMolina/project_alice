@@ -12,15 +12,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     fileAction: {
         marginTop: theme.spacing(2),
     },
-    filePreviewContainer: {
-        marginTop: theme.spacing(3),
-        padding: theme.spacing(2),
-        border: `1px solid ${theme.palette.divider}`,
-        borderRadius: theme.shape.borderRadius,
-    },
-    previewTitle: {
-        marginBottom: theme.spacing(2),
-    },
     messageSmall: {
         marginBottom: theme.spacing(1),
         padding: theme.spacing(1),

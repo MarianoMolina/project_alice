@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
     TextField,
     Box,
@@ -22,39 +22,46 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
 }) => {
     const { fetchItem } = useApi();
     const { selectCardItem } = useCardDialog();
-    const [form, setForm] = useState<Partial<AliceChat>>(getDefaultChatForm());
+    const [form, setForm] = useState<Partial<AliceChat>>(item || getDefaultChatForm());
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
-
-    useEffect(() => {
-        if (item) {
-            setForm({ ...getDefaultChatForm(), ...item });
-        }
-    }, [item]);
+    const [isSaving, setIsSaving] = useState(false);
 
     const isEditMode = mode === 'edit' || mode === 'create';
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        onChange({ ...form, [name]: value });
-    };
+    useEffect(() => {
+        if (isSaving) {
+            handleSave();
+            setIsSaving(false);
+        }
+    }, [isSaving, handleSave]);
 
-    const handleAgentChange = async (selectedIds: string[]) => {
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setForm(prevForm => ({ ...prevForm, [name]: value }));
+    }, []);
+
+    const handleAgentChange = useCallback(async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {
             const agent = await fetchItem('agents', selectedIds[0]) as AliceAgent;
-            onChange({ ...form, alice_agent: agent });
+            setForm(prevForm => ({ ...prevForm, alice_agent: agent }));
         } else {
-            onChange({ ...form, alice_agent: undefined });
+            setForm(prevForm => ({ ...prevForm, alice_agent: undefined }));
         }
-    };
+    }, [fetchItem]);
 
-    const handleFunctionsChange = async (selectedIds: string[]) => {
+    const handleFunctionsChange = useCallback(async (selectedIds: string[]) => {
         const functions = await Promise.all(selectedIds.map(id => fetchItem('tasks', id) as Promise<AliceTask>));
-        onChange({ ...form, functions });
-    };
+        setForm(prevForm => ({ ...prevForm, functions }));
+    }, [fetchItem]);
 
-    const handleAccordionToggle = (accordion: string | null) => {
+    const handleAccordionToggle = useCallback((accordion: string | null) => {
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
-    };
+    }, []);
+
+    const handleLocalSave = useCallback(() => {
+        onChange(form);
+        setIsSaving(true);
+    }, [form, onChange]);
 
     const title = mode === 'create' ? 'Create New Chat' : mode === 'edit' ? 'Edit Chat' : 'Chat Details';
     const saveButtonText = form._id ? 'Update Chat' : 'Create Chat';
@@ -63,7 +70,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
         <GenericFlexibleView
             elementType='Chat'
             title={title}
-            onSave={handleSave}
+            onSave={handleLocalSave}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
         >
