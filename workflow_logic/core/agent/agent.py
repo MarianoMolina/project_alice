@@ -1,4 +1,4 @@
-import docker, os, tempfile, json, traceback
+import docker, os, json, traceback, re
 from bson import ObjectId
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Dict, Any, List, Optional, Tuple, Callable, Union
@@ -7,7 +7,7 @@ from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.model import AliceModel
 from workflow_logic.core.api import APIManager
 from workflow_logic.core.data_structures import TaskResponse, FileReference, ContentType, MessageDict, ApiType, ModelType, FileType, References, FileContentReference
-from workflow_logic.util import LOGGER
+from workflow_logic.util import LOGGER, run_code, LOG_LEVEL
 
 class AliceAgent(BaseModel):
     id: Optional[str] = Field(default=None, description="The ID of the agent", alias="_id")
@@ -219,8 +219,10 @@ class AliceAgent(BaseModel):
         return True, None
     
     def collect_code_blocs(self, messages: List[MessageDict]) -> List[Tuple[str, str]]:
-        code_blocks: List[Tuple[str, str]] = []
-        for message in messages:
+        LOGGER.debug(f"Entering collect_code_blocs with {len(messages)} messages")
+        code_blocs: List[Tuple[str, str]] = []
+        for i, message in enumerate(messages):
+            LOGGER.debug(f"Processing message {i+1}/{len(messages)}")
             if not isinstance(message, MessageDict):
                 try:
                     message = MessageDict(**message)
@@ -228,110 +230,70 @@ class AliceAgent(BaseModel):
                     LOGGER.error(f"Error parsing message: {e}")
                     continue
             if message.content:
-                code_blocks.extend(self._extract_code_blocks(message.content))
-        return code_blocks
+                LOGGER.debug(f"Message content length: {len(message.content)}")
+                extracted_blocs = self._extract_code_blocs(message.content)
+                LOGGER.debug(f"Extracted {len(extracted_blocs)} code blocs from message {i+1}")
+                code_blocs.extend(extracted_blocs)
+        LOGGER.debug(f"Total code blocs collected: {len(code_blocs)}")
+        return code_blocs
 
     async def _process_code_execution(self, messages: List[MessageDict]) -> Tuple[List[MessageDict], Dict]:
         
-        code_blocks = self.collect_code_blocs(messages)
-        if not code_blocks:
-            LOGGER.warning(f'No code blocks found')
+        code_blocs = self.collect_code_blocs(messages)
+        if not code_blocs:
+            LOGGER.warning(f'No code blocs found')
+            LOGGER.debug(f'Messages with no code blocks: {messages}')
             return [], {}
 
-        # Group code blocks by language
+        # Group code blocs by language
         code_by_lang = {}
-        for lang, code in code_blocks:
+        for lang, code in code_blocs:
             if lang not in code_by_lang:
                 code_by_lang[lang] = []
             code_by_lang[lang].append(code)
 
         executed_messages = []
         for lang, codes in code_by_lang.items():
-            # Merge code blocks for each language
+            if not lang or not isinstance(lang, str) or not isinstance(code, str): pass
+            # Merge code blocs for each language
             merged_code = "\n\n".join(codes)
-            exit_code, logs, _ = self._execute_code_in_docker(merged_code, lang)
+            exit_code, logs = self._execute_code_in_docker(merged_code, lang)
             executed_messages.append(MessageDict(
                 role="tool",
                 content=f"Language: {lang}\nExit Code: {exit_code}\nOutput:\n{logs}",
                 generated_by="tool",
                 step="code_execution",
-                type="text"
+                type=ContentType.TEXT, 
+                references=References(string_outputs=[merged_code, lang])
             ))
         return executed_messages, code_by_lang
 
-    def _extract_code_blocks(self, content: str) -> List[Tuple[str, str]]:
-        code_blocks = []
-        lines = content.split('\n')
-        in_code_block = False
-        current_block = []
-        current_language = ""
-
-        for line in lines:
-            if line.strip().startswith('```'):
-                if in_code_block:
-                    code_blocks.append((current_language, '\n'.join(current_block)))
-                    current_block = []
-                    in_code_block = False
-                else:
-                    in_code_block = True
-                    current_language = line[3:].strip()
-            elif in_code_block:
-                current_block.append(line)
-
-        return code_blocks
-
-    def _execute_code_in_docker(self, code: str, lang: str) -> Tuple[int, str, Optional[str]]:
-        LOGGER.info(f"Executing code in {lang}:")
-        LOGGER.info(code)
+    def _extract_code_blocs(self, content: str) -> List[Tuple[str, str]]:
+        # Improved regex pattern
+        pattern = r'```(\w*)[^\S\r\n]*\n?(.*?)```'
+        matches = re.findall(pattern, content, re.DOTALL)
         
-        client = docker.from_env()
+        code_blocs = []
+        for lang, code in matches:
+            language = lang.strip() or 'unknown'
+            code = code.strip()
+            if code and language != 'unknown':
+                code_blocs.append((language, code))
         
+        LOGGER.debug(f"Extracted {len(code_blocs)} code blocs")
+        return code_blocs
+
+    def _execute_code_in_docker(self, code: str, lang: str) -> Tuple[int, str]:
+        if not code or not lang:
+            return 1, "Invalid code or language"
+        LOGGER.info(f"Executing code in {lang if lang else ''} - Code: \n{code}")
         try:
-            image = "python:3-slim" if lang.startswith("python") else "ubuntu:latest"
-            
-            # Create a Dockerfile
-            dockerfile = f"""
-            FROM {image}
-            WORKDIR /app
-            COPY code.{lang} .
-            CMD ["python", "code.{lang}"] if "{lang}".startswith("python") else ["sh", "code.{lang}"]
-            """
-            
-            # Create a build context
-            with tempfile.TemporaryDirectory() as tmpdir:
-                # Write the code to a file
-                with open(os.path.join(tmpdir, f'code.{lang}'), 'w') as f:
-                    f.write(code)
-                
-                # Write the Dockerfile
-                with open(os.path.join(tmpdir, 'Dockerfile'), 'w') as f:
-                    f.write(dockerfile)
-                
-                # Build the image
-                image, _ = client.images.build(path=tmpdir, rm=True)
-            
-            # Run the container
-            container = client.containers.run(image.id, detach=True)
-            
-            container.wait()
-            logs = container.logs().decode('utf-8')
-            exit_code = container.attrs['State']['ExitCode']
-
-            LOGGER.info(f"Container exit code: {exit_code}")
-            LOGGER.info(f"Container logs: {logs}")
-
-            return exit_code, logs, image.id
-        
-        except docker.errors.DockerException as e:
-            LOGGER.error(f"Docker error during execution: {str(e)}")
-            return 1, str(e), None
+            logs, exit_code = run_code(code, lang, log_level=LOG_LEVEL)
+            return exit_code, logs
         except Exception as e:
-            LOGGER.error(f"Error during Docker execution: {str(e)}")
-            return 1, str(e), None
-        finally:
-            if 'container' in locals():
-                container.remove()
-                
+            LOGGER.error(f"Error executing code: {e}")
+            return 1, str(e)
+
     def _prepare_messages_for_api(self, messages: List[MessageDict]) -> List[Dict[str, Any]]:
         """Prepare messages for the API call, including the system message."""
         return [self._convert_message_dict_to_api_format(msg) for msg in messages]

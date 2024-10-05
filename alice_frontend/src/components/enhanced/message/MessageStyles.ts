@@ -46,6 +46,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   markdownText: {
     fontFamily: theme.typography.fontFamily,
+    fontSize: '0.85em',
   },
   messageHeader: {
     display: 'flex',
@@ -60,8 +61,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
   },
   viewButton: {
-    padding: theme.spacing(0.5),
-    marginRight: theme.spacing(1),
+    lineHeight: '20px',
     '& svg': {
       fontSize: '0.875rem',
     },

@@ -6,13 +6,16 @@ import { MessageComponentProps } from '../../../../types/MessageTypes';
 import { BackgroundBeams } from '../../../ui/aceternity/BackgroundBeams';
 import { hasAnyReferences } from '../../../../types/ReferenceTypes';
 import ReferenceChip from '../../common/references/ReferenceChip';
-import { Visibility } from '@mui/icons-material';
+import { CopyAll, Visibility } from '@mui/icons-material';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
-import CustomMarkdown from '../../common/markdown/CustomMarkdown';
+import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import { useNotification } from '../../../../contexts/NotificationContext';
 
 const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => {
     const classes = useStyles();
     const { selectCardItem, selectFlexibleItem } = useCardDialog();
+    const { addNotification } = useNotification();
 
     if (!message) {
         return <Typography>No message data available.</Typography>;
@@ -42,7 +45,21 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => 
     };
 
     const renderMessageContent = () => {
-        return <CustomMarkdown className={classes.markdownText}>{message.content}</CustomMarkdown>;
+        return (
+            <>
+                <CustomMarkdown className={classes.markdownText}>{message.content}</CustomMarkdown>
+                {message.tool_calls && message.tool_calls.length > 0 && (
+                    <>
+                        <Typography variant="subtitle2">Tool Calls:</Typography>
+                        <Box display="flex" flexWrap="wrap" gap={1}>
+                            {message.tool_calls?.map((toolCall, index) => (
+                                <ReferenceChip key={`tool-call-${index}`} reference={toolCall} type="tool_call" view />
+                            ))}
+                        </Box>
+                    </>
+                )}
+            </>
+        );
     };
 
     const renderReferences = () => {
@@ -51,6 +68,7 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => 
         return (
             <Box className={classes.referencesContainer}>
                 <Typography variant="subtitle2">References:</Typography>
+
                 <Box display="flex" flexWrap="wrap" gap={1}>
                     {message.references.messages?.map((msg, index) => (
                         <ReferenceChip key={`msg-${index}`} reference={msg} type="Message" view />
@@ -70,7 +88,7 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => 
                 </Box>
             </Box>
         );
-    };
+    }; 
 
     return (
         <Box className={`${classes.message} ${getMessageClass()}`}>
@@ -83,20 +101,35 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => 
                         </Typography>
                     </Tooltip>
                     <Box>
-                        <IconButton
-                            size="small"
-                            onClick={() => selectCardItem('Message', message._id || '', message)}
-                            className={classes.viewButton}
-                        >
-                            <Visibility fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                            size="small"
-                            onClick={() => selectFlexibleItem('Message', 'edit', message._id, message )}
-                            className={classes.editButton}
-                        >
-                            <EditIcon fontSize="small" />
-                        </IconButton>
+                        <Tooltip title="Copy message to clipboard" arrow>
+                            <IconButton
+                                size='small'
+                                onClick={() => addNotification && addNotification('Message copied to clipboard', 'success')}
+                                className={classes.viewButton}
+                            >
+                                <CopyToClipboard text={message.content}>
+                                    <CopyAll />
+                                </CopyToClipboard>
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="View message details" arrow>
+                            <IconButton
+                                size="small"
+                                onClick={() => selectCardItem && selectCardItem('Message', message._id || '', message)}
+                                className={classes.viewButton}
+                            >
+                                <Visibility fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Edit message" arrow>
+                            <IconButton
+                                size="small"
+                                onClick={() => selectFlexibleItem && selectFlexibleItem('Message', 'edit', message._id, message)}
+                                className={classes.editButton}
+                            >
+                                <EditIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
 
                     </Box>
                 </Box>

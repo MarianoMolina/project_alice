@@ -5,7 +5,6 @@ from workflow_logic.api_app.util import TaskExecutionRequest
 from workflow_logic.core import TaskResponse
 from workflow_logic.api_app.util.utils import deep_api_check
 from workflow_logic.api_app.util.dependencies import get_db_app
-from workflow_logic.api_app.util.reference_utils import check_references
 
 router = APIRouter()
 
@@ -64,8 +63,6 @@ async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(ge
 
         # Process and update file content references
         LOGGER.debug(f'task_result: {result.model_dump()}')
-        # if result.references:
-        #     result.references = await check_references(result.references, db_app)
 
         # LOGGER.debug(f'result after checking references: {result.model_dump()}')
         LOGGER.debug(f'References: {result.references.model_dump()}')

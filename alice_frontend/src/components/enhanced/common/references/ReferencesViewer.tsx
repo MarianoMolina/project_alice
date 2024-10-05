@@ -4,7 +4,7 @@ import { References } from '../../../../types/ReferenceTypes';
 import FileViewer from '../../file/FileViewer';
 import { URLReferenceViewer } from '../../url_reference/URLReferenceViewer';
 import EnhancedMessage from '../../message/message/EnhancedMessage';
-import CustomMarkdown from '../markdown/CustomMarkdown';
+import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
 
 interface ReferencesViewerProps {
   references: References;
@@ -41,7 +41,6 @@ const ReferencesViewer: React.FC<ReferencesViewerProps> = ({ references }) => {
           <Typography variant="h6">Task Responses</Typography>
           {references.task_responses.map((taskResponse, index) => (
             <Box key={taskResponse._id || `task-response-${index}`}>
-              {/* <CustomMarkdown>{taskResponse.task_outputs ?? ''}</CustomMarkdown> */}
               <ReferencesViewer references={taskResponse.references ?? {}} />
             </Box>
           ))}

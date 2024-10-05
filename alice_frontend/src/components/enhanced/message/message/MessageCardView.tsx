@@ -2,52 +2,15 @@ import React from 'react';
 import {
     Typography,
     Box,
-    Chip,
 } from '@mui/material';
-import { Person, AccessTime, AttachFile, TextSnippet, Engineering, PersonPin } from '@mui/icons-material';
+import { Person, AccessTime, AttachFile, TextSnippet, Engineering, PersonPin, Functions } from '@mui/icons-material';
 import { MessageComponentProps } from '../../../../types/MessageTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { CollectionElementString } from '../../../../types/CollectionTypes';
 import { References } from '../../../../types/ReferenceTypes';
 import useStyles from '../MessageStyles';
-import CustomMarkdown from '../../common/markdown/CustomMarkdown';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
-import { FileReference } from '../../../../types/FileTypes';
-
-interface ReferenceChipProps {
-    reference: any;
-    type: CollectionElementString | 'string_output';
-    view: () => void;
-}
-
-const ReferenceChip: React.FC<ReferenceChipProps> = ({ reference, type, view }) => {
-    let label = '';
-    switch (type) {
-        case 'Message':
-            label = `Message: ${reference.content.substring(0, 20)}...`;
-            break;
-        case 'File':
-            label = `File: ${reference.filename}`;
-            break;
-        case 'TaskResponse':
-            label = `Task: ${reference.task_name}`;
-            break;
-        case 'URLReference':
-            label = `URL: ${reference.url}`;
-            break;
-        case 'string_output':
-            label = `Output: ${reference.substring(0, 20)}...`;
-            break;
-    }
-
-    return (
-        <Chip
-            label={label}
-            onClick={view}
-            variant="outlined"
-        />
-    );
-};
+import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
+import { CodeBlock } from '../../../ui/markdown/CodeBlock';
+import ReferenceChip from '../../common/references/ReferenceChip';
 
 const hasAnyReferences = (references: References | undefined): boolean => {
     if (!references) return false;
@@ -64,7 +27,6 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
     item,
 }) => {
     const classes = useStyles();
-    const { selectCardItem } = useCardDialog();
     if (!item) {
         return <Typography>No message data available.</Typography>;
     }
@@ -80,7 +42,7 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
                             key={`msg-${index}`} 
                             reference={msg} 
                             type="Message" 
-                            view={() => selectCardItem && selectCardItem('Message', msg._id!, msg)}
+                            view={true}
                         />
                     ))}
                     {item.references.files?.map((file, index) => (
@@ -88,7 +50,7 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
                             key={`file-${index}`} 
                             reference={file} 
                             type="File" 
-                            view={() => selectCardItem && selectCardItem('File', file._id!, file as FileReference)}
+                            view={true}
                         />
                     ))}
                     {item.references.task_responses?.map((task, index) => (
@@ -96,7 +58,7 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
                             key={`task-${index}`} 
                             reference={task} 
                             type="TaskResponse" 
-                            view={() => selectCardItem && selectCardItem('Task', task._id!, task)}
+                            view={true}
                         />
                     ))}
                     {item.references.search_results?.map((url, index) => (
@@ -104,15 +66,15 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
                             key={`url-${index}`} 
                             reference={url} 
                             type="URLReference" 
-                            view={() => selectCardItem && selectCardItem('URLReference', url._id!, url)}
+                            view={true}
                         />
                     ))}
                     {item.references.string_outputs?.map((str, index) => (
-                        <ReferenceChip 
+                        <ReferenceChip
                             key={`str-${index}`} 
                             reference={str} 
                             type="string_output" 
-                            view={() => {}} // No action for string outputs
+                            view={true}
                         />
                     ))}
                 </Box>
@@ -158,9 +120,14 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
             secondary_text: renderReferences()
         },
         {
+            icon: <Functions />,
+            primary_text: "Tool Calls",
+            secondary_text: item.tool_calls ? <CodeBlock language="json" code={JSON.stringify(item.tool_calls, null, 2)} /> : "N/A",
+        },
+        {
             icon: <Person />,
             primary_text: "Metadata",
-            secondary_text: JSON.stringify(item.creation_metadata ?? {}, null, 2),
+            secondary_text: item.creation_metadata ? <CodeBlock language="json" code={JSON.stringify(item.creation_metadata, null, 2)} /> : "N/A",
         },
         {
             icon: <AccessTime />,

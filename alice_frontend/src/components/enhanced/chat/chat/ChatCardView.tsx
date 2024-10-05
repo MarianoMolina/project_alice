@@ -9,8 +9,8 @@ import {
 import { Person, Functions, Message as MessageIcon } from '@mui/icons-material';
 import { ChatComponentProps } from '../../../../types/ChatTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import MessageListView from '../../message/message/MessageListView';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import MessageShortListView from '../../message/message/MessageShortListView';
 
 const ChatCardView: React.FC<ChatComponentProps> = ({
   item,
@@ -54,7 +54,7 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
       secondary_text: (
         <Box>
           <Typography variant="body2">Total: {item.messages.length}</Typography>
-          <MessageListView
+          <MessageShortListView
             items={item.messages || []}
             item={null}
             onChange={() => { }}

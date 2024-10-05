@@ -1,7 +1,6 @@
 import React from 'react';
 import Markdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { dracula } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import { CodeBlock } from './CodeBlock';
 
 interface CustomMarkdownProps {
   className?: string;
@@ -17,14 +16,12 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
           const match = /language-(\w+)/.exec(className || '');
 
           return !inline && match ? (
-            <SyntaxHighlighter style={dracula} PreTag="div" language={match[1]} {...props}>
-              {String(children).replace(/\n$/, '')}
-            </SyntaxHighlighter>
+            <CodeBlock language={match[1]} code={children} props={props}/>
           ) : (
             <code className={className} {...props}>
               {children}
             </code>
-          );
+          ); 
         },
       }}
     >

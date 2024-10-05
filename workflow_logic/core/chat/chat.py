@@ -87,7 +87,7 @@ class AliceChat(BaseModel):
                 tools_list=self.tool_list(api_manager), 
                 max_turns=self.alice_agent.max_consecutive_auto_reply,
                 )
-            LOGGER.info(f"New messages generated: {new_messages}")
+            LOGGER.debug(f"New messages generated: {new_messages}")
             self.messages.extend(new_messages)
             return new_messages
         except Exception as e:

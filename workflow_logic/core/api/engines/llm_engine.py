@@ -134,10 +134,10 @@ class LLMEngine(APIEngine):
             content = choice.message.content
 
             if choice.message.tool_calls:
-                LOGGER.info(f"Tool calls: {choice.message.tool_calls}")
-                LOGGER.info(f'Model dump: {choice.message.tool_calls[0].model_dump()}')
+                LOGGER.debug(f"Tool calls: {choice.message.tool_calls}")
+                LOGGER.debug(f'Model dump: {choice.message.tool_calls[0].model_dump()}')
                 for tool_call in choice.message.tool_calls:
-                    LOGGER.info(f'Tool call: {ToolCall(**tool_call.model_dump())}')
+                    LOGGER.debug(f'Tool call: {ToolCall(**tool_call.model_dump())}')
 
             tool_calls = [ToolCall(**tool_call.model_dump()) for tool_call in choice.message.tool_calls] if choice.message.tool_calls else None
             msg = MessageDict(

@@ -27,6 +27,10 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
     const { selectCardItem } = useCardDialog();
     const [isResultsDialogOpen, setIsResultsDialogOpen] = useState(false);
 
+    const taskResults = useMemo(() =>
+        getTaskResultsById(item?._id || '')
+    , [getTaskResultsById, item?._id]);
+
     if (!item) return null;
 
     const inputVariables = item.input_variables?.properties || {};
@@ -51,10 +55,6 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
     const handleCloseResultsDialog = () => {
         setIsResultsDialogOpen(false);
     };
-
-    const taskResults = useMemo(() =>
-        getTaskResultsById(item._id || '')
-    , [item._id]);
 
     return (
         <Card className={classes.taskCard}>

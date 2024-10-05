@@ -16,7 +16,14 @@ class References(BaseModel):
         data = super().model_dump(*args, **kwargs)
         for key in ['messages', 'files', 'task_responses', 'search_results', 'string_outputs']:
             if getattr(self, key) is not None:
-                data[key] = [item.model_dump(*args, **kwargs) for item in getattr(self, key)]
+                data[key] = [
+                    item.model_dump(*args, **kwargs) if isinstance(item, BaseModel)
+                    else item if isinstance(item, str)
+                    else None
+                    for item in getattr(self, key)
+                    if isinstance(item, (BaseModel, str))
+                ]
+
         return data
 
     def add_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, URLReference, str]):

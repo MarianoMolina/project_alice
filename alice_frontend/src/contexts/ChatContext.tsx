@@ -5,6 +5,7 @@ import { MessageType } from '../types/MessageTypes';
 import { useAuth } from './AuthContext';
 import { useApi } from './ApiContext';
 import Logger from '../utils/Logger';
+import { globalEventEmitter } from '../utils/EventEmitter';
 
 interface ChatContextType {
     messages: MessageType[];
@@ -65,7 +66,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         }
     }, [fetchItem]);
 
-    const fetchCurrentChat = async () => {
+    const fetchCurrentChat = useCallback(async () => {
         if (!currentChatId) return;
         try {
             const chatData = await fetchChatById(currentChatId)
@@ -74,7 +75,18 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         } catch (error) {
             Logger.error('Error fetching current chat:', error);
         }
-    }
+    }, [currentChatId, fetchChatById]);
+    
+    useEffect(() => {
+        globalEventEmitter.on('created:chats', fetchChats);
+        globalEventEmitter.on('updated:chats', fetchCurrentChat);
+
+        return () => {
+            globalEventEmitter.off('created:chats', fetchChats);
+            globalEventEmitter.off('updated:chats', fetchCurrentChat);
+        };
+    }, [currentChatId, fetchChats, fetchCurrentChat]);
+
 
     const handleSelectChat = async (chatId: string) => {
         try {

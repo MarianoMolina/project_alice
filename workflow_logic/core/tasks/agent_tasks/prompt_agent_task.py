@@ -180,8 +180,8 @@ class CodeGenerationLLMTask(PromptAgentTask):
         if not response_code or not chat_output or not chat_output[-1].content:
             LOGGER.warning(f"Invalid input for task {self.task_name}. Returning default failure code. Response code: {response_code} Chat output: {chat_output}")
             return 1
-        code_blocks = self.agent._extract_code_blocks(chat_output[-1].content)
-        if not code_blocks:
+        code_blocs = self.agent._extract_code_blocs(chat_output[-1].content)
+        if not code_blocs:
             return 2
         return 0
     
@@ -221,9 +221,9 @@ class CodeExecutionLLMTask(PromptAgentTask):
     async def generate_agent_response(self, api_manager: APIManager, **kwargs) -> Tuple[Optional[References], int, Optional[Dict[str, str]]]:    
         if not kwargs.get('messages'):
             LOGGER.warning(f"No messages to execute code from in task {self.task_name}")
-            return {}, self.get_exit_code([], False)
+            return {}, self.get_exit_code([], False), {}
 
         # Process and execute the code blocks
-        code_execs, code_blocks = await self.agent._process_code_execution(kwargs.get('messages'))
+        code_execs, code_blocs = await self.agent._process_code_execution(kwargs.get('messages'))
         
-        return References(messages=code_execs), self.get_exit_code(code_execs, True), code_blocks
+        return References(messages=code_execs), self.get_exit_code(code_execs, True), code_blocs

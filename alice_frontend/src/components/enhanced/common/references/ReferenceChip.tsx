@@ -8,25 +8,27 @@ import { TaskResponse } from '../../../../types/TaskResponseTypes';
 import { URLReference } from '../../../../types/URLReferenceTypes';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import { CollectionElementString, CollectionTypeString } from '../../../../types/CollectionTypes';
+import { ToolCall } from '../../../../types/ParameterTypes';
+import ToolCallView from '../tool_call/ToolCall';
 
-type ReferenceType = MessageType | FileReference | FileContentReference | TaskResponse | URLReference | string;
+type ReferenceType = MessageType | FileReference | FileContentReference | TaskResponse | URLReference | string | ToolCall;
 
 interface ReferenceChipProps {
   reference: ReferenceType;
-  type: CollectionTypeString[keyof CollectionTypeString] | 'string_output';
+  type: CollectionTypeString[keyof CollectionTypeString] | 'string_output' | 'tool_call';
   view?: boolean;
   className?: string;
   delete?: boolean;
   onDelete?: () => void;
 }
 
-const ReferenceChip: React.FC<ReferenceChipProps> = ({ 
-  reference, 
-  type, 
-  view = false, 
-  className, 
-  delete: deleteOption = false, 
-  onDelete 
+const ReferenceChip: React.FC<ReferenceChipProps> = ({
+  reference,
+  type,
+  view = false,
+  className,
+  delete: deleteOption = false,
+  onDelete
 }) => {
   const { selectCardItem } = useCardDialog();
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -43,13 +45,15 @@ const ReferenceChip: React.FC<ReferenceChipProps> = ({
         return (reference as URLReference).title;
       case 'string_output':
         return (reference as string).substring(0, 20) + '...';
+      case 'tool_call':
+        return `Tool: ${(reference as ToolCall).function.name}`;
       default:
         return 'Unknown';
     }
   };
 
   const handleView = () => {
-    if (type === 'string_output') {
+    if (type === 'string_output' || type === 'tool_call') {
       setDialogOpen(true);
     } else if (typeof reference === 'object' && '_id' in reference) {
       selectCardItem(type as CollectionElementString, reference._id);
@@ -62,6 +66,14 @@ const ReferenceChip: React.FC<ReferenceChipProps> = ({
     }
   };
 
+  const renderDialogContent = () => {
+    if (type === 'string_output') {
+      return <ReactMarkdown>{reference as string}</ReactMarkdown>;
+    } else if (type === 'tool_call') {
+      return <ToolCallView toolCall={reference as ToolCall} />;
+    }
+  };
+
   return (
     <>
       <Chip
@@ -71,27 +83,25 @@ const ReferenceChip: React.FC<ReferenceChipProps> = ({
         onClick={view ? handleView : undefined}
         icon={view ? <Visibility /> : undefined}
       />
-      {type === 'string_output' && (
-        <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-          <DialogTitle>
-            String Output
-            <IconButton
-              aria-label="close"
-              onClick={() => setDialogOpen(false)}
-              sx={{
-                position: 'absolute',
-                right: 8,
-                top: 8,
-              }}
-            >
-              <Close />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent>
-            <ReactMarkdown>{reference as string}</ReactMarkdown>
-          </DialogContent>
-        </Dialog>
-      )}
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
+        <DialogTitle>
+          {type === 'tool_call' ? 'Tool Call' : 'String Output'}
+          <IconButton
+            aria-label="close"
+            onClick={() => setDialogOpen(false)}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+            }}
+          >
+            <Close />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          {renderDialogContent()}
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

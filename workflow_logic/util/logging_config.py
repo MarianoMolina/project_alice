@@ -3,7 +3,7 @@ import os
 from logging.handlers import RotatingFileHandler
 from workflow_logic.util.const import LOGGING_FOLDER, LOG_LEVEL
 
-def setup_logging(log_level=logging.WARNING):
+def setup_logging(log_level=logging.WARNING) -> logging.Logger:
     # Create logs directory if it doesn't exist
     workflow_log_dir = os.path.join(LOGGING_FOLDER, 'workflow')
     if not os.path.exists(workflow_log_dir):

@@ -1,13 +1,12 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { Box } from '@mui/material';
-import { Add, Chat, Info, Functions, Assignment, AttachFile, Description, Message } from '@mui/icons-material';
+import { Add, Chat, Info, Functions, Assignment, AttachFile, Message, Link } from '@mui/icons-material';
 import { TaskResponse } from '../types/TaskResponseTypes';
 import { AliceTask } from '../types/TaskTypes';
 import { AliceChat } from '../types/ChatTypes';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
 import { useChat } from '../contexts/ChatContext';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
-import EnhancedChat from '../components/enhanced/chat/chat/EnhancedChat';
 import EnhancedTask from '../components/enhanced/task/task/EnhancedTask';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
 import ChatInput, { ChatInputRef } from '../components/enhanced/common/chat_components/ChatInput';
@@ -20,11 +19,14 @@ import EnhancedURLReference from '../components/enhanced/url_reference/url_refer
 import EnhancedMessage from '../components/enhanced/message/message/EnhancedMessage';
 import Logger from '../utils/Logger';
 import ChatFullView from '../components/enhanced/common/chat_components/ChatFullView';
+import ChatShortListView from '../components/enhanced/chat/chat/ChatShortListView';
+import ChatCardView from '../components/enhanced/chat/chat/ChatCardView';
 
 const ChatAlice: React.FC = () => {
   const classes = useStyles();
   const {
     messages,
+    pastChats,
     currentChatId,
     handleSelectChat,
     handleSendMessage,
@@ -35,7 +37,6 @@ const ChatAlice: React.FC = () => {
   const { selectCardItem, selectFlexibleItem } = useCardDialog();
 
   const [activeTab, setActiveTab] = useState('Select Chat');
-  const [listKey, setListKey] = useState(0);
 
   const chatInputRef = useRef<ChatInputRef>(null);
 
@@ -51,9 +52,6 @@ const ChatAlice: React.FC = () => {
 
   const handleTabChange = useCallback((tabName: string) => {
     setActiveTab(tabName);
-    if (tabName === 'Select Chat') {
-      setListKey(prev => prev + 1);
-    }
   }, []);
 
   const actions = [
@@ -72,7 +70,7 @@ const ChatAlice: React.FC = () => {
     { name: 'Add File Reference', icon: AttachFile, disabled: !currentChatId, group: 'Ref' },
     { name: 'Add Message Reference', icon: Message, disabled: !currentChatId, group: 'Ref' },
     { name: 'Add Task Results', icon: Assignment, disabled: !currentChatId, group: 'Ref' },
-    { name: 'Add URL Reference', icon: Description, disabled: !currentChatId, group: 'Ref' },
+    { name: 'Add URL Reference', icon: Link, disabled: !currentChatId, group: 'Ref' },
   ];
 
   const checkAndAddTask = useCallback((task: AliceTask) => {
@@ -112,23 +110,23 @@ const ChatAlice: React.FC = () => {
     switch (tabName) {
       case 'Select Chat':
         return (
-          <EnhancedChat
-            key={listKey}
-            mode="shortList"
-            onView={(chat) => selectCardItem('Chat', chat._id)}
+          <ChatShortListView
+            items={pastChats}
+            onView={(chat) => selectCardItem('Chat', chat?._id, chat)}
             onInteraction={selectChatId}
-            fetchAll={true}
-            isInteractable={true}
-            {...handleProps}
+            item={null} mode={'view'}
+            onChange={() => null}
+            handleSave={async () => { }}
           />
         );
       case 'Current Chat':
         return (
-          <EnhancedChat
-            itemId={currentChat?._id}
-            mode="card"
-            fetchAll={false}
-            {...handleProps}
+          <ChatCardView
+            items={null}
+            item={currentChat}
+            mode={'view'}
+            onChange={() => null}
+            handleSave={async () => { }}
           />
         );
       case 'Add Functions':
@@ -184,7 +182,7 @@ const ChatAlice: React.FC = () => {
       default:
         return null;
     }
-  }, [listKey, selectChatId, currentChat, checkAndAddTask, addTaskResponse, addFileReference, addURLReference, addMessageReference, selectCardItem]);
+  }, [selectChatId, currentChat, checkAndAddTask, addTaskResponse, addFileReference, addURLReference, addMessageReference, selectCardItem, pastChats]);
 
   return (
     <Box className={classes.chatAliceContainer}>

@@ -6,7 +6,7 @@ import { InsertDriveFile, CalendarToday, AccessTime, TextSnippet, AttachFile } f
 import FileViewer from '../FileViewer';
 import useStyles from '../FileStyles';
 import { bytesToMB } from '../../../../utils/FileUtils';
-import CustomMarkdown from '../../common/markdown/CustomMarkdown';
+import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
 
 const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
     const classes = useStyles();

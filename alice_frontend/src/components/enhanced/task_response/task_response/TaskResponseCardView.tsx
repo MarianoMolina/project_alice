@@ -8,12 +8,13 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
-import { CommandLineLog } from '../../common/markdown/CommandLog';
-import { CodeBlock } from '../../common/markdown/CodeBlock';
+import { CommandLineLog } from '../../../ui/markdown/CommandLog';
+import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import { styled } from '@mui/material/styles';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { AccessTime, CheckCircle, Error, Warning, Output, Code, BugReport, DataObject, Analytics } from '@mui/icons-material';
 import ReferencesViewer from '../../common/references/ReferencesViewer';
+import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
 
 const ExitCodeChip = styled(Chip)(({ theme }) => ({
     fontWeight: 'bold',
@@ -119,9 +120,7 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
                 <AccordionSection
                     title="Raw Output"
                     content={
-                        <Typography variant="body2" component="pre" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                            {typeof item.task_outputs === 'string' ? item.task_outputs : JSON.stringify(item.task_outputs, null, 2)}
-                        </Typography>
+                        <CustomMarkdown>{item.task_outputs as string}</CustomMarkdown>
                     }
                     disabled={!item.task_outputs}
                 />

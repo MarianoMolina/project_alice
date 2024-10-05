@@ -7,7 +7,7 @@ import { Language, Description, QueryBuilder, DataObject } from '@mui/icons-mate
 import { URLReferenceComponentProps } from '../../../../types/URLReferenceTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import useStyles from '../URLReferenceStyles';
-import { CodeBlock } from '../../common/markdown/CodeBlock';
+import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 
 const URLReferenceCardView: React.FC<URLReferenceComponentProps> = ({
     item

@@ -62,6 +62,7 @@ const useStyles = makeStyles((theme: Theme) => ({
         flexDirection: 'column',
         flexGrow: 1,
         marginLeft: theme.spacing(2),
+        maxWidth: 'calc(100% - 85px)',
     },
     listItemIcon: {
         minWidth: 'auto',
@@ -139,13 +140,13 @@ const CommonCardView = <T extends CollectionName>({
                         )}
                     </Box>
                 </Box>
-                {subtitle && (
-                    <Typography variant="subtitle1" className={classes.subtitle}>{subtitle}</Typography>
-                )}
                 {id && (
                     <Typography variant="caption" className={classes.id}>
                         ID: {id}
                     </Typography>
+                )}
+                {subtitle && (
+                    <Typography variant="subtitle1" className={classes.subtitle}>{subtitle}</Typography>
                 )}
                 {listItems && listItems.length > 0 && (
                     <List className={classes.list}>

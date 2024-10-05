@@ -51,13 +51,6 @@ services:
       retries: 5
       start_period: 10s
 
-  mongo:
-    image: mongo:latest
-    ports:
-      - "26017:27017"
-    volumes:
-      - mongo_data:/data/db
-
   workflow:
     build:
       context: ./workflow_logic
@@ -72,6 +65,10 @@ services:
       backend:
         condition: service_healthy
       volume-init:
+        condition: service_completed_successfully
+      python_image:
+        condition: service_completed_successfully
+      bash_image:
         condition: service_completed_successfully
     environment:
       - PYTHONPATH=/app
@@ -104,6 +101,27 @@ services:
         echo 'Finished volume initialization' &&
         ls -la /logs /shared-uploads
       "
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "26017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  python_image:
+    build:
+      context: .
+      dockerfile: Dockerfile.python
+    image: mypython:latest
+    command: ["bash"]
+
+  bash_image:
+    build:
+      context: .
+      dockerfile: Dockerfile.bash
+    image: mybash:latest
+    command: ["bash"]
 
 volumes:
   logs:

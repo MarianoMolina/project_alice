@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Box } from '@mui/material';
-import { Add, Person, Category, Settings, Description, Functions, Assignment, Api, AttachFile, Message, QuestionAnswer } from '@mui/icons-material';
+import { Add, Person, Category, Settings, Description, Functions, Assignment, Api, AttachFile, Message, QuestionAnswer, Link } from '@mui/icons-material';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH, TASK_SIDEBAR_WIDTH_TABLE, TASK_SIDEBAR_WIDTH_COMPACT } from '../utils/Constants';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
 import { ComponentMode, CollectionElement, CollectionElementString } from '../types/CollectionTypes';
@@ -71,7 +71,7 @@ const Database: React.FC = () => {
         { name: 'Prompt' as CollectionElementString, icon: Description, group: 'Core' },
         { name: 'Task' as CollectionElementString, icon: Functions, group: 'Core' },
         { name: 'TaskResponse' as CollectionElementString, icon: Assignment, group: 'Ref' },
-        { name: 'URLReference' as CollectionElementString, icon: Description, group: 'Ref' },
+        { name: 'URLReference' as CollectionElementString, icon: Link, group: 'Ref' },
     ];
 
     // Active tab logic

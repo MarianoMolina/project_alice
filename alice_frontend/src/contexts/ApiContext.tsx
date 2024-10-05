@@ -22,6 +22,7 @@ import { TaskResponse } from '../types/TaskResponseTypes';
 import { FileReference, FileContentReference } from '../types/FileTypes';
 import { useDialog } from './DialogCustomContext';
 import Logger from '../utils/Logger';
+import { globalEventEmitter } from '../utils/EventEmitter';
 
 interface ApiContextType {
     fetchItem: typeof apiFetchItem;
@@ -53,6 +54,11 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const { selectCardItem } = useCardDialog();
     const { openDialog } = useDialog();
 
+    const emitEvent = (eventType: string, collectionName: CollectionName, item: any) => {
+        globalEventEmitter.emit(`${eventType}:${collectionName}`, item);
+        globalEventEmitter.emit(eventType, collectionName, item);
+    };
+
     const createItem = useCallback(async <T extends CollectionName>(
         collectionName: T,
         itemData: Partial<CollectionType[T]>
@@ -68,6 +74,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                     onClick: () => selectCardItem(collectionName as CollectionElementString, createdItem._id as string)
                 }
             );
+            emitEvent('created', collectionName, createdItem);
             return createdItem;
         } catch (error) {
             addNotification(`Error creating ${collectionName}`, 'error');
@@ -91,6 +98,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                     onClick: () => selectCardItem(collectionName as CollectionElementString, itemId)
                 }
             );
+            emitEvent('updated', collectionName, updatedItem);
             return updatedItem;
         } catch (error) {
             addNotification(`Error updating ${collectionName}`, 'error');
@@ -105,6 +113,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 label: 'View Result',
                 onClick: () => selectCardItem('TaskResponse', result._id as string)
             });
+            emitEvent('created', 'taskresults', result);
             return result;
         } catch (error) {
             addNotification('Error executing task', 'error');
@@ -116,6 +125,10 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         try {
             const result = await apiGenerateChatResponse(chatId);
             addNotification('Chat response generated successfully', 'success');
+            if (result) {
+                const updatedChat = await apiFetchItem('chats', chatId) as AliceChat;
+                emitEvent('updated', 'chats', updatedChat);
+            }
             return result;
         } catch (error) {
             addNotification('Error generating chat response', 'error');
@@ -127,19 +140,11 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         try {
             const result = await apiSendMessage(chatId, message);
             addNotification('Message sent successfully', 'success');
+            emitEvent('created', 'messages', message);
+            emitEvent('updated', 'chats', result);
             return result;
         } catch (error) {
             addNotification('Error sending message', 'error');
-            throw error;
-        }
-    }, [addNotification]);
-
-    const purgeAndReinitializeDatabase = useCallback(async (): Promise<void> => {
-        try {
-            await apiPurgeAndReinitializeDatabase();
-            addNotification('Database purged and reinitialized successfully', 'success');
-        } catch (error) {
-            addNotification('Error purging and reinitializing database', 'error');
             throw error;
         }
     }, [addNotification]);
@@ -151,6 +156,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 label: 'View File',
                 onClick: () => selectCardItem('File', result._id as string)
             });
+            emitEvent('created', 'files', result);
             return result;
         } catch (error) {
             addNotification('Error uploading file', 'error');
@@ -165,6 +171,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 label: 'View File',
                 onClick: () => selectCardItem('File', result._id as string)
             });
+            emitEvent('updated', 'files', result);
             return result;
         } catch (error) {
             addNotification('Error updating file', 'error');
@@ -187,7 +194,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                         onConfirm: async () => {
                             try {
                                 const newTranscript = await apiRequestFileTranscript(fileId, agentId, chatId);
-                                await apiUpdateItem('files', fileId, { transcript: newTranscript });
+                                await updateItem('files', fileId, { transcript: newTranscript });
                                 addNotification('New transcript generated successfully', 'success');
                                 resolve(newTranscript);
                             } catch (error) {
@@ -203,7 +210,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 });
             } else {
                 const transcript = await apiRequestFileTranscript(fileId, agentId, chatId);
-                await apiUpdateItem('files', fileId, { transcript: transcript });
+                await updateItem('files', fileId, { transcript: transcript });
                 addNotification('Transcript generated successfully', 'success');
                 return transcript;
             }
@@ -211,12 +218,15 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             addNotification('Error requesting transcript', 'error');
             throw error;
         }
-    }, [addNotification, openDialog]);
+    }, [addNotification, openDialog, updateItem]);
 
     const updateMessageInChat = useCallback(async (chatId: string, message: MessageType): Promise<MessageType> => {
         try {
             const result = await apiUpdateMessageInChat(chatId, message);
             addNotification('Message updated successfully', 'success');
+            emitEvent('updated', 'messages', result);
+            const updatedChat = await apiFetchItem('chats', chatId) as AliceChat;
+            emitEvent('updated', 'chats', updatedChat);
             return result;
         } catch (error) {
             addNotification('Error updating message', 'error');
@@ -231,7 +241,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         executeTask,
         generateChatResponse,
         sendMessage,
-        purgeAndReinitializeDatabase,
+        purgeAndReinitializeDatabase: apiPurgeAndReinitializeDatabase,
         uploadFileContentReference,
         updateFile,
         retrieveFile: apiRetrieveFile,

@@ -69,7 +69,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: 'flex',
     flexDirection: 'column',
     padding: '0 !important',
-    overflow: 'hidden',
+    overflow: 'auto',
   },
   recentExecutionsList: {
     overflowY: 'auto',

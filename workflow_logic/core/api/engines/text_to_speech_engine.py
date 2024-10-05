@@ -68,7 +68,7 @@ class OpenAITextToSpeechEngine(APIEngine):
                 model=model,
                 voice=voice,
                 input=input,
-                speed=speed
+                speed=float(speed)
             )
            
             # Get the raw audio data
