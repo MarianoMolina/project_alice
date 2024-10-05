@@ -7,7 +7,6 @@ import {
 } from '@mui/material';
 import { AliceTask, TaskComponentProps, TaskType, getDefaultTaskForm } from '../../../../types/TaskTypes';
 import { SelectChangeEvent } from '@mui/material';
-import BasicAgentTask from './task_types/BasicAgentTask';
 import PromptAgentTask from './task_types/PromptAgentTask';
 import CheckTask from './task_types/CheckTask';
 import CodeGenerationLLMTask from './task_types/CodeGenerationLLMTask';
@@ -20,7 +19,6 @@ import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import Logger from '../../../../utils/Logger';
 
 const taskTypes: TaskType[] = [
-    "BasicAgentTask",
     "PromptAgentTask",
     "CheckTask",
     "CodeGenerationLLMTask",
@@ -41,7 +39,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
 }) => {
     const { fetchItem } = useApi();
     const isEditMode = mode === 'edit' || mode === 'create';
-    const [taskType, setTaskType] = useState<TaskType>(item?.task_type || "BasicAgentTask");
+    const [taskType, setTaskType] = useState<TaskType>(item?.task_type || "PromptAgentTask");
     const [form, setForm] = useState<AliceTask>(() => item || getDefaultTaskForm(taskType));
     const [apis, setApis] = useState<API[]>([]);
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
@@ -92,8 +90,6 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
         };
 
         switch (taskType) {
-            case 'BasicAgentTask':
-                return <BasicAgentTask {...commonProps} />;
             case 'PromptAgentTask':
                 return <PromptAgentTask {...commonProps} />;
             case 'CheckTask':

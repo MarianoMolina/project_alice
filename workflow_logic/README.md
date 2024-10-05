@@ -155,13 +155,6 @@ The Workflow container supports various task types, each designed for specific p
 
 ### Major Task Types
 
-1. **BasicAgentTask**
-   - Purpose: General-purpose tasks executed by an AI agent
-   - Key Properties:
-     - `agent`: The AI agent executing the task
-     - `templates`: Dictionary of prompts/templates used by the agent
-   - Usage: Ideal for tasks that require complex reasoning or decision-making
-
 2. **PromptAgentTask**
    - Purpose: Tasks that use templated prompts for execution
    - Key Properties:

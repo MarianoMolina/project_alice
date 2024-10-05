@@ -1,7 +1,8 @@
 import React, { useMemo, useRef } from 'react';
-import { Box, TextField, FormControlLabel, Checkbox } from '@mui/material';
+import { Box, TextField, FormControlLabel, Checkbox, Typography, Tooltip } from '@mui/material';
 import { TaskFormsProps } from '../../../../../types/TaskTypes';
 import PromptAgentTask from './PromptAgentTask';
+import TaskEndCodeRoutingBuilder from '../../../common/task_end_code_routing/TaskEndCodeRoutingBuilder';
 
 const Workflow: React.FC<TaskFormsProps> = ({
   item,
@@ -21,7 +22,7 @@ const Workflow: React.FC<TaskFormsProps> = ({
   itemRef.current = item;
   onChangeRef.current = onChange;
 
-  const memoizedBasicAgentTask = useMemo(() => (
+  const memoizedPromptAgentTask = useMemo(() => (
     <PromptAgentTask
       apis={apis}
       handleSave={handleSave}
@@ -50,7 +51,7 @@ const Workflow: React.FC<TaskFormsProps> = ({
   };
   return (
     <Box>
-      {memoizedBasicAgentTask}
+      {memoizedPromptAgentTask}
       <TextField
         fullWidth
         margin="normal"
@@ -62,6 +63,9 @@ const Workflow: React.FC<TaskFormsProps> = ({
         inputProps={{ min: 1 }}
         disabled={!isEditMode}
       />
+      <Typography variant="h6">Exit Code Routing</Typography>
+      <TaskEndCodeRoutingBuilder tasks={Object.values(item.tasks)} initialRouting={item.tasks_end_code_routing??{}} onChange={(newRouting) => onChange({ ...item, tasks_end_code_routing: newRouting })} isViewMode={!isEditMode}/>
+      <Tooltip title="Normally, if a task being executed is present in the execution history of a task, it will be rejected, unless it is recursive. Workflows usually should have recursion enabled.">
       <FormControlLabel
         control={
           <Checkbox
@@ -73,6 +77,7 @@ const Workflow: React.FC<TaskFormsProps> = ({
         }
         label="Recursive"
       />
+      </Tooltip>
     </Box>
   );
 };

@@ -2,7 +2,7 @@ services:
   frontend:
     build:
       context: ./alice_frontend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT_DOCKER}"
     depends_on:
@@ -19,14 +19,14 @@ services:
       - logs:/app/logs
       - shared-uploads:/app/shared-uploads:ro
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
+      NODE_ENV: ${NODE_ENV:-production}
       CHOKIDAR_USEPOLLING: "true"
       WATCHPACK_POLLING: "true"
 
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT_DOCKER}"
     depends_on:
@@ -41,7 +41,7 @@ services:
       - logs:/app/logs
       - shared-uploads:/app/shared-uploads
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
+      NODE_ENV: ${NODE_ENV:-production}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
@@ -108,6 +108,7 @@ services:
       - "26017:27017"
     volumes:
       - mongo_data:/data/db
+    attach: false
 
   python_image:
     build:

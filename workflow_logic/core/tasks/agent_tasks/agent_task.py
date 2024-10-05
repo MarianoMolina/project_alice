@@ -3,9 +3,8 @@ from typing import List, Dict, Optional, Callable, Tuple, Union
 from workflow_logic.core.api import APIManager
 from workflow_logic.core.agent.agent import AliceAgent
 from workflow_logic.core.tasks.task import AliceTask
-from workflow_logic.core.data_structures import References, MessageDict, TaskResponse, ApiType
+from workflow_logic.core.data_structures import References, MessageDict, TaskResponse, ApiType, FunctionParameters, ParameterDefinition, FunctionConfig
 from workflow_logic.util import LOGGER
-from workflow_logic.core.data_structures import FunctionParameters, ParameterDefinition, FunctionConfig
 
 class BasicAgentTask(AliceTask):
     """
@@ -42,6 +41,11 @@ class BasicAgentTask(AliceTask):
     )
     required_apis: List[ApiType] = Field(['llm_api'], description="A list of required APIs for the task")
 
+    def create_message_list(self, **kwargs) -> List[MessageDict]:
+        """Create a list of messages from the input data."""
+        messages: List[MessageDict] = kwargs.get('messages', [])
+        return messages
+        
     def tool_list(self, api_manager: APIManager) -> List[FunctionConfig]:
         return [func.get_function(api_manager)["tool_function"] for func in self.tasks.values()] if self.tasks else None
     
@@ -52,8 +56,8 @@ class BasicAgentTask(AliceTask):
             combined_function_map.update(function_details["function_map"])
         return combined_function_map
     
-    async def generate_agent_response(self, api_manager: APIManager, **kwargs) ->  Tuple[Optional[References], int, Optional[Union[List[MessageDict], Dict[str, str]]]]:     
-        messages: List[MessageDict] = kwargs.get('messages', [])
+    async def generate_agent_response(self, api_manager: APIManager, **kwargs) ->  Tuple[Optional[References], int, Optional[Union[List[MessageDict], Dict[str, str]]]]:   
+        messages = self.create_message_list(**kwargs)  
         new_messages, start_messages = await self.agent.chat(api_manager=api_manager, messages=messages, max_turns=self.agent.max_consecutive_auto_reply, tool_map=self.tool_map(api_manager), tools_list=self.tool_list(api_manager))
         if not new_messages:
             LOGGER.error("No messages returned from agent.")

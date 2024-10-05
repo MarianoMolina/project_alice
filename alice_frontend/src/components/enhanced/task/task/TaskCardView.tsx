@@ -5,11 +5,12 @@ import {
     Chip,
     ListItemButton,
 } from '@mui/material';
-import { Category, Description, Functions, Person, ApiRounded, Sos, Settings, Logout } from '@mui/icons-material';
+import { Category, Description, Functions, Person, ApiRounded, Sos, Settings, Logout, ExitToApp } from '@mui/icons-material';
 import { TaskComponentProps } from '../../../../types/TaskTypes';
 import useStyles from '../TaskStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import TaskEndCodeRoutingBuilder from '../../common/task_end_code_routing/TaskEndCodeRoutingBuilder';
 
 interface ChipItem {
     _id?: string;
@@ -130,7 +131,18 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
             icon: <Sos />,
             primary_text: "Human Input Required",
             secondary_text: item.human_input ? 'Yes' : 'No'
-        }
+        },
+        {
+            icon: <ExitToApp />,
+            primary_text: "Exit Code Routing",
+            secondary_text: (item.tasks_end_code_routing && Object.keys(item.tasks_end_code_routing).length > 0) ? 
+                <TaskEndCodeRoutingBuilder 
+                    tasks={Object.values(item.tasks)} 
+                    initialRouting={item.tasks_end_code_routing??{}} 
+                    onChange={() => {}}
+                    isViewMode={true}
+                    /> : "No exit code routing defined"
+        },
     ];
 
     return (

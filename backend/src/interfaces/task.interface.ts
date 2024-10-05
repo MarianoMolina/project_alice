@@ -5,7 +5,6 @@ export enum TaskType {
   CVGenerationTask = "CVGenerationTask",
   APITask = "APITask",
   Workflow = "Workflow",
-  BasicAgentTask = "BasicAgentTask",
   PromptAgentTask = "PromptAgentTask",
   CheckTask = "CheckTask",
   CodeGenerationLLMTask = "CodeGenerationLLMTask",

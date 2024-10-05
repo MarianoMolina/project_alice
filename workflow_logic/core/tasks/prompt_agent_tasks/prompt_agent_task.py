@@ -1,4 +1,3 @@
-import re
 from pydantic import Field
 from typing import List, Dict, Any, Tuple, Optional
 from workflow_logic.core.api import APIManager
@@ -76,10 +75,6 @@ class PromptAgentTask(BasicAgentTask):
         input_string = template.format_prompt(**sanitized_inputs)
         LOGGER.info(f"Input string for task {self.task_name}: {input_string}")
         return [MessageDict(content=input_string, role="user", generated_by="user", step=self.task_name)]
-
-    async def run(self, api_manager: APIManager, **kwargs) -> TaskResponse:
-        messages = self.create_message_list(**kwargs)
-        return await super().run(api_manager=api_manager, messages=messages, **kwargs)
 
     def update_inputs(self, **kwargs) -> Dict[str, Any]:
         """

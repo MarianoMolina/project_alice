@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   markdownText: {
     fontFamily: theme.typography.fontFamily,
-    fontSize: '0.85em',
+    fontSize: '0.9em',
   },
   messageHeader: {
     display: 'flex',

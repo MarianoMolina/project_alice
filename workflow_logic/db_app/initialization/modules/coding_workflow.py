@@ -264,6 +264,7 @@ coding_workflow_module = CodingWorkflowModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
+                        "outputs_generaate_code": "outputs_generate_code",
                         "outputs_generate_unit_tests": "outputs_generate_unit_tests",
                     },
                     "required": ["outputs_generate_unit_tests"]
