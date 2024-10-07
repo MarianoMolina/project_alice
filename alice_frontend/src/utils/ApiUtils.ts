@@ -56,10 +56,6 @@ export const API_TYPE_CONFIGS: Record<ApiType, ApiTypeConfig> = {
       base_url: '',
     },
   },
-  [ApiType.WEB_SCRAPE]: {
-    api_name: [ApiName.BEAUTIFULSOUP],
-    apiConfig: {},
-  },
   [ApiType.SPEECH_TO_TEXT]: {
     api_name: [ApiName.OPENAI_STT, ApiName.OPENAI_ASTT],
     apiConfig: {

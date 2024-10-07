@@ -33,10 +33,9 @@ const StartTask: React.FC = () => {
     await handleExecuteTask();
   };
 
-  const setAndRunTaskFromExecution = async (execution: RecentExecution) => {
+  const setTaskFromExecution = async (execution: RecentExecution) => {
     setTaskById(execution.taskId);
     setInputValues(execution.inputs);
-    await handleExecuteTask();
   }
 
   const actions = [
@@ -145,7 +144,7 @@ const StartTask: React.FC = () => {
                       onView={() => execution.result._id && triggerItemDialog('TaskResponse', execution.result._id)}
                       onInteraction={
                         selectedTask && execution.taskId === selectedTask._id
-                          ? () => setAndRunTaskFromExecution(execution)
+                          ? () => setTaskFromExecution(execution)
                           : undefined
                       }
                     />

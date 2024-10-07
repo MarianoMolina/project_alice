@@ -3,6 +3,7 @@ from pydantic import Field
 from workflow_logic.db_app.initialization.modules.init_module import InitializationModule, get_prompt_file
 
 class CodingWorkflowModule(InitializationModule):
+    """This module defines the coding workflow, its subtasks, agents and prompts"""
     name: str = "coding_workflow"
     dependencies: List[str] = ["base"]
     data: Dict[str, List[Dict[str, Any]]] = Field(default_factory=dict)
@@ -84,7 +85,7 @@ coding_workflow_module = CodingWorkflowModule(
             {
                 "key": "test_execution_task",
                 "name": "Test Code Execution Task",
-                "content": "This is the code:\n{{ outputs_generate_unit_tests }}",
+                "content": get_prompt_file('unit_test_execution_task.prompt'),
                 "is_templated": True,
                 "parameters": {
                     "type": "object",

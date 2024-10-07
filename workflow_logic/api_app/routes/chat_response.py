@@ -57,7 +57,7 @@ async def chat_response(chat_id: str, db_app: BackendAPI = Depends(get_db_app)) 
             if not stored_chat:
                 LOGGER.error(f"Failed to store message: {response} in chat_id {chat_id}")
        
-        LOGGER.info(f'Stored messages: {responses}')
+        LOGGER.debug(f'Stored messages: {responses}')
         return True
    
     return False

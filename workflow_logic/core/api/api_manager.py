@@ -4,7 +4,7 @@ from workflow_logic.core.model import AliceModel
 from workflow_logic.core.api.api import API
 from workflow_logic.core.data_structures import References, ApiType, ApiName, ModelConfig, ModelApis
 from workflow_logic.util import LOGGER
-from workflow_logic.core.api.engines import APIEngine, LLMAnthropic, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI, ExaSearchAPI, ArxivSearchAPI, LLMEngine, VisionModelEngine, ImageGenerationEngine, BeautifulSoupWebScraperEngine, AnthropicVisionEngine, OpenAIAdvancedSpeechToTextEngine, OpenAISpeechToTextEngine, OpenAITextToSpeechEngine, OpenAIEmbeddingsEngine
+from workflow_logic.core.api.engines import APIEngine, LLMAnthropic, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI, ExaSearchAPI, ArxivSearchAPI, LLMEngine, VisionModelEngine, ImageGenerationEngine, AnthropicVisionEngine, OpenAIAdvancedSpeechToTextEngine, OpenAISpeechToTextEngine, OpenAITextToSpeechEngine, OpenAIEmbeddingsEngine
 
 ApiEngineMap = {
     ApiType.LLM_MODEL: {
@@ -35,9 +35,6 @@ ApiEngineMap = {
     },
     ApiType.IMG_GENERATION: {
         ApiName.OPENAI_IMG_GENERATION: ImageGenerationEngine
-    },
-    ApiType.WEB_SCRAPE: {
-        ApiName.BEAUTIFULSOUP: BeautifulSoupWebScraperEngine
     },
     ApiType.SPEECH_TO_TEXT: {
         ApiName.OPENAI_STT: OpenAISpeechToTextEngine,
@@ -212,7 +209,7 @@ class APIManager(BaseModel):
             api = self.get_api_by_type(api_type, model)
             if not api:
                 raise ValueError(f"No API found for type: {api_type}")
-            LOGGER.info(f"API found: {api}")
+            LOGGER.debug(f"API found: {api}")
             api_data = api.get_api_data(model)
             
             api_engine = get_api_engine(api_type, api.api_name)()

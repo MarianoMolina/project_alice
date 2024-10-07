@@ -13,7 +13,6 @@ const apiIcons: Record<ApiType, React.ReactElement> = {
   [ApiType.ARXIV_SEARCH]: <Book />,
   [ApiType.IMG_VISION]: <RemoveRedEye />,
   [ApiType.IMG_GENERATION]: <Brush />,
-  [ApiType.WEB_SCRAPE]: <CloudDownload />,
   [ApiType.SPEECH_TO_TEXT]: <Hearing />,
   [ApiType.TEXT_TO_SPEECH]: <RecordVoiceOver />,
   [ApiType.EMBEDDINGS]: <Tag />,

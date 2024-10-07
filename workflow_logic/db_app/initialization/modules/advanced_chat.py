@@ -3,6 +3,7 @@ from pydantic import Field
 from workflow_logic.db_app.initialization.modules.init_module import InitializationModule
 
 class AdvancedChatModule(InitializationModule):
+    """This module defines the advanced chat agents and chats."""
     name: str = "advanced_chat"
     dependencies: List[str] = ["base", "base_tasks", "base_chat", "adv_tasks"]
     data: Dict[str, List[Dict[str, Any]]] = Field(default_factory=dict)

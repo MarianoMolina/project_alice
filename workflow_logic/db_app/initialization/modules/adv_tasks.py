@@ -3,6 +3,7 @@ from pydantic import Field
 from workflow_logic.db_app.initialization.modules.init_module import InitializationModule, get_prompt_file
 
 class AdvTasksModule(InitializationModule):
+    """This module defines the advanced tasks (img gen, tts, embeddings), their agents, parameters and prompts."""
     name: str = "adv_tasks"
     dependencies: List[str] = ["base", "base_chat"]
     data: Dict[str, List[Dict[str, Any]]] = Field(default_factory=dict)

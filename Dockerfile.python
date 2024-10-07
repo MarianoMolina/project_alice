@@ -27,7 +27,8 @@ RUN pip install --no-cache-dir \
     pillow \
     plotly \
     seaborn \
-    jupyter
+    jupyter \
+    python-dotenv 
 
 # Set the working directory
 WORKDIR /app

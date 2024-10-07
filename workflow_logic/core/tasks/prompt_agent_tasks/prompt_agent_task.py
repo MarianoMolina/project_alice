@@ -213,12 +213,13 @@ class CodeExecutionLLMTask(PromptAgentTask):
             return 1
         return 0
     
-    async def generate_agent_response(self, api_manager: APIManager, **kwargs) -> Tuple[Optional[References], int, Optional[Dict[str, str]]]:    
-        if not kwargs.get('messages'):
+    async def generate_agent_response(self, api_manager: APIManager, **kwargs) -> Tuple[Optional[References], int, Optional[Dict[str, str]]]:
+        messages: List[MessageDict] = self.create_message_list(**kwargs)
+        if not messages:
             LOGGER.warning(f"No messages to execute code from in task {self.task_name}")
             return {}, self.get_exit_code([], False), {}
 
         # Process and execute the code blocks
-        code_execs, code_blocs = await self.agent._process_code_execution(kwargs.get('messages'))
+        code_execs, code_blocs = await self.agent._process_code_execution(messages)
         
         return References(messages=code_execs), self.get_exit_code(code_execs, True), code_blocs

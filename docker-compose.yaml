@@ -84,6 +84,7 @@ services:
 
   volume-init:
     image: busybox
+    attach: false
     volumes:
       - ${COMPOSE_PROJECT_DIR}/logs:/logs
       - ${COMPOSE_PROJECT_DIR}/shared-uploads:/shared-uploads

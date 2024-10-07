@@ -104,6 +104,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
 
   const handleSend = () => {
     if (currentChatId && (newMessage.content.trim() || hasReferences(newMessage.references))) {
+      console.log('Sending message content:', newMessage.content);
       sendMessage(currentChatId, newMessage);
       setNewMessage(getDefaultMessageForm());
     }
@@ -173,6 +174,9 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
               maxHeight: '200px',
               overflowY: 'auto',
             },
+          }}
+          InputProps={{
+            style: { whiteSpace: 'pre-wrap' },
           }}
         />
         <Button

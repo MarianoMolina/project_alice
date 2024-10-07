@@ -39,7 +39,7 @@ class BasicAgentTask(AliceTask):
         ),
         description="Inputs that the agent will require. Default is a list of messages."
     )
-    required_apis: List[ApiType] = Field(['llm_api'], description="A list of required APIs for the task")
+    required_apis: List[ApiType] = Field([ApiType.LLM_MODEL], description="A list of required APIs for the task")
 
     def create_message_list(self, **kwargs) -> List[MessageDict]:
         """Create a list of messages from the input data."""

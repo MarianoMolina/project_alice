@@ -15,6 +15,7 @@ BACKEND_PORT = os.getenv("BACKEND_PORT")
 LOCAL_LLM_API_URL = f"http://{BACKEND_HOST}:{BACKEND_PORT}/lm-studio"
 
 class BaseModule(InitializationModule):
+    """This module defines the base models and apis for the system, as well as the default parameter and prompt."""
     name: str = "base"
     dependencies: List[str] = []
     data: Dict[str, List[Dict[str, Any]]] = Field(default_factory=dict)
@@ -280,15 +281,6 @@ base_module = BaseModule(
                 "is_active": True,
                 "health_status": "healthy",
                 "default_model": "Dall-E-3"
-            },
-            {
-                "key": "web_scrape",
-                "api_type": "web_scrape",
-                "api_name": "beautiful_soup",
-                "name": "Web Scrape w/ BeautifulSoup",
-                "api_config": {},
-                "is_active": True,
-                "health_status": "healthy",
             },
             {
                 "key": "speech_to_text",

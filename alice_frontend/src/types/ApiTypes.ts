@@ -12,7 +12,6 @@ export enum ApiType {
     ARXIV_SEARCH = 'arxiv_search',
     IMG_VISION = 'img_vision',
     IMG_GENERATION = 'img_generation',
-    WEB_SCRAPE = 'web_scrape',
     SPEECH_TO_TEXT = 'speech_to_text',
     TEXT_TO_SPEECH = 'text_to_speech',
     EMBEDDINGS = 'embeddings',
@@ -37,7 +36,6 @@ export enum ApiName {
     WIKIPEDIA_SEARCH = 'wikipedia_search',
     EXA_SEARCH = 'exa_search',
     ARXIV_SEARCH = 'arxiv_search',
-    BEAUTIFULSOUP = 'beautiful_soup'
 }
 
 export enum LlmProvider {

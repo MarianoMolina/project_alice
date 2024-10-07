@@ -39,9 +39,7 @@ thread_pool = None
 async def run_initial_tests(app: FastAPI):
     test_env = TestEnvironment()
     db_tests = DBTests()
-    api_tests = APITests()
     await test_env.add_module(db_tests)
-    # await test_env.add_module(api_tests)
     test_settings = {
         "db_structure": DB_STRUCTURE,
         "verbose": True
@@ -54,7 +52,6 @@ async def run_initial_tests(app: FastAPI):
 async def lifespan(app: FastAPI):
     global db_app, thread_pool
     db_app = ContainerAPI()
-    await db_app.initialize_db_app()
     thread_pool = ThreadPoolExecutor()
     app.state.db_app = db_app
     # Run initial tests

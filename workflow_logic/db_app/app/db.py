@@ -24,7 +24,6 @@ class BackendAPI(BaseModel):
         collection_map (Dict[EntityType, str]): Mapping of entity types to collection names.
 
     Methods:
-        initialize_db_app(): Initializes the database application.
         get_prompts(prompt_id: Optional[str] = None) -> Dict[str, Prompt]: Retrieves prompts.
         get_users(user_id: Optional[str] = None) -> Dict[str, User]: Retrieves users.
         get_agents(agent: Optional[str] = None) -> Dict[str, AliceAgent]: Retrieves agents.
@@ -65,16 +64,7 @@ class BackendAPI(BaseModel):
     @property
     def task_types(self) -> Dict[str, AliceTask]:
         return {task.__name__: task for task in self.available_task_types}
-    
-    async def initialize_db_app(self):
-        try:
-            if self.user_token:
-                validate = self.validate_token(self.user_token)
-                if validate.get("valid"):
-                    return True
-        except Exception as e:
-            LOGGER.error(f"Error in initialize_libraries: {e}")
-            raise
+
 
     def _get_headers(self):
         return {

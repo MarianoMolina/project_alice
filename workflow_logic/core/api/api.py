@@ -39,8 +39,8 @@ class API(BaseModel):
             if not self.default_model:
                 raise ValueError("No model specified.")
             model = self.default_model
-        LOGGER.info(f'model: {model}')
-        LOGGER.info(f'api self: {self}')
+        LOGGER.debug(f'model: {model}')
+        LOGGER.debug(f'api self: {self}')
         return ModelConfig( 
             temperature=model.temperature, 
             use_cache=model.use_cache,

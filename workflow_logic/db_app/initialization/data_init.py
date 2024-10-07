@@ -1,6 +1,6 @@
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
-from workflow_logic.db_app.initialization.modules import InitializationModule, base, base_chat, base_tasks, coding_workflow, advanced_chat, adv_tasks
+from workflow_logic.db_app.initialization.modules import InitializationModule, base_module, base_chat_module, base_tasks_module, coding_workflow_module, advanced_chat_module, adv_tasks_module, research_workflow_module, web_scrape_workflow_module
 
 class ModularDBStructure(BaseModel):
     modules: Dict[str, InitializationModule] = Field(default_factory=dict)
@@ -55,12 +55,14 @@ class DBStructure(BaseModel):
 
 # Create ModularDBStructure and add all modules
 modular_db = ModularDBStructure()
-modular_db.add_module(base.base_module)
-modular_db.add_module(base_tasks.base_tasks_module)
-modular_db.add_module(base_chat.base_chat_module)
-modular_db.add_module(coding_workflow.coding_workflow_module)
-modular_db.add_module(advanced_chat.advanced_chat_module)
-modular_db.add_module(adv_tasks.adv_tasks_module)
+modular_db.add_module(base_module)
+modular_db.add_module(base_tasks_module)
+modular_db.add_module(base_chat_module)
+modular_db.add_module(coding_workflow_module)
+modular_db.add_module(research_workflow_module)
+modular_db.add_module(advanced_chat_module)
+modular_db.add_module(adv_tasks_module)
+modular_db.add_module(web_scrape_workflow_module)
 
 # Validate dependencies
 validation_result = modular_db.validate_dependencies()
@@ -68,7 +70,7 @@ if validation_result:
     raise ValueError(f"Dependency validation failed: {validation_result}")
 
 # Get combined data for all modules
-all_modules = ["base", "base_tasks", "base_chat", "coding_workflow", "advanced_chat"]
+all_modules = ["base", "base_tasks", "base_chat", "coding_workflow", "advanced_chat", "adv_tasks", "research_workflow"]
 combined_data = modular_db.get_combined_data(all_modules)
 
 # Create DB_STRUCTURE
