@@ -25,9 +25,7 @@ export const URLReferenceViewer: React.FC<URLReferenceViewerProps> = ({ result }
         </Typography>
 
         <Typography variant="subtitle1" className={classes.sectionLabel}>CONTENT:</Typography>
-        <Box className={classes.urlReferenceBody}>
-            <CustomMarkdown>{result.content}</CustomMarkdown>
-        </Box>
+        <CustomMarkdown className={classes.urlReferenceBody}>{result.content}</CustomMarkdown>
 
         {result.metadata && Object.keys(result.metadata).length > 0 && (
           <>

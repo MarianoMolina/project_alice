@@ -64,25 +64,42 @@ const useStyles = makeStyles((theme: Theme) => ({
         fontSize: '0.8em !important',
         fontWeight: 'bold',
     },
-
     markdownText: {
         fontSize: '1em !important',
         marginBottom: '0 !important',
-
     },
     markdownTitle: {
         fontSize: '1.25em !important',
     },
-    heading: {
+    h1: {
         fontWeight: 600,
         marginTop: '5px !important',
-        fontSize: 'clamp(1rem, 2rem - 0.25rem * var(--heading-level), 2rem)',
-        '$h1&': { '--heading-level': 1 },
-        '$h2&': { '--heading-level': 2 },
-        '$h3&': { '--heading-level': 3 },
-        '$h4&': { '--heading-level': 4 },
-        '$h5&': { '--heading-level': 5 },
-        '$h6&': { '--heading-level': 6 },
+        fontSize: 'clamp(1.5rem, 2.5rem, 3rem) !important',
+    },
+    h2: {
+        fontWeight: 600,
+        marginTop: '5px !important',
+        fontSize: 'clamp(1.4rem, 2.25rem, 2.75rem) !important',
+    },
+    h3: {
+        fontWeight: 600,
+        marginTop: '5px !important',
+        fontSize: 'clamp(1.3rem, 2rem, 2.5rem) !important',
+    },
+    h4: {
+        fontWeight: 600,
+        marginTop: '5px !important',
+        fontSize: 'clamp(1.2rem, 1.75rem, 2.25rem) !important',
+    },
+    h5: {
+        fontWeight: 600,
+        marginTop: '5px !important',
+        fontSize: 'clamp(1.1rem, 1.5rem, 2rem) !important',
+    },
+    h6: {
+        fontWeight: 600,
+        marginTop: '5px !important',
+        fontSize: 'clamp(1rem, 1.25rem, 1.75rem) !important',
     },
 }));
 

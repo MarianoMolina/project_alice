@@ -8,7 +8,7 @@ export interface ApiTypeConfig {
 
 export const API_TYPE_CONFIGS: Record<ApiType, ApiTypeConfig> = {
   [ApiType.LLM_MODEL]: {
-    api_name: [ApiName.OPENAI, ApiName.AZURE, ApiName.ANTHROPIC, ApiName.LM_STUDIO],
+    api_name: [ApiName.OPENAI, ApiName.AZURE, ApiName.ANTHROPIC, ApiName.LM_STUDIO, ApiName.GEMINI, ApiName.MISTRAL, ApiName.META, ApiName.COHERE, ApiName.GROQ],
     apiConfig: {
       api_key: '',
       base_url: '',
@@ -43,7 +43,7 @@ export const API_TYPE_CONFIGS: Record<ApiType, ApiTypeConfig> = {
     apiConfig: {},
   },
   [ApiType.IMG_VISION]: {
-    api_name: [ApiName.OPENAI_VISION, ApiName.ANTHROPIC_VISION, ApiName.LM_STUDIO_VISION],
+    api_name: [ApiName.OPENAI_VISION, ApiName.ANTHROPIC_VISION, ApiName.LM_STUDIO_VISION, ApiName.GEMINI_VISION, ApiName.MISTRAL_VISION, ApiName.META_VISION, ApiName.GROQ_VISION],
     apiConfig: {
       api_key: '',
       base_url: '',
@@ -64,14 +64,14 @@ export const API_TYPE_CONFIGS: Record<ApiType, ApiTypeConfig> = {
     },
   },
   [ApiType.TEXT_TO_SPEECH]: {
-    api_name: [ApiName.OPENAI_TTS],
+    api_name: [ApiName.OPENAI_TTS, ApiName.GROQ_TTS],
     apiConfig: {
       api_key: '',
       base_url: '',
     },
   },
   [ApiType.EMBEDDINGS]: {
-    api_name: [ApiName.OPENAI_EMBEDDINGS],
+    api_name: [ApiName.OPENAI_EMBEDDINGS, ApiName.MISTRAL_EMBEDDINGS, ApiName.GEMINI_EMBEDDINGS],
     apiConfig: {
       api_key: '',
       base_url: '',
@@ -96,6 +96,26 @@ export const LLM_PROVIDERS = {
     api_name: [ApiName.LM_STUDIO, ApiName.LM_STUDIO_VISION],
     baseUrl: 'http://localhost:1234/v1',
   },
+  Gemini: {
+    api_name: [ApiName.GEMINI, ApiName.GEMINI_VISION, ApiName.GEMINI_EMBEDDINGS, ApiName.GEMINI_STT],
+    baseUrl: 'https://api.gemini.ai',
+  },
+  Mistral: {
+    api_name: [ApiName.MISTRAL, ApiName.MISTRAL_VISION, ApiName.MISTRAL_EMBEDDINGS],
+    baseUrl: 'https://api.mistral.ai',
+  },
+  Meta: {
+    api_name: [ApiName.META, ApiName.META_VISION],
+    baseUrl: 'https://api.meta.ai',
+  },
+  Cohere: {
+    api_name: [ApiName.COHERE],
+    baseUrl: 'https://api.cohere.ai',
+  },
+  Groq: {
+    api_name: [ApiName.GROQ, ApiName.GROQ_VISION, ApiName.GROQ_TTS],
+    baseUrl: 'https://api.groq.com/openai/v1',
+  }
 };
 
 export const modelApis = [ApiType.LLM_MODEL, ApiType.IMG_VISION, ApiType.IMG_GENERATION, ApiType.SPEECH_TO_TEXT, ApiType.TEXT_TO_SPEECH, ApiType.EMBEDDINGS];

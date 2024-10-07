@@ -9,8 +9,14 @@ from .oai_stt_engine import OpenAISpeechToTextEngine
 from .oai_timestamped_stt_engine import OpenAIAdvancedSpeechToTextEngine
 from .text_to_speech_engine import OpenAITextToSpeechEngine
 from .embedding_engine import OpenAIEmbeddingsEngine
+from .gemini_llm_engine import GeminiLLMEngine
+from .cohere_llm_engine import CohereLLMEngine
+from .gemini_vision import GeminiVisionEngine
+from .gemini_embedding import GeminiEmbeddingsEngine
+from .gemini_stt import GeminiSpeechToTextEngine
+from .groq_llm_engine import GroqLLMEngine
 
-__all__ = ["ArxivSearchAPI", "ExaSearchAPI", "GoogleSearchAPI", "RedditSearchAPI", "WikipediaSearchAPI", "APIEngine", 
-           "LLMEngine", "LLMOpenAI", "LLMAnthropic", "ImageGenerationEngine", 
+__all__ = ["ArxivSearchAPI", "ExaSearchAPI", "GoogleSearchAPI", "RedditSearchAPI", "WikipediaSearchAPI", "APIEngine", "GroqLLMEngine",
+           "LLMEngine", "LLMOpenAI", "LLMAnthropic", "ImageGenerationEngine", "CohereLLMEngine", "GeminiVisionEngine", "GeminiEmbeddingsEngine", "GeminiSpeechToTextEngine",
            "VisionModelEngine", "AnthropicVisionEngine", "OpenAISpeechToTextEngine", "OpenAIAdvancedSpeechToTextEngine",
-           "OpenAITextToSpeechEngine", "OpenAIEmbeddingsEngine"]
+           "OpenAITextToSpeechEngine", "OpenAIEmbeddingsEngine", "GeminiLLMEngine"]

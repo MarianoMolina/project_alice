@@ -33,6 +33,32 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                 "name": "Web Summarizer",
                 "content": get_prompt_file("web_summarizer.prompt"),
             },
+            {
+                "key": "basic_prompt_url",
+                "name": "URL Prompt",
+                "content": "{{ url }}",
+                "is_templated": True,
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "url": "url_param"
+                    },
+                    "required": ["url"]
+                }
+            },
+            {
+                "key": "web_summarize_task_prompt",
+                "name": "Web summarization prompt",
+                "content": "{{ outputs_web_scrape }}",
+                "is_templated": True,
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "outputs_web_scrape": "outputs_web_scrape_task"
+                    },
+                    "required": ["outputs_web_scrape"]
+                }
+            },
         ],
         "agents": [
             {
@@ -67,7 +93,7 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                 "agent": "web_scrape_selector_agent",
                 "required_apis": ["llm_api"],
                 "templates": {
-                    "task_template": "basic_prompt"
+                    "task_template": "basic_prompt_url"
                 },
                 "input_variables": {
                     "type": "object",
@@ -86,13 +112,13 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "outputs_web_scrape_task": "outputs_web_scrape_task",
+                        "outputs_web_scrape": "outputs_web_scrape_task",
                     },
-                    "required": ["outputs_web_scrape_task"]
+                    "required": ["outputs_web_scrape"]
                 },
                 "required_apis": ["llm_api"],
                 "templates": {
-                    "task_template": "basic_prompt"
+                    "task_template": "web_summarize_task_prompt"
                 }
             },
             {

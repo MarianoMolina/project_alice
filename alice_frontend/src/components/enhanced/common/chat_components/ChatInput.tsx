@@ -154,9 +154,11 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ display: 'flex' }}>
         <Tooltip title="Upload an image, video, sound or text file to give your assistant access to it">
-          <Button sx={{ mr: 1, minWidth: 36 }} variant="outlined" onClick={handleAddFile} disabled={!chatSelected}>
-            <AttachFile />
-          </Button>
+          <span style={{ paddingRight: '5px' }}>
+            <Button variant="outlined" onClick={handleAddFile} disabled={!chatSelected} sx={{width: '100%', height: '100%'}}>
+              <AttachFile />
+            </Button>
+          </span>
         </Tooltip>
         <TextField
           variant="outlined"

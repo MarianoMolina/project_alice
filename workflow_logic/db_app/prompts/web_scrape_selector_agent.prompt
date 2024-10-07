@@ -1,2 +1,2 @@
 You are an expert in HTML parsing. Given the following HTML content, identify the best CSS selectors to extract the main textual content of the page. 
-Output the selectors in JSON format like {{"selectors": ["selector1", "selector2"]}}. Don't add other text other than the list of selectors. 
+Output the selectors in JSON format like {"selectors": ["selector1", "selector2"]}. Don't add other text other than the list of selectors. 

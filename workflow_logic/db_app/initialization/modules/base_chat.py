@@ -29,8 +29,8 @@ base_chat_module = BaseChatModule(
                     "chat": "GPT4o",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": False,
-                "has_code_exec": True,
+                "has_functions": True,
+                "has_code_exec": False,
             },
             {
                 "key": "claude_alice",
@@ -41,7 +41,7 @@ base_chat_module = BaseChatModule(
                 },
                 "max_consecutive_auto_reply": 1,
                 "has_functions": True,
-                "has_code_exec": True,
+                "has_code_exec": False,
             },
             {
                 "key": "lm_studio_alice",
@@ -52,8 +52,52 @@ base_chat_module = BaseChatModule(
                 },
                 "max_consecutive_auto_reply": 1,
                 "has_functions": True,
-                "has_code_exec": True,
-            }
+                "has_code_exec": False,
+            },
+            {
+                "key": "gemini_alice",
+                "name": "Alice (Gemini)",
+                "system_message": "default_system_message",
+                "models": {
+                    "chat": "gemini_1.5_flash",
+                },
+                "max_consecutive_auto_reply": 1,
+                "has_functions": True,
+                "has_code_exec": False,
+            },
+            {
+                "key": "mistral_alice",
+                "name": "Alice (Mistral)",
+                "system_message": "default_system_message",
+                "models": {
+                    "chat": "mistral_small",
+                },
+                "max_consecutive_auto_reply": 1,
+                "has_functions": True,
+                "has_code_exec": False,
+            },
+            {
+                "key": "cohere_alice",
+                "name": "Alice (Cohere)",
+                "system_message": "default_system_message",
+                "models": {
+                    "chat": "command-r-plus",
+                },
+                "max_consecutive_auto_reply": 1,
+                "has_functions": True,
+                "has_code_exec": False,                
+            },
+            {
+                "key": "meta_alice",
+                "name": "Alice (Meta)",
+                "system_message": "default_system_message",
+                "models": {
+                    "chat": "llama3.2_90b",
+                },
+                "max_consecutive_auto_reply": 1,
+                "has_functions": True,
+                "has_code_exec": False,
+            },
         ],
         "chats": [
             {
@@ -76,7 +120,35 @@ base_chat_module = BaseChatModule(
                 "messages": [],
                 "alice_agent": "lm_studio_alice",
                 "functions": [],
-            }
+            },
+            {
+                "key": "gemini_chat",
+                "name": "Gemini Chat",
+                "messages": [],
+                "alice_agent": "gemini_alice",
+                "functions": [],
+            },
+            {
+                "key": "mistral_chat",
+                "name": "Mistral Chat",
+                "messages": [],
+                "alice_agent": "mistral_alice",
+                "functions": [],
+            },
+            {
+                "key": "cohere_chat",
+                "name": "Cohere Chat",
+                "messages": [],
+                "alice_agent": "cohere_alice",
+                "functions": [],
+            },
+            {
+                "key": "meta_chat",
+                "name": "Meta Chat",
+                "messages": [],
+                "alice_agent": "meta_alice",
+                "functions": [],
+            },
         ]
     }
 )

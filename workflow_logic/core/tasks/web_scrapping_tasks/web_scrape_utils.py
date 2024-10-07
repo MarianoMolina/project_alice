@@ -4,15 +4,27 @@ import re
 from typing import List, Optional
 from workflow_logic.util import LOGGER
 
-def fetch_webpage(url: str) -> str:
+def extract_json(text: str) -> str:
+
+    """Extract JSON from a possible code block."""
+
+    json_match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', text)
+
+    if json_match:
+
+        return json_match.group(1)
+    LOGGER.warning(f"No JSON code block found, returning original string: {text[:100]}...")
+    return text
+
+def fetch_webpage_and_title(url: str) -> tuple[str, str]:
     """
-    Fetch the HTML content of the webpage.
+    Fetch the HTML content of the webpage and extract its title.
 
     Args:
         url (str): The URL of the webpage to fetch.
 
     Returns:
-        str: The HTML content of the webpage.
+        tuple[str, str]: A tuple containing the HTML content and the title of the webpage.
 
     Raises:
         requests.HTTPError: If the HTTP request returned an unsuccessful status code.
@@ -21,7 +33,19 @@ def fetch_webpage(url: str) -> str:
     response = requests.get(url)
     response.raise_for_status()
     LOGGER.info("Webpage fetched successfully.")
-    return response.text
+    
+    html_content = response.text
+    
+    # Parse the HTML content
+    soup = BeautifulSoup(html_content, 'html.parser')
+    
+    # Extract the title
+    title = soup.title.string if soup.title else "No title found"
+    
+    LOGGER.info(f"Extracted title: {title}")
+    
+    return html_content, title
+
 
 def preprocess_html(html: str) -> str:
     """

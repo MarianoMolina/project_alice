@@ -4,7 +4,7 @@ from workflow_logic.core.model import AliceModel
 from workflow_logic.core.api.api import API
 from workflow_logic.core.data_structures import References, ApiType, ApiName, ModelConfig, ModelApis
 from workflow_logic.util import LOGGER
-from workflow_logic.core.api.engines import APIEngine, LLMAnthropic, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI, ExaSearchAPI, ArxivSearchAPI, LLMEngine, VisionModelEngine, ImageGenerationEngine, AnthropicVisionEngine, OpenAIAdvancedSpeechToTextEngine, OpenAISpeechToTextEngine, OpenAITextToSpeechEngine, OpenAIEmbeddingsEngine
+from workflow_logic.core.api.engines import APIEngine, LLMAnthropic, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI, ExaSearchAPI, ArxivSearchAPI, LLMEngine, VisionModelEngine, ImageGenerationEngine, AnthropicVisionEngine, OpenAIAdvancedSpeechToTextEngine, OpenAISpeechToTextEngine, OpenAITextToSpeechEngine, OpenAIEmbeddingsEngine, GeminiLLMEngine, CohereLLMEngine, GeminiVisionEngine, GeminiEmbeddingsEngine, GeminiSpeechToTextEngine, GroqLLMEngine
 
 ApiEngineMap = {
     ApiType.LLM_MODEL: {
@@ -12,6 +12,11 @@ ApiEngineMap = {
         ApiName.ANTHROPIC: LLMAnthropic,
         ApiName.LM_STUDIO: LLMEngine,
         ApiName.AZURE: LLMEngine,
+        ApiName.GEMINI: GeminiLLMEngine,
+        ApiName.MISTRAL: LLMEngine,
+        ApiName.COHERE: CohereLLMEngine,
+        ApiName.META: LLMEngine,
+        ApiName.GROQ: LLMEngine
     },
     ApiType.GOOGLE_SEARCH: {
         ApiName.GOOGLE_SEARCH: GoogleSearchAPI,
@@ -32,6 +37,10 @@ ApiEngineMap = {
         ApiName.OPENAI_VISION: VisionModelEngine,
         ApiName.ANTHROPIC_VISION: AnthropicVisionEngine,
         ApiName.LM_STUDIO_VISION: VisionModelEngine,
+        ApiName.META_VISION: VisionModelEngine,
+        ApiName.MISTRAL_VISION: VisionModelEngine,
+        ApiName.GEMINI_VISION: GeminiVisionEngine,
+        ApiName.GROQ_VISION: VisionModelEngine
     },
     ApiType.IMG_GENERATION: {
         ApiName.OPENAI_IMG_GENERATION: ImageGenerationEngine
@@ -39,12 +48,16 @@ ApiEngineMap = {
     ApiType.SPEECH_TO_TEXT: {
         ApiName.OPENAI_STT: OpenAISpeechToTextEngine,
         ApiName.OPENAI_ASTT: OpenAIAdvancedSpeechToTextEngine,
+        ApiName.GEMINI_STT: GeminiSpeechToTextEngine
     },
     ApiType.TEXT_TO_SPEECH: {
-        ApiName.OPENAI_TTS: OpenAITextToSpeechEngine
+        ApiName.OPENAI_TTS: OpenAITextToSpeechEngine,
+        ApiName.GROQ_TTS: OpenAITextToSpeechEngine
     },
     ApiType.EMBEDDINGS: {
-        ApiName.OPENAI_EMBEDDINGS: OpenAIEmbeddingsEngine
+        ApiName.OPENAI_EMBEDDINGS: OpenAIEmbeddingsEngine,
+        ApiName.MISTRAL_EMBEDDINGS: OpenAIEmbeddingsEngine,
+        ApiName.GEMINI_EMBEDDINGS: GeminiEmbeddingsEngine
     },
 }
 

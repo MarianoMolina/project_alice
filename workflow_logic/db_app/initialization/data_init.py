@@ -70,7 +70,7 @@ if validation_result:
     raise ValueError(f"Dependency validation failed: {validation_result}")
 
 # Get combined data for all modules
-all_modules = ["base", "base_tasks", "base_chat", "coding_workflow", "advanced_chat", "adv_tasks", "research_workflow"]
+all_modules = ["base", "base_tasks", "base_chat", "coding_workflow", "advanced_chat", "adv_tasks", "research_workflow", "web_scrape_workflow"]
 combined_data = modular_db.get_combined_data(all_modules)
 
 # Create DB_STRUCTURE

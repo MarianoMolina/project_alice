@@ -22,10 +22,12 @@ python-magic
 pymongo # BSON
 
 # Third party APIs
-google-api-python-client
 openai
+google-api-python-client
+google-generativeai
+cohere
 anthropic
-exa_py
-praw
-arxiv
 wikipedia
+praw
+exa_py
+arxiv

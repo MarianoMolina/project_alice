@@ -5,7 +5,7 @@ from workflow_logic.db_app.initialization.modules.init_module import Initializat
 class AdvancedChatModule(InitializationModule):
     """This module defines the advanced chat agents and chats."""
     name: str = "advanced_chat"
-    dependencies: List[str] = ["base", "base_tasks", "base_chat", "adv_tasks"]
+    dependencies: List[str] = ["base", "base_tasks", "base_chat", "adv_tasks", "web_scrape_workflow", "coding_workflow", "research_workflow"]
     data: Dict[str, List[Dict[str, Any]]] = Field(default_factory=dict)
 
 advanced_chat_module = AdvancedChatModule(
@@ -13,12 +13,12 @@ advanced_chat_module = AdvancedChatModule(
         "agents": [
             {
                 "key": "gpt_alice_adv",
-                "name": "GPT Alice (turbo)",
+                "name": "Alice w/ tools (Gemini)",
                 "system_message": "default_system_message",
                 "models": {
-                    "chat": "gpt-4o-mini",
+                    "chat": "gemini_1.5_flash",
                     "img_gen": "Dall-E-3",
-                    "embeddings": "oai_embedding_large",
+                    "embeddings": "gemini_text_embedding",
                     "tts": "tts-1",
                 },
                 "has_code_exec": False,
@@ -27,7 +27,7 @@ advanced_chat_module = AdvancedChatModule(
             },
             {
                 "key": "claude_alice_adv",
-                "name": "Claude Alice",
+                "name": "Alice w/ tools (Claude)",
                 "system_message": "default_system_message",
                 "models": {
                     "chat": "Claude3.5",
@@ -37,7 +37,7 @@ advanced_chat_module = AdvancedChatModule(
                 },
                 "max_consecutive_auto_reply": 1,
                 "has_functions": True,
-                "has_code_exec": True,
+                "has_code_exec": False,
             },
         ],
         "chats": [
@@ -45,15 +45,15 @@ advanced_chat_module = AdvancedChatModule(
                 "key": "advanced_chat",
                 "name": "Advanced Chat (GPT)",
                 "messages": [],
-                "alice_agent": "gpt_alice_adv",  # Reference to agent key from base_chat
-                "functions": ["search_hub", "embedding_task", "tts_task"],  # Reference to task keys from base_tasks and coding_workflow
+                "alice_agent": "gpt_alice_adv", 
+                "functions": [ "web_scrape_workflow", "embedding_task", "tts_task", "research_workflow"], 
             },
             {
                 "key": "advanced_chat_claude",
                 "name": "Advanced Chat (Claude)",
                 "messages": [],
-                "alice_agent": "claude_alice",  # Reference to agent key from base_chat
-                "functions": ["search_hub", "image_gen_task"],  # Reference to task keys from base_tasks and coding_workflow
+                "alice_agent": "claude_alice",
+                "functions": ["coding_workflow", "image_gen_task", "embedding_task"], 
             },
         ]
     }

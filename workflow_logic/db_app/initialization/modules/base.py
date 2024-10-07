@@ -5,6 +5,11 @@ from workflow_logic.db_app.initialization.modules.init_module import Initializat
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 ANTHROPIC_API = os.getenv("ANTHROPIC_API")
+MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+COHERE_API_KEY = os.getenv("COHERE_API_KEY")
+META_API_KEY = os.getenv("META_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 EXA_API_KEY = os.getenv("EXA_API_KEY")
 REDDIT_CLIENT_ID = os.getenv("REDDIT_CLIENT_ID")
 REDDIT_CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET")
@@ -135,6 +140,114 @@ base_module = BaseModule(
                 "ctx_size": 128000,
                 "model_type": "chat",
                 "api_name": "openai_llm"
+            },
+            {
+                "key": "mistral_small",
+                "short_name": "Mistral Small",
+                "model_name": "mistral-small-latest",
+                "model_format": "OpenChat",
+                "ctx_size": 32000,
+                "model_type": "chat",
+                "api_name": "mistral_llm",
+            },
+            {
+                "key": "gemini_1.5_flash",
+                "short_name": "Gemini 1.5 Flash",
+                "model_name": "gemini-1.5-flash",
+                "model_format": "OpenChat",
+                "ctx_size": 1048576,
+                "model_type": "chat",
+                "api_name": "gemini_llm",
+            },
+            {
+                "key": "gemini_1.5_flash_v",
+                "short_name": "Gemini 1.5 Flash Vision",
+                "model_name": "gemini-1.5-flash",
+                "model_format": "OpenChat",
+                "ctx_size": 1048576,
+                "model_type": "vision",
+                "api_name": "gemini_vision",
+            },
+            {
+                "key": "gemini_1.5_flash_stt",
+                "short_name": "Gemini 1.5 Flash STT",
+                "model_name": "gemini-1.5-flash",
+                "model_format": "OpenChat",
+                "ctx_size": 1048576,
+                "model_type": "stt",
+                "api_name": "gemini_stt",
+            },
+            {
+                "key": "gemini_text_embedding",
+                "short_name": "Gemini Text Embedding",
+                "model_name": "text-embedding-004",
+                "model_format": "OpenChat",
+                "ctx_size": 2048,
+                "model_type": "embeddings",
+                "api_name": "gemini_embeddings",
+            },
+            {
+                "key": "llama3.2_90b",
+                "short_name": "Llama3.2 90B",
+                "model_name": "llama3.2-90b-vision",
+                "model_format": "Llama3",
+                "ctx_size": 128000,
+                "model_type": "chat",
+                "api_name": "meta_llm",
+            },
+            {
+                "key": "pixtral12b",
+                "short_name": "Pixtral 12B",
+                "model_name": "pixtral-12b",
+                "model_format": "OpenChat",
+                "ctx_size": 128000,
+                "model_type": "vision",
+                "api_name": "mistral_vision",
+            },
+            {
+                "key": "mistral-embed",
+                "short_name": "Mistral Embed",
+                "model_name": "mistral-embed",
+                "model_format": "OpenChat",
+                "ctx_size": 8000,
+                "model_type": "embeddings",
+                "api_name": "mistral_embeddings",
+            },
+            {
+                "key": "command-r-plus",
+                "short_name": "Command R Plus",
+                "model_name": "command-r-plus-08-2024",
+                "model_format": "OpenChat",
+                "ctx_size": 128000,
+                "model_type": "chat",
+                "api_name": "cohere_llm",
+            },
+            {
+                "key": "groq_llama_3.2_90b",
+                "short_name": "Llama 3.2 90b",
+                "model_name": "llama-3.2-90b-vision-preview",
+                "model_format": "Llama3",
+                "ctx_size": 128000,
+                "model_type": "chat",
+                "api_name": "groq_llm",
+            },
+            {
+                "key": "groq_tts_whisper",
+                "short_name": "Groq Whisper",
+                "model_name": "whisper-large-v3",
+                "model_format": "Base",
+                "ctx_size": 2048,
+                "model_type": "tts",
+                "api_name": "groq_tts",
+            },
+            {
+                "key": "groq_llama_3.2_11b_vision",
+                "short_name": "Llama 3.2 11b Vision",
+                "model_name": "llama-3.2-11b-vision-preview",
+                "model_format": "Llama3",
+                "ctx_size": 8000,
+                "model_type": "vision",
+                "api_name": "groq_vision",
             }
         ],
         "apis": [
@@ -205,6 +318,45 @@ base_module = BaseModule(
                 "default_model": "GPT4o",
             },
             {
+                "key": "mistral_llm_api",
+                "api_type": "llm_api",
+                "api_name": "mistral_llm",
+                "name": "Mistral API",
+                "api_config": {
+                    "api_key": MISTRAL_API_KEY,
+                    "base_url": "https://api.mistral.ai"
+                },
+                "is_active": True,
+                "health_status": "healthy",
+                "default_model": "mistral-small-latest",
+            },
+            {
+                "key": "mistral_vision",
+                "api_type": "img_vision",
+                "api_name": "mistral_vision",
+                "name": "Mistral Vision API",
+                "api_config": {
+                    "api_key": MISTRAL_API_KEY,
+                    "base_url": "https://api.mistral.ai"
+                },
+                "is_active": True,
+                "health_status": "healthy",
+                "default_model": "pixtral-12b",
+            },
+            {
+                "key": "mistral_embeddings",
+                "api_type": "embeddings",
+                "api_name": "mistral_embeddings",
+                "name": "Mistral Embeddings API",
+                "api_config": {
+                    "api_key": MISTRAL_API_KEY,
+                    "base_url": "https://api.mistral.ai"
+                },
+                "is_active": True,
+                "health_status": "healthy",
+                "default_model": "mistral-embed",
+            },
+            {
                 "key": "anthropic",
                 "api_type": "llm_api",
                 "api_name": "anthropic_llm",
@@ -216,6 +368,84 @@ base_module = BaseModule(
                 "is_active": True,
                 "health_status": "healthy",
                 "default_model": "Claude3.5",
+            },
+            {
+                "key": "gemini_llm",
+                "api_type": "llm_api",
+                "api_name": "gemini_llm",
+                "name": "Gemini API",
+                "api_config": {
+                    "api_key": GEMINI_API_KEY,
+                    "base_url": "https://api.gemini.ai"
+                },
+                "is_active": True,
+                "health_status": "healthy",
+                "default_model": "gemini-1.5-flash",
+            },
+            {
+                "key": "gemini_vision",
+                "api_type": "img_vision",
+                "api_name": "gemini_vision",
+                "name": "Gemini Vision API",
+                "api_config": {
+                    "api_key": GEMINI_API_KEY,
+                    "base_url": "https://api.gemini.ai"
+                },
+                "is_active": True,
+                "health_status": "healthy",
+                "default_model": "gemini_1.5_flash_v",
+            },
+            {
+                "key": "gemini_stt",
+                "api_type": "speech_to_text",
+                "api_name": "gemini_stt",
+                "name": "Gemini Speech to Text API",
+                "api_config": {
+                    "api_key": GEMINI_API_KEY,
+                    "base_url": "https://api.gemini.ai"
+                },
+                "is_active": True,
+                "health_status": "healthy",
+                "default_model": "gemini_1.5_flash_stt",
+            },
+            {
+                "key": "gemini_embeddings",
+                "api_type": "embeddings",
+                "api_name": "gemini_embeddings",
+                "name": "Gemini Embeddings API",
+                "api_config": {
+                    "api_key": GEMINI_API_KEY,
+                    "base_url": "https://api.gemini.ai"
+                },
+                "is_active": True,
+                "health_status": "healthy",
+                "default_model": "gemini_text_embedding",
+            },
+            {
+                "key": "cohere_llm",
+                "api_type": "llm_api",
+                "api_name": "cohere_llm",
+                "name": "Cohere API",
+                "api_config": {
+                    "api_key": COHERE_API_KEY,
+                    "base_url": "https://api.cohere.ai"
+                },
+                "is_active": True,
+                "health_status": "healthy",
+                "default_model": "command-r-plus",
+            },
+            {
+                "key": "meta_llm",
+                "api_type": "llm_api",
+                "api_name": "meta_llm",
+                "name": "Meta API",
+                "api_config": {
+                    "api_key": META_API_KEY,
+                    "base_url": "https://api.meta.ai"
+                },
+                "is_active": True,
+                "health_status": "healthy",
+                "default_model": "llama3.2-90b-vision",
             },
             {
                 "key": "local_lm_studio",
@@ -333,6 +563,45 @@ base_module = BaseModule(
                 "is_active": True,
                 "health_status": "healthy",
                 "default_model": "oai_embedding_large"            
+            },
+            {
+                "key": "groq_llm",
+                "api_type": "llm_api",
+                "api_name": "groq_llm",
+                "name": "Groq API",
+                "api_config": {
+                    "api_key": GROQ_API_KEY,
+                    "base_url": "https://api.groq.ai"
+                },
+                "is_active": True,
+                "health_status": "healthy",
+                "default_model": "groq_llama_3.2_90b",
+            },
+            {
+                "key": "groq_vision",
+                "api_type": "img_vision",
+                "api_name": "groq_vision",
+                "name": "Groq Vision API",
+                "api_config": {
+                    "api_key": GROQ_API_KEY,
+                    "base_url": "https://api.groq.ai"
+                },
+                "is_active": True,
+                "health_status": "healthy",
+                "default_model": "groq_llama_3.2_11b_vision",
+            },
+            {
+                "key": "groq_tts",
+                "api_type": "speech_to_text",
+                "api_name": "groq_tts",
+                "name": "Groq Text to Speech API",
+                "api_config": {
+                    "api_key": GROQ_API_KEY,
+                    "base_url": "https://api.groq.ai"
+                },
+                "is_active": True,
+                "health_status": "healthy",
+                "default_model": "groq_tts_whisper",
             }
         ],
         "parameters": [

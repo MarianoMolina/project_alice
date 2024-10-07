@@ -15,6 +15,8 @@ const useStyles = makeStyles((theme: Theme) => ({
   urlReferenceContent: {
     display: 'flex',
     flexDirection: 'column',
+    backgroundColor: theme.palette.background.default,
+    padding: theme.spacing(1),
   },
   sectionLabel: {
     fontWeight: 'bold',
