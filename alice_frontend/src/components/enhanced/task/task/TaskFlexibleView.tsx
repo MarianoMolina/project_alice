@@ -57,6 +57,12 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     useEffect(() => {
         fetchItem('apis').then((data) => setApis(data as API[]));
     }, [fetchItem]);
+    
+    useEffect(() => {
+        if (item) {
+            setForm(item);
+        }
+    }, [item]);
 
     const handleTaskTypeChange = useCallback((event: SelectChangeEvent<TaskType>) => {
         const newType = event.target.value as TaskType;

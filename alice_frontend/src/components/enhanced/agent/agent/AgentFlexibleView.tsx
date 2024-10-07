@@ -33,7 +33,13 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             setIsSaving(false);
         }
     }, [isSaving, handleSave]);
-    
+
+    useEffect(() => {
+        if (item) {
+            setForm(item);
+        }
+    }, [item]);
+
     const isEditMode = mode === 'edit' || mode === 'create';
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;

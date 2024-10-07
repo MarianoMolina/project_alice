@@ -29,6 +29,12 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
             setIsSaving(false);
         }
     }, [isSaving, handleSave]);
+    
+    useEffect(() => {
+        if (item) {
+            setForm(item);
+        }
+    }, [item]);
 
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;

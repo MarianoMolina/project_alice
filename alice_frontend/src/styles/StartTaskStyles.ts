@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     overflow: 'hidden',
   },
   apiStatusContainer: {
-    padding: theme.spacing(3),
+    paddingTop: theme.spacing(1),
     borderBottom: `1px solid ${theme.palette.divider}`,
   },
   sectionTitle: {
@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   apiTooltipContainer: {
     marginTop: theme.spacing(2),
     display: 'flex',
-    justifyContent: 'center',
+    overflow: 'auto',
   },
   recentExecutionsAccordion: {
     flexGrow: 1,

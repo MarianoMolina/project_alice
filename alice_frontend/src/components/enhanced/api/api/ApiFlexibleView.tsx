@@ -46,6 +46,12 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
             setIsSaving(false);
         }
     }, [isSaving, handleSave]);
+    
+    useEffect(() => {
+        if (item) {
+            setForm(item);
+        }
+    }, [item]);
 
     const updateAvailableApiNames = useCallback((apiType: ApiType | undefined) => {
         Logger.info('updateAvailableApiNames', apiType);

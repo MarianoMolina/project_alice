@@ -12,7 +12,7 @@ advanced_chat_module = AdvancedChatModule(
     data={
         "agents": [
             {
-                "key": "gpt_alice_adv",
+                "key": "gemini_alice_adv",
                 "name": "Alice w/ tools (Gemini)",
                 "system_message": "default_system_message",
                 "models": {
@@ -43,16 +43,16 @@ advanced_chat_module = AdvancedChatModule(
         "chats": [
             {
                 "key": "advanced_chat",
-                "name": "Advanced Chat (GPT)",
+                "name": "Advanced Chat (Gemini)",
                 "messages": [],
-                "alice_agent": "gpt_alice_adv", 
+                "alice_agent": "gemini_alice_adv", 
                 "functions": [ "web_scrape_workflow", "embedding_task", "tts_task", "research_workflow"], 
             },
             {
                 "key": "advanced_chat_claude",
                 "name": "Advanced Chat (Claude)",
                 "messages": [],
-                "alice_agent": "claude_alice",
+                "alice_agent": "claude_alice_adv",
                 "functions": ["coding_workflow", "image_gen_task", "embedding_task"], 
             },
         ]
