@@ -16,6 +16,11 @@ class CohereLLMEngine(APIEngine):
                     description="The list of messages in the conversation.",
                     default=None
                 ),
+                "system": ParameterDefinition(
+                    type="string",
+                    description="System message to be used for the conversation.",
+                    default=None
+                ),
                 "tools": ParameterDefinition(
                     type="array",
                     description="A list of tool definitions that the model may use.",
@@ -30,6 +35,16 @@ class CohereLLMEngine(APIEngine):
                     type="number",
                     description="The sampling temperature to use.",
                     default=0.7
+                ),
+                "tool_choice": ParameterDefinition(
+                    type="string",
+                    description="Specifies the function calling mode.",
+                    default="auto"
+                ),
+                "n": ParameterDefinition(
+                    type="integer",
+                    description="The number of chat completion choices to generate.",
+                    default=1
                 )
             },
             required=["messages"]
@@ -38,13 +53,22 @@ class CohereLLMEngine(APIEngine):
     )
     required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
 
-    async def generate_api_response(self, api_data: ModelConfig, messages: List[Dict[str, Any]], tools: Optional[List[Dict[str, Any]]] = None, max_tokens: Optional[int] = None, temperature: Optional[float] = 0.7, **kwargs) -> References:
+    async def generate_api_response(self, api_data: ModelConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[Dict[str, Any]]] = None, max_tokens: Optional[int] = None, temperature: Optional[float] = 0.7, tool_choice: Optional[str] = "auto", n: Optional[int] = 1, **kwargs) -> References:
         if not api_data.api_key:
             raise ValueError("API key not found in API data")
 
         client = cohere.Client(api_data.api_key)
 
         try:
+            # Prepare messages, including system message if provided
+            cohere_messages = []
+            if system:
+                cohere_messages.append({"role": "SYSTEM", "message": system})
+            for message in messages:
+                role = message["role"].upper()
+                cohere_messages.append({"role": role, "message": message["content"]})
+
+            # Prepare tools
             cohere_tools = []
             if tools:
                 for tool in tools:
@@ -52,7 +76,8 @@ class CohereLLMEngine(APIEngine):
 
             response: NonStreamedChatResponse = client.chat(
                 model=api_data.model,
-                messages=messages,
+                message=cohere_messages[-1]["message"],  # Last message as the current input
+                chat_history=cohere_messages[:-1],  # All previous messages as history
                 tools=cohere_tools if cohere_tools else None,
                 max_tokens=max_tokens,
                 temperature=temperature
@@ -60,14 +85,7 @@ class CohereLLMEngine(APIEngine):
 
             tool_calls = None
             if response.tool_calls:
-                tool_calls = [ToolCall(
-                    id=tool_call.id,
-                    type="function",
-                    function={
-                        "name": tool_call.function.name,
-                        "arguments": tool_call.function.arguments
-                    }
-                ) for tool_call in response.tool_calls]
+                tool_calls = [ToolCall(**tool_call.model_dump()) for tool_call in response.tool_calls]
 
             msg = MessageDict(
                 role="assistant",

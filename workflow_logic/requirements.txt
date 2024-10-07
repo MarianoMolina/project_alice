@@ -25,6 +25,7 @@ pymongo # BSON
 openai
 google-api-python-client
 google-generativeai
+groq
 cohere
 anthropic
 wikipedia

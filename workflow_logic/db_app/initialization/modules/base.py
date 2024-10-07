@@ -223,9 +223,9 @@ base_module = BaseModule(
                 "api_name": "cohere_llm",
             },
             {
-                "key": "groq_llama_3.2_90b",
-                "short_name": "Llama 3.2 90b",
-                "model_name": "llama-3.2-90b-vision-preview",
+                "key": "llama-3.1-70b-versatile",
+                "short_name": "Llama 3.1 70b",
+                "model_name": "llama-3.1-70b-versatile",
                 "model_format": "Llama3",
                 "ctx_size": 128000,
                 "model_type": "chat",
@@ -324,11 +324,11 @@ base_module = BaseModule(
                 "name": "Mistral API",
                 "api_config": {
                     "api_key": MISTRAL_API_KEY,
-                    "base_url": "https://api.mistral.ai"
+                    "base_url": "https://api.mistral.ai/v1"
                 },
                 "is_active": True,
                 "health_status": "healthy",
-                "default_model": "mistral-small-latest",
+                "default_model": "mistral_small",
             },
             {
                 "key": "mistral_vision",
@@ -337,11 +337,11 @@ base_module = BaseModule(
                 "name": "Mistral Vision API",
                 "api_config": {
                     "api_key": MISTRAL_API_KEY,
-                    "base_url": "https://api.mistral.ai"
+                    "base_url": "https://api.mistral.ai/v1"
                 },
                 "is_active": True,
                 "health_status": "healthy",
-                "default_model": "pixtral-12b",
+                "default_model": "pixtral12b",
             },
             {
                 "key": "mistral_embeddings",
@@ -350,7 +350,7 @@ base_module = BaseModule(
                 "name": "Mistral Embeddings API",
                 "api_config": {
                     "api_key": MISTRAL_API_KEY,
-                    "base_url": "https://api.mistral.ai"
+                    "base_url": "https://api.mistral.ai/v1"
                 },
                 "is_active": True,
                 "health_status": "healthy",
@@ -380,7 +380,7 @@ base_module = BaseModule(
                 },
                 "is_active": True,
                 "health_status": "healthy",
-                "default_model": "gemini-1.5-flash",
+                "default_model": "gemini_1.5_flash",
             },
             {
                 "key": "gemini_vision",
@@ -441,11 +441,11 @@ base_module = BaseModule(
                 "name": "Meta API",
                 "api_config": {
                     "api_key": META_API_KEY,
-                    "base_url": "https://api.meta.ai"
+                    "base_url": "https://api.llama-api.com"
                 },
                 "is_active": True,
                 "health_status": "healthy",
-                "default_model": "llama3.2-90b-vision",
+                "default_model": "llama3.2_90b",
             },
             {
                 "key": "local_lm_studio",
@@ -571,11 +571,11 @@ base_module = BaseModule(
                 "name": "Groq API",
                 "api_config": {
                     "api_key": GROQ_API_KEY,
-                    "base_url": "https://api.groq.ai"
+                    "base_url": "https://api.groq.com/openai/v1"
                 },
                 "is_active": True,
                 "health_status": "healthy",
-                "default_model": "groq_llama_3.2_90b",
+                "default_model": "llama-3.1-70b-versatile",
             },
             {
                 "key": "groq_vision",
@@ -584,7 +584,7 @@ base_module = BaseModule(
                 "name": "Groq Vision API",
                 "api_config": {
                     "api_key": GROQ_API_KEY,
-                    "base_url": "https://api.groq.ai"
+                    "base_url": "https://api.groq.com/openai/v1"
                 },
                 "is_active": True,
                 "health_status": "healthy",
@@ -597,7 +597,7 @@ base_module = BaseModule(
                 "name": "Groq Text to Speech API",
                 "api_config": {
                     "api_key": GROQ_API_KEY,
-                    "base_url": "https://api.groq.ai"
+                    "base_url": "https://api.groq.com/openai/v1"
                 },
                 "is_active": True,
                 "health_status": "healthy",

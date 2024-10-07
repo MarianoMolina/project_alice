@@ -1,4 +1,5 @@
 import google.generativeai as genai
+from google.generativeai.types import GenerateContentResponse
 from pydantic import Field
 from typing import Dict, Any, List, Optional
 from workflow_logic.core.api.engines import APIEngine
@@ -13,6 +14,11 @@ class GeminiLLMEngine(APIEngine):
                 "messages": ParameterDefinition(
                     type="array",
                     description="The list of messages in the conversation.",
+                    default=None
+                ),
+                "system": ParameterDefinition(
+                    type="string",
+                    description="System message to be used for the conversation.",
                     default=None
                 ),
                 "tools": ParameterDefinition(
@@ -34,6 +40,11 @@ class GeminiLLMEngine(APIEngine):
                     type="string",
                     description="Specifies the function calling mode.",
                     default="auto"
+                ),
+                "n": ParameterDefinition(
+                    type="integer",
+                    description="The number of chat completion choices to generate.",
+                    default=1
                 )
             },
             required=["messages"]
@@ -42,17 +53,31 @@ class GeminiLLMEngine(APIEngine):
     )
     required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
 
-    async def generate_api_response(self, api_data: ModelConfig, messages: List[Dict[str, Any]], tools: Optional[List[Dict[str, Any]]] = None, max_tokens: Optional[int] = None, temperature: Optional[float] = 0.7, tool_choice: Optional[str] = "auto", **kwargs) -> References:
+    async def generate_api_response(self, api_data: ModelConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[Dict[str, Any]]] = None, max_tokens: Optional[int] = None, temperature: Optional[float] = 0.7, tool_choice: Optional[str] = "auto", n: Optional[int] = 1, **kwargs) -> References:
         if not api_data.api_key:
             raise ValueError("API key not found in API data")
 
         genai.configure(api_key=api_data.api_key)
-        model = genai.GenerativeModel(api_data.model)
-
+        
         try:
-            content = []
-            for message in messages:
-                content.append(message['content'])
+            # Prepare the chat history (all messages except the last one)
+            history = []
+            for message in messages[:-1]:
+                role = "model" if message["role"] == "assistant" else message["role"]
+                history.append({"role": role, "parts": message["content"]})
+
+            # Get the last message as the new input
+            new_message = messages[-1]["content"] if messages else ""
+
+            # Set up the model with system instruction if provided
+            model_kwargs = {"model_name": api_data.model}
+            if system:
+                model_kwargs["system_instruction"] = system
+            
+            model = genai.GenerativeModel(**model_kwargs)
+
+            # Start the chat with history
+            chat = model.start_chat(history=history)
 
             generation_config = genai.types.GenerationConfig(
                 max_output_tokens=max_tokens,
@@ -80,33 +105,36 @@ class GeminiLLMEngine(APIEngine):
                         "mode": tool_choice.upper()
                     }
 
-            response = model.generate_content(
-                content,
+            # Send the new message to get the response
+            response: GenerateContentResponse = chat.send_message(
+                new_message,
                 generation_config=generation_config,
                 tools=tool_config
             )
 
-            tool_calls = None
-            if response.candidates[0].content.parts[0].function_call:
-                function_call = response.candidates[0].content.parts[0].function_call
-                tool_calls = [ToolCall(
-                    type="function",
-                    function={
-                        "name": function_call.name,
-                        "arguments": function_call.args
-                    }
-                )]
+            # Process tool calls
+            tool_calls = []
+            for candidate in response.candidates:
+                for part in candidate.content.parts:
+                    if part.function_call:
+                        tool_calls.append(ToolCall(
+                            type="function",
+                            function={
+                                "name": part.function_call.name,
+                                "arguments": part.function_call.args
+                            }
+                        ))
 
             msg = MessageDict(
                 role="assistant",
                 content=response.text,
-                tool_calls=tool_calls,
+                tool_calls=tool_calls if tool_calls else None,
                 generated_by="llm",
                 type=ContentType.TEXT,
                 creation_metadata={
                     "model": api_data.model,
                     "prompt_tokens": response.usage_metadata.prompt_token_count,
-                    "completion_tokens": response.candidates[0].token_count,
+                    "completion_tokens": response.usage_metadata.candidates_token_count,
                     "total_tokens": response.usage_metadata.total_token_count,
                     "finish_reason": response.candidates[0].finish_reason.name
                 }

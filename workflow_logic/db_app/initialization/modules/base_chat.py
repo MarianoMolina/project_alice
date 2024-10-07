@@ -98,6 +98,17 @@ base_chat_module = BaseChatModule(
                 "has_functions": True,
                 "has_code_exec": False,
             },
+            {
+                "key": "groq_alice",
+                "name": "Alice (Groq)",
+                "system_message": "default_system_message",
+                "models": {
+                    "chat": "llama-3.1-70b-versatile",
+                },
+                "max_consecutive_auto_reply": 1,
+                "has_functions": True,
+                "has_code_exec": False,
+            }
         ],
         "chats": [
             {
@@ -149,6 +160,13 @@ base_chat_module = BaseChatModule(
                 "alice_agent": "meta_alice",
                 "functions": [],
             },
+            {
+                "key": "groq_chat",
+                "name": "Groq Chat",
+                "messages": [],
+                "alice_agent": "groq_alice",
+                "functions": [],
+            }
         ]
     }
 )
