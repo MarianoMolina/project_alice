@@ -68,8 +68,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   content: {
     flexGrow: 1,
-    overflowY: 'auto',
-    overflowX: 'hidden',
+    overflow: 'hidden',
     width: 'inherit',
   },
 }));

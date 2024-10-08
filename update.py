@@ -23,7 +23,7 @@ def main():
 
     # Rebuild Docker images
     print("Rebuilding Docker images...")
-    run_command("docker-compose build", "Failed to rebuild Docker images.")
+    run_command("docker-compose build --no-cache", "Failed to rebuild Docker images.")
 
     # Run the run.py script
     print("Starting Project Alice...")

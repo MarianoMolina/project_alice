@@ -100,10 +100,6 @@ class GeminiLLMEngine(APIEngine):
                 tool_config = {
                     "function_declarations": function_declarations
                 }
-                if tool_choice:
-                    tool_config["function_calling_config"] = {
-                        "mode": tool_choice.upper()
-                    }
 
             # Send the new message to get the response
             response: GenerateContentResponse = chat.send_message(

@@ -20,7 +20,8 @@ const useStyles = makeStyles((theme: Theme) => ({
     minWidth: 0,
     display: 'flex',
     flexDirection: 'column',
-    margin: '0 10px'
+    margin: '0 10px',
+    maxHeight: 'calc(100% - 73px)',
   },
   chatAliceInput: {
     borderTop: `1px solid ${theme.palette.divider}`,
@@ -30,6 +31,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: 'flex',
     justifyContent: 'center',
   },
+  activeListContainer: {
+    height: '100%',
+    overflowY: 'auto',
+  }
 }));
 
 export default useStyles;

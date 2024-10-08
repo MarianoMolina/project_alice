@@ -107,81 +107,88 @@ const ChatAlice: React.FC = () => {
       handleURLReferenceClick: (id: string) => selectCardItem('URLReference', id),
     };
 
-    switch (tabName) {
-      case 'Select Chat':
-        return (
-          <ChatShortListView
-            items={pastChats}
-            onView={(chat) => selectCardItem('Chat', chat?._id, chat)}
-            onInteraction={selectChatId}
-            item={null} mode={'view'}
-            onChange={() => null}
-            handleSave={async () => { }}
-          />
-        );
-      case 'Current Chat':
-        return (
-          <ChatCardView
-            items={null}
-            item={currentChat}
-            mode={'view'}
-            onChange={() => null}
-            handleSave={async () => { }}
-          />
-        );
-      case 'Add Functions':
-        return (
-          <EnhancedTask
-            mode={'list'}
-            fetchAll={true}
-            onInteraction={checkAndAddTask}
-            onView={(task) => task._id && selectCardItem('Task', task._id)}
-            {...handleProps}
-          />
-        );
-      case 'Add Task Results':
-        return (
-          <EnhancedTaskResponse
-            mode={'list'}
-            fetchAll={true}
-            onView={(taskResult) => taskResult._id && selectCardItem('TaskResponse', taskResult._id)}
-            onInteraction={addTaskResponse}
-            {...handleProps}
-          />
-        );
-      case 'Add File Reference':
-        return (
-          <EnhancedFile
-            mode={'list'}
-            fetchAll={true}
-            onView={(file) => file._id && selectCardItem('File', file._id)}
-            onInteraction={addFileReference}
-            {...handleProps}
-          />
-        );
-      case 'Add URL Reference':
-        return (
-          <EnhancedURLReference
-            mode={'list'}
-            fetchAll={true}
-            onView={(urlReference) => urlReference._id && selectCardItem('URLReference', urlReference._id)}
-            onInteraction={addURLReference}
-            {...handleProps}
-          />
-        );
-      case 'Add Message Reference':
-        return (
-          <EnhancedMessage
-            mode={'list'}
-            fetchAll={true}
-            onView={(message) => message._id && selectCardItem('Message', message._id)}
-            onInteraction={addMessageReference}
-            {...handleProps}
-          />
-        );
-      default:
-        return null;
-    }
+    return (
+      <Box className={classes.activeListContainer}>
+        {(() => {
+          switch (tabName) {
+            case 'Select Chat':
+              return (
+                <ChatShortListView
+                  items={pastChats}
+                  onView={(chat) => selectCardItem('Chat', chat?._id, chat)}
+                  onInteraction={selectChatId}
+                  item={null} mode={'view'}
+                  onChange={() => null}
+                  handleSave={async () => { }}
+                />
+              );
+            case 'Current Chat':
+              return (
+                <ChatCardView
+                  items={null}
+                  item={currentChat}
+                  mode={'view'}
+                  onChange={() => null}
+                  handleSave={async () => { }}
+                />
+              );
+            case 'Add Functions':
+              return (
+                <EnhancedTask
+                  mode={'list'}
+                  fetchAll={true}
+                  onInteraction={checkAndAddTask}
+                  onView={(task) => task._id && selectCardItem('Task', task._id)}
+                  {...handleProps}
+                />
+              );
+            case 'Add Task Results':
+              return (
+                <EnhancedTaskResponse
+                  mode={'list'}
+                  fetchAll={true}
+                  onView={(taskResult) => taskResult._id && selectCardItem('TaskResponse', taskResult._id)}
+                  onInteraction={addTaskResponse}
+                  {...handleProps}
+                />
+              );
+            case 'Add File Reference':
+              return (
+                <EnhancedFile
+                  mode={'list'}
+                  fetchAll={true}
+                  onView={(file) => file._id && selectCardItem('File', file._id)}
+                  onInteraction={addFileReference}
+                  {...handleProps}
+                />
+              );
+            case 'Add URL Reference':
+              return (
+                <EnhancedURLReference
+                  mode={'list'}
+                  fetchAll={true}
+                  onView={(urlReference) => urlReference._id && selectCardItem('URLReference', urlReference._id)}
+                  onInteraction={addURLReference}
+                  {...handleProps}
+                />
+              );
+            case 'Add Message Reference':
+              return (
+                <EnhancedMessage
+                  mode={'list'}
+                  fetchAll={true}
+                  onView={(message) => message._id && selectCardItem('Message', message._id)}
+                  onInteraction={addMessageReference}
+                  {...handleProps}
+                />
+              );
+            default:
+              return null;
+          }
+        }
+        )()}
+      </Box>
+    )
   }, [selectChatId, currentChat, checkAndAddTask, addTaskResponse, addFileReference, addURLReference, addMessageReference, selectCardItem, pastChats]);
 
   return (

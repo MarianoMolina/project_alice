@@ -70,25 +70,33 @@ const StartTask: React.FC = () => {
   };
 
   const renderSidebarContent = () => {
-    switch (activeTab) {
-      case 'TaskResponse':
-        return <EnhancedTaskResponse
-          key={listKey}
-          onView={(taskResult) => taskResult._id && triggerItemDialog('TaskResponse', taskResult._id)}
-          mode={'list'}
-          fetchAll={true}
-        />;
-      case 'Task':
-        return <EnhancedTask
-          key={listKey}
-          mode={'shortList'}
-          fetchAll={true}
-          onView={(task) => task._id && triggerItemDialog('Task', task._id)}
-          onInteraction={handleTabWhenTaskSelect}
-        />;
-      default:
-        return null;
-    }
+
+    return (
+      <Box className={classes.activeListContainer}>
+        {(() => {
+          switch (activeTab) {
+            case 'TaskResponse':
+              return <EnhancedTaskResponse
+                key={listKey}
+                onView={(taskResult) => taskResult._id && triggerItemDialog('TaskResponse', taskResult._id)}
+                mode={'list'}
+                fetchAll={true}
+              />;
+            case 'Task':
+              return <EnhancedTask
+                key={listKey}
+                mode={'shortList'}
+                fetchAll={true}
+                onView={(task) => task._id && triggerItemDialog('Task', task._id)}
+                onInteraction={handleTabWhenTaskSelect}
+              />;
+            default:
+              return null;
+          }
+        }
+        )()}
+      </Box>
+    )
   };
 
   return (

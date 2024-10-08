@@ -83,6 +83,10 @@ const useStyles = makeStyles((theme: Theme) => ({
   accordionRoot: {
     height: '100%',
   },
+  activeListContainer: {
+    height: '100%',
+    overflowY: 'auto',
+  }
 }));
 
 export default useStyles;

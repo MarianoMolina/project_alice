@@ -95,44 +95,46 @@ const Database: React.FC = () => {
         };
 
         return (
-            <Box>
+            <Box className={classes.activeListContainer}>
                 <ToggleBox activeTab={activeTab} viewMode={viewMode} handleViewModeChange={handleViewModeChange} />
-                {(() => {
-                    switch (activeTab) {
-                        case 'Agent':
-                            return <EnhancedAgent {...commonProps} />;
-                        case 'Model':
-                            return <EnhancedModel {...commonProps} />;
-                        case 'Parameter':
-                            return <EnhancedParameter {...commonProps} />;
-                        case 'Prompt':
-                            return <EnhancedPrompt {...commonProps} />;
-                        case 'Task':
-                            return <EnhancedTask {...commonProps} />;
-                        case 'TaskResponse':
-                            return <EnhancedTaskResponse {...commonProps} />;
-                        case 'Chat':
-                            return <EnchancedChat {...commonProps} />;
-                        case 'API':
-                            return <EnhancedAPI {...commonProps} />;
-                        case 'File':
-                            return <EnhancedFile {...commonProps} />;
-                        case 'Message':
-                            return <EnhancedMessage {...commonProps} />;
-                        case 'URLReference':
-                            return <EnhancedURLReference {...commonProps} />;
-                        default:
-                            return null;
-                    }
-                })()}
+                <Box className={classes.activeListContent}> {/* Add a content box for scrollability */}
+                    {(() => {
+                        switch (activeTab) {
+                            case 'Agent':
+                                return <EnhancedAgent {...commonProps} />;
+                            case 'Model':
+                                return <EnhancedModel {...commonProps} />;
+                            case 'Parameter':
+                                return <EnhancedParameter {...commonProps} />;
+                            case 'Prompt':
+                                return <EnhancedPrompt {...commonProps} />;
+                            case 'Task':
+                                return <EnhancedTask {...commonProps} />;
+                            case 'TaskResponse':
+                                return <EnhancedTaskResponse {...commonProps} />;
+                            case 'Chat':
+                                return <EnchancedChat {...commonProps} />;
+                            case 'API':
+                                return <EnhancedAPI {...commonProps} />;
+                            case 'File':
+                                return <EnhancedFile {...commonProps} />;
+                            case 'Message':
+                                return <EnhancedMessage {...commonProps} />;
+                            case 'URLReference':
+                                return <EnhancedURLReference {...commonProps} />;
+                            default:
+                                return null;
+                        }
+                    })()}
+                </Box>
             </Box>
         );
-    }, [activeTab, handleItemSelect, viewMode, handleViewModeChange, selectCardItem]);
+    }, [activeTab, handleItemSelect, viewMode, handleViewModeChange, selectCardItem, classes.activeListContainer, classes.activeListContent]);
 
     const renderActiveComponent = useCallback(() => {
         if (!showActiveComponent) {
             return (
-                <PlaceholderSkeleton mode="compact" text='Select an item or create a new one to start configuring.'/>
+                <PlaceholderSkeleton mode="compact" text='Select an item or create a new one to start configuring.' />
             );
         }
 
@@ -158,7 +160,7 @@ const Database: React.FC = () => {
             case 'Chat':
                 return <EnchancedChat {...commonProps} />;
             case 'API':
-                return <EnhancedAPI {...commonProps}/>;
+                return <EnhancedAPI {...commonProps} />;
             case 'File':
                 return <EnhancedFile {...commonProps} />;
             case 'Message':

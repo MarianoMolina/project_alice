@@ -47,6 +47,18 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
           />
         ),
         code({ node, inline, className, children, ...props }: any) {
+          if (inline) {
+            return (
+              <Typography
+                component="span"
+                className={classes.inlineVariable}
+                style={{ fontStyle: 'italic' }}
+                {...props}
+              >
+                {children}
+              </Typography>
+            );
+          }
           const match = /language-(\w+)/.exec(className || '');
           return !inline && match ? (
             <CodeBlock language={match[1]} code={children} props={props} />

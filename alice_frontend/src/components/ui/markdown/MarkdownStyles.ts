@@ -66,7 +66,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
     markdownText: {
         fontSize: '1em !important',
-        marginBottom: '0 !important',
+        // marginBottom: '0 !important',
     },
     markdownTitle: {
         fontSize: '1.25em !important',
@@ -101,6 +101,14 @@ const useStyles = makeStyles((theme: Theme) => ({
         marginTop: '5px !important',
         fontSize: 'clamp(1rem, 1.25rem, 1.75rem) !important',
     },
+    inlineVariable: {
+        backgroundColor: theme.palette.secondary.dark,
+        padding: '2px 4px',
+        borderRadius: '3px',
+        fontStyle: 'italic',
+        fontSize: '1em !important',
+        marginBottom: '0 !important',
+    }
 }));
 
 export default useStyles;

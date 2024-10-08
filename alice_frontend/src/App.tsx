@@ -24,6 +24,7 @@ import { DialogProvider as CardDialogProvider } from './contexts/CardDialogConte
 import DialogComponent from './components/ui/dialog/DialogCustom';
 import EnhancedCardDialog from './components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
 import EnhancedFlexibleDialog from './components/enhanced/common/enhanced_card_dialog/EnhancedFlexibleDialog';
+import Knowledgebase from './pages/Knowledgbase';
 
 const App: React.FC = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -73,6 +74,7 @@ const App: React.FC = () => {
                         />
                       }
                     />
+                    <Route path="/knowledgebase/*" element={<Knowledgebase />} />
                   </Routes>
                 </MainLayout>
               </NavigationGuard>
