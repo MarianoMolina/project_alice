@@ -13,17 +13,15 @@ services:
       volume-init:
         condition: service_completed_successfully
     volumes:
-      - ./alice_frontend:/app:delegated
+      # - ./alice_frontend:/app:delegated
       - /app/node_modules
       - /app/dist
       - ./.env:/app/.env
-      - logs:/app/logs
-      - shared-uploads:/app/shared-uploads:ro
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       CI: "true" # comment out when in development
-      CHOKIDAR_USEPOLLING: "true"
-      WATCHPACK_POLLING: "true"
+      # CHOKIDAR_USEPOLLING: "true"
+      # WATCHPACK_POLLING: "true"
 
   backend:
     build:
@@ -60,7 +58,7 @@ services:
     ports:
       - "${WORKFLOW_PORT}:${WORKFLOW_PORT_DOCKER}"
     volumes:
-      - .:/app
+      # - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
       - logs:/app/logs
       - shared-uploads:/app/shared-uploads:ro

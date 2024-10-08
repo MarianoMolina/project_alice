@@ -33,6 +33,26 @@ These components share information in one of 4 main ways, all of which have a st
 - Task Results
 - URL References
 
+## Setup and Installation
+
+1. Ensure you have Docker installed on your system. On Windows, it comes with docker-compose, but [check if you have it installed](https://stackoverflow.com/questions/72928891/how-can-i-check-if-docker-compose-plugin-is-installed). Otherwise (if in Linux), [install it](https://docs.docker.com/compose/install/linux/)
+
+2. (Optional) Install LM Studio if you plan to use local models.
+
+3. Download the repository:
+   ```
+   git clone https://github.com/MarianoMolina/project_alice.git
+   ```
+
+4. Create a `.env` file in the root directory using the `template.env` file as a reference. Complete the data for any APIs you want to use (e.g., OpenAI API key).
+
+5. Run the appropriate script for your operating system:
+   - Windows: Run `run.bat`
+   - Linux/Mac: Run `run.sh`
+Alternatively you can just execute run.py using `python run.py` in a commandline while in the repository folder
+
+This will build and launch the containers. Once ready, the frontend will be accessible at `http://localhost:4000/`. 
+
 ## Features
 
 ### 1. Task Execution
@@ -65,26 +85,6 @@ These components share information in one of 4 main ways, all of which have a st
 ### 5. Flexible Model Deployment
 - Deploy local models using LM Studio
 - Use any OpenAI-compatible endpoints or Anthropic, Gemini and Cohere models to power your agents and workflows
-
-## Setup and Installation
-
-1. Ensure you have Docker installed on your system. On Windows, it comes with docker-compose, but [check if you have it installed](https://stackoverflow.com/questions/72928891/how-can-i-check-if-docker-compose-plugin-is-installed). Otherwise (if in Linux), [install it](https://docs.docker.com/compose/install/linux/)
-
-2. (Optional) Install LM Studio if you plan to use local models.
-
-3. Download the repository:
-   ```
-   git clone https://github.com/MarianoMolina/project_alice.git
-   ```
-
-4. Create a `.env` file in the root directory using the `template.env` file as a reference. Complete the data for any APIs you want to use (e.g., OpenAI API key).
-
-5. Run the appropriate script for your operating system:
-   - Windows: Run `run.bat`
-   - Linux/Mac: Run `run.sh`
-Alternatively you can just execute run.py using `python run.py` in a commandline while in the repository folder
-
-This will build and launch the containers. Once ready, the frontend will be accessible at `http://localhost:4000/`. 
 
 ## Usage
 
