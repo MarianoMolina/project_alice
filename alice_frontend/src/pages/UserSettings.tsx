@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
-import { Box, TextField, Typography, Button, Dialog, Card, CardContent, Paper } from '@mui/material';
+import { Box, TextField, Typography, Button, Card, CardContent, Paper } from '@mui/material';
 import { Person, Api, Warning } from '@mui/icons-material';
-import { useApi } from '../context/ApiContext';
-import { useAuth } from '../context/AuthContext';
+import { useApi } from '../contexts/ApiContext';
+import { useAuth } from '../contexts/AuthContext';
 import { User } from '../types/UserTypes';
-import { useNotification } from '../context/NotificationContext';
-import { API, getDefaultApiForm } from '../types/ApiTypes';
-import { ComponentMode } from '../types/CollectionTypes';
+import { useNotification } from '../contexts/NotificationContext';
+import { API } from '../types/ApiTypes';
 import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
 import useStyles from '../styles/UserSettingsStyles';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
-import { useDialog } from '../context/DialogCustomContext';
+import { useDialog } from '../contexts/DialogCustomContext';
+import { useCardDialog } from '../contexts/CardDialogContext';
+import Logger from '../utils/Logger';
 
 interface UserSettingsProps {
     setHasUnsavedChanges: (value: boolean) => void;
@@ -19,30 +20,27 @@ interface UserSettingsProps {
 
 const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => {
     const { openDialog } = useDialog();
+    const { selectFlexibleItem } = useCardDialog();
     const { fetchItem, updateItem, purgeAndReinitializeDatabase } = useApi();
     const { addNotification } = useNotification();
     const [userObject, setUserObject] = useState<User | null>(null);
     const [originalUserObject, setOriginalUserObject] = useState<User | null>(null);
     const { user } = useAuth();
-    const [showCreateAPI, setShowCreateAPI] = useState(false);
-    const [showConfirmPurge, setShowConfirmPurge] = useState(false);
     const classes = useStyles();
     const isInitialMount = useRef(true);
-    const [apiUpdateTrigger, setApiUpdateTrigger] = useState(0);
-    const [selectedItem, setSelectedItem] = useState<Partial<API> | null>(null);
-    const [isCreating, setIsCreating] = useState(false);
     const [activeTab, setActiveTab] = useState('Personal information');
 
     useEffect(() => {
         const loadUser = async () => {
             try {
                 if (user) {
+                    Logger.info('Loading user data');
                     const userData = await fetchItem('users', user._id) as User;
                     setUserObject(userData);
                     setOriginalUserObject(userData);
                 }
             } catch (error) {
-                console.error('Error loading user data:', error);
+                Logger.error('Error loading user data:', error);
             }
         };
         loadUser();
@@ -72,53 +70,51 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
     const handleSaveChanges = useCallback(async () => {
         if (userObject && userObject._id) {
             try {
+                Logger.info('Saving user changes');
                 const updated = await updateItem('users', userObject._id ?? '', userObject);
                 setUserObject(updated as User);
                 setOriginalUserObject(updated as User);
                 setHasUnsavedChanges(false);
             } catch (error) {
-                console.error('Error updating user:', error);
+                Logger.error('Error updating user:', error);
             }
         }
     }, [userObject, updateItem, setHasUnsavedChanges]);
 
-    const handleApiCreated = useCallback(async (api: API) => {
-        setShowCreateAPI(false);
-        setApiUpdateTrigger(prev => prev + 1);
-    }, []);
-
     const handleApiSelect = useCallback((item: Partial<API>) => {
-        setSelectedItem(item);
-        setIsCreating(false);
-        setShowCreateAPI(true);
-    }, []);
+        Logger.debug('API selected:', item);
+        selectFlexibleItem('API', 'edit', item._id, item as API);
+    }, [selectFlexibleItem]);
 
-    const handlePurgeAndReinitialize = useCallback(async () => {
+    const handlePurgeAndReinitialize = useCallback(() => {
+        Logger.info('handlePurgeAndReinitialize called');
         openDialog({
-          title: 'Confirm Database Purge and Reinitialization',
-          content: 'Are you sure you want to purge and reinitialize your database? This action cannot be undone and will delete all your current data.',
-          confirmText: 'Confirm Purge and Reinitialize',
-          onConfirm: async () => {
-            try {
-              await purgeAndReinitializeDatabase();
-              console.log('Database successfully purged and reinitialized');
-              addNotification('Database successfully purged and reinitialized', 'success');
-            } catch (error) {
-              console.error('Failed to purge and reinitialize database:', error);
-              addNotification('Failed to purge and reinitialize database. Please try again.', 'error');
-            }
-          },
+            title: 'Confirm Database Purge and Reinitialization',
+            content: 'Are you sure you want to purge and reinitialize your database? This action cannot be undone and will delete all your current data.',
+            confirmText: 'Confirm Purge and Reinitialize',
+            onConfirm: async () => {
+                Logger.debug('Dialog confirmed');
+                try {
+                    Logger.info('Purging db');
+                    await purgeAndReinitializeDatabase();
+                    Logger.info('Database successfully purged and reinitialized');
+                    addNotification('Database successfully purged and reinitialized', 'success');
+                } catch (error) {
+                    Logger.error('Failed to purge and reinitialize database:', error);
+                    addNotification('Failed to purge and reinitialize database. Please try again.', 'error');
+                }
+            },
         });
-      }, [openDialog, purgeAndReinitializeDatabase, addNotification]);
+    }, [openDialog, purgeAndReinitializeDatabase, addNotification]);
 
-      const tabs = [
+    const tabs = [
         { name: 'Personal information', icon: Person },
         { name: 'APIs', icon: Api },
         { name: 'Danger Zone', icon: Warning },
     ];
 
-
     const renderActiveContent = useCallback(() => {
+        Logger.debug('Rendering active content:', activeTab);
         if (!userObject) {
             return <Typography>Loading user settings...</Typography>;
         }
@@ -166,53 +162,51 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
                             <Button
                                 variant="contained"
                                 color="primary"
-                                onClick={() => handleApiSelect(getDefaultApiForm())}
+                                onClick={() => selectFlexibleItem('API', 'create')}
                             >
                                 Create New API
                             </Button>
                         </Box>
                         <Paper className={classes.apiPaper}>
                             <EnhancedAPI
-                                key={apiUpdateTrigger}
+                                key={0}
                                 mode="list"
                                 fetchAll={true}
                                 onView={handleApiSelect}
                             />
                         </Paper>
                     </Box>
-                )
-                case 'Danger Zone':
-                    return (
-                        <Card className={classes.card}>
-                            <CardContent>
-                                <Box className={classes.dangerZone}>
-                                    <Box className={classes.userInfoHeader}>
-                                        <Warning color="error" />
-                                        <Typography variant="h5">Danger Zone</Typography>
-                                    </Box>
-                                    <Typography variant="body1" color="error" paragraph>
-                                        The following action will delete all your data and reinitialize your database. This cannot be undone.
-                                    </Typography>
-                                    <Button
-                                        variant="contained"
-                                        onClick={() => openDialog({
-                                            title: 'Confirm Database Purge and Reinitialization',
-                                            content: 'Are you sure you want to purge and reinitialize your database? This action cannot be undone and will delete all your current data.',
-                                            confirmText: 'Confirm Purge and Reinitialize',
-                                            onConfirm: handlePurgeAndReinitialize,
-                                        })}
-                                        className={classes.dangerButton}
-                                    >
-                                        Purge and Reinitialize Database
-                                    </Button>
+                );
+            case 'Danger Zone':
+                return (
+                    <Card className={classes.card}>
+                        <CardContent>
+                            <Box className={classes.dangerZone}>
+                                <Box className={classes.userInfoHeader}>
+                                    <Warning color="error" />
+                                    <Typography variant="h5">Danger Zone</Typography>
                                 </Box>
-                            </CardContent>
-                        </Card>
-                    );
-                default:
-                    return null;
+                                <Typography variant="body1" color="error" paragraph>
+                                    The following action will delete all your data and reinitialize your database. This cannot be undone.
+                                </Typography>
+                                <Button
+                                    variant="contained"
+                                    onClick={() => {
+                                        Logger.debug('Purge button clicked');
+                                        handlePurgeAndReinitialize();
+                                    }}
+                                    className={classes.dangerButton}
+                                >
+                                    Purge and Reinitialize Database
+                                </Button>
+                            </Box>
+                        </CardContent>
+                    </Card>
+                );
+            default:
+                return null;
         }
-    }, [activeTab, userObject, handleUserUpdate, handleSaveChanges, handleApiSelect, apiUpdateTrigger, classes]);
+    }, [activeTab, userObject, handleUserUpdate, handleSaveChanges, handleApiSelect, classes, handlePurgeAndReinitialize, selectFlexibleItem]);
 
     return (
         <Box className={classes.root}>
@@ -223,17 +217,9 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
                 collapsedWidth={SIDEBAR_COLLAPSED_WIDTH}
                 expandedWidth={SIDEBAR_COLLAPSED_WIDTH}
             />
-            <Box flexGrow={1} p={3}>
+            <Box flexGrow={1} p={3} className={classes.mainContainer}>
                 {renderActiveContent()}
             </Box>
-            <Dialog open={showCreateAPI} onClose={() => setShowCreateAPI(false)}>
-                <EnhancedAPI
-                    itemId={selectedItem?._id}
-                    mode={(isCreating ? 'create' : 'edit') as ComponentMode}
-                    fetchAll={true}
-                    onSave={handleApiCreated}
-                />
-            </Dialog>
         </Box>
     );
 };

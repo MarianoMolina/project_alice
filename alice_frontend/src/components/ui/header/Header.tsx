@@ -1,10 +1,11 @@
 import React from 'react';
 import { AppBar, Toolbar, IconButton, Box, Tooltip, Button, Typography } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { SettingsApplications, Storage, Chat, Task, Home } from '@mui/icons-material';
+import { SettingsApplications, Storage, Chat, Task, Home, School } from '@mui/icons-material';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import useStyles from './HeaderStyles';
+import Logger from '../../../utils/Logger';
 
 const Header: React.FC = () => {
   const classes = useStyles();
@@ -17,12 +18,15 @@ const Header: React.FC = () => {
   };
 
   const handleLogout = () => {
-    console.log('Logging out');
+    Logger.info('Logging out');
     logout();
     navigate('/login');
   };
 
   const isActive = (path: string) => {
+    if (path === '/knowledgebase') {
+      return location.pathname.startsWith(path);
+    }
     return location.pathname === path;
   };
 
@@ -41,7 +45,6 @@ const Header: React.FC = () => {
             </IconButton>
           </Tooltip>
         </Box>
-
         {isAuthenticated && (
           <Box className={classes.centerSection}>
             <Tooltip title="Chat with Alice">
@@ -71,9 +74,17 @@ const Header: React.FC = () => {
                 <Storage />
               </IconButton>
             </Tooltip>
+            <Tooltip title="Knowledgebase">
+              <IconButton
+                color="inherit"
+                onClick={() => handleNavigation('/knowledgebase')}
+                className={isActive('/knowledgebase') ? classes.activeButton : ''}
+              >
+                <School />
+              </IconButton>
+            </Tooltip>
           </Box>
         )}
-
         <Box className={classes.rightSection}>
           {isAuthenticated ? (
             <>

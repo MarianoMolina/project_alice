@@ -10,6 +10,6 @@
     "forceConsistentCasingInFileNames": true,
     "typeRoots": ["./node_modules/@types", "./src/types"]
   },
-  "include": ["src/**/*", "../tmp/trash/Agent.js", "../tmp/trash/Chat.js", "../tmp/trash/Model.js", "../tmp/trash/Parameter.js", "../tmp/trash/Prompt.js", "../tmp/trash/Task.js", "../tmp/trash/TaskResult.js", "../tmp/trash/User.js", "../tmp/trash/corsConfig.js", "../tmp/trash/auth.js", "../tmp/agents.js", "../tmp/chats.js", "../tmp/collections.js", "../tmp/models.js", "../tmp/parameters.js", "../tmp/prompts.js", "../tmp/taskResult.js", "../tmp/tasks.js", "../tmp/users.js", "../tmp/app.js", "../tmp/trash/schemas.js", "../tmp/trash/utils.js"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }

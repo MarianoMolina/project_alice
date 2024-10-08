@@ -10,13 +10,15 @@ import { Code, ExpandMore, Assignment, QueryBuilder, Settings } from '@mui/icons
 import { PromptComponentProps } from '../../../../types/PromptTypes';
 import useStyles from '../PromptStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
+import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
 
 const PromptCardView: React.FC<PromptComponentProps> = ({
     item,
-    handleParameterClick,
 }) => {
     const classes = useStyles();
 
+    const { selectCardItem } = useCardDialog();
     if (!item) {
         return <Typography>No prompt data available.</Typography>;
     }
@@ -46,7 +48,7 @@ const PromptCardView: React.FC<PromptComponentProps> = ({
                         <Chip
                             key={key}
                             label={`${key}: ${param.type}`}
-                            onClick={() => handleParameterClick && handleParameterClick(param._id!)}
+                            onClick={() => selectCardItem && selectCardItem('Prompt', param._id!, param)}
                             className={classes.chip}
                             color={item.parameters?.required.includes(key) ? "primary" : "default"}
                         />
@@ -77,6 +79,8 @@ const PromptCardView: React.FC<PromptComponentProps> = ({
             title={item.name}
             id={item._id}
             listItems={listItems}
+            item={item}
+            itemType='prompts'
         >
             <Accordion>
                 <AccordionSummary
@@ -87,9 +91,9 @@ const PromptCardView: React.FC<PromptComponentProps> = ({
                     <Typography>Prompt Content</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                    <Typography variant="body2" className={classes.content}>
+                    <CustomMarkdown className={`${classes.messageSmall} ${classes.assistantMessage}`}>
                         {item.content}
-                    </Typography>
+                    </CustomMarkdown>
                 </AccordionDetails>
             </Accordion>
         </CommonCardView>

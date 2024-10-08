@@ -30,7 +30,7 @@ from contextlib import asynccontextmanager
 from concurrent.futures import ThreadPoolExecutor
 from workflow_logic.db_app import ContainerAPI, DB_STRUCTURE
 from workflow_logic.api_app.middleware import add_cors_middleware, auth_middleware
-from workflow_logic.api_app.routes import health_route, task_execute, chat_response, db_init
+from workflow_logic.api_app.routes import health_route, task_execute, chat_response, db_init, file_transcript
 from workflow_logic.test.component_tests import TestEnvironment, DBTests, APITests
 from workflow_logic.util import LOGGER
 
@@ -39,9 +39,7 @@ thread_pool = None
 async def run_initial_tests(app: FastAPI):
     test_env = TestEnvironment()
     db_tests = DBTests()
-    api_tests = APITests()
     await test_env.add_module(db_tests)
-    # await test_env.add_module(api_tests)
     test_settings = {
         "db_structure": DB_STRUCTURE,
         "verbose": True
@@ -54,7 +52,6 @@ async def run_initial_tests(app: FastAPI):
 async def lifespan(app: FastAPI):
     global db_app, thread_pool
     db_app = ContainerAPI()
-    await db_app.initialize_db_app()
     thread_pool = ThreadPoolExecutor()
     app.state.db_app = db_app
     # Run initial tests
@@ -70,3 +67,4 @@ WORKFLOW_APP.include_router(health_route)
 WORKFLOW_APP.include_router(task_execute)
 WORKFLOW_APP.include_router(chat_response)
 WORKFLOW_APP.include_router(db_init)
+WORKFLOW_APP.include_router(file_transcript)

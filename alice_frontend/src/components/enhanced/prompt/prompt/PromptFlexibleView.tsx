@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
     Typography,
     TextField,
@@ -7,9 +7,10 @@ import {
     Box
 } from '@mui/material';
 import FunctionDefinitionBuilder from '../../common/function_select/FunctionDefinitionBuilder';
-import { PromptComponentProps } from '../../../../types/PromptTypes';
+import { PromptComponentProps, Prompt } from '../../../../types/PromptTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import { FunctionParameters } from '../../../../types/ParameterTypes';
+import Logger from '../../../../utils/Logger';
 
 const PromptFlexibleView: React.FC<PromptComponentProps> = ({
     item,
@@ -17,38 +18,74 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
     mode,
     handleSave
 }) => {
-    const handleFunctionDefinitionChange = useCallback((newDefinition: FunctionParameters) => {
-        onChange({ ...item, parameters: newDefinition });
-    }, [onChange, item]);
+    const [form, setForm] = useState<Partial<Prompt>>(item || {});
+    const [isSaving, setIsSaving] = useState(false);
 
-    if (!item) {
+    Logger.debug('PromptFlexibleView', 'form', form);
+
+    useEffect(() => {
+        if (isSaving) {
+            handleSave();
+            setIsSaving(false);
+        }
+    }, [isSaving, handleSave]);
+    
+    useEffect(() => {
+        if (item) {
+            setForm(item);
+        }
+    }, [item]);
+
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setForm(prevForm => ({ ...prevForm, [name]: value }));
+    }, []);
+
+    const handleSwitchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, checked } = e.target;
+        setForm(prevForm => ({ ...prevForm, [name]: checked }));
+    }, []);
+
+    const handleFunctionDefinitionChange = useCallback((newDefinition: FunctionParameters) => {
+        setForm(prevForm => ({ ...prevForm, parameters: newDefinition }));
+    }, []);
+
+    const handleLocalSave = useCallback(() => {
+        onChange(form);
+        setIsSaving(true);
+    }, [form, onChange]);
+
+    if (!form) {
         return <Typography>No Prompt data available.</Typography>;
     }
+
     const isEditMode = mode === 'edit' || mode === 'create';
     const title = mode === 'create' ? 'Create New Prompt' : mode === 'edit' ? 'Edit Prompt' : 'Prompt Details';
-    const saveButtonText = item._id ? 'Update Prompt' : 'Create Prompt';
+    const saveButtonText = form._id ? 'Update Prompt' : 'Create Prompt';
 
     return (
         <GenericFlexibleView
             elementType="Prompt"
             title={title}
-            onSave={handleSave}
+            onSave={handleLocalSave}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
         >
             <TextField
                 fullWidth
+                name="name"
                 label="Name"
-                value={item.name || ''}
-                onChange={(e) => onChange({ name: e.target.value })}
+                value={form.name || ''}
+                onChange={handleInputChange}
                 margin="normal"
                 disabled={!isEditMode}
             />
             <TextField
                 fullWidth
+                name="content"
                 label="Content"
-                value={item.content || ''}
-                onChange={(e) => onChange({ content: e.target.value })}
+                value={form.content || ''}
+                onChange={handleInputChange}
                 margin="normal"
                 multiline
                 rows={4}
@@ -57,18 +94,19 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
             <FormControlLabel
                 control={
                     <Switch
-                        checked={item.is_templated || false}
-                        onChange={(e) => onChange({ is_templated: e.target.checked })}
+                        name="is_templated"
+                        checked={form.is_templated || false}
+                        onChange={handleSwitchChange}
                         disabled={!isEditMode}
                     />
                 }
                 label="Is Templated"
             />
-            {item.is_templated && (
+            {form.is_templated && (
                 <Box>
                     <Typography gutterBottom>Parameters</Typography>
                     <FunctionDefinitionBuilder
-                        initialParameters={item.parameters}
+                        initialParameters={form.parameters}
                         onChange={handleFunctionDefinitionChange}
                         isViewOnly={!isEditMode}
                     />

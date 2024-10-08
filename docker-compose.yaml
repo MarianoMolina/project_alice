@@ -10,13 +10,18 @@ services:
         condition: service_healthy
       workflow:
         condition: service_healthy
+      volume-init:
+        condition: service_completed_successfully
     volumes:
-      # - ./alice_frontend:/app:delegated
+      - ./alice_frontend:/app:delegated
       - /app/node_modules
+      - ./.env:/app/.env
+      - logs:/app/logs
+      - shared-uploads:/app/shared-uploads:ro
     environment:
-      NODE_ENV: production
-      # CHOKIDAR_USEPOLLING: "true"
-      # WATCHPACK_POLLING: "true"
+      NODE_ENV: ${NODE_ENV:-production}
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
 
   backend:
     build:
@@ -27,10 +32,14 @@ services:
     depends_on:
       mongo:
         condition: service_started
+      volume-init:
+        condition: service_completed_successfully
     volumes:
       - ./.env:/app/.env
       - ./backend:/app
       - /app/node_modules
+      - logs:/app/logs
+      - shared-uploads:/app/shared-uploads
     environment:
       NODE_ENV: ${NODE_ENV:-production}
     extra_hosts:
@@ -42,13 +51,6 @@ services:
       retries: 5
       start_period: 10s
 
-  mongo:
-    image: mongo:latest
-    ports:
-      - "26017:27017"
-    volumes:
-      - mongo_data:/data/db
-
   workflow:
     build:
       context: ./workflow_logic
@@ -56,10 +58,18 @@ services:
       - "${WORKFLOW_PORT}:${WORKFLOW_PORT_DOCKER}"
     volumes:
       - .:/app
-      - /var/run/docker.sock:/var/run/docker.sock  # Add this line
+      - /var/run/docker.sock:/var/run/docker.sock
+      - logs:/app/logs
+      - shared-uploads:/app/shared-uploads:ro
     depends_on:
       backend:
         condition: service_healthy
+      volume-init:
+        condition: service_completed_successfully
+      python_image:
+        condition: service_completed_successfully
+      bash_image:
+        condition: service_completed_successfully
     environment:
       - PYTHONPATH=/app
       - HOST=host.docker.internal
@@ -72,5 +82,60 @@ services:
       retries: 5
       start_period: 5s
 
+  volume-init:
+    image: busybox
+    attach: false
+    volumes:
+      - ${COMPOSE_PROJECT_DIR}/logs:/logs
+      - ${COMPOSE_PROJECT_DIR}/shared-uploads:/shared-uploads
+    command: |
+      sh -c "
+        echo 'Starting volume initialization' &&
+        ls -la / &&
+        echo 'Creating directories' &&
+        mkdir -p /logs /shared-uploads &&
+        echo 'Setting permissions' &&
+        chmod -R 755 /logs &&
+        chown -R 1000:1000 /logs &&
+        chmod -R 755 /shared-uploads &&
+        chown -R 1000:1000 /shared-uploads &&
+        echo 'Finished volume initialization' &&
+        ls -la /logs /shared-uploads
+      "
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "26017:27017"
+    volumes:
+      - mongo_data:/data/db
+    attach: false
+
+  python_image:
+    build:
+      context: .
+      dockerfile: Dockerfile.python
+    image: mypython:latest
+    command: ["bash"]
+
+  bash_image:
+    build:
+      context: .
+      dockerfile: Dockerfile.bash
+    image: mybash:latest
+    command: ["bash"]
+
 volumes:
+  logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${COMPOSE_PROJECT_DIR}/logs
+  shared-uploads:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${COMPOSE_PROJECT_DIR}/shared-uploads
   mongo_data:

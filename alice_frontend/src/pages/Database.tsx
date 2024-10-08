@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Box } from '@mui/material';
-import { Add, Person, Category, Settings, Description, Functions, Assignment, Chat, Api } from '@mui/icons-material';
+import { Add, Person, Category, Settings, Description, Functions, Assignment, Api, AttachFile, Message, QuestionAnswer, Link } from '@mui/icons-material';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH, TASK_SIDEBAR_WIDTH_TABLE, TASK_SIDEBAR_WIDTH_COMPACT } from '../utils/Constants';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
 import { ComponentMode, CollectionElement, CollectionElementString } from '../types/CollectionTypes';
@@ -15,34 +15,37 @@ import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
 import useStyles from '../styles/DatabaseStyles';
 import ToggleBox from '../components/ui/toggle_box/ToggleBox';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
-import EnhancedCardDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
-import { useCardDialog } from '../context/CardDialogContext.tsx';
+import { useCardDialog } from '../contexts/CardDialogContext';
+import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
+import EnhancedMessage from '../components/enhanced/message/message/EnhancedMessage';
+import EnhancedURLReference from '../components/enhanced/url_reference/url_reference/EnhancedURLReference';
+import Logger from '../utils/Logger';
 
 const Database: React.FC = () => {
     const classes = useStyles();
     const [selectedItem, setSelectedItem] = useState<CollectionElement | null>(null);
-    const { selectItem } = useCardDialog();
+    const { selectCardItem } = useCardDialog();
     const [activeTab, setActiveTab] = useState<CollectionElementString>('Agent');
     const [showActiveComponent, setShowActiveComponent] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const [viewMode, setViewMode] = useState<'list' | 'shortList' | 'table'>('list');
 
     const handleCreateNew = useCallback(() => {
-        console.log('Create new clicked');
+        Logger.debug('Create new clicked');
         setSelectedItem(null);
         setIsCreating(true);
         setShowActiveComponent(true);
     }, [setSelectedItem]);
 
     const handleItemSelect = useCallback((item: CollectionElement | null) => {
-        console.log('Item selected:', item);
+        Logger.debug('Item selected:', item);
         setSelectedItem(item);
         setIsCreating(false);
         setShowActiveComponent(true);
     }, [setSelectedItem]);
 
     const handleSave = useCallback(async (item: CollectionElement | null) => {
-        console.log('Saving item:', item);
+        Logger.debug('Saving item:', item);
         setSelectedItem(null);
         setIsCreating(false);
         setShowActiveComponent(false);
@@ -58,14 +61,17 @@ const Database: React.FC = () => {
     ];
 
     const tabs = [
-        { name: 'Agent' as CollectionElementString, icon: Person },
-        { name: 'Model' as CollectionElementString, icon: Category },
-        { name: 'Parameter' as CollectionElementString, icon: Settings },
-        { name: 'Prompt' as CollectionElementString, icon: Description },
-        { name: 'Task' as CollectionElementString, icon: Functions },
-        { name: 'TaskResponse' as CollectionElementString, icon: Assignment },
-        { name: 'Chat' as CollectionElementString, icon: Chat },
-        { name: 'API' as CollectionElementString, icon: Api },
+        { name: 'Agent' as CollectionElementString, icon: Person, group: 'Core' },
+        { name: 'API' as CollectionElementString, icon: Api, group: 'Core' },
+        { name: 'Chat' as CollectionElementString, icon: QuestionAnswer, group: 'Core' },
+        { name: 'File' as CollectionElementString, icon: AttachFile, group: 'Ref' },
+        { name: 'Message' as CollectionElementString, icon: Message, group: 'Ref' },
+        { name: 'Model' as CollectionElementString, icon: Category, group: 'Core' },
+        { name: 'Parameter' as CollectionElementString, icon: Settings, group: 'Core' },
+        { name: 'Prompt' as CollectionElementString, icon: Description, group: 'Core' },
+        { name: 'Task' as CollectionElementString, icon: Functions, group: 'Core' },
+        { name: 'TaskResponse' as CollectionElementString, icon: Assignment, group: 'Ref' },
+        { name: 'URLReference' as CollectionElementString, icon: Link, group: 'Ref' },
     ];
 
     // Active tab logic
@@ -81,46 +87,54 @@ const Database: React.FC = () => {
             fetchAll: true,
             onInteraction: handleItemSelect,
             onView: (item: any) => {
+                Logger.debug('Viewing item:', item);
                 if (item._id) {
-                    selectItem(activeTab, item._id);
+                    selectCardItem(activeTab, item._id);
                 }
             },
         };
 
         return (
-            <Box>
+            <Box className={classes.activeListContainer}>
                 <ToggleBox activeTab={activeTab} viewMode={viewMode} handleViewModeChange={handleViewModeChange} />
-                {(() => {
-                    switch (activeTab) {
-                        case 'Agent':
-                            return <EnhancedAgent {...commonProps} />;
-                        case 'Model':
-                            return <EnhancedModel {...commonProps} />;
-                        case 'Parameter':
-                            return <EnhancedParameter {...commonProps} />;
-                        case 'Prompt':
-                            return <EnhancedPrompt {...commonProps} />;
-                        case 'Task':
-                            return <EnhancedTask {...commonProps} />;
-                        case 'TaskResponse':
-                            return <EnhancedTaskResponse {...commonProps} />;
-                        case 'Chat':
-                            return <EnchancedChat {...commonProps} />;
-                        case 'API':
-                            return <EnhancedAPI {...commonProps} />;
-                        default:
-                            return null;
-                    }
-                })()}
-                <EnhancedCardDialog />
+                <Box className={classes.activeListContent}> {/* Add a content box for scrollability */}
+                    {(() => {
+                        switch (activeTab) {
+                            case 'Agent':
+                                return <EnhancedAgent {...commonProps} />;
+                            case 'Model':
+                                return <EnhancedModel {...commonProps} />;
+                            case 'Parameter':
+                                return <EnhancedParameter {...commonProps} />;
+                            case 'Prompt':
+                                return <EnhancedPrompt {...commonProps} />;
+                            case 'Task':
+                                return <EnhancedTask {...commonProps} />;
+                            case 'TaskResponse':
+                                return <EnhancedTaskResponse {...commonProps} />;
+                            case 'Chat':
+                                return <EnchancedChat {...commonProps} />;
+                            case 'API':
+                                return <EnhancedAPI {...commonProps} />;
+                            case 'File':
+                                return <EnhancedFile {...commonProps} />;
+                            case 'Message':
+                                return <EnhancedMessage {...commonProps} />;
+                            case 'URLReference':
+                                return <EnhancedURLReference {...commonProps} />;
+                            default:
+                                return null;
+                        }
+                    })()}
+                </Box>
             </Box>
         );
-    }, [activeTab, handleItemSelect, viewMode, handleViewModeChange, selectItem]);
+    }, [activeTab, handleItemSelect, viewMode, handleViewModeChange, selectCardItem, classes.activeListContainer, classes.activeListContent]);
 
     const renderActiveComponent = useCallback(() => {
         if (!showActiveComponent) {
             return (
-                <PlaceholderSkeleton mode="compact" text='Select an item or create a new one to start configuring.'/>
+                <PlaceholderSkeleton mode="compact" text='Select an item or create a new one to start configuring.' />
             );
         }
 
@@ -146,7 +160,13 @@ const Database: React.FC = () => {
             case 'Chat':
                 return <EnchancedChat {...commonProps} />;
             case 'API':
-                return <EnhancedAPI {...commonProps} fetchAll={true} />;
+                return <EnhancedAPI {...commonProps} />;
+            case 'File':
+                return <EnhancedFile {...commonProps} />;
+            case 'Message':
+                return <EnhancedMessage {...commonProps} />;
+            case 'URLReference':
+                return <EnhancedURLReference {...commonProps} />;
             default:
                 return null;
         }

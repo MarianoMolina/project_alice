@@ -1,7 +1,8 @@
 import axios from 'axios';
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { TextField, Button, Container, Typography, Box, Alert, Link } from '@mui/material';
+import Logger from '../utils/Logger';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -17,10 +18,10 @@ const Login: React.FC = () => {
       await loginAndNavigate(email, password);
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        console.error('Login failed:', error.response?.data);
+        Logger.error('Login failed:', error.response?.data);
         setError('Login failed. Please check your credentials and try again.');
       } else {
-        console.error('Unexpected error:', error);
+        Logger.error('Unexpected error:', error);
         setError('An unexpected error occurred. Please try again later.');
       }
     }

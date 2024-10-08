@@ -1,8 +1,7 @@
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from workflow_logic.core.api import APIManager, API, APIEngine
-from workflow_logic.core import AliceModel, FunctionParameters, ParameterDefinition
-from workflow_logic.util import SearchOutput, LLMConfig, ApiType, ApiName
+from workflow_logic.core import AliceModel, FunctionParameters, ParameterDefinition, SearchOutput, ModelConfig, ApiType, ApiName
 
 @pytest.fixture
 def sample_api():
@@ -44,7 +43,7 @@ def test_get_api_by_type(api_manager, sample_api):
 def test_retrieve_api_data_llm(api_manager, sample_api):
     api_manager.add_api(sample_api)
     llm_config = api_manager.retrieve_api_data(ApiType.LLM_MODEL)
-    assert isinstance(llm_config, LLMConfig)
+    assert isinstance(llm_config, ModelConfig)
     assert llm_config.model == 'test-model'
     assert llm_config.api_key == 'test_key'
 

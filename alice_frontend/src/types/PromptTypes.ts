@@ -1,19 +1,15 @@
-import { User, convertToUser } from './UserTypes';
+import { BaseDataseObject, convertToUser } from './UserTypes';
 import { FunctionParameters } from './ParameterTypes';
 import { HandleClickProps } from './CollectionTypes';
 
-export interface Prompt {
+export interface Prompt extends BaseDataseObject {
     _id?: string;
     name: string;
     content: string;
-    created_by?: User;
-    updated_by?: User;
     is_templated?: boolean;
     parameters?: FunctionParameters;
     partial_variables?: Record<string, any>;
     version?: number;
-    createdAt?: Date;
-    updatedAt?: Date;
 }
 
 export const convertToPrompt = (data: any): Prompt => {

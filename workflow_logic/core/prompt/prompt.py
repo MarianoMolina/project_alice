@@ -3,7 +3,7 @@ from bson import ObjectId
 from jinja2 import Template
 from typing import Optional, List, Any, Dict, Union
 from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
-from workflow_logic.core.parameters import FunctionParameters
+from workflow_logic.core.data_structures import FunctionParameters
 
 TYPE_MAPPING = {
     "string": str,
@@ -60,7 +60,7 @@ from bson import ObjectId
 from jinja2 import Template
 from typing import Optional, List, Any, Dict
 from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
-from workflow_logic.core.parameters import FunctionParameters
+from workflow_logic.core.data_structures import FunctionParameters
 
 TYPE_MAPPING = {
     "string": str,

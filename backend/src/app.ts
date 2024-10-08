@@ -16,8 +16,12 @@ import HealthRoutes from './routes/health.route';
 import APIRoutes from './routes/api.route';
 import corsConfigMiddleware from './middleware/corsConfig.middleware';
 import loggingMiddleware from './middleware/logging.middleware';
-import lmStudioRoute from './routes/lmStudio.route';
+import LmStudioRoute from './routes/lmStudio.route';
 import Logger from './utils/logger';
+import FileRoutes from './routes/file.route';
+import MessageRoutes from './routes/message.route';
+import URLReferenceRoutes from './routes/urlReference.route';
+import './models';
 
 dotenv.config();
 
@@ -47,6 +51,7 @@ app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 // Health route should be registered before other routes
+app.use('/lm-studio', LmStudioRoute);
 app.use('/api/health', HealthRoutes);
 app.use('/api/apis', APIRoutes);
 app.use('/api/agents', AgentRoutes);
@@ -57,7 +62,9 @@ app.use('/api/prompts', PromptRoutes);
 app.use('/api/taskresults', TaskResultRouter);
 app.use('/api/tasks', TaskRoutes);
 app.use('/api/users', UserRoutes);
-app.use('/lm-studio', lmStudioRoute);
 app.use('/api/parameters', ParametersRoutes);
+app.use('/api/files', FileRoutes);
+app.use('/api/messages', MessageRoutes);
+app.use('/api/urlreferences', URLReferenceRoutes)
 
 export default app;

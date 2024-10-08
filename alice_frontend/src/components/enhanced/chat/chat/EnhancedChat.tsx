@@ -3,7 +3,6 @@ import ChatFlexibleView from './ChatFlexibleView';
 import ChatListView from './ChatListView';
 import ChatTableView from './ChatTableView';
 import ChatCardView from './ChatCardView';
-import ChatFullView from './ChatFullView';
 import ChatShortListView from './ChatShortListView';
 import { AliceChat } from '../../../../types/ChatTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
@@ -37,10 +36,6 @@ const EnhancedChat: React.FC<EnhancedChatProps> = (props) => {
       isInteractable: props.isInteractable,
       onInteraction: props.onInteraction,
       onView: props.onView,
-      showRegenerate: props.showRegenerate,
-      handleTaskClick: props.handleTaskClick,
-      handleTaskResultClick: props.handleTaskResultClick,
-      handleAgentClick: props.handleAgentClick,
       showHeaders: props.showHeaders,
     };
 
@@ -57,12 +52,6 @@ const EnhancedChat: React.FC<EnhancedChatProps> = (props) => {
         return <ChatTableView {...commonProps} />;
       case 'card':
         return <ChatCardView {...commonProps} />;
-      case 'full':
-        return (
-          <ChatFullView
-            {...commonProps}
-          />
-        );
       default:
         return null;
     }

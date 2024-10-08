@@ -27,6 +27,12 @@ The framework is based around 4 main components:
 - Tasks that leverage agents and other API types to produce an output (Task Response)
 - Chats, that leverage tasks and agents, to produce a conversational experience, generating messages (MessageDict)
 
+These components share information in one of 4 main ways, all of which have a string representation:
+- Files (All file types have a method for generating a 'transcript' for the file, and files generated through prompts keep it as a representation)
+- Messages
+- Task Results
+- URL References
+
 ## Features
 
 ### 1. Task Execution
@@ -38,8 +44,7 @@ The framework is based around 4 main components:
   - Workflow
   - API tasks: Reddit, Wikipedia, Google, Exa, and Arxiv search
   - Agentic tasks:
-    - BasicAgentTask: Including CodeExecutionLLMTask
-    - PromptAgentTask: Including CheckTask and CodeGenerationLLMTask
+    - PromptAgentTask: Including CheckTask, CodeExecutionLLMTask and CodeGenerationLLMTask
 
 ### 2. Intelligent Chat
 - Create and manage chat conversations with AI agents
@@ -104,22 +109,33 @@ The Alice framework provides a user-friendly frontend interface for interacting 
    - Reddit Search
    - Wikipedia Search
    - Arxiv Search
+   - WebScrappingTask
 
 2. Agentic Tasks:
-   - BasicAgentTask: General-purpose tasks executed by an AI agent. Takes a list of messages as input. If the task has other tasks available, the agent can use those tasks as tools. 
    - PromptAgentTask: Tasks that deploy templated prompts, allowing the inputs to be a string ({{ prompt }} is the basic task prompt) instead of a list of messages. 
      - CheckTask: For validating or checking specific conditions - it checks for strings in the output, and converts that into a discrete result (0, 1, etc)
      - CodeGenerationLLMTask: For generating code based on prompts - it validates that it's returning a valid code block
      - CodeExecutionLLMTask: For executing code snippets
 
-3. Workflows:
+3. API-Agent Tasks:
+   - Tasks that leverage an agent's models to use a generative AI engine, like:
+      - EmbeddingTask: Provide a string and get the vector embeddings from any available embedding model
+      - ImageGenerationTask: Provide a prompt and generate an image based on it
+      - TextToSpeechTask: Provide a prompt and generate a speech
+
+4. Workflows:
    - Combine multiple tasks into a sequential or conditional flow
    - Define complex processes involving multiple agents and task types, check tasks, api tasks, agents with tools, etc. 
 
 ### Available APIs
 Currently, there are 2 types of APIs:
 - **LLM model**: You can use LM Studio (deploy locally), OpenAI-like endpoints and Anthropic. Any model can be added, but to add any endpoint that behaves differently, you'll need a new APIEngine class. 
-- **Search APIs**: Google, Exa, Reddit, Arxiv and Wikipedia. 
+- **Search APIs**: Google, Exa, Reddit, Arxiv and Wikipedia.
+- **Web Scraping**: BeautifulSoup
+- **Image Vision**:
+- **Image Generation**: 
+- **Text-to-speech**:
+- **Speech-to-text**: 
 
 ## Development
 
@@ -139,8 +155,6 @@ Currently, there are 2 types of APIs:
 For detailed instructions on adding new API types and names, refer to the backend and workflow README files.
 
 ### Adding New Models, APIs, Tasks, Chats, Agents
-
-
 
 To add new instances: 
 

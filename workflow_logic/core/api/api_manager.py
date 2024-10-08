@@ -2,8 +2,9 @@ from pydantic import BaseModel
 from typing import Dict, Any, Union, Optional
 from workflow_logic.core.model import AliceModel
 from workflow_logic.core.api.api import API
-from workflow_logic.util import SearchOutput, MessageDict, ApiType, ApiName, LLMConfig, LOGGER
-from workflow_logic.core.api.engines import APIEngine, LLMAnthropic, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI, ExaSearchAPI, ArxivSearchAPI, LLMEngine
+from workflow_logic.core.data_structures import References, ApiType, ApiName, ModelConfig, ModelApis
+from workflow_logic.util import LOGGER
+from workflow_logic.core.api.engines import APIEngine, LLMAnthropic, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI, ExaSearchAPI, ArxivSearchAPI, LLMEngine, VisionModelEngine, ImageGenerationEngine, AnthropicVisionEngine, OpenAIAdvancedSpeechToTextEngine, OpenAISpeechToTextEngine, OpenAITextToSpeechEngine, OpenAIEmbeddingsEngine, GeminiLLMEngine, CohereLLMEngine, GeminiVisionEngine, GeminiEmbeddingsEngine, GeminiSpeechToTextEngine, GroqLLMEngine
 
 ApiEngineMap = {
     ApiType.LLM_MODEL: {
@@ -11,6 +12,11 @@ ApiEngineMap = {
         ApiName.ANTHROPIC: LLMAnthropic,
         ApiName.LM_STUDIO: LLMEngine,
         ApiName.AZURE: LLMEngine,
+        ApiName.GEMINI: GeminiLLMEngine,
+        ApiName.MISTRAL: LLMEngine,
+        ApiName.COHERE: CohereLLMEngine,
+        ApiName.META: LLMEngine,
+        ApiName.GROQ: LLMEngine
     },
     ApiType.GOOGLE_SEARCH: {
         ApiName.GOOGLE_SEARCH: GoogleSearchAPI,
@@ -26,6 +32,32 @@ ApiEngineMap = {
     },
     ApiType.ARXIV_SEARCH: {
         ApiName.ARXIV_SEARCH: ArxivSearchAPI,
+    },
+    ApiType.IMG_VISION: {
+        ApiName.OPENAI_VISION: VisionModelEngine,
+        ApiName.ANTHROPIC_VISION: AnthropicVisionEngine,
+        ApiName.LM_STUDIO_VISION: VisionModelEngine,
+        ApiName.META_VISION: VisionModelEngine,
+        ApiName.MISTRAL_VISION: VisionModelEngine,
+        ApiName.GEMINI_VISION: GeminiVisionEngine,
+        ApiName.GROQ_VISION: VisionModelEngine
+    },
+    ApiType.IMG_GENERATION: {
+        ApiName.OPENAI_IMG_GENERATION: ImageGenerationEngine
+    },
+    ApiType.SPEECH_TO_TEXT: {
+        ApiName.OPENAI_STT: OpenAISpeechToTextEngine,
+        ApiName.OPENAI_ASTT: OpenAIAdvancedSpeechToTextEngine,
+        ApiName.GEMINI_STT: GeminiSpeechToTextEngine
+    },
+    ApiType.TEXT_TO_SPEECH: {
+        ApiName.OPENAI_TTS: OpenAITextToSpeechEngine,
+        ApiName.GROQ_TTS: OpenAITextToSpeechEngine
+    },
+    ApiType.EMBEDDINGS: {
+        ApiName.OPENAI_EMBEDDINGS: OpenAIEmbeddingsEngine,
+        ApiName.MISTRAL_EMBEDDINGS: OpenAIEmbeddingsEngine,
+        ApiName.GEMINI_EMBEDDINGS: GeminiEmbeddingsEngine
     },
 }
 
@@ -64,23 +96,23 @@ class APIManager(BaseModel):
     def add_api(self, api: API):
         """
         Add a new API to the manager.
-
         Args:
             api (API): The API object to be added.
         """
-        self.apis[api.api_name] = api
+        self.apis[api.id] = api
 
-    def get_api(self, api_name: ApiName) -> Optional[API]:
+    def get_api(self, api_name: str) -> Optional[API]:
         """
         Retrieve an API by its name.
-
         Args:
-            api_name (ApiName): The name of the API to retrieve.
-
+            api_name (str): The name of the API to retrieve.
         Returns:
             Optional[API]: The API object if found, None otherwise.
         """
-        return self.apis.get(api_name)
+        for api in self.apis.values():
+            if api.api_name == api_name:
+                return api
+        return None
    
     def get_api_by_type(self, api_type: ApiType, model: Optional[AliceModel] = None) -> Optional[API]:
         """
@@ -97,45 +129,46 @@ class APIManager(BaseModel):
         """
         if isinstance(api_type, str):
             api_type = ApiType(api_type)
-        if api_type == ApiType.LLM_MODEL:
-            return self._retrieve_llm_api(model)
+        if api_type in ModelApis:
+            return self._retrieve_model_api(api_type, model)
         else:
-            return self._retrieve_non_llm_api(api_type)
+            return self._retrieve_non_model_api(api_type)
     
-    def _retrieve_llm_api(self, model: Optional[AliceModel] = None) -> Optional[API]:
+    def _retrieve_model_api(self, api_type: ApiType = ApiType.LLM_MODEL, model: Optional[AliceModel] = None) -> Optional[API]:
         """
-        Internal method to retrieve an LLM API.
+        Internal method to retrieve an API that uses models.
 
         This method attempts to find a matching API for the given model,
-        or returns a default LLM API if no specific model is provided.
+        or returns a default API if no specific model is provided.
 
         Args:
             model (Optional[AliceModel]): The model to match against.
 
         Returns:
-            Optional[API]: The matching or default LLM API if found, None otherwise.
+            Optional[API]: The matching or default Model API if found, None otherwise.
         """
-        llm_apis = [api for api in self.apis.values() if ApiType(api.api_type) == ApiType.LLM_MODEL and api.is_active]
+        available_apis = [api for api in self.apis.values() if ApiType(api.api_type) == api_type and api.is_active]
         
-        if not llm_apis:
-            LOGGER.info("No LLM APIs found.")
+        if not available_apis:
+            LOGGER.info(f'No {api_type} APIs found.')
             LOGGER.info(f'APIs: {self.apis}')
             return None
+        
         if model:
-            matching_api = next((api for api in llm_apis if api.api_name == model.api_name and api.is_active), None)
+            matching_api = next((api for api in available_apis if api.api_name == model.api_name and api.is_active), None)
             if matching_api:
                 return matching_api
             else:
                 LOGGER.error(f'No matching API found for model: {model} with api_name: {model.api_name}')
 
         # If no matching API found or no model specified, use the first available LLM API
-        default_api = next((api for api in llm_apis if api.default_model), None)
+        default_api = next((api for api in available_apis if api.default_model), None)
         if default_api:
             return default_api
 
         return None
     
-    def _retrieve_non_llm_api(self, api_type: ApiType) -> Optional[API]:
+    def _retrieve_non_model_api(self, api_type: ApiType) -> Optional[API]:
         """
         Internal method to retrieve a non-LLM API by type.
 
@@ -147,7 +180,7 @@ class APIManager(BaseModel):
         """
         return next((api for api in self.apis.values() if api.api_type == api_type and api.is_active), None)
         
-    def retrieve_api_data(self, api_type: ApiType, model: Optional[AliceModel] = None) -> Union[Dict[str, Any], LLMConfig]:
+    def retrieve_api_data(self, api_type: ApiType, model: Optional[AliceModel] = None) -> Union[Dict[str, Any], ModelConfig]:
         """
         Retrieve the configuration data for a specific API type and model.
 
@@ -156,7 +189,7 @@ class APIManager(BaseModel):
             model (Optional[AliceModel]): The model to consider for LLM APIs.
 
         Returns:
-            Union[Dict[str, Any], LLMConfig]: The API configuration data.
+            Union[Dict[str, Any], ModelConfig]: The API configuration data.
 
         Raises:
             ValueError: If no active API is found for the given type.
@@ -166,7 +199,7 @@ class APIManager(BaseModel):
             raise ValueError(f"No active API found for type: {api_type}")
         return api.get_api_data(model)
 
-    async def generate_response_with_api_engine(self, api_type: ApiType, model: Optional[AliceModel] = None, **kwargs) -> Union[SearchOutput, MessageDict]:
+    async def generate_response_with_api_engine(self, api_type: ApiType, model: Optional[AliceModel] = None, **kwargs) -> References:
         """
         Select the appropriate API engine, validate inputs, and generate a response.
 
@@ -179,7 +212,7 @@ class APIManager(BaseModel):
             **kwargs: Additional arguments to pass to the API engine.
 
         Returns:
-            Union[SearchOutput, MessageDict]: The generated response from the API engine.
+            References: The generated response from the API engine.
 
         Raises:
             ValueError: If no API is found or if there's an error in generating the response.
@@ -197,12 +230,12 @@ class APIManager(BaseModel):
             # Validate inputs against the API engine's input_variables
             self._validate_inputs(api_engine, kwargs)
 
-            # Generate response using the API engine
-            response = await api_engine.generate_api_response(api_data, **kwargs)
-            return response
+            return await api_engine.generate_api_response(api_data, **kwargs)
 
         except Exception as e:
+            import traceback
             LOGGER.error(f"Error generating response with API engine: {str(e)}")
+            LOGGER.error(traceback.format_exc())
             raise ValueError(f"Error generating response with API engine: {str(e)}")
 
     def _validate_inputs(self, api_engine: APIEngine, kwargs: Dict[str, Any]):

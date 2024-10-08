@@ -18,13 +18,17 @@ pydantic
 jinja2
 pillow
 python-dotenv
+python-magic
 pymongo # BSON
 
 # Third party APIs
-google-api-python-client
 openai
+google-api-python-client
+google-generativeai
+groq
+cohere
 anthropic
-exa_py
-praw
-arxiv
 wikipedia
+praw
+exa_py
+arxiv

@@ -3,12 +3,17 @@ import { IAPIEngine } from './schemas';
 
 export type ObjectWithId = { _id: Types.ObjectId | string } | Types.ObjectId | string;
 
-export const getObjectId = (item: ObjectWithId): Types.ObjectId | string => {
-  if (item && typeof item === 'object' && '_id' in item) {
-    return item._id;
+export function getObjectId(id: any): Types.ObjectId {
+  if (id instanceof Types.ObjectId) {
+    return id;
+  } else if (typeof id === 'string') {
+    return new Types.ObjectId(id);
+  } else if (id && id._id) {
+    return getObjectId(id._id);
+  } else {
+    throw new Error(`Invalid ID: ${id}`);
   }
-  return item as string;
-};
+}
 
 export function ensureObjectIdHelper(value: any): Types.ObjectId | any {
   if (value && typeof value === 'object' && '_id' in value) {

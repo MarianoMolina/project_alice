@@ -22,8 +22,8 @@ userSchema.methods.apiRepresentation = function(this: IUserDocument) {
     name: this.name || null,
     email: this.email || null,
     role: this.role || "user",
-    created_at: this.createdAt || null,
-    updated_at: this.updatedAt || null
+    createdAt: this.createdAt || null,
+    updatedAt: this.updatedAt || null
   };
 };
 

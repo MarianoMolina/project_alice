@@ -1,8 +1,7 @@
 import pytest
 from unittest.mock import Mock, AsyncMock
 from workflow_logic.core.api import APIManager, API, APIEngine
-from workflow_logic.util import TaskResponse, DatabaseTaskResponse, ApiType
-from workflow_logic.core import FunctionParameters, ParameterDefinition, AliceTask
+from workflow_logic.core import FunctionParameters, ParameterDefinition, AliceTask, TaskResponse, ApiType
 from pydantic import ValidationError
 
 class ConcreteAliceTask(AliceTask):
@@ -53,7 +52,7 @@ def mock_api_manager():
 async def test_a_execute_basic(sample_task, mock_api_manager):
     result = await sample_task.a_execute(api_manager=mock_api_manager, test_input="test value")
     
-    assert isinstance(result, DatabaseTaskResponse)
+    assert isinstance(result, TaskResponse)
     assert result.task_name == "TestTask"
     assert result.status == "complete"
     assert result.result_code == 0
@@ -138,7 +137,7 @@ async def test_a_execute_with_api_engine(sample_task, mock_api_manager):
     
     result = await sample_task.a_execute(api_manager=mock_api_manager, test_input="test value")
     
-    assert isinstance(result, DatabaseTaskResponse)
+    assert isinstance(result, TaskResponse)
     assert result.task_outputs == "API Engine output"
     assert result.result_diagnostic == "API Engine diagnostic"
     api_engine_mock.generate_api_response.assert_called_once_with(mock_api_manager, test_input="test value")

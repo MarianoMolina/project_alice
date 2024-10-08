@@ -4,7 +4,6 @@ import {
     Typography,
     List,
     ListItem,
-    ListItemText,
     Checkbox,
     TextField,
     FormControlLabel,
@@ -12,14 +11,18 @@ import {
     Alert,
     Grid,
     IconButton,
-    Tooltip
+    Tooltip,
+    Button
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import AddIcon from '@mui/icons-material/Add';
 import { ParameterDefinition, FunctionParameters } from '../../../../types/ParameterTypes';
 import EnhancedParameter from '../../parameter/parameter/EnhancedParameter';
-import { useApi } from '../../../../context/ApiContext';
+import { useApi } from '../../../../contexts/ApiContext';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import useStyles from './FunctionStyles';
 import * as FunctionUtils from './FunctionUtils';
+import Logger from '../../../../utils/Logger';
 
 interface FunctionDefinitionBuilderProps {
     initialParameters?: FunctionParameters;
@@ -34,6 +37,7 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
 }) => {
     const classes = useStyles();
     const { fetchItem } = useApi();
+    const { selectFlexibleItem } = useCardDialog();
     const [parameters, setParameters] = useState<ParameterDefinition[]>([]);
     const [activeParameters, setActiveParameters] = useState<FunctionUtils.ActiveParameter[]>([]);
     const initializedRef = useRef(false);
@@ -81,6 +85,10 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
         });
     }, []);
 
+    const handleCreateParameter = useCallback(() => {
+        selectFlexibleItem('Parameter', 'create');
+    }, [selectFlexibleItem]);
+
     const previousFunctionDefinition = useRef<FunctionParameters | null>(null);
 
     const functionDefinition = useMemo(() => {
@@ -93,7 +101,7 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
                 onChange(functionDefinition);
                 previousFunctionDefinition.current = functionDefinition;
             } else {
-                console.log('Function definition unchanged, skipping onChange');
+                Logger.info('Function definition unchanged, skipping onChange');
             }
         }
     }, [functionDefinition, onChange, isViewOnly]);
@@ -106,7 +114,17 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
     return (
         <Paper elevation={3} className={classes.container}>
             {!isViewOnly && (
-                <Typography variant="h6" gutterBottom>Function Definition Builder</Typography>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                    <Typography variant="h6">Function Definition Builder</Typography>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<AddIcon />}
+                        onClick={handleCreateParameter}
+                    >
+                        Create Parameter
+                    </Button>
+                </Box>
             )}
             {!isViewOnly && validationMessage && (
                 <Alert severity="warning" sx={{ mb: 2 }}>
@@ -136,32 +154,28 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
                             <List>
                                 {activeParameters.filter(param => param.isActive).map((param) => (
                                     <ListItem key={param._id}>
-                                        <ListItemText
-                                            primary={
-                                                <TextField
-                                                    label="Parameter Name"
-                                                    value={param.name}
-                                                    onChange={(e) => handleNameChange(param._id!, e.target.value)}
-                                                    error={param.name.trim() === ''}
-                                                    helperText={param.name.trim() === '' ? 'Name is required' : ''}
-                                                    fullWidth
-                                                    margin="normal"
-                                                    disabled={isViewOnly}
-                                                />
-                                            }
-                                            secondary={
-                                                <FormControlLabel
-                                                    control={
-                                                        <Checkbox
-                                                            checked={param.isRequired}
-                                                            onChange={() => handleRequiredToggle(param._id!)}
-                                                            disabled={isViewOnly}
-                                                        />
-                                                    }
-                                                    label="Required"
-                                                />
-                                            }
+                                        <TextField
+                                            label="Parameter Name"
+                                            value={param.name}
+                                            onChange={(e) => handleNameChange(param._id!, e.target.value)}
+                                            error={param.name.trim() === ''}
+                                            helperText={param.name.trim() === '' ? 'Name is required' : ''}
+                                            fullWidth
+                                            margin="normal"
+                                            disabled={isViewOnly}
                                         />
+                                        <Box>
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        checked={param.isRequired}
+                                                        onChange={() => handleRequiredToggle(param._id!)}
+                                                        disabled={isViewOnly}
+                                                    />
+                                                }
+                                                label="Required"
+                                            />
+                                        </Box>
                                         {!isViewOnly && (
                                             <Tooltip title="Deactivate">
                                                 <IconButton

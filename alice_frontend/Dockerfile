@@ -13,6 +13,9 @@ RUN npm install --legacy-peer-deps
 # Install TypeScript
 RUN npm install -g typescript
 
+# Add `/app/node_modules/.bin` to $PATH
+ENV PATH /app/node_modules/.bin:$PATH
+
 # Copy the rest of the application code
 COPY . .
 

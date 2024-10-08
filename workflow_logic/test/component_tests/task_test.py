@@ -1,8 +1,7 @@
 from unittest.mock import patch, AsyncMock
 from typing import Dict, Any, List, Union
-from workflow_logic.util import TaskResponse
 from workflow_logic.db_app import DBInitManager
-from workflow_logic.core import APIManager, AliceTask
+from workflow_logic.core import APIManager, AliceTask, TaskResponse
 from workflow_logic.test.component_tests.test_environment import TestModule
 
 class TaskTests(TestModule):

@@ -1,12 +1,12 @@
 import unittest
 from unittest.mock import AsyncMock, patch, MagicMock
 from workflow_logic.core.api.engines import LLMEngine
-from workflow_logic.util import MessageDict, LLMConfig
+from workflow_logic.core.data_structures import MessageDict, ModelConfig
 
 class TestLLMEngine(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         self.llm_engine = LLMEngine()
-        self.api_data = LLMConfig(
+        self.api_data = ModelConfig(
             api_key="dummy_api_key",
             base_url="http://api.example.com",
             model="test-model"

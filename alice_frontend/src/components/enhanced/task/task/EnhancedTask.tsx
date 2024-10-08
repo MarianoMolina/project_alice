@@ -38,11 +38,6 @@ const EnhancedTask: React.FC<EnhancedTaskProps> = (props) => {
             onInteraction: props.onInteraction,
             onView: props.onView,
             isInteractable: props.isInteractable,
-            handleAgentClick: props.handleAgentClick,
-            handleModelClick: props.handleModelClick,
-            handleTaskClick: props.handleTaskClick,
-            handlePromptClick: props.handlePromptClick,
-            handleParameterClick: props.handleParameterClick,
             showHeaders: props.showHeaders,
         };
         switch (props.mode) {

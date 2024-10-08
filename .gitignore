@@ -7,3 +7,4 @@ venv
 .cache
 .vscode
 __pycache__
+shared-uploads

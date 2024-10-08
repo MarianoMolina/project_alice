@@ -1,7 +1,6 @@
 import pytest
 from bson import ObjectId
-from workflow_logic.core import API, AliceModel
-from workflow_logic.util import ApiType, ApiName, LLMConfig, User
+from workflow_logic.core import API, AliceModel, User, ModelConfig, ApiType, ApiName
 
 @pytest.fixture
 def sample_api():
@@ -38,16 +37,16 @@ def test_api_creation(sample_api):
     assert sample_api.api_config["api_key"] == "test_api_key"
     assert sample_api.default_model.model_name == "gpt-4"
 
-def test_create_llm_config(sample_api):
-    llm_config = sample_api._create_llm_config()
-    assert isinstance(llm_config, LLMConfig)
+def test_create_model_config(sample_api):
+    llm_config = sample_api._create_model_config()
+    assert isinstance(llm_config, ModelConfig)
     assert llm_config.model == "gpt-4"
     assert llm_config.api_key == "test_api_key"
     assert llm_config.base_url == "https://api.openai.com/v1"
     assert llm_config.temperature == 0.7
     assert llm_config.use_cache == True
 
-def test_create_llm_config_with_custom_model(sample_api):
+def test_create_model_config_with_custom_model(sample_api):
     custom_model = AliceModel(
         _id="gpt-3.5-turbo",
         short_name="GPT-3.5",
@@ -59,19 +58,19 @@ def test_create_llm_config_with_custom_model(sample_api):
         temperature=0.5,
         use_cache=False
     )
-    llm_config = sample_api._create_llm_config(custom_model)
+    llm_config = sample_api._create_model_config(custom_model)
     assert llm_config.model == "gpt-3.5-turbo"
     assert llm_config.temperature == 0.5
     assert llm_config.use_cache == False
 
-def test_create_llm_config_no_model(sample_api):
+def test_create_model_config_no_model(sample_api):
     sample_api.default_model = None
     with pytest.raises(ValueError, match="No model specified."):
-        sample_api._create_llm_config()
+        sample_api._create_model_config()
 
 def test_get_api_data_llm(sample_api):
     api_data = sample_api.get_api_data()
-    assert isinstance(api_data, LLMConfig)
+    assert isinstance(api_data, ModelConfig)
     assert api_data.model == "gpt-4"
     assert api_data.api_key == "test_api_key"
 
@@ -116,7 +115,7 @@ def test_get_api_data_lm_studio():
         )
     )
     api_data = lm_studio_api.get_api_data()
-    assert isinstance(api_data, LLMConfig)
+    assert isinstance(api_data, ModelConfig)
     assert api_data.model == "local-model"
     assert api_data.api_key == "lm_studio_key"
     assert api_data.base_url == "http://localhost:1234/v1"
@@ -129,13 +128,9 @@ def test_api_with_user_info():
         name="Test API",
         created_by=user,
         updated_by=user,
-        created_at="2023-01-01T00:00:00Z",
-        updated_at="2023-01-02T00:00:00Z"
     )
     assert api.created_by == user
     assert api.updated_by == user
-    assert api.created_at == "2023-01-01T00:00:00Z"
-    assert api.updated_at == "2023-01-02T00:00:00Z"
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -5,7 +5,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   messagesContainer: {
     flexGrow: 1,
     overflowY: 'auto',
-    display: 'grid',
+    // display: 'grid',
   },
   actionButtonContainer: {
     display: 'flex',

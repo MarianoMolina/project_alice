@@ -1,11 +1,13 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { CircularProgress, Box } from '@mui/material';
-import { ApiProvider } from '../context/ApiContext';
-import { TaskProvider } from '../context/TaskContext';
-import { ChatProvider } from '../context/ChatContext';
-import { DialogProvider } from '../context/CardDialogContext.tsx';
+import { ApiProvider } from '../contexts/ApiContext';
+import { TaskProvider } from '../contexts/TaskContext';
+import { ChatProvider } from '../contexts/ChatContext';
+import { DialogProvider } from '../contexts/CardDialogContext';
+import EnhancedCardDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
+import EnhancedFlexibleDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedFlexibleDialog';
 
 interface ProtectedRouteProps {
   element: React.ReactNode;
@@ -24,15 +26,17 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
   }
 
   return isAuthenticated ? (
-    <ApiProvider>
-      <TaskProvider>
-        <ChatProvider>
-          <DialogProvider>
+    <DialogProvider>
+      <ApiProvider>
+        <TaskProvider>
+          <ChatProvider>
+            <EnhancedCardDialog />
+            <EnhancedFlexibleDialog />
             {element}
-          </DialogProvider>
-        </ChatProvider>
-      </TaskProvider>
-    </ApiProvider>
+          </ChatProvider>
+        </TaskProvider>
+      </ApiProvider>
+    </DialogProvider>
   ) : (
     <Navigate to="/login" replace state={{ from: location }} />
   );

@@ -27,10 +27,11 @@
  *
  * @template T - The type of the database item being handled
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { CircularProgress, Box } from '@mui/material';
-import { useApi } from '../../../../context/ApiContext';
+import { useApi } from '../../../../contexts/ApiContext';
 import { CollectionName, CollectionType } from '../../../../types/CollectionTypes';
+import Logger from '../../../../utils/Logger';
 
 export interface BaseDbElementProps<T extends CollectionType[CollectionName]> {
   /**
@@ -86,6 +87,24 @@ export interface BaseDbElementProps<T extends CollectionType[CollectionName]> {
     handleSave: () => Promise<void>
   ) => React.ReactNode;
 }
+
+export interface BaseDbElementProps<T extends CollectionType[CollectionName]> {
+  collectionName: CollectionName;
+  itemId?: string;
+  mode: 'create' | 'view' | 'edit';
+  fetchAll: boolean;
+  isInteractable?: boolean;
+  onInteraction?: (item: T) => void;
+  onSave?: (savedItem: T) => void;
+  render: (
+    items: T[] | null,
+    item: T | null,
+    onChange: (newItem: Partial<T>) => void,
+    mode: 'create' | 'view' | 'edit',
+    handleSave: () => Promise<void>
+  ) => React.ReactNode;
+}
+
 function BaseDbElement<T extends CollectionType[CollectionName]>({
   collectionName,
   itemId,
@@ -103,46 +122,55 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
 
   const { fetchItem, createItem, updateItem } = useApi();
 
-  const fetchAllItems = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await fetchItem(collectionName);
-      setItems(data as T[]);
-      setError(null);
-    } catch (err) {
-      setError('Failed to fetch items');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchItem, collectionName]);
-
-  const fetchSingleItem = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await fetchItem(collectionName, itemId!);
-      setItem(data as T);
-      setError(null);
-    } catch (err) {
-      setError('Failed to fetch item');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchItem, collectionName, itemId]);
-
+  // Combine data fetching into a single useEffect
   useEffect(() => {
-    if (fetchAll) {
-      fetchAllItems();
-    }
-    if (itemId && mode !== 'create') {
-      fetchSingleItem();
-    } else if (mode === 'create') {
-      setItem({} as T);
-    }
-  }, [itemId, collectionName, mode, fetchAll, fetchAllItems, fetchSingleItem]);
+    let isMounted = true;
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        if (fetchAll) {
+          const data = await fetchItem(collectionName);
+          if (isMounted) {
+            setItems(data as T[]);
+            setError(null);
+          }
+        } else if (itemId && mode !== 'create') {
+          const data = await fetchItem(collectionName, itemId);
+          if (isMounted) {
+            setItem(data as T);
+            setError(null);
+          }
+        } else if (mode === 'create') {
+          setItem({} as T);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError((err as Error).message || 'Failed to fetch data');
+          Logger.error(err as string);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
 
-  const handleSave = async () => {
+    fetchData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [collectionName, itemId, mode, fetchAll, fetchItem]);
+
+  // Memoize handlers to prevent unnecessary re-renders
+  const handleChange = useCallback(
+    (newItem: Partial<T>) => {
+      setItem(prevItem => ({ ...prevItem, ...newItem } as T));
+    },
+    [setItem]
+  );
+
+  const handleSave = useCallback(async () => {
     if (!item) return;
     setLoading(true);
     try {
@@ -158,22 +186,24 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
         onSave(savedItem as T);
       }
     } catch (err) {
-      setError('Failed to save item');
-      console.error(err);
+      setError((err as Error).message || 'Failed to save item');
+      Logger.error(err as string);
     } finally {
       setLoading(false);
     }
-  };
+  }, [item, mode, createItem, updateItem, collectionName, itemId, onSave]);
 
-  const handleChange = (newItem: Partial<T>) => {
-    setItem(prevItem => ({ ...prevItem, ...newItem } as T));
-  };
-
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     if (isInteractable && onInteraction && item) {
       onInteraction(item);
     }
-  };
+  }, [isInteractable, onInteraction, item]);
+
+  // Memoize content to prevent unnecessary re-renders
+  const content = useMemo(
+    () => render(items, item, handleChange, mode, handleSave),
+    [items, item, handleChange, mode, handleSave, render]
+  );
 
   if (loading) {
     return <CircularProgress />;
@@ -183,12 +213,8 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
     return <div>Error: {error}</div>;
   }
 
-  const content = render(items, item, handleChange, mode, handleSave);
-
   return (
-    <Box 
-      onClick={handleClick} 
-    >
+    <Box {...(isInteractable && { onClick: handleClick })}>
       {content}
     </Box>
   );

@@ -24,10 +24,37 @@ const useStyles = makeStyles((theme: Theme) => ({
     alignItems: 'center',
   },
   tabsSection: {
-    padding: theme.spacing(1, 0),
+    // padding: theme.spacing(1, 0),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+  },
+  tabGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    padding: theme.spacing(1, 0),
+    borderRadius: theme.shape.borderRadius,
+    margin: theme.spacing(0.5, 0),
+    '&:nth-of-type(1)': {
+      '--group-color-0': hexToRgba(theme.palette.primary.main, 0.4),
+    },
+    '&:nth-of-type(2)': {
+      '--group-color-1': hexToRgba(theme.palette.secondary.main, 0.4),
+    },
+    '&:nth-of-type(3)': {
+      '--group-color-2': hexToRgba(theme.palette.info.light, 0.4),
+    },
+    '&:nth-of-type(4)': {
+      '--group-color-3': hexToRgba(theme.palette.success.light, 0.4),
+    },
+    '&:nth-of-type(5)': {
+      '--group-color-4': hexToRgba(theme.palette.warning.light, 0.4),
+    },
+  },
+  groupLabel: {
+    textTransform: 'uppercase',
+    marginBottom: theme.spacing(0.5),
   },
   divider: {
     margin: theme.spacing(1, 0),
@@ -41,8 +68,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   content: {
     flexGrow: 1,
-    overflowY: 'auto',
-    overflowX: 'hidden',
+    overflow: 'hidden',
     width: 'inherit',
   },
 }));

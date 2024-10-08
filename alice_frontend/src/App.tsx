@@ -13,14 +13,18 @@ import ProtectedRoute from './layouts/ProtectedRoute';
 import Database from './pages/Database';
 import UserSettings from './pages/UserSettings';
 import NavigationGuard from './components/ui/navigation_guard/NavigationGuard';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
 import './assets/fonts/fonts.css';
-import { ApiProvider } from './context/ApiContext';
+import { ApiProvider } from './contexts/ApiContext';
 import ErrorBoundary from './layouts/ErrorBoundary';
-import { NotificationProvider } from './context/NotificationContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import NotificationComponent from './components/ui/notification/Notification';
-import { DialogProvider } from './context/DialogCustomContext';
+import { DialogProvider } from './contexts/DialogCustomContext';
+import { DialogProvider as CardDialogProvider } from './contexts/CardDialogContext';
 import DialogComponent from './components/ui/dialog/DialogCustom';
+import EnhancedCardDialog from './components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
+import EnhancedFlexibleDialog from './components/enhanced/common/enhanced_card_dialog/EnhancedFlexibleDialog';
+import Knowledgebase from './pages/Knowledgebase';
 
 const App: React.FC = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -51,9 +55,13 @@ const App: React.FC = () => {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={
-                      <ApiProvider>
-                        <Register />
-                      </ApiProvider>
+                      <CardDialogProvider>
+                        <ApiProvider>
+                          <EnhancedCardDialog />
+                          <EnhancedFlexibleDialog />
+                          <Register />
+                        </ApiProvider>
+                      </CardDialogProvider>
                     } />
                     <Route path="/chat-alice" element={<ProtectedRoute element={<ChatAlice />} />} />
                     <Route path="/start-task" element={<ProtectedRoute element={<CreateWorkflow />} />} />
@@ -66,6 +74,7 @@ const App: React.FC = () => {
                         />
                       }
                     />
+                    <Route path="/knowledgebase/*" element={<Knowledgebase />} />
                   </Routes>
                 </MainLayout>
               </NavigationGuard>

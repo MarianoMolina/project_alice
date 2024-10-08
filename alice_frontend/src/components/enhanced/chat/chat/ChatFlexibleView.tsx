@@ -1,86 +1,113 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
     TextField,
-    Dialog
+    Box,
 } from '@mui/material';
 import { ChatComponentProps, AliceChat, getDefaultChatForm } from '../../../../types/ChatTypes';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
-import EnhancedModel from '../../model/model/EnhancedModel';
-import EnhancedAgent from '../../agent/agent/EnhancedAgent';
-import EnhancedTask from '../../task/task/EnhancedTask';
+import AgentShortListView from '../../agent/agent/AgentShortListView';
+import TaskShortListView from '../../task/task/TaskShortListView';
 import { AliceAgent } from '../../../../types/AgentTypes';
 import { AliceTask } from '../../../../types/TaskTypes';
-import { useApi } from '../../../../context/ApiContext';
+import { useApi } from '../../../../contexts/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
+import MessageListView from '../../message/message/MessageListView';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
 
-const ChatFlexibleView: React.FC<ChatComponentProps> = ({ 
+const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     item,
     onChange,
     mode,
-    handleSave
+    handleSave,
 }) => {
     const { fetchItem } = useApi();
-    const [form, setForm] = useState<Partial<AliceChat>>(getDefaultChatForm());
+    const { selectCardItem } = useCardDialog();
+    const [form, setForm] = useState<Partial<AliceChat>>(item || getDefaultChatForm());
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [dialogContent, setDialogContent] = useState<React.ReactNode | null>(null);
-
-    useEffect(() => {
-        if (item) {
-            setForm({ ...getDefaultChatForm(), ...item });
-        }
-    }, [item]);
+    const [isSaving, setIsSaving] = useState(false);
 
     const isEditMode = mode === 'edit' || mode === 'create';
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        onChange({ ...form, [name]: value });
-    };
+    useEffect(() => {
+        if (isSaving) {
+            handleSave();
+            setIsSaving(false);
+        }
+    }, [isSaving, handleSave]);
+    
+    useEffect(() => {
+        if (item) {
+            setForm(item);
+        }
+    }, [item]);
 
-    const handleAgentChange = async (selectedIds: string[]) => {
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setForm(prevForm => ({ ...prevForm, [name]: value }));
+    }, []);
+
+    const handleAgentChange = useCallback(async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {
             const agent = await fetchItem('agents', selectedIds[0]) as AliceAgent;
-            onChange({ ...form, alice_agent: agent });
+            setForm(prevForm => ({ ...prevForm, alice_agent: agent }));
         } else {
-            onChange({ ...form, alice_agent: undefined });
+            setForm(prevForm => ({ ...prevForm, alice_agent: undefined }));
         }
-    };
+    }, [fetchItem]);
 
-    const handleFunctionsChange = async (selectedIds: string[]) => {
+    const handleFunctionsChange = useCallback(async (selectedIds: string[]) => {
         const functions = await Promise.all(selectedIds.map(id => fetchItem('tasks', id) as Promise<AliceTask>));
-        onChange({ ...form, functions });
-    };
+        setForm(prevForm => ({ ...prevForm, functions }));
+    }, [fetchItem]);
 
-    const handleAccordionToggle = (accordion: string | null) => {
+    const handleAccordionToggle = useCallback((accordion: string | null) => {
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
-    };
+    }, []);
 
-    const handleViewDetails = (type: 'agent' | 'model' | 'task', itemId: string) => {
-        let content;
-        switch (type) {
-            case 'agent':
-                content = <EnhancedAgent mode="card" itemId={itemId} fetchAll={false} />;
-                break;
-            case 'model':
-                content = <EnhancedModel mode="card" itemId={itemId} fetchAll={false} />;
-                break;
-            case 'task':
-                content = <EnhancedTask mode="card" itemId={itemId} fetchAll={false} />;
-                break;
-        }
-        setDialogContent(content);
-        setDialogOpen(true);
-    };
+    const handleLocalSave = useCallback(() => {
+        onChange(form);
+        setIsSaving(true);
+    }, [form, onChange]);
 
     const title = mode === 'create' ? 'Create New Chat' : mode === 'edit' ? 'Edit Chat' : 'Chat Details';
     const saveButtonText = form._id ? 'Update Chat' : 'Create Chat';
+
+    const memoizedAgentSelect = useMemo(() => (
+        <EnhancedSelect<AliceAgent>
+            componentType="agents"
+            EnhancedView={AgentShortListView}
+            selectedItems={form.alice_agent ? [form.alice_agent] : []}
+            onSelect={handleAgentChange}
+            isInteractable={isEditMode}
+            label="Select Agent"
+            activeAccordion={activeAccordion}
+            onAccordionToggle={handleAccordionToggle}
+            accordionEntityName="agent"
+            showCreateButton={true}
+        />
+    ), [form.alice_agent, handleAgentChange, isEditMode, activeAccordion, handleAccordionToggle]);
+    
+      const memoizedTaskSelect = useMemo(() => (
+        <EnhancedSelect<AliceTask>
+            componentType="tasks"
+            EnhancedView={TaskShortListView}
+            selectedItems={form.functions || []}
+            onSelect={handleFunctionsChange}
+            isInteractable={isEditMode}
+            multiple
+            label="Select Functions"
+            activeAccordion={activeAccordion}
+            onAccordionToggle={handleAccordionToggle}
+            accordionEntityName="functions"
+            showCreateButton={true}
+        />
+    ), [form.functions, handleFunctionsChange, isEditMode, activeAccordion, handleAccordionToggle]);
 
     return (
         <GenericFlexibleView
             elementType='Chat'
             title={title}
-            onSave={handleSave}
+            onSave={handleLocalSave}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
         >
@@ -92,34 +119,18 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                 onChange={handleInputChange}
                 disabled={!isEditMode}
             />
-            <EnhancedSelect<AliceAgent>
-                componentType="agents"
-                EnhancedComponent={EnhancedAgent}
-                selectedItems={form.alice_agent ? [form.alice_agent] : []}
-                onSelect={handleAgentChange}
-                isInteractable={isEditMode}
-                label="Select Agent"
-                activeAccordion={activeAccordion}
-                onAccordionToggle={handleAccordionToggle}
-                onView={(id) => handleViewDetails("agent", id)}
-                accordionEntityName="agent"
-            />
-            <EnhancedSelect<AliceTask>
-                componentType="tasks"
-                EnhancedComponent={EnhancedTask}
-                selectedItems={form.functions || []}
-                onSelect={handleFunctionsChange}
-                isInteractable={isEditMode}
-                multiple
-                label="Select Functions"
-                activeAccordion={activeAccordion}
-                onAccordionToggle={handleAccordionToggle}
-                onView={(id) => handleViewDetails("task", id)}
-                accordionEntityName="functions"
-            />
-            <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-                {dialogContent}
-            </Dialog>
+            {memoizedAgentSelect}
+            {memoizedTaskSelect}
+            <Box mt={2}>
+                <MessageListView
+                    items={form.messages || []}
+                    item={null}
+                    onChange={() => { }}
+                    mode={'view'}
+                    handleSave={async () => { }}
+                    onView={(message) => selectCardItem && selectCardItem('Message', message._id ?? '', message)}
+                />
+            </Box>
         </GenericFlexibleView>
     );
 };

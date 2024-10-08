@@ -1,22 +1,20 @@
 import { HandleClickProps } from "./CollectionTypes";
+import { References } from "./ReferenceTypes";
+import { BaseDataseObject } from "./UserTypes";
 
-export interface TaskResponse {
+export interface TaskResponse extends BaseDataseObject {
+    _id?: string;
     task_name: string;
     task_id: string;
     task_description: string;
     status: 'pending' | 'complete' | 'failed';
     result_code: number;
     task_outputs?: string;
-    task_content?: { [key: string]: any };
+    references?: References;
     task_inputs?: { [key: string]: any };
     result_diagnostic?: string;
     usage_metrics?: { [key: string]: any };
     execution_history?: { [key: string]: any }[];
-    created_by?: string;
-    updated_by?: string;
-    createdAt?: string;
-    updatedAt?: string;
-    _id?: string;
 }
 
 export const convertToTaskResponse = (data: any): TaskResponse => {
@@ -27,7 +25,7 @@ export const convertToTaskResponse = (data: any): TaskResponse => {
         status: data?.status || 'pending',
         result_code: data?.result_code || 0,
         task_outputs: data?.task_outputs || {},
-        task_content: data?.task_content || {},
+        references: data?.references || {},
         task_inputs: data?.task_inputs || {},
         result_diagnostic: data?.result_diagnostic || '',
         usage_metrics: data?.usage_metrics || {},

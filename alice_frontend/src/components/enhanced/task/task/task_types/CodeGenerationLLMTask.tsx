@@ -4,7 +4,7 @@ import PromptAgentTask from './PromptAgentTask';
 import { TaskFormsProps } from '../../../../../types/TaskTypes';
 
 const CodeGenerationLLMTask: React.FC<TaskFormsProps> = ({
-  item, onChange, mode, handleAccordionToggle, handleViewDetails, activeAccordion, handleSave, apis
+  item, onChange, mode, handleAccordionToggle, activeAccordion, handleSave, apis
 }) => {
 
   return (
@@ -17,7 +17,6 @@ const CodeGenerationLLMTask: React.FC<TaskFormsProps> = ({
         onChange={onChange}
         mode={mode}
         handleAccordionToggle={handleAccordionToggle}
-        handleViewDetails={handleViewDetails}
         activeAccordion={activeAccordion}
       />
     </Box>

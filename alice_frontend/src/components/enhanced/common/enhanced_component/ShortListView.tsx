@@ -2,7 +2,6 @@ import React from 'react';
 import {
     List,
     ListItem,
-    ListItemText,
     Typography,
     Box,
     IconButton,
@@ -28,12 +27,7 @@ const ButtonBox = styled(Box)({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    // width: '48px',
 });
-
-const ListItemCustom = styled(ListItemText)(({ theme }) => ({
-    margin: theme.spacing(0) + ' !important',
-}));
 
 const IconButtonCustom = styled(IconButton)(({ theme }) => ({
     padding: theme.spacing(0.25) + ' !important',
@@ -55,34 +49,30 @@ function EnhancedShortListItem<T>({
     onInteraction
 }: EnhancedShortListItemProps<T>) {
     return (
-            <ListItemStyled>
-                <ContentBox>
-                    <ListItemCustom
-                        primary={primaryText}
-                        secondary={
-                            <Typography component="span" variant="body2" color="textSecondary">
-                                {secondaryText}
-                            </Typography>
-                        }
-                    />
-                </ContentBox>
-                <ButtonBox>
-                    {onView && (
-                        <Tooltip title="View Item">
-                            <IconButtonCustom size="small" onClick={() => onView(item)}>
-                                <Visibility />
-                            </IconButtonCustom>
-                        </Tooltip>
-                    )}
-                    {onInteraction && (
-                        <Tooltip title="Select Item">
-                            <IconButtonCustom size="small" onClick={() => onInteraction(item)}>
-                                <PlayArrow />
-                            </IconButtonCustom>
-                        </Tooltip>
-                    )}
-                </ButtonBox>
-            </ListItemStyled>
+        <ListItemStyled>
+            <ContentBox>
+                <Typography variant="body1">{primaryText}</Typography>
+                <Typography variant="body2" color="textSecondary">
+                    {secondaryText}
+                </Typography>
+            </ContentBox>
+            <ButtonBox>
+                {onView && (
+                    <Tooltip title="View Item">
+                        <IconButtonCustom size="small" onClick={() => onView(item)}>
+                            <Visibility />
+                        </IconButtonCustom>
+                    </Tooltip>
+                )}
+                {onInteraction && (
+                    <Tooltip title="Select Item">
+                        <IconButtonCustom size="small" onClick={() => onInteraction(item)}>
+                            <PlayArrow />
+                        </IconButtonCustom>
+                    </Tooltip>
+                )}
+            </ButtonBox>
+        </ListItemStyled>
     );
 }
 
@@ -109,7 +99,7 @@ function EnhancedShortListView<T>({
 
     const renderItem = (itemToRender: T) => (
         <EnhancedShortListItem
-            key={getPrimaryText(itemToRender)}
+            key={Math.random().toString(36).substr(2, 9)}
             item={itemToRender}
             primaryText={getPrimaryText(itemToRender)}
             secondaryText={getSecondaryText(itemToRender)}

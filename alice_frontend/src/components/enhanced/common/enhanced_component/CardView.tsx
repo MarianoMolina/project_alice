@@ -7,53 +7,10 @@ import {
     List,
     ListItem,
     ListItemIcon,
-    ListItemText,
 } from '@mui/material';
-import { Theme } from '@mui/material/styles';
-import { makeStyles } from '@mui/styles';
-
-const useStyles = makeStyles((theme: Theme) => ({
-    card: {
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-    },
-    titleContainer: {
-        position: 'relative',
-        backgroundColor: theme.palette.primary.main,
-        color: theme.palette.primary.contrastText,
-        padding: theme.spacing(2),
-        borderRadius: theme.shape.borderRadius,
-        marginBottom: theme.spacing(1),
-    },
-    title: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    elementType: {
-        position: 'absolute',
-        top: -10,
-        left: 8,
-        fontSize: '0.75rem',
-        padding: '0 4px',
-        backgroundColor: theme.palette.primary.main,
-        borderRadius: 4,
-    },
-    subtitle: {
-        marginBottom: theme.spacing(1),
-    },
-    id: {
-        display: 'block',
-        marginBottom: theme.spacing(2),
-    },
-    list: {
-        padding: 0,
-    },
-    listItem: {
-        width: '100%',
-    }
-}));
+import { DownloadEntity } from '../download_entity/DownloadEntity';
+import { CollectionName, CollectionType } from '../../../../types/CollectionTypes';
+import useStyles from './EnhancedStyles';
 
 interface ListItemData {
     icon: React.ReactElement;
@@ -61,23 +18,27 @@ interface ListItemData {
     secondary_text: React.ReactNode;
 }
 
-interface CommonCardViewProps {
+interface CommonCardViewProps<T extends CollectionName> {
     title: string;
     elementType?: string;
     subtitle?: string;
     id?: string;
     listItems?: ListItemData[];
     children?: React.ReactNode;
+    item?: CollectionType[T];
+    itemType?: T;
 }
 
-const CommonCardView: React.FC<CommonCardViewProps> = ({ 
-    title, 
-    elementType, 
-    subtitle, 
-    id, 
-    listItems, 
-    children 
-}) => {
+const CommonCardView = <T extends CollectionName>({
+    title,
+    elementType,
+    subtitle,
+    id,
+    listItems,
+    children,
+    item,
+    itemType
+}: CommonCardViewProps<T>) => {
     const classes = useStyles();
 
     return (
@@ -89,27 +50,36 @@ const CommonCardView: React.FC<CommonCardViewProps> = ({
                             {elementType}
                         </Typography>
                     )}
-                    <Typography variant="h5" className={classes.title}>
-                        {title}
-                    </Typography>
+                    <Box className={classes.titleContent}>
+                        <Typography variant="h5" className={classes.title}>
+                            {title}
+                        </Typography>
+                        {item && itemType && (
+                            <Box className={classes.downloadButton}>
+                                <DownloadEntity item={item} itemType={itemType} />
+                            </Box>
+                        )}
+                    </Box>
                 </Box>
-                {subtitle && (
-                    <Typography variant="subtitle1" className={classes.subtitle}>{subtitle}</Typography>
-                )}
                 {id && (
                     <Typography variant="caption" className={classes.id}>
                         ID: {id}
                     </Typography>
                 )}
+                {subtitle && (
+                    <Typography variant="subtitle1" className={classes.subtitle}>{subtitle}</Typography>
+                )}
                 {listItems && listItems.length > 0 && (
                     <List className={classes.list}>
                         {listItems.map((item, index) => (
                             <ListItem key={index} className={classes.listItem}>
-                                <ListItemIcon>{item.icon}</ListItemIcon>
-                                <ListItemText
-                                    primary={item.primary_text}
-                                    secondary={item.secondary_text}
-                                />
+                                <ListItemIcon className={classes.listItemIcon}>{item.icon}</ListItemIcon>
+                                <Box className={classes.listItemContent}>
+                                    <Typography className={classes.primaryText}>
+                                        {item.primary_text}
+                                    </Typography>
+                                    <Box className={classes.secondaryText}>{item.secondary_text}</Box>
+                                </Box>
                             </ListItem>
                         ))}
                     </List>

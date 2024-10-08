@@ -46,6 +46,9 @@ const useStyles = makeStyles((theme: Theme) => ({
             backgroundColor: theme.palette.error.dark,
         },
     },
+    mainContainer: {
+        overflow: 'auto',
+    }
 }));
 
 export default useStyles;

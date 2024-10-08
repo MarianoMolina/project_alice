@@ -4,8 +4,7 @@ from unittest.mock import patch, AsyncMock
 from typing import Dict, Any, List, Optional
 from workflow_logic.test.component_tests.test_environment import TestModule
 from workflow_logic.db_app import DBInitManager
-from workflow_logic.core import AliceModel, AliceChat, APIManager
-from workflow_logic.util import MessageDict, DatabaseTaskResponse, ApiType
+from workflow_logic.core import AliceModel, AliceChat, APIManager, TaskResponse, MessageDict, ApiType
 
 class ChatTests(TestModule):
     name: str = "ChatTests"
@@ -109,7 +108,7 @@ class ChatTests(TestModule):
         try:
             # Mock function for testing
             async def mock_function(**kwargs):
-                return DatabaseTaskResponse(
+                return TaskResponse(
                     task_id="mock_task_id",
                     task_name="mock_function",
                     task_description="A mock function for testing",
@@ -150,7 +149,7 @@ class ChatTests(TestModule):
                 response = await chat.generate_response(api_manager, test_message)
                 self.log_response(response)
 
-            if any(msg.role == "tool" and msg.task_responses for msg in response):
+            if any(msg.role == "tool" and msg.references for msg in response):
                 return "Success"
             else:
                 return f"Failed: Function call not detected in response - {response}"

@@ -8,12 +8,13 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
-import { CommandLineLog } from '../CommandLog';
-import { CodeBlock } from '../CodeBlock';
-import { WorkflowOutput } from '../WorkflowOutput';
+import { CommandLineLog } from '../../../ui/markdown/CommandLog';
+import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import { styled } from '@mui/material/styles';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { AccessTime, CheckCircle, Error, Warning, Output, Code, BugReport, DataObject, Analytics } from '@mui/icons-material';
+import ReferencesViewer from '../../common/references/ReferencesViewer';
+import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
 
 const ExitCodeChip = styled(Chip)(({ theme }) => ({
     fontWeight: 'bold',
@@ -80,23 +81,6 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             secondary_text: item.createdAt ? new Date(item.createdAt).toLocaleString() : 'N/A'
         },
         {
-            icon: <Output />,
-            primary_text: "Output",
-            secondary_text: (
-                <AccordionSection
-                    title="Output"
-                    content={
-                        item.task_content ? (
-                            <WorkflowOutput content={item} />
-                        ) : (
-                            <Typography>No output content available</Typography>
-                        )
-                    }
-                    disabled={!item.task_content}
-                />
-            )
-        },
-        {
             icon: <Code />,
             primary_text: "Inputs",
             secondary_text: (
@@ -105,6 +89,17 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
                     content={<CodeBlock language="json" code={JSON.stringify(item.task_inputs, null, 2)} />}
                     disabled={!item.task_inputs}
                 />
+            )
+        },
+        {
+            icon: <Output />,
+            primary_text: "Output",
+            secondary_text: (
+                item.references ? (
+                    <ReferencesViewer references={item.references} />
+                ) : (
+                    <Typography>No output content available</Typography>
+                )
             )
         },
         {
@@ -125,9 +120,7 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
                 <AccordionSection
                     title="Raw Output"
                     content={
-                        <Typography variant="body2" component="pre" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                            {typeof item.task_outputs === 'string' ? item.task_outputs : JSON.stringify(item.task_outputs, null, 2)}
-                        </Typography>
+                        <CustomMarkdown>{item.task_outputs as string}</CustomMarkdown>
                     }
                     disabled={!item.task_outputs}
                 />
@@ -153,6 +146,8 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             subtitle={item.task_description}
             id={item._id}
             listItems={listItems}
+            item={item}
+            itemType='taskresults'
         />
     );
 };

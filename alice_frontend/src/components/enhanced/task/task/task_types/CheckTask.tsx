@@ -3,7 +3,7 @@ import { Box, TextField, Button, Typography } from '@mui/material';
 import { TaskFormsProps } from '../../../../../types/TaskTypes';
 import PromptAgentTask from './PromptAgentTask';
 
-const CheckTask: React.FC<TaskFormsProps> = ({ item, onChange, mode, handleAccordionToggle, handleViewDetails, activeAccordion, handleSave, apis }) => {
+const CheckTask: React.FC<TaskFormsProps> = ({ item, onChange, mode, handleAccordionToggle, activeAccordion, handleSave, apis }) => {
   const isEditMode = mode === 'edit' || mode === 'create';
 
   if (!item) {
@@ -39,7 +39,6 @@ const CheckTask: React.FC<TaskFormsProps> = ({ item, onChange, mode, handleAccor
         onChange={onChange}
         mode={mode}
         handleAccordionToggle={handleAccordionToggle}
-        handleViewDetails={handleViewDetails}
         activeAccordion={activeAccordion}
       />
      

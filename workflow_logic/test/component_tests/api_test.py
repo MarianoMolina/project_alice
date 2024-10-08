@@ -5,9 +5,8 @@ from arxiv import Client, Search, SortCriterion
 from typing import Dict, Any
 from workflow_logic.test.component_tests.test_environment import TestModule
 from workflow_logic.core.api import APIManager, API
-from workflow_logic.core import AliceAgent
+from workflow_logic.core import AliceAgent, ApiType
 from workflow_logic.db_app import DBInitManager
-from workflow_logic.util import ApiType
 
 class APITests(TestModule):
     name: str = "APITests"
@@ -55,7 +54,7 @@ class APITests(TestModule):
 
     async def test_llm_api(self, api: API, api_manager: APIManager) -> str:
         try:
-            agent = AliceAgent(name="Test Agent", model_id=api.default_model)
+            agent = AliceAgent(name="Test Agent", models= {"chat": api.default_model})
             autogen_agent = agent.get_autogen_agent(api_manager=api_manager)
             response = autogen_agent.generate_reply([{"role": "user", "content": "Hello, this is a test message."}])
             return "Success" if response else "Failed to generate response"

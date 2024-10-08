@@ -1,12 +1,13 @@
 import requests, aiohttp, asyncio, json
 from aiohttp import ClientError
 from bson import ObjectId
-from typing import Dict, Any, Optional, Literal
+from typing import Dict, Any, Optional, Literal, Union
 from pydantic import BaseModel, Field, ConfigDict
-from workflow_logic.core.tasks import available_task_types
-from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, API
+from workflow_logic.db_app.utils import available_task_types
+from workflow_logic.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, API, User, TaskResponse, MessageDict, FileReference, FileContentReference
 from workflow_logic.util.const import BACKEND_PORT, HOST, ADMIN_TOKEN
-from workflow_logic.util import User, DatabaseTaskResponse, MessageDict, EntityType, LOGGER
+from workflow_logic.core.data_structures import EntityType
+from workflow_logic.util import LOGGER
 
 class BackendAPI(BaseModel):
     """
@@ -23,7 +24,6 @@ class BackendAPI(BaseModel):
         collection_map (Dict[EntityType, str]): Mapping of entity types to collection names.
 
     Methods:
-        initialize_db_app(): Initializes the database application.
         get_prompts(prompt_id: Optional[str] = None) -> Dict[str, Prompt]: Retrieves prompts.
         get_users(user_id: Optional[str] = None) -> Dict[str, User]: Retrieves users.
         get_agents(agent: Optional[str] = None) -> Dict[str, AliceAgent]: Retrieves agents.
@@ -33,7 +33,7 @@ class BackendAPI(BaseModel):
         update_api_health(api_id: str, health_status: str) -> bool: Updates API health status.
         get_chats(chat_id: Optional[str] = None) -> Dict[str, AliceChat]: Retrieves chats.
         store_chat_message(chat_id: str, message: MessageDict) -> AliceChat: Stores a chat message.
-        store_task_response(task_response: DatabaseTaskResponse) -> DatabaseTaskResponse: Stores a task response.
+        store_task_response(task_response: TaskResponse) -> TaskResponse: Stores a task response.
         validate_token(token: str) -> dict: Validates an authentication token.
         create_entity_in_db(entity_type: EntityType, entity_data: dict) -> str: Creates an entity in the database.
         check_existing_data(max_retries=3, retry_delay=1) -> bool: Checks for existing data in the database.
@@ -46,31 +46,25 @@ class BackendAPI(BaseModel):
     user_token: str = Field(ADMIN_TOKEN, description="The admin token for the backend API")
     available_task_types: list[AliceTask] = Field(available_task_types, frozen=True, description="The available task types")
     collection_map: Dict[EntityType, str] = Field(default_factory=lambda: {
+        "agents": "agents",
+        "apis": "apis",
         "users": "users",
         "models": "models",
         "prompts": "prompts",
-        "agents": "agents",
         "tasks": "tasks",
         "chats": "chats", 
         "parameters": "parameters",
         "task_responses": "taskresults",
-        "apis": "apis"
+        "files": "files",
+        "messages": "messages",
+        "urlreferences": "urlreferences"
     }, description="Map of entity types to collection names")
     model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str}, arbitrary_types_allowed=True)
 
     @property
     def task_types(self) -> Dict[str, AliceTask]:
         return {task.__name__: task for task in self.available_task_types}
-    
-    async def initialize_db_app(self):
-        try:
-            if self.user_token:
-                validate = self.validate_token(self.user_token)
-                if validate.get("valid"):
-                    return True
-        except Exception as e:
-            LOGGER.error(f"Error in initialize_libraries: {e}")
-            raise
+
 
     def _get_headers(self):
         return {
@@ -310,6 +304,8 @@ class BackendAPI(BaseModel):
         for message in chat.get('messages', []):
             if 'task_responses' not in message:
                 message['task_responses'] = []
+            if 'references' not in message:
+                message['references'] = []
         
         try:
             return AliceChat(**chat)
@@ -330,52 +326,6 @@ class BackendAPI(BaseModel):
         except aiohttp.ClientError as e:
             LOGGER.error(f"Error storing messages: {e}")
             return None
-
-    async def store_task_response(self, task_response: DatabaseTaskResponse) -> DatabaseTaskResponse:
-        url = f"{self.base_url}/taskResults"
-        headers = self._get_headers()
-        headers['Content-Type'] = 'application/json'
-        
-        # Use model_dump_json() to get a JSON string
-        json_str = task_response.model_dump_json(by_alias=True)
-        # Parse the JSON string back into a Python object
-        data = json.loads(json_str)
-        
-        LOGGER.debug(f"Data after parsing: {str(data)}...") 
-        
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(url, json=data, headers=headers) as response:                
-                    try:
-                        response.raise_for_status()
-                    except aiohttp.ClientResponseError as e:
-                        LOGGER.info(f"Response status: {response.status}")
-                        response_text = await response.text()
-                        LOGGER.info(f"Response content: {response_text}")
-                        raise
-                    result = await response.json()
-                    return DatabaseTaskResponse(**result)
-        except aiohttp.ClientError as e:
-            LOGGER.error(f"Error storing DatabaseTaskResponse: {e}")
-            raise
-        except Exception as e:
-            LOGGER.error(f"Unexpected error: {e}")
-            raise      
-
-    async def store_task_response_on_chat(self, task_response: DatabaseTaskResponse, chat_id: str) -> Dict[str, Any]:
-        url = f"{self.base_url}/chats/{chat_id}/add_task_response"
-        headers = self._get_headers()
-        try:
-            result = await self.store_task_response(task_response)
-            async with aiohttp.ClientSession() as session:
-                async with session.patch(url, json={"task_response_id": result.id}, headers=headers) as response:
-                    response.raise_for_status()
-                    chat_result = await response.json()
-                    LOGGER.debug(f"DatabaseTaskResponse added to chat successfully: {chat_result}")
-                    return chat_result
-        except aiohttp.ClientError as e:
-            LOGGER.error(f"Error storing DatabaseTaskResponse on chat: {e}")
-            raise
         
     def validate_token(self, token: str) -> dict:
         url = f"{self.base_url}/users/validate"
@@ -391,7 +341,22 @@ class BackendAPI(BaseModel):
             LOGGER.error(f"Error validating token: {e}")
             return {"valid": False, "message": str(e)}
         
-    async def create_entity_in_db(self, entity_type: EntityType, entity_data: dict) -> str:
+    async def get_entity_from_db(self, entity_type: EntityType, entity_id: str) -> Dict[str, Any]:
+        collection_name = self.collection_map[entity_type]
+        url = f"{self.base_url}/{collection_name}/{entity_id}"
+        headers = self._get_headers()
+        
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(url, headers=headers) as response:
+                    response.raise_for_status()
+                    result = await response.json()
+                    return result
+            except aiohttp.ClientError as e:
+                LOGGER.error(f"Error retrieving entity: {e}")
+                return {}
+        
+    async def create_entity_in_db(self, entity_type: EntityType, entity_data: dict) -> Dict[str, Any]:
         collection_name = self.collection_map[entity_type]
         url = f"{self.base_url}/{collection_name}"
         headers = self._get_headers()
@@ -405,7 +370,7 @@ class BackendAPI(BaseModel):
                     
                     response.raise_for_status()
                     result = await response.json()
-                    LOGGER.info(f'Created {entity_type[:-1]}')
+                    LOGGER.info(f'Created {entity_type} with ID: {result["_id"]}')
                     return result
             except aiohttp.ClientResponseError as e:
                 LOGGER.error(f"HTTP error during entity creation: {e.status} - {e.message}")
@@ -414,6 +379,30 @@ class BackendAPI(BaseModel):
             except Exception as e:
                 LOGGER.error(f"Unexpected error during entity creation: {str(e)}")
                 LOGGER.error(f"Entity data: {entity_data}")
+                raise
+        
+    async def update_entity_in_db(self, entity_type: EntityType, entity_id: str, entity_data: dict) -> Dict[str, Any]:
+        collection_name = self.collection_map[entity_type]
+        url = f"{self.base_url}/{collection_name}/{entity_id}"
+        headers = self._get_headers()
+        
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.patch(url, json=entity_data, headers=headers) as response:
+                    if response.status == 400:
+                        error_data = await response.json()
+                        raise ValueError(f"Bad request when updating {entity_type}: {error_data}")
+                    response.raise_for_status()
+                    result = await response.json()
+                    LOGGER.info(f'Updated {entity_type} with ID: {entity_id}')
+                    return result
+            except aiohttp.ClientError as e:
+                LOGGER.error(f"HTTP error during entity creation: {e.status} - {e.message}")
+                LOGGER.error(f"Error updating entity: {e}")
+                raise
+            except Exception as e:
+                LOGGER.error(f"Unexpected error during entity creation: {str(e)}")
+                LOGGER.error(f"Unexpected error updating entity: {e}")
                 raise
 
     async def check_existing_data(self, max_retries=3, retry_delay=1) -> bool:
@@ -429,6 +418,7 @@ class BackendAPI(BaseModel):
                             if response.status == 200:
                                 data = await response.json()
                                 if data:
+                                    LOGGER.warning(f"Existing data found in collection: {collection} - {data}")
                                     return True
                 return False
             except (ClientError, asyncio.TimeoutError) as e:
@@ -437,7 +427,50 @@ class BackendAPI(BaseModel):
                     raise
                 LOGGER.error(f"Attempt {attempt + 1} failed, retrying in {retry_delay} seconds...")
                 await asyncio.sleep(retry_delay)
+                
+    async def get_file_reference(self, file_reference_id: str): 
+        url = f"{self.base_url}/files/{file_reference_id}"
+        headers = self._get_headers()
+        
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(url, headers=headers) as response:
+                    response.raise_for_status()
+                    file = await response.json()
+                    
+                    file = await self.preprocess_data(file)
+                    return {file['_id']: FileReference(**file)}
+            except aiohttp.ClientError as e:
+                LOGGER.error(f"Error retrieving chats: {e}")
+                return {}
+            
+    async def update_file_reference(self, file_reference: Union[FileReference, FileContentReference]): 
+        # self.debug_file_reference_serialization(file_reference)
+        url = f"{self.base_url}/files/{file_reference.id}"
+        headers = self._get_headers()
+        data = file_reference.model_dump(by_alias=True)
+        LOGGER.info(f"Updating file reference: {json.dumps(data, indent=2)}")
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.patch(url, json=data, headers=headers) as response:
+                    file = response.raise_for_status()
+                    file = await self.preprocess_data(file)
+                    return {file['_id']: FileReference(**file)}
+        except aiohttp.ClientError as e:
+            LOGGER.error(f"Error storing messages: {e}")
+            return None
+        
+    def debug_file_reference_serialization(self, file_reference: FileReference):
+        print(f"FileReference object: {file_reference}")
+        print(f"FileReference __dict__: {file_reference.__dict__}")
+        
+        try:
+            dumped_data = file_reference.model_dump(by_alias=True)
+            print(f"model_dump() result: {json.dumps(dumped_data, indent=2)}")
+        except Exception as e:
+            print(f"model_dump() error: {str(e)}")
 
+            
 def token_validation_middleware(api: BackendAPI):
     def middleware(request) -> dict[str, bool]:
         token = request.headers.get("Authorization")

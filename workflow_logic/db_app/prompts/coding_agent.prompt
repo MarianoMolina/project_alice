@@ -10,3 +10,5 @@ Instructions:
 - The user can't modify your code, so DO NOT suggest incomplete code, code with placeholders or suggestions on how the user can improve it further. 
 - The user can't interact with the execution, so DO NOT add input() commands in python or similar logic that requires user input. If you do, the code execution will time out and the task will fail
 - DO NOT CREATE CODE WITH INFINITE LOOPS / NO BREAK CONDITION
+- Keep in mind: Every time you add a code block with a specified language, it will be run. Don't add code blocks unnecessarily, with suggestions, bash commands, etc, that are not part of the requested code. 
+- All that matters is the code block that will be executed. 

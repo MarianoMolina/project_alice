@@ -1,8 +1,7 @@
 from abc import abstractmethod
 from pydantic import BaseModel, Field
-from workflow_logic.util import SearchOutput, MessageDict, ApiType
-from workflow_logic.core.parameters import FunctionParameters
-from typing import Dict, Any, Union
+from workflow_logic.core.data_structures import References, ApiType, FunctionParameters
+from typing import Dict, Any
 
 class APIEngine(BaseModel):
     """
@@ -23,7 +22,7 @@ class APIEngine(BaseModel):
     required_api: ApiType = Field(..., title="The API engine required")
 
     @abstractmethod
-    async def generate_api_response(self, api_data: Dict[str, Any], **kwargs) -> Union[SearchOutput, MessageDict]:
+    async def generate_api_response(self, api_data: Dict[str, Any], **kwargs) -> References:
         """
         Generate an API response based on the provided data and parameters.
 

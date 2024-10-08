@@ -1,14 +1,13 @@
 import unittest
 from unittest.mock import AsyncMock, patch
 from workflow_logic.core.api.engines import LLMAnthropic
-from workflow_logic.util import LLMConfig
-from workflow_logic.core.parameters import ToolFunction, FunctionConfig, FunctionParameters, ParameterDefinition
+from workflow_logic.core.data_structures import ModelConfig, ToolFunction, FunctionConfig, FunctionParameters, ParameterDefinition
 from anthropic.types import Message, TextBlock, Usage
 
 class TestLLMAnthropic(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         self.llm_anthropic = LLMAnthropic()
-        self.api_data = LLMConfig(
+        self.api_data = ModelConfig(
             api_key="dummy_api_key",
             base_url="https://api.anthropic.com",
             model="claude-3-opus-20240229"

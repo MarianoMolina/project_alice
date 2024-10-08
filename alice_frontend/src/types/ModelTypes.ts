@@ -1,22 +1,27 @@
-import { User, convertToUser } from "./UserTypes";
-import { LlmProvider } from "./ApiTypes";
+import { BaseDataseObject, convertToUser } from "./UserTypes";
+import { ApiName } from "./ApiTypes";
 import { HandleClickProps } from "./CollectionTypes";
 
-export interface AliceModel {
+export enum ModelType {
+    INSTRUCT = 'instruct',
+    CHAT = 'chat',
+    VISION = 'vision',
+    STT = 'stt',
+    TTS = 'tts',
+    EMBEDDINGS = 'embeddings',
+    IMG_GEN = 'img_gen',
+}
+export interface AliceModel extends BaseDataseObject {
     _id?: string;
     short_name: string;
     model_name: string;
     model_format?: string;
     ctx_size?: number;
-    model_type: 'instruct' | 'chat' | 'vision';
-    api_name: LlmProvider;
+    model_type: ModelType;
+    api_name: ApiName;
     temperature?: number;
     seed?: number | null;
     use_cache?: boolean;
-    created_by?: User;
-    updated_by?: User;
-    createdAt?: Date;
-    updatedAt?: Date;
 }
 
 export const convertToAliceModel = (data: any): AliceModel => {
@@ -55,8 +60,8 @@ export const getDefaultModelForm = (): Partial<AliceModel> => ({
     model_name: '',
     model_format: '',
     ctx_size: 0,
-    model_type: 'chat',
-    api_name: LlmProvider.OPENAI,
+    model_type: ModelType.CHAT,
+    api_name: ApiName.OPENAI,
     temperature: 0.7,
     use_cache: true
 });

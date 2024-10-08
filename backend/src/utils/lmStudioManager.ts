@@ -197,7 +197,6 @@ export class LMStudioManager {
 
     private async unloadAllModels() {
         return this.queue.enqueue(async () => {
-            Logger.info("Starting to unload all previously loaded models...");
             try {
                 const loadedModelsList = await callLMStudioMethod('listLoaded', () => this.client.llm.listLoaded());
                 Logger.debug("Loaded models:", loadedModelsList);
@@ -207,7 +206,6 @@ export class LMStudioManager {
                     Logger.debug(`Successfully unloaded model: ${model.identifier}`);
                 }
                 this.loadedModels = {};
-                Logger.info("All models unloaded successfully.");
             } catch (error) {
                 console.error("Error unloading models:", error);
             }

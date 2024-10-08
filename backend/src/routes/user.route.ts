@@ -16,6 +16,10 @@ import Task from '../models/task.model';
 import TaskResult from '../models/taskResult.model';
 import ParameterDefinition from '../models/parameter.model';
 import Logger from '../utils/logger';
+import FileReference from '../models/file.model';
+import Message from '../models/message.model';
+import URLReference from '../models/urlReference.model';
+import { purgeAndReinitialize } from '../utils/purge.utils';
 
 const router: Router = express.Router();
 
@@ -132,34 +136,17 @@ router.post('/purge-and-reinitialize', auth, async (req: AuthRequest, res: Respo
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    Logger.info('Purging data for userId:', userId);
-
-    const models = [Agent, API, Chat, Model, Prompt, Task, TaskResult, ParameterDefinition];
-    
-    for (const ModelClass of models) {
-      await (ModelClass as any).deleteMany({ created_by: userId });
-    }
-
-    Logger.info('All collections purged');
-
-    // Get the original authorization token from the request
     const token = req.headers.authorization;
 
     if (!token) {
       return res.status(401).json({ message: 'No authorization token provided' });
     }
 
-    // Reinitialize the user database
-    const workflowUrl = `http://${workflow_name}:${workflow_port}/initialize_user_database`;
-    await axios.post(workflowUrl, {}, {
-      headers: {
-        Authorization: token
-      }
-    });
+    await purgeAndReinitialize(userId, token);
 
     res.json({ message: 'Database purged and re-initialized successfully' });
   } catch (error) {
-    console.error('Error in purge-and-reinitialize:', error);
+    Logger.error('Error in purge-and-reinitialize:', error);
     if (axios.isAxiosError(error)) {
       res.status(error.response?.status || 500).json({ message: error.response?.data || 'An error occurred while reinitializing the database' });
     } else {

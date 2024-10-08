@@ -1,12 +1,14 @@
 from fastapi import APIRouter, Depends
-from workflow_logic.util import DatabaseTaskResponse, LOGGER
-from workflow_logic.core.tasks import AliceTask, TaskExecutionRequest
+from workflow_logic.util import LOGGER
+from workflow_logic.core import AliceTask
+from workflow_logic.api_app.util import TaskExecutionRequest
+from workflow_logic.core import TaskResponse
 from workflow_logic.api_app.util.utils import deep_api_check
 from workflow_logic.api_app.util.dependencies import get_db_app
 
 router = APIRouter()
 
-@router.post("/execute_task", response_model=DatabaseTaskResponse)
+@router.post("/execute_task", response_model=TaskResponse)
 async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(get_db_app)) -> dict:
     """
     Execute a specific task and store its response.
@@ -56,16 +58,25 @@ async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(ge
         LOGGER.debug(f'task type: {type(task)}')
        
         result = await task.a_execute(api_manager=api_manager, **inputs)
-       
-        LOGGER.info(f'task_result: {result.model_dump()}')
+        if not result:
+            raise ValueError(f"Task execution failed for task ID {taskId}")
+
+        # Process and update file content references
+        LOGGER.debug(f'task_result: {result.model_dump()}')
+
+        # LOGGER.debug(f'result after checking references: {result.model_dump()}')
+        LOGGER.debug(f'References: {result.references.model_dump()}')
         LOGGER.debug(f'type: {type(result)}')
-        db_result = await db_app.store_task_response(result)
-        LOGGER.debug(f'db_result: {db_result.model_dump(by_alias=True)}')
-        return db_result.model_dump(by_alias=True)
+        db_result = await db_app.create_entity_in_db('task_responses', result.model_dump(exclude={'id'}))
+
+        updated_ref = await db_app.get_entity_from_db('task_responses', db_result['_id'])
+
+        LOGGER.debug(f'db_result: {db_result}')
+        return TaskResponse(**updated_ref)
     except Exception as e:
         import traceback
         LOGGER.error(f'Error: {e}\nTraceback: {traceback.format_exc()}')
-        result = DatabaseTaskResponse(
+        result = TaskResponse(
             task_id=taskId,
             task_name=task.task_name if task else "Unknown",
             task_description=task.task_description if task else "Task execution failed",
@@ -77,5 +88,5 @@ async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(ge
             usage_metrics=None,
             execution_history=None
         )
-        db_result = await db_app.store_task_response(result)
-        return db_result.model_dump(by_alias=True)
+        db_result = await db_app.create_entity_in_db('task_responses', result.model_dump(exclude={'id'}))
+        return db_result

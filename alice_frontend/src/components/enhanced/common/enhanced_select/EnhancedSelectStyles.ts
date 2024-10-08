@@ -38,7 +38,14 @@ const useStyles = makeStyles((theme: Theme) => ({
       backgroundColor: theme.palette.action.hover,
     },
   },
+  buttonContainer: {
+    display: 'flex',
+    marginLeft: 'auto',
+  },
   editButton: {
+    marginLeft: theme.spacing(1),
+  },
+  createButton: {
     marginLeft: theme.spacing(1),
   },
   divider: {

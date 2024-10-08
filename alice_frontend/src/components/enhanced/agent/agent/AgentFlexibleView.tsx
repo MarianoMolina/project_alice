@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
     TextField,
     FormControlLabel,
     Switch,
-    Dialog
 } from '@mui/material';
 import { AgentComponentProps, AliceAgent, getDefaultAgentForm } from '../../../../types/AgentTypes';
 import { Prompt } from '../../../../types/PromptTypes';
-import { AliceModel } from '../../../../types/ModelTypes';
+import { AliceModel, ModelType } from '../../../../types/ModelTypes';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
-import EnhancedModel from '../../model/model/EnhancedModel';
-import EnhancedPrompt from '../../prompt/prompt/EnhancedPrompt';
-import { useApi } from '../../../../context/ApiContext';
+import PromptShortListView from '../../prompt/prompt/PromptShortListView';
+import ModelShortListView from '../../model/model/ModelShortListView';
+import { useApi } from '../../../../contexts/ApiContext';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
+import Logger from '../../../../utils/Logger';
 
 const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     item,
@@ -21,73 +22,112 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     handleSave
 }) => {
     const { fetchItem } = useApi();
+    const { selectCardItem } = useCardDialog();
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
-    const [form, setForm] = useState<Partial<AliceAgent>>(getDefaultAgentForm());
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [dialogContent, setDialogContent] = useState<React.ReactNode | null>(null);
+    const [form, setForm] = useState<Partial<AliceAgent>>(item || getDefaultAgentForm());
+    const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        if (isSaving) {
+            handleSave();
+            setIsSaving(false);
+        }
+    }, [isSaving, handleSave]);
 
     useEffect(() => {
         if (item) {
-            setForm({ ...getDefaultAgentForm(), ...item });
+            setForm(item);
         }
     }, [item]);
 
     const isEditMode = mode === 'edit' || mode === 'create';
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        onChange({ ...form, [name]: value });
-    };
+        if (name === 'max_consecutive_auto_reply') {
+            // Only allow non-negative integers
+            const numValue = parseInt(value, 10);
+            if (!isNaN(numValue) && numValue >= 0) {
+                setForm(prevForm => ({ ...prevForm, [name]: numValue }));
+            }
+        } else {
+            setForm(prevForm => ({ ...prevForm, [name]: value }));
+        }
+    }, []);
 
-    const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleCheckboxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, checked } = e.target;
-        onChange({ ...form, [name]: checked });
-    };
+        setForm(prevForm => ({ ...prevForm, [name]: checked }));
+    }, []);
 
-    const handleModelChange = async (selectedIds: string[]) => {
-        if (selectedIds.length > 0) {
-            const model = await fetchItem('models', selectedIds[0]) as AliceModel;
-            onChange({ ...form, model_id: model });
-        } else {
-            onChange({ ...form, model_id: null });
+    const handleModelChange = useCallback(async (selectedIds: string[]) => {
+        const updatedModels: { [key in ModelType]?: AliceModel } = {};
+        for (const id of selectedIds) {
+            const model = await fetchItem('models', id) as AliceModel;
+            if (model && model.model_type) {
+                updatedModels[model.model_type] = model;
+            }
         }
-    };
+        setForm(prevForm => ({ ...prevForm, models: updatedModels }));
+    }, [fetchItem]);
 
-    const handlePromptChange = async (selectedIds: string[]) => {
+    const handlePromptChange = useCallback(async (selectedIds: string[]) => {
+        let updatedSystemMessage: Prompt | undefined;
         if (selectedIds.length > 0) {
-            const prompt = await fetchItem('prompts', selectedIds[0]) as Prompt;
-            onChange({ ...form, system_message: prompt });
-        } else {
-            onChange({ ...form, system_message: undefined });
+            updatedSystemMessage = await fetchItem('prompts', selectedIds[0]) as Prompt;
         }
-    };
+        setForm(prevForm => ({ ...prevForm, system_message: updatedSystemMessage }));
+    }, [fetchItem]);
 
-    const handleAccordionToggle = (accordion: string | null) => {
+    const handleAccordionToggle = useCallback((accordion: string | null) => {
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
-    };
+    }, []);
 
-    const handleViewDetails = (type: 'model' | 'prompt', itemId: string) => {
-        let content;
-        switch (type) {
-            case 'model':
-                content = <EnhancedModel mode="card" itemId={itemId} fetchAll={false} />;
-                break;
-            case 'prompt':
-                content = <EnhancedPrompt mode="card" itemId={itemId} fetchAll={false} />;
-                break;
-        }
-        setDialogContent(content);
-        setDialogOpen(true);
-    };
+    const handleLocalSave = useCallback(() => {
+        onChange(form);
+        setIsSaving(true);
+    }, [form, onChange]);
 
     const title = mode === 'create' ? 'Create New Agent' : mode === 'edit' ? 'Edit Agent' : 'Agent Details';
     const saveButtonText = form._id ? 'Update Agent' : 'Create Agent';
+
+    Logger.debug('AgentFlexibleView', { form, mode });
+
+    const memoizedPromptSelect = useMemo(() => (
+        <EnhancedSelect<Prompt>
+            componentType="prompts"
+            EnhancedView={PromptShortListView}
+            selectedItems={form.system_message ? [form.system_message] : []}
+            onSelect={handlePromptChange}
+            isInteractable={isEditMode}
+            label="Select System Message"
+            activeAccordion={activeAccordion}
+            onAccordionToggle={handleAccordionToggle}
+            onView={(id) => selectCardItem("Prompt", id)}
+            accordionEntityName="system-message"
+        />
+    ), [form.system_message, handlePromptChange, isEditMode, activeAccordion, handleAccordionToggle, selectCardItem]);
+
+    const memoizedModelSelect = useMemo(() => (
+        <EnhancedSelect<AliceModel>
+            componentType="models"
+            EnhancedView={ModelShortListView}
+            selectedItems={form.models ? Object.values(form.models) : []}
+            onSelect={handleModelChange}
+            isInteractable={isEditMode}
+            multiple
+            label="Select Models"
+            activeAccordion={activeAccordion}
+            onAccordionToggle={handleAccordionToggle}
+            onView={(id) => selectCardItem("Model", id)}
+            accordionEntityName="models"
+        />
+    ), [form.models, handleModelChange, isEditMode, activeAccordion, handleAccordionToggle, selectCardItem]);
 
     return (
         <GenericFlexibleView
             elementType='Agent'
             title={title}
-            onSave={handleSave}
+            onSave={handleLocalSave}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
         >
@@ -100,33 +140,18 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
                 margin="normal"
                 disabled={!isEditMode}
             />
-
-            <EnhancedSelect<Prompt>
-                componentType="prompts"
-                EnhancedComponent={EnhancedPrompt}
-                selectedItems={form.system_message ? [form.system_message] : []}
-                onSelect={handlePromptChange}
-                isInteractable={isEditMode}
-                label="Select System Message"
-                activeAccordion={activeAccordion}
-                onAccordionToggle={handleAccordionToggle}
-                onView={(id) => handleViewDetails("prompt", id)}
-                accordionEntityName="system-message"
+            {memoizedPromptSelect}
+            {memoizedModelSelect}
+            <TextField
+                fullWidth
+                name="max_consecutive_auto_reply"
+                type='number'
+                label="Max Consecutive Auto Reply"
+                value={form.max_consecutive_auto_reply || ''}
+                onChange={handleInputChange}
+                margin="normal"
+                disabled={!isEditMode}
             />
-
-            <EnhancedSelect<AliceModel>
-                componentType="models"
-                EnhancedComponent={EnhancedModel}
-                selectedItems={form.model_id ? [form.model_id] : []}
-                onSelect={handleModelChange}
-                isInteractable={isEditMode}
-                label="Select Model"
-                activeAccordion={activeAccordion}
-                onAccordionToggle={handleAccordionToggle}
-                onView={(id) => handleViewDetails("model", id)}
-                accordionEntityName="model"
-            />
-
             <FormControlLabel
                 control={
                     <Switch
@@ -149,10 +174,6 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
                 }
                 label="Has Functions"
             />
-
-            <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-                {dialogContent}
-            </Dialog>
         </GenericFlexibleView>
     );
 };

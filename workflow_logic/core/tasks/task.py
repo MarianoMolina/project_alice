@@ -5,9 +5,9 @@ from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field
 from workflow_logic.core.prompt import Prompt
 from workflow_logic.core.agent import AliceAgent
-from workflow_logic.core.parameters import FunctionParameters, ParameterDefinition, FunctionConfig, ToolFunction
 from workflow_logic.core.api import APIManager, APIEngine
-from workflow_logic.util import TaskResponse, DatabaseTaskResponse, ApiType, LOGGER
+from workflow_logic.core.data_structures import TaskResponse, ApiType, FunctionParameters, ParameterDefinition, FunctionConfig, ToolFunction
+from workflow_logic.util import LOGGER
 
 class AliceTask(BaseModel, ABC):
     """
@@ -54,35 +54,37 @@ class AliceTask(BaseModel, ABC):
     id: Optional[str] = Field(default=None, description="The task ID", alias="_id")
     task_name: str = Field(..., description="The name of the task")
     task_description: str = Field(..., description="A clear, concise statement of what the task entails")
-    input_variables: FunctionParameters = Field(FunctionParameters(
+    input_variables: FunctionParameters = Field(
+        default_factory=lambda: FunctionParameters(
             type="object",
             properties={
                 "prompt": ParameterDefinition(
                     type="string",
                     description="The input prompt for the task",
                     default=None
-                )},
+                )
+            },
             required=["prompt"]
-        ), description="The input variables for the task. Default is a string prompt."
+        ),
+        description="The input variables for the task. Default is a string prompt."
     )
-    exit_codes: Dict[int, str] = Field(default={0: "Success", 1: "Failed"}, description="A dictionary of exit codes for the task, consistent with the TaskResponse structure", example={0: "Success", 1: "Failed"})
+    exit_codes: Dict[int, str] = Field(default_factory=lambda: {0: "Success", 1: "Failed"}, description="A dictionary of exit codes for the task")
     recursive: bool = Field(True, description="Whether the task can be executed recursively")
-    templates: Optional[Dict[str, Prompt]] = Field(default={}, description="A dictionary of templates for the task")
-    tasks: Optional[Dict[str, "AliceTask"]] = Field(default={}, description="A dictionary of task_id: task")
-    valid_languages: List[str] = Field([], description="A list of valid languages for the task")
-    timeout: Optional[int] = Field(None, description="The timeout for the task in seconds")
-    prompts_to_add: Optional[Dict[str, Prompt]] = Field(None, description="A dictionary of prompts to add to the task")
-    exit_code_response_map: Optional[Dict[str, int]] = Field(None, description="A dictionary mapping exit codes to responses")
-    start_task: Optional[str] = Field(None, description="The name of the starting task")
-    required_apis: Optional[List[ApiType]] = Field([], description="A list of required APIs for the task")
-    task_selection_method: Optional[Callable[[TaskResponse, List[Dict[str, Any]]], Optional[str]]] = Field(None, description="A method to select the next task based on the current task's response")
-    tasks_end_code_routing: Optional[Dict[str, Dict[Union[str, int], Tuple[Optional[str], bool]]]] = Field(None, description="A dictionary of tasks -> exit codes and the task to route to given each exit code and a bool to determine if the outcome represents an extra 'try' at the task. If a selection method is provided, this isn't used")
-    max_attempts: int = Field(3, description="The maximum number of failed task attempts before the workflow is considered failed. Default is 3.")
-    recursive: bool = Field(False, description="Whether the workflow can be executed recursively. By default, tasks are recursive but workflows are not, unless one is expected to be used within another workflow")
-    agent: Optional[AliceAgent] = Field(None, description="The agent that the task is associated with")
-    human_input: Optional[bool] = Field(default=False, description="Whether the task requires human input")
-    api_engine: Optional[APIEngine] = Field(None, description="The API engine for the task")
-
+    templates: Dict[str, Prompt] = Field(default_factory=dict, description="A dictionary of templates for the task")
+    tasks: Dict[str, "AliceTask"] = Field(default_factory=dict, description="A dictionary of task_id: task")
+    valid_languages: List[str] = Field(default_factory=list, description="A list of valid languages for the task")
+    timeout: Optional[int] = Field(default=None, description="The timeout for the task in seconds")
+    prompts_to_add: Optional[Dict[str, Prompt]] = Field(default_factory=dict, description="A dictionary of prompts to add to the task")
+    exit_code_response_map: Optional[Dict[str, int]] = Field(default=None, description="A dictionary mapping exit codes to responses")
+    start_task: Optional[str] = Field(default=None, description="The name of the starting task")
+    required_apis: List[ApiType] = Field(default_factory=list, description="A list of required APIs for the task")
+    task_selection_method: Optional[Callable[[TaskResponse, List[Dict[str, Any]]], Optional[str]]] = Field(default=None, description="A method to select the next task based on the current task's response")
+    tasks_end_code_routing: Optional[Dict[str, Dict[Union[str, int], Tuple[Optional[str], bool]]]] = Field(default=None, description="A dictionary of tasks -> exit codes and the task to route to given each exit code")
+    max_attempts: int = Field(default=3, description="The maximum number of failed task attempts before the workflow is considered failed")
+    agent: Optional[AliceAgent] = Field(default=None, description="The agent that the task is associated with")
+    human_input: bool = Field(default=False, description="Whether the task requires human input")
+    api_engine: Optional[APIEngine] = Field(default=None, description="The API engine for the task")
+    
     @property
     def task_type(self) -> str:
         return self.__class__.__name__
@@ -180,7 +182,7 @@ class AliceTask(BaseModel, ABC):
 
         return result
     
-    async def a_execute(self, **kwargs) -> DatabaseTaskResponse:
+    async def a_execute(self, **kwargs) -> TaskResponse:
         """Executes the task and returns a TaskResponse."""
         LOGGER.info(f'Executing task {self.task_name}')
         task_id = str(uuid.uuid4())
@@ -202,16 +204,14 @@ class AliceTask(BaseModel, ABC):
             "task_id": task_id,
             "task_description": self.task_description
         })
-        # Run the task
-        response = await self.run(execution_history=execution_history, **kwargs)        
-        # Return the response
-        return DatabaseTaskResponse(**response.model_dump(by_alias=True))
+        # Return the the task response
+        return await self.run(execution_history=execution_history, **kwargs)        
     
     def get_function(self, execution_history: Optional[List]=[], api_manager: Optional[APIManager] = None) -> Dict[str, Any]:
         """
         Returns a dictionary representing the function typedict and the function callable.
         """
-        async def function_callable(**kwargs) -> DatabaseTaskResponse:
+        async def function_callable(**kwargs) -> TaskResponse:
             params = {"api_manager": api_manager} if api_manager else {}
             final_params = {"execution_history": execution_history, **params, **kwargs}
             return await self.a_execute(**final_params)
@@ -264,7 +264,7 @@ class AliceTask(BaseModel, ABC):
     #     """Executes the task and returns a TaskResponse."""
     #     return await self.execute(**kwargs)
 
-    # def execute(self, **kwargs) -> DatabaseTaskResponse:
+    # def execute(self, **kwargs) -> TaskResponse:
     #     # Generate a new task ID for this execution
     #     print(f'Executing task {self.task_name}')
     #     task_id = self.id if self.id else str(uuid.uuid4())
@@ -288,7 +288,7 @@ class AliceTask(BaseModel, ABC):
         
     #     # Run the task
     #     response = self.run(execution_history=execution_history, **kwargs)
-    #     return DatabaseTaskResponse.model_validate(response)
+    #     return TaskResponse.model_validate(response)
     
     # def update_input(self, **kwargs) -> list[Any]:
     #     """Executes the task and returns a TaskResponse."""

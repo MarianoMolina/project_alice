@@ -26,8 +26,8 @@ promptSchema.methods.apiRepresentation = function (this: IPromptDocument) {
     content: this.content || null,
     is_templated: this.is_templated || false,
     version: this.version || 1,
-    created_at: this.createdAt || null,
-    updated_at: this.updatedAt || null,
+    createdAt: this.createdAt || null,
+    updatedAt: this.updatedAt || null,
     parameters: this.is_templated ? (this.parameters || null) : null,
     partial_variables: this.is_templated ? (this.partial_variables || {}) : null,
     created_by: this.created_by || null,
@@ -44,10 +44,9 @@ function ensureObjectId(this: IPromptDocument, next: CallbackWithoutResultAndOpt
   next();
 }
 
-promptSchema.pre('save', ensureObjectId);
 
-promptSchema.pre('findOneAndUpdate', function (this: any, next: CallbackWithoutResultAndOptionalError) {
-  const update = this.getUpdate();
+function ensureObjectIdForUpdate(this: Query<any, any>, next: CallbackWithoutResultAndOptionalError) {
+  const update = this.getUpdate() as any;
 
   if (update.created_by) {
     update.created_by = ensureObjectIdHelper(update.created_by);
@@ -60,7 +59,7 @@ promptSchema.pre('findOneAndUpdate', function (this: any, next: CallbackWithoutR
     update.parameters.properties = ensureObjectIdForProperties(update.parameters.properties);
   }
   next();
-});
+};
 
 
 function autoPopulate(this: Query<any, any>, next: CallbackWithoutResultAndOptionalError) {
@@ -68,6 +67,8 @@ function autoPopulate(this: Query<any, any>, next: CallbackWithoutResultAndOptio
   next();
 }
 
+promptSchema.pre('save', ensureObjectId);
+promptSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
 promptSchema.pre('find', autoPopulate);
 promptSchema.pre('findOne', autoPopulate);
 

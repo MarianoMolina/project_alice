@@ -97,7 +97,7 @@ Example:
 
 ```python
 from workflow_logic.core.tasks.task import AliceTask
-from workflow_logic.util import TaskResponse
+from workflow_logic.core.data_structures import TaskResponse
 
 class NewTask(AliceTask):
     async def run(self, **kwargs) -> TaskResponse:
@@ -155,13 +155,6 @@ The Workflow container supports various task types, each designed for specific p
 
 ### Major Task Types
 
-1. **BasicAgentTask**
-   - Purpose: General-purpose tasks executed by an AI agent
-   - Key Properties:
-     - `agent`: The AI agent executing the task
-     - `templates`: Dictionary of prompts/templates used by the agent
-   - Usage: Ideal for tasks that require complex reasoning or decision-making
-
 2. **PromptAgentTask**
    - Purpose: Tasks that use templated prompts for execution
    - Key Properties:
@@ -217,7 +210,7 @@ Example of creating a new PromptAgentTask:
 
 ```python
 from workflow_logic.core.tasks import PromptAgentTask
-from workflow_logic.util import TaskResponse
+from workflow_logic.core.data_structures import TaskResponse
 
 class MyCustomTask(PromptAgentTask):
     custom_property: str = "default_value"

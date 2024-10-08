@@ -7,10 +7,24 @@ import { TaskResponse, convertToTaskResponse } from './TaskResponseTypes';
 import { ParameterDefinition, convertToParameterDefinition } from './ParameterTypes';
 import { User, convertToUser } from './UserTypes';
 import { API, convertToAPI } from './ApiTypes';
+import { convertToFileReference, FileReference } from './FileTypes';
+import { convertToMessageType, MessageType } from './MessageTypes';
+import { convertToURLReference, URLReference } from './URLReferenceTypes';
+import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
+import EnhancedAgent from '../components/enhanced/agent/agent/EnhancedAgent';
+import EnhancedChat from '../components/enhanced/chat/chat/EnhancedChat';
+import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
+import EnhancedMessage from '../components/enhanced/message/message/EnhancedMessage';
+import EnhancedModel from '../components/enhanced/model/model/EnhancedModel';
+import EnhancedParameter from '../components/enhanced/parameter/parameter/EnhancedParameter';
+import EnhancedPrompt from '../components/enhanced/prompt/prompt/EnhancedPrompt';
+import EnhancedTask from '../components/enhanced/task/task/EnhancedTask';
+import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
+import EnhancedURLReference from '../components/enhanced/url_reference/url_reference/EnhancedURLReference';
 
-export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis';
-export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User;
-export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API';
+export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' | 'urlreferences';
+export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType | URLReference;
+export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API' | 'User' | 'File' | 'Message' | 'URLReference';
 
 export type CollectionType = {
     agents: AliceAgent;
@@ -22,25 +36,56 @@ export type CollectionType = {
     users: User;
     parameters: ParameterDefinition;
     apis: API;
+    files: FileReference;
+    messages: MessageType;
+    urlreferences: URLReference;
 };
 
-export const convertCollectionToElementName = <T extends CollectionName>(collectionName: T): CollectionElementMap[T] => {
-    return collectionName.slice(0, -1) as CollectionElementMap[T];
+export type CollectionTypeString = {
+    agents: 'Agent';
+    chats: 'Chat';
+    models: 'Model';
+    tasks: 'Task';
+    prompts: 'Prompt';
+    taskresults: 'TaskResponse';
+    users: 'User';
+    parameters: 'Parameter';
+    apis: 'API';
+    files: 'File';
+    messages: 'Message';
+    urlreferences: 'URLReference';
 };
 
-export type ElementName = 'agent' | 'chat' | 'model' | 'task' | 'prompt' | 'taskresult' | 'user' | 'parameter' | 'api';
-
-export type CollectionElementMap = {
-    agents: 'agent';
-    chats: 'chat';
-    models: 'model';
-    tasks: 'task';
-    prompts: 'prompt';
-    taskresults: 'taskresult';
-    users: 'user';
-    parameters: 'parameter';
-    apis: 'api';
+export const collectionNameToElementString: Record<CollectionName, CollectionElementString> = {
+    agents: 'Agent',
+    chats: 'Chat',
+    models: 'Model',
+    tasks: 'Task',
+    prompts: 'Prompt',
+    taskresults: 'TaskResponse',
+    users: 'User',
+    parameters: 'Parameter',
+    apis: 'API',
+    files: 'File',
+    messages: 'Message',
+    urlreferences: 'URLReference'
 };
+
+export const collectionNameToEnhancedComponent: Record<CollectionName, React.ComponentType<any>> = {
+    agents: EnhancedAgent,
+    chats: EnhancedChat,
+    models: EnhancedModel,
+    tasks: EnhancedTask,
+    prompts: EnhancedPrompt,
+    taskresults: EnhancedTaskResponse,
+    users: EnhancedAgent,
+    parameters: EnhancedParameter,
+    apis: EnhancedAPI,
+    files: EnhancedFile,
+    messages: EnhancedMessage,
+    urlreferences: EnhancedURLReference
+};
+
 
 export const converters: { [K in CollectionName]: (data: any) => CollectionType[K] } = {
     agents: convertToAliceAgent,
@@ -52,16 +97,22 @@ export const converters: { [K in CollectionName]: (data: any) => CollectionType[
     users: convertToUser,
     parameters: convertToParameterDefinition,
     apis: convertToAPI,
+    files: convertToFileReference,
+    messages: convertToMessageType,
+    urlreferences: convertToURLReference,
 };
 
 export type ComponentMode = 'create' | 'edit' | 'view' | 'list' | 'shortList' | 'table';
 
 export interface HandleClickProps {
-    handleModelClick?: (modelId: string) => void;
-    handleAgentClick?: (agentId: string) => void;
-    handleTaskClick?: (taskId: string) => void;
-    handlePromptClick?: (promptId: string) => void;
-    handleParameterClick?: (paramId: string) => void;
-    handleApiClick?: (apiId: string) => void;
-    handleTaskResultClick?: (taskResultId: string) => void;
+    handleModelClick?: (modelId: string, item?: AliceModel) => void;
+    handleAgentClick?: (agentId: string, item?: AliceAgent) => void;
+    handleTaskClick?: (taskId: string, item?: AliceTask) => void;
+    handlePromptClick?: (promptId: string, item?: Prompt) => void;
+    handleParameterClick?: (paramId: string, item?: ParameterDefinition) => void;
+    handleApiClick?: (apiId: string, item?: API) => void;
+    handleTaskResultClick?: (taskResultId: string, item?: TaskResponse) => void;
+    handleFileClick?: (fileId: string, item?: FileReference) => void;
+    handleMessageClick?: (messageId: string, item?: MessageType) => void;
+    handleURLReferenceClick?: (urlReferenceId: string, item?: URLReference) => void;
 }

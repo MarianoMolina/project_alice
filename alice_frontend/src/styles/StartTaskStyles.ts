@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     overflow: 'hidden',
   },
   apiStatusContainer: {
-    padding: theme.spacing(3),
+    paddingTop: theme.spacing(1),
     borderBottom: `1px solid ${theme.palette.divider}`,
   },
   sectionTitle: {
@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   apiTooltipContainer: {
     marginTop: theme.spacing(2),
     display: 'flex',
-    justifyContent: 'center',
+    overflow: 'auto',
   },
   recentExecutionsAccordion: {
     flexGrow: 1,
@@ -69,7 +69,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: 'flex',
     flexDirection: 'column',
     padding: '0 !important',
-    overflow: 'hidden',
+    overflow: 'auto',
   },
   recentExecutionsList: {
     overflowY: 'auto',
@@ -83,6 +83,10 @@ const useStyles = makeStyles((theme: Theme) => ({
   accordionRoot: {
     height: '100%',
   },
+  activeListContainer: {
+    height: '100%',
+    overflowY: 'auto',
+  }
 }));
 
 export default useStyles;

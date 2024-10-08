@@ -1,6 +1,7 @@
 import subprocess
 import time
 import platform
+import os
 
 def is_docker_running():
     try:
@@ -22,24 +23,37 @@ def start_docker():
         exit(1)
 
 def start_lm_studio():
-    subprocess.Popen(["lms", "server", "start"])
+    system = platform.system()
+    if system == "Windows":
+        subprocess.Popen(["lms", "server", "start"], creationflags=subprocess.CREATE_NO_WINDOW)
+    else:
+        subprocess.Popen(["lms", "server", "start"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+def setup_directories():
+    os.makedirs("shared-uploads", exist_ok=True)
+    os.makedirs("logs", exist_ok=True)
+    os.chmod("shared-uploads", 0o777)
+    os.chmod("logs", 0o777)
 
 def main():
+    print("Setting up directories...")
+    setup_directories()
+
     print("Launching Docker...")
     start_docker()
-
+   
     print("Waiting for Docker to start...")
     while not is_docker_running():
         print("Docker is not ready yet. Waiting...")
         time.sleep(2)
     print("Docker is ready!")
-
+   
     print("Starting LM Studio server...")
     start_lm_studio()
-
+   
     print("Waiting for LM Studio server to start...")
     time.sleep(5)
-
+   
     print("Starting Docker Compose...")
     subprocess.run(["docker-compose", "up"])
 

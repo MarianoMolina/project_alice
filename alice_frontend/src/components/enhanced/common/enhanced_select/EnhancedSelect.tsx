@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Box, IconButton, Accordion, AccordionSummary, AccordionDetails, Typography, Chip, Divider } from '@mui/material';
-import { Edit, Close, ExpandMore } from '@mui/icons-material';
-import { CollectionName, CollectionType } from '../../../../types/CollectionTypes';
+import { Edit, Close, ExpandMore, Add } from '@mui/icons-material';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import useStyles from './EnhancedSelectStyles';
+import { CollectionName, CollectionType, CollectionElementString, collectionNameToElementString, collectionNameToEnhancedComponent } from '../../../../types/CollectionTypes';
+import Logger from '../../../../utils/Logger';
 
 interface EnhancedSelectProps<T extends CollectionType[CollectionName]> {
   componentType: CollectionName;
-  EnhancedComponent: React.ComponentType<any>;
+  EnhancedView: React.ComponentType<any>;
   selectedItems: T[];
   onSelect: (selectedIds: string[]) => void;
   isInteractable: boolean;
@@ -14,12 +16,14 @@ interface EnhancedSelectProps<T extends CollectionType[CollectionName]> {
   label: string;
   activeAccordion: string | null;
   onAccordionToggle: (accordionName: string | null) => void;
-  onView: (id: string) => void;
+  onView?: (id: string) => void;
   accordionEntityName: string;
+  showCreateButton?: boolean;
 }
 
 function EnhancedSelect<T extends CollectionType[CollectionName]>({
-  EnhancedComponent,
+  componentType,
+  EnhancedView,
   selectedItems,
   onSelect,
   isInteractable,
@@ -27,10 +31,15 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
   label,
   activeAccordion,
   onAccordionToggle,
-  onView,
-  accordionEntityName
+  accordionEntityName,
+  showCreateButton = false
 }: EnhancedSelectProps<T>) {
   const classes = useStyles();
+  const { selectFlexibleItem, selectCardItem } = useCardDialog();
+  Logger.debug('EnhancedSelect', { componentType, selectedItems, isInteractable, multiple, label, activeAccordion, accordionEntityName, showCreateButton });
+
+  const EnhancedComponent = collectionNameToEnhancedComponent[componentType]
+
   const accordionName = `select-${accordionEntityName}`;
   const isExpanded = activeAccordion === accordionName;
 
@@ -38,54 +47,88 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
     onAccordionToggle(isExpanded ? null : accordionName);
   };
 
-  const handleDelete = (itemToDelete: T) => {
+  const handleDelete = useCallback((itemToDelete: T) => {
     const updatedIds = selectedItems
       .filter(item => item._id !== itemToDelete._id)
       .map(item => item._id!);
     onSelect(updatedIds);
-  };
+  }, [selectedItems, onSelect]);
 
-  const renderSelectedItem = (item: T) => (
+  const collectionElementString = collectionNameToElementString[componentType] as CollectionElementString;
+
+  const handleCreate = () => {
+    selectFlexibleItem(collectionElementString, 'create');
+  };
+  const commonProps = useMemo(() => ({
+    items: null,
+    onChange: () => { },
+    mode: 'view',
+    handleSave: async () => undefined,
+  }), []);
+
+  const handleInteraction = useCallback((item: T) => {
+    const newSelectedIds = multiple
+      ? [...selectedItems.map(i => i._id!), item._id!]
+      : [item._id!];
+    onSelect(newSelectedIds);
+  }, [multiple, selectedItems, onSelect]);
+
+  const handleView = useCallback((item: T) => {
+    selectCardItem(collectionElementString, item._id!);
+  }, [selectCardItem, collectionElementString]);
+
+  const memoizedEnhancedComponent = useMemo(() => (
+    <EnhancedComponent
+      mode="shortList"
+      fetchAll={true}
+      onInteraction={handleInteraction}
+      onView={handleView}
+      isInteractable={isInteractable}
+    />
+  ), [EnhancedComponent, handleInteraction, handleView, isInteractable]);
+
+  const renderSelectedItem = useCallback((item: T) => (
     <Chip
       key={item._id}
-      label={<EnhancedComponent mode="shortList" itemId={item._id} fetchAll={false} />}
+      label={<EnhancedView item={item} {...commonProps} />}
       onDelete={multiple && isInteractable ? () => handleDelete(item) : undefined}
-      onClick={() => onView(item._id!)}
+      onClick={() => selectCardItem(collectionElementString, item._id!)}
       className={classes.chip}
     />
-  );
+  ), [classes.chip, isInteractable, multiple, selectCardItem, collectionElementString, commonProps, EnhancedView, handleDelete]);
 
   return (
     <Box className={classes.selectContainer}>
       <Typography className={classes.label} variant="caption">{label}{multiple ? ' (multiple)' : null}</Typography>
       <Box className={classes.chipContainer}>
         {selectedItems?.map(renderSelectedItem)}
-        <IconButton 
-          onClick={handleToggle} 
-          disabled={!isInteractable} 
-          size="small"
-          className={classes.editButton}
-        >
-          {isExpanded ? <Close /> : <Edit />}
-        </IconButton>
+        <Box className={classes.buttonContainer}>
+          <IconButton
+            onClick={handleToggle}
+            disabled={!isInteractable}
+            size="small"
+            className={classes.editButton}
+          >
+            {isExpanded ? <Close /> : <Edit />}
+          </IconButton>
+          {showCreateButton && (
+            <IconButton
+              onClick={handleCreate}
+              disabled={!isInteractable}
+              size="small"
+              className={classes.createButton}
+            >
+              <Add />
+            </IconButton>
+          )}
+        </Box>
       </Box>
       <Accordion expanded={isExpanded} onChange={handleToggle}>
         <AccordionSummary expandIcon={<ExpandMore />}>
           <Typography>{label}</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <EnhancedComponent
-            mode="shortList"
-            fetchAll={true}
-            onInteraction={(item: T) => {
-              const newSelectedIds = multiple
-                ? [...selectedItems.map(i => i._id!), item._id!]
-                : [item._id!];
-              onSelect(newSelectedIds);
-            }}
-            onView={(item: T) => onView(item._id!)}
-            isInteractable={isInteractable}
-          />
+          {memoizedEnhancedComponent}
         </AccordionDetails>
       </Accordion>
       <Divider className={classes.divider} />

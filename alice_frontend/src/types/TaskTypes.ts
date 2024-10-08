@@ -5,10 +5,16 @@ import { AliceModel } from './ModelTypes';
 import { ApiType } from './ApiTypes';
 import { HandleClickProps } from "./CollectionTypes";
 import { API, APIEngine } from './ApiTypes';
+import { BaseDataseObject } from "./UserTypes";
 
-export type TaskType = "CVGenerationTask" | "RedditSearchTask" | "APITask" | "WikipediaSearchTask" | "GoogleSearchTask" | "ExaSearchTask" | "ArxivSearchTask" | "BasicAgentTask" | "PromptAgentTask" | "CheckTask" | "CodeGenerationLLMTask" | "CodeExecutionLLMTask" | "Workflow";
+export type TaskType = "CVGenerationTask" | "APITask" | "PromptAgentTask" | "CheckTask" | "CodeGenerationLLMTask" | "CodeExecutionLLMTask" | "Workflow" | "EmbeddingTask" | "GenerateImageTask" | "TextToSpeechTask" | "WebScrapeBeautifulSoupTask";
 
-export interface AliceTask {
+export type RouteMapTuple = [string | null, boolean];
+export type RouteMap = { [key: number]: RouteMapTuple };
+export type TasksEndCodeRouting = { [key: string]: RouteMap };
+
+export interface AliceTask extends BaseDataseObject {
+  _id?: string;
   task_name: string;
   task_description: string;
   task_type: TaskType;
@@ -25,16 +31,11 @@ export interface AliceTask {
   required_apis?: ApiType[] | null;
   model_id: AliceModel | null;
   task_selection_method?: CallableFunction | null;
-  tasks_end_code_routing?: { [key: string]: { [key: number]: any } } | null;
+  tasks_end_code_routing?: TasksEndCodeRouting | null;
   max_attempts?: number;
   agent?: AliceAgent | null;
   human_input?: boolean;
   api_engine?: APIEngine | null;
-  created_by?: string;
-  updated_by?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-  _id?: string;
 }
 
 export const convertToAliceTask = (data: any): AliceTask => {
@@ -88,7 +89,6 @@ export interface TaskComponentProps extends HandleClickProps {
 export interface TaskFormsProps extends TaskComponentProps {
   handleAccordionToggle: (accordion: string | null) => void;
   activeAccordion: string | null;
-  handleViewDetails: (type: 'agent' | 'task' | 'api' | 'template' | 'prompt', item_id: string) => void;
   apis: API[];
 }
 

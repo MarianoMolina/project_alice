@@ -7,6 +7,7 @@ import PromptShortListView from './PromptShortListView';
 import { Prompt } from '../../../../types/PromptTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
 import { PromptComponentProps } from '../../../../types/PromptTypes';
+import Logger from '../../../../utils/Logger';
 
 type BasePromptMode = BaseDbElementProps<Prompt>['mode'];
 type ExtendedPromptMode = 'list' | 'shortList' | 'card' | 'table';
@@ -27,6 +28,7 @@ const EnhancedPrompt: React.FC<EnhancedPromptProps> = (props) => {
     mode: BasePromptMode,
     handleSave: () => Promise<void>
   ) => {
+    Logger.debug('EnhancedPrompt', { items, item, mode });
     const commonProps: PromptComponentProps = {
       items,
       item,
@@ -36,7 +38,6 @@ const EnhancedPrompt: React.FC<EnhancedPromptProps> = (props) => {
       isInteractable: props.isInteractable,
       onView: props.onView,
       onInteraction: props.onInteraction,
-      handleParameterClick: props.handleParameterClick,
       showHeaders: props.showHeaders,
     };
 

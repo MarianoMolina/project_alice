@@ -1,8 +1,7 @@
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
-from workflow_logic.core import BasicAgentTask, FunctionParameters, ParameterDefinition, AliceAgent, Prompt, AliceModel
+from workflow_logic.core import BasicAgentTask, FunctionParameters, ParameterDefinition, AliceAgent, Prompt, AliceModel, TaskResponse, MessageDict, LLMChatOutput, ApiType
 from workflow_logic.core.api import APIManager
-from workflow_logic.util import TaskResponse, MessageDict, LLMChatOutput, ApiType
 
 @pytest.fixture
 def mock_api_manager():
@@ -13,7 +12,7 @@ def sample_agent():
     return AliceAgent(
         name="TestAgent",
         system_message=Prompt(name="test", content="You are a test assistant"),
-        model_id=AliceModel(short_name="TestModel", model_name="test-model", model_format="OpenChat", ctx_size=1000, model_type="chat", deployment="test")
+        models= {"chat": AliceModel(short_name="TestModel", model_name="test-model", model_format="OpenChat", ctx_size=1000, model_type="chat", deployment="test")}
     )
 
 @pytest.fixture

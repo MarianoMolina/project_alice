@@ -5,11 +5,14 @@ export enum TaskType {
   CVGenerationTask = "CVGenerationTask",
   APITask = "APITask",
   Workflow = "Workflow",
-  BasicAgentTask = "BasicAgentTask",
   PromptAgentTask = "PromptAgentTask",
   CheckTask = "CheckTask",
   CodeGenerationLLMTask = "CodeGenerationLLMTask",
   CodeExecutionLLMTask = "CodeExecutionLLMTask",
+  EmbeddingTask = "EmbeddingTask",
+  GenerateImageTask = "GenerateImageTask",
+  TextToSpeechTask = "TextToSpeechTask",
+  WebScrapeBeautifulSoupTask = "WebScrapeBeautifulSoupTask"
 }
 
 export interface ITask {

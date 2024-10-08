@@ -1,13 +1,13 @@
 import React from 'react';
-import { Alert, Snackbar } from '@mui/material';
-import { useNotification } from '../../../context/NotificationContext';
+import { Alert, Snackbar, Button } from '@mui/material';
+import { useNotification } from '../../../contexts/NotificationContext';
 
 const NotificationComponent: React.FC = () => {
   const { notifications, removeNotification } = useNotification();
 
   return (
     <>
-      {notifications.map(({ id, message, type }) => (
+      {notifications.map(({ id, message, type, action }) => (
         <Snackbar
           key={id}
           open={true}
@@ -15,7 +15,18 @@ const NotificationComponent: React.FC = () => {
           onClose={() => removeNotification(id)}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         >
-          <Alert onClose={() => removeNotification(id)} severity={type} sx={{ width: '100%' }}>
+          <Alert 
+            onClose={() => removeNotification(id)} 
+            severity={type} 
+            sx={{ width: '100%' }}
+            action={
+              action && (
+                <Button color="inherit" size="small" onClick={action.onClick}>
+                  {action.label}
+                </Button>
+              )
+            }
+          >
             {message}
           </Alert>
         </Snackbar>

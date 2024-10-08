@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography } from '@mui/material';
-import { useDialog } from '../../../context/DialogCustomContext';
+import { useDialog } from '../../../contexts/DialogCustomContext';
 
 const DialogComponent: React.FC = () => {
   const { dialogOptions, closeDialog } = useDialog();

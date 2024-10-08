@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getToken } from '../utils/AuthUtils';
+import Logger from '../utils/Logger';
 
 // const BACKEND_HOST = process.env.BACKEND_HOST || 'backend';
 // const WORKFLOW_HOST = process.env.WORKFLOW_HOST || 'workflow';
@@ -51,7 +52,7 @@ taskAxiosInstance.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     } else {
-      console.error('No token found');
+      Logger.error('No token found');
     }
     return config;
   },
