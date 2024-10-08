@@ -129,7 +129,5 @@ This structure allows an agent to use different models (and thus, different APIs
 
 To add support for a new API:
 
-1. Update the `ApiType` enum if it's a new category of API.
-2. Add a new entry to the `ApiName` enum for the provider.
-3. Update the frontend components to handle the new API type (see the Frontend README for details).
-4. Implement the necessary backend logic to interact with the new API.
+1. If it requires an API engine that is not in place, you'll need to build one and add it to the Api Manager map in Workflow (workflow_logic\core\api\api_manager.py). 
+2. If it uses an API engine available, simply create a new api of that api type / api name. For example, if you want to use an LLM endpoint that is compatible with an OpenAI client, you can just put the base url pointing to that address and it will work. 

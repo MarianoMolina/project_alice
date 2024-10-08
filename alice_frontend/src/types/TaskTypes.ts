@@ -7,7 +7,7 @@ import { HandleClickProps } from "./CollectionTypes";
 import { API, APIEngine } from './ApiTypes';
 import { BaseDataseObject } from "./UserTypes";
 
-export type TaskType = "CVGenerationTask" | "RedditSearchTask" | "APITask" | "WikipediaSearchTask" | "GoogleSearchTask" | "ExaSearchTask" | "ArxivSearchTask" | "PromptAgentTask" | "CheckTask" | "CodeGenerationLLMTask" | "CodeExecutionLLMTask" | "Workflow" | "EmbeddingTask" | "GenerateImageTask" | "TextToSpeechTask" | "WebScrapeBeautifulSoupTask";
+export type TaskType = "CVGenerationTask" | "APITask" | "PromptAgentTask" | "CheckTask" | "CodeGenerationLLMTask" | "CodeExecutionLLMTask" | "Workflow" | "EmbeddingTask" | "GenerateImageTask" | "TextToSpeechTask" | "WebScrapeBeautifulSoupTask";
 
 export type RouteMapTuple = [string | null, boolean];
 export type RouteMap = { [key: number]: RouteMapTuple };

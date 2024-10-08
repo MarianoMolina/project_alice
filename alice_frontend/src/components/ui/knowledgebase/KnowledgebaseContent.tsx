@@ -16,7 +16,6 @@ const KnowledgebaseContent: React.FC = () => {
           throw new Error('Failed to fetch content');
         }
         const text = await response.text();
-        console.log('Loaded markdown content:', text);
         setContent(text);
       } catch (error) {
         console.error('Failed to load markdown content:', error);

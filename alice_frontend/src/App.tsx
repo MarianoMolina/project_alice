@@ -24,7 +24,7 @@ import { DialogProvider as CardDialogProvider } from './contexts/CardDialogConte
 import DialogComponent from './components/ui/dialog/DialogCustom';
 import EnhancedCardDialog from './components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
 import EnhancedFlexibleDialog from './components/enhanced/common/enhanced_card_dialog/EnhancedFlexibleDialog';
-import Knowledgebase from './pages/Knowledgbase';
+import Knowledgebase from './pages/Knowledgebase';
 
 const App: React.FC = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);

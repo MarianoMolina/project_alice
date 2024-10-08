@@ -1,70 +1,51 @@
 # Introduction to the Alice System
 
 Welcome to the Alice system documentation. Alice is a sophisticated AI-driven platform designed to facilitate complex interactions between users, AI agents, and a variety of tasks and data types. This introduction provides an overview of the system's key components and their interrelationships.
-
+```User_prompt 
+Lets do something fun: Why don't you use the image_gen_task to create a representation of yourself?
+```
+![Alice represents itself](/content/img/alice_represented_1_small.png)
+```Assistant_prompt 
+A friendly and intelligent AI assistant named Alice, represented as a glowing, ethereal blue hologram of a female face with circuit-like patterns, floating above a futuristic desk with holographic screens. The image should convey warmth, intelligence, and helpfulness
+```
 ## System Overview
 
 Alice is built on several core components that work together to create a versatile and powerful AI interaction environment:
 
-1. **Agents**: The primary AI entities that interact with users and perform tasks.
-2. **Models**: The underlying AI models that power the agents' capabilities.
-3. **Chats**: Conversational interfaces where users interact with agents.
-4. **Tasks**: Predefined operations that can be executed by agents or triggered within chats.
-5. **APIs**: Interfaces to external services and AI providers.
-6. **Prompts**: Templated instructions that guide AI behavior.
-7. **Parameters**: Structured input definitions for tasks and prompts.
-8. **Messages**: Individual units of communication within chats.
-9. **Task Responses**: Results and metadata from executed tasks.
-10. **URL References**: Managed references to external web resources.
-11. **Files and Transcripts**: Handling of various file types with AI-readable transcripts.
+1. **Agents**: The primary AI entities that interact with users and perform tasks. [LINK](/knowledgebase/agent)
+2. **Models**: The underlying AI models that power the agents' capabilities. [LINK](/knowledgebase/model)
+3. **Chats**: Conversational interfaces where users interact with agents. [LINK](/knowledgebase/chat)
+4. **Tasks**: Predefined operations that can be executed by agents or triggered within chats. [LINK](/knowledgebase/task)
+5. **APIs**: Interfaces to external services and AI providers. [LINK](/knowledgebase/api)
+6. **Prompts**: Templated instructions that guide AI behavior. [LINK](/knowledgebase/prompt)
+7. **Parameters**: Structured input definitions for tasks and prompts. [LINK](/knowledgebase/parameter)
+8. **Messages**: Individual units of communication within chats. [LINK](/knowledgebase/message)
+9. **Task Responses**: Results and metadata from executed tasks. [LINK](/knowledgebase/task_response)
+10. **URL References**: Managed references to external web resources. [LINK](/knowledgebase/url_reference)
+11. **Files**: Handling of various file types with AI-readable transcripts. [LINK](/knowledgebase/file)
+12. **|COMING| Data Clusters**: Group references with managed embeddings to facilitate RAG and Fine-tunning, as well as providing a reusable context.
 
 ## Key Features
 
-- **Flexible AI Interactions**: Engage in open-ended conversations or structured task executions with AI agents.
-- **Multi-Modal Support**: Handle text, images, audio, and other file types seamlessly within the system.
-- **Extensible Task Framework**: Create and execute a wide variety of tasks, from simple API calls to complex workflows.
-- **Context-Aware Responses**: Utilize chat history, file transcripts, and URL references for more intelligent interactions.
-- **Customizable Behavior**: Fine-tune AI responses using prompts and parameters.
+- **CHAT: Flexible AI Interactions**: Engage in open-ended conversations or structured task executions with AI agents.
+- **TASKS: Extensible Task Framework**: Create and execute a wide variety of tasks, from simple API calls to complex workflows.
+- **Multi-Modal Support**: Handle text, images, audio, and other file types seamlessly within the system within tasks and chats. Non-text files get transcribed so LLM-agents can "see".
+- **Context-Aware Responses**: Utilize chat history, file transcripts, URL references and task responses in the agent's context for more intelligent interactions.
 - **Integration Capabilities**: Connect with various external services and AI providers through the API system.
+- **Customizable Behavior**: Tune AI tasks and agents using prompts, parameters and models to achieve the best result.
+- **|COMING| Fine-Tune Models**: Use data-clusters to fine-tune your favorite models. 
+- **|COMING| RAG-Powered Agents**: Deploy agents with RAG access to data-clusters to empower your workflows with your knowledgebase
+- **|COMING| ReACT-Powered Agents**: Tool using agents can engage in ReACT-processes while in conversation to contemplate and acquire the necessary data for the task
 
-## System Architecture
+## System Architecture Overview
 
 The Alice system is designed with a modular architecture:
 
-- **Frontend**: A React-based user interface for interacting with the system.
-- **Backend**: Manages data persistence, authentication, and core logic.
-- **Workflow Engine**: Handles task execution and complex workflows.
-- **AI Integration Layer**: Interfaces with various AI models and providers.
+- **Frontend**: Where you probably are -> a ReactJS/TS user interface for interacting with the system, viewing the database and executing new processes.
+- **Backend**: A NodeJS/TS module in charge of managing data persistence and authentication.
+- **Workflow Engine**: Handles task execution and complex workflows, interfaces with various AI models and providers: handles all of the logic.
 
-## Getting Started
-
-To begin using the Alice system:
-
-1. Set up your environment following the [Getting Started](/knowledgebase/getting-started) guide.
-2. Familiarize yourself with the [Agent](/knowledgebase/agent) concept, as agents are central to most interactions.
-3. Explore the various components like [Chats](/knowledgebase/chats), [Tasks](/knowledgebase/tasks), and [Models](/knowledgebase/models) to understand their roles and capabilities.
-
-## Diving Deeper
-
-As you become more familiar with Alice, you can delve into more advanced topics:
-
-- Learn how to craft effective [Prompts](/knowledgebase/prompts) to guide AI behavior.
-- Understand how [Parameters](/knowledgebase/parameters) are used to structure inputs across the system.
-- Explore the [Files and Transcripts](/knowledgebase/files-and-transcripts) feature to see how Alice handles various media types.
-
-## Best Practices
-
-1. **Start Simple**: Begin with basic agent-user interactions before moving to complex tasks.
-2. **Iterate on Prompts**: Refine your prompts over time to achieve desired AI behaviors.
-3. **Leverage Context**: Make use of chat history and file transcripts for more coherent interactions.
-4. **Monitor and Analyze**: Regularly review task responses and chat logs to improve system performance.
-
-## Support and Community
-
-If you need assistance or want to connect with other Alice users:
-
-- Consult our comprehensive documentation.
-- Join our community forums (link to be provided).
-- Contact our support team for technical issues.
-
-Welcome to the world of Alice! We're excited to see what you'll create with this powerful AI system.
+![Alice represents itself 2](/content/img/alice_represented_2_small.png)
+```Assistant_prompt 
+A friendly and intelligent AI assistant named Alice, represented as a glowing, ethereal blue hologram of a female face with circuit-like patterns, floating above a futuristic desk with holographic screens. The image should convey warmth, intelligence, and helpfulness.
+```

@@ -22,7 +22,7 @@ An agent has access to a dictionary of models, where each model is associated wi
 models?: { [key in ModelType]?: AliceModel };
 ```
 
-This flexible structure enables the agent to switch between different models based on the requirements of the task at hand.
+This flexible structure enables the agent to switch between different models (check [models](/knowledgebase/model) to see all the model types) based on the requirements of the task at hand. 
 
 ### 3. Capability Settings
 
@@ -32,7 +32,7 @@ The agent's behavior and abilities are further defined by several boolean flags 
 - `has_code_exec`: Indicates if the agent is allowed to execute code blocks.
 - `max_consecutive_auto_reply`: Controls the number of consecutive automated replies the agent can make.
 
-## Consecutive Auto-Replies
+#### Consecutive Auto-Replies
 
 The `max_consecutive_auto_reply` setting is particularly important for controlling the agent's behavior in complex scenarios:
 
@@ -42,6 +42,12 @@ The `max_consecutive_auto_reply` setting is particularly important for controlli
   - If set to 2 or higher, the agent can continue this cycle, potentially using more tool calls or executing more code before giving a final response.
 
 This feature allows for more sophisticated and autonomous behavior, enabling the agent to complete complex tasks with minimal user intervention.
+
+## How to use
+
+Agents are used in either [chats](/knowledgebase/chat) or [tasks](/knowledgebase/task), where they enable access to any 'model' API. These are the APIs that have a 'model' you can choose. This flexibility means that to run those APIs, we'd want to be able to decide which model is used easily. Agents help us do that. 
+
+Beyond the models, the agent's main differentiating factor at the moment is the system [prompt](/knowledgebase/prompt). With it you can tailor agents to specific tasks, improving your ability to deploy smaller models for complex tasks. 
 
 ## Agent Interface
 

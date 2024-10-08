@@ -7,13 +7,18 @@ import { CopyButton } from './CopyButton';
 
 interface CodeBlockProps {
   language: string;
-  code: string;
+  code: string | number | boolean | object;
   props?: any;
 }
 
 export const CodeBlock: React.FC<CodeBlockProps> = ({ language, code, props }) => {
   const classes = useStyles();
- 
+  
+  // Safely convert code to string and count lines
+  const codeString = String(code);
+  const lineCount = codeString.split('\n').length;
+  const showLineNumbers = lineCount >= 3;
+
   return (
     <Box className={classes.CodeBlockClass}>
       <Box className={classes.CodeBlockHeader}>
@@ -23,7 +28,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ language, code, props }) =
               {language}
             </Typography>
           )}
-          <CopyButton code={code} />
+          <CopyButton code={codeString} />
         </Box>
       </Box>
       <SyntaxHighlighter
@@ -31,7 +36,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ language, code, props }) =
         style={vscDarkPlus}
         PreTag="pre"
         CodeTag="code"
-        showLineNumbers={true}
+        showLineNumbers={showLineNumbers}
         wrapLines={true}
         customStyle={{
           margin: 0,
@@ -58,7 +63,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ language, code, props }) =
         }}
         {...props}
       >
-        {String(code).replace(/\n$/, '')}
+        {codeString.replace(/\n$/, '')}
       </SyntaxHighlighter>
     </Box>
   );

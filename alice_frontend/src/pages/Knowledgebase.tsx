@@ -8,7 +8,7 @@ import useStyles from '../styles/KnowledgebaseStyles';
 const Knowledgebase: React.FC = () => {
     const classes = useStyles();
     return (
-        <Box display="flex" height="100vh">
+        <Box display="flex" height="100%">
             <Paper elevation={3} className={classes.knowledgebaseNavContainer}>
                 <KnowledgebaseNavigation />
             </Paper>

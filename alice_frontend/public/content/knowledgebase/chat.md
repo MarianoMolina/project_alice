@@ -34,14 +34,9 @@ In the frontend, chats provide the following functionality:
 
 4. **Context Management**: The chat maintains context across multiple interactions, allowing for more coherent and contextually relevant responses from the AI agent.
 
-## User Interface Considerations
+## How to use
 
-When designing the chat interface, consider:
-
-1. Clear distinction between user messages and AI responses
-2. Easy access to associated functions/tasks
-3. Options for editing or deleting messages
-4. Ability to view and modify chat settings (e.g., changing the assigned agent)
+The `Chat with Alice` section lets you see, edit and continue chats, their messages, references, agents, etc. Just jump in a chat and start yapping. 
 
 ## Integration with Other Components
 

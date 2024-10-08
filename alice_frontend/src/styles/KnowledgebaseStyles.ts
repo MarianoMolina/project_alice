@@ -9,7 +9,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
     knowledgebaseContentContainer: {
         overflow: 'auto',
-        backgroundColor: hexToRgba(theme.palette.secondary.dark, 0.6)
+        backgroundColor: hexToRgba(theme.palette.secondary.dark, 0.7)
     }
 }));
 

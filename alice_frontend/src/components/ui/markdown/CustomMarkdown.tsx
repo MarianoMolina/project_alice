@@ -18,12 +18,12 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
       className={className}
       remarkPlugins={[gfm]}
       components={{
-        h1: ({ node, ...props }) => <Typography className={classes.h1} variant="h1" {...props} />,
-        h2: ({ node, ...props }) => <Typography className={classes.h2} variant="h2" {...props} />,
-        h3: ({ node, ...props }) => <Typography className={classes.h3} variant="h3" {...props} />,
-        h4: ({ node, ...props }) => <Typography className={classes.h4} variant="h4" {...props} />,
-        h5: ({ node, ...props }) => <Typography className={classes.h5} variant="h5" {...props} />,
-        h6: ({ node, ...props }) => <Typography className={classes.h6} variant="h6" {...props} />,
+        h1: ({ node, ...props }) => <Typography className={classes.h1} component="h1" variant="h1" {...props} />,
+        h2: ({ node, ...props }) => <Typography className={classes.h2} component="h2" variant="h2" {...props} />,
+        h3: ({ node, ...props }) => <Typography className={classes.h3} component="h3" variant="h3" {...props} />,
+        h4: ({ node, ...props }) => <Typography className={classes.h4} component="h4" variant="h4" {...props} />,
+        h5: ({ node, ...props }) => <Typography className={classes.h5} component="h5" variant="h5" {...props} />,
+        h6: ({ node, ...props }) => <Typography className={classes.h6} component="h6" variant="h6" {...props} />,
         p: ({ node, ...props }) => <Typography paragraph className={classes.markdownText} {...props} />,
         a: ({ node, href, ...props }) => (
           <MuiLink href={href} target="_blank" rel="noopener noreferrer" {...props} />

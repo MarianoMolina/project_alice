@@ -1,11 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import {
-  motion,
-  useTransform,
-  AnimatePresence,
+  // motion,
+  // AnimatePresence,
+  // useTransform,
+  // useSpring,
   useMotionValue,
-  useSpring,
 } from "framer-motion";
 
 type ImageType = string | React.ReactNode;
@@ -23,16 +23,16 @@ export const AnimatedTooltip = ({
   items: TooltipItem[];
 }) => {
   const [hoveredIndex, setHoveredIndex] = useState<string | null>(null);
-  const springConfig = { stiffness: 100, damping: 5 };
+  // const springConfig = { stiffness: 100, damping: 5 };
   const x = useMotionValue(0);
-  const rotate = useSpring(
-    useTransform(x, [-100, 100], [-45, 45]),
-    springConfig
-  );
-  const translateX = useSpring(
-    useTransform(x, [-100, 100], [-50, 50]),
-    springConfig
-  );
+  // const rotate = useSpring(
+  //   useTransform(x, [-100, 100], [-45, 45]),
+  //   springConfig
+  // );
+  // const translateX = useSpring(
+  //   useTransform(x, [-100, 100], [-50, 50]),
+  //   springConfig
+  // );
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     const halfWidth = event.currentTarget.offsetWidth / 2;
