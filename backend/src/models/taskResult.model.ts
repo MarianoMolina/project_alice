@@ -1,11 +1,8 @@
 import mongoose, { Schema } from 'mongoose';
 import { ITaskResultDocument, ITaskResultModel } from '../interfaces/taskResult.interface';
-<<<<<<< HEAD
-=======
 import referencesSchema from './reference.model';
 import mongooseAutopopulate from 'mongoose-autopopulate';
 import { ensureObjectIdHelper } from '../utils/utils';
->>>>>>> development
 
 const taskResultSchema = new Schema<ITaskResultDocument, ITaskResultModel>({
   task_name: { type: String, required: true },
@@ -18,15 +15,9 @@ const taskResultSchema = new Schema<ITaskResultDocument, ITaskResultModel>({
   result_diagnostic: { type: String, default: null },
   usage_metrics: { type: Map, of: String, default: null },
   execution_history: [{ type: Map, of: Schema.Types.Mixed, default: null }],
-<<<<<<< HEAD
-  task_content: { type: Map, of: Schema.Types.Mixed, default: null },
-  created_by: { type: Schema.Types.ObjectId, ref: 'User' },
-  updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
-=======
   references: { type: referencesSchema, default: {}, description: "References associated with the task result" },
   created_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true },
   updated_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true }
->>>>>>> development
 }, { timestamps: true });
 
 taskResultSchema.methods.apiRepresentation = function(this: ITaskResultDocument) {
@@ -42,45 +33,6 @@ taskResultSchema.methods.apiRepresentation = function(this: ITaskResultDocument)
     result_diagnostic: this.result_diagnostic || null,
     usage_metrics: this.usage_metrics || null,
     execution_history: this.execution_history || [],
-<<<<<<< HEAD
-    task_content: this.task_content || null,
-    created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
-    updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,
-    created_at: this.createdAt || null,
-    updated_at: this.updatedAt || null
-  };
-};
-
-function ensureObjectIdForSave(this: ITaskResultDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {
-  if (this.created_by && (this.created_by as any)._id) {
-    this.created_by = (this.created_by as any)._id;
-  }
-  if (this.updated_by && (this.updated_by as any)._id) {
-    this.updated_by = (this.updated_by as any)._id;
-  }
-  next();
-}
-
-function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
-  const update = this.getUpdate() as any;
-  if (update.created_by && update.created_by._id) {
-    update.created_by = update.created_by._id;
-  }
-  if (update.updated_by && update.updated_by._id) {
-    update.updated_by = update.updated_by._id;
-  }
-  next();
-}
-
-function autoPopulate(this: mongoose.Query<any, any>) {
-  this.populate('created_by updated_by'); // We don't populate task_id - its the only case and the goal is to avoid too much data
-}
-
-taskResultSchema.pre('save', ensureObjectIdForSave);
-taskResultSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
-taskResultSchema.pre('find', autoPopulate);
-taskResultSchema.pre('findOne', autoPopulate);
-=======
     references: this.references || null,
     created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
     updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,
@@ -139,7 +91,6 @@ function ensureObjectIdForUpdate(
 taskResultSchema.plugin(mongooseAutopopulate);
 taskResultSchema.pre('save', ensureObjectIdForSave);
 taskResultSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
->>>>>>> development
 
 const TaskResult = mongoose.model<ITaskResultDocument, ITaskResultModel>('TaskResult', taskResultSchema);
 

@@ -189,7 +189,7 @@ const ChatAlice: React.FC = () => {
         )()}
       </Box>
     )
-  }, [selectChatId, currentChat, checkAndAddTask, addTaskResponse, addFileReference, addURLReference, addMessageReference, selectCardItem, pastChats]);
+  }, [selectChatId, currentChat, checkAndAddTask, addTaskResponse, addFileReference, addURLReference, addMessageReference, selectCardItem, pastChats, classes.activeListContainer]);
 
   return (
     <Box className={classes.chatAliceContainer}>

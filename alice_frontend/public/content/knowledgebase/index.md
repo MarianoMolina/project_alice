@@ -1,6 +1,6 @@
 # Introduction to the Alice System
 
-Welcome to the Alice system documentation. Alice is a sophisticated AI-driven platform designed to facilitate complex interactions between users, AI agents, and a variety of tasks and data types. This introduction provides an overview of the system's key components and their interrelationships.
+Welcome to the Alice system documentation. Alice is a sophisticated AI-driven platform designed to facilitate complex workflows between AI agents, and a variety of tasks, APIs and data structures. This introduction provides an overview of the system's key components.
 ```User_prompt 
 Lets do something fun: Why don't you use the image_gen_task to create a representation of yourself?
 ```

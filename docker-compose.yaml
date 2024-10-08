@@ -15,11 +15,13 @@ services:
     volumes:
       - ./alice_frontend:/app:delegated
       - /app/node_modules
+      - /app/dist
       - ./.env:/app/.env
       - logs:/app/logs
       - shared-uploads:/app/shared-uploads:ro
     environment:
       NODE_ENV: ${NODE_ENV:-production}
+      CI: "true" # comment out when in development
       CHOKIDAR_USEPOLLING: "true"
       WATCHPACK_POLLING: "true"
 
@@ -35,9 +37,10 @@ services:
       volume-init:
         condition: service_completed_successfully
     volumes:
-      - ./.env:/app/.env
-      - ./backend:/app
+      # - ./backend:/app
       - /app/node_modules
+      - /app/dist
+      - ./.env:/app/.env
       - logs:/app/logs
       - shared-uploads:/app/shared-uploads
     environment:

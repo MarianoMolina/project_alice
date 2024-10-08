@@ -4,7 +4,7 @@ from pydantic import Field
 from workflow_logic.db_app.initialization.modules.init_module import InitializationModule
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-ANTHROPIC_API = os.getenv("ANTHROPIC_API")
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 COHERE_API_KEY = os.getenv("COHERE_API_KEY")
@@ -362,7 +362,7 @@ base_module = BaseModule(
                 "api_name": "anthropic_llm",
                 "name": "Anthropic API",
                 "api_config": {
-                    "api_key": ANTHROPIC_API,
+                    "api_key": ANTHROPIC_API_KEY,
                     "base_url": "https://api.anthropic.com"
                 },
                 "is_active": True,
@@ -492,7 +492,7 @@ base_module = BaseModule(
                 "api_name": "anthropic_vision",
                 "name": "Anthropic Image Vision",
                 "api_config": {
-                    "api_key": ANTHROPIC_API,
+                    "api_key": ANTHROPIC_API_KEY,
                     "base_url": "https://api.anthropic.com"
                 },
                 "is_active": True,

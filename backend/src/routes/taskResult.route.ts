@@ -3,13 +3,6 @@ import TaskResult from '../models/taskResult.model';
 import auth from '../middleware/auth.middleware';
 import { ITaskResultDocument } from '../interfaces/taskResult.interface';
 import { Router } from 'express';
-<<<<<<< HEAD
-
-const router = Router();
-router.use(auth);
-const generatedRoutes = createRoutes<ITaskResultDocument, 'TaskResult'>(TaskResult, 'TaskResult');
-router.use('/', generatedRoutes);
-=======
 import { createTaskResult, updateTaskResult } from '../utils/taskResult.utils';
 
 const router = Router();
@@ -29,6 +22,5 @@ const taskResultRoutes = createRoutes<ITaskResultDocument, 'TaskResult'>(TaskRes
 
 // Use the generated routes
 router.use('/', taskResultRoutes);
->>>>>>> development
 
 export default router;

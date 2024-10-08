@@ -22,7 +22,7 @@ async def test_llm_engines():
     # Anthropic setup
     anthropic_engine = LLMAnthropic()
     anthropic_config = ModelConfig(
-        api_key=os.environ.get("ANTHROPIC_API"),
+        api_key=os.environ.get("ANTHROPIC_API_KEY"),
         base_url="https://api.anthropic.com",
         model="claude-3-haiku-20240307"
     )

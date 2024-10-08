@@ -6,7 +6,7 @@ Well, if you are here, you've seemingly done the hardest part. But in case you h
 
 Once you have the frontend running, you can start exploring Alice's features:
 
-1. **SETUP**: If you haven't set up your **.env** yet, take a second to navigate to the `User Settings` -> [APIs](/e/api) and set up the API keys for any API you would like to be able to use. Here you can manage your account settings. 
+1. **SETUP**: If you haven't set up your **.env** yet, take a second to navigate to the `User Settings` -> [APIs](/knowledgebase/api) and set up the API keys for any API you would like to be able to use. Here you can manage your account settings. 
 
 2. **CHAT**: Navigate to `Chat with Alice` and either use any of the pre-set chats (note that each agent's name tells you which API they depend on) or, if you are feeling adventurous, create your own [Chat](/knowledgebase/chat). If you are feeling frisky though, you can even create your own [Agent](/knowledgebase/agent) and with its own system [Prompt](/knowledgebase/prompt), as well as selecting the your favorite [Model](/knowledgebase/model) of preference (or creating it if I haven't added it by default). 
 

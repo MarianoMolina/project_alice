@@ -12,7 +12,7 @@ An Alice Agent is defined by three main components:
 
 ### 1. System Message Prompt
 
-The system message prompt is a crucial element that sets the context and behavior for the agent. It provides initial instructions and guidelines that shape the agent's responses and actions throughout its interactions.
+The system message prompt is a crucial element that sets the context and behavior for the agent. It provides initial instructions and guidelines that shape the agent's responses and actions throughout its interactions. For now, they can only use non-templated prompts. 
 
 ### 2. Model Dictionary
 
