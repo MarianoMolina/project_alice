@@ -1,6 +1,6 @@
 import { BaseDataseObject, convertToUser } from './UserTypes';
 import { FunctionParameters } from './ParameterTypes';
-import { HandleClickProps } from './CollectionTypes';
+import { EnhancedComponentProps } from './CollectionTypes';
 
 export interface Prompt extends BaseDataseObject {
     _id?: string;
@@ -28,16 +28,8 @@ export const convertToPrompt = (data: any): Prompt => {
     };
 };
 
-export interface PromptComponentProps extends HandleClickProps {
-    items: Prompt[] | null;
-    item: Prompt | null;
-    onChange: (newItem: Partial<Prompt>) => void;
-    mode: 'create' | 'view' | 'edit';
-    handleSave: () => Promise<void>;
-    isInteractable?: boolean;
-    onView?: (prompt: Prompt) => void;
-    onInteraction?: (prompt: Prompt) => void;
-    showHeaders?: boolean;
+export interface PromptComponentProps extends EnhancedComponentProps<Prompt> {
+    
 }
 export const getDefaultPromptForm = (): Partial<Prompt> => ({
     name: '',

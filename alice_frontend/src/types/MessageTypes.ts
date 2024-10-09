@@ -1,4 +1,4 @@
-import { HandleClickProps } from "./CollectionTypes";
+import { EnhancedComponentProps } from "./CollectionTypes";
 import { FileType } from "./FileTypes";
 import { ToolCall } from "./ParameterTypes";
 import { References } from "./ReferenceTypes";
@@ -55,17 +55,7 @@ export const convertToMessageType = (data: any): MessageType => {
     };
 };
 
-export interface MessageComponentProps extends HandleClickProps {
-    items: MessageType[] | null;
-    item: MessageType | null;
-    onChange: (newItem: Partial<MessageType>) => void;
-    mode: 'create' | 'view' | 'edit';
-    handleSave: () => Promise<void>;
-    isInteractable?: boolean;
-    onInteraction?: (message: MessageType) => void;
-    onView?: (message: MessageType) => void;
-    showHeaders?: boolean;
-    chatId?: string;
+export interface MessageComponentProps extends EnhancedComponentProps<MessageType> {
 }
 
 export const getDefaultMessageForm = (): MessageType => ({

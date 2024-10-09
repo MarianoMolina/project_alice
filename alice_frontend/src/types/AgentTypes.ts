@@ -1,7 +1,7 @@
 import { BaseDataseObject } from "./UserTypes";
 import { AliceModel, ModelType } from "./ModelTypes";
 import { Prompt } from "./PromptTypes";
-import { HandleClickProps } from "./CollectionTypes";
+import { EnhancedComponentProps } from "./CollectionTypes";
 
 export interface AliceAgent extends BaseDataseObject {
   _id?: string;
@@ -29,16 +29,7 @@ export const convertToAliceAgent = (data: any): AliceAgent => {
   };
 };
 
-export interface AgentComponentProps extends HandleClickProps {
-  items: AliceAgent[] | null;
-  item: AliceAgent | null;
-  onChange: (newItem: Partial<AliceAgent>) => void;
-  mode: 'create' | 'view' | 'edit';
-  handleSave: () => Promise<void>;
-  isInteractable?: boolean;
-  onInteraction?: (agent: AliceAgent) => void;
-  onView?: (agent: AliceAgent) => void;
-  showHeaders?: boolean;
+export interface AgentComponentProps extends EnhancedComponentProps<AliceAgent> {
 }
 
 export const getDefaultAgentForm = (): Partial<AliceAgent> => ({

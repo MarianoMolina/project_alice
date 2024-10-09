@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { CollectionElementString, CollectionElement } from '../types/CollectionTypes';
+import Logger from '../utils/Logger';
 
 interface DialogContextType {
   // Card Dialog
@@ -36,6 +37,7 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
   const [activeDialog, setActiveDialog] = useState<'card' | 'flexible' | null>(null);
 
   const selectCardItem = useCallback((itemType: CollectionElementString, itemId?: string, item?: CollectionElement) => {
+    Logger.debug('CardDialogContext', { itemType, itemId, item });
     setSelectedCardItemType(itemType);
     if (item) {
       setSelectedCardItem(item);

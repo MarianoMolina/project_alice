@@ -13,15 +13,15 @@ services:
       volume-init:
         condition: service_completed_successfully
     volumes:
-      # - ./alice_frontend:/app:delegated
+      - ./alice_frontend:/app:delegated
       - /app/node_modules
       - /app/dist
       - ./.env:/app/.env
     environment:
       NODE_ENV: ${NODE_ENV:-production}
-      CI: "true" # comment out when in development
-      # CHOKIDAR_USEPOLLING: "true"
-      # WATCHPACK_POLLING: "true"
+      CI: "false" # "true" # comment out when in development
+      CHOKIDAR_USEPOLLING: "true" ## "false"
+      WATCHPACK_POLLING: "true" ## "false"
 
   backend:
     build:

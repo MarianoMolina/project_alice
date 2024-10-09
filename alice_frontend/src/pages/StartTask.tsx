@@ -43,7 +43,6 @@ const StartTask: React.FC = () => {
       name: `Create task`,
       icon: Add,
       action: () => selectFlexibleItem('Task', 'create'),
-      disabled: activeTab === 'TaskResponse'
     }
   ];
 

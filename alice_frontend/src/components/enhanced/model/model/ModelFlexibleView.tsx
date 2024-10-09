@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
     TextField,
     FormControl,
@@ -12,7 +12,7 @@ import {
     Box,
     Chip
 } from '@mui/material';
-import { ModelComponentProps, ModelType } from '../../../../types/ModelTypes';
+import { AliceModel, getDefaultModelForm, ModelComponentProps, ModelType } from '../../../../types/ModelTypes';
 import { ApiName } from '../../../../types/ApiTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 
@@ -20,28 +20,41 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
     item,
     onChange,
     mode,
-    handleSave
+    handleSave,
+    handleDelete
 }) => {
-    if (!item) {
-        return <Typography>No Model data available.</Typography>;
-    }
+
+    useEffect(() => {
+        if (!item || Object.keys(item).length === 0) {
+            onChange(getDefaultModelForm());
+        }
+    }, [item, onChange]);
+    const handleLocalDelete = useCallback(() => {
+        if (item && Object.keys(item).length > 0 && handleDelete) {
+            handleDelete(item);
+        }
+    }, [item, handleDelete]);
+
     const isEditMode = mode === 'edit' || mode === 'create';
 
     const title = mode === 'create' ? 'Create New Model' : mode === 'edit' ? 'Edit Model' : 'Model Details';
-    const saveButtonText = item._id ? 'Update Model' : 'Create Model';
+    const saveButtonText = item?._id ? 'Update Model' : 'Create Model';
 
     return (
         <GenericFlexibleView
             elementType='Model'
             title={title}
             onSave={handleSave}
+            onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
+            item={item as AliceModel}
+            itemType='models'
         >
             <TextField
                 fullWidth
                 label="Short Name"
-                value={item.short_name || ''}
+                value={item?.short_name || ''}
                 onChange={(e) => onChange({ short_name: e.target.value })}
                 margin="normal"
                 disabled={!isEditMode}
@@ -49,7 +62,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
             <TextField
                 fullWidth
                 label="Model Name"
-                value={item.model_name || ''}
+                value={item?.model_name || ''}
                 onChange={(e) => onChange({ model_name: e.target.value })}
                 margin="normal"
                 disabled={!isEditMode}
@@ -57,7 +70,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
             <FormControl fullWidth margin="normal">
                 <InputLabel>Model Type</InputLabel>
                 <Select<ModelType>
-                    value={item.model_type || ''}
+                    value={item?.model_type || ''}
                     onChange={(e) => onChange({ model_type: e.target.value as ModelType })}
                     renderValue={(selected) => (
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -76,7 +89,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
             <FormControl fullWidth margin="normal">
                 <InputLabel>API Name</InputLabel>
                 <Select
-                    value={item.api_name || ''}
+                    value={item?.api_name || ''}
                     onChange={(e) => onChange({ api_name: e.target.value as ApiName })}
                     renderValue={(selected) => (
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -96,7 +109,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
             <TextField
                 fullWidth
                 label="Model Format"
-                value={item.model_format || ''}
+                value={item?.model_format || ''}
                 onChange={(e) => onChange({ model_format: e.target.value })}
                 margin="normal"
                 disabled={!isEditMode}
@@ -104,7 +117,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
 
             <Typography gutterBottom>Temperature</Typography>
             <Slider
-                value={item.temperature || 0.7}
+                value={item?.temperature || 0.7}
                 onChange={(_, newValue) => onChange({ temperature: newValue as number })}
                 min={0}
                 max={1}
@@ -117,7 +130,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                 fullWidth
                 label="Seed"
                 type="number"
-                value={item.seed || ''}
+                value={item?.seed || ''}
                 onChange={(e) => onChange({ seed: parseInt(e.target.value) })}
                 margin="normal"
                 disabled={!isEditMode}
@@ -127,7 +140,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                 fullWidth
                 label="Context size"
                 type="number"
-                value={item.ctx_size || ''}
+                value={item?.ctx_size || ''}
                 onChange={(e) => onChange({ ctx_size: parseInt(e.target.value) })}
                 margin="normal"
                 disabled={!isEditMode}
@@ -136,7 +149,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
             <FormControlLabel
                 control={
                     <Switch
-                        checked={item.use_cache || false}
+                        checked={item?.use_cache || false}
                         onChange={(e) => onChange({ use_cache: e.target.checked })}
                         disabled={!isEditMode}
                     />

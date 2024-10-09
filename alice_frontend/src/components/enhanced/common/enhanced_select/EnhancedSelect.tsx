@@ -4,6 +4,7 @@ import { Edit, Close, ExpandMore, Add } from '@mui/icons-material';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import useStyles from './EnhancedSelectStyles';
 import { CollectionName, CollectionType, CollectionElementString, collectionNameToElementString, collectionNameToEnhancedComponent } from '../../../../types/CollectionTypes';
+// eslint-disable-next-line react-hooks/exhaustive-deps
 import Logger from '../../../../utils/Logger';
 
 interface EnhancedSelectProps<T extends CollectionType[CollectionName]> {

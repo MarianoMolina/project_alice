@@ -1,4 +1,4 @@
-import { HandleClickProps } from "./CollectionTypes";
+import { EnhancedComponentProps } from "./CollectionTypes";
 import { BaseDataseObject } from "./UserTypes";
 
 export interface URLReference extends BaseDataseObject {
@@ -23,14 +23,13 @@ export const convertToURLReference = (data: any): URLReference => {
     };
 };
 
-export interface URLReferenceComponentProps extends HandleClickProps {
-    items: URLReference[] | null;
-    item: URLReference | null;
-    onChange: (newItem: Partial<URLReference>) => void;
-    mode: 'create' | 'view' | 'edit';
-    handleSave: () => Promise<void>;
-    isInteractable?: boolean;
-    onView?: (urlReference: URLReference) => void;
-    onInteraction?: (urlReference: URLReference) => void;
-    showHeaders?: boolean;
+export interface URLReferenceComponentProps extends EnhancedComponentProps<URLReference> {
+    
 }
+
+export const getDefaultURLReferenceForm = (): Partial<URLReference> => ({
+    title: '',
+    url: '',
+    content: '',
+    metadata: {}
+});

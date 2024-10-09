@@ -7,7 +7,7 @@ Tasks in Alice represent specific operations or workflows that can be executed b
 The Alice system supports various task types, each designed for specific purposes:
 
 ```typescript
-export type TaskType = "CVGenerationTask" | "APITask" | "PromptAgentTask" | "CheckTask" | "CodeGenerationLLMTask" | "CodeExecutionLLMTask" | "Workflow" | "EmbeddingTask" | "GenerateImageTask" | "TextToSpeechTask" | "WebScrapeBeautifulSoupTask";
+export type TaskType = "APITask" | "PromptAgentTask" | "CheckTask" | "CodeGenerationLLMTask" | "CodeExecutionLLMTask" | "Workflow" | "EmbeddingTask" | "GenerateImageTask" | "TextToSpeechTask" | "WebScrapeBeautifulSoupTask";
 ```
 
 These task types cover a broad spectrum of functionalities, including search operations, code generation and execution, text-to-speech conversion, and more. The simplest of these are the:

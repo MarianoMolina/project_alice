@@ -18,6 +18,7 @@ interface EnhancedMessageProps extends Omit<MessageComponentProps, 'items' | 'it
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: MessageType) => void;
+  onDelete?: (deletedItem: MessageType) => Promise<void>;
 }
 
 const EnhancedMessage: React.FC<EnhancedMessageProps> = (props) => {
@@ -26,7 +27,8 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = (props) => {
     item: MessageType | null,
     onChange: (newItem: Partial<MessageType>) => void,
     mode: BaseMessageMode,
-    handleSave: () => Promise<void>
+    handleSave: () => Promise<void>,
+    onDelete: (deletedItem: MessageType) => Promise<void>,
   ) => {
     const commonProps: MessageComponentProps = {
       items,
@@ -34,11 +36,11 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = (props) => {
       onChange,
       mode,
       handleSave,
+      handleDelete: onDelete,
       isInteractable: props.isInteractable,
       onInteraction: props.onInteraction,
       onView: props.onView,
       showHeaders: props.showHeaders,
-      chatId: props.chatId,
     };
 
     switch (props.mode) {
@@ -73,6 +75,7 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = (props) => {
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}
       onSave={props.onSave}
+      onDelete={props.onDelete}
       fetchAll={props.fetchAll}
       render={renderContent}
     />

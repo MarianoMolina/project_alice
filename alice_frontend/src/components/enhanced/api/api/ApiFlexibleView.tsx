@@ -30,6 +30,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
     onChange,
     mode,
     handleSave,
+    handleDelete,
 }) => {
     const { fetchItem } = useApi();
     const [form, setForm] = useState<Partial<API>>(() => item || getDefaultApiForm());
@@ -50,8 +51,10 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
     useEffect(() => {
         if (item) {
             setForm(item);
+        } else if (!item || Object.keys(item).length === 0)  {
+            onChange(getDefaultApiForm());
         }
-    }, [item]);
+    }, [item, onChange]);
 
     const updateAvailableApiNames = useCallback((apiType: ApiType | undefined) => {
         Logger.info('updateAvailableApiNames', apiType);
@@ -66,6 +69,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
         if (form.api_type) {
             updateAvailableApiNames(form.api_type);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [form.api_type, updateAvailableApiNames]);
 
     useEffect(() => {
@@ -81,6 +85,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                 }));
             }
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [form.api_name]);
 
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,6 +141,12 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
         setIsSaving(true);
     }, [form, onChange]);
 
+    const handleLocalDelete = useCallback(() => {
+        if (item && Object.keys(item).length > 0 && handleDelete) {
+            handleDelete(item);
+        }
+    }, [item, handleDelete]);
+
     const title = mode === 'create' ? 'Create New API' : mode === 'edit' ? 'Edit API' : 'API Details';
     const saveButtonText = form._id ? 'Update API' : 'Create API';
 
@@ -144,8 +155,11 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
             elementType='API'
             title={title}
             onSave={handleLocalSave}
+            onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
+            item={item as API}
+            itemType='apis'
         >
             {isCreateMode && (
                 <FormControl fullWidth margin="normal">

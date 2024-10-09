@@ -18,6 +18,7 @@ interface EnhancedPromptProps extends Omit<PromptComponentProps, 'items' | 'item
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: Prompt) => void;
+  onDelete?: (deletedItem: Prompt) => Promise<void>;
 }
 
 const EnhancedPrompt: React.FC<EnhancedPromptProps> = (props) => {
@@ -26,7 +27,8 @@ const EnhancedPrompt: React.FC<EnhancedPromptProps> = (props) => {
     item: Prompt | null,
     onChange: (newItem: Partial<Prompt>) => void,
     mode: BasePromptMode,
-    handleSave: () => Promise<void>
+    handleSave: () => Promise<void>,
+    onDelete: (deletedItem: Prompt) => Promise<void>,
   ) => {
     Logger.debug('EnhancedPrompt', { items, item, mode });
     const commonProps: PromptComponentProps = {
@@ -35,6 +37,7 @@ const EnhancedPrompt: React.FC<EnhancedPromptProps> = (props) => {
       onChange,
       mode,
       handleSave,
+      handleDelete: onDelete,
       isInteractable: props.isInteractable,
       onView: props.onView,
       onInteraction: props.onInteraction,
@@ -71,6 +74,7 @@ const EnhancedPrompt: React.FC<EnhancedPromptProps> = (props) => {
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}
       onSave={props.onSave}
+      onDelete={props.onDelete}
       fetchAll={props.fetchAll}
       render={renderContent}
     />

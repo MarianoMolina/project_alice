@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Box } from '@mui/material';
 import { Add, Person, Category, Settings, Description, Functions, Assignment, Api, AttachFile, Message, QuestionAnswer, Link } from '@mui/icons-material';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH, TASK_SIDEBAR_WIDTH_TABLE, TASK_SIDEBAR_WIDTH_COMPACT } from '../utils/Constants';
@@ -29,26 +29,36 @@ const Database: React.FC = () => {
     const [showActiveComponent, setShowActiveComponent] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const [viewMode, setViewMode] = useState<'list' | 'shortList' | 'table'>('list');
+    const [lastUpdate, setLastUpdate] = useState<number>(Date.now());
 
     const handleCreateNew = useCallback(() => {
-        Logger.debug('Create new clicked');
+        Logger.debug('Database - Create new clicked');
         setSelectedItem(null);
         setIsCreating(true);
         setShowActiveComponent(true);
     }, [setSelectedItem]);
 
     const handleItemSelect = useCallback((item: CollectionElement | null) => {
-        Logger.debug('Item selected:', item);
+        Logger.debug('Database - Item selected:', item);
         setSelectedItem(item);
         setIsCreating(false);
         setShowActiveComponent(true);
     }, [setSelectedItem]);
 
     const handleSave = useCallback(async (item: CollectionElement | null) => {
-        Logger.debug('Saving item:', item);
+        Logger.debug('Database - Saving item:', item);
         setSelectedItem(null);
         setIsCreating(false);
         setShowActiveComponent(false);
+        setLastUpdate(Date.now());
+    }, [setSelectedItem]);
+
+    const handleDelete = useCallback(async (item: any) => {
+        Logger.debug('Database - Deleting item:', item);
+        setSelectedItem(null);
+        setIsCreating(false);
+        setShowActiveComponent(false);
+        setLastUpdate(Date.now());
     }, [setSelectedItem]);
 
     const actions = [
@@ -81,47 +91,48 @@ const Database: React.FC = () => {
         }
     }, []);
 
-    const renderActiveList = useCallback(() => {
-        const commonProps = {
-            mode: viewMode,
-            fetchAll: true,
-            onInteraction: handleItemSelect,
-            onView: (item: any) => {
-                Logger.debug('Viewing item:', item);
-                if (item._id) {
-                    selectCardItem(activeTab, item._id);
-                }
-            },
-        };
+    const commonListProps = useMemo(() => ({
+        mode: viewMode,
+        fetchAll: true,
+        onInteraction: handleItemSelect,
+        onView: (item: any) => {
+            Logger.debug('Viewing item:', item);
+            if (item._id) {
+                selectCardItem(activeTab, item._id);
+            }
+        },
+        lastUpdate, // Pass lastUpdate to all list components
+    }), [viewMode, handleItemSelect, selectCardItem, activeTab, lastUpdate]);
 
+    const renderActiveList = useCallback(() => {
         return (
             <Box className={classes.activeListContainer}>
                 <ToggleBox activeTab={activeTab} viewMode={viewMode} handleViewModeChange={handleViewModeChange} />
-                <Box className={classes.activeListContent}> {/* Add a content box for scrollability */}
+                <Box className={classes.activeListContent}>
                     {(() => {
                         switch (activeTab) {
                             case 'Agent':
-                                return <EnhancedAgent {...commonProps} />;
+                                return <EnhancedAgent {...commonListProps} />;
                             case 'Model':
-                                return <EnhancedModel {...commonProps} />;
+                                return <EnhancedModel {...commonListProps} />;
                             case 'Parameter':
-                                return <EnhancedParameter {...commonProps} />;
+                                return <EnhancedParameter {...commonListProps} />;
                             case 'Prompt':
-                                return <EnhancedPrompt {...commonProps} />;
+                                return <EnhancedPrompt {...commonListProps} />;
                             case 'Task':
-                                return <EnhancedTask {...commonProps} />;
+                                return <EnhancedTask {...commonListProps} />;
                             case 'TaskResponse':
-                                return <EnhancedTaskResponse {...commonProps} />;
+                                return <EnhancedTaskResponse {...commonListProps} />;
                             case 'Chat':
-                                return <EnchancedChat {...commonProps} />;
+                                return <EnchancedChat {...commonListProps} />;
                             case 'API':
-                                return <EnhancedAPI {...commonProps} />;
+                                return <EnhancedAPI {...commonListProps} />;
                             case 'File':
-                                return <EnhancedFile {...commonProps} />;
+                                return <EnhancedFile {...commonListProps} />;
                             case 'Message':
-                                return <EnhancedMessage {...commonProps} />;
+                                return <EnhancedMessage {...commonListProps} />;
                             case 'URLReference':
-                                return <EnhancedURLReference {...commonProps} />;
+                                return <EnhancedURLReference {...commonListProps} />;
                             default:
                                 return null;
                         }
@@ -129,7 +140,7 @@ const Database: React.FC = () => {
                 </Box>
             </Box>
         );
-    }, [activeTab, handleItemSelect, viewMode, handleViewModeChange, selectCardItem, classes.activeListContainer, classes.activeListContent]);
+    }, [activeTab, viewMode, handleViewModeChange, classes.activeListContainer, classes.activeListContent, commonListProps]);
 
     const renderActiveComponent = useCallback(() => {
         if (!showActiveComponent) {
@@ -142,6 +153,7 @@ const Database: React.FC = () => {
             mode: (isCreating ? 'create' : 'edit') as ComponentMode,
             fetchAll: false,
             onSave: handleSave,
+            onDelete: handleDelete,
             itemId: selectedItem?._id,
         };
         switch (activeTab) {
@@ -170,7 +182,7 @@ const Database: React.FC = () => {
             default:
                 return null;
         }
-    }, [activeTab, isCreating, selectedItem, handleSave, showActiveComponent]);
+    }, [activeTab, isCreating, selectedItem, handleSave, showActiveComponent, handleDelete]);
 
     return (
         <Box className={classes.databaseContainer}>

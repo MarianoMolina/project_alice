@@ -2,7 +2,6 @@ import { Document, Types, Model } from 'mongoose';
 import { IFunctionParameters, IAPIEngine } from '../utils/schemas';
 
 export enum TaskType {
-  CVGenerationTask = "CVGenerationTask",
   APITask = "APITask",
   Workflow = "Workflow",
   PromptAgentTask = "PromptAgentTask",

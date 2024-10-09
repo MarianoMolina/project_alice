@@ -1,7 +1,7 @@
 import { AliceModel, convertToAliceModel } from "./ModelTypes";
 import { BaseDataseObject, convertToUser } from "./UserTypes";
 import { FunctionParameters } from "./ParameterTypes";
-import { HandleClickProps } from "./CollectionTypes";
+import { EnhancedComponentProps } from "./CollectionTypes";
 
 export enum ApiType {
     LLM_MODEL = 'llm_api',
@@ -101,16 +101,8 @@ export interface APIEngine {
     input_variables: FunctionParameters;
 }
 
-export interface ApiComponentProps extends HandleClickProps {
-    items: API[] | null;
-    item: API | null;
-    onChange: (newItem: Partial<API>) => void;
-    mode: 'create' | 'view' | 'edit';
-    handleSave: () => Promise<void>;
-    isInteractable?: boolean;
-    onView?: (api: API) => void;
-    onInteraction?: (api: API) => void;
-    showHeaders?: boolean;
+export interface ApiComponentProps extends EnhancedComponentProps<API> {
+
 }
 export const getDefaultApiForm = (): Partial<API> => ({
     api_type: undefined,

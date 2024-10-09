@@ -17,6 +17,7 @@ interface EnhancedModelProps extends Omit<ModelComponentProps, 'items' | 'item' 
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: AliceModel) => void;
+  onDelete?: (deletedItem: AliceModel) => Promise<void>;
 }
 
 const EnhancedModel: React.FC<EnhancedModelProps> = (props: EnhancedModelProps) => {
@@ -25,7 +26,8 @@ const EnhancedModel: React.FC<EnhancedModelProps> = (props: EnhancedModelProps) 
     item: AliceModel | null,
     onChange: (newItem: Partial<AliceModel>) => void,
     mode: BaseModelMode,
-    handleSave: () => Promise<void>
+    handleSave: () => Promise<void>,
+    onDelete: (deletedItem: AliceModel) => Promise<void>,
   ) => {
     const commonProps: ModelComponentProps = {
       items,
@@ -33,6 +35,7 @@ const EnhancedModel: React.FC<EnhancedModelProps> = (props: EnhancedModelProps) 
       onChange,
       mode,
       handleSave,
+      handleDelete: onDelete,
       onView: props.onView,
       isInteractable: props.isInteractable,
       onInteraction: props.onInteraction,
@@ -69,6 +72,7 @@ const EnhancedModel: React.FC<EnhancedModelProps> = (props: EnhancedModelProps) 
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}
       onSave={props.onSave}
+      onDelete={props.onDelete}
       fetchAll={props.fetchAll}
       render={renderContent}
     />

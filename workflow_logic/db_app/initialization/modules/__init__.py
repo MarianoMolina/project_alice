@@ -7,5 +7,16 @@ from .init_module import InitializationModule
 from .adv_tasks import adv_tasks_module
 from .research_workflow import research_workflow_module
 from .web_scrape_workflow import web_scrape_workflow_module
-__all__ = ['base_module', 'base_chat_module', 'base_tasks_module', 'coding_workflow_module', 'advanced_chat_module', 
-           'InitializationModule', 'adv_tasks_module', 'research_workflow_module', 'web_scrape_workflow_module']
+from typing import List
+module_list: List[InitializationModule] = [
+    base_module, 
+    base_tasks_module, 
+    base_chat_module, 
+    coding_workflow_module, 
+    advanced_chat_module, 
+    adv_tasks_module, 
+    research_workflow_module,
+    web_scrape_workflow_module
+]
+
+__all__ = ['InitializationModule']

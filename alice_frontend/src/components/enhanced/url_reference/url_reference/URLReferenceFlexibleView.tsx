@@ -1,38 +1,51 @@
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
     Typography,
     TextField,
     Box,
     Chip
 } from '@mui/material';
-import { URLReferenceComponentProps } from '../../../../types/URLReferenceTypes';
+import { getDefaultURLReferenceForm, URLReference, URLReferenceComponentProps } from '../../../../types/URLReferenceTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 
 const URLReferenceFlexibleView: React.FC<URLReferenceComponentProps> = ({
     item,
     onChange,
     mode,
-    handleSave
+    handleSave,
+    handleDelete
 }) => {
-    if (!item) {
-        return <Typography>No URL Reference data available.</Typography>;
-    }
+    useEffect(() => {
+        if (!item || Object.keys(item).length === 0) {
+            onChange(getDefaultURLReferenceForm());
+        }
+    }, [item, onChange]);
+    
+    const handleLocalDelete = useCallback(() => {
+        if (item && Object.keys(item).length > 0 && handleDelete) {
+            handleDelete(item);
+        }
+    }, [item, handleDelete]);
+
     const isEditMode = mode === 'edit' || mode === 'create';
     const title = mode === 'create' ? 'Create New URL Reference' : mode === 'edit' ? 'Edit URL Reference' : 'URL Reference Details';
-    const saveButtonText = item._id ? 'Update URL Reference' : 'Create URL Reference';
+    const saveButtonText = item?._id ? 'Update URL Reference' : 'Create URL Reference';
 
     return (
         <GenericFlexibleView
             elementType="URL Reference"
             title={title}
             onSave={handleSave}
+            onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
+            item={item as URLReference}
+            itemType="urlreferences"
         >
             <TextField
                 fullWidth
                 label="Title"
-                value={item.title || ''}
+                value={item?.title || ''}
                 onChange={(e) => onChange({ title: e.target.value })}
                 margin="normal"
                 disabled={!isEditMode}
@@ -40,7 +53,7 @@ const URLReferenceFlexibleView: React.FC<URLReferenceComponentProps> = ({
             <TextField
                 fullWidth
                 label="URL"
-                value={item.url || ''}
+                value={item?.url || ''}
                 onChange={(e) => onChange({ url: e.target.value })}
                 margin="normal"
                 disabled={!isEditMode}
@@ -48,7 +61,7 @@ const URLReferenceFlexibleView: React.FC<URLReferenceComponentProps> = ({
             <TextField
                 fullWidth
                 label="Content"
-                value={item.content || ''}
+                value={item?.content || ''}
                 onChange={(e) => onChange({ content: e.target.value })}
                 margin="normal"
                 multiline
@@ -57,7 +70,7 @@ const URLReferenceFlexibleView: React.FC<URLReferenceComponentProps> = ({
             />
             <Box mt={2}>
                 <Typography variant="subtitle1" gutterBottom>Metadata</Typography>
-                {Object.entries(item.metadata || {}).map(([key, value]) => (
+                {Object.entries(item?.metadata || {}).map(([key, value]) => (
                     <Chip
                         key={key}
                         label={`${key}: ${value}`}

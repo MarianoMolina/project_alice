@@ -2,12 +2,12 @@ import React from 'react';
 import { AliceChat } from '../../../../types/ChatTypes';
 import { AliceTask, TaskComponentProps } from '../../../../types/TaskTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
-import TaskFlexibleView from './TaskFlexibleView';
 import TaskCardView from './TaskCardView';
 import TaskListView from './TaskListView';
 import TaskTableView from './TaskTableView';
 import TaskExecuteView from './TaskExecuteView';
 import TaskShortListView from './TaskShortListView';
+import TaskFlexibleView from './TaskFlexibleView';
 
 type BaseTaskMode = BaseDbElementProps<AliceChat>['mode'];
 type ExtendedTaskMode = 'list' | 'shortList' | 'card' | 'table' | 'execute';
@@ -18,6 +18,7 @@ interface EnhancedTaskProps extends Omit<TaskComponentProps, 'items' | 'item' | 
     itemId?: string;
     fetchAll: boolean;
     onSave?: (savedItem: AliceTask) => void;
+    onDelete?: (deletedItem: AliceTask) => Promise<void>;
     onExecute?: () => Promise<any>;
 }
 
@@ -27,7 +28,8 @@ const EnhancedTask: React.FC<EnhancedTaskProps> = (props) => {
         item: AliceTask | null,
         onChange: (newItem: Partial<AliceTask>) => void,
         mode: BaseTaskMode,
-        handleSave: () => Promise<void>
+        handleSave: () => Promise<void>,
+        onDelete: (deletedItem: AliceTask) => Promise<void>,
     ) => {
         const commonProps: TaskComponentProps = {
             items,
@@ -35,6 +37,7 @@ const EnhancedTask: React.FC<EnhancedTaskProps> = (props) => {
             mode,
             onChange,
             handleSave,
+            handleDelete: onDelete,
             onInteraction: props.onInteraction,
             onView: props.onView,
             isInteractable: props.isInteractable,
@@ -72,6 +75,7 @@ const EnhancedTask: React.FC<EnhancedTaskProps> = (props) => {
             isInteractable={props.isInteractable}
             onInteraction={props.onInteraction}
             onSave={props.onSave}
+            onDelete={props.onDelete}
             fetchAll={props.fetchAll}
             render={renderContent}
         />

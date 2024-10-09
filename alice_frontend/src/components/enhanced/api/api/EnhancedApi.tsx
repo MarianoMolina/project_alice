@@ -18,6 +18,7 @@ interface EnhancedApiProps extends Omit<ApiComponentProps, 'items' | 'item' | 'o
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: API) => void;
+  onDelete?: (deletedItem: API) => Promise<void>;
 }
 
 const EnhancedAPI: React.FC<EnhancedApiProps> = (props: EnhancedApiProps) => {
@@ -26,7 +27,8 @@ const EnhancedAPI: React.FC<EnhancedApiProps> = (props: EnhancedApiProps) => {
     item: API | null,
     onChange: (newItem: Partial<API>) => void,
     mode: BaseApiMode,
-    handleSave: () => Promise<void>
+    handleSave: () => Promise<void>,
+    onDelete: (deletedItem: API) => Promise<void>,
   ) => {
     const commonProps: ApiComponentProps = {
       items,
@@ -34,6 +36,7 @@ const EnhancedAPI: React.FC<EnhancedApiProps> = (props: EnhancedApiProps) => {
       onChange,
       mode,
       handleSave,
+      handleDelete: onDelete,
       onView: props.onView,
       isInteractable: props.isInteractable,
       onInteraction: props.onInteraction,
@@ -72,6 +75,7 @@ const EnhancedAPI: React.FC<EnhancedApiProps> = (props: EnhancedApiProps) => {
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}
       onSave={props.onSave}
+      onDelete={props.onDelete}
       fetchAll={props.fetchAll}
       render={renderContent}
     />

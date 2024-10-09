@@ -1,4 +1,4 @@
-import { HandleClickProps } from "./CollectionTypes";
+import { EnhancedComponentProps } from "./CollectionTypes";
 import { References } from "./ReferenceTypes";
 import { BaseDataseObject } from "./UserTypes";
 
@@ -38,14 +38,6 @@ export const convertToTaskResponse = (data: any): TaskResponse => {
     };
 };
 
-export interface TaskResponseComponentProps extends HandleClickProps {
-    items: TaskResponse[] | null;
-    item: TaskResponse | null;
-    mode: 'create' | 'view' | 'edit';
-    onChange: (newItem: Partial<TaskResponse>) => void;
-    handleSave: () => Promise<void>;
-    onInteraction?: (taskResponse: TaskResponse) => void;
-    isInteractable?: boolean;
-    onView?: (taskResponse: TaskResponse) => void;
-    showHeaders?: boolean;
+export interface TaskResponseComponentProps extends EnhancedComponentProps<TaskResponse> {
+    
 }

@@ -187,6 +187,15 @@ base_module = BaseModule(
                 "api_name": "gemini_embeddings",
             },
             {
+                "key": "gemini_img_gen_imagen-3",
+                "short_name": "Gemini Imagen 3",
+                "model_name": "imagen-3.0-generate-001",
+                "model_format": "OpenChat",
+                "ctx_size": 2048,
+                "model_type": "img_gen",
+                "api_name": "gemini_img_gen",
+            },
+            {
                 "key": "llama3.2_90b",
                 "short_name": "Llama3.2 90B",
                 "model_name": "llama3.2-90b-vision",
@@ -420,6 +429,19 @@ base_module = BaseModule(
                 "is_active": True,
                 "health_status": "healthy",
                 "default_model": "gemini_text_embedding",
+            },
+            {
+                "key": "gemini_img_gen",
+                "api_type": "img_generation",
+                "api_name": "gemini_img_gen",
+                "name": "Gemini Image Generation API",
+                "api_config": {
+                    "api_key": GEMINI_API_KEY,
+                    "base_url": "https://api.gemini.ai"
+                },
+                "is_active": True,
+                "health_status": "healthy",
+                "default_model": "gemini_img_gen_imagen-3",
             },
             {
                 "key": "cohere_llm",

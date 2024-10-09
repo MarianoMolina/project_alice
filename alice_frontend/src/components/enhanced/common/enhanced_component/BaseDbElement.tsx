@@ -32,6 +32,7 @@ import { CircularProgress, Box } from '@mui/material';
 import { useApi } from '../../../../contexts/ApiContext';
 import { CollectionName, CollectionType } from '../../../../types/CollectionTypes';
 import Logger from '../../../../utils/Logger';
+import { globalEventEmitter } from '../../../../utils/EventEmitter';
 
 export interface BaseDbElementProps<T extends CollectionType[CollectionName]> {
   /**
@@ -70,6 +71,11 @@ export interface BaseDbElementProps<T extends CollectionType[CollectionName]> {
   onSave?: (savedItem: T) => void;
 
   /**
+   * Callback function triggered after an item is successfully deleted
+   */
+  onDelete?: (deletedItem: T) => Promise<void>;
+
+  /**
    * Function to render the content based on the fetched data and current mode
    *
    * @param items - Array of items if fetchAll is true, null otherwise
@@ -77,6 +83,7 @@ export interface BaseDbElementProps<T extends CollectionType[CollectionName]> {
    * @param onChange - Function to update the item's data
    * @param mode - Current mode of operation
    * @param handleSave - Function to trigger the save operation
+   * @param onDelete - Function to delete the item
    * @returns React node to be rendered
    */
   render: (
@@ -84,7 +91,8 @@ export interface BaseDbElementProps<T extends CollectionType[CollectionName]> {
     item: T | null,
     onChange: (newItem: Partial<T>) => void,
     mode: 'create' | 'view' | 'edit',
-    handleSave: () => Promise<void>
+    handleSave: () => Promise<void>,
+    onDelete: (deletedItem: T) => Promise<void>,
   ) => React.ReactNode;
 }
 
@@ -96,12 +104,14 @@ export interface BaseDbElementProps<T extends CollectionType[CollectionName]> {
   isInteractable?: boolean;
   onInteraction?: (item: T) => void;
   onSave?: (savedItem: T) => void;
+  onDelete?: (deletedItem: T) => Promise<void>;
   render: (
     items: T[] | null,
     item: T | null,
     onChange: (newItem: Partial<T>) => void,
     mode: 'create' | 'view' | 'edit',
-    handleSave: () => Promise<void>
+    handleSave: () => Promise<void>,
+    onDelete: (deletedItem: T) => Promise<void>,
   ) => React.ReactNode;
 }
 
@@ -113,6 +123,7 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
   isInteractable = false,
   onInteraction,
   onSave,
+  onDelete,
   render,
 }: BaseDbElementProps<T>) {
   const [items, setItems] = useState<T[] | null>(null);
@@ -120,55 +131,72 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { fetchItem, createItem, updateItem } = useApi();
-
-  // Combine data fetching into a single useEffect
-  useEffect(() => {
-    let isMounted = true;
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        if (fetchAll) {
-          const data = await fetchItem(collectionName);
-          if (isMounted) {
-            setItems(data as T[]);
-            setError(null);
-          }
-        } else if (itemId && mode !== 'create') {
-          const data = await fetchItem(collectionName, itemId);
-          if (isMounted) {
-            setItem(data as T);
-            setError(null);
-          }
-        } else if (mode === 'create') {
-          setItem({} as T);
-        }
-      } catch (err) {
-        if (isMounted) {
-          setError((err as Error).message || 'Failed to fetch data');
-          Logger.error(err as string);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+  const { fetchItem, createItem, updateItem, deleteItem } = useApi();
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      if (fetchAll) {
+        const data = await fetchItem(collectionName);
+        setItems(data as T[]);
+      } else if (itemId && mode !== 'create') {
+        const data = await fetchItem(collectionName, itemId);
+        setItem(data as T);
+      } else if (mode === 'create') {
+        setItem({} as T);
       }
-    };
+      setError(null);
+    } catch (err) {
+      setError((err as Error).message || 'Failed to fetch data');
+      Logger.error(err as string);
+    } finally {
+      setLoading(false);
+    }
+  }, [collectionName, itemId, mode, fetchAll, fetchItem]);
 
+  useEffect(() => {
     fetchData();
 
+    // Subscribe to events
+    const eventTypes = ['created', 'updated', 'deleted'];
+    const eventHandlers: { [key: string]: (item: T) => void } = {};
+
+    if (fetchAll) {
+      eventTypes.forEach(eventType => {
+        const handler = () => {
+          fetchData();
+        };
+        eventHandlers[`${eventType}:${collectionName}`] = handler;
+        globalEventEmitter.on(`${eventType}:${collectionName}`, handler);
+      });
+    } else if (itemId) {
+      eventTypes.forEach(eventType => {
+        const handler = (updatedItem: T) => {
+          if (updatedItem._id === itemId) {
+            if (eventType === 'deleted') {
+              setItem(null);
+            } else {
+              setItem(updatedItem);
+            }
+          }
+        };
+        eventHandlers[`${eventType}:${collectionName}`] = handler;
+        globalEventEmitter.on(`${eventType}:${collectionName}`, handler);
+      });
+    }
+
+    // Cleanup function to remove event listeners
     return () => {
-      isMounted = false;
+      Object.entries(eventHandlers).forEach(([event, handler]) => {
+        globalEventEmitter.off(event, handler);
+      });
     };
-  }, [collectionName, itemId, mode, fetchAll, fetchItem]);
+  }, [collectionName, itemId, fetchAll, fetchData]);
 
   // Memoize handlers to prevent unnecessary re-renders
   const handleChange = useCallback(
     (newItem: Partial<T>) => {
       setItem(prevItem => ({ ...prevItem, ...newItem } as T));
-    },
-    [setItem]
-  );
+    }, [setItem]);
 
   const handleSave = useCallback(async () => {
     if (!item) return;
@@ -193,6 +221,26 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
     }
   }, [item, mode, createItem, updateItem, collectionName, itemId, onSave]);
 
+  const handleDelete = useCallback(async () => {
+    if (!item) return;
+    try {
+      const bool = await deleteItem(collectionName, itemId!);
+      if (!bool) return;
+      setLoading(true);
+      setItem(null);
+      setError(null);
+      Logger.debug('BaseDBElement handleDelete', { item , onDelete});
+      if (onDelete) {
+        onDelete(item as T);
+      }
+    } catch (err) {
+      setError((err as Error).message || 'Failed to delete item');
+      Logger.error(err as string);
+    } finally {
+      setLoading(false);
+    }
+  }, [item, deleteItem, collectionName, itemId, onDelete]);
+
   const handleClick = useCallback(() => {
     if (isInteractable && onInteraction && item) {
       onInteraction(item);
@@ -201,9 +249,14 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
 
   // Memoize content to prevent unnecessary re-renders
   const content = useMemo(
-    () => render(items, item, handleChange, mode, handleSave),
-    [items, item, handleChange, mode, handleSave, render]
-  );
+    () => render(
+      items, 
+      item, 
+      handleChange, 
+      mode, 
+      handleSave, 
+      handleDelete
+    ), [items, item, handleChange, mode, handleSave, render, handleDelete]);
 
   if (loading) {
     return <CircularProgress />;

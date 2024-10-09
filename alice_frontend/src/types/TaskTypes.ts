@@ -3,12 +3,23 @@ import { Prompt } from "./PromptTypes";
 import { FunctionParameters } from "./ParameterTypes";
 import { AliceModel } from './ModelTypes';
 import { ApiType } from './ApiTypes';
-import { HandleClickProps } from "./CollectionTypes";
+import { EnhancedComponentProps } from "./CollectionTypes";
 import { API, APIEngine } from './ApiTypes';
 import { BaseDataseObject } from "./UserTypes";
+import Logger from "../utils/Logger";
 
-export type TaskType = "CVGenerationTask" | "APITask" | "PromptAgentTask" | "CheckTask" | "CodeGenerationLLMTask" | "CodeExecutionLLMTask" | "Workflow" | "EmbeddingTask" | "GenerateImageTask" | "TextToSpeechTask" | "WebScrapeBeautifulSoupTask";
-
+export enum TaskType {
+  APITask = "APITask",
+  PromptAgentTask = "PromptAgentTask",
+  CheckTask = "CheckTask",
+  CodeGenerationLLMTask = "CodeGenerationLLMTask",
+  CodeExecutionLLMTask = "CodeExecutionLLMTask",
+  Workflow = "Workflow",
+  EmbeddingTask = "EmbeddingTask",
+  GenerateImageTask = "GenerateImageTask",
+  TextToSpeechTask = "TextToSpeechTask",
+  WebScrapeBeautifulSoupTask = "WebScrapeBeautifulSoupTask"
+}
 export type RouteMapTuple = [string | null, boolean];
 export type RouteMap = { [key: number]: RouteMapTuple };
 export type TasksEndCodeRouting = { [key: string]: RouteMap };
@@ -73,17 +84,8 @@ export const convertToAliceTask = (data: any): AliceTask => {
 
 export const DefaultAliceTask: AliceTask = convertToAliceTask({});
 
-export interface TaskComponentProps extends HandleClickProps {
-  items: AliceTask[] | null;
-  item: AliceTask | null;
-  mode: 'create' | 'view' | 'edit';
-  onChange: (newItem: Partial<AliceTask>) => void;
-  handleSave: () => Promise<void>;
-  onInteraction?: (task: AliceTask) => void;
-  onView?: (task: AliceTask) => void;
+export interface TaskComponentProps extends EnhancedComponentProps<AliceTask> {
   onExecute?: () => Promise<any>;
-  isInteractable?: boolean;
-  showHeaders?: boolean;
 }
 
 export interface TaskFormsProps extends TaskComponentProps {
@@ -116,6 +118,7 @@ export const getDefaultTaskForm = (taskType: TaskType): AliceTask => {
     max_attempts: 3
   };
 
+  Logger.debug('getDefaultTaskForm', taskType);
   switch (taskType) {
     case 'CheckTask':
       return { ...baseForm, exit_code_response_map: {} };

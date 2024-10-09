@@ -19,7 +19,8 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     item,
     onChange,
     mode,
-    handleSave
+    handleSave,
+    handleDelete,
 }) => {
     const { fetchItem } = useApi();
     const { selectCardItem } = useCardDialog();
@@ -37,8 +38,10 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     useEffect(() => {
         if (item) {
             setForm(item);
+        } else if (!item || Object.keys(item).length === 0)  {
+            onChange(getDefaultAgentForm());
         }
-    }, [item]);
+    }, [item, onChange]);
 
     const isEditMode = mode === 'edit' || mode === 'create';
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,6 +90,12 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
         setIsSaving(true);
     }, [form, onChange]);
 
+    const handleLocalDelete = useCallback(() => {
+        if (item && Object.keys(item).length > 0 && handleDelete) {
+            handleDelete(item);
+        }
+    }, [item, handleDelete]);
+
     const title = mode === 'create' ? 'Create New Agent' : mode === 'edit' ? 'Edit Agent' : 'Agent Details';
     const saveButtonText = form._id ? 'Update Agent' : 'Create Agent';
 
@@ -99,12 +108,13 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             selectedItems={form.system_message ? [form.system_message] : []}
             onSelect={handlePromptChange}
             isInteractable={isEditMode}
-            label="Select System Message"
+            label="Select System Message" 
             activeAccordion={activeAccordion}
             onAccordionToggle={handleAccordionToggle}
             onView={(id) => selectCardItem("Prompt", id)}
             accordionEntityName="system-message"
         />
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     ), [form.system_message, handlePromptChange, isEditMode, activeAccordion, handleAccordionToggle, selectCardItem]);
 
     const memoizedModelSelect = useMemo(() => (
@@ -121,6 +131,7 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             onView={(id) => selectCardItem("Model", id)}
             accordionEntityName="models"
         />
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     ), [form.models, handleModelChange, isEditMode, activeAccordion, handleAccordionToggle, selectCardItem]);
 
     return (
@@ -128,8 +139,11 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             elementType='Agent'
             title={title}
             onSave={handleLocalSave}
+            onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
+            item={item as AliceAgent}
+            itemType='agents'
         >
             <TextField
                 fullWidth

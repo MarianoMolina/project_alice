@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   Box,
   TextField,
@@ -33,57 +33,46 @@ const PromptAgentTask: React.FC<TaskFormsProps> = ({
   const { fetchItem } = useApi();
   const isEditMode = mode === 'edit' || mode === 'create';
 
-  const itemRef = useRef(item);
-  const onChangeRef = useRef(onChange);
-
-  // Update refs when props change
-  itemRef.current = item;
-  onChangeRef.current = onChange;
-
   const availableApiTypes = useMemo(() => {
     if (!apis) return [];
     return Array.from(new Set(apis.map(api => api.api_type)));
   }, [apis]);
 
   const handleInputVariablesChange = useCallback((newDefinition: FunctionParameters) => {
-    const currentItem = itemRef.current;
-    if (currentItem) onChangeRef.current({ ...currentItem, input_variables: newDefinition });
-  }, []);
+    if (item && Object.keys(item).length !== 0) onChange({ ...item, input_variables: newDefinition });
+  }, [item, onChange]);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const currentItem = itemRef.current;
-    if (currentItem) {
+    if (item && Object.keys(item).length !== 0) {
       const { name, value } = e.target;
-      onChangeRef.current({ ...currentItem, [name]: value });
+      onChange({ ...item, [name]: value });
     }
-  }, []);
+  }, [item, onChange]);
 
   const handleRequiredApisChange = useCallback((event: SelectChangeEvent<ApiType[]>) => {
-    const currentItem = itemRef.current;
-    if (currentItem) {
+    if (item && Object.keys(item).length !== 0) {
       const value = event.target.value as ApiType[];
-      onChangeRef.current({ ...currentItem, required_apis: value });
+      onChange({ ...item, required_apis: value });
     }
-  }, []);
+  }, [item, onChange]);
   
   const memoizedPromptSelect = useMemo(() => (
     <EnhancedSelect<Prompt>
       componentType="prompts"
       EnhancedView={PromptShortListView}
-      selectedItems={itemRef.current?.templates?.task_template ? [itemRef.current.templates.task_template] : []}
+      selectedItems={item?.templates?.task_template ? [item.templates.task_template] : []}
       onSelect={async (selectedIds: string[]) => {
-        const currentItem = itemRef.current;
-        if (currentItem) {
+        if (item && Object.keys(item).length !== 0) {
           if (selectedIds.length > 0) {
             const prompt = await fetchItem('prompts', selectedIds[0]) as Prompt;
-            onChangeRef.current({
-              ...currentItem,
-              templates: { ...currentItem.templates, task_template: prompt },
+            onChange({
+              ...item,
+              templates: { ...item.templates, task_template: prompt },
             });
           } else {
-            onChangeRef.current({
-              ...currentItem,
-              templates: { ...currentItem.templates, task_template: null },
+            onChange({
+              ...item,
+              templates: { ...item.templates, task_template: null },
             });
           }
         }
@@ -95,21 +84,20 @@ const PromptAgentTask: React.FC<TaskFormsProps> = ({
       accordionEntityName="prompts"
       showCreateButton={true}
     />
-  ), [item?.templates, isEditMode, activeAccordion, handleAccordionToggle, fetchItem]);
+  ), [item, isEditMode, activeAccordion, handleAccordionToggle, fetchItem, onChange]);
 
   const memoizedAgentSelect = useMemo(() => (
     <EnhancedSelect<AliceAgent>
       componentType="agents"
       EnhancedView={AgentShortListView}
-      selectedItems={itemRef.current?.agent ? [itemRef.current.agent] : []}
+      selectedItems={item?.agent ? [item.agent] : []}
       onSelect={async (selectedIds: string[]) => {
-        const currentItem = itemRef.current;
-        if (currentItem) {
+        if (item && Object.keys(item).length !== 0) {
           if (selectedIds.length > 0) {
             const agent = await fetchItem('agents', selectedIds[0]) as AliceAgent;
-            onChangeRef.current({ ...currentItem, agent: agent });
+            onChange({ ...item, agent: agent });
           } else {
-            onChangeRef.current({ ...currentItem, agent: null });
+            onChange({ ...item, agent: null });
           }
         }
       }}
@@ -120,22 +108,21 @@ const PromptAgentTask: React.FC<TaskFormsProps> = ({
       accordionEntityName="agent"
       showCreateButton={true}
     />
-  ), [item?.agent, isEditMode, activeAccordion, handleAccordionToggle, fetchItem]);
+  ), [item, isEditMode, activeAccordion, handleAccordionToggle, fetchItem, onChange]);
 
   const memoizedTaskSelect = useMemo(() => (
     <EnhancedSelect<AliceTask>
       componentType="tasks"
       EnhancedView={TaskShortListView}
-      selectedItems={Object.values(itemRef.current?.tasks || {})}
+      selectedItems={Object.values(item?.tasks || {})}
       onSelect={async (selectedIds: string[]) => {
-        const currentItem = itemRef.current;
-        if (currentItem) {
+        if (item && Object.keys(item).length !== 0) {
           const tasks = await Promise.all(selectedIds.map(id => fetchItem('tasks', id) as Promise<AliceTask>));
           const tasksObject = tasks.reduce((acc, task) => {
             acc[task.task_name] = task;
             return acc;
           }, {} as Record<string, AliceTask>);
-          onChangeRef.current({ ...currentItem, tasks: tasksObject });
+          onChange({ ...item, tasks: tasksObject });
         }
       }}
       isInteractable={isEditMode}
@@ -146,9 +133,9 @@ const PromptAgentTask: React.FC<TaskFormsProps> = ({
       accordionEntityName="tasks"
       showCreateButton={true}
     />
-  ), [item?.tasks, isEditMode, activeAccordion, handleAccordionToggle, fetchItem]);
+  ), [item, isEditMode, activeAccordion, handleAccordionToggle, fetchItem, onChange]);
 
-  if (!item) {
+  if (!item || Object.keys(item).length === 0) {
     return <Box>No task data available.</Box>;
   }
 

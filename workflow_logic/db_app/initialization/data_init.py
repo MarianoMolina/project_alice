@@ -1,10 +1,22 @@
 from typing import List, Dict, Any, Optional
-from pydantic import BaseModel, Field
-from workflow_logic.db_app.initialization.modules import InitializationModule, base_module, base_chat_module, base_tasks_module, coding_workflow_module, advanced_chat_module, adv_tasks_module, research_workflow_module, web_scrape_workflow_module
+from pydantic import BaseModel, Field, field_validator
+from workflow_logic.db_app.initialization.modules import InitializationModule, module_list
+
+modules: Dict[str, InitializationModule] = {module.name: module for module in module_list}
+all_modules = [module.name for module in module_list]
 
 class ModularDBStructure(BaseModel):
-    modules: Dict[str, InitializationModule] = Field(default_factory=dict)
+    modules: Dict[str, InitializationModule] = Field(default=modules)
 
+    @field_validator('modules')
+    @classmethod
+    def validate_module_dependencies(cls, v: Dict[str, InitializationModule]) -> Dict[str, InitializationModule]:
+        modular_db = cls(modules=v)
+        error = modular_db.validate_dependencies()
+        if error:
+            raise ValueError(error)
+        return v
+    
     def add_module(self, module: InitializationModule):
         self.modules[module.name] = module
 
@@ -53,25 +65,9 @@ class DBStructure(BaseModel):
     tasks: List[Dict[str, Any]] = Field(default_factory=list, description="List of tasks to create")
     chats: List[Dict[str, Any]] = Field(default_factory=list, description="List of chats to create")
 
-# Create ModularDBStructure and add all modules
-modular_db = ModularDBStructure()
-modular_db.add_module(base_module)
-modular_db.add_module(base_tasks_module)
-modular_db.add_module(base_chat_module)
-modular_db.add_module(coding_workflow_module)
-modular_db.add_module(research_workflow_module)
-modular_db.add_module(advanced_chat_module)
-modular_db.add_module(adv_tasks_module)
-modular_db.add_module(web_scrape_workflow_module)
-
-# Validate dependencies
-validation_result = modular_db.validate_dependencies()
-if validation_result:
-    raise ValueError(f"Dependency validation failed: {validation_result}")
-
-# Get combined data for all modules
-all_modules = ["base", "base_tasks", "base_chat", "coding_workflow", "advanced_chat", "adv_tasks", "research_workflow", "web_scrape_workflow"]
-combined_data = modular_db.get_combined_data(all_modules)
-
+def get_combined_data() -> Dict[str, List[Dict[str, Any]]]:
+    modular_db = ModularDBStructure()
+    return modular_db.get_combined_data(all_modules)
+    
 # Create DB_STRUCTURE
-DB_STRUCTURE = DBStructure(**combined_data)
+DB_STRUCTURE = DBStructure(**get_combined_data())

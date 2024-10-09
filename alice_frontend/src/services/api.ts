@@ -62,6 +62,21 @@ export const updateItem = async <T extends CollectionName>(
   }
 };
 
+export const deleteItem = async <T extends CollectionName>(
+  collectionName: T,
+  itemId: string
+): Promise<void> => {
+  try {
+    const url = `/${collectionName}/${itemId}`;
+    Logger.debug(`Deleting item from ${collectionName}:`, itemId);
+    await dbAxiosInstance.delete(url);
+    Logger.debug(`Item deleted successfully from ${collectionName}:`, itemId);
+  } catch (error) {
+    Logger.error(`Error deleting item from ${collectionName}:`, error);
+    throw error;
+  }
+};
+
 export const sendMessage = async (chatId: string, message: MessageType): Promise<AliceChat> => {
   try {
     Logger.debug('Sending message to chatId:', chatId);

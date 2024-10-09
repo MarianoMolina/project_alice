@@ -33,12 +33,15 @@ import { FileReference } from '../../../../types/FileTypes';
 import { URLReference } from '../../../../types/URLReferenceTypes';
 import URLReferenceCardView from '../../url_reference/url_reference/URLReferenceCardView';
 import EnhancedURLReference from '../../url_reference/url_reference/EnhancedURLReference';
+import Logger from '../../../../utils/Logger';
 
 const EnhancedCardDialog: React.FC = () => {
   const { selectedCardItem, selectedCardItemType, handleClose, selectCardItem } = useCardDialog();
 
   const renderDialogContent = () => {
     if (!selectedCardItem || !selectedCardItemType) return null;
+
+    Logger.debug('EnhancedCardDialog', { selectedCardItem, selectedCardItemType });
 
     const handleProps = {
       handleAgentClick: (id: string, item?: AliceAgent) => selectCardItem('Agent', id, item),
@@ -66,7 +69,8 @@ const EnhancedCardDialog: React.FC = () => {
       ...handleProps,
     };
 
-    if ('_id' in selectedCardItem && typeof selectedCardItem._id === 'string') {
+    if ('_id' in selectedCardItem && typeof selectedCardItem._id === 'string' && Object.keys(selectedCardItem).length === 1) {
+      Logger.debug('SWITCH EnhancedCardDialog', { selectedCardItem, selectedCardItemType });
       switch (selectedCardItemType) {
         case 'Agent':
           return <EnhancedAgent itemId={selectedCardItem._id} {...commonProps} />;
@@ -94,6 +98,7 @@ const EnhancedCardDialog: React.FC = () => {
           return null;
       }
     } else {
+      Logger.debug('SWITCH 2 EnhancedCardDialog', { selectedCardItem, selectedCardItemType });
       switch (selectedCardItemType) {
         case 'Agent':
           return <AgentCardView item={selectedCardItem as CollectionType['agents']} {...cardViewProps} />;

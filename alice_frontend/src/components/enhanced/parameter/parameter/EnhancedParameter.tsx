@@ -17,6 +17,7 @@ interface EnhancedParameterProps extends Omit<ParameterComponentProps, 'items' |
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: ParameterDefinition) => void;
+  onDelete?: (deletedItem: ParameterDefinition) => Promise<void>;
 }
 
 const EnhancedParameter: React.FC<EnhancedParameterProps> = (props) => {
@@ -25,7 +26,8 @@ const EnhancedParameter: React.FC<EnhancedParameterProps> = (props) => {
     item: ParameterDefinition | null,
     onChange: (newItem: Partial<ParameterDefinition>) => void,
     mode: BaseParameterMode,
-    handleSave: () => Promise<void>
+    handleSave: () => Promise<void>,
+    onDelete: (deletedItem: ParameterDefinition) => Promise<void>,
   ) => {
     const commonProps: ParameterComponentProps = {
       items,
@@ -33,6 +35,7 @@ const EnhancedParameter: React.FC<EnhancedParameterProps> = (props) => {
       onChange,
       mode,
       handleSave,
+      handleDelete: onDelete,
       onView: props.onView,
       isInteractable: props.isInteractable,
       onInteraction: props.onInteraction,
@@ -69,6 +72,7 @@ const EnhancedParameter: React.FC<EnhancedParameterProps> = (props) => {
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}
       onSave={props.onSave}
+      onDelete={props.onDelete}
       fetchAll={props.fetchAll}
       render={renderContent}
     />

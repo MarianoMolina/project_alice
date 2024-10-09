@@ -1,6 +1,6 @@
 import { BaseDataseObject, convertToUser } from "./UserTypes";
 import { ApiName } from "./ApiTypes";
-import { HandleClickProps } from "./CollectionTypes";
+import { EnhancedComponentProps } from "./CollectionTypes";
 
 export enum ModelType {
     INSTRUCT = 'instruct',
@@ -43,16 +43,8 @@ export const convertToAliceModel = (data: any): AliceModel => {
     };
 };
 
-export interface ModelComponentProps extends HandleClickProps {
-  items: AliceModel[] | null;
-  item: AliceModel | null;
-  onChange: (newItem: Partial<AliceModel>) => void;
-  mode: 'create' | 'view' | 'edit';
-  handleSave: () => Promise<void>;
-  isInteractable?: boolean;
-  onView?: (model: AliceModel) => void;
-  onInteraction?: (model: AliceModel) => void;
-  showHeaders?: boolean;
+export interface ModelComponentProps extends EnhancedComponentProps<AliceModel> {
+    
 }
 
 export const getDefaultModelForm = (): Partial<AliceModel> => ({
@@ -60,8 +52,8 @@ export const getDefaultModelForm = (): Partial<AliceModel> => ({
     model_name: '',
     model_format: '',
     ctx_size: 0,
-    model_type: ModelType.CHAT,
-    api_name: ApiName.OPENAI,
+    model_type: undefined,
+    api_name: undefined,
     temperature: 0.7,
     use_cache: true
 });

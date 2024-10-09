@@ -12,7 +12,7 @@ const useStyles = makeStyles((theme: Theme) => ({
         backgroundColor: theme.palette.primary.main,
         color: theme.palette.primary.contrastText,
         padding: theme.spacing(2),
-        borderRadius: theme.shape.borderRadius,
+        borderRadius: `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0 0`,
         marginBottom: theme.spacing(1),
     },
     title: {
@@ -76,6 +76,29 @@ const useStyles = makeStyles((theme: Theme) => ({
     downloadButton: {
         marginLeft: theme.spacing(2),
         color: theme.palette.secondary.light,
+    },
+    flexibleViewContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        padding: theme.spacing(3),
+        backgroundColor: `${theme.palette.background.paper}cc !important`,
+    },
+    elementTypeText: {
+        position: 'absolute',
+        top: -10,
+        left: 8,
+        fontSize: '0.75rem',
+        padding: '0 4px',
+        backgroundColor: theme.palette.primary.main,
+        borderRadius: 4,
+    },
+    formContainer: {
+        flexGrow: 1,
+        marginBottom: theme.spacing(3),
+    },
+    buttonContainer: {
+        display: 'flex',
+        justifyContent: 'center',
     },
 }));
 

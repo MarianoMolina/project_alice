@@ -116,3 +116,15 @@ export interface HandleClickProps {
     handleMessageClick?: (messageId: string, item?: MessageType) => void;
     handleURLReferenceClick?: (urlReferenceId: string, item?: URLReference) => void;
 }
+export interface EnhancedComponentProps<T extends CollectionElement> extends HandleClickProps {
+    items: T[] | null;
+    item: T | null;
+    onChange: (newItem: Partial<T>) => void;
+    mode: 'create' | 'view' | 'edit';
+    handleSave: () => Promise<void>;
+    handleDelete?: (deletedItem: T) => Promise<void>;
+    isInteractable?: boolean;
+    onView?: (item: T) => void;
+    onInteraction?: (item: T) => void;
+    showHeaders?: boolean
+}

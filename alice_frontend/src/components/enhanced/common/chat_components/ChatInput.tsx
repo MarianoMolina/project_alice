@@ -9,6 +9,7 @@ import { TaskResponse } from '../../../../types/TaskResponseTypes';
 import { URLReference } from '../../../../types/URLReferenceTypes';
 import { References } from '../../../../types/ReferenceTypes';
 import { AttachFile } from '@mui/icons-material';
+import Logger from '../../../../utils/Logger';
 
 interface ChatInputProps {
   sendMessage: (chatId: string, message: MessageType) => Promise<void>;
@@ -104,7 +105,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
 
   const handleSend = () => {
     if (currentChatId && (newMessage.content.trim() || hasReferences(newMessage.references))) {
-      console.log('Sending message content:', newMessage.content);
+      Logger.debug('Sending message content:', newMessage.content);
       sendMessage(currentChatId, newMessage);
       setNewMessage(getDefaultMessageForm());
     }

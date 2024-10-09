@@ -17,6 +17,7 @@ interface EnhancedURLReferenceProps extends Omit<URLReferenceComponentProps, 'it
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: URLReference) => void;
+  onDelete?: (deletedItem: URLReference) => Promise<void>;
 }
 
 const EnhancedURLReference: React.FC<EnhancedURLReferenceProps> = (props) => {
@@ -25,7 +26,8 @@ const EnhancedURLReference: React.FC<EnhancedURLReferenceProps> = (props) => {
     item: URLReference | null,
     onChange: (newItem: Partial<URLReference>) => void,
     mode: BaseURLReferenceMode,
-    handleSave: () => Promise<void>
+    handleSave: () => Promise<void>,
+    onDelete: (deletedItem: URLReference) => Promise<void>,
   ) => {
     const commonProps: URLReferenceComponentProps = {
       items,
@@ -33,6 +35,7 @@ const EnhancedURLReference: React.FC<EnhancedURLReferenceProps> = (props) => {
       onChange,
       mode,
       handleSave,
+      handleDelete: onDelete,
       isInteractable: props.isInteractable,
       onView: props.onView,
       onInteraction: props.onInteraction,
@@ -69,6 +72,7 @@ const EnhancedURLReference: React.FC<EnhancedURLReferenceProps> = (props) => {
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}
       onSave={props.onSave}
+      onDelete={props.onDelete}
       fetchAll={props.fetchAll}
       render={renderContent}
     />

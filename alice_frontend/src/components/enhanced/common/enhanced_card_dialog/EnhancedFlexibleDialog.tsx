@@ -45,7 +45,11 @@ const EnhancedFlexibleDialog: React.FC = () => {
     const commonProps = {
       mode: flexibleDialogMode as ComponentMode,
       fetchAll: false,
-      onSave: handleClose,
+      onSave: async () => {
+        handleClose();
+        return Promise.resolve();
+      },
+      onDelete: async () => handleClose(),
       ...handleProps,
     };
 

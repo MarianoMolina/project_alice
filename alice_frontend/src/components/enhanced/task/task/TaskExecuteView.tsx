@@ -92,7 +92,10 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
                         value={inputValues[key] || ''}
                         onChange={(e) => handleInputChange(key, e.target.value)}
                         fullWidth
-                        multiline
+                        InputProps={{
+                            multiline: true,
+                            inputComponent: 'textarea'
+                        }}
                         className={classes.inputField}
                         helperText={(value as any).description}
                     />

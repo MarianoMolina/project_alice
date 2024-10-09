@@ -1,3 +1,4 @@
+import { EnhancedComponentProps } from "./CollectionTypes";
 import { MessageType } from "./MessageTypes";
 import { BaseDataseObject } from "./UserTypes";
 
@@ -41,14 +42,12 @@ export const convertToFileReference = (data: any): FileReference => {
     };
 };
 
-export interface FileComponentProps {
-    items: FileReference[] | null;
-    item: FileReference | null;
-    onChange: (newItem: Partial<FileReference>) => void;
-    mode: 'create' | 'view' | 'edit';
-    handleSave: () => Promise<void>;
-    isInteractable?: boolean;
-    onInteraction?: (file: FileReference) => void;
-    onView?: (file: FileReference) => void;
-    showHeaders?: boolean;
+export interface FileComponentProps extends EnhancedComponentProps<FileReference> {
+    
 }
+
+export const getDefaultFileForm = (): Partial<FileReference> => ({
+    filename: '',
+    type: FileType.FILE,
+    file_size: 0,
+});

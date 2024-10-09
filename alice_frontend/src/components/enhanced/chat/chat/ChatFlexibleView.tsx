@@ -13,12 +13,14 @@ import { useApi } from '../../../../contexts/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import MessageListView from '../../message/message/MessageListView';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import Logger from '../../../../utils/Logger';
 
 const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     item,
     onChange,
     mode,
     handleSave,
+    handleDelete,
 }) => {
     const { fetchItem } = useApi();
     const { selectCardItem } = useCardDialog();
@@ -27,6 +29,8 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     const [isSaving, setIsSaving] = useState(false);
 
     const isEditMode = mode === 'edit' || mode === 'create';
+
+    Logger.debug('ChatFlexibleView', { item, handleDelete });
 
     useEffect(() => {
         if (isSaving) {
@@ -38,8 +42,10 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     useEffect(() => {
         if (item) {
             setForm(item);
+        } else if (!item || Object.keys(item).length === 0)  {
+            onChange(getDefaultChatForm());
         }
-    }, [item]);
+    }, [item, onChange]);
 
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -69,6 +75,13 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
         setIsSaving(true);
     }, [form, onChange]);
 
+    const handleLocalDelete = useCallback(() => {
+        Logger.debug('ChatFlexibleView handleLocalDelete', { item, handleDelete });
+        if (item && Object.keys(item).length > 0 && handleDelete) {
+            handleDelete(item);
+        }
+    }, [item, handleDelete]);
+
     const title = mode === 'create' ? 'Create New Chat' : mode === 'edit' ? 'Edit Chat' : 'Chat Details';
     const saveButtonText = form._id ? 'Update Chat' : 'Create Chat';
 
@@ -85,6 +98,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             accordionEntityName="agent"
             showCreateButton={true}
         />
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     ), [form.alice_agent, handleAgentChange, isEditMode, activeAccordion, handleAccordionToggle]);
     
       const memoizedTaskSelect = useMemo(() => (
@@ -101,6 +115,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             accordionEntityName="functions"
             showCreateButton={true}
         />
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     ), [form.functions, handleFunctionsChange, isEditMode, activeAccordion, handleAccordionToggle]);
 
     return (
@@ -108,8 +123,11 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             elementType='Chat'
             title={title}
             onSave={handleLocalSave}
+            onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
+            item={item as AliceChat}
+            itemType='chats'
         >
             <TextField
                 fullWidth

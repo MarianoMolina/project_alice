@@ -11,11 +11,12 @@ import {
     updateFile as apiUpdateFile,
     retrieveFile as apiRetrieveFile,
     requestFileTranscript as apiRequestFileTranscript,
-    updateMessageInChat as apiUpdateMessageInChat
+    updateMessageInChat as apiUpdateMessageInChat,
+    deleteItem as apiDeleteItem
 } from '../services/api';
 import { useNotification } from './NotificationContext';
 import { useCardDialog } from './CardDialogContext';
-import { CollectionName, CollectionType, CollectionElementString } from '../types/CollectionTypes';
+import { CollectionName, CollectionType, CollectionElementString, collectionNameToElementString } from '../types/CollectionTypes';
 import { AliceChat } from '../types/ChatTypes';
 import { MessageType } from '../types/MessageTypes';
 import { TaskResponse } from '../types/TaskResponseTypes';
@@ -37,6 +38,7 @@ interface ApiContextType {
     retrieveFile: typeof apiRetrieveFile;
     requestFileTranscript: typeof apiRequestFileTranscript;
     updateMessageInChat: typeof apiUpdateMessageInChat;
+    deleteItem: <T extends CollectionName>(collectionName: T, itemId: string) => Promise<boolean>;
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -56,7 +58,6 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     const emitEvent = (eventType: string, collectionName: CollectionName, item: any) => {
         globalEventEmitter.emit(`${eventType}:${collectionName}`, item);
-        globalEventEmitter.emit(eventType, collectionName, item);
     };
 
     const createItem = useCallback(async <T extends CollectionName>(
@@ -65,13 +66,14 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     ): Promise<CollectionType[T]> => {
         try {
             const createdItem = await apiCreateItem(collectionName, itemData);
+            Logger.debug(`Created ${collectionName}:`, createdItem);
             addNotification(
                 `${collectionName} created successfully`,
                 'success',
                 5000,
                 {
                     label: 'View',
-                    onClick: () => selectCardItem(collectionName as CollectionElementString, createdItem._id as string)
+                    onClick: () => selectCardItem(collectionNameToElementString[collectionName] as CollectionElementString, createdItem._id as string)
                 }
             );
             emitEvent('created', collectionName, createdItem);
@@ -95,7 +97,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 5000,
                 {
                     label: 'View',
-                    onClick: () => selectCardItem(collectionName as CollectionElementString, itemId)
+                    onClick: () => selectCardItem(collectionNameToElementString[collectionName] as CollectionElementString, itemId)
                 }
             );
             emitEvent('updated', collectionName, updatedItem);
@@ -105,6 +107,36 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             throw error;
         }
     }, [addNotification, selectCardItem]);
+
+    const deleteItem = useCallback(async <T extends CollectionName>(
+        collectionName: T,
+        itemId: string
+    ): Promise<boolean> => {
+        return new Promise((resolve) => {
+            openDialog({
+                title: 'Confirm Deletion',
+                content: `Are you sure you want to delete this ${collectionNameToElementString[collectionName]}?`,
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                onConfirm: async () => {
+                    try {
+                        await apiDeleteItem(collectionName, itemId);
+                        addNotification(`${collectionNameToElementString[collectionName]} deleted successfully`, 'success');
+                        emitEvent('deleted', collectionName, { _id: itemId });
+                        resolve(true);
+                    } catch (error) {
+                        addNotification(`Error deleting ${collectionName}`, 'error');
+                        Logger.error(`Error deleting item from ${collectionName}:`, error);
+                        resolve(false);
+                    }
+                },
+                onCancel: () => {
+                    addNotification(`Deletion of ${collectionName} cancelled`, 'info');
+                    resolve(false);
+                }
+            });
+        });
+    }, [addNotification, openDialog]);
 
     const executeTask = useCallback(async (taskId: string, inputs: any): Promise<TaskResponse> => {
         try {
@@ -169,7 +201,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             const result = await apiUpdateFile(file, fileId);
             addNotification('File updated successfully', 'success', 5000, {
                 label: 'View File',
-                onClick: () => selectCardItem('File', result._id as string)
+                onClick: () => selectCardItem('File', result._id as string, result)
             });
             emitEvent('updated', 'files', result);
             return result;
@@ -238,6 +270,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         fetchItem: apiFetchItem,
         createItem,
         updateItem,
+        deleteItem,
         executeTask,
         generateChatResponse,
         sendMessage,

@@ -1,7 +1,7 @@
 import { BaseDataseObject } from './UserTypes';
 import { AliceTask, convertToAliceTask } from './TaskTypes';
 import { AliceAgent, convertToAliceAgent } from './AgentTypes';
-import { HandleClickProps } from './CollectionTypes';
+import { EnhancedComponentProps } from './CollectionTypes';
 import { convertToMessageType, MessageType } from './MessageTypes';
 
 export interface AliceChat extends BaseDataseObject {
@@ -31,16 +31,8 @@ export interface MessageProps {
     chatId?: string,
 }
 
-export interface ChatComponentProps extends HandleClickProps {
-    items: AliceChat[] | null;
-    item: AliceChat | null;
-    onChange: (newItem: Partial<AliceChat>) => void;
-    mode: 'create' | 'view' | 'edit';
-    handleSave: () => Promise<void>;
-    isInteractable?: boolean;
-    onInteraction?: (chat: AliceChat) => void;
-    onView?: (chat: AliceChat) => void;
-    showHeaders?: boolean;
+export interface ChatComponentProps extends EnhancedComponentProps<AliceChat> {
+    
 }
 
 export const getDefaultChatForm = (): Partial<AliceChat> => ({

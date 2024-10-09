@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, TextField, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
 import PromptAgentTask from './PromptAgentTask';
 import { TaskFormsProps } from '../../../../../types/TaskTypes';
+import Logger from '../../../../../utils/Logger';
 
 const CodeExecutionLLMTask: React.FC<TaskFormsProps> = ({
   item, onChange, mode, handleAccordionToggle, activeAccordion, handleSave, apis
@@ -11,6 +12,7 @@ const CodeExecutionLLMTask: React.FC<TaskFormsProps> = ({
   if (!item) {
     return <Box>No task data available.</Box>;
   }
+  Logger.debug('CodeExecutionLLMTask', 'item', item);
 
   const handleValidLanguagesChange = (event: SelectChangeEvent<string[]>) => {
     const {

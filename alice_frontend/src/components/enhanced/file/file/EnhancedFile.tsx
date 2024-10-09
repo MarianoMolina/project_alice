@@ -17,6 +17,7 @@ interface EnhancedFileProps extends Omit<FileComponentProps, 'items' | 'item' | 
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: FileReference) => void;
+  onDelete?: (deletedItem: FileReference) => Promise<void>;
 }
 
 const EnhancedFile: React.FC<EnhancedFileProps> = (props) => {
@@ -25,7 +26,8 @@ const EnhancedFile: React.FC<EnhancedFileProps> = (props) => {
     item: FileReference | null,
     onChange: (newItem: Partial<FileReference>) => void,
     mode: BaseFileMode,
-    handleSave: () => Promise<void>
+    handleSave: () => Promise<void>,
+    onDelete: (deletedItem: FileReference) => Promise<void>,
   ) => {
     const commonProps: FileComponentProps = {
       items,
@@ -33,6 +35,7 @@ const EnhancedFile: React.FC<EnhancedFileProps> = (props) => {
       onChange,
       mode,
       handleSave,
+      handleDelete: onDelete,
       isInteractable: props.isInteractable,
       onInteraction: props.onInteraction,
       onView: props.onView,
@@ -69,6 +72,7 @@ const EnhancedFile: React.FC<EnhancedFileProps> = (props) => {
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}
       onSave={props.onSave}
+      onDelete={props.onDelete}
       fetchAll={props.fetchAll}
       render={renderContent}
     />

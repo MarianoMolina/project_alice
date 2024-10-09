@@ -16,6 +16,7 @@ interface EnhancedTaskResponseProps extends Omit<TaskResponseComponentProps, 'it
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: TaskResponse) => void;
+  onDelete?: (deletedItem: TaskResponse) => Promise<void>;
   onInteraction?: (selectedItem: TaskResponse) => void;
   onView?: (viewItem: TaskResponse) => void;
 }
@@ -26,7 +27,8 @@ const EnhancedTaskResponse: React.FC<EnhancedTaskResponseProps> = (props) => {
     item: TaskResponse | null,
     onChange: (newItem: Partial<TaskResponse>) => void,
     mode: BaseTaskResponseMode,
-    handleSave: () => Promise<void>
+    handleSave: () => Promise<void>,
+    onDelete: (deletedItem: TaskResponse) => Promise<void>,
   ) => {
     const commonProps: TaskResponseComponentProps = {
       items,
@@ -34,6 +36,7 @@ const EnhancedTaskResponse: React.FC<EnhancedTaskResponseProps> = (props) => {
       mode,
       onChange,
       handleSave,
+      handleDelete: onDelete,
       onInteraction: props.onInteraction,
       isInteractable: false,
       onView: props.onView,
@@ -69,6 +72,7 @@ const EnhancedTaskResponse: React.FC<EnhancedTaskResponseProps> = (props) => {
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}
       onSave={props.onSave}
+      onDelete={props.onDelete}
       fetchAll={props.fetchAll}
       render={renderContent}
     />

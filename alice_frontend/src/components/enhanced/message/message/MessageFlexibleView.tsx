@@ -26,7 +26,8 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
     item,
     onChange,
     mode,
-    handleSave
+    handleSave,
+    handleDelete
 }) => {
     const { fetchItem } = useApi();
     const [form, setForm] = useState<Partial<MessageType>>(item || getDefaultMessageForm());
@@ -39,6 +40,14 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
             setIsSaving(false);
         }
     }, [isSaving, handleSave]);
+    
+    useEffect(() => {
+        if (item) {
+            setForm(item);
+        } else if (!item || Object.keys(item).length === 0)  {
+            onChange(getDefaultMessageForm());
+        }
+    }, [item, onChange]);
 
     const isEditMode = mode === 'edit' || mode === 'create';
 
@@ -83,6 +92,12 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
         setIsSaving(true);
     }, [form, onChange]);
 
+    const handleLocalDelete = useCallback(() => {
+        if (item && Object.keys(item).length > 0 && handleDelete) {
+            handleDelete(item);
+        }
+    }, [item, handleDelete]);
+
     const title = mode === 'create' ? 'Create New Message' : mode === 'edit' ? 'Edit Message' : 'Message Details';
     const saveButtonText = form._id ? 'Update Message' : 'Create Message';
 
@@ -99,6 +114,7 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
             onAccordionToggle={handleAccordionToggle}
             accordionEntityName="referenced-messages"
         />
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     ), [form.references?.messages, handleReferencesChange, isEditMode, activeAccordion, handleAccordionToggle]);
 
     const memoizedFileSelect = useMemo(() => (
@@ -114,6 +130,7 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
             onAccordionToggle={handleAccordionToggle}
             accordionEntityName="file-references"
         />
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     ), [form.references?.files, handleReferencesChange, isEditMode, activeAccordion, handleAccordionToggle]);
 
     const memoizedTaskResponseSelect = useMemo(() => (
@@ -129,6 +146,7 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
             onAccordionToggle={handleAccordionToggle}
             accordionEntityName="task-responses"
         />
+    // eslint-disable-next-line react-hooks/exhaustive-deps 
     ), [form.references?.task_responses, handleReferencesChange, isEditMode, activeAccordion, handleAccordionToggle]);
 
     const memoizedURLReferenceSelect = useMemo(() => (
@@ -144,6 +162,7 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
             onAccordionToggle={handleAccordionToggle}
             accordionEntityName="search-results"
         />
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     ), [form.references?.search_results, handleReferencesChange, isEditMode, activeAccordion, handleAccordionToggle]);
 
     return (
@@ -151,8 +170,11 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
             elementType='Message'
             title={title}
             onSave={handleLocalSave}
+            onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
+            item={item as MessageType}
+            itemType='messages'
         >
             <FormControl fullWidth margin="normal">
                 <InputLabel>Role</InputLabel>

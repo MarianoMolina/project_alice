@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     TextField,
     Typography,
@@ -9,7 +9,7 @@ import {
     DialogContent,
     DialogActions,
 } from '@mui/material';
-import { FileComponentProps, FileContentReference, FileReference, FileType } from '../../../../types/FileTypes';
+import { FileComponentProps, FileContentReference, FileReference, FileType, getDefaultFileForm } from '../../../../types/FileTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import FileViewer from '../FileViewer';
 import Transcript from '../Transcript';
@@ -23,17 +23,31 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
     item,
     onChange,
     mode,
-    handleSave
+    handleSave,
+    handleDelete,
 }) => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const { uploadFileContentReference } = useApi();
     const { addNotification } = useNotification();
 
+    useEffect(() => {
+        if (!item || Object.keys(item).length === 0) {
+            onChange(getDefaultFileForm());
+        }
+    }, [item, onChange]);
+
+
+    const handleLocalDelete = useCallback(() => {
+        if (item && Object.keys(item).length > 0 && handleDelete) {
+            handleDelete(item);
+        }
+    }, [item, handleDelete]);
+
     if (!item && mode !== 'create') {
         return <Typography>No file data available.</Typography>;
     }
-
+    
     const isEditMode = mode === 'edit' || mode === 'create';
     const title = mode === 'create' ? 'Upload New File' : mode === 'edit' ? 'Edit File' : 'File Details';
     const saveButtonText = item?._id ? 'Update File' : 'Upload File';
@@ -143,8 +157,11 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
             elementType='File'
             title={title}
             onSave={handleSave}
+            onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={mode === "create" ? false : isEditMode}
+            item={item as FileReference}
+            itemType='files'
         >
             {renderContent()}
         </GenericFlexibleView>

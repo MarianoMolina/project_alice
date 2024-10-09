@@ -12,11 +12,12 @@ type BaseChatMode = BaseDbElementProps<AliceChat>['mode'];
 type ExtendedChatMode = 'list' | 'shortList' | 'card' | 'full' | 'table';
 type EnhancedChatMode = BaseChatMode | ExtendedChatMode;
 
-interface EnhancedChatProps extends Omit<ChatComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
+interface EnhancedChatProps extends Omit<ChatComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode' | 'handleDelete'> {
   mode: EnhancedChatMode;
   itemId?: string;
   fetchAll: boolean;
-  onSave?: (savedItem: AliceChat) => void;
+  onSave?: (savedItem: AliceChat) => Promise<void>;
+  onDelete?: (deletedItem: AliceChat) => Promise<void>;
 }
 
 const EnhancedChat: React.FC<EnhancedChatProps> = (props) => {
@@ -25,7 +26,8 @@ const EnhancedChat: React.FC<EnhancedChatProps> = (props) => {
     item: AliceChat | null,
     onChange: (newItem: Partial<AliceChat>) => void,
     mode: BaseChatMode,
-    handleSave: () => Promise<void>
+    handleSave: () => Promise<void>,
+    onDelete: (deletedItem: AliceChat) => Promise<void>,
   ) => {
     const commonProps: ChatComponentProps = {
       items,
@@ -33,6 +35,7 @@ const EnhancedChat: React.FC<EnhancedChatProps> = (props) => {
       onChange,
       mode,
       handleSave,
+      handleDelete: onDelete,
       isInteractable: props.isInteractable,
       onInteraction: props.onInteraction,
       onView: props.onView,
@@ -69,6 +72,7 @@ const EnhancedChat: React.FC<EnhancedChatProps> = (props) => {
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}
       onSave={props.onSave}
+      onDelete={props.onDelete}
       fetchAll={props.fetchAll}
       render={renderContent}
     />

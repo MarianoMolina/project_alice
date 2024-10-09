@@ -1,4 +1,4 @@
-import { HandleClickProps } from "./CollectionTypes";
+import { EnhancedComponentProps } from "./CollectionTypes";
 import { BaseDataseObject, convertToUser } from "./UserTypes";
 
 export interface FunctionParameters {
@@ -26,16 +26,7 @@ export const convertToParameterDefinition = (data: any): ParameterDefinition => 
     };
 };
 
-export interface ParameterComponentProps extends HandleClickProps {
-    items: ParameterDefinition[] | null;
-    item: ParameterDefinition | null;
-    onChange: (newItem: Partial<ParameterDefinition>) => void;
-    mode: 'create' | 'view' | 'edit';
-    handleSave: () => Promise<void>;
-    isInteractable?: boolean;
-    onView?: (parameter: ParameterDefinition) => void;
-    onInteraction?: (parameter: ParameterDefinition) => void;
-    showHeaders?: boolean;
+export interface ParameterComponentProps extends EnhancedComponentProps<ParameterDefinition> {
 }
 export const getDefaultParameterForm = (): Partial<ParameterDefinition> => ({
     type: 'string',

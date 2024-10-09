@@ -7,7 +7,7 @@ import {
     Box
 } from '@mui/material';
 import FunctionDefinitionBuilder from '../../common/function_select/FunctionDefinitionBuilder';
-import { PromptComponentProps, Prompt } from '../../../../types/PromptTypes';
+import { PromptComponentProps, Prompt, getDefaultPromptForm } from '../../../../types/PromptTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import { FunctionParameters } from '../../../../types/ParameterTypes';
 import Logger from '../../../../utils/Logger';
@@ -16,9 +16,10 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
     item,
     onChange,
     mode,
-    handleSave
+    handleSave,
+    handleDelete
 }) => {
-    const [form, setForm] = useState<Partial<Prompt>>(item || {});
+    const [form, setForm] = useState<Partial<Prompt>>(item || getDefaultPromptForm());
     const [isSaving, setIsSaving] = useState(false);
 
     Logger.debug('PromptFlexibleView', 'form', form);
@@ -33,8 +34,10 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
     useEffect(() => {
         if (item) {
             setForm(item);
+        } else {
+            onChange(getDefaultPromptForm());
         }
-    }, [item]);
+    }, [item, onChange]);
 
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -54,6 +57,12 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
         onChange(form);
         setIsSaving(true);
     }, [form, onChange]);
+    
+    const handleLocalDelete = useCallback(() => {
+        if (item && Object.keys(item).length > 0 && handleDelete) {
+            handleDelete(item);
+        }
+    }, [item, handleDelete]);
 
     if (!form) {
         return <Typography>No Prompt data available.</Typography>;
@@ -68,8 +77,11 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
             elementType="Prompt"
             title={title}
             onSave={handleLocalSave}
+            onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
+            item={item as Prompt}
+            itemType="prompts"
         >
             <TextField
                 fullWidth
