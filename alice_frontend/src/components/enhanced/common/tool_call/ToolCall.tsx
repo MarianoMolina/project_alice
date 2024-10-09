@@ -10,7 +10,7 @@ interface ToolCallProps {
 
 const ToolCallView: React.FC<ToolCallProps> = ({ toolCall }) => {
     const [parsedArguments, setParsedArguments] = useState<any>(toolCall.function.arguments);
-    Logger.info('ToolCallView', 'ToolCall:', toolCall);
+    Logger.debug('ToolCallView', 'ToolCall:', toolCall);
     useEffect(() => {
         if (typeof toolCall.function.arguments === 'string') {
             try {
