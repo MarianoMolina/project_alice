@@ -16,11 +16,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     flexDirection: 'column',
     height: '100%',
   },
-
   activeListContent: {
     overflowY: 'auto',
     flexGrow: 1,
-
   },
 }));
 

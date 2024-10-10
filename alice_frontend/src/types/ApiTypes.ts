@@ -56,6 +56,11 @@ export enum LlmProvider {
     AZURE = ApiName.AZURE,
     ANTHROPIC = ApiName.ANTHROPIC,
     LM_STUDIO = ApiName.LM_STUDIO,
+    GEMINI = ApiName.GEMINI,
+    MISTRAL = ApiName.MISTRAL,
+    GROQ = ApiName.GROQ,
+    META = ApiName.META,
+    COHERE = ApiName.COHERE,
 }
 
 export interface API extends BaseDataseObject{

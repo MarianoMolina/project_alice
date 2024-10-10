@@ -13,13 +13,13 @@ import EnhancedTaskResponse from '../components/enhanced/task_response/task_resp
 import EnchancedChat from '../components/enhanced/chat/chat/EnhancedChat';
 import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
 import useStyles from '../styles/DatabaseStyles';
-import ToggleBox from '../components/ui/toggle_box/ToggleBox';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
 import { useCardDialog } from '../contexts/CardDialogContext';
 import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
 import EnhancedMessage from '../components/enhanced/message/message/EnhancedMessage';
 import EnhancedURLReference from '../components/enhanced/url_reference/url_reference/EnhancedURLReference';
 import Logger from '../utils/Logger';
+import ToggleBox from '../components/ui/sidetab_header/ToggleBox';
 
 const Database: React.FC = () => {
     const classes = useStyles();

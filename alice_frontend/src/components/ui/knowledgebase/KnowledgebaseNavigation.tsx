@@ -5,7 +5,7 @@ import { NavLink } from 'react-router-dom';
 const navigation = [
     { title: 'Introduction', path: '/knowledgebase', type: 'main' },
     { title: 'Getting Started', path: '/knowledgebase/getting_started', type: 'main' },
-    { title: 'Start chatting', path: '/knowledgebase/start_chatting', type: 'main' },
+    { title: 'Start chatting', path: '/knowledgebase/start_chat', type: 'main' },
     { title: 'Execute a task', path: '/knowledgebase/execute_task', type: 'main' },
     { title: 'Components', type: 'group' },
     { title: 'Agent', path: '/knowledgebase/agent', type: 'sub' },

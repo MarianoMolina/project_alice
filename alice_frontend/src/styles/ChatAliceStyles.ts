@@ -32,9 +32,14 @@ const useStyles = makeStyles((theme: Theme) => ({
     justifyContent: 'center',
   },
   activeListContainer: {
+    display: 'flex',
+    flexDirection: 'column',
     height: '100%',
+  },
+  activeListContent: {
     overflowY: 'auto',
-  }
+    flexGrow: 1,
+  },
 }));
 
 export default useStyles;

@@ -1,22 +1,11 @@
 import React from 'react';
-import { Box, Typography, ToggleButtonGroup, ToggleButton, Tooltip } from '@mui/material';
+import { ToggleButtonGroup, ToggleButton, Tooltip } from '@mui/material';
 import { List, ViewList, TableChart } from '@mui/icons-material';
 import { makeStyles } from '@mui/styles';
 import { Theme } from '@mui/material/styles';
+import TabHeader from './SidetabHeader';
 
 const useStyles = makeStyles((theme: Theme) => ({
-  toggleBox: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
-    padding: theme.spacing(0.5),
-    height: '56px',
-  },
-  title: {
-    fontWeight: 'bold',
-  },
   toggleGroup: {
     backgroundColor: theme.palette.background.paper,
     borderRadius: theme.shape.borderRadius,
@@ -33,10 +22,7 @@ const ToggleBox: React.FC<ToggleBoxProps> = ({ activeTab, viewMode, handleViewMo
   const classes = useStyles();
 
   return (
-    <Box className={classes.toggleBox}>
-      <Typography variant="h6" className={classes.title}>
-        {activeTab}
-      </Typography>
+    <TabHeader title={activeTab}>
       <ToggleButtonGroup
         value={viewMode}
         exclusive
@@ -60,7 +46,7 @@ const ToggleBox: React.FC<ToggleBoxProps> = ({ activeTab, viewMode, handleViewMo
           </ToggleButton>
         </Tooltip>
       </ToggleButtonGroup>
-    </Box>
+    </TabHeader>
   );
 };
 

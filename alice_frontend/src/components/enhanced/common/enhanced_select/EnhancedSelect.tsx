@@ -1,10 +1,9 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Box, IconButton, Accordion, AccordionSummary, AccordionDetails, Typography, Chip, Divider } from '@mui/material';
 import { Edit, Close, ExpandMore, Add } from '@mui/icons-material';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import useStyles from './EnhancedSelectStyles';
 import { CollectionName, CollectionType, CollectionElementString, collectionNameToElementString, collectionNameToEnhancedComponent } from '../../../../types/CollectionTypes';
-// eslint-disable-next-line react-hooks/exhaustive-deps
 import Logger from '../../../../utils/Logger';
 
 interface EnhancedSelectProps<T extends CollectionType[CollectionName]> {
@@ -37,15 +36,20 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
 }: EnhancedSelectProps<T>) {
   const classes = useStyles();
   const { selectFlexibleItem, selectCardItem } = useCardDialog();
+  const [localExpanded, setLocalExpanded] = useState(false);
   Logger.debug('EnhancedSelect', { componentType, selectedItems, isInteractable, multiple, label, activeAccordion, accordionEntityName, showCreateButton });
 
   const EnhancedComponent = collectionNameToEnhancedComponent[componentType]
 
   const accordionName = `select-${accordionEntityName}`;
-  const isExpanded = activeAccordion === accordionName;
+  const isExpanded = activeAccordion === accordionName || localExpanded;
 
   const handleToggle = () => {
-    onAccordionToggle(isExpanded ? null : accordionName);
+    if (multiple) {
+      onAccordionToggle(isExpanded ? null : accordionName);
+    } else {
+      setLocalExpanded(!isExpanded);
+    }
   };
 
   const handleDelete = useCallback((itemToDelete: T) => {
@@ -60,6 +64,7 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
   const handleCreate = () => {
     selectFlexibleItem(collectionElementString, 'create');
   };
+
   const commonProps = useMemo(() => ({
     items: null,
     onChange: () => { },
@@ -72,6 +77,10 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
       ? [...selectedItems.map(i => i._id!), item._id!]
       : [item._id!];
     onSelect(newSelectedIds);
+    
+    if (!multiple) {
+      setLocalExpanded(false);
+    }
   }, [multiple, selectedItems, onSelect]);
 
   const handleView = useCallback((item: T) => {

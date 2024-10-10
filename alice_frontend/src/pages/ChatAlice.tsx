@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useRef } from 'react';
-import { Box } from '@mui/material';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
+import { Box, SelectChangeEvent } from '@mui/material';
 import { Add, Chat, Info, Functions, Assignment, AttachFile, Message, Link } from '@mui/icons-material';
 import { TaskResponse } from '../types/TaskResponseTypes';
 import { AliceTask } from '../types/TaskTypes';
@@ -21,6 +21,9 @@ import Logger from '../utils/Logger';
 import ChatFullView from '../components/enhanced/common/chat_components/ChatFullView';
 import ChatShortListView from '../components/enhanced/chat/chat/ChatShortListView';
 import ChatCardView from '../components/enhanced/chat/chat/ChatCardView';
+import { LlmProvider } from '../types/ApiTypes';
+import TabHeader from '../components/ui/sidetab_header/SidetabHeader';
+import FilterSelect from '../components/ui/sidetab_header/FilterSelect';
 
 const ChatAlice: React.FC = () => {
   const classes = useStyles();
@@ -37,6 +40,7 @@ const ChatAlice: React.FC = () => {
   const { selectCardItem, selectFlexibleItem } = useCardDialog();
 
   const [activeTab, setActiveTab] = useState('Select Chat');
+  const [selectedApiProvider, setSelectedApiProvider] = useState<string>('');
 
   const chatInputRef = useRef<ChatInputRef>(null);
 
@@ -54,23 +58,17 @@ const ChatAlice: React.FC = () => {
     setActiveTab(tabName);
   }, []);
 
-  const actions = [
-    {
-      name: `Create chat`,
-      icon: Add,
-      action: handleCreateNew,
-    }
-  ];
+  const handleApiProviderChange = useCallback((event: SelectChangeEvent<string>) => {
+    setSelectedApiProvider(event.target.value);
+  }, []);
 
-  const tabs = [
-    { name: 'Select Chat', icon: Chat, group: 'Chat' },
-    { name: 'Current Chat', icon: Info, disabled: !currentChatId, group: 'Info' },
-    { name: 'Add Functions', icon: Functions, disabled: !currentChatId, group: 'Info' },
-    { name: 'Add File Reference', icon: AttachFile, disabled: !currentChatId, group: 'Ref' },
-    { name: 'Add Message Reference', icon: Message, disabled: !currentChatId, group: 'Ref' },
-    { name: 'Add Task Results', icon: Assignment, disabled: !currentChatId, group: 'Ref' },
-    { name: 'Add URL Reference', icon: Link, disabled: !currentChatId, group: 'Ref' },
-  ];
+  const filteredPastChats = useMemo(() => {
+    if (!selectedApiProvider) return pastChats;
+    return pastChats.filter(chat => {
+      const chatModel = chat.alice_agent.models?.chat;
+      return chatModel && chatModel.api_name === selectedApiProvider;
+    });
+  }, [pastChats, selectedApiProvider]);
 
   const checkAndAddTask = useCallback((task: AliceTask) => {
     if (task._id && !isTaskInChat(task._id)) {
@@ -94,6 +92,24 @@ const ChatAlice: React.FC = () => {
     chatInputRef.current?.addMessageReference(message);
   }, []);
 
+  const actions = [
+    {
+      name: `Create chat`,
+      icon: Add,
+      action: handleCreateNew,
+    }
+  ];
+
+  const tabs = [
+    { name: 'Select Chat', icon: Chat, group: 'Chat' },
+    { name: 'Current Chat', icon: Info, disabled: !currentChatId, group: 'Info' },
+    { name: 'Add Functions', icon: Functions, disabled: !currentChatId, group: 'Info' },
+    { name: 'Add File Reference', icon: AttachFile, disabled: !currentChatId, group: 'Ref' },
+    { name: 'Add Message Reference', icon: Message, disabled: !currentChatId, group: 'Ref' },
+    { name: 'Add Task Results', icon: Assignment, disabled: !currentChatId, group: 'Ref' },
+    { name: 'Add URL Reference', icon: Link, disabled: !currentChatId, group: 'Ref' },
+  ];
+
   const renderSidebarContent = useCallback((tabName: string) => {
     const handleProps = {
       handleAgentClick: (id: string) => selectCardItem('Agent', id),
@@ -108,87 +124,96 @@ const ChatAlice: React.FC = () => {
 
     return (
       <Box className={classes.activeListContainer}>
-        {(() => {
-          switch (tabName) {
-            case 'Select Chat':
-              return (
-                <ChatShortListView
-                  items={pastChats}
-                  onView={(chat) => selectCardItem('Chat', chat?._id, chat)}
-                  onInteraction={selectChatId}
-                  item={null} mode={'view'}
-                  onChange={() => null}
-                  handleSave={async () => { }}
-                />
-              );
-            case 'Current Chat':
-              return (
-                <ChatCardView
-                  items={null}
-                  item={currentChat}
-                  mode={'view'}
-                  onChange={() => null}
-                  handleSave={async () => { }}
-                />
-              );
-            case 'Add Functions':
-              return (
-                <EnhancedTask
-                  mode={'list'}
-                  fetchAll={true}
-                  onInteraction={checkAndAddTask}
-                  onView={(task) => task._id && selectCardItem('Task', task._id)}
-                  {...handleProps}
-                />
-              );
-            case 'Add Task Results':
-              return (
-                <EnhancedTaskResponse
-                  mode={'list'}
-                  fetchAll={true}
-                  onView={(taskResult) => taskResult._id && selectCardItem('TaskResponse', taskResult._id)}
-                  onInteraction={addTaskResponse}
-                  {...handleProps}
-                />
-              );
-            case 'Add File Reference':
-              return (
-                <EnhancedFile
-                  mode={'list'}
-                  fetchAll={true}
-                  onView={(file) => file._id && selectCardItem('File', file._id)}
-                  onInteraction={addFileReference}
-                  {...handleProps}
-                />
-              );
-            case 'Add URL Reference':
-              return (
-                <EnhancedURLReference
-                  mode={'list'}
-                  fetchAll={true}
-                  onView={(urlReference) => urlReference._id && selectCardItem('URLReference', urlReference._id)}
-                  onInteraction={addURLReference}
-                  {...handleProps}
-                />
-              );
-            case 'Add Message Reference':
-              return (
-                <EnhancedMessage
-                  mode={'list'}
-                  fetchAll={true}
-                  onView={(message) => message._id && selectCardItem('Message', message._id)}
-                  onInteraction={addMessageReference}
-                  {...handleProps}
-                />
-              );
-            default:
-              return null;
-          }
-        }
-        )()}
+        {tabName === 'Select Chat' && (
+          <FilterSelect
+            title="Select Chat"
+            currentSelection={selectedApiProvider}
+            options={Object.values(LlmProvider)}
+            handleSelectionChange={handleApiProviderChange}
+          />
+        )}
+        <Box className={classes.activeListContent}>
+          {(() => {
+            switch (tabName) {
+              case 'Select Chat':
+                return (
+                  <ChatShortListView
+                    items={filteredPastChats}
+                    onView={(chat) => selectCardItem('Chat', chat?._id, chat)}
+                    onInteraction={selectChatId}
+                    item={null} mode={'view'}
+                    onChange={() => null}
+                    handleSave={async () => { }}
+                  />
+                );
+              case 'Current Chat':
+                return (
+                  <ChatCardView
+                    items={null}
+                    item={currentChat}
+                    mode={'view'}
+                    onChange={() => null}
+                    handleSave={async () => { }}
+                  />
+                );
+              case 'Add Functions':
+                return (
+                  <EnhancedTask
+                    mode={'list'}
+                    fetchAll={true}
+                    onInteraction={checkAndAddTask}
+                    onView={(task) => task._id && selectCardItem('Task', task._id)}
+                    {...handleProps}
+                  />
+                );
+              case 'Add Task Results':
+                return (
+                  <EnhancedTaskResponse
+                    mode={'list'}
+                    fetchAll={true}
+                    onView={(taskResult) => taskResult._id && selectCardItem('TaskResponse', taskResult._id)}
+                    onInteraction={addTaskResponse}
+                    {...handleProps}
+                  />
+                );
+              case 'Add File Reference':
+                return (
+                  <EnhancedFile
+                    mode={'list'}
+                    fetchAll={true}
+                    onView={(file) => file._id && selectCardItem('File', file._id)}
+                    onInteraction={addFileReference}
+                    {...handleProps}
+                  />
+                );
+              case 'Add URL Reference':
+                return (
+                  <EnhancedURLReference
+                    mode={'list'}
+                    fetchAll={true}
+                    onView={(urlReference) => urlReference._id && selectCardItem('URLReference', urlReference._id)}
+                    onInteraction={addURLReference}
+                    {...handleProps}
+                  />
+                );
+              case 'Add Message Reference':
+                return (
+                  <EnhancedMessage
+                    mode={'list'}
+                    fetchAll={true}
+                    onView={(message) => message._id && selectCardItem('Message', message._id)}
+                    onInteraction={addMessageReference}
+                    {...handleProps}
+                  />
+                );
+              default:
+                return null;
+            }
+          })()}
+        </Box>
       </Box>
     )
-  }, [selectChatId, currentChat, checkAndAddTask, addTaskResponse, addFileReference, addURLReference, addMessageReference, selectCardItem, pastChats, classes.activeListContainer]);
+  }, [selectChatId, currentChat, checkAndAddTask, addTaskResponse, addFileReference, addURLReference, addMessageReference, selectCardItem, filteredPastChats, classes.activeListContainer, classes.activeListContent, selectedApiProvider, handleApiProviderChange]);
 
   return (
     <Box className={classes.chatAliceContainer}>
