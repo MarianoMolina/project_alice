@@ -106,7 +106,7 @@ export const getDefaultTaskForm = (taskType: TaskType): AliceTask => {
     prompts_to_add: null,
     tasks: {},
     required_apis: [],
-    exit_codes: {},
+    exit_codes: {0: "Success", 1: "Failure"},
     recursive: false,
     valid_languages: [],
     timeout: null,

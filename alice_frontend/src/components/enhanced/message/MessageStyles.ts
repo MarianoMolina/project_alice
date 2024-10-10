@@ -112,6 +112,9 @@ const useStyles = makeStyles((theme: Theme) => ({
   referencesContainer: {
     marginTop: theme.spacing(1),
   },
+  titleText: {
+    marginTop: `${theme.spacing(2)} !important`,
+  }
 }));
 
 export default useStyles;

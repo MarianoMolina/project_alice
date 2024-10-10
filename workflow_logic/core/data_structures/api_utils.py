@@ -29,6 +29,7 @@ class ApiName(str, Enum):
     GEMINI_VISION = 'gemini_vision',
     GEMINI_STT = 'gemini_stt',
     GEMINI_EMBEDDINGS = 'gemini_embeddings',
+    GEMINI_IMG_GEN = 'gemini_img_gen',
     MISTRAL = 'mistral_llm',
     MISTRAL_VISION = 'mistral_vision',
     MISTRAL_EMBEDDINGS = 'mistral_embeddings',

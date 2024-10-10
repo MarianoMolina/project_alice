@@ -187,7 +187,7 @@ base_module = BaseModule(
                 "api_name": "gemini_embeddings",
             },
             {
-                "key": "gemini_img_gen_imagen-3",
+                "key": "gemini_img_gen_imagen_3",
                 "short_name": "Gemini Imagen 3",
                 "model_name": "imagen-3.0-generate-001",
                 "model_format": "OpenChat",
@@ -441,7 +441,7 @@ base_module = BaseModule(
                 },
                 "is_active": True,
                 "health_status": "healthy",
-                "default_model": "gemini_img_gen_imagen-3",
+                "default_model": "gemini_img_gen_imagen_3",
             },
             {
                 "key": "cohere_llm",

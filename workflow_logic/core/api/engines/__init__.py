@@ -14,9 +14,10 @@ from .cohere_llm_engine import CohereLLMEngine
 from .gemini_vision import GeminiVisionEngine
 from .gemini_embedding import GeminiEmbeddingsEngine
 from .gemini_stt import GeminiSpeechToTextEngine
+from .gemini_img_gen import GeminiImageGenerationEngine
 from .groq_llm_engine import GroqLLMEngine
 
-__all__ = ["ArxivSearchAPI", "ExaSearchAPI", "GoogleSearchAPI", "RedditSearchAPI", "WikipediaSearchAPI", "APIEngine", "GroqLLMEngine",
+__all__ = ["ArxivSearchAPI", "ExaSearchAPI", "GoogleSearchAPI", "RedditSearchAPI", "WikipediaSearchAPI", "APIEngine", "GroqLLMEngine", "GeminiImageGenerationEngine",
            "LLMEngine", "LLMOpenAI", "LLMAnthropic", "ImageGenerationEngine", "CohereLLMEngine", "GeminiVisionEngine", "GeminiEmbeddingsEngine", "GeminiSpeechToTextEngine",
            "VisionModelEngine", "AnthropicVisionEngine", "OpenAISpeechToTextEngine", "OpenAIAdvancedSpeechToTextEngine",
            "OpenAITextToSpeechEngine", "OpenAIEmbeddingsEngine", "GeminiLLMEngine"]

@@ -19,9 +19,12 @@ const useStyles = makeStyles((theme: Theme) => ({
         overflow: 'hidden',
     },
     assistantMessage: {
-      backgroundColor: theme.palette.secondary.main,
-      color: theme.palette.secondary.contrastText,
+        backgroundColor: theme.palette.secondary.main,
+        color: theme.palette.secondary.contrastText,
     },
+    titleText: {
+        marginTop: `${theme.spacing(2)} !important`,
+    }
 }));
 
 export default useStyles;

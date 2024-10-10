@@ -6,6 +6,7 @@ import {
     MenuItem,
     Switch,
     TextField,
+    Typography,
 } from '@mui/material';
 import { ApiComponentProps, API, ApiType, ApiName, getDefaultApiForm } from '../../../../types/ApiTypes';
 import { API_TYPE_CONFIGS, LLM_PROVIDERS } from '../../../../utils/ApiUtils';
@@ -15,6 +16,7 @@ import { AliceModel } from '../../../../types/ModelTypes';
 import { useApi } from '../../../../contexts/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import Logger from '../../../../utils/Logger';
+import useStyles from '../ApiStyles';
 
 const getLlmProviderBaseUrl = (apiName: ApiName): string => {
     for (const provider of Object.values(LLM_PROVIDERS)) {
@@ -40,6 +42,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
     const isEditMode = mode === 'edit' || mode === 'create';
     const isCreateMode = mode === 'create';
     const [isSaving, setIsSaving] = useState(false);
+    const classes = useStyles();
 
     useEffect(() => {
         if (isSaving) {
@@ -47,11 +50,11 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
             setIsSaving(false);
         }
     }, [isSaving, handleSave]);
-    
+
     useEffect(() => {
         if (item) {
             setForm(item);
-        } else if (!item || Object.keys(item).length === 0)  {
+        } else if (!item || Object.keys(item).length === 0) {
             onChange(getDefaultApiForm());
         }
     }, [item, onChange]);
@@ -69,7 +72,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
         if (form.api_type) {
             updateAvailableApiNames(form.api_type);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [form.api_type, updateAvailableApiNames]);
 
     useEffect(() => {
@@ -85,7 +88,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                 }));
             }
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [form.api_name]);
 
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -162,19 +165,22 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
             itemType='apis'
         >
             {isCreateMode && (
-                <FormControl fullWidth margin="normal">
-                    <InputLabel>API Type</InputLabel>
-                    <Select
-                        value={form.api_type || ''}
-                        onChange={(e) => handleApiTypeChange(e.target.value as ApiType)}
-                    >
-                        {Object.values(ApiType).map((type) => (
-                            <MenuItem key={type} value={type}>{type}</MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+                <>
+                    <Typography variant="h6" className={classes.titleText}>API Type</Typography>
+                    <FormControl fullWidth margin="normal">
+                        <InputLabel>API Type</InputLabel>
+                        <Select
+                            value={form.api_type || ''}
+                            onChange={(e) => handleApiTypeChange(e.target.value as ApiType)}
+                        >
+                            {Object.values(ApiType).map((type) => (
+                                <MenuItem key={type} value={type}>{type}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </>
             )}
-
+            <Typography variant="h6" className={classes.titleText}>Name</Typography>
             <FormControl fullWidth margin="normal">
                 <InputLabel>API Name</InputLabel>
                 <Select
@@ -188,6 +194,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                 </Select>
             </FormControl>
 
+            <Typography variant="h6" className={classes.titleText}>Display Name</Typography>
             <TextField
                 fullWidth
                 name="name"
@@ -198,6 +205,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                 disabled={!isEditMode}
             />
 
+            <Typography variant="h6" className={classes.titleText}>Configuration</Typography>
             {form.api_config && Object.entries(form.api_config).map(([key, value]) => (
                 <TextField
                     key={key}
@@ -209,23 +217,28 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                     margin="normal"
                     disabled={!isEditMode}
                 />
+
             ))}
 
             {form.api_type === ApiType.LLM_MODEL && (
-                <EnhancedSelect<AliceModel>
-                    componentType="models"
-                    EnhancedView={ModelShortListView}
-                    selectedItems={form.default_model ? [form.default_model] : []}
-                    onSelect={handleDefaultModelChange}
-                    isInteractable={isEditMode}
-                    label="Select Default Model"
-                    activeAccordion={activeAccordion}
-                    onAccordionToggle={handleAccordionToggle}
-                    accordionEntityName="default-model"
-                    showCreateButton={true}
-                />
+                <>
+                    <Typography variant="h6" className={classes.titleText}>Default Model</Typography>
+                    <EnhancedSelect<AliceModel>
+                        componentType="models"
+                        EnhancedView={ModelShortListView}
+                        selectedItems={form.default_model ? [form.default_model] : []}
+                        onSelect={handleDefaultModelChange}
+                        isInteractable={isEditMode}
+                        label="Select Default Model"
+                        activeAccordion={activeAccordion}
+                        onAccordionToggle={handleAccordionToggle}
+                        accordionEntityName="default-model"
+                        showCreateButton={true}
+                    />
+                </>
             )}
 
+            <Typography variant="h6" className={classes.titleText}>Active?</Typography>
             <FormControl fullWidth margin="normal">
                 <InputLabel>Is Active</InputLabel>
                 <Switch

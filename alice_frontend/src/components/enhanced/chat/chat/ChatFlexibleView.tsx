@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
     TextField,
     Box,
+    Typography,
 } from '@mui/material';
 import { ChatComponentProps, AliceChat, getDefaultChatForm } from '../../../../types/ChatTypes';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
@@ -14,6 +15,7 @@ import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import MessageListView from '../../message/message/MessageListView';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import Logger from '../../../../utils/Logger';
+import useStyles from '../ChatStyles';
 
 const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     item,
@@ -27,6 +29,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     const [form, setForm] = useState<Partial<AliceChat>>(item || getDefaultChatForm());
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const classes = useStyles();
 
     const isEditMode = mode === 'edit' || mode === 'create';
 
@@ -38,11 +41,11 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             setIsSaving(false);
         }
     }, [isSaving, handleSave]);
-    
+
     useEffect(() => {
         if (item) {
             setForm(item);
-        } else if (!item || Object.keys(item).length === 0)  {
+        } else if (!item || Object.keys(item).length === 0) {
             onChange(getDefaultChatForm());
         }
     }, [item, onChange]);
@@ -98,10 +101,10 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             accordionEntityName="agent"
             showCreateButton={true}
         />
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     ), [form.alice_agent, handleAgentChange, isEditMode, activeAccordion, handleAccordionToggle]);
-    
-      const memoizedTaskSelect = useMemo(() => (
+
+    const memoizedTaskSelect = useMemo(() => (
         <EnhancedSelect<AliceTask>
             componentType="tasks"
             EnhancedView={TaskShortListView}
@@ -115,7 +118,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             accordionEntityName="functions"
             showCreateButton={true}
         />
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     ), [form.functions, handleFunctionsChange, isEditMode, activeAccordion, handleAccordionToggle]);
 
     return (
@@ -129,6 +132,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             item={item as AliceChat}
             itemType='chats'
         >
+            <Typography variant="h6" className={classes.titleText}>Name</Typography>
             <TextField
                 fullWidth
                 name="name"
@@ -136,19 +140,27 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                 value={form.name || ''}
                 onChange={handleInputChange}
                 disabled={!isEditMode}
+                margin="normal"
             />
+            <Typography variant="h6" className={classes.titleText}>Agent</Typography>
             {memoizedAgentSelect}
+            <Typography variant="h6" className={classes.titleText}>Tools for the Agent</Typography>
             {memoizedTaskSelect}
-            <Box mt={2}>
-                <MessageListView
-                    items={form.messages || []}
-                    item={null}
-                    onChange={() => { }}
-                    mode={'view'}
-                    handleSave={async () => { }}
-                    onView={(message) => selectCardItem && selectCardItem('Message', message._id ?? '', message)}
-                />
-            </Box>
+            {form.messages && form.messages.length > 0 && (
+                <>
+                    <Typography variant="h6" className={classes.titleText}>Messages</Typography>
+                    <Box mt={2}>
+                        <MessageListView
+                            items={form.messages || []}
+                            item={null}
+                            onChange={() => { }}
+                            mode={'view'}
+                            handleSave={async () => { }}
+                            onView={(message) => selectCardItem && selectCardItem('Message', message._id ?? '', message)}
+                        />
+                    </Box>
+                </>
+            )}
         </GenericFlexibleView>
     );
 };

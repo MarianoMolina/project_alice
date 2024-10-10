@@ -108,6 +108,13 @@ const useStyles = makeStyles((theme: Theme) => ({
   noResultsText: {
     textAlign: 'center',
     padding: theme.spacing(2),
+  },
+  endCodeRoutingContainer: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  titleText: {
+    marginTop: `${theme.spacing(2)} !important`,
   }
 }));
 

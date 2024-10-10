@@ -196,6 +196,7 @@ coding_workflow_module = CodingWorkflowModule(
                     },
                     "required": ["prompt"]
                 },
+                "exit_codes": {0: "Success", 1: "Generation failed."}
             },
             {
                 "key": "generate_code",
@@ -216,7 +217,8 @@ coding_workflow_module = CodingWorkflowModule(
                 "required_apis": ["llm_api"],
                 "templates": {
                     "task_template": "code_generation_task"
-                }
+                },
+                "exit_codes": {0: "Success", 1: "Generation failed.", 2: "No code blocks in response"}
             },
             {
                 "key": "execute_code",
@@ -233,7 +235,8 @@ coding_workflow_module = CodingWorkflowModule(
                 },
                 "templates": {
                     "task_template": "code_execution_task"
-                }
+                },
+                "exit_codes": {0: "Success", 1: "Execution failed."}
             },
             {
                 "key": "generate_unit_tests",
@@ -254,7 +257,8 @@ coding_workflow_module = CodingWorkflowModule(
                 },
                 "templates": {
                     "task_template": "code_generation_task"
-                }
+                },
+                "exit_codes": {0: "Success", 1: "Generation failed.", 2: "No code blocks in response"}
             },
             {
                 "key": "execute_unit_tests",
@@ -272,7 +276,8 @@ coding_workflow_module = CodingWorkflowModule(
                 },
                 "templates": {
                     "task_template": "test_execution_task"
-                }
+                },
+                "exit_codes": {0: "Success", 1: "Execution failed."}
             },
             {
                 "key": "check_unit_test_results",
@@ -324,8 +329,6 @@ coding_workflow_module = CodingWorkflowModule(
                     "execute_code": {
                         0: ("generate_unit_tests", False),
                         1: ("generate_code", True),
-                        2: ("generate_code", True),
-                        3: ("execute_code", True)
                     },
                     "generate_unit_tests": {
                         0: ("execute_unit_tests", False),
@@ -335,8 +338,6 @@ coding_workflow_module = CodingWorkflowModule(
                     "execute_unit_tests": {
                         0: ("check_unit_test_results", False),
                         1: ("generate_unit_tests", True),
-                        2: ("generate_unit_tests", True),
-                        3: ("execute_unit_tests", True)
                     },
                     "check_unit_test_results": {
                         0: (None, False),

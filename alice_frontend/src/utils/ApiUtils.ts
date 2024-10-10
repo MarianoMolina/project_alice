@@ -97,7 +97,7 @@ export const LLM_PROVIDERS = {
     baseUrl: 'http://localhost:1234/v1',
   },
   Gemini: {
-    api_name: [ApiName.GEMINI, ApiName.GEMINI_VISION, ApiName.GEMINI_EMBEDDINGS, ApiName.GEMINI_STT],
+    api_name: [ApiName.GEMINI, ApiName.GEMINI_VISION, ApiName.GEMINI_EMBEDDINGS, ApiName.GEMINI_STT, ApiName.GEMINI_IMG_GEN],
     baseUrl: 'https://api.gemini.ai',
   },
   Mistral: {

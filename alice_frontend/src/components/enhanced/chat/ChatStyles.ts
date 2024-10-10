@@ -27,6 +27,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     width: '100%',
     margin: theme.spacing(2, 0),
   },
+  titleText: {
+    marginTop: `${theme.spacing(2)} !important`,
+  }
 }));
 
 export default useStyles;

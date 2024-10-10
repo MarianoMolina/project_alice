@@ -99,6 +99,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: theme.palette.secondary.dark,
     color: theme.palette.primary.dark,
   },
+  titleText: {
+    marginTop: `${theme.spacing(2)} !important`,
+  }
 }));
 
 export default useStyles;

@@ -33,6 +33,7 @@ export enum ApiName {
     MISTRAL_EMBEDDINGS = 'mistral_embeddings',
     GEMINI_STT = 'gemini_stt',
     GEMINI_EMBEDDINGS = 'gemini_embeddings',
+    GEMINI_IMG_GEN = 'gemini_img_gen',
     COHERE = 'cohere_llm',
     GROQ = 'groq_llm',
     GROQ_VISION = 'groq_vision',

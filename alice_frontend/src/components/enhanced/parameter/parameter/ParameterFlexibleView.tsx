@@ -5,10 +5,12 @@ import {
     InputLabel,
     Select,
     MenuItem,
+    Typography,
 } from '@mui/material';
 import { ParameterComponentProps, ParameterDefinition, getDefaultParameterForm } from '../../../../types/ParameterTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import Logger from '../../../../utils/Logger';
+import useStyles from '../ParameterStyles';
 
 const ParameterFlexibleView: React.FC<ParameterComponentProps> = ({
     item,
@@ -17,6 +19,7 @@ const ParameterFlexibleView: React.FC<ParameterComponentProps> = ({
     handleSave,
     handleDelete
 }) => {
+    const classes = useStyles();
 
     useEffect(() => {
         if (!item || Object.keys(item).length === 0) {
@@ -48,6 +51,7 @@ const ParameterFlexibleView: React.FC<ParameterComponentProps> = ({
             item={item as ParameterDefinition}
             itemType='parameters'
         >
+            <Typography variant="h6" className={classes.titleText}>Type</Typography>
             <FormControl fullWidth margin="normal">
                 <InputLabel>Type</InputLabel>
                 <Select
@@ -59,6 +63,7 @@ const ParameterFlexibleView: React.FC<ParameterComponentProps> = ({
                     <MenuItem value="integer">Integer</MenuItem>
                 </Select>
             </FormControl>
+            <Typography variant="h6" className={classes.titleText}>Description</Typography>
             <TextField
                 fullWidth
                 label="Description"
@@ -67,6 +72,7 @@ const ParameterFlexibleView: React.FC<ParameterComponentProps> = ({
                 margin="normal"
                 disabled={!isEditMode}
             />
+            <Typography variant="h6" className={classes.titleText}>Default Value</Typography>
             <TextField
                 fullWidth
                 label="Default Value"

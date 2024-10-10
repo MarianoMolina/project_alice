@@ -7,6 +7,7 @@ import {
 } from '@mui/material';
 import { getDefaultURLReferenceForm, URLReference, URLReferenceComponentProps } from '../../../../types/URLReferenceTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
+import useStyles from '../URLReferenceStyles';
 
 const URLReferenceFlexibleView: React.FC<URLReferenceComponentProps> = ({
     item,
@@ -15,6 +16,7 @@ const URLReferenceFlexibleView: React.FC<URLReferenceComponentProps> = ({
     handleSave,
     handleDelete
 }) => {
+    const classes = useStyles();
     useEffect(() => {
         if (!item || Object.keys(item).length === 0) {
             onChange(getDefaultURLReferenceForm());
@@ -42,6 +44,7 @@ const URLReferenceFlexibleView: React.FC<URLReferenceComponentProps> = ({
             item={item as URLReference}
             itemType="urlreferences"
         >
+            <Typography variant="h6" className={classes.titleText}>Title</Typography>
             <TextField
                 fullWidth
                 label="Title"
@@ -50,6 +53,7 @@ const URLReferenceFlexibleView: React.FC<URLReferenceComponentProps> = ({
                 margin="normal"
                 disabled={!isEditMode}
             />
+            <Typography variant="h6" className={classes.titleText}>URL</Typography>
             <TextField
                 fullWidth
                 label="URL"
@@ -58,6 +62,7 @@ const URLReferenceFlexibleView: React.FC<URLReferenceComponentProps> = ({
                 margin="normal"
                 disabled={!isEditMode}
             />
+            <Typography variant="h6" className={classes.titleText}>Content</Typography>
             <TextField
                 fullWidth
                 label="Content"
@@ -68,8 +73,8 @@ const URLReferenceFlexibleView: React.FC<URLReferenceComponentProps> = ({
                 rows={4}
                 disabled={!isEditMode}
             />
-            <Box mt={2}>
-                <Typography variant="subtitle1" gutterBottom>Metadata</Typography>
+            <Box>
+                <Typography variant="h6" className={classes.titleText}>Metadata</Typography>
                 {Object.entries(item?.metadata || {}).map(([key, value]) => (
                     <Chip
                         key={key}

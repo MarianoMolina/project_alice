@@ -3,6 +3,7 @@ import {
     TextField,
     FormControlLabel,
     Switch,
+    Typography,
 } from '@mui/material';
 import { AgentComponentProps, AliceAgent, getDefaultAgentForm } from '../../../../types/AgentTypes';
 import { Prompt } from '../../../../types/PromptTypes';
@@ -14,6 +15,7 @@ import { useApi } from '../../../../contexts/ApiContext';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import Logger from '../../../../utils/Logger';
+import useStyles from '../AgentStyles';
 
 const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     item,
@@ -27,6 +29,7 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [form, setForm] = useState<Partial<AliceAgent>>(item || getDefaultAgentForm());
     const [isSaving, setIsSaving] = useState(false);
+    const classes = useStyles();
 
     useEffect(() => {
         if (isSaving) {
@@ -145,6 +148,7 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             item={item as AliceAgent}
             itemType='agents'
         >
+            <Typography variant="h6" className={classes.titleText}>Name</Typography>
             <TextField
                 fullWidth
                 name="name"
@@ -154,8 +158,11 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
                 margin="normal"
                 disabled={!isEditMode}
             />
+            <Typography variant="h6" className={classes.titleText}>System Message</Typography>
             {memoizedPromptSelect}
+            <Typography variant="h6" className={classes.titleText}>Models</Typography>
             {memoizedModelSelect}
+            <Typography variant="h6" className={classes.titleText}>Max Consecutive Replies</Typography>
             <TextField
                 fullWidth
                 name="max_consecutive_auto_reply"
@@ -166,6 +173,7 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
                 margin="normal"
                 disabled={!isEditMode}
             />
+            <Typography variant="h6" className={classes.titleText}>Code Execution</Typography>
             <FormControlLabel
                 control={
                     <Switch
@@ -175,8 +183,9 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
                         disabled={!isEditMode}
                     />
                 }
-                label="Execute Code"
+                label="Can execute code"
             />
+            <Typography variant="h6" className={classes.titleText}>Tool Execution</Typography>
             <FormControlLabel
                 control={
                     <Switch
@@ -186,7 +195,7 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
                         disabled={!isEditMode}
                     />
                 }
-                label="Has Functions"
+                label="Can use tools"
             />
         </GenericFlexibleView>
     );

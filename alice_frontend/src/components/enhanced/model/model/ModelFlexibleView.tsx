@@ -15,6 +15,7 @@ import {
 import { AliceModel, getDefaultModelForm, ModelComponentProps, ModelType } from '../../../../types/ModelTypes';
 import { ApiName } from '../../../../types/ApiTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
+import useStyles from '../ModelStyles';
 
 const ModelFlexibleView: React.FC<ModelComponentProps> = ({
     item,
@@ -23,6 +24,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
     handleSave,
     handleDelete
 }) => {
+    const classes = useStyles();
 
     useEffect(() => {
         if (!item || Object.keys(item).length === 0) {
@@ -51,6 +53,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
             item={item as AliceModel}
             itemType='models'
         >
+            <Typography variant="h6" className={classes.titleText}>Short Name</Typography>
             <TextField
                 fullWidth
                 label="Short Name"
@@ -59,6 +62,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                 margin="normal"
                 disabled={!isEditMode}
             />
+            <Typography variant="h6" className={classes.titleText}>Model Name</Typography>
             <TextField
                 fullWidth
                 label="Model Name"
@@ -67,6 +71,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                 margin="normal"
                 disabled={!isEditMode}
             />
+            <Typography variant="h6" className={classes.titleText}>Model Type</Typography>
             <FormControl fullWidth margin="normal">
                 <InputLabel>Model Type</InputLabel>
                 <Select<ModelType>
@@ -86,6 +91,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                     ))}
                 </Select>
             </FormControl>
+            <Typography variant="h6" className={classes.titleText}>API Name</Typography>
             <FormControl fullWidth margin="normal">
                 <InputLabel>API Name</InputLabel>
                 <Select
@@ -105,7 +111,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                     ))}
                 </Select>
             </FormControl>
-
+            <Typography variant="h6" className={classes.titleText}>Model Format</Typography>
             <TextField
                 fullWidth
                 label="Model Format"
@@ -115,7 +121,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                 disabled={!isEditMode}
             />
 
-            <Typography gutterBottom>Temperature</Typography>
+            <Typography variant="h6" className={classes.titleText}>Temperature</Typography>
             <Slider
                 value={item?.temperature || 0.7}
                 onChange={(_, newValue) => onChange({ temperature: newValue as number })}
@@ -125,7 +131,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                 valueLabelDisplay="auto"
                 disabled={!isEditMode}
             />
-
+            <Typography variant="h6" className={classes.titleText}>Seed</Typography>
             <TextField
                 fullWidth
                 label="Seed"
@@ -135,7 +141,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                 margin="normal"
                 disabled={!isEditMode}
             />
-
+            <Typography variant="h6" className={classes.titleText}>Context Size</Typography>
             <TextField
                 fullWidth
                 label="Context size"
@@ -145,7 +151,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                 margin="normal"
                 disabled={!isEditMode}
             />
-
+            <Typography variant="h6" className={classes.titleText}>Cache</Typography>
             <FormControlLabel
                 control={
                     <Switch

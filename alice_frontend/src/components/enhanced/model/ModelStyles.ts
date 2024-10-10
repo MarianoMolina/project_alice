@@ -45,6 +45,9 @@ const useStyles = makeStyles((theme: Theme) => ({
   chip: {
     margin: theme.spacing(0.25) + ' !important',
   },
+  titleText: {
+      marginTop: `${theme.spacing(2)} !important`,
+  }
 }));
 
 export default useStyles;

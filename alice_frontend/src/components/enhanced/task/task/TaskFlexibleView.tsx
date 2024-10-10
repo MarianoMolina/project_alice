@@ -27,6 +27,9 @@ import TaskEndCodeRoutingBuilder from '../../common/task_end_code_routing/TaskEn
 import FunctionDefinitionBuilder from '../../common/function_select/FunctionDefinitionBuilder';
 import Logger from '../../../../utils/Logger';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
+import TaskFlowchart from '../../common/task_end_code_routing/FlowChart';
+import useStyles from '../TaskStyles';
+import ExitCodeManager from '../../common/exit_code_manager/ExitCodeManager';
 
 const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     item,
@@ -40,6 +43,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     const [form, setForm] = useState<Partial<AliceTask>>(item || getDefaultTaskForm(taskType));
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const classes = useStyles();
 
     useEffect(() => {
         if (isSaving) {
@@ -122,6 +126,11 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
         setForm(prevForm => ({ ...prevForm, tasks: tasksObject }));
     }, [fetchItem]);
 
+    const handleExitCodesChange = useCallback((newExitCodes: { [key: string]: string }) => {
+        setForm(prevForm => ({ ...prevForm, exit_codes: newExitCodes }));
+    }, []);
+
+
     const memoizedPromptSelect = useMemo(() => (
         <EnhancedSelect<Prompt>
             componentType="prompts"
@@ -197,6 +206,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             item={item as AliceTask}
             itemType='tasks'
         >
+            <Typography variant="h6" className={classes.titleText}>Type</Typography>
             <FormControl fullWidth margin="normal">
                 <InputLabel>Task Type</InputLabel>
                 <Select<TaskType>
@@ -211,6 +221,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                     ))}
                 </Select>
             </FormControl>
+            <Typography variant="h6" className={classes.titleText}>Name</Typography>
             <TextField
                 fullWidth
                 margin="normal"
@@ -221,6 +232,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                 required
                 disabled={!isEditMode}
             />
+            <Typography variant="h6" className={classes.titleText}>Description</Typography>
             <TextField
                 fullWidth
                 margin="normal"
@@ -233,9 +245,13 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                 required
                 disabled={!isEditMode}
             />
+            <Typography variant="h6" className={classes.titleText}>Agent</Typography>
             {memoizedAgentSelect}
+            <Typography variant="h6" className={classes.titleText}>Sub-tasks</Typography>
             {memoizedTaskSelect}
+            <Typography variant="h6" className={classes.titleText}>Template</Typography>
             {memoizedPromptSelect}
+            <Typography variant="h6" className={classes.titleText}>Required APIs</Typography>
             <FormControl fullWidth margin="normal">
                 <InputLabel>Required API Types</InputLabel>
                 <Select
@@ -259,15 +275,22 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                 </Select>
             </FormControl>
 
+            <Typography variant="h6" className={classes.titleText}>Input Variables</Typography>
             <FunctionDefinitionBuilder
                 initialParameters={form.input_variables || undefined}
                 onChange={handleInputVariablesChange}
                 isViewOnly={!isEditMode}
             />
-
+            <Typography variant="h6" className={classes.titleText}>Exit Codes</Typography>
+            <ExitCodeManager
+                exitCodes={form.exit_codes || {}}
+                onChange={handleExitCodesChange}
+                isEditMode={isEditMode}
+            />
             {/* Workflow specific fields */}
             {taskType === 'Workflow' && (
                 <>
+                    <Typography variant="h6" className={classes.titleText}>Max attempts</Typography>
                     <TextField
                         fullWidth
                         margin="normal"
@@ -279,13 +302,17 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                         inputProps={{ min: 1 }}
                         disabled={!isEditMode}
                     />
-                    <Typography variant="h6">Exit Code Routing</Typography>
-                    <TaskEndCodeRoutingBuilder
-                        tasks={Object.values(form.tasks ?? {})}
-                        initialRouting={form.tasks_end_code_routing || {}}
-                        onChange={(newRouting) => onChange({ ...form, tasks_end_code_routing: newRouting })}
-                        isViewMode={!isEditMode}
-                    />
+                    <Typography variant="h6" className={classes.titleText}>Exit Code Routing</Typography>
+                    <Box className={classes.endCodeRoutingContainer}>
+                        <TaskEndCodeRoutingBuilder
+                            tasks={Object.values(form.tasks ?? {})}
+                            initialRouting={form.tasks_end_code_routing || {}}
+                            onChange={(newRouting) => onChange({ ...form, tasks_end_code_routing: newRouting })}
+                            isViewMode={!isEditMode}
+                        />
+                        <TaskFlowchart tasksEndCodeRouting={form.tasks_end_code_routing || {}} startTask={form.start_task || ''}/>
+                    </Box>
+                    <Typography variant="h6" className={classes.titleText}>Enable Recursion</Typography>
                     <Tooltip title="Normally, if a task being executed is present in the execution history of a task, it will be rejected, unless it is recursive. Workflows usually should have recursion enabled.">
                         <FormControlLabel
                             control={
@@ -305,6 +332,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             {/* CodeExecutionLLMTask specific fields */}
             {taskType === 'CodeExecutionLLMTask' && (
                 <>
+                    <Typography variant="h6" className={classes.titleText}>Valid Languages for Execution</Typography>
                     <FormControl fullWidth margin="normal">
                         <InputLabel>Valid Languages</InputLabel>
                         <Select
@@ -318,6 +346,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                             <MenuItem value="javascript">JavaScript</MenuItem>
                         </Select>
                     </FormControl>
+                    <Typography variant="h6" className={classes.titleText}>Timeout</Typography>
                     <TextField
                         fullWidth
                         margin="normal"
@@ -338,3 +367,4 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
 };
 
 export default TaskFlexibleView;
+

@@ -11,6 +11,7 @@ import { PromptComponentProps, Prompt, getDefaultPromptForm } from '../../../../
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import { FunctionParameters } from '../../../../types/ParameterTypes';
 import Logger from '../../../../utils/Logger';
+import useStyles from '../PromptStyles';
 
 const PromptFlexibleView: React.FC<PromptComponentProps> = ({
     item,
@@ -21,7 +22,8 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
 }) => {
     const [form, setForm] = useState<Partial<Prompt>>(item || getDefaultPromptForm());
     const [isSaving, setIsSaving] = useState(false);
-
+    const classes = useStyles();
+    
     Logger.debug('PromptFlexibleView', 'form', form);
 
     useEffect(() => {
@@ -83,6 +85,7 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
             item={item as Prompt}
             itemType="prompts"
         >
+            <Typography variant="h6" className={classes.titleText}>Name</Typography>
             <TextField
                 fullWidth
                 name="name"
@@ -92,6 +95,7 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
                 margin="normal"
                 disabled={!isEditMode}
             />
+            <Typography variant="h6" className={classes.titleText}>Content</Typography>
             <TextField
                 fullWidth
                 name="content"
@@ -103,6 +107,7 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
                 rows={4}
                 disabled={!isEditMode}
             />
+            <Typography variant="h6" className={classes.titleText}>Is templated?</Typography>
             <FormControlLabel
                 control={
                     <Switch
@@ -116,7 +121,7 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
             />
             {form.is_templated && (
                 <Box>
-                    <Typography gutterBottom>Parameters</Typography>
+                    <Typography variant="h6" className={classes.titleText}>Parameters</Typography>
                     <FunctionDefinitionBuilder
                         initialParameters={form.parameters}
                         onChange={handleFunctionDefinitionChange}

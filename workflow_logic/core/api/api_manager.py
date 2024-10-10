@@ -4,7 +4,7 @@ from workflow_logic.core.model import AliceModel
 from workflow_logic.core.api.api import API
 from workflow_logic.core.data_structures import References, ApiType, ApiName, ModelConfig, ModelApis
 from workflow_logic.util import LOGGER
-from workflow_logic.core.api.engines import APIEngine, LLMAnthropic, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI, ExaSearchAPI, ArxivSearchAPI, LLMEngine, VisionModelEngine, ImageGenerationEngine, AnthropicVisionEngine, OpenAIAdvancedSpeechToTextEngine, OpenAISpeechToTextEngine, OpenAITextToSpeechEngine, OpenAIEmbeddingsEngine, GeminiLLMEngine, CohereLLMEngine, GeminiVisionEngine, GeminiEmbeddingsEngine, GeminiSpeechToTextEngine, GroqLLMEngine
+from workflow_logic.core.api.engines import APIEngine, LLMAnthropic, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI, ExaSearchAPI, ArxivSearchAPI, LLMEngine, VisionModelEngine, ImageGenerationEngine, AnthropicVisionEngine, OpenAIAdvancedSpeechToTextEngine, OpenAISpeechToTextEngine, OpenAITextToSpeechEngine, OpenAIEmbeddingsEngine, GeminiLLMEngine, CohereLLMEngine, GeminiVisionEngine, GeminiEmbeddingsEngine, GeminiSpeechToTextEngine, GeminiImageGenerationEngine
 
 ApiEngineMap = {
     ApiType.LLM_MODEL: {
@@ -43,7 +43,8 @@ ApiEngineMap = {
         ApiName.GROQ_VISION: VisionModelEngine
     },
     ApiType.IMG_GENERATION: {
-        ApiName.OPENAI_IMG_GENERATION: ImageGenerationEngine
+        ApiName.OPENAI_IMG_GENERATION: ImageGenerationEngine,
+        ApiName.GEMINI_IMG_GEN: GeminiImageGenerationEngine
     },
     ApiType.SPEECH_TO_TEXT: {
         ApiName.OPENAI_STT: OpenAISpeechToTextEngine,
@@ -57,7 +58,7 @@ ApiEngineMap = {
     ApiType.EMBEDDINGS: {
         ApiName.OPENAI_EMBEDDINGS: OpenAIEmbeddingsEngine,
         ApiName.MISTRAL_EMBEDDINGS: OpenAIEmbeddingsEngine,
-        ApiName.GEMINI_EMBEDDINGS: GeminiEmbeddingsEngine
+        ApiName.GEMINI_EMBEDDINGS: GeminiEmbeddingsEngine,
     },
 }
 
