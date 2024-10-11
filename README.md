@@ -28,7 +28,7 @@ The project consists of three main components:
    git clone https://github.com/MarianoMolina/project_alice.git
    ```
 
-4. Create a `.env` file in the root directory using the `template.env` file as a reference. Complete the data for any APIs you want to use (e.g., OpenAI API key).
+4. Create a `.env` file in the root directory using the `template.env` file as a reference. Complete the data for any APIs you want to use (e.g., OpenAI API key). Even if you don't update anything, if you don't create it / copy it, the build process will fail. 
 
 5. Run the appropriate script for your operating system:
    - Windows: Run `run.bat`
@@ -241,6 +241,11 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
 9. **Make modular addition easy**: [Improved] Ideally, you should be able to sign up to a repository that has a workflow for example, and then be able to 'spawn' it in your current DB. Requires:
    - Module manager -> Select which modules you want to download and/or keep
    - Module integrator -> Select a module to create a fresh version in your DB -> What about removal? Would we want to add a variable to entities to keep track of this? 
+
+10. **Cost management**: Currently, the completion metadata is stored, but not much is done with it. Goals are:
+   - Good tracking of costs
+   - Task cost estimation based on an algorithm and, when it exists, past data to improve the estimation. 
+   - Cost/use tracking by API in a clear UI
 
 ## License
 
