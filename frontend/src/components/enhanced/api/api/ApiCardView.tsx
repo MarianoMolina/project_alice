@@ -5,16 +5,23 @@ import {
     ListItemSecondaryAction,
     ListItemButton,
 } from '@mui/material';
-import { ApiComponentProps } from '../../../../types/ApiTypes';
+import { ApiComponentProps, ApiType, ModelApiType } from '../../../../types/ApiTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { Api, Category, HealthAndSafety, PowerSettingsNew } from '@mui/icons-material';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
+
+type ListItemType = {
+    icon: React.ReactElement;
+    primary_text: string;
+    secondary_text: React.ReactNode;
+};
 
 const ApiCardView: React.FC<ApiComponentProps> = ({
     item,
     onChange,
 }) => {
     const { selectCardItem } = useCardDialog();
+
     if (!item) {
         return <Typography>No API data available.</Typography>;
     }
@@ -25,7 +32,11 @@ const ApiCardView: React.FC<ApiComponentProps> = ({
         }
     };
 
-    const listItems = [
+    function isModelApiType(apiType: ApiType): apiType is ApiType & ModelApiType {
+        return Object.values(ModelApiType).includes(apiType as any);
+    }
+
+    const listItems: ListItemType[] = [
         {
             icon: <Api />,
             primary_text: "API Type",
@@ -49,18 +60,21 @@ const ApiCardView: React.FC<ApiComponentProps> = ({
                     />
                 </ListItemSecondaryAction>
             )
-        },
-        {
+        }
+    ];
+
+    // Add Default Model section only if item.api_type is ModelApiType
+    if (isModelApiType(item.api_type)) {
+        listItems.push({
             icon: <Category />,
             primary_text: "Default Model",
-            secondary_text: (item.default_model ?
+            secondary_text: item.default_model ? (
                 <ListItemButton onClick={() => item.default_model?._id && selectCardItem && selectCardItem('Model', item.default_model._id, item.default_model)}>
                     {item.default_model?.model_name || 'N/A'}
                 </ListItemButton>
-                : "N/A"
-            )
-        }
-    ];
+            ) : "N/A"
+        });
+    }
 
     return (
         <CommonCardView

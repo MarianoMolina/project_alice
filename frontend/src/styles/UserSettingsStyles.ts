@@ -22,6 +22,13 @@ const useStyles = makeStyles((theme: Theme) => ({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: theme.spacing(2),
+        '& > *:first-child': {
+            display: 'flex',
+            alignItems: 'center',
+            '& > *:first-child': {
+                marginRight: theme.spacing(1),
+            },
+        },
     },
     apiPaper: {
         padding: theme.spacing(2),
@@ -36,7 +43,7 @@ const useStyles = makeStyles((theme: Theme) => ({
         marginTop: theme.spacing(3),
     },
     dangerZone: {
-        paddingTop: theme.spacing(2),
+
     },
     dangerButton: {
         marginTop: theme.spacing(2),

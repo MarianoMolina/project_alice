@@ -12,6 +12,7 @@ interface AuthContextProps {
   loginAndNavigate: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
+  getToken: () => string | null;
 }
 
 interface AuthProviderProps {
@@ -25,7 +26,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
-
   useEffect(() => {
     try {
       const savedUser = localStorage.getItem('user');
@@ -43,6 +43,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(false);
     }
   }, []);
+
+  const getToken = () => {
+    return localStorage.getItem('token');
+  };
 
   const saveUserData = (userData: LoginResponse) => {
     try {
@@ -95,7 +99,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, loading, login, loginAndNavigate, register, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, loading, login, loginAndNavigate, register, logout, getToken }}>
       {children}
     </AuthContext.Provider>
   );

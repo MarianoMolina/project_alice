@@ -19,7 +19,7 @@ The project consists of three main components:
 
 ## Setup and Installation
 
-1. Ensure you have Docker installed on your system. On Windows, it comes with docker-compose, but [check if you have it installed](https://stackoverflow.com/questions/72928891/how-can-i-check-if-docker-compose-plugin-is-installed). Otherwise (if in Linux), [install it](https://docs.docker.com/compose/install/linux/)
+1. Ensure you have Docker installed on your system. On Windows, it comes with docker-compose, but [check if you have it installed](https://stackoverflow.com/questions/72928891/how-can-i-check-if-docker-compose-plugin-is-installed). Otherwise (if in Linux), [install it](https://docs.docker.com/compose/install/linux/). If for whatever reason the starting script doesn't start Docker (can't find it), all you need to do is have the Docker Daemon running, for which all you need to do is open your Docker app. 
 
 2. (Optional) Install LM Studio if you plan to use local models.
 
@@ -211,7 +211,7 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
    - [Added]: Basic route end code editor
 
 2. **More API engines and base tasks** [Done]: BeautifulSoup to scrap websites, vision_models, text_to_image_models, text_to_speech_models, etc. This will enable a new set of tasks to be created. This includes adding more providers, like Google, Mistral, etc. 
-   - [Added]: 21 new API providers, with their corresponding models
+   - [Added]: 21 new API providers, with their corresponding models, for a total of 160 distinct entities for you to use. 
    - [Added]: 2 new workflows -> Web Scrape and Research. 
 
 3. **File input and type interface** [Done]: Being able to add files of any type to a conversation, which makes a conversion to text of the file (stt, itt, or simply parsing for files that can be converted to a string), allowing for the user and the agents to share any type of data. This, in turn, requires the agents to also be able to produce different types of outputs, which is where the type interface logic comes in, to convert str -> any and back. 

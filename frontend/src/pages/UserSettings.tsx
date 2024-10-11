@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
 import { Box, TextField, Typography, Button, Card, CardContent, Paper } from '@mui/material';
-import { Person, Api, Warning } from '@mui/icons-material';
+import { Person, Api, Warning, Key } from '@mui/icons-material';
 import { useApi } from '../contexts/ApiContext';
 import { useAuth } from '../contexts/AuthContext';
 import { User } from '../types/UserTypes';
@@ -13,6 +13,7 @@ import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSide
 import { useDialog } from '../contexts/DialogCustomContext';
 import { useCardDialog } from '../contexts/CardDialogContext';
 import Logger from '../utils/Logger';
+import { CodeBlock } from '../components/ui/markdown/CodeBlock';
 
 interface UserSettingsProps {
     setHasUnsavedChanges: (value: boolean) => void;
@@ -25,10 +26,16 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
     const { addNotification } = useNotification();
     const [userObject, setUserObject] = useState<User | null>(null);
     const [originalUserObject, setOriginalUserObject] = useState<User | null>(null);
-    const { user } = useAuth();
+    const { user, getToken } = useAuth();
     const classes = useStyles();
     const isInitialMount = useRef(true);
     const [activeTab, setActiveTab] = useState('Personal information');
+    const [userToken, setUserToken] = useState<string | null>(null);
+
+    useEffect(() => {
+        const token = getToken();
+        setUserToken(token);
+    }, [getToken]);
 
     useEffect(() => {
         const loadUser = async () => {
@@ -112,6 +119,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
     const tabs = [
         { name: 'Personal information', icon: Person },
         { name: 'APIs', icon: Api },
+        { name: 'User Token', icon: Key },
         { name: 'Danger Zone', icon: Warning },
     ];
 
@@ -158,26 +166,55 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
                 );
             case 'APIs':
                 return (
-                    <Box>
-                        <Box className={classes.apiConfigHeader}>
-                            <Typography variant="h5">API Configuration</Typography>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={() => selectFlexibleItem('API', 'create')}
-                            >
-                                Create New API
-                            </Button>
-                        </Box>
-                        <Paper className={classes.apiPaper}>
-                            <EnhancedAPI
-                                key={0}
-                                mode="list"
-                                fetchAll={true}
-                                onView={handleApiSelect}
-                            />
-                        </Paper>
-                    </Box>
+                    <Card className={classes.card}>
+                        <CardContent>
+                            <Box className={classes.apiConfigHeader}>
+                                <Box>
+                                    <Api />
+                                    <Typography variant="h5">API Configuration</Typography>
+                                </Box>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => selectFlexibleItem('API', 'create')}
+                                >
+                                    Create New API
+                                </Button>
+                            </Box>
+                            <Paper className={classes.apiPaper}>
+                                <EnhancedAPI
+                                    key={0}
+                                    mode="list"
+                                    fetchAll={true}
+                                    onView={handleApiSelect}
+                                />
+                            </Paper>
+                        </CardContent>
+                    </Card>
+                );
+            case 'User Token':
+                return (
+                    <Card className={classes.card}>
+                        <CardContent>
+                            <Box className={classes.userInfoHeader}>
+                                <Key />
+                                <Typography variant="h5">User Token</Typography>
+                            </Box>
+                            <Typography variant="body1" paragraph>
+                                This is your user token. Keep it secret and use it for API authentication.
+                            </Typography>
+                            {userToken ? (
+                                <CodeBlock
+                                    language="JWT Token"
+                                    code={userToken}
+                                />
+                            ) : (
+                                <Typography variant="body2" color="error">
+                                    Token not available. Please try refreshing the page and logging in again.
+                                </Typography>
+                            )}
+                        </CardContent>
+                    </Card>
                 );
             case 'Danger Zone':
                 return (
@@ -208,7 +245,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
             default:
                 return null;
         }
-    }, [activeTab, userObject, handleUserUpdate, handleSaveChanges, handleApiSelect, classes, handlePurgeAndReinitialize, selectFlexibleItem]);
+    }, [activeTab, userObject, handleUserUpdate, handleSaveChanges, handleApiSelect, classes, handlePurgeAndReinitialize, selectFlexibleItem, userToken]);
 
     return (
         <Box className={classes.root}>
