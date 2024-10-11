@@ -59,7 +59,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "start:prod": "serve -s build"
+    "start:prod": "serve -s build -l ${FRONTEND_PORT_DOCKER:-4000}"
   },
   "eslintConfig": {
     "extends": [
