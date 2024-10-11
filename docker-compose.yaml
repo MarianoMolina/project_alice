@@ -1,7 +1,7 @@
 services:
   frontend:
     build:
-      context: ./alice_frontend
+      context: ./frontend
       dockerfile: Dockerfile
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT_DOCKER}"
@@ -13,10 +13,10 @@ services:
       volume-init:
         condition: service_completed_successfully
     volumes:
-      # - ./alice_frontend:/app:delegated
+      # - ./frontend:/app:delegated
       # - /app/node_modules
       # - /app/dist
-      - ./.env:/app/.env
+      - ./.env:/app/.env:ro
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       CI: "true" # "true" # comment out when in development
@@ -54,17 +54,19 @@ services:
 
   workflow:
     build:
-      context: ./workflow_logic
+      context: ./workflow
+    env_file:
+      - .env
     ports:
       - "${WORKFLOW_PORT}:${WORKFLOW_PORT_DOCKER}"
     volumes:
-      # - .:/app
+      # - ./workflow:/app
       - /var/run/docker.sock:/var/run/docker.sock
       - logs:/app/logs
       - shared-uploads:/app/shared-uploads:ro
     depends_on:
-      backend:
-        condition: service_healthy
+      # backend:
+      #   condition: service_healthy
       volume-init:
         condition: service_completed_successfully
       python_image:

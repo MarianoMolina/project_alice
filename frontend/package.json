@@ -1,0 +1,83 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@mui/icons-material": "^5.15.20",
+    "@mui/material": "^5.15.20",
+    "@mui/styles": "^5.15.20",
+    "@rjsf/core": "^5.18.4",
+    "@rjsf/mui": "^5.18.4",
+    "@rjsf/utils": "^5.18.4",
+    "@rjsf/validator-ajv8": "^5.18.4",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/dagre": "^0.7.52",
+    "@types/jest": "^29.5.12",
+    "@types/react": "^18.3.3",
+    "@types/react-beautiful-dnd": "^13.1.8",
+    "@types/react-dom": "^18.3.0",
+    "axios": ">=1.7.4",
+    "clsx": "^2.1.1",
+    "dagre": "^0.8.5",
+    "framer-motion": "^11.3.2",
+    "next": ">=14.2.10",
+    "prismjs": "^1.29.0",
+    "react": "^18.3.1",
+    "react-beautiful-dnd": "^13.1.1",
+    "react-dom": "^18.3.1",
+    "react-markdown": "^8.0.7",
+    "react-router-dom": "^6.23.1",
+    "react-scripts": "^5.0.1",
+    "react-syntax-highlighter": "^15.5.0",
+    "reactflow": "^11.11.4",
+    "rehype-raw": "^7.0.0",
+    "remark-gfm": "3.0.1",
+    "serve": "^14.2.3",
+    "simplex-noise": "^4.0.2",
+    "tailwind-merge": "^2.4.0",
+    "typescript": "^5.5.4",
+    "web-vitals": "^2.1.4",
+    "winston": "^3.13.1"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.16.7",
+    "@types/debug": "^4.1.12",
+    "@types/mdast": "^4.0.4",
+    "@types/react-copy-to-clipboard": "^5.0.7",
+    "@types/react-syntax-highlighter": "^15.5.13",
+    "autoprefixer": "^10.4.19",
+    "postcss": ">=8.4.6",
+    "react-copy-to-clipboard": "^5.1.0",
+    "tailwindcss": "^3.4.4"
+  },
+  "scripts": {
+    "start": "HOST=0.0.0.0 react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "start:prod": "serve -s build"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "proxy": "http://localhost:4000"
+}

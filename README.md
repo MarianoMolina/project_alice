@@ -1,5 +1,5 @@
 # Alice: Advanced Language Intelligence and Cognitive Engine
-![Alice LOGO](./alice_frontend/public/logo_alice.ico)
+![Alice LOGO](./frontend/public/logo_alice.ico)
 
 Alice is an agentic workflow framework that integrates task execution and intelligent chat capabilities. It provides a flexible environment for creating, managing, and deploying AI agents for various purposes, leveraging a microservices architecture with MongoDB for data persistence.
 
@@ -13,25 +13,9 @@ The project consists of three main components:
 
 ## The Goal
 1. Provide a tool to create, test and deploy agentic solutions
-2. A framework where 'text' is the primary input and the output of most operations, with the goal of making this tool 'human languange readable', allowing agents to not only execute complex workflows, but create new ones, and not requiring in-depth technical expertise from users in order to create complex and powerful workflows. 
-3. Produce a framework that is model-agnostic/brand-agnostic, allowing the user to set and deploy their solutions however they want
-4. In the long term, offer an open-source option that helps put the control in the users hand, even in an AI-powered world. 
-5. Elevator pitch is: in a world where agentic solutions are able to tackle more and more problem types, and more and more complex problems, the key value add is going to be the expertise in converting expertise into automated workflows: then, knowing how to perform a task is less important than knowing how to perform a task an infinite amount of times. 
-
-## How it works
-
-![Logic Flow](./img/basic_logic_flow.png)
-The framework is based around 4 main components:
-- APIs and their engine
-- Agents, which deploy prompts and use LLM API
-- Tasks that leverage agents and other API types to produce an output (Task Response)
-- Chats, that leverage tasks and agents, to produce a conversational experience, generating messages (MessageDict)
-
-These components share information in one of 4 main ways, all of which have a string representation:
-- Files (All file types have a method for generating a 'transcript' for the file, and files generated through prompts keep it as a representation)
-- Messages
-- Task Results
-- URL References
+2. A `human-language` framework where text is the primary input and the output of most operations, with the goal of making this tool easy to engage with by both users and agents
+3. Produce a model-agnostic/brand-agnostic framwork, allowing the user to set and deploy their solutions however they want
+4. Offer an open-source option that helps put the control in the users hand 
 
 ## Setup and Installation
 
@@ -53,6 +37,23 @@ Alternatively you can just execute run.py using `python run.py` in a commandline
 
 This will build and launch the containers. Once ready, the frontend will be accessible at `http://localhost:4000/`. 
 
+**NOTE**: If you want to update, run `git pull` and `python update.py`
+
+## Framework
+
+![Logic Flow](./img/basic_logic_flow.png)
+The framework is based around 4 main components:
+- APIs and their engine
+- Agents, which deploy prompts and have models for any API they want to use
+- Tasks that leverage agents, other tasks and APIs to produce an output
+- Chats, that leverage tasks and agents, to produce a conversational experience
+
+These components share information in one of 4 main ways, all of which have a string representation:
+- Files (All file types have a method for generating a 'transcript' for the file, and files generated through prompts keep it as a representation)
+- Messages
+- Task Results
+- URL References
+
 ## Features
 
 ### 1. Task Execution
@@ -61,17 +62,18 @@ This will build and launch the containers. Once ready, the frontend will be acce
 - Execute tasks with custom parameters
 - Run tasks directly from the frontend, or programatically with the workflow container's API
 - Supported task types include:
-  - Workflow
-  - API tasks: Reddit, Wikipedia, Google, Exa, and Arxiv search
+  - Workflow -> Combine other tasks
+  - API tasks: Reddit, Wikipedia, Google, Exa, and Arxiv search -> Retrieve information
   - Agentic tasks:
-    - PromptAgentTask: Including CheckTask, CodeExecutionLLMTask and CodeGenerationLLMTask
+    - Prompt Agent Tasks: Including the base PromptAgentTask, and CheckTask, CodeExecutionLLMTask and CodeGenerationLLMTask
+    - Agent Tasks: WebScrapeBeautifulSoupTask, TextToSpeechTask, GenerateImageTask, and EmbeddingTask
 
 ### 2. Intelligent Chat
 - Create and manage chat conversations with AI agents
-- Add task results from the database to ongoing conversations
+- Add references from other conversations or task executions to enrich the chat context
 - Integrate new tasks as tools for the active agent during chat
-- Support for various message types (text, image, video, audio, file)
-- Deploy these agents wherever you want, since the workflow API offers an endpoint to create chat completions. 
+- Support for various message types (text, image, video, audio, file) -> automatic transcript is created so the agent can interpret
+- Deploy these agents wherever you want, since the workflow API offers an endpoint to create chat completions
 
 ### 3. Extensible Framework
 - Modular architecture allowing easy addition of new components
@@ -84,7 +86,11 @@ This will build and launch the containers. Once ready, the frontend will be acce
 
 ### 5. Flexible Model Deployment
 - Deploy local models using LM Studio
-- Use any OpenAI-compatible endpoints or Anthropic, Gemini and Cohere models to power your agents and workflows
+- Use any OpenAI-compatible endpoints (Groq, Mistral & Llama) or Anthropic, Gemini, and Cohere models to power your agents and workflows
+
+### 6. Programatic Access to your Tasks and Chats
+- The Workflow container exposes its API to your `http://localhost:8000/`, with routes `/execute_task` and `/chat_response/{chat_id}` as the primary entry points. You'll need the token for validation. 
+-  Check the relevant routes files for the prop structure. 
 
 ## Usage
 
@@ -163,12 +169,12 @@ export enum ApiName {
 
 1. Create a new task class in the Workflow module, extending the `AliceTask` base class.
 2. Implement the `run` method to define the task's behavior.
-3. Add the new task type to the `task_type` enum in the `task.model.ts` file.
-4. Update the task creation logic in the frontend to include the new task type.
+3. Add the new task to the `available_task_types` list in `workflow/core/tasks/__init__.py`.
+4. Add the new task type to the `TaskType` enum in the `backend/interfaces/task.model.ts` and `frontend/src/types/TaskTypes` files.
 
 ### Adding New API Types and API Names
 
-1. Update the `ApiType` and `ApiName` enums in the backend and workflow containers.
+1. Update the `ApiType` and `ApiName` enums in the backend, frontend and workflow containers.
 2. Implement the necessary logic in the workflow container to handle the new API type.
 3. Update the frontend to support the new API type in the API management interface.
 
@@ -179,10 +185,10 @@ For detailed instructions on adding new API types and names, refer to the backen
 To add new instances: 
 
 1. Navigate to the Database page in the frontend and select the entity type you want to create and click on create new.
-2. To add new entities that will be available to new users, you can modify the workflow initialization modules:
-   - Locate the `workflow_logic/db_app/initialization/modules` directory in the workflow container.
+2. To add new entities that will be available to new users (or to yourself if you decide to re-initialize your DB), you can modify the workflow initialization modules:
+   - Locate the `workflow/db_app/initialization/modules` directory in the workflow container.
    - Create a new module file or modify existing ones to include your new entities.
-   - Update the `modular_db` in `workflow_logic/db_app/initialization/data_init.py` to include your new module.
+   - Update the `module_list` list in `workflow/db_app/initialization/modules/__init__.py` to include your new module.
 
 For more detailed information on creating and managing initialization modules, refer to the workflow container README.
 
@@ -198,13 +204,19 @@ Contributions are welcome! Please follow these steps:
 
 If you've created new tasks, workflows, or initialization modules that you'd like to share, please include them in your pull request along with appropriate documentation. We're particularly interested in contributions that expand the capabilities of the workflow initialization process, allowing users to start with a richer set of pre-configured entities.
 
-## Future Features
+## Future Features / Upgrades
 
-1. **Workflow generator** [Basic implementation done]: Improve the interface for workflow generation. Ideally, something that allows the user to handle tasks/nodes, visualize the execution of it, etc. 
+1. **Workflow generator** [Done]: Improve the interface for workflow generation. Ideally, something that allows the user to handle tasks/nodes, visualize the execution of it, etc. 
+   - [Added]: Flowchart for workflows
+   - [Added]: Basic route end code editor
 
 2. **More API engines and base tasks** [Done]: BeautifulSoup to scrap websites, vision_models, text_to_image_models, text_to_speech_models, etc. This will enable a new set of tasks to be created. This includes adding more providers, like Google, Mistral, etc. 
+   - [Added]: 21 new API providers, with their corresponding models
+   - [Added]: 2 new workflows -> Web Scrape and Research. 
 
 3. **File input and type interface** [Done]: Being able to add files of any type to a conversation, which makes a conversion to text of the file (stt, itt, or simply parsing for files that can be converted to a string), allowing for the user and the agents to share any type of data. This, in turn, requires the agents to also be able to produce different types of outputs, which is where the type interface logic comes in, to convert str -> any and back. 
+   - [Added]: Image and Sound file support
+   - [Added]: Both generation (TTS and Image Generation) as well as transcription (STT and Image Vision) available
 
 4. **Complex Agent Structures**: Implementation of more advanced agent architectures, such as ReAct and RAG agents, to enable more sophisticated reasoning and decision-making capabilities.
 
@@ -220,8 +232,15 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
 
 7. **Improvements and fixes**: There are 3 areas I think are crucial in the mid-term to tackle:
    - Edge-case analysis
-   - Improve error handling and logging
+   - [Improved] Improve error handling and logging
+      - [Added]: Logging folder, and better logs from all containers
+      - [Added]: Logging managers with levels, allowing for dev and prod setups
 
+8. **Unify the type files**: Create a single source of truth for types, enums, etc. Either in TS or Python, and the conversion logic to the other.  
+
+9. **Make modular addition easy**: [Improved] Ideally, you should be able to sign up to a repository that has a workflow for example, and then be able to 'spawn' it in your current DB. Requires:
+   - Module manager -> Select which modules you want to download and/or keep
+   - Module integrator -> Select a module to create a fresh version in your DB -> What about removal? Would we want to add a variable to entities to keep track of this? 
 
 ## License
 

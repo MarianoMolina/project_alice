@@ -6,7 +6,7 @@ const WORKFLOW_PORT = process.env.WORKFLOW_PORT || 8000;
 const HOST = process.env.HOST || 'localhost';
 const FRONTEND_HOST = process.env.FRONTEND_HOST || 'frontend';
 const WORKFLOW_HOST = process.env.WORKFLOW_HOST || 'workflow';
-const FRONTEND_PORT_DOCKER = process.env.FRONTEND_PORT_DOCKER || 3000;
+const FRONTEND_PORT_DOCKER = process.env.FRONTEND_PORT_DOCKER || 4000;
 const WORKFLOW_PORT_DOCKER = process.env.WORKFLOW_PORT_DOCKER || 8000;
 
 // Define CORS options
