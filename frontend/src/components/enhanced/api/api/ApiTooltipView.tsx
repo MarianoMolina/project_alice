@@ -43,20 +43,22 @@ const ApiTooltipView: React.FC<ApiComponentProps> = ({ items, onInteraction }) =
     name: api.name,
     designation: api.api_type,
     image: (
-      <div 
-        className={`relative w-full h-full rounded-full flex items-center justify-center ${getBackgroundColor(api.health_status)} cursor-pointer`}
-        onClick={() => handleClick(api)}
-      >
-        {apiIcons[api.api_type] || <LaptopMac />}
-        {!api.is_active && (
-          <div className="absolute inset-0 bg-gray-800 opacity-50 rounded-full"></div>
-        )}
+      <div className="">
+        <div
+          className={`relative w-fit h-full rounded-full flex items-center justify-center ${getBackgroundColor(api.health_status)} cursor-pointer`}
+          onClick={() => handleClick(api)}
+        >
+          {apiIcons[api.api_type] || <LaptopMac />}
+          {!api.is_active && (
+            <div className="absolute inset-0 bg-gray-800 opacity-50 rounded-full"></div>
+          )}
+        </div>
       </div>
     ),
   }));
 
   return (
-    <div className="flex flex-row items-center justify-center mb-10 w-full">
+    <div className="flex flex-row items-center justify-center mb-10 w-full overflow-x-auto">
       <AnimatedTooltip items={tooltipItems} />
     </div>
   );
