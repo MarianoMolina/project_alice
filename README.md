@@ -19,7 +19,7 @@ The project consists of three main components:
 
 ## Setup and Installation
 
-1. Ensure you have Docker installed on your system. On Windows, it comes with docker-compose, but [check if you have it installed](https://stackoverflow.com/questions/72928891/how-can-i-check-if-docker-compose-plugin-is-installed). Otherwise (if in Linux), [install it](https://docs.docker.com/compose/install/linux/). If for whatever reason the starting script doesn't start Docker (can't find it), all you need to do is have the Docker Daemon running, for which all you need to do is open your Docker app. 
+1. Ensure you have [Docker installed](https://docs.docker.com/engine/install/) on your system. On Windows, once you do, it comes with the docker-compose plugin installed by default, but [check if you have it installed](https://stackoverflow.com/questions/72928891/how-can-i-check-if-docker-compose-plugin-is-installed). Otherwise (if in Linux for example), [install it](https://docs.docker.com/compose/install/linux/). If for whatever reason the starting script doesn't start Docker (can't find it), all you need to do is open your Docker app. 
 
 2. (Optional) Install LM Studio if you plan to use local models.
 
@@ -36,6 +36,8 @@ The project consists of three main components:
 Alternatively you can just execute run.py using `python run.py` in a commandline while in the repository folder
 
 This will build and launch the containers. Once ready, the frontend will be accessible at `http://localhost:4000/`. 
+
+If you see an error during the installation related to `403  connecting to archive.ubuntu.com`, just run it again. Sometimes Docker has an issue installing an image due to connection errors. 
 
 **NOTE**: If you want to update, run `git pull` and `python update.py`
 

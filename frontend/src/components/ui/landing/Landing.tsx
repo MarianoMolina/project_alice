@@ -14,12 +14,12 @@ const Landing: React.FC = () => {
   return (
     <WavyBackground>
       <Box component="main" sx={{ maxHeight: '100%', padding: '50px 0 100px 0', overflowY: 'auto' }}>
-        <Typography variant="h2" component="h2" gutterBottom align='center'>
-          Welcome
+        <Typography variant="h4" component="h4" gutterBottom align='center'>
+          Welcome to
         </Typography>
 
-        <Typography variant="h3" component="h3" gutterBottom align='center'>
-          To Project Alice
+        <Typography variant="h1" component="h1" gutterBottom align='center'>
+          Project Alice
         </Typography>
 
         <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
