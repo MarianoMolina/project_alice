@@ -39,11 +39,12 @@ This will build and launch the containers. Once ready, the frontend will be acce
 
 If you see an error during the installation related to `403  connecting to archive.ubuntu.com`, just run it again. Sometimes Docker has an issue installing an image due to connection errors. 
 
-**NOTE**: If you want to update, run `git pull` and `python update.py`
+**NOTE**: If you want to update, run `python update.py`
 
 ## Framework
 
 ![Logic Flow](./img/basic_logic_flow.png)
+
 The framework is based around 4 main components:
 - APIs and their engine
 - Agents, which deploy prompts and have models for any API they want to use

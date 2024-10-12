@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     border: `1px solid ${theme.palette.divider} !important`,
     transition: 'transform 0.1s ease-in-out !important',
     '&:hover': {
-      transform: 'translateY(-2px)',
+      transform: 'translateY(-1px)',
     },
   },
   contentBox: {
