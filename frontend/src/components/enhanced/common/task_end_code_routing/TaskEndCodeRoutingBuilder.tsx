@@ -2,7 +2,6 @@ import React, { useEffect, useCallback, useState } from 'react';
 import { Box, Typography, Select, MenuItem, Alert } from '@mui/material';
 import { AliceTask, RouteMap, TasksEndCodeRouting } from '../../../../types/TaskTypes';
 import RouteMapView from './RouteMapView';
-import { useNotification } from '../../../../contexts/NotificationContext';
 import useStyles from './RoutingStyles';
 import WarningIcon from '@mui/icons-material/Warning';
 

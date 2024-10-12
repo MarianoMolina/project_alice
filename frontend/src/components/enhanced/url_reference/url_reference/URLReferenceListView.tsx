@@ -26,6 +26,7 @@ const URLReferenceListView: React.FC<URLReferenceComponentProps> = ({
             onInteraction={onInteraction}
             interactionTooltip="Select URL Reference"
             viewTooltip="View URL Reference"
+            collectionElementString='URLReference'
         />
     );
 };

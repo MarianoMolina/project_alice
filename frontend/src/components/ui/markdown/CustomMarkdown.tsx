@@ -2,7 +2,7 @@ import React from 'react';
 import Markdown from 'react-markdown';
 import { CodeBlock } from './CodeBlock';
 import gfm from 'remark-gfm';
-import { Typography, Link as MuiLink } from '@mui/material';
+import { Typography, Link as MuiLink, Divider } from '@mui/material';
 import useStyles from './MarkdownStyles';
 
 interface CustomMarkdownProps {
@@ -46,6 +46,7 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
             {...props} 
           />
         ),
+        hr: ({ node, ...props }) => <Divider className={classes.hr} {...props} />,
         code({ node, inline, className, children, ...props }: any) {
           if (inline) {
             return (

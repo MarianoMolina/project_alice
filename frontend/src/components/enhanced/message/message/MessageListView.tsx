@@ -10,7 +10,7 @@ const MessageListView: React.FC<MessageComponentProps> = ({
     onView,
 }) => {
     const getPrimaryText = (message: MessageType) => {
-        return `${message.role}: ${message.content.substring(0, 50)}${message.content.length > 50 ? '...' : ''}`;
+        return `${message.role}: ${message.content.substring(0, 300)}${message.content.length > 300 ? '...' : ''}`;
     };
 
     const getSecondaryText = (message: MessageType) => (
@@ -29,6 +29,7 @@ const MessageListView: React.FC<MessageComponentProps> = ({
             onInteraction={onInteraction}
             interactionTooltip="Select Message"
             viewTooltip="View Message Details"
+            collectionElementString='Message'
         />
     );
 };

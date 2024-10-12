@@ -40,7 +40,6 @@ export interface AliceTask extends BaseDataseObject {
   exit_code_response_map: { [key: string]: number } | null;
   start_task?: string | null;
   required_apis?: ApiType[] | null;
-  model_id: AliceModel | null;
   task_selection_method?: CallableFunction | null;
   tasks_end_code_routing?: TasksEndCodeRouting | null;
   max_attempts?: number;
@@ -70,7 +69,6 @@ export const convertToAliceTask = (data: any): AliceTask => {
     task_selection_method: data?.task_selection_method || null,
     tasks_end_code_routing: data?.tasks_end_code_routing || null,
     max_attempts: data?.max_attempts || undefined,
-    model_id: data?.model_id || null,
     agent: data?.agent || null,
     human_input: data?.human_input || false,
     api_engine: data?.api_engine || null,
@@ -112,7 +110,6 @@ export const getDefaultTaskForm = (taskType: TaskType): AliceTask => {
     timeout: null,
     exit_code_response_map: null,
     start_task: null,
-    model_id: null,
     task_selection_method: null,
     tasks_end_code_routing: null,
     max_attempts: 3

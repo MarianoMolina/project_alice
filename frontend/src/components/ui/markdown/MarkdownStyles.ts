@@ -86,7 +86,7 @@ const useStyles = makeStyles((theme: Theme) => ({
             top: 0,
             bottom: 0,
             width: '2px',
-            backgroundColor: theme.palette.primary.main,
+            backgroundColor: theme.palette.primary.light,
         },
     },
     h2: {
@@ -103,7 +103,7 @@ const useStyles = makeStyles((theme: Theme) => ({
             top: 0,
             bottom: 0,
             width: '2px',
-            backgroundColor: theme.palette.secondary.main,
+            backgroundColor: theme.palette.primary.dark,
             opacity: 0.8,
         },
     },
@@ -180,12 +180,16 @@ const useStyles = makeStyles((theme: Theme) => ({
         },
     },
     inlineVariable: {
-        backgroundColor: theme.palette.secondary.dark,
+        backgroundColor: theme.palette.primary.light,
         padding: '2px 4px',
         borderRadius: '3px',
         fontStyle: 'italic',
         fontSize: '1em !important',
-    }
+    },
+    hr: {
+        margin: `${theme.spacing(2, 0)} !important`,
+        backgroundColor: theme.palette.divider,
+    },
 }));
 
 export default useStyles;

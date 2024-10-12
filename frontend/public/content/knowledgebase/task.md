@@ -23,7 +23,7 @@ These task types cover a broad spectrum of functionalities, including search ope
   - `EmbeddingTask`: Takes a string and the agent's embeddings model to generate the vector embeddings for the text provided. 
 - `Workflow`: The simplest a most complex task. Simple because all it does is run other tasks. Complex because the options are endless. Main difference is they have a tasks_end_code_routing to map the logic path and require a start_task to begin it. 
 
-## Task Structure
+## Task Interface
 
 Each task in the system is represented by the `AliceTask` interface:
 
@@ -44,7 +44,6 @@ export interface AliceTask extends BaseDataseObject {
   exit_code_response_map: { [key: string]: number } | null;
   start_task?: string | null;
   required_apis?: ApiType[] | null;
-  model_id: AliceModel | null;
   task_selection_method?: CallableFunction | null;
   tasks_end_code_routing?: TasksEndCodeRouting | null;
   max_attempts?: number;
@@ -60,7 +59,6 @@ Key properties:
 - `input_variables`: Defines the expected inputs for the task
 - `exit_codes`: Possible outcomes of the task execution
 - `tasks`: Subtasks for complex workflows
-- `model_id`: The AI model used for this task (if applicable)
 - `agent`: The agent assigned to execute this task (if applicable)
 
 ## Task Functionality

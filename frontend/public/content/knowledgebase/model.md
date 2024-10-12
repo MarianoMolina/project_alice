@@ -26,7 +26,7 @@ export enum ModelType {
 - `EMBEDDINGS`: For creating vector representations of text
 - `IMG_GEN`: For generating images from text descriptions
 
-## Model Structure
+## Model Interface
 
 Each model in the system is represented by the `AliceModel` interface:
 

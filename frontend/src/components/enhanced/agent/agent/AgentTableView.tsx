@@ -20,9 +20,14 @@ const AgentTableView: React.FC<AgentComponentProps> = ({
       render: (agent: AliceAgent) => agent.models?.chat?.model_name || 'N/A',
     },
     {
-      header: 'Created At',
-      render: (agent: AliceAgent) => new Date(agent.createdAt || '').toLocaleString(),
-      sortKey: 'createdAt'
+      header: 'Tool',
+      render: (agent: AliceAgent) => agent.has_functions ? 'Yes' : 'No',
+      sortKey: 'has_functions'
+    },
+    {
+      header: 'Code',
+      render: (agent: AliceAgent) => agent.has_code_exec ? 'Yes' : 'No',
+      sortKey: 'has_code_exec'
     }
   ];
 

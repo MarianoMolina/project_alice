@@ -37,6 +37,7 @@ const TaskResponseListView: React.FC<TaskResponseComponentProps> = ({
             onInteraction={onInteraction}
             interactionTooltip="Add Task Response"
             viewTooltip="View Task Response"
+            collectionElementString='TaskResponse'
         />
     );
 };

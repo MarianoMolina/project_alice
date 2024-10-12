@@ -86,9 +86,7 @@ export enum ApiName {
 }
 ```
 
-## API Configuration
-
-Each API in the system is represented by the `API` interface:
+## API Interfacee
 
 ```typescript
 export interface API extends BaseDataseObject {

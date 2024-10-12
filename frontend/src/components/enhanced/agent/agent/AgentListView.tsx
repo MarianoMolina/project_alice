@@ -12,7 +12,7 @@ const AgentListView: React.FC<AgentComponentProps> = ({
     const getPrimaryText = (agent: AliceAgent) => agent.name;
     const getSecondaryText = (agent: AliceAgent) => (
         <Typography component="span" variant="body2" color="textSecondary">
-            Created: {new Date(agent.createdAt || '').toLocaleString()}
+            Chat model: {agent.models?.chat?.model_name || 'N/A'}
         </Typography>
     );
 
@@ -26,6 +26,7 @@ const AgentListView: React.FC<AgentComponentProps> = ({
             onInteraction={onInteraction}
             interactionTooltip="Add Agent"
             viewTooltip="View Agent"
+            collectionElementString='Agent'
         />
     );
 };

@@ -222,7 +222,7 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
 
 4. **Complex Agent Structures**: Implementation of more advanced agent architectures, such as ReAct and RAG agents, to enable more sophisticated reasoning and decision-making capabilities.
 
-5. **Work Environments**: Introduction of a feature similar to Anthropic's Artifacts, providing a more structured way to manage and interact with complex data and tools within the Alice ecosystem. Idea is to use a mix of in-context and RAG-powered sources, that the user is actively able to update, trim, etc. to ensure the correct info is available at the right time. 
+5. **Work Environments / Data Clusters**: Introduction of a feature similar to Anthropic's Artifacts but easier to update, edit, modularize, etc., providing a more structured way to manage and interact with complex data and tools within the Alice ecosystem. Idea is to use a mix of in-context and RAG-powered sources, that the user is actively able to update, trim, etc. to ensure the correct info is available at the right time. 
 
 6. **Journals**: Development of a holistic view of conversations and interactions, enabling the creation of workflows that run periodically. This feature will support tasks such as:
    - Reviewing and summarizing emails
@@ -232,8 +232,10 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
    - Generating periodic reports and insights
    - Updating RAG-sources
 
-7. **Improvements and fixes**: There are 3 areas I think are crucial in the mid-term to tackle:
+7. **Improvements and fixes**: There are several misc areas I think are crucial in the mid-term to tackle:
    - Edge-case analysis
+   - Lazy-loading on the frontend
+   - Context management -> be able to predict the context size of a chat or task instance, prevent extreme cases, etc. 
    - [Improved] Improve error handling and logging
       - [Added]: Logging folder, and better logs from all containers
       - [Added]: Logging managers with levels, allowing for dev and prod setups

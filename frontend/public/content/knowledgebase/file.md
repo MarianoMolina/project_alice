@@ -2,7 +2,7 @@
 
 The Alice system supports various file types and provides a unique transcript feature that allows AI agents to understand and interact with the content of these files.
 
-## File Structure
+## File Interface
 
 Files in the system are represented by the `FileReference` interface:
 

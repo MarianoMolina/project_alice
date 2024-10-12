@@ -9,7 +9,7 @@ const ChatShortListView: React.FC<ChatComponentProps> = ({
     onView,
 }) => {
     const getPrimaryText = (chat: AliceChat) => chat.name;
-    const getSecondaryText = (chat: AliceChat) => chat.alice_agent?.name || 'N/A';
+    const getSecondaryText = (chat: AliceChat) => `${chat.alice_agent?.name || 'N/A'} - Msg: ${chat.messages.length || 0}`;
 
     return (
         <EnhancedShortListView<AliceChat>

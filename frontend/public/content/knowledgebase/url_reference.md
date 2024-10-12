@@ -2,7 +2,7 @@
 
 URL References allow the Alice system to store and manage information about external web resources, including their content and metadata.
 
-## URL Reference Structure
+## URL Reference Interface
 
 Each URL reference in the system is represented by the `URLReference` interface:
 

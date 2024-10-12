@@ -35,7 +35,7 @@ const Register = () => {
       if (!selectedFlexibleItem && step !== 0) await updateAPIs();
     };
     fetchData();
-  }, [selectedFlexibleItem]);
+  }, [selectedFlexibleItem, step, updateAPIs]);
 
   const handleApiSelect = (api: API) => {
     if (!api._id) return;

@@ -25,8 +25,9 @@ const ModelListView: React.FC<ModelComponentProps> = ({
             getSecondaryText={getSecondaryText}
             onView={onView}
             onInteraction={onInteraction}
-            interactionTooltip="Add Agent"
-            viewTooltip="View Agent"
+            interactionTooltip="Add Model"
+            viewTooltip="View Model"
+            collectionElementString='Model'
         />
         </>
     );

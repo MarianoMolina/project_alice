@@ -52,6 +52,7 @@ const ApiListView: React.FC<ApiComponentProps> = ({
             onInteraction={onInteraction}
             interactionTooltip="Add Agent"
             viewTooltip="View Agent"
+            collectionElementString='API'
         />
     );
 };

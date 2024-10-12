@@ -2,19 +2,25 @@ import { Theme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
 
 const useStyles = makeStyles((theme: Theme) => ({
-  messagesContainer: {
-    flexGrow: 1,
-    overflowY: 'auto',
-    // display: 'grid',
-  },
-  actionButtonContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-  },
   fullChatView: {
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
+    position: 'relative',
+  },
+  messagesContainer: {
+    flexGrow: 1,
+    overflowY: 'auto',
+    paddingBottom: theme.spacing(8), // Add padding to account for the action button
+  },
+  actionButtonContainer: {
+    position: 'absolute',
+    bottom: theme.spacing(0.5),
+    left: 0,
+    right: 0,
+    display: 'flex',
+    justifyContent: 'center',
+    background: 'transparent',
   },
   emptyMessagesContainer: {
     display: 'flex',
@@ -29,7 +35,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   titleText: {
     marginTop: `${theme.spacing(2)} !important`,
-  }
+  },
 }));
 
 export default useStyles;

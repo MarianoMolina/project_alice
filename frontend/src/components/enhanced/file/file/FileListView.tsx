@@ -13,7 +13,7 @@ const FileListView: React.FC<FileComponentProps> = ({
     const getPrimaryText = (file: FileReference) => file.filename;
     const getSecondaryText = (file: FileReference) => (
         <Typography component="span" variant="body2" color="textSecondary">
-            Type: {file.type}, Size: {bytesToMB(file.file_size)}, Last accessed: {file.last_accessed ? new Date(file.last_accessed).toLocaleString() : 'Never'}
+            Type: {file.type}, Size: {bytesToMB(file.file_size)}
         </Typography>
     );
 
@@ -27,6 +27,7 @@ const FileListView: React.FC<FileComponentProps> = ({
             onInteraction={onInteraction}
             interactionTooltip="Select File"
             viewTooltip="View File Details"
+            collectionElementString='File'
         />
     );
 };

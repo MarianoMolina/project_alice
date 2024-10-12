@@ -2,7 +2,7 @@
 
 Parameters define the structure and types of inputs expected by various components, such as prompts and tasks.
 
-## Parameter Structure
+## Parameter Interface
 
 Parameters are defined using the `FunctionParameters` and `ParameterDefinition` interfaces:
 

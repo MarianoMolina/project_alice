@@ -1,6 +1,13 @@
 # Alice Agent
 
 An Alice Agent is a fundamental component, designed to interact with users and perform various tasks. This document explains the key features and capabilities of an Alice Agent.
+```User_prompt 
+A representation of an AI agent
+```
+![Agent Represents An AI Agent](/content/img/ai_agent_represented_small.png)
+```Agent_prompt
+A futuristic representation of an AI agent. The image shows a sleek, translucent humanoid figure with circuitry and data streams visible within its form. The figure is positioned in a dynamic pose, reaching out with one hand. Its head is slightly oversized, featuring a network of glowing nodes representing neural connections. The background is a abstract digital landscape with flowing lines of code and pulsing energy. The color palette is dominated by cool blues and purples with accents of bright white and electric blue to represent energy and intelligence. The overall style is a blend of digital art and sci-fi concept illustration, creating a sense of advanced technology and artificial consciousness.
+```
 
 ## Core Components
 

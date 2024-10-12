@@ -7,6 +7,9 @@ const useStyles = makeStyles((theme: Theme) => ({
         display: 'flex',
         flexDirection: 'column',
     },
+    cardContent: {
+        maxHeight: '100%',
+    },
     titleContainer: {
         position: 'relative',
         backgroundColor: theme.palette.primary.main,
@@ -36,8 +39,9 @@ const useStyles = makeStyles((theme: Theme) => ({
         display: 'block',
         marginBottom: theme.spacing(2),
     },
-    list: {
-        padding: 0,
+    cardList: {
+        maxHeight: 'calc(100% - 100px)',
+        overflowY: 'auto',
     },
     listItem: {
         width: '100%',

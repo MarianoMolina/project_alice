@@ -15,6 +15,10 @@ const ListItemStyled = styled(ListItem)(({ theme }) => ({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: theme.spacing(1, 1),
+    transition: 'transform 0.1s ease-in-out !important',
+    '&:hover': {
+      transform: 'translateY(-1px)',
+    },
 }));
 
 const ContentBox = styled(Box)({
@@ -39,6 +43,14 @@ interface EnhancedShortListItemProps<T> {
     secondaryText: string;
     onView?: (item: T) => void;
     onInteraction?: (item: T) => void;
+    maxCharacters: number;
+}
+
+function truncateText(text: string, maxLength: number): { truncated: string, isTruncated: boolean } {
+    if (text.length <= maxLength) {
+        return { truncated: text, isTruncated: false };
+    }
+    return { truncated: text.slice(0, maxLength) + '...', isTruncated: true };
 }
 
 function EnhancedShortListItem<T>({
@@ -46,15 +58,31 @@ function EnhancedShortListItem<T>({
     primaryText,
     secondaryText,
     onView,
-    onInteraction
+    onInteraction,
+    maxCharacters
 }: EnhancedShortListItemProps<T>) {
+    const { truncated: truncatedPrimaryText, isTruncated: isPrimaryTruncated } = truncateText(primaryText, maxCharacters);
+    const { truncated: truncatedSecondaryText, isTruncated: isSecondaryTruncated } = truncateText(secondaryText, maxCharacters);
+
+    const renderText = (text: string, truncated: string, isTruncated: boolean, variant: "body1" | "body2") => {
+        const TextComponent = (
+            <Typography variant={variant} color={variant === "body2" ? "textSecondary" : undefined}>
+                {truncated}
+            </Typography>
+        );
+
+        return isTruncated ? (
+            <Tooltip title={text}>
+                {TextComponent}
+            </Tooltip>
+        ) : TextComponent;
+    };
+
     return (
         <ListItemStyled>
             <ContentBox>
-                <Typography variant="body1">{primaryText}</Typography>
-                <Typography variant="body2" color="textSecondary">
-                    {secondaryText}
-                </Typography>
+                {renderText(primaryText, truncatedPrimaryText, isPrimaryTruncated, "body1")}
+                {renderText(secondaryText, truncatedSecondaryText, isSecondaryTruncated, "body2")}
             </ContentBox>
             <ButtonBox>
                 {onView && (
@@ -83,6 +111,7 @@ interface EnhancedShortListViewProps<T> {
     getSecondaryText: (item: T) => string;
     onView?: (item: T) => void;
     onInteraction?: (item: T) => void;
+    maxCharacters?: number;
 }
 
 function EnhancedShortListView<T>({
@@ -92,6 +121,7 @@ function EnhancedShortListView<T>({
     getSecondaryText,
     onView,
     onInteraction,
+    maxCharacters = 50,
 }: EnhancedShortListViewProps<T>) {
     if (!items && !item) {
         return <Typography>No data available.</Typography>;
@@ -105,6 +135,7 @@ function EnhancedShortListView<T>({
             secondaryText={getSecondaryText(itemToRender)}
             onView={onView}
             onInteraction={onInteraction}
+            maxCharacters={maxCharacters}
         />
     );
 
