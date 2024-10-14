@@ -13,6 +13,7 @@ class ApiType(str, Enum):
     SPEECH_TO_TEXT = 'speech_to_text'
     TEXT_TO_SPEECH = 'text_to_speech'
     EMBEDDINGS = 'embeddings'
+    GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph'
 
 class ApiName(str, Enum):
     OPENAI = 'openai_llm',
@@ -47,6 +48,7 @@ class ApiName(str, Enum):
     WIKIPEDIA_SEARCH = 'wikipedia_search',
     EXA_SEARCH = 'exa_search',
     ARXIV_SEARCH = 'arxiv_search'
+    GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph'
 
 ModelApis: List[ApiType] = [ApiType.LLM_MODEL, ApiType.IMG_VISION, ApiType.IMG_GENERATION, ApiType.SPEECH_TO_TEXT, ApiType.TEXT_TO_SPEECH, ApiType.EMBEDDINGS]
     

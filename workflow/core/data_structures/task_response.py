@@ -26,9 +26,9 @@ class TaskResponse(BaseDataStructure):
     references: ReferencesType = Field(default_factory=get_default_references, description="References associated with this task response")
 
     def __str__(self) -> str:
-        base_str = f"{self.task_name}: {self.task_description}\nTask Output:\n{self.task_outputs}"
+        base_str = f"{self.task_name}: {self.task_description}\n\nTask Output:\n\n{self.task_outputs}"
         if self.references:
-            base_str += f"\nReferences: {self.references.summary()}"
+            base_str += f"\n\nReferences: {self.references.summary()}"
         return base_str
     
     def model_dump(self, *args, **kwargs):

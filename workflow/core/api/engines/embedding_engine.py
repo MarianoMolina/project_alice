@@ -4,7 +4,7 @@ from typing import List, Union
 from openai import AsyncOpenAI
 from workflow.core.data_structures import ModelConfig, ApiType, MessageDict, FileContentReference, FileType, ContentType, References, FunctionParameters, ParameterDefinition
 from workflow.core.api.engines.api_engine import APIEngine
-from workflow.util import LOGGER
+from workflow.util import LOGGER, est_token_count
 
 class OpenAIEmbeddingsEngine(APIEngine):
     input_variables: FunctionParameters = Field(
@@ -37,6 +37,8 @@ class OpenAIEmbeddingsEngine(APIEngine):
         )
         # 'text-embedding-ada-002', 'text-embedding-3-small', 'text-embedding-3-large'
         model = api_data.model
+        if est_token_count(input) > api_data.ctx_size:
+            return References(messages=[MessageDict(role='system', content=f"Input text (tokens est.: {est_token_count(input)}) exceeds the maximum token limit: {api_data.ctx_size}", type=ContentType.TEXT)])
         try:
             response = await client.embeddings.create(
                 input=input,

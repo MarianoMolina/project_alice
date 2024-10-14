@@ -5,10 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import ApiSetup from '../components/ui/registration/ApiSetup';
 import RegistrationComplete from '../components/ui/registration/RegistrationComplete';
 import { API } from '../types/ApiTypes';
-import { fetchItem } from '../services/api';
 import useStyles from '../styles/RegisterStyles';
 import Logger from '../utils/Logger';
 import { useCardDialog } from '../contexts/CardDialogContext';
+import { useApi } from '../contexts/ApiContext';
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -22,6 +22,7 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const classes = useStyles();
   const { selectFlexibleItem, selectedFlexibleItem } = useCardDialog();
+  const { fetchItem } = useApi();
 
   const updateAPIs = useCallback(async () => {
     setIsLoading(true);

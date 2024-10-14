@@ -47,6 +47,7 @@ class API(BaseModel):
             api_key=self.api_config.get("api_key"),
             base_url=self.api_config.get("base_url"),
             model=model.model_name if self.api_name != ApiName.LM_STUDIO else model.id,
+            ctx_size=model.ctx_size,
         )
 
     def get_api_data(self, model: Optional[AliceModel] = None) -> Union[Dict[str, Any], ModelConfig]:

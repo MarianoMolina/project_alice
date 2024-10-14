@@ -61,7 +61,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
       const updatedType = updateMessageType(updatedReferences);
       return { ...prev, references: updatedReferences, type: updatedType };
     });
-  }, [updateMessageType]);
+  }, [updateMessageType, addNotification]);
 
   const removeReference = useCallback((type: keyof References, id: string) => {
     setNewMessage(prev => {
@@ -73,7 +73,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
       const updatedType = updateMessageType(updatedReferences);
       return { ...prev, references: updatedReferences, type: updatedType };
     });
-  }, [updateMessageType]);
+  }, [updateMessageType, addNotification]);
 
   useImperativeHandle(ref, () => ({
     addFileReference: (file: FileReference) => addReference('files', file),

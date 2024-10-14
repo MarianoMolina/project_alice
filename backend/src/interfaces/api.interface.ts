@@ -7,6 +7,7 @@ export enum ApiType {
   WIKIPEDIA_SEARCH = 'wikipedia_search',
   EXA_SEARCH = 'exa_search',
   ARXIV_SEARCH = 'arxiv_search',
+  GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph',
   IMG_VISION = 'img_vision',
   IMG_GENERATION = 'img_generation',
   SPEECH_TO_TEXT = 'speech_to_text',
@@ -47,6 +48,7 @@ export enum ApiName {
   WIKIPEDIA_SEARCH = 'wikipedia_search',
   EXA_SEARCH = 'exa_search',
   ARXIV_SEARCH = 'arxiv_search',
+    GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph'
 }
 
 export interface IAPI {

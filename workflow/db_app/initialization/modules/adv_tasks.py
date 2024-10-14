@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 from pydantic import Field
-from workflow.db_app.initialization.modules.init_module import InitializationModule, get_prompt_file
+from workflow.db_app.initialization.modules.init_module import InitializationModule
 
 class AdvTasksModule(InitializationModule):
     """This module defines the advanced tasks (img gen, tts, embeddings), their agents, parameters and prompts."""
@@ -50,7 +50,7 @@ adv_tasks_module = AdvTasksModule(
                 "key": "speed_parameter",
                 "type": "number",
                 "description": "The speed of the speech."
-            }
+            },
         ],
         "agents": [
             {
@@ -66,13 +66,13 @@ adv_tasks_module = AdvTasksModule(
             },
             {
                 "key": "image_gen_agent",
-                "name": "image_gen_agent",
+                "name": "image_gen_dalle_agent",
                 "system_message": "default_system_message",
                 "models": {
                     "img_gen": "Dall-E-3",
                 },
                 "has_code_exec": False,
-                "has_functions": True,
+                "has_functions": False,
                 "max_consecutive_auto_reply": 1,
             },
             {
@@ -84,6 +84,17 @@ adv_tasks_module = AdvTasksModule(
                 },
                 "has_code_exec": False,
                 "has_functions": True,
+                "max_consecutive_auto_reply": 1,
+            },
+            {
+                "key": "image_gen_gemini_agent",
+                "name": "image_gen_gemini_agent",
+                "system_message": "default_system_message",
+                "models": {
+                    "img_gen": "gemini_img_gen_imagen_3",
+                },
+                "has_code_exec": False,
+                "has_functions": False,
                 "max_consecutive_auto_reply": 1,
             }
         ],
@@ -106,8 +117,26 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "image_gen_task",
                 "task_type": "GenerateImageTask",
-                "task_name": "image_gen_task",
+                "task_name": "image_gen_task_dall_e",
                 "agent": "image_gen_agent",
+                "task_description": "Generates an image from the input text",
+                "input_variables": {
+                    "type": "object",
+                    "properties": {
+                        "prompt": "prompt_img_gen",
+                        "n": "n_parameter",
+                        "size": "size_parameter",
+                        "quality": "quality_parameter"
+                    },
+                    "required": ["prompt"]
+                },
+                "required_apis": ["img_generation"],
+            },
+            {
+                "key": "image_gen_task_gemini",
+                "task_type": "GenerateImageTask",
+                "task_name": "image_gen_task_gemini",
+                "agent": "image_gen_gemini_agent",
                 "task_description": "Generates an image from the input text",
                 "input_variables": {
                     "type": "object",

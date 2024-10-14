@@ -1,7 +1,6 @@
 import { AliceAgent } from "./AgentTypes";
 import { Prompt } from "./PromptTypes";
 import { FunctionParameters } from "./ParameterTypes";
-import { AliceModel } from './ModelTypes';
 import { ApiType } from './ApiTypes';
 import { EnhancedComponentProps } from "./CollectionTypes";
 import { API, APIEngine } from './ApiTypes';

@@ -11,6 +11,7 @@ const apiIcons: Record<ApiType, React.ReactElement> = {
   [ApiType.GOOGLE_SEARCH]: <Google />,
   [ApiType.EXA_SEARCH]: <Search />,
   [ApiType.ARXIV_SEARCH]: <Book />,
+  [ApiType.GOOGLE_KNOWLEDGE_GRAPH]: <Search />,
   [ApiType.IMG_VISION]: <RemoveRedEye />,
   [ApiType.IMG_GENERATION]: <Brush />,
   [ApiType.SPEECH_TO_TEXT]: <Hearing />,

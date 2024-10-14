@@ -163,6 +163,7 @@ export enum ApiName {
     WIKIPEDIA_SEARCH = 'wikipedia_search',
     EXA_SEARCH = 'exa_search',
     ARXIV_SEARCH = 'arxiv_search',
+    GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph'
 }
 ```
 

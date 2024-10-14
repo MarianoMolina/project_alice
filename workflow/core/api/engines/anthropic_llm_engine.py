@@ -5,7 +5,7 @@ from anthropic.types import TextBlock, ToolUseBlock, ToolParam, Message
 from workflow.core.data_structures import ToolCall, ToolCallConfig, ToolFunction
 from workflow.core.api.engines.llm_engine import LLMEngine
 from workflow.core.data_structures import MessageDict, ContentType, ModelConfig, References
-from workflow.util import LOGGER
+from workflow.util import LOGGER, est_messages_token_count, prune_messages
 
 ANTHROPIC_PRICING_1k = {
     "claude-3-5-sonnet-20240620": (0.003, 0.015),
@@ -62,7 +62,7 @@ class LLMAnthropic(LLMEngine):
                     
                     if prev_role != next_role:
                         # Append content to the previous message
-                        adapted[-1]["content"] += f"\n[{role}]: {content}"
+                        adapted[-1]["content"] += f"\n\n[{role}]: {content}"
                         continue
                     else:
                         # Use the other role
@@ -124,6 +124,14 @@ class LLMAnthropic(LLMEngine):
             api_key=api_data.api_key, 
             base_url=api_data.base_url
         )
+        estimated_tokens = est_messages_token_count(messages, tools)
+        if estimated_tokens > api_data.ctx_size:
+            LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning. ")
+        elif estimated_tokens > 0.8 * api_data.ctx_size:
+            LOGGER.warning(f"Estimated tokens ({estimated_tokens}) are over 80% of context size ({api_data.ctx_size}).")
+        # Prune messages if estimated tokens exceed context size
+        if estimated_tokens > api_data.ctx_size:
+            messages = prune_messages(messages, api_data.ctx_size)
 
         anthropic_tools: Optional[List[ToolParam]] = self._convert_into_tool_params(tools) if tools else None
 

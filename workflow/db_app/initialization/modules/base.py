@@ -17,6 +17,7 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
 BACKEND_HOST = os.getenv("BACKEND_HOST")
 BACKEND_PORT = os.getenv("BACKEND_PORT")
+GOOGLE_KNOWLEDGE_GRAPH_API_KEY = os.getenv("GOOGLE_KNOWLEDGE_GRAPH_API_KEY")
 LOCAL_LLM_API_URL = f"http://{BACKEND_HOST}:{BACKEND_PORT}/lm-studio"
 
 class BaseModule(InitializationModule):
@@ -260,6 +261,17 @@ base_module = BaseModule(
             }
         ],
         "apis": [
+            {
+                "key": "google_knowledge_graph_api",
+                "api_type": "google_knowledge_graph",
+                "api_name": "google_knowledge_graph",
+                "name": "Google Knowledge Graph",
+                "api_config": {
+                    "api_key": GOOGLE_KNOWLEDGE_GRAPH_API_KEY
+                },
+                "is_active": True,
+                "health_status": "healthy" if GOOGLE_KNOWLEDGE_GRAPH_API_KEY else "unhealthy",
+            },
             {
                 "key": "reddit_search",
                 "api_type": "reddit_search",

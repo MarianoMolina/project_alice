@@ -72,7 +72,7 @@ coding_workflow_module = CodingWorkflowModule(
             {
                 "key": "code_execution_task",
                 "name": "Code Execution Task",
-                "content": "This is the code:\n{{ outputs_generate_code }}",
+                "content": "This is the code:\n\n{{ outputs_generate_code }}",
                 "is_templated": True,
                 "parameters": {
                     "type": "object",
