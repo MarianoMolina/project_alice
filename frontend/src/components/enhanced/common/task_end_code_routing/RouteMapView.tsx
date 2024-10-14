@@ -24,7 +24,7 @@ const RouteMapView: React.FC<RouteMapProps> = ({
     if (!isViewMode) {
       onChange({
         ...routeMap,
-        [exitCode]: [nextTask, retry],
+        [exitCode]: [nextTask ?? null, retry],
       });
     }
   };
@@ -47,13 +47,13 @@ const RouteMapView: React.FC<RouteMapProps> = ({
               <Typography>{nextTask || 'None'}</Typography>
             ) : (
               <Select
-                value={nextTask || ''}
+                value={nextTask || undefined}
                 onChange={(e) => handleRouteChange(parseInt(exitCode), e.target.value as string, retry)}
                 size="small"
                 className={classes.select}
                 disabled={isViewMode}
               >
-                <MenuItem value="">None</MenuItem>
+                <MenuItem value={undefined}>None</MenuItem>
                 {availableTasks.map(task => (
                   <MenuItem key={task} value={task}>{task}</MenuItem>
                 ))}

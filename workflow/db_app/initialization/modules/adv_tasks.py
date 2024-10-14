@@ -155,7 +155,7 @@ adv_tasks_module = AdvTasksModule(
                 "task_type": "TextToSpeechTask",
                 "task_name": "tts_task",
                 "agent": "tts_agent",
-                "task_description": "Converts text to speech",
+                "task_description": "Converts text to speech using the OpenAI TTS API",
                 "input_variables": {
                     "type": "object",
                     "properties": {

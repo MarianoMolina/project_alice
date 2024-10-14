@@ -111,7 +111,16 @@ base_module = BaseModule(
                 "short_name": "tts-1",
                 "model_name": "tts-1",
                 "model_format": "Base", # random value
-                "ctx_size": 2048, # random value
+                "ctx_size": 4096,
+                "model_type": "tts",
+                "api_name": "openai_tts",
+            },
+            {
+                "key": "tts-1-hd",
+                "short_name": "tts-1-hd",
+                "model_name": "tts-1-hd",
+                "model_format": "Base", # random value
+                "ctx_size": 4096, 
                 "model_type": "tts",
                 "api_name": "openai_tts",
             },
@@ -120,7 +129,7 @@ base_module = BaseModule(
                 "short_name": "text-embedding-3-large",
                 "model_name": "text-embedding-3-large",
                 "model_format": "Base", # random value
-                "ctx_size": 2048, # random value
+                "ctx_size": 8192,
                 "model_type": "embeddings",
                 "api_name": "openai_embeddings",
             },

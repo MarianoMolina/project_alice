@@ -127,10 +127,6 @@ export const getDefaultTaskForm = (taskType: TaskType): AliceTask => {
     case 'APITask':
       return {
         ...baseForm,
-        task_name: '',
-        task_description: '',
-        input_variables: null,
-        required_apis: [],
       };
     default:
       return baseForm;

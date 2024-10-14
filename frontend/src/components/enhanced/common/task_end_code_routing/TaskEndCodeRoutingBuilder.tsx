@@ -19,6 +19,7 @@ const TaskEndCodeRoutingBuilder: React.FC<TaskEndCodeRoutingBuilderProps> = ({
   isViewMode = false,
 }) => {
   const [warnings, setWarnings] = useState<string[]>([]);
+  const [selectedTask, setSelectedTask] = useState<string>('');
   const classes = useStyles();
 
   const validateRouting = useCallback(() => {
@@ -47,6 +48,7 @@ const TaskEndCodeRoutingBuilder: React.FC<TaskEndCodeRoutingBuilderProps> = ({
       ...routing,
       [taskName]: {},
     });
+    setSelectedTask(''); // Reset the select after adding a task
   };
 
   const handleRouteMapChange = (taskName: string, newRouteMap: RouteMap) => {
@@ -83,8 +85,12 @@ const TaskEndCodeRoutingBuilder: React.FC<TaskEndCodeRoutingBuilderProps> = ({
       {!isViewMode && unusedTasks.length > 0 && (
         <Box mt={2}>
           <Select
-            value=""
-            onChange={(e) => handleTaskAdd(e.target.value as string)}
+            value={selectedTask}
+            onChange={(e) => {
+              const value = e.target.value as string;
+              setSelectedTask(value);
+              handleTaskAdd(value);
+            }}
             displayEmpty
           >
             <MenuItem value="" disabled>Add a task</MenuItem>
