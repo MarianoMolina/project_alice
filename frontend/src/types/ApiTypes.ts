@@ -15,6 +15,7 @@ export enum ApiType {
     SPEECH_TO_TEXT = 'speech_to_text',
     TEXT_TO_SPEECH = 'text_to_speech',
     EMBEDDINGS = 'embeddings',
+    GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph'
 }
 
 export enum ModelApiType {
@@ -59,6 +60,7 @@ export enum ApiName {
     WIKIPEDIA_SEARCH = 'wikipedia_search',
     EXA_SEARCH = 'exa_search',
     ARXIV_SEARCH = 'arxiv_search',
+    GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph'
 }
 
 export enum LlmProvider {

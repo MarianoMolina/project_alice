@@ -42,6 +42,12 @@ export const API_TYPE_CONFIGS: Record<ApiType, ApiTypeConfig> = {
     api_name: [ApiName.ARXIV_SEARCH],
     apiConfig: {},
   },
+  [ApiType.GOOGLE_KNOWLEDGE_GRAPH]: {
+    api_name: [ApiName.GOOGLE_KNOWLEDGE_GRAPH],
+    apiConfig: {
+      api_key: '',
+    },
+  },
   [ApiType.IMG_VISION]: {
     api_name: [ApiName.OPENAI_VISION, ApiName.ANTHROPIC_VISION, ApiName.LM_STUDIO_VISION, ApiName.GEMINI_VISION, ApiName.MISTRAL_VISION, ApiName.META_VISION, ApiName.GROQ_VISION],
     apiConfig: {

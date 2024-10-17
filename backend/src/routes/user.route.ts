@@ -6,25 +6,10 @@ import adminOnly from '../middleware/admin.middleware';
 import User from '../models/user.model';
 import { AuthRequest } from '../interfaces/auth.interface';
 import axios from 'axios';
-import mongoose from 'mongoose';
-import Agent from '../models/agent.model';
-import API from '../models/api.model';
-import Chat from '../models/chat.model';
-import Model from '../models/model.model';
-import Prompt from '../models/prompt.model';
-import Task from '../models/task.model';
-import TaskResult from '../models/taskResult.model';
-import ParameterDefinition from '../models/parameter.model';
 import Logger from '../utils/logger';
-import FileReference from '../models/file.model';
-import Message from '../models/message.model';
-import URLReference from '../models/urlReference.model';
 import { purgeAndReinitialize } from '../utils/purge.utils';
 
 const router: Router = express.Router();
-
-const workflow_port = process.env.WORKFLOW_PORT_DOCKER || 8000;
-const workflow_name = process.env.WORKFLOW_NAME || 'workflow';
 
 const handleErrors = (res: Response, error: any) => {
   console.error('Error in user route:', error);
@@ -113,12 +98,12 @@ router.get('/:id', userSelfOrAdmin, async (req: AuthRequest, res: Response) => {
 });
 
 // Update a user by ID (authenticated users can update their own info, admins can update any user's info)
-router.put('/:id', userSelfOrAdmin, async (req: AuthRequest, res: Response) => {
+router.patch('/:id', userSelfOrAdmin, async (req: AuthRequest, res: Response) => {
   try {
     if (req.body.password) {
       req.body.password = await bcrypt.hash(req.body.password, 10);
     }
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true, });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }

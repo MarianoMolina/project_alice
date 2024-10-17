@@ -22,9 +22,9 @@ const TaskTableView: React.FC<TaskComponentProps> = ({
       sortKey: 'task_description'
     },
     {
-      header: 'Created At',
-      render: (task: AliceTask) => new Date(task.createdAt || '').toLocaleString(),
-      sortKey: 'createdAt'
+      header: 'Type',
+      render: (task: AliceTask) =>  task.task_type || 'N/A',
+      sortKey: 'task_type'
     }
   ];
 

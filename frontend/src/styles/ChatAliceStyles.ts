@@ -6,14 +6,13 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: 'flex',
     height: '100%',
     maxWidth: '100%',
-    // overflow: 'hidden',
   },
   chatAliceMain: {
     flexGrow: 1,
     display: 'flex',
     flexDirection: 'column',
     minWidth: 0,
-    overflow: 'auto',
+    height: '100%',
   },
   chatAliceMessages: {
     flexGrow: 1,
@@ -21,11 +20,14 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: 'flex',
     flexDirection: 'column',
     margin: '0 10px',
-    maxHeight: 'calc(100% - 73px)',
+    overflow: 'auto', 
+    minHeight: 0,
   },
   chatAliceInput: {
     borderTop: `1px solid ${theme.palette.divider}`,
-    padding: theme.spacing(1),
+    padding: theme.spacing(1, 1, 0, 1),
+    display: 'flex',
+    flexDirection: 'column',
   },
   actionButtonContainer: {
     display: 'flex',

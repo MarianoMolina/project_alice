@@ -1,6 +1,6 @@
 from typing import List, Type
 from pydantic import Field, model_validator
-from workflow.core.api import APIManager, APIEngine, WikipediaSearchAPI, GoogleSearchAPI, ExaSearchAPI, ArxivSearchAPI, RedditSearchAPI
+from workflow.core.api import APIManager, APIEngine, WikipediaSearchAPI, GoogleSearchAPI, ExaSearchAPI, ArxivSearchAPI, RedditSearchAPI, GoogleGraphEngine
 from workflow.core.data_structures import TaskResponse, ApiType
 from workflow.core.tasks.task import AliceTask
 
@@ -64,6 +64,7 @@ class APITask(AliceTask):
             ApiType.EXA_SEARCH: ExaSearchAPI,
             ApiType.ARXIV_SEARCH: ArxivSearchAPI,
             ApiType.REDDIT_SEARCH: RedditSearchAPI,
+            ApiType.GOOGLE_KNOWLEDGE_GRAPH: GoogleGraphEngine
         }
 
         # Get the correct API engine class

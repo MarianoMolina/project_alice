@@ -3,6 +3,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
+    env_file:
+      - .env
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT_DOCKER}"
     depends_on:
@@ -16,11 +18,11 @@ services:
       - ./frontend:/app:delegated
       - /app/node_modules
       - /app/dist
-      - ./.env:/app/.env:ro
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       CHOKIDAR_USEPOLLING: "true"
       WATCHPACK_POLLING: "true"
+      PORT: ${FRONTEND_PORT_DOCKER:-4000}
 
   backend:
     build:

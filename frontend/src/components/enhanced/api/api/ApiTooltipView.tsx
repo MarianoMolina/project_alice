@@ -11,6 +11,7 @@ const apiIcons: Record<ApiType, React.ReactElement> = {
   [ApiType.GOOGLE_SEARCH]: <Google />,
   [ApiType.EXA_SEARCH]: <Search />,
   [ApiType.ARXIV_SEARCH]: <Book />,
+  [ApiType.GOOGLE_KNOWLEDGE_GRAPH]: <Search />,
   [ApiType.IMG_VISION]: <RemoveRedEye />,
   [ApiType.IMG_GENERATION]: <Brush />,
   [ApiType.SPEECH_TO_TEXT]: <Hearing />,
@@ -43,7 +44,7 @@ const ApiTooltipView: React.FC<ApiComponentProps> = ({ items, onInteraction }) =
     name: api.name,
     designation: api.api_type,
     image: (
-      <div 
+      <div
         className={`relative w-full h-full rounded-full flex items-center justify-center ${getBackgroundColor(api.health_status)} cursor-pointer`}
         onClick={() => handleClick(api)}
       >
@@ -56,8 +57,10 @@ const ApiTooltipView: React.FC<ApiComponentProps> = ({ items, onInteraction }) =
   }));
 
   return (
-    <div className="flex flex-row items-center justify-center mb-10 w-full">
-      <AnimatedTooltip items={tooltipItems} />
+    <div className="w-full overflow-x-auto">
+      <div className="flex flex-row items-center justify-center mb-4 w-fit">
+        <AnimatedTooltip items={tooltipItems} />
+      </div>
     </div>
   );
 };

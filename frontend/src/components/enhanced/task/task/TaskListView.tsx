@@ -17,7 +17,7 @@ const TaskListView: React.FC<TaskComponentProps> = ({
                 </Typography>
                 <br />
                 <Typography component="span" variant="body2" color="textSecondary">
-                    Created: {new Date(task.createdAt || '').toLocaleString()}
+                    Type: {task.task_type || 'N/A'}
                 </Typography>
             </>
     );
@@ -32,6 +32,7 @@ const TaskListView: React.FC<TaskComponentProps> = ({
             onInteraction={onInteraction}
             interactionTooltip="Add Task"
             viewTooltip="View Task"
+            collectionElementString='Task'
         />
     );
 };

@@ -54,22 +54,26 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
       }
       if (!updatedReferences[type]!.some((ref: any) => ref._id === item._id)) {
         updatedReferences[type] = [...updatedReferences[type]!, item];
+        addNotification('Reference added', 'success');
+      } else {
+        addNotification('Reference already added', 'info');
       }
       const updatedType = updateMessageType(updatedReferences);
       return { ...prev, references: updatedReferences, type: updatedType };
     });
-  }, [updateMessageType]);
+  }, [updateMessageType, addNotification]);
 
   const removeReference = useCallback((type: keyof References, id: string) => {
     setNewMessage(prev => {
       const updatedReferences = { ...prev.references };
       if (updatedReferences[type]) {
         updatedReferences[type] = (updatedReferences[type] as any[]).filter((ref: any) => ref._id !== id);
+        addNotification('Reference removed', 'info');
       }
       const updatedType = updateMessageType(updatedReferences);
       return { ...prev, references: updatedReferences, type: updatedType };
     });
-  }, [updateMessageType]);
+  }, [updateMessageType, addNotification]);
 
   useImperativeHandle(ref, () => ({
     addFileReference: (file: FileReference) => addReference('files', file),
@@ -192,7 +196,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
         </Button>
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, my: 1 }}>
           {renderReferenceChips()}
         </Box>
       </Box>

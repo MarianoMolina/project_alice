@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { API } from '../../../types/ApiTypes';
 import ApiTooltipView from '../../enhanced/api/api/ApiTooltipView';
-import { useCardDialog } from '../../../contexts/CardDialogContext';
 
 interface ApiSetupProps {
   apis: API[];
@@ -21,7 +20,7 @@ const ApiSetup: React.FC<ApiSetupProps> = ({ apis, onApiSelect, onComplete }) =>
       <Typography variant="h6" gutterBottom>
         Configure Your APIs
       </Typography>
-      <ApiTooltipView items={apis} onInteraction={onApiSelect} item={null} onChange={() => {}} mode={'view'} handleSave={async () => {}}/>
+      <ApiTooltipView items={apis} onInteraction={onApiSelect} item={null} onChange={() => { }} mode={'view'} handleSave={async () => { }} />
       <Button variant="contained" color="primary" onClick={handleComplete}>
         Complete Setup
       </Button>

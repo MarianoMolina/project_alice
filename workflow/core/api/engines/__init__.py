@@ -16,7 +16,7 @@ from .gemini_vision import GeminiVisionEngine
 from .gemini_embedding import GeminiEmbeddingsEngine
 from .gemini_stt import GeminiSpeechToTextEngine
 from .gemini_img_gen import GeminiImageGenerationEngine
-from .groq_llm_engine import GroqLLMEngine
+from .google_knowledge_graph_engine import GoogleGraphEngine
 ApiEngineMap = {
     ApiType.LLM_MODEL: {
         ApiName.OPENAI: LLMEngine,
@@ -43,6 +43,9 @@ ApiEngineMap = {
     },
     ApiType.ARXIV_SEARCH: {
         ApiName.ARXIV_SEARCH: ArxivSearchAPI,
+    },
+    ApiType.GOOGLE_KNOWLEDGE_GRAPH: {
+        ApiName.GOOGLE_KNOWLEDGE_GRAPH: GoogleGraphEngine,
     },
     ApiType.IMG_VISION: {
         ApiName.OPENAI_VISION: VisionModelEngine,
@@ -72,7 +75,7 @@ ApiEngineMap = {
         ApiName.GEMINI_EMBEDDINGS: GeminiEmbeddingsEngine,
     },
 }
-__all__ = ["ArxivSearchAPI", "ExaSearchAPI", "GoogleSearchAPI", "RedditSearchAPI", "WikipediaSearchAPI", "APIEngine", "GroqLLMEngine", "GeminiImageGenerationEngine",
+__all__ = ["ArxivSearchAPI", "ExaSearchAPI", "GoogleSearchAPI", "RedditSearchAPI", "WikipediaSearchAPI", "APIEngine", "GeminiImageGenerationEngine",
            "LLMEngine", "LLMOpenAI", "LLMAnthropic", "ImageGenerationEngine", "CohereLLMEngine", "GeminiVisionEngine", "GeminiEmbeddingsEngine", "GeminiSpeechToTextEngine",
            "VisionModelEngine", "AnthropicVisionEngine", "OpenAISpeechToTextEngine", "OpenAIAdvancedSpeechToTextEngine",
-           "OpenAITextToSpeechEngine", "OpenAIEmbeddingsEngine", "GeminiLLMEngine"]
+           "OpenAITextToSpeechEngine", "OpenAIEmbeddingsEngine", "GeminiLLMEngine", "CohereLLMEngine", "GoogleGraphEngine"]

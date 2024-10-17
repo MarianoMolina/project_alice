@@ -12,7 +12,7 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import dagre from 'dagre';
-import { Box, Typography } from '@mui/material';
+import { Alert, Box, Typography } from '@mui/material';
 import { TasksEndCodeRouting } from '../../../../types/TaskTypes';
 import SelfLoopEdge from './SelfLoopEdge';
 import DoubleBackEdge from './DoubleBackEdge';
@@ -24,8 +24,8 @@ interface FlowchartProps {
 }
 
 const edgeTypes: EdgeTypes = {
-    selfLoop: SelfLoopEdge,
-    doubleBack: DoubleBackEdge,
+    selfLoop: (props) => <SelfLoopEdge {...props} />,
+    doubleBack: (props) => <DoubleBackEdge {...props} />,
 };
 
 const nodeWidth = 180;
@@ -58,8 +58,8 @@ const Flowchart: React.FC<FlowchartProps> = ({ tasksEndCodeRouting, startTask })
                 return {
                     ...node,
                     position: {
-                        x: nodeWithPosition.x - nodeWidth / 2,
-                        y: nodeWithPosition.y - nodeHeight / 2,
+                        x: isNaN(nodeWithPosition.x) ? 0 : nodeWithPosition.x - nodeWidth / 2,
+                        y: isNaN(nodeWithPosition.y) ? 0 : nodeWithPosition.y - nodeHeight / 2,
                     },
                 };
             });
@@ -68,31 +68,30 @@ const Flowchart: React.FC<FlowchartProps> = ({ tasksEndCodeRouting, startTask })
                 const sourceNode = layoutedNodes.find(n => n.id === edge.source);
                 const targetNode = layoutedNodes.find(n => n.id === edge.target);
 
-                if (sourceNode && targetNode) {
-                    const isBackEdge = sourceNode.position.y > targetNode.position.y;
-                    const isSelfLoop = edge.source === edge.target;
+                if (!sourceNode || !targetNode) {
+                    console.warn(`Edge ${edge.id} has missing source or target node`);
+                    return edge;
+                }
 
-                    if (isSelfLoop) {
-                        return {
-                            ...edge,
-                            type: 'selfLoop',
-                            sourceHandle: 'bottom',
-                            targetHandle: 'top',
-                            markerEnd: {
-                                type: MarkerType.ArrowClosed,
-                            },
-                        };
-                    } else if (isBackEdge) {
-                        return {
-                            ...edge,
-                            type: 'doubleBack',
-                            sourceHandle: 'right',
-                            targetHandle: 'right',
-                            markerEnd: {
-                                type: MarkerType.ArrowClosed,
-                            },
-                        };
-                    }
+                const isBackEdge = sourceNode.position.y > targetNode.position.y;
+                const isSelfLoop = edge.source === edge.target;
+
+                if (isSelfLoop) {
+                    return {
+                        ...edge,
+                        type: 'selfLoop',
+                        markerEnd: {
+                            type: MarkerType.ArrowClosed,
+                        },
+                    };
+                } else if (isBackEdge) {
+                    return {
+                        ...edge,
+                        type: 'doubleBack',
+                        markerEnd: {
+                            type: MarkerType.ArrowClosed,
+                        },
+                    };
                 }
 
                 return edge;
@@ -102,7 +101,11 @@ const Flowchart: React.FC<FlowchartProps> = ({ tasksEndCodeRouting, startTask })
         },
         []
     );
+
     useEffect(() => {
+        console.log('tasksEndCodeRouting:', tasksEndCodeRouting);
+        console.log('startTask:', startTask);
+
         const nodes: Node[] = [];
         const edges: Edge[] = [];
         const addedNodes = new Set<string>();
@@ -118,16 +121,18 @@ const Flowchart: React.FC<FlowchartProps> = ({ tasksEndCodeRouting, startTask })
                         width: nodeWidth, 
                         height: nodeHeight, 
                         padding: 10,
-                        backgroundColor: isEndNode ? '#90EE90' : undefined, // Light green for end node
-                        border: isEndNode ? '2px solid #2E8B57' : undefined // Dark green border for end node
+                        backgroundColor: isEndNode ? '#90EE90' : undefined,
+                        border: isEndNode ? '2px solid #2E8B57' : undefined
                     },
-                    targetPosition: Position.Top,
                     sourcePosition: Position.Bottom,
+                    targetPosition: Position.Top,
                 });
                 addedNodes.add(taskName);
             }
         };
+
         addNode("End", true);
+
         const processTask = (taskName: string) => {
             if (processedTasks.has(taskName)) {
                 return;
@@ -141,9 +146,15 @@ const Flowchart: React.FC<FlowchartProps> = ({ tasksEndCodeRouting, startTask })
             if (!routeMap || Object.keys(routeMap).length === 0) {
                 return;
             }
-
-            Object.entries(routeMap).forEach(([exitCode, [nextTask, isFailure]]) => {
-                if (nextTask !== null) {
+            
+            Object.entries(routeMap).forEach(([exitCode, routeInfo]) => {
+                if (!Array.isArray(routeInfo) || routeInfo.length < 2) {
+                    console.warn(`Invalid route info for task ${taskName}, exit code ${exitCode}`);
+                    return;
+                }
+            
+                const [nextTask, isFailure] = routeInfo;
+                if (nextTask !== null && nextTask !== "" && nextTask !== undefined) {
                     addNode(nextTask);
                     edges.push({
                         id: `${taskName}-${nextTask}-${exitCode}`,
@@ -151,7 +162,7 @@ const Flowchart: React.FC<FlowchartProps> = ({ tasksEndCodeRouting, startTask })
                         target: nextTask,
                         label: exitCode,
                         labelStyle: { fill: '#888', fontWeight: 700 },
-                        type: 'smoothstep',
+                        type: 'default',
                         markerEnd: {
                             type: MarkerType.ArrowClosed,
                         },
@@ -161,14 +172,13 @@ const Flowchart: React.FC<FlowchartProps> = ({ tasksEndCodeRouting, startTask })
                         processTask(nextTask);
                     }
                 } else {
-                    // Handle the case where nextTask is null (end of workflow)
                     edges.push({
                         id: `${taskName}-End-${exitCode}`,
                         source: taskName,
                         target: "End",
                         label: exitCode,
                         labelStyle: { fill: '#888', fontWeight: 700 },
-                        type: 'smoothstep',
+                        type: 'default',
                         markerEnd: {
                             type: MarkerType.ArrowClosed,
                         },
@@ -180,21 +190,39 @@ const Flowchart: React.FC<FlowchartProps> = ({ tasksEndCodeRouting, startTask })
 
         processTask(startTask);
 
-        // Process any remaining tasks that weren't reached from the start task
         Object.keys(tasksEndCodeRouting).forEach(taskName => {
             if (!processedTasks.has(taskName)) {
                 processTask(taskName);
             }
         });
 
+        console.log('Nodes before layout:', nodes);
+        console.log('Edges before layout:', edges);
+
         const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
             nodes,
             edges
         );
 
+        console.log('Nodes after layout:', layoutedNodes);
+        console.log('Edges after layout:', layoutedEdges);
+
         setNodes(layoutedNodes);
         setEdges(layoutedEdges);
     }, [tasksEndCodeRouting, startTask, getLayoutedElements, setNodes, setEdges]);
+
+    if (!tasksEndCodeRouting || Object.keys(tasksEndCodeRouting).length === 0) {
+        return (
+            <Box className={classes.flowChartContainer}>
+                <Typography variant="h6">
+                    Workflow Flowchart
+                </Typography>
+                <Alert severity="info" sx={{ width: '100%', marginTop: 10 }}>
+                    No tasks found to build the flowchart.
+                </Alert>
+            </Box>
+        );
+    }
 
     return (
         <Box className={classes.flowChartContainer}>

@@ -11,14 +11,9 @@ const ParameterListView: React.FC<ParameterComponentProps> = ({
 }) => {
     const getPrimaryText = (parameter: ParameterDefinition) => parameter.type;
     const getSecondaryText = (parameter: ParameterDefinition) => (
-        <>
-            <Typography component="span" variant="body2" color="textSecondary">
-                Description: {parameter.description}
-            </Typography>
-            <Typography component="span" variant="body2" color="textSecondary">
-                Created: {new Date(parameter.createdAt || '').toLocaleString()}
-            </Typography>
-        </>
+        <Typography component="span" variant="body2" color="textSecondary">
+            Description: {parameter.description}
+        </Typography>
     );
 
     return (
@@ -31,6 +26,7 @@ const ParameterListView: React.FC<ParameterComponentProps> = ({
             onInteraction={onInteraction}
             interactionTooltip="Add Parameter"
             viewTooltip="View Parameter"
+            collectionElementString='Parameter'
         />
     );
 };

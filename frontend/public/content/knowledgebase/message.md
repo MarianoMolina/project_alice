@@ -2,7 +2,7 @@
 
 Messages represent individual units of communication within chats, encompassing various types of content and metadata.
 
-## Message Structure
+## Message Interface
 
 Each message in the system is represented by the `MessageType` interface:
 

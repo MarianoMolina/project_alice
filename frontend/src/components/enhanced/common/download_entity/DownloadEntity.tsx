@@ -2,6 +2,7 @@ import { IconButton, Tooltip } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import { styled } from '@mui/system';
 import { CollectionName, collectionNameToElementString, CollectionType } from '../../../../types/CollectionTypes';
+import { removeCreatedUpdatedBy } from '../../../../utils/AuthUtils';
 
 interface DownloadEntityProps<T extends CollectionName> {
     item: CollectionType[T];
@@ -23,10 +24,10 @@ export function DownloadEntity<T extends CollectionName>({
 }: DownloadEntityProps<T>) {
     const handleDownload = () => {
         const fileName = `${collectionNameToElementString[itemType]}${item._id ? '_' + item._id : ''}.json`;
-        const json = JSON.stringify(item, null, 2);
+        const cleanedItem = removeCreatedUpdatedBy(item);
+        const json = JSON.stringify(cleanedItem, null, 2);
         const blob = new Blob([json], { type: 'application/json' });
         const href = URL.createObjectURL(blob);
-
         const link = document.createElement('a');
         link.href = href;
         link.download = fileName;

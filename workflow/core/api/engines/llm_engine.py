@@ -4,7 +4,7 @@ from openai.types.chat import ChatCompletion
 from pydantic import Field
 from typing import Dict, Any, List, Optional
 from workflow.core.api.engines import APIEngine
-from workflow.util import LOGGER
+from workflow.util import LOGGER, est_messages_token_count, prune_messages
 from workflow.core.data_structures import MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall
 
 class LLMEngine(APIEngine):
@@ -111,6 +111,15 @@ class LLMEngine(APIEngine):
         if system:
             messages = [{"role": "system", "content": system}] + messages
 
+        estimated_tokens = est_messages_token_count(messages, tools)
+        if estimated_tokens > api_data.ctx_size:
+            LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning. ")
+        elif estimated_tokens > 0.8 * api_data.ctx_size:
+            LOGGER.warning(f"Estimated tokens ({estimated_tokens}) are over 80% of context size ({api_data.ctx_size}).")
+        # Prune messages if estimated tokens exceed context size
+        if estimated_tokens > api_data.ctx_size:
+            messages = prune_messages(messages, api_data.ctx_size)
+
         try:
             # Prepare the API call parameters
             api_params = {
@@ -199,7 +208,10 @@ class LLMEngine(APIEngine):
             'gpt-3.5-turbo': (0.0015, 0.002),  # (input_price, output_price) per 1K tokens
             'gpt-4': (0.03, 0.06),
             'gpt-4-32k': (0.06, 0.12),
-            # Add more models and their pricing as needed
+            "llama3-70b-8192": (0.00059, 0.00079),
+            "mixtral-8x7b-32768": (0.00024, 0.00024),
+            "llama3-8b-8192": (0.00005, 0.00008),
+            "gemma-7b-it": (0.00007, 0.00007),
         }
 
         model_pricing = pricing.get(model, (0.0, 0.0))

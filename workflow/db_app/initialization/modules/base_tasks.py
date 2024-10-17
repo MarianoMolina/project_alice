@@ -34,6 +34,21 @@ base_tasks_module = BaseTasksModule(
                 "type": "string",
                 "description": "The subreddit to search",
                 "default": "all"
+            },
+            {
+                "key": "query_parameter",
+                "type": "string",
+                "description": "The entity to search for in the Knowledge Graph."
+            },
+            {
+                "key": "types_parameter",
+                "type": "string",
+                "description": "An optional list of entity types to restrict the results. Provide them as comma separated values. Types are: Book, BookSeries, EducationalOrganization, Event, GovernmentOrganization, LocalBusiness, Movie, MovieSeries, MusicAlbum, MusicGroup, MusicRecording, Organization, Periodical, Person, Place, SportsTeam, TVEpisode, TVSeries, VideoGame, VideoGameSeries, WebSite"
+            },
+            {
+                "key": "limit_parameter",
+                "type": "integer",
+                "description": "Limits the number of entities to be returned. Maximum is 500. Default is 10."
             }
         ],
         "prompts": [
@@ -58,6 +73,22 @@ base_tasks_module = BaseTasksModule(
             },
         ],
         "tasks": [
+            {
+                "key": "knowledge_graph_search_task",
+                "task_type": "APITask",
+                "task_name": "knowledge_graph_search",
+                "task_description": "Searches the Google Knowledge Graph for information",
+                "input_variables": {
+                    "type": "object",
+                    "properties": {
+                        "query": "query_parameter",
+                        "types": "types_parameter",
+                        "limit": "limit_parameter"
+                    },
+                    "required": ["query"]
+                },
+                "required_apis": ["google_knowledge_graph"]
+            },
             {
                 "key": "reddit_search",
                 "task_type": "APITask",
@@ -151,6 +182,7 @@ base_tasks_module = BaseTasksModule(
                     "wikipedia_search": "wikipedia_search",
                     "google_search": "google_search",
                     "arxiv_search": "arxiv_search",
+                    "knowledge_graph_search": "knowledge_graph_search_task"
                 },
                 "input_variables": {
                     "type": "object",

@@ -19,7 +19,7 @@ The project consists of three main components:
 
 ## Setup and Installation
 
-1. Ensure you have Docker installed on your system. On Windows, it comes with docker-compose, but [check if you have it installed](https://stackoverflow.com/questions/72928891/how-can-i-check-if-docker-compose-plugin-is-installed). Otherwise (if in Linux), [install it](https://docs.docker.com/compose/install/linux/). If for whatever reason the starting script doesn't start Docker (can't find it), all you need to do is have the Docker Daemon running, for which all you need to do is open your Docker app. 
+1. Ensure you have [Docker installed](https://docs.docker.com/engine/install/) on your system. On Windows, once you do, it comes with the docker-compose plugin installed by default, but [check if you have it installed](https://stackoverflow.com/questions/72928891/how-can-i-check-if-docker-compose-plugin-is-installed). Otherwise (if in Linux for example), [install it](https://docs.docker.com/compose/install/linux/). If for whatever reason the starting script doesn't start Docker (can't find it), all you need to do is open your Docker app. 
 
 2. (Optional) Install LM Studio if you plan to use local models.
 
@@ -37,11 +37,14 @@ Alternatively you can just execute run.py using `python run.py` in a commandline
 
 This will build and launch the containers. Once ready, the frontend will be accessible at `http://localhost:4000/`. 
 
-**NOTE**: If you want to update, run `git pull` and `python update.py`
+If you see an error during the installation related to `403  connecting to archive.ubuntu.com`, just run it again. Sometimes Docker has an issue installing an image due to connection errors. 
+
+**NOTE**: If you want to update, run `python update.py`
 
 ## Framework
 
 ![Logic Flow](./img/basic_logic_flow.png)
+
 The framework is based around 4 main components:
 - APIs and their engine
 - Agents, which deploy prompts and have models for any API they want to use
@@ -160,6 +163,7 @@ export enum ApiName {
     WIKIPEDIA_SEARCH = 'wikipedia_search',
     EXA_SEARCH = 'exa_search',
     ARXIV_SEARCH = 'arxiv_search',
+    GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph'
 }
 ```
 
@@ -218,9 +222,11 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
    - [Added]: Image and Sound file support
    - [Added]: Both generation (TTS and Image Generation) as well as transcription (STT and Image Vision) available
 
-4. **Complex Agent Structures**: Implementation of more advanced agent architectures, such as ReAct and RAG agents, to enable more sophisticated reasoning and decision-making capabilities.
+4. **Complex Information Flows**: 
+   - Implement more advanced agent tools, such as ReAct and RAG agents, to enable more sophisticated reasoning and decision-making capabilities.
+   - Implement interactive workflows, where the agent could either ask for permission, or deploy a request/action conditional to user approval. 
 
-5. **Work Environments**: Introduction of a feature similar to Anthropic's Artifacts, providing a more structured way to manage and interact with complex data and tools within the Alice ecosystem. Idea is to use a mix of in-context and RAG-powered sources, that the user is actively able to update, trim, etc. to ensure the correct info is available at the right time. 
+5. **Work Environments / Data Clusters**: Introduction of a feature similar to Anthropic's Artifacts but easier to update, edit, modularize, etc., providing a more structured way to manage and interact with complex data and tools within the Alice ecosystem. Idea is to use a mix of in-context and RAG-powered sources, that the user is actively able to update, trim, etc. to ensure the correct info is available at the right time. 
 
 6. **Journals**: Development of a holistic view of conversations and interactions, enabling the creation of workflows that run periodically. This feature will support tasks such as:
    - Reviewing and summarizing emails
@@ -230,8 +236,10 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
    - Generating periodic reports and insights
    - Updating RAG-sources
 
-7. **Improvements and fixes**: There are 3 areas I think are crucial in the mid-term to tackle:
+7. **Improvements and fixes**: There are several misc areas I think are crucial in the mid-term to tackle:
    - Edge-case analysis
+   - Lazy-loading on the frontend
+   - Context management -> be able to predict the context size of a chat or task instance, prevent extreme cases, etc. 
    - [Improved] Improve error handling and logging
       - [Added]: Logging folder, and better logs from all containers
       - [Added]: Logging managers with levels, allowing for dev and prod setups
@@ -246,6 +254,9 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
    - Good tracking of costs
    - Task cost estimation based on an algorithm and, when it exists, past data to improve the estimation. 
    - Cost/use tracking by API in a clear UI
+
+11. **Local deployment**: Offer more options for local deployment, especially for smaller models like TTS (even RVC), image generation, etc. (local llm, embeddings and vision can already be used with LM Studio) 
+   - Offer something closer to Automatic111 for img gen. An option I've thought about is having a ComfyUI container with a set of workflows pre-set that work off the box. 
 
 ## License
 

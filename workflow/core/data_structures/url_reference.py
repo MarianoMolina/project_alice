@@ -27,4 +27,4 @@ class URLReference(BaseDataStructure):
         return values
     
     def __str__(self) -> str:
-        return f"Title: {self.title} \nURL: {self.url} \n Content: {self.content}\n"
+        return f"\n\nTitle: {self.title}\n\nURL: {self.url}\n\n Content: {self.content}"

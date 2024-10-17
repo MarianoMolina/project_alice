@@ -267,7 +267,7 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
   }
 
   return (
-    <Box {...(isInteractable && { onClick: handleClick })}>
+    <Box className="max-w-full" {...(isInteractable && { onClick: handleClick })}>
       {content}
     </Box>
   );

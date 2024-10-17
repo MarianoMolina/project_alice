@@ -43,7 +43,7 @@ const CommonCardView = <T extends CollectionName>({
 
     return (
         <Card className={classes.card}>
-            <CardContent>
+            <CardContent className={classes.cardContent}>
                 <Box className={classes.titleContainer}>
                     {elementType && (
                         <Typography variant="caption" className={classes.elementType}>
@@ -70,7 +70,7 @@ const CommonCardView = <T extends CollectionName>({
                     <Typography variant="subtitle1" className={classes.subtitle}>{subtitle}</Typography>
                 )}
                 {listItems && listItems.length > 0 && (
-                    <List className={classes.list}>
+                    <List className={classes.cardList}>
                         {listItems.map((item, index) => (
                             <ListItem key={index} className={classes.listItem}>
                                 <ListItemIcon className={classes.listItemIcon}>{item.icon}</ListItemIcon>

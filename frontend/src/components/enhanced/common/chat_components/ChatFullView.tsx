@@ -43,14 +43,14 @@ const ChatFullView: React.FC<ChatFullViewProps> = React.memo(({
     if (lastMessage && lastMessage.role === 'user' && generateResponse) {
       return (
         <Tooltip title="Request a new response from the assistant based on the last message">
-          <Button onClick={generateResponse}>Request Response</Button>
+          <Button variant='contained' onClick={generateResponse}>Request Response</Button>
         </Tooltip>
       );
     }
     if (lastMessage && lastMessage.role === 'assistant' && handleRegenerateResponse) {
       return (
         <Tooltip title="Remove the last assistant reply and generate a new response">
-          <Button onClick={handleRegenerateResponse}>Regenerate Response</Button>
+          <Button variant='contained' onClick={handleRegenerateResponse}>Regenerate Response</Button>
         </Tooltip>
       );
     }
@@ -77,16 +77,20 @@ const ChatFullView: React.FC<ChatFullViewProps> = React.memo(({
           memoizedMessages
         ) : (
           <Box className={classes.emptyMessagesContainer}>
-            <PlaceholderSkeleton mode="chat" text='No messages yet. Send your first message to start the conversation.' className={classes.skeletonContainer} />
+            <PlaceholderSkeleton
+              mode="chat"
+              text='No messages yet. Send your first message to start the conversation.'
+              className={classes.skeletonContainer}
+            />
           </Box>
         )}
         <div ref={messagesEndRef} />
       </Box>
-      {showRegenerate &&
+      {showRegenerate && (
         <Box className={classes.actionButtonContainer}>
           {renderActionButton()}
         </Box>
-      }
+      )}
     </Box>
   );
 });

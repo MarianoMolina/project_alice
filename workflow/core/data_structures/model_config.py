@@ -10,3 +10,4 @@ class ModelConfig(BaseModel):
     use_cache: Optional[bool] = False
     tools: Optional[List[str]] = None
     model_config = ConfigDict(protected_namespaces=())
+    ctx_size: Optional[int] = 1024

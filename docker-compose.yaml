@@ -16,6 +16,7 @@ services:
       - ./.env:/app/.env:ro
     environment:
       NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${FRONTEND_PORT_DOCKER:-4000}
       CI: "true"
 
   backend:

@@ -86,6 +86,22 @@ export const collectionNameToEnhancedComponent: Record<CollectionName, React.Com
     urlreferences: EnhancedURLReference
 };
 
+// Create a runtime mapping object
+export const collectionTypeMapping: Record<string, CollectionElementString> = {
+    AliceAgent: 'Agent',
+    AliceChat: 'Chat',
+    AliceModel: 'Model',
+    AliceTask: 'Task',
+    Prompt: 'Prompt',
+    TaskResponse: 'TaskResponse',
+    User: 'User',
+    ParameterDefinition: 'Parameter',
+    API: 'API',
+    FileReference: 'File',
+    MessageType: 'Message',
+    URLReference: 'URLReference'
+};
+
 
 export const converters: { [K in CollectionName]: (data: any) => CollectionType[K] } = {
     agents: convertToAliceAgent,

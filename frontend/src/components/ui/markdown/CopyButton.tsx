@@ -1,5 +1,4 @@
 
-import React from 'react';
 import { Tooltip, Typography } from '@mui/material';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { CopyAll } from '@mui/icons-material';

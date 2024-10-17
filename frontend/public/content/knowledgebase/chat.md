@@ -2,7 +2,7 @@
 
 Chats represent ongoing conversations between users and AI agents. They encapsulate the context, history, and functionality of these interactions.
 
-## Chat Structure
+## Chat Interface
 
 Each chat in the system is represented by the `AliceChat` interface:
 

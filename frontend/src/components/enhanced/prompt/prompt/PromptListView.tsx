@@ -24,8 +24,9 @@ const PromptListView: React.FC<PromptComponentProps> = ({
             getSecondaryText={getSecondaryText}
             onView={onView}
             onInteraction={onInteraction}
-            interactionTooltip="Add Agent"
-            viewTooltip="View Agent"
+            interactionTooltip="Add Prompt"
+            viewTooltip="View Prompt"
+            collectionElementString='Prompt'
         />
     );
 };

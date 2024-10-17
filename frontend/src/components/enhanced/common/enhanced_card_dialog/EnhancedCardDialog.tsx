@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import EnhancedTask from '../../task/task/EnhancedTask';
 import EnhancedTaskResponse from '../../task_response/task_response/EnhancedTaskResponse';
 import EnhancedChat from '../../chat/chat/EnhancedChat';
@@ -101,27 +101,71 @@ const EnhancedCardDialog: React.FC = () => {
       Logger.debug('SWITCH 2 EnhancedCardDialog', { selectedCardItem, selectedCardItemType });
       switch (selectedCardItemType) {
         case 'Agent':
-          return <AgentCardView item={selectedCardItem as CollectionType['agents']} {...cardViewProps} />;
+          return (
+            <Box className="max-w-full">
+              <AgentCardView item={selectedCardItem as CollectionType['agents']} {...cardViewProps} />
+            </Box>
+          );
         case 'Task':
-          return <TaskCardView item={selectedCardItem as CollectionType['tasks']} {...cardViewProps} />;
+          return (
+            <Box className="max-w-full">
+              <TaskCardView item={selectedCardItem as CollectionType['tasks']} {...cardViewProps} />
+            </Box>
+          );
         case 'TaskResponse':
-          return <TaskResponseCardView item={selectedCardItem as CollectionType['taskresults']} {...cardViewProps} />;
+          return (
+            <Box className="max-w-full">
+              <TaskResponseCardView item={selectedCardItem as CollectionType['taskresults']} {...cardViewProps} />
+            </Box>
+          );
         case 'Chat':
-          return <ChatCardView item={selectedCardItem as CollectionType['chats']} {...cardViewProps} />;
+          return (
+            <Box className="max-w-full"> 
+              <ChatCardView item={selectedCardItem as CollectionType['chats']} {...cardViewProps} />
+            </Box>
+          );
         case 'Prompt':
-          return <PromptCardView item={selectedCardItem as CollectionType['prompts']} {...cardViewProps} />;
+          return (
+            <Box className="max-w-full">
+              <PromptCardView item={selectedCardItem as CollectionType['prompts']} {...cardViewProps} />
+            </Box>
+          );
         case 'Model':
-          return <ModelCardView item={selectedCardItem as CollectionType['models']} {...cardViewProps} />;
+          return (
+            <Box className="max-w-full">
+              <ModelCardView item={selectedCardItem as CollectionType['models']} {...cardViewProps} />
+            </Box>
+          );
         case 'Parameter':
-          return <ParameterCardView item={selectedCardItem as CollectionType['parameters']} {...cardViewProps} />;
+          return (
+            <Box className="max-w-full">
+              <ParameterCardView item={selectedCardItem as CollectionType['parameters']} {...cardViewProps} />
+            </Box>
+          );
         case 'API':
-          return <ApiCardView item={selectedCardItem as CollectionType['apis']} {...cardViewProps} />;
+          return (
+            <Box className="max-w-full">
+              <ApiCardView item={selectedCardItem as CollectionType['apis']} {...cardViewProps} />
+            </Box>
+          );
         case 'File':
-          return <FileCardView item={selectedCardItem as CollectionType['files']} {...cardViewProps} />;
+          return (
+            <Box className="max-w-full">
+              <FileCardView item={selectedCardItem as CollectionType['files']} {...cardViewProps} />
+            </Box>
+          );
         case 'Message':
-          return <MessageCardView item={selectedCardItem as CollectionType['messages']} {...cardViewProps} />;
+          return (
+            <Box className="max-w-full">
+              <MessageCardView item={selectedCardItem as CollectionType['messages']} {...cardViewProps} />
+            </Box>
+          );
         case 'URLReference':
-          return <URLReferenceCardView item={selectedCardItem as CollectionType['urlreferences']} {...cardViewProps} />;
+          return (
+            <Box className="max-w-full">
+              <URLReferenceCardView item={selectedCardItem as CollectionType['urlreferences']} {...cardViewProps} />;
+            </Box>
+          );
         default:
           return null;
       }

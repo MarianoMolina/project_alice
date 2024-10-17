@@ -53,10 +53,14 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     }, [isSaving, handleSave]);
 
     useEffect(() => {
-        Logger.debug('useEffect TaskFlexibleView', { item, taskType });
         if (item && Object.keys(item).length !== 0) {
+            Logger.debug('TaskFlexibleView', 'setForm', item);
             setForm(item);
-        } else if (!item || Object.keys(item).length === 0) {
+        }
+    }, [item]);
+
+    useEffect(() => {
+        if (!item || Object.keys(item).length === 0) {
             Logger.debug('TaskFlexibleView', 'getDefaultTaskForm', taskType);
             onChange(getDefaultTaskForm(taskType));
         }
@@ -90,7 +94,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     const handleTaskTypeChange = useCallback((event: SelectChangeEvent<TaskType>) => {
         const newType = event.target.value as TaskType;
         setTaskType(newType);
-        setForm(getDefaultTaskForm(newType));
+        setForm(prevForm => ({ ...prevForm, task_type: newType }));
         Logger.debug('handleTaskTypeChange', newType);
     }, []);
 

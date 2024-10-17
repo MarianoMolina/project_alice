@@ -14,7 +14,7 @@ const ChatListView: React.FC<ChatComponentProps> = ({
     const getPrimaryText = (chat: AliceChat) => chat.name;
     const getSecondaryText = (chat: AliceChat) => (
         <Typography component="span" variant="body2" color="textSecondary">
-            Created: {new Date(chat.createdAt || '').toLocaleString()}
+            Agent: {chat.alice_agent.name || 'N/A'} - Messages: {chat.messages.length || 0}
         </Typography>
     );
 
@@ -26,8 +26,9 @@ const ChatListView: React.FC<ChatComponentProps> = ({
             getSecondaryText={getSecondaryText}
             onView={onView}
             onInteraction={onInteraction}
-            interactionTooltip="Add Agent"
-            viewTooltip="View Agent"
+            interactionTooltip="Add Chat"
+            viewTooltip="View Chat"
+            collectionElementString='Chat'
         />
     );
 };

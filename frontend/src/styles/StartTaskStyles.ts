@@ -42,7 +42,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   apiTooltipContainer: {
     marginTop: theme.spacing(2),
     display: 'flex',
-    overflow: 'auto',
   },
   recentExecutionsAccordion: {
     flexGrow: 1,

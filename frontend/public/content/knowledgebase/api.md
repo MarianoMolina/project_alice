@@ -43,6 +43,7 @@ Non-Model APIs are used for various other functionalities that don't directly in
 - `WIKIPEDIA_SEARCH`: For searching Wikipedia articles
 - `EXA_SEARCH`: For using the Exa search engine
 - `ARXIV_SEARCH`: For searching academic papers on arXiv
+- `GOOGLE_KNOWLEDGE_GRAPH`: For searching for specific entities
 
 ## API Providers
 
@@ -65,7 +66,7 @@ export enum ApiName {
     MISTRAL_EMBEDDINGS = 'mistral_embeddings',
     GEMINI_STT = 'gemini_stt',
     GEMINI_EMBEDDINGS = 'gemini_embeddings',
-    GEMINI_IMG_GEN = 'gemini_img_gen',
+    GEMINI_IMG_GEN = 'gemini_img_gen', // DOES NOT WORK -> THEIR SDK IS BROKEN -> Waiting for fix, update, etc. 
     COHERE = 'cohere_llm',
     GROQ = 'groq_llm',
     GROQ_VISION = 'groq_vision',
@@ -83,12 +84,11 @@ export enum ApiName {
     WIKIPEDIA_SEARCH = 'wikipedia_search',
     EXA_SEARCH = 'exa_search',
     ARXIV_SEARCH = 'arxiv_search',
+    GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph',
 }
 ```
 
-## API Configuration
-
-Each API in the system is represented by the `API` interface:
+## API Interfacee
 
 ```typescript
 export interface API extends BaseDataseObject {

@@ -4,7 +4,7 @@ from pydantic import Field
 from typing import Dict, Any, List, Optional
 from workflow.core.api.engines import APIEngine
 from workflow.core.data_structures import MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall
-from workflow.util import LOGGER
+from workflow.util import LOGGER, est_messages_token_count, prune_messages, est_token_count
 
 class GeminiLLMEngine(APIEngine):
     input_variables: FunctionParameters = Field(
@@ -58,7 +58,14 @@ class GeminiLLMEngine(APIEngine):
             raise ValueError("API key not found in API data")
 
         genai.configure(api_key=api_data.api_key)
-        
+        estimated_tokens = est_messages_token_count(messages, tools)
+        if estimated_tokens > (api_data.ctx_size - est_token_count(system)):
+            LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning. ")
+        elif estimated_tokens > 0.8 * (api_data.ctx_size - est_token_count(system)):
+            LOGGER.warning(f"Estimated tokens ({estimated_tokens}) are over 80% of context size ({api_data.ctx_size}).")
+        # Prune messages if estimated tokens exceed context size
+        if estimated_tokens > (api_data.ctx_size - est_token_count(system)):
+            messages = prune_messages(messages, api_data.ctx_size)
         try:
             # Prepare the chat history (all messages except the last one)
             history = []
