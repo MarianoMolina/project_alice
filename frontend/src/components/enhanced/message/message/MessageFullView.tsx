@@ -79,7 +79,7 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => 
                     {message.references.task_responses?.map((task, index) => (
                         <ReferenceChip key={`task-${index}`} reference={task} type="TaskResponse" view />
                     ))}
-                    {message.references.search_results?.map((url, index) => (
+                    {message.references.url_references?.map((url, index) => (
                         <ReferenceChip key={`url-${index}`} reference={url} type="URLReference" view />
                     ))}
                     {message.references.string_outputs?.map((str, index) => (

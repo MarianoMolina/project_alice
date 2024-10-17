@@ -5,6 +5,7 @@ import { updateTaskResult, createTaskResult } from './taskResult.utils';
 import Logger from './logger';
 import { createMessage, updateMessage } from './message.utils';
 import { createURLReference, updateURLReference } from './urlReference.utils';
+import { createUserInteraction, updateUserInteraction } from './userInteraction.utils';
 
 export async function processReferences(references: References | undefined, userId: string): Promise<References> {
   const processedReferences: References = {};
@@ -63,8 +64,8 @@ export async function processReferences(references: References | undefined, user
       }
     }));
   }
-  if (references.search_results && Array.isArray(references.search_results)) {
-    processedReferences.search_results = await Promise.all(references.search_results.map(async (ref) => {
+  if (references.url_references && Array.isArray(references.url_references)) {
+    processedReferences.url_references = await Promise.all(references.url_references.map(async (ref) => {
       if (typeof ref === 'string' || ref instanceof Types.ObjectId) {
         return new Types.ObjectId(ref);
       } else if ('_id' in ref && ref._id) {
@@ -83,6 +84,25 @@ export async function processReferences(references: References | undefined, user
   }
 
   if (references.string_outputs) processedReferences.string_outputs = references.string_outputs;
+
+  if (references.user_interactions && Array.isArray(references.user_interactions)) {
+    processedReferences.user_interactions = await Promise.all(references.user_interactions.map(async (ref) => {
+      if (typeof ref === 'string' || ref instanceof Types.ObjectId) {
+        return new Types.ObjectId(ref);
+      } else if ('_id' in ref && ref._id) {
+        const updatedUI = await updateUserInteraction(ref._id.toString(), ref, userId);
+        return updatedUI?._id || new Types.ObjectId(ref._id);
+      } else {
+        const newUI = await createUserInteraction(ref, userId);
+        if (!newUI) {
+          Logger.error('Failed to create user interaction');
+          Logger.error(JSON.stringify(ref));
+          throw new Error('Failed to create user interaction');
+        }
+        return newUI._id;
+      }
+    }));
+  }
 
   return processedReferences;
 }

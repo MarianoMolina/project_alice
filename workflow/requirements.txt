@@ -32,3 +32,9 @@ wikipedia
 praw
 exa_py
 arxiv
+
+# Local generation
+transformers
+diffusers
+torch
+scipy

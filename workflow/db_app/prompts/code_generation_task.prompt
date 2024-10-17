@@ -1,21 +1,21 @@
-{{ outputs_plan_workflow }}
+{{ plan_workflow }}
 
-{% if outputs_generate_code %}
+{% if generate_code %}
 This is your last attempt at drafting this code:
-{{ outputs_generate_code }}
+{{ generate_code }}
 {% endif %}
 
-{% if outputs_execute_code %}
+{% if execute_code %}
 This is code execution output:
-{{ outputs_execute_code }}
+{{ execute_code }}
 {% endif %}
 
-{% if outputs_generate_unit_tests %}
+{% if generate_unit_tests %}
 This is the unit test code:
-{{ outputs_generate_unit_tests }}
+{{ generate_unit_tests }}
 {% endif %}
 
-{% if outputs_execute_unit_tests %}
+{% if execute_unit_tests %}
 This is the execution output for both code snippets:
-{{ outputs_execute_unit_tests }}
+{{ execute_unit_tests }}
 {% endif %}

@@ -14,7 +14,7 @@ export interface IURLReferenceMethods {
 }
 
 export interface IURLReferenceDocument extends IURLReference, Document, IURLReferenceMethods {
-  _id: Types.ObjectId; 
+  _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }

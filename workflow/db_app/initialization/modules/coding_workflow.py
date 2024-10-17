@@ -12,27 +12,27 @@ coding_workflow_module = CodingWorkflowModule(
     data={
         "parameters": [
             {
-                "key": "outputs_plan_workflow",
+                "key": "param_plan_workflow",
                 "type": "string",
                 "description": "The task plan that describes the code requirements for the task",
             },
             {
-                "key": "outputs_generate_code",
+                "key": "param_generate_code",
                 "type": "string",
                 "description": "The code that was generated",
             },
             {
-                "key": "outputs_execute_code",
+                "key": "param_execute_code",
                 "type": "string",
                 "description": "The code execution output that was generated",
             },
             {
-                "key": "outputs_generate_unit_tests",
+                "key": "param_generate_unit_tests",
                 "type": "string",
                 "description": "The unit test code that was generated, passed in case of a recursive call",
             },
             {
-                "key": "outputs_execute_unit_tests",
+                "key": "param_execute_unit_tests",
                 "type": "string",
                 "description": "The output of the unit test execution, passed in case of a recursive call",
             }
@@ -61,25 +61,25 @@ coding_workflow_module = CodingWorkflowModule(
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "outputs_plan_workflow": "outputs_plan_workflow",
-                        "outputs_generate_code": "outputs_generate_code",
-                        "outputs_execute_code": "outputs_execute_code",
-                        "outputs_generate_unit_tests": "outputs_generate_unit_tests",
+                        "plan_workflow": "param_plan_workflow",
+                        "generate_code": "param_generate_code",
+                        "execute_code": "param_execute_code",
+                        "generate_unit_tests": "param_generate_unit_tests",
                     },
-                    "required": ["outputs_plan_workflow"]
+                    "required": ["plan_workflow"]
                 }
             },
             {
                 "key": "code_execution_task",
                 "name": "Code Execution Task",
-                "content": "This is the code:\n\n{{ outputs_generate_code }}",
+                "content": "This is the code:\n\n{{ generate_code }}",
                 "is_templated": True,
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "outputs_generate_code": "outputs_generate_code",
+                        "generate_code": "param_generate_code",
                     },
-                    "required": ["outputs_generate_code"]
+                    "required": ["generate_code"]
                 }
             },
             {
@@ -90,10 +90,10 @@ coding_workflow_module = CodingWorkflowModule(
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "outputs_generate_code": "outputs_generate_code",
-                        "outputs_generate_unit_tests": "outputs_generate_unit_tests",
+                        "generate_code": "param_generate_code",
+                        "generate_unit_tests": "param_generate_unit_tests",
                     },
-                    "required": ["outputs_generate_unit_tests"]
+                    "required": ["generate_unit_tests"]
                 }
             },
             {
@@ -109,13 +109,13 @@ coding_workflow_module = CodingWorkflowModule(
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "outputs_plan_workflow": "outputs_plan_workflow",
-                        "outputs_generate_code": "outputs_generate_code",
-                        "outputs_execute_code": "outputs_execute_code",
-                        "outputs_generate_unit_tests": "outputs_generate_unit_tests",
-                        "outputs_execute_unit_tests": "outputs_execute_unit_tests",
+                        "plan_workflow": "param_plan_workflow",
+                        "generate_code": "param_generate_code",
+                        "execute_code": "param_execute_code",
+                        "generate_unit_tests": "param_generate_unit_tests",
+                        "execute_unit_tests": "param_execute_unit_tests",
                     },
-                    "required": ["outputs_generate_unit_tests", "outputs_generate_code", "outputs_execute_unit_tests", "outputs_plan_workflow", "outputs_execute_code"]
+                    "required": ["generate_unit_tests", "generate_code", "execute_unit_tests", "plan_workflow", "execute_code"]
                 }
             }, 
             {
@@ -207,12 +207,12 @@ coding_workflow_module = CodingWorkflowModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "outputs_plan_workflow": "outputs_plan_workflow",
-                        "outputs_generate_code": "outputs_generate_code",
-                        "outputs_execute_code": "outputs_execute_code",
-                        "outputs_generate_unit_tests": "outputs_generate_unit_tests",
+                        "plan_workflow": "param_plan_workflow",
+                        "generate_code": "param_generate_code",
+                        "execute_code": "param_execute_code",
+                        "generate_unit_tests": "param_generate_unit_tests",
                     },
-                    "required": ["outputs_plan_workflow"]
+                    "required": ["plan_workflow"]
                 },
                 "required_apis": ["llm_api"],
                 "templates": {
@@ -229,9 +229,9 @@ coding_workflow_module = CodingWorkflowModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "outputs_generate_code": "outputs_generate_code",
+                        "generate_code": "param_generate_code",
                     },
-                    "required": ["outputs_generate_code"]
+                    "required": ["generate_code"]
                 },
                 "templates": {
                     "task_template": "code_execution_task"
@@ -247,13 +247,13 @@ coding_workflow_module = CodingWorkflowModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "outputs_plan_workflow": "outputs_plan_workflow",
-                        "outputs_generate_code": "outputs_generate_code",
-                        "outputs_execute_code": "outputs_execute_code",
-                        "outputs_generate_unit_tests": "outputs_generate_unit_tests",
-                        "outputs_execute_unit_tests": "outputs_execute_unit_tests",
+                        "plan_workflow": "param_plan_workflow",
+                        "generate_code": "param_generate_code",
+                        "execute_code": "param_execute_code",
+                        "generate_unit_tests": "param_generate_unit_tests",
+                        "execute_unit_tests": "param_execute_unit_tests",
                     },
-                    "required": ["outputs_generate_code", "outputs_execute_code"]
+                    "required": ["generate_code", "execute_code"]
                 },
                 "templates": {
                     "task_template": "code_generation_task"
@@ -269,10 +269,10 @@ coding_workflow_module = CodingWorkflowModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "outputs_generaate_code": "outputs_generate_code",
-                        "outputs_generate_unit_tests": "outputs_generate_unit_tests",
+                        "generaate_code": "param_generate_code",
+                        "generate_unit_tests": "param_generate_unit_tests",
                     },
-                    "required": ["outputs_generate_unit_tests"]
+                    "required": ["generate_unit_tests"]
                 },
                 "templates": {
                     "task_template": "test_execution_task"
@@ -288,13 +288,13 @@ coding_workflow_module = CodingWorkflowModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "outputs_plan_workflow": "outputs_plan_workflow",
-                        "outputs_generate_code": "outputs_generate_code",
-                        "outputs_execute_code": "outputs_execute_code",
-                        "outputs_generate_unit_tests": "outputs_generate_unit_tests",
-                        "outputs_execute_unit_tests": "outputs_execute_unit_tests",
+                        "plan_workflow": "param_plan_workflow",
+                        "generate_code": "param_generate_code",
+                        "execute_code": "param_execute_code",
+                        "generate_unit_tests": "param_generate_unit_tests",
+                        "execute_unit_tests": "param_execute_unit_tests",
                     },
-                    "required": ["outputs_generate_unit_tests", "outputs_generate_code", "outputs_execute_unit_tests"]
+                    "required": ["generate_unit_tests", "generate_code", "execute_unit_tests"]
                 },
                 "exit_code_response_map": {"TEST FAILED": 2, "ALL TESTS PASSED": 0, "TEST CODE ERROR": 3},
                 "exit_codes": {0: "Test Passed", 1: "Response generation failed", 2: "Test Failed", 3: "Test Code Error"},
@@ -308,12 +308,12 @@ coding_workflow_module = CodingWorkflowModule(
                 "task_name": "coding_workflow",
                 "task_description": "Executes a coding workflow based on the provided prompt",
                 "tasks": {
-                    "plan_workflow": "plan_workflow",
-                    "generate_code": "generate_code",
-                    "execute_code": "execute_code",
-                    "generate_unit_tests": "generate_unit_tests",
-                    "execute_unit_tests": "execute_unit_tests",
-                    "check_unit_test_results": "check_unit_test_results"
+                    "plan_workflow": "param_plan_workflow",
+                    "generate_code": "param_generate_code",
+                    "execute_code": "param_execute_code",
+                    "generate_unit_tests": "param_generate_unit_tests",
+                    "execute_unit_tests": "param_execute_unit_tests",
+                    "check_unit_test_results": "param_check_unit_test_results"
                 },
                 "start_task": "plan_workflow",
                 "tasks_end_code_routing": {

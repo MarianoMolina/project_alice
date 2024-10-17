@@ -2,7 +2,6 @@ import mongoose, { CallbackWithoutResultAndOptionalError, Query, Schema } from "
 import { IURLReferenceDocument, IURLReferenceModel } from "../interfaces/urlReference.interface";
 import { ensureObjectIdHelper } from "../utils/utils";
 
-
 const urlReferenceSchema = new Schema<IURLReferenceDocument, IURLReferenceModel>({
     title: { type: String, required: true },
     url: { type: String, required: true },

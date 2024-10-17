@@ -4,17 +4,19 @@ from workflow.core.data_structures.message import MessageDict
 from workflow.core.data_structures.file_reference import FileReference, FileContentReference
 from workflow.core.data_structures.task_response import TaskResponse
 from workflow.core.data_structures.url_reference import URLReference
+from workflow.core.data_structures.user_interaction import UserInteraction
 
 class References(BaseModel):
     messages: Optional[List[MessageDict]] = Field(default=None, description="List of message references")
     files: Optional[List[Union[FileReference, FileContentReference]]] = Field(default=None, description="List of file references")
     task_responses: Optional[List[TaskResponse]] = Field(default=None, description="List of task response references")
-    search_results: Optional[List[URLReference]] = Field(default=None, description="List of search result references")
+    url_references: Optional[List[URLReference]] = Field(default=None, description="List of search result references")
     string_outputs: Optional[List[str]] = Field(default=None, description="List of string output references")
+    user_interactions: Optional[List[UserInteraction]] = Field(default=None, description="List of user interaction references")
 
     def model_dump(self, *args, **kwargs) -> Dict[str, Any]:
         data = super().model_dump(*args, **kwargs)
-        for key in ['messages', 'files', 'task_responses', 'search_results', 'string_outputs']:
+        for key in ['messages', 'files', 'task_responses', 'url_references', 'string_outputs', 'user_interactions']:
             if getattr(self, key) is not None:
                 data[key] = [
                     item.model_dump(*args, **kwargs) if isinstance(item, BaseModel)
@@ -26,7 +28,7 @@ class References(BaseModel):
 
         return data
 
-    def add_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, URLReference, str]):
+    def add_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, URLReference, str, UserInteraction]):
         """Add a reference to the appropriate list based on its type."""
         if isinstance(reference, MessageDict):
             if self.messages is None:
@@ -41,13 +43,17 @@ class References(BaseModel):
                 self.task_responses = []
             self.task_responses.append(reference)
         elif isinstance(reference, URLReference):
-            if self.search_results is None:
-                self.search_results = []
-            self.search_results.append(reference)
+            if self.url_references is None:
+                self.url_references = []
+            self.url_references.append(reference)
         elif isinstance(reference, str):
             if self.string_outputs is None:
                 self.string_outputs = []
             self.string_outputs.append(reference)
+        elif isinstance(reference, UserInteraction):
+            if self.user_interactions is None:
+                self.user_interactions = []
+            self.user_interactions.append(reference)
         else:
             raise ValueError(f"Unsupported reference type: {type(reference)}")
 
@@ -58,14 +64,15 @@ class References(BaseModel):
                 "messages": self.messages,
                 "files": self.files,
                 "task_responses": self.task_responses,
-                "search_results": self.search_results,
+                "url_references": self.url_references,
                 "string_outputs": self.string_outputs,
+                "user_interactions": self.user_interactions,
             }
         return getattr(self, ref_type, None)
 
-    def remove_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, URLReference, str]) -> bool:
+    def remove_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, URLReference, str, UserInteraction]) -> bool:
         """Remove a specific reference."""
-        for attr in ['messages', 'files', 'task_responses', 'search_results', 'string_outputs']:
+        for attr in ['messages', 'files', 'task_responses', 'url_references', 'string_outputs', 'user_interactions']:
             ref_list = getattr(self, attr)
             if ref_list is not None and reference in ref_list:
                 ref_list.remove(reference)
@@ -78,8 +85,9 @@ class References(BaseModel):
             self.messages = None
             self.files = None
             self.task_responses = None
-            self.search_results = None
+            self.url_references = None
             self.string_outputs = None
+            self.user_interactions = None
         else:
             setattr(self, ref_type, None)
 
@@ -125,7 +133,7 @@ class References(BaseModel):
                 complete_refs.add_reference(ref)
                 if hasattr(ref, 'transcript') and ref.transcript:
                     collect_nested_references(ref.transcript)
-            elif isinstance(ref, (URLReference, str)):
+            elif isinstance(ref, (URLReference, str, UserInteraction)):
                 complete_refs.add_reference(ref)
 
         for ref_list in self.__dict__.values():

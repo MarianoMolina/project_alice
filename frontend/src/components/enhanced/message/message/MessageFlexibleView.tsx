@@ -78,7 +78,7 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
                     updatedReferences.task_responses = fetchedItems as TaskResponse[];
                     break;
                 case 'urlreferences':
-                    updatedReferences.search_results = fetchedItems as URLReference[];
+                    updatedReferences.url_references = fetchedItems as URLReference[];
                     break;
             }
             return { ...prevForm, references: updatedReferences };
@@ -155,7 +155,7 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
         <EnhancedSelect<URLReference>
             componentType="urlreferences"
             EnhancedView={URLReferenceShortListView}
-            selectedItems={form.references?.search_results || []}
+            selectedItems={form.references?.url_references || []}
             onSelect={(ids) => handleReferencesChange('urlreferences', ids)}
             isInteractable={isEditMode}
             multiple
@@ -165,7 +165,7 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
             accordionEntityName="search-results"
         />
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    ), [form.references?.search_results, handleReferencesChange, isEditMode, activeAccordion, handleAccordionToggle]);
+    ), [form.references?.url_references, handleReferencesChange, isEditMode, activeAccordion, handleAccordionToggle]);
 
     return (
         <GenericFlexibleView

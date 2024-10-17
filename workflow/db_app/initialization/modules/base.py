@@ -267,6 +267,24 @@ base_module = BaseModule(
                 "ctx_size": 8000,
                 "model_type": "vision",
                 "api_name": "groq_vision",
+            },
+            {
+                "key": "bark_large",
+                "short_name": "Bark Large",
+                "model_name": "suno/bark",
+                "model_format": "OpenChat", # random value
+                "ctx_size": 1024,
+                "model_type": "tts",
+                "api_name": "bark_tts",
+            }, 
+            {
+                "key": "pixart_sigma_model",
+                "short_name": "Pixart Sigma",
+                "model_name": "PixArt-alpha/PixArt-Sigma-XL-2-2K-MS",
+                "model_format": "OpenChat", # random value
+                "ctx_size": 1024, # random value
+                "model_type": "img_gen",
+                "api_name": "pixart_img_gen",
             }
         ],
         "apis": [
@@ -645,6 +663,30 @@ base_module = BaseModule(
                 "is_active": True,
                 "health_status": "healthy" if GROQ_API_KEY else "unhealthy",
                 "default_model": "groq_tts_whisper",
+            },
+            {
+                "key": "bark_tts",
+                "api_type": "text_to_speech",
+                "api_name": "bark_tts",
+                "name": "Bark TTS",
+                "api_config": {
+                    "api_key": "bark",
+                },
+                "is_active": True,
+                "health_status": "healthy",
+                "default_model": "bark_large",
+            },
+            {
+                "key": "pixart_img_gen",
+                "api_type": "img_generation",
+                "api_name": "pixart_img_gen",
+                "name": "Pixart Image Generation",
+                "api_config": {
+                    "api_key": "pixart",
+                },
+                "is_active": True,
+                "health_status": "healthy",
+                "default_model": "pixart_sigma_model",
             }
         ],
         "parameters": [

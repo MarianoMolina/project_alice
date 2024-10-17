@@ -101,7 +101,7 @@ class GoogleGraphEngine(APIEngine):
         service_url = 'https://kgsearch.googleapis.com/v1/entities:search'
         url = service_url + '?' + urllib.parse.urlencode(params, doseq=True)
 
-        search_results = []
+        url_references = []
 
         async with aiohttp.ClientSession() as session:
             try:
@@ -133,9 +133,9 @@ class GoogleGraphEngine(APIEngine):
                             content=content if content else "No content",
                             metadata=metadata,
                         )
-                        search_results.append(url_ref)
+                        url_references.append(url_ref)
             except Exception as e:
                 LOGGER.error(f"Error fetching data for query '{query}': {e}")
                 raise
 
-        return References(search_results=search_results)
+        return References(url_references=url_references)

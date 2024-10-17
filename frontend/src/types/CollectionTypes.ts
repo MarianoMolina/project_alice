@@ -21,10 +21,11 @@ import EnhancedPrompt from '../components/enhanced/prompt/prompt/EnhancedPrompt'
 import EnhancedTask from '../components/enhanced/task/task/EnhancedTask';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
 import EnhancedURLReference from '../components/enhanced/url_reference/url_reference/EnhancedURLReference';
+import { convertToUserInteraction, UserInteraction } from './UserInteractionTypes';
 
-export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' | 'urlreferences';
-export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType | URLReference;
-export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API' | 'User' | 'File' | 'Message' | 'URLReference';
+export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' | 'urlreferences' | 'userinteractions';
+export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType | URLReference | UserInteraction;
+export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API' | 'User' | 'File' | 'Message' | 'URLReference' | 'UserInteraction';
 
 export type CollectionType = {
     agents: AliceAgent;
@@ -39,6 +40,7 @@ export type CollectionType = {
     files: FileReference;
     messages: MessageType;
     urlreferences: URLReference;
+    userinteractions: UserInteraction;
 };
 
 export type CollectionTypeString = {
@@ -54,6 +56,7 @@ export type CollectionTypeString = {
     files: 'File';
     messages: 'Message';
     urlreferences: 'URLReference';
+    userinteractions: 'UserInteraction';
 };
 
 export const collectionNameToElementString: Record<CollectionName, CollectionElementString> = {
@@ -68,7 +71,8 @@ export const collectionNameToElementString: Record<CollectionName, CollectionEle
     apis: 'API',
     files: 'File',
     messages: 'Message',
-    urlreferences: 'URLReference'
+    urlreferences: 'URLReference',
+    userinteractions: 'UserInteraction'
 };
 
 export const collectionNameToEnhancedComponent: Record<CollectionName, React.ComponentType<any>> = {
@@ -83,7 +87,8 @@ export const collectionNameToEnhancedComponent: Record<CollectionName, React.Com
     apis: EnhancedAPI,
     files: EnhancedFile,
     messages: EnhancedMessage,
-    urlreferences: EnhancedURLReference
+    urlreferences: EnhancedURLReference,
+    userinteractions: EnhancedAgent
 };
 
 // Create a runtime mapping object
@@ -99,7 +104,8 @@ export const collectionTypeMapping: Record<string, CollectionElementString> = {
     API: 'API',
     FileReference: 'File',
     MessageType: 'Message',
-    URLReference: 'URLReference'
+    URLReference: 'URLReference',
+    UserInteraction: 'UserInteraction'
 };
 
 
@@ -116,6 +122,7 @@ export const converters: { [K in CollectionName]: (data: any) => CollectionType[
     files: convertToFileReference,
     messages: convertToMessageType,
     urlreferences: convertToURLReference,
+    userinteractions: convertToUserInteraction
 };
 
 export type ComponentMode = 'create' | 'edit' | 'view' | 'list' | 'shortList' | 'table';
@@ -131,6 +138,7 @@ export interface HandleClickProps {
     handleFileClick?: (fileId: string, item?: FileReference) => void;
     handleMessageClick?: (messageId: string, item?: MessageType) => void;
     handleURLReferenceClick?: (urlReferenceId: string, item?: URLReference) => void;
+    handleUserInteractionClick?: (userInteractionId: string, item?: UserInteraction) => void;
 }
 export interface EnhancedComponentProps<T extends CollectionElement> extends HandleClickProps {
     items: T[] | null;

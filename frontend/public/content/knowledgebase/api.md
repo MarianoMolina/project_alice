@@ -78,6 +78,8 @@ export enum ApiName {
     LM_STUDIO = 'lm-studio_llm',
     LM_STUDIO_VISION = 'lm-studio_vision',
     CUSTOM = 'Custom',
+    BARK_TTS = 'bark_tts',
+    PIXART_IMG_GEN = 'pixart_img_gen',
     // Non-model API providers
     GOOGLE_SEARCH = 'google_search',
     REDDIT_SEARCH = 'reddit_search',

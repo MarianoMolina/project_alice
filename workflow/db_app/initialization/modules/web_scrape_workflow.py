@@ -17,7 +17,7 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                 "description": "The URL to scrape",
             },
             {
-                "key": "outputs_web_scrape_task",
+                "key": "paramsparams",
                 "type": "string",
                 "description": "The outputs of the web scrape task",
             },
@@ -49,14 +49,14 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
             {
                 "key": "web_summarize_task_prompt",
                 "name": "Web summarization prompt",
-                "content": "{{ outputs_web_scrape }}",
+                "content": "{{ web_scrape }}",
                 "is_templated": True,
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "outputs_web_scrape": "outputs_web_scrape_task"
+                        "web_scrape": "paramsparams"
                     },
-                    "required": ["outputs_web_scrape"]
+                    "required": ["web_scrape"]
                 }
             },
         ],
@@ -112,9 +112,9 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "outputs_web_scrape": "outputs_web_scrape_task",
+                        "web_scrape": "params_web_scrape_task",
                     },
-                    "required": ["outputs_web_scrape"]
+                    "required": ["web_scrape"]
                 },
                 "required_apis": ["llm_api"],
                 "templates": {

@@ -53,10 +53,10 @@ class WikipediaSearchAPI(APISearchEngine):
 
     async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> References:
         # Wikipedia doesn't require API keys, so we don't need to use api_data
-        search_results = wikipedia.search(prompt, results=max_results, suggestion=True)
-        LOGGER.debug(f'search_results: {search_results} type: {type(search_results)} type of search_results[0]: {type(search_results[0])}')
+        url_references = wikipedia.search(prompt, results=max_results, suggestion=True)
+        LOGGER.debug(f'url_references: {url_references} type: {type(url_references)} type of url_references[0]: {type(url_references[0])}')
         detailed_results = []
-        for result in search_results[0]:
+        for result in url_references[0]:
             try:
                 detailed_results += [wikipedia.page(title=result, auto_suggest=False)]
             except wikipedia.exceptions.DisambiguationError as e:
@@ -66,7 +66,7 @@ class WikipediaSearchAPI(APISearchEngine):
                     pass
         if not detailed_results:
             raise ValueError("No results found")
-        return References(search_results=[
+        return References(url_references=[
             URLReference(
                 title=result.title,
                 url=result.url,
@@ -96,7 +96,7 @@ class GoogleSearchAPI(APISearchEngine):
         service = build("customsearch", "v1", developerKey=api_data['api_key'])
         res = service.cse().list(q=prompt, cx=api_data['cse_id'], num=max_results).execute()
         results = res.get('items', [])
-        return References(search_results=[
+        return References(url_references=[
             URLReference(
                 title=result['title'],
                 url=result['link'],
@@ -128,7 +128,7 @@ class ExaSearchAPI(APISearchEngine):
         LOGGER.debug(f'exa_search: {exa_search.results}')
         results = exa_search.results
 
-        return References(search_results=[
+        return References(url_references=[
             URLReference(
                 title=result.title if hasattr(result, 'title') and result.title else result.url,
                 url=result.url,
@@ -163,7 +163,7 @@ class ArxivSearchAPI(APISearchEngine):
         if not results:
             raise ValueError("No results found")
 
-        return References(search_results=[
+        return References(url_references=[
             URLReference(
                 title=result.title,
                 url=result.pdf_url,
@@ -259,8 +259,8 @@ class RedditSearchAPI(APIEngine):
             user_agent=user_agent,
         )
         subredditObject: Subreddits = reddit.subreddit(subreddit)
-        search_results: ListingGenerator = subredditObject.search(query=prompt, limit=int(limit), params={"sort": sort, "time_filter": time_filter})
-        submissions: List[Submission] = [submission for submission in search_results]
+        url_references: ListingGenerator = subredditObject.search(query=prompt, limit=int(limit), params={"sort": sort, "time_filter": time_filter})
+        submissions: List[Submission] = [submission for submission in url_references]
 
         search_result_list = [
             URLReference(
@@ -278,4 +278,4 @@ class RedditSearchAPI(APIEngine):
                 }
             ) for submission in submissions
         ]
-        return References(search_results=search_result_list)
+        return References(url_references=search_result_list)

@@ -12,17 +12,17 @@ research_workflow_module = ResearchWorkflowModule(
     data={
         "parameters": [
             {
-                "key": "outputs_research_brief_task",
+                "key": "param_research_brief_task",
                 "type": "string",
                 "description": "The research brief created based on the user prompt",
             },
             {
-                "key": "outputs_research_check_task",
+                "key": "param_research_check_task",
                 "type": "string",
                 "description": "The conclusion of the data retrieval check during the research process",
             },
             {
-                "key": "outputs_data_retrieval_task",
+                "key": "param_data_retrieval_task",
                 "type": "string",
                 "description": "The research data retrieval task output",
             },
@@ -56,10 +56,10 @@ research_workflow_module = ResearchWorkflowModule(
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "outputs_research_brief_task": "outputs_research_brief_task",
-                        "outputs_research_check_task": "outputs_research_check_task",
+                        "research_brief_task": "param_research_brief_task",
+                        "research_check_task": "param_research_check_task",
                     },
-                    "required": ["outputs_research_brief_task"]
+                    "required": ["research_brief_task"]
                 }
             },
             {
@@ -70,10 +70,10 @@ research_workflow_module = ResearchWorkflowModule(
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "outputs_research_brief_task": "outputs_research_brief_task",
-                        "outputs_data_retrieval_task": "outputs_data_retrieval_task",
+                        "research_brief_task": "param_research_brief_task",
+                        "data_retrieval_task": "param_data_retrieval_task",
                     },
-                    "required": ["outputs_data_retrieval_task", "outputs_research_brief_task"]
+                    "required": ["data_retrieval_task", "research_brief_task"]
                 }
             },
             {
@@ -85,9 +85,9 @@ research_workflow_module = ResearchWorkflowModule(
                     "type": "object",
                     "properties": {
                         "prompt": "prompt_parameter",
-                        "outputs_data_retrieval_task": "outputs_data_retrieval_task",
+                        "data_retrieval_task": "param_data_retrieval_task",
                     },
-                    "required": ["prompt", "outputs_data_retrieval_task"]
+                    "required": ["prompt", "data_retrieval_task"]
                 }
             },
         ],
@@ -165,10 +165,10 @@ research_workflow_module = ResearchWorkflowModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "outputs_research_brief_task": "outputs_research_brief_task",
-                        "outputs_research_check_task": "outputs_research_check_task",
+                        "research_brief_task": "param_research_brief_task",
+                        "research_check_task": "param_research_check_task",
                     },
-                    "required": ["outputs_research_brief_task"]
+                    "required": ["research_brief_task"]
                 },
                 "tasks":{
                     "exa_search": "exa_search",
@@ -192,10 +192,10 @@ research_workflow_module = ResearchWorkflowModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "outputs_research_brief_task": "outputs_research_brief_task",
-                        "outputs_data_retrieval_task": "outputs_data_retrieval_task",
+                        "research_brief_task": "param_research_brief_task",
+                        "data_retrieval_task": "param_data_retrieval_task",
                     },
-                    "required": ["outputs_data_retrieval_task", "outputs_research_brief_task"]
+                    "required": ["data_retrieval_task", "research_brief_task"]
                 },
                 "templates": {
                     "task_template": "research_check_task_prompt"
@@ -211,9 +211,9 @@ research_workflow_module = ResearchWorkflowModule(
                     "type": "object",
                     "properties": {
                         "prompt": "prompt_parameter",
-                        "outputs_data_retrieval_task": "outputs_data_retrieval_task",
+                        "data_retrieval_task": "param_data_retrieval_task",
                     },
-                    "required": ["prompt", "outputs_data_retrieval_task"]
+                    "required": ["prompt", "data_retrieval_task"]
                 },
                 "templates": {
                     "task_template": "research_summary_task_prompt"

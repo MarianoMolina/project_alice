@@ -46,10 +46,10 @@ const ReferencesViewer: React.FC<ReferencesViewerProps> = ({ references }) => {
           ))}
         </Box>
       )}
-      {references.search_results && references.search_results.length > 0 && (
+      {references.url_references && references.url_references.length > 0 && (
         <Box mb={2}>
           <Typography variant="h6">Search Results</Typography>
-          {references.search_results.map((result, index) => (
+          {references.url_references.map((result, index) => (
             <URLReferenceViewer key={result.url || `search-result-${index}`} result={result} />
           ))}
         </Box>

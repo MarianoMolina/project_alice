@@ -1,4 +1,4 @@
-{{ outputs_research_brief_task }}
+{{ research_brief_task }}
 {% if research_check_feedback %}
 Retry attempt #{{ retry_count }}. Previous attempt was insufficient:
 {{ research_check_feedback }}

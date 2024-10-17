@@ -55,8 +55,8 @@ function ensureObjectIdForSave(
     if (this.references.task_responses) {
       this.references.task_responses = this.references.task_responses.map(taskResponse => ensureObjectIdHelper(taskResponse));
     }
-    if (this.references.search_results) {
-      this.references.search_results = this.references.search_results.map(searchResult => ensureObjectIdHelper(searchResult));
+    if (this.references.url_references) {
+      this.references.url_references = this.references.url_references.map(searchResult => ensureObjectIdHelper(searchResult));
     }
   }
   this.created_by = ensureObjectIdHelper(this.created_by);
@@ -79,8 +79,8 @@ function ensureObjectIdForUpdate(
     if (update.references.task_responses) {
       update.references.task_responses = update.references.task_responses.map((taskResponse: any) => ensureObjectIdHelper(taskResponse));
     }
-    if (update.references.search_results) {
-      update.references.search_results = update.references.search_results.map((searchResult: any) => ensureObjectIdHelper(searchResult));
+    if (update.references.url_references) {
+      update.references.url_references = update.references.url_references.map((searchResult: any) => ensureObjectIdHelper(searchResult));
     }
   }
   update.created_by = ensureObjectIdHelper(update.created_by);

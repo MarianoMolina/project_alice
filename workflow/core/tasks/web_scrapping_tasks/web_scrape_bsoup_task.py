@@ -32,7 +32,7 @@ class WebScrapeBeautifulSoupTask(BasicAgentTask):
         if not page_content:
             LOGGER.error("No output returned from API engine.")
             return {}, 1, None
-        output = References(search_results=[page_content])
+        output = References(url_references=[page_content])
         return output, 0, None
     
     async def run(self, api_manager: APIManager, **kwargs) -> TaskResponse:     

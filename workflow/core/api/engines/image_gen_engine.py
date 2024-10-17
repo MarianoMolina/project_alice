@@ -30,11 +30,6 @@ class ImageGenerationEngine(APIEngine):
                     description="The quality of the image generation.",
                     default="standard"
                 ),
-                "model": ParameterDefinition(
-                    type="string",
-                    description="The model to use for image generation.",
-                    default="dall-e-3"
-                )
             },
             required=["prompt"]
         )

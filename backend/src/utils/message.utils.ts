@@ -121,7 +121,7 @@ function compareReferences(ref1: References | undefined, ref2: References | unde
   if (!ref1 && !ref2) return true;
   if (!ref1 || !ref2) return false;
 
-  const keys: (keyof References)[] = ['messages', 'files', 'task_responses', 'search_results', 'string_outputs'];
+  const keys: (keyof References)[] = ['messages', 'files', 'task_responses', 'url_references', 'string_outputs'];
 
   for (const key of keys) {
     if (key === 'string_outputs') {

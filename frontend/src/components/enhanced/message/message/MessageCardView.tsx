@@ -18,7 +18,7 @@ const hasAnyReferences = (references: References | undefined): boolean => {
         references.messages?.length ||
         references.files?.length ||
         references.task_responses?.length ||
-        references.search_results?.length ||
+        references.url_references?.length ||
         references.string_outputs?.length
     );
 };
@@ -61,7 +61,7 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
                             view={true}
                         />
                     ))}
-                    {item.references.search_results?.map((url, index) => (
+                    {item.references.url_references?.map((url, index) => (
                         <ReferenceChip 
                             key={`url-${index}`} 
                             reference={url} 

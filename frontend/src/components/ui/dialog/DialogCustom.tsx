@@ -7,31 +7,30 @@ const DialogComponent: React.FC = () => {
 
   if (!dialogOptions) return null;
 
-  const { title, content, confirmText = 'Confirm', cancelText = 'Cancel', onConfirm, onCancel } = dialogOptions;
+  const { title, content, buttons } = dialogOptions;
 
-  const handleConfirm = () => {
-    onConfirm();
-    closeDialog();
-  };
-
-  const handleCancel = () => {
-    if (onCancel) onCancel();
+  const handleButtonClick = (action: () => void) => {
+    action();
     closeDialog();
   };
 
   return (
-    <Dialog open={!!dialogOptions} onClose={handleCancel}>
+    <Dialog open={!!dialogOptions} onClose={closeDialog}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <Typography>{content}</Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleCancel} color="primary">
-          {cancelText}
-        </Button>
-        <Button onClick={handleConfirm} color="error" variant="contained">
-          {confirmText}
-        </Button>
+        {buttons.map((button, index) => (
+          <Button
+            key={index}
+            onClick={() => handleButtonClick(button.action)}
+            color={button.color || 'primary'}
+            variant={button.variant || 'text'}
+          >
+            {button.text}
+          </Button>
+        ))}
       </DialogActions>
     </Dialog>
   );

@@ -43,6 +43,8 @@ class ApiName(str, Enum):
     GROQ_VISION = 'groq_vision',
     GROQ_TTS = 'groq_tts',
     CUSTOM = 'Custom',
+    BARK_TTS = 'bark_tts',
+    PIXART_IMG_GEN = 'pixart_img_gen',
     GOOGLE_SEARCH = 'google_search',
     REDDIT_SEARCH = 'reddit_search',
     WIKIPEDIA_SEARCH = 'wikipedia_search',

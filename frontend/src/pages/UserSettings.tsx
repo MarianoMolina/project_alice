@@ -98,21 +98,34 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
         openDialog({
             title: 'Confirm Database Purge and Reinitialization',
             content: 'Are you sure you want to purge and reinitialize your database? This action cannot be undone and will delete all your current data.',
-            confirmText: 'Confirm Purge and Reinitialize',
-            onConfirm: async () => {
-                Logger.debug('Dialog confirmed');
-                try {
-                    Logger.info('Purging db');
-                    await purgeAndReinitializeDatabase();
-                    Logger.info('Database successfully purged and reinitialized');
-                    addNotification('Database successfully purged and reinitialized', 'success');
-                    // Reload the page immediately after successful purge and reinitialization
-                    window.location.reload();
-                } catch (error) {
-                    Logger.error('Failed to purge and reinitialize database:', error);
-                    addNotification('Failed to purge and reinitialize database. Please try again.', 'error');
-                }
-            },
+            buttons: [
+                {
+                    text: 'Cancel',
+                    action: () => {
+                        addNotification('Database reinitialization cancelled', 'info');
+                    },
+                    color: 'primary',
+                },
+                {
+                    text: 'Confirm Purge and Reinitialize',
+                    action: async () => {
+                        Logger.debug('Dialog confirmed');
+                        try {
+                            Logger.info('Purging db');
+                            await purgeAndReinitializeDatabase();
+                            Logger.info('Database successfully purged and reinitialized');
+                            addNotification('Database successfully purged and reinitialized', 'success');
+                            // Reload the page immediately after successful purge and reinitialization
+                            window.location.reload();
+                        } catch (error) {
+                            Logger.error('Failed to purge and reinitialize database:', error);
+                            addNotification('Failed to purge and reinitialize database. Please try again.', 'error');
+                        }
+                    },
+                    color: 'error',
+                    variant: 'contained',
+                },
+            ],
         });
     }, [openDialog, purgeAndReinitializeDatabase, addNotification]);
 

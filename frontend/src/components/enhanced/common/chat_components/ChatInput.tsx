@@ -39,7 +39,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
       references.files.forEach(file => types.add(file.type as unknown as ContentType));
     }
     if (references.task_responses?.length) types.add(ContentType.TASK_RESULT);
-    if (references.search_results?.length) types.add(ContentType.URL_REFERENCE);
+    if (references.url_references?.length) types.add(ContentType.URL_REFERENCE);
     if (references.messages?.length) types.add(ContentType.TEXT);
     if (references.string_outputs?.length) types.add(ContentType.TEXT);
 
@@ -78,7 +78,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
   useImperativeHandle(ref, () => ({
     addFileReference: (file: FileReference) => addReference('files', file),
     addTaskResponse: (taskResponse: TaskResponse) => addReference('task_responses', taskResponse),
-    addURLReference: (urlReference: URLReference) => addReference('search_results', urlReference),
+    addURLReference: (urlReference: URLReference) => addReference('url_references', urlReference),
     addMessageReference: (message: MessageType) => addReference('messages', message),
   }));
 
@@ -132,7 +132,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
           case 'task_responses':
             label = `Task: ${(ref as TaskResponse).task_name}`;
             break;
-          case 'search_results':
+          case 'url_references':
             label = `Search: ${(ref as URLReference).title}`;
             break;
           case 'messages':

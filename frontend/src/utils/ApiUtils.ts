@@ -56,7 +56,7 @@ export const API_TYPE_CONFIGS: Record<ApiType, ApiTypeConfig> = {
     },
   },
   [ApiType.IMG_GENERATION]: {
-    api_name: [ApiName.OPENAI_VISION, ApiName.LM_STUDIO_VISION, ApiName.GEMINI_IMG_GEN],
+    api_name: [ApiName.OPENAI_VISION, ApiName.LM_STUDIO_VISION, ApiName.GEMINI_IMG_GEN, ApiName.PIXART_IMG_GEN],
     apiConfig: {
       api_key: '',
       base_url: '',
@@ -70,7 +70,7 @@ export const API_TYPE_CONFIGS: Record<ApiType, ApiTypeConfig> = {
     },
   },
   [ApiType.TEXT_TO_SPEECH]: {
-    api_name: [ApiName.OPENAI_TTS, ApiName.GROQ_TTS],
+    api_name: [ApiName.OPENAI_TTS, ApiName.GROQ_TTS, ApiName.BARK_TTS],
     apiConfig: {
       api_key: '',
       base_url: '',
@@ -121,6 +121,10 @@ export const LLM_PROVIDERS = {
   Groq: {
     api_name: [ApiName.GROQ, ApiName.GROQ_VISION, ApiName.GROQ_TTS],
     baseUrl: 'https://api.groq.com/openai/v1',
+  },
+  Local: {
+    api_name: [ApiName.CUSTOM, ApiName.BARK_TTS],
+    baseUrl: 'http://localhost:1234/v1',
   }
 };
 

@@ -116,24 +116,33 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             openDialog({
                 title: 'Confirm Deletion',
                 content: `Are you sure you want to delete this ${collectionNameToElementString[collectionName]}?`,
-                confirmText: 'Delete',
-                cancelText: 'Cancel',
-                onConfirm: async () => {
-                    try {
-                        await apiDeleteItem(collectionName, itemId);
-                        addNotification(`${collectionNameToElementString[collectionName]} deleted successfully`, 'success');
-                        emitEvent('deleted', collectionName, { _id: itemId });
-                        resolve(true);
-                    } catch (error) {
-                        addNotification(`Error deleting ${collectionName}`, 'error');
-                        Logger.error(`Error deleting item from ${collectionName}:`, error);
-                        resolve(false);
-                    }
-                },
-                onCancel: () => {
-                    addNotification(`Deletion of ${collectionName} cancelled`, 'info');
-                    resolve(false);
-                }
+                buttons: [
+                    {
+                        text: 'Cancel',
+                        action: () => {
+                            addNotification(`Deletion of ${collectionName} cancelled`, 'info');
+                            resolve(false);
+                        },
+                        color: 'primary',
+                    },
+                    {
+                        text: 'Delete',
+                        action: async () => {
+                            try {
+                                await apiDeleteItem(collectionName, itemId);
+                                addNotification(`${collectionNameToElementString[collectionName]} deleted successfully`, 'success');
+                                emitEvent('deleted', collectionName, { _id: itemId });
+                                resolve(true);
+                            } catch (error) {
+                                addNotification(`Error deleting ${collectionName}`, 'error');
+                                Logger.error(`Error deleting item from ${collectionName}:`, error);
+                                resolve(false);
+                            }
+                        },
+                        color: 'error',
+                        variant: 'contained',
+                    },
+                ],
             });
         });
     }, [addNotification, openDialog]);
@@ -221,23 +230,32 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                     openDialog({
                         title: 'Existing Transcript',
                         content: 'This file already has a transcript. Do you want to generate a new one?',
-                        confirmText: 'Generate New',
-                        cancelText: 'Use Existing',
-                        onConfirm: async () => {
-                            try {
-                                const newTranscript = await apiRequestFileTranscript(fileId, agentId, chatId);
-                                await updateItem('files', fileId, { transcript: newTranscript });
-                                addNotification('New transcript generated successfully', 'success');
-                                resolve(newTranscript);
-                            } catch (error) {
-                                addNotification('Error generating new transcript', 'error');
-                                reject(error);
-                            }
-                        },
-                        onCancel: () => {
-                            addNotification('Using existing transcript', 'info');
-                            resolve(fileData.transcript as MessageType);
-                        }
+                        buttons: [
+                            {
+                                text: 'Use Existing',
+                                action: () => {
+                                    addNotification('Using existing transcript', 'info');
+                                    resolve(fileData.transcript as MessageType);
+                                },
+                                color: 'primary',
+                            },
+                            {
+                                text: 'Generate New',
+                                action: async () => {
+                                    try {
+                                        const newTranscript = await apiRequestFileTranscript(fileId, agentId, chatId);
+                                        await updateItem('files', fileId, { transcript: newTranscript });
+                                        addNotification('New transcript generated successfully', 'success');
+                                        resolve(newTranscript);
+                                    } catch (error) {
+                                        addNotification('Error generating new transcript', 'error');
+                                        reject(error);
+                                    }
+                                },
+                                color: 'primary',
+                                variant: 'contained',
+                            },
+                        ],
                     });
                 });
             } else {

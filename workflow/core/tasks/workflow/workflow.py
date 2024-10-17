@@ -64,21 +64,6 @@ class Workflow(AliceTask):
         return self.create_workflow_response(tasks_performed, status, diagnostic, **task_inputs)
 
     async def execute_workflow(self, **kwargs) -> Tuple[List[TaskResponse], str, str]:
-        """
-        Core method for executing the workflow.
-
-        This method manages the flow of task execution, including task selection,
-        execution, and handling of results and errors.
-
-        Args:
-            **kwargs: Additional keyword arguments passed to the tasks.
-
-        Returns:
-            Tuple[List[TaskResponse], str, str]: A tuple containing:
-                - List of TaskResponse objects for all executed tasks
-                - Status of the workflow execution ("complete" or "failed")
-                - Diagnostic information or error message
-        """
         tasks_performed = []
         attempts = 1
         current_task_name, bool = self.get_initial_task_name()
@@ -86,8 +71,15 @@ class Workflow(AliceTask):
         try:
             while current_task_name:
                 task_result = await self.execute_task(current_task_name, **kwargs)
+                
+                # Update tasks_performed, ensuring only one result per task name
+                existing_task_index = next((i for i, t in enumerate(tasks_performed) if t.task_name == current_task_name), None)
+                if existing_task_index is not None:
+                    # Move existing task to references of the new task
+                    task_result.references.task_responses.append(tasks_performed.pop(existing_task_index))
                 tasks_performed.append(task_result)
-                kwargs = self.update_kwargs(kwargs, current_task_name, task_result)
+                
+                kwargs = self.update_kwargs(kwargs, task_result)
                 
                 current_task_name, try_bool = self.get_next_task(task_result, tasks_performed)
                 
@@ -100,6 +92,25 @@ class Workflow(AliceTask):
 
         except Exception as e:
             return tasks_performed, "failed", f"Error: {str(e)}\nTraceback: {self.get_traceback()}"
+
+    def update_kwargs(self, kwargs: Dict[str, Any], task_result: TaskResponse) -> Dict[str, Any]:
+        """
+        Update the keyword arguments with the results of the latest task execution.
+
+        Args:
+            kwargs (Dict[str, Any]): The current keyword arguments.
+            task_result (TaskResponse): The result of the task execution.
+
+        Returns:
+            Dict[str, Any]: Updated keyword arguments including the latest task output.
+        """
+        # Pass the task_outputs as the task name
+        kwargs[task_result.task_name] = task_result.task_outputs
+
+        # Pass the references.summary() as task_name_inner
+        kwargs[f"{task_result.task_name}_inner"] = task_result.references.summary()
+
+        return kwargs
 
     def get_initial_task(self) -> Optional[str]:
         """
@@ -130,21 +141,6 @@ class Workflow(AliceTask):
         if not current_task:
             raise ValueError(f"Task {task_name} not found in the workflow.")
         return await current_task.run(**kwargs)
-
-    def update_kwargs(self, kwargs: Dict[str, Any], task_name: str, task_result: TaskResponse) -> Dict[str, Any]:
-        """
-        Update the keyword arguments with the results of the latest task execution.
-
-        Args:
-            kwargs (Dict[str, Any]): The current keyword arguments.
-            task_name (str): The name of the task that was just executed.
-            task_result (TaskResponse): The result of the task execution.
-
-        Returns:
-            Dict[str, Any]: Updated keyword arguments including the latest task output.
-        """
-        kwargs[f'outputs_{task_name}'] = str(task_result.task_outputs) if task_result.task_outputs else None
-        return kwargs
 
     def get_next_task(self, task_result: TaskResponse, tasks_performed: List[TaskResponse]) -> Tuple[Optional[str], bool]:
         """
