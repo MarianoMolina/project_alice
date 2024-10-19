@@ -25,7 +25,7 @@ ApiEngineMap = {
         ApiName.LM_STUDIO: LLMEngine,
         ApiName.AZURE: LLMEngine,
         ApiName.MISTRAL: LLMEngine,
-        ApiName.META: LLMEngine,
+        ApiName.LLAMA: LLMEngine,
         ApiName.GROQ: LLMEngine,
         ApiName.ANTHROPIC: LLMAnthropic,
         ApiName.GEMINI: GeminiLLMEngine,
@@ -53,7 +53,7 @@ ApiEngineMap = {
         ApiName.OPENAI_VISION: VisionModelEngine,
         ApiName.ANTHROPIC_VISION: AnthropicVisionEngine,
         ApiName.LM_STUDIO_VISION: VisionModelEngine,
-        ApiName.META_VISION: VisionModelEngine,
+        ApiName.LLAMA_VISION: VisionModelEngine,
         ApiName.MISTRAL_VISION: VisionModelEngine,
         ApiName.GEMINI_VISION: GeminiVisionEngine,
         ApiName.GROQ_VISION: VisionModelEngine
@@ -77,6 +77,7 @@ ApiEngineMap = {
         ApiName.OPENAI_EMBEDDINGS: OpenAIEmbeddingsEngine,
         ApiName.MISTRAL_EMBEDDINGS: OpenAIEmbeddingsEngine,
         ApiName.GEMINI_EMBEDDINGS: GeminiEmbeddingsEngine,
+        ApiName.LM_STUDIO_EMBEDDINGS: OpenAIEmbeddingsEngine
     },
 }
 __all__ = ["ArxivSearchAPI", "ExaSearchAPI", "GoogleSearchAPI", "RedditSearchAPI", "WikipediaSearchAPI", "APIEngine", "GeminiImageGenerationEngine",

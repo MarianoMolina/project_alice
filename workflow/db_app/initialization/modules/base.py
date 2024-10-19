@@ -8,7 +8,7 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 COHERE_API_KEY = os.getenv("COHERE_API_KEY")
-META_API_KEY = os.getenv("META_API_KEY")
+LLAMA_API_KEY = os.getenv("LLAMA_API_KEY")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 EXA_API_KEY = os.getenv("EXA_API_KEY")
 REDDIT_CLIENT_ID = os.getenv("REDDIT_CLIENT_ID")
@@ -212,7 +212,7 @@ base_module = BaseModule(
                 "model_format": "Llama3",
                 "ctx_size": 128000,
                 "model_type": "chat",
-                "api_name": "meta_llm",
+                "api_name": "llama_llm",
             },
             {
                 "key": "pixtral12b",
@@ -496,16 +496,16 @@ base_module = BaseModule(
                 "default_model": "command-r-plus",
             },
             {
-                "key": "meta_llm",
+                "key": "llama_llm",
                 "api_type": "llm_api",
-                "api_name": "meta_llm",
-                "name": "Meta API",
+                "api_name": "llama_llm",
+                "name": "LLAMA API",
                 "api_config": {
-                    "api_key": META_API_KEY,
+                    "api_key": LLAMA_API_KEY,
                     "base_url": "https://api.llama-api.com"
                 },
                 "is_active": True,
-                "health_status": "healthy" if META_API_KEY else "unhealthy",
+                "health_status": "healthy" if LLAMA_API_KEY else "unhealthy",
                 "default_model": "llama3.2_90b",
             },
             {

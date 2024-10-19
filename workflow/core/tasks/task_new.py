@@ -6,8 +6,15 @@ from pydantic import BaseModel, Field
 from workflow.core.prompt import Prompt
 from workflow.core.agent import AliceAgent
 from workflow.core.api import APIManager, APIEngine
-from workflow.core.data_structures import TaskResponse, ApiType, FunctionParameters, ParameterDefinition, FunctionConfig, ToolFunction
+from workflow.core.data_structures import ApiType, FunctionParameters, ParameterDefinition, FunctionConfig, ToolFunction, References
+from workflow.core.data_structures.user_interaction import UserCheckpoint, UserInteraction
+from workflow.core.data_structures.task_response_new import NodeResponse, TaskResponse
+from workflow.util.utils import simplify_execution_history
 from workflow.util import LOGGER
+
+RouteMapTuple = Tuple[Union[str, None], bool]
+RouteMap = Dict[int, RouteMapTuple]
+TasksEndCodeRouting = Dict[str, RouteMap]
 
 class AliceTask(BaseModel, ABC):
     """
@@ -76,15 +83,15 @@ class AliceTask(BaseModel, ABC):
     timeout: Optional[int] = Field(default=None, description="The timeout for the task in seconds")
     prompts_to_add: Optional[Dict[str, Prompt]] = Field(default_factory=dict, description="A dictionary of prompts to add to the task")
     exit_code_response_map: Optional[Dict[str, int]] = Field(default=None, description="A dictionary mapping exit codes to responses")
-    start_task: Optional[str] = Field(default=None, description="The name of the starting task")
+    start_node: Optional[str] = Field(default=None, description="The name of the starting task")
     required_apis: List[ApiType] = Field(default_factory=list, description="A list of required APIs for the task")
-    task_selection_method: Optional[Callable[[TaskResponse, List[Dict[str, Any]]], Optional[str]]] = Field(default=None, description="A method to select the next task based on the current task's response")
-    tasks_end_code_routing: Optional[Dict[str, Dict[Union[str, int], Tuple[Optional[str], bool]]]] = Field(default=None, description="A dictionary of tasks -> exit codes and the task to route to given each exit code")
+    task_selection_method: Optional[Callable[[TaskResponse, List[Dict[str, Any]]], Optional[str]]] = Field(default=None, description="A method to select the next task based on the current task's response. Overrides the default logic that uses task_end_code_routing.")
+    node_end_code_routing: Optional[TasksEndCodeRouting] = Field(default=None, description="A dictionary of tasks/nodes -> exit codes and the task to route to given each exit code")
     max_attempts: int = Field(default=3, description="The maximum number of failed task attempts before the workflow is considered failed")
-    agent: Optional[AliceAgent] = Field(default=None, description="The agent that the task is associated with")
-    human_input: bool = Field(default=False, description="Whether the task requires human input")
+    agent: Optional[AliceAgent] = Field(default=None, description="The agent that the task is associated with, if any")
     api_engine: Optional[APIEngine] = Field(default=None, description="The API engine for the task")
-    
+    user_checkpoints: Dict[str, UserCheckpoint] = Field(default_factory=dict, description="Dictionary of node to user checkpoint to implement human input for this task")
+
     @property
     def task_type(self) -> str:
         return self.__class__.__name__
@@ -143,9 +150,32 @@ class AliceTask(BaseModel, ABC):
         return dumped_data
     
     @abstractmethod
-    async def run(self, **kwargs) -> TaskResponse:
-        """Runs the task and returns a TaskResponse."""
-        ...
+    async def run(self, execution_history: List[NodeResponse] = None, node_name: str = None, **kwargs) -> TaskResponse:
+        """
+        Runs the task and returns a TaskResponse.
+        This method must be implemented by subclasses to define their specific logic.
+        """
+        pass
+
+    async def handle_user_checkpoints(self, execution_history: List[NodeResponse] = None, node_name: str = None) -> Optional[NodeResponse]:
+        """
+        Handles user checkpoints. This method can be called by subclasses before their specific logic.
+        Returns a TaskResponse if a user interaction is needed, None otherwise.
+        """
+        execution_history = execution_history or []
+        node_name = node_name or self.start_node or "default"
+       
+        if node_name in self.user_checkpoints:
+            completed_interaction = next((
+                node for node in reversed(execution_history)
+                if node.node_name == node_name
+                and node.references.user_interactions
+                and node.references.user_interactions[-1].user_response is not None
+            ), None)
+           
+            if not completed_interaction:
+                return self.create_user_interaction(node_name, len(execution_history))
+        return None
 
     def validate_required_apis(self, api_manager: APIManager) -> bool:
         if not self.required_apis:
@@ -182,30 +212,79 @@ class AliceTask(BaseModel, ABC):
 
         return result
     
-    async def a_execute(self, **kwargs) -> TaskResponse:
+    async def a_execute(self, execution_history: List[NodeResponse] = None, **kwargs) -> TaskResponse:
         """Executes the task and returns a TaskResponse."""
         LOGGER.info(f'Executing task {self.task_name}')
-        
-        # Retrieve or initialize execution history
-        execution_history: List[Dict] = kwargs.pop("execution_history", [])
-        if self.required_apis and not self.validate_required_apis(kwargs.get("api_manager")):
+        execution_history = execution_history or []
+
+        try:
+            self._validate_apis(kwargs.get("api_manager"))
+        except ValueError as e:
+            return self.get_failed_task_response(str(e), **kwargs)
+
+        node_name = self._determine_next_node(execution_history)
+        if node_name is None:
+            return self._complete_partial_execution(execution_history, **kwargs)
+
+        return await self.run(execution_history=execution_history, node_name=node_name, **kwargs)
+
+    def _validate_apis(self, api_manager: Optional[APIManager]) -> None:
+        """Validates that all required APIs are active and healthy."""
+        if self.required_apis and not self.validate_required_apis(api_manager):
             raise ValueError("Required APIs are not active or healthy.")
-        
-        # Check for recursion
+
+    def _determine_next_node(self, execution_history: List[NodeResponse]) -> Optional[str]:
+        """Determines the next node to execute based on execution history."""
+        if not execution_history or not any(node.parent_task_id == self.id for node in execution_history):
+            return self.start_node or "default"
+
+        if self._is_task_completed(execution_history):
+            return self._handle_completed_task(execution_history)
+
+        return self._handle_partial_execution(execution_history)
+
+    def _is_task_completed(self, execution_history: List[NodeResponse]) -> bool:
+        """Checks if the task has been completed before."""
+        return any(node.node_name == self.task_name for node in execution_history)
+
+    def _handle_completed_task(self, execution_history: List[NodeResponse]) -> Optional[str]:
+        """Handles the case when the task has been completed before."""
         if not self.recursive:
-            if any(task["task_name"] == self.task_name for task in execution_history):
-                LOGGER.error(f'Error: Task {self.task_name} is already in the execution history. Execution history: {execution_history}')
-                raise RecursionError(f"Task {self.task_name} is already in the execution history, preventing recursion.")
-        
-        # Add current task to execution history
-        execution_history.append({
-            "task_name": self.task_name,
-            "task_id": self.id,
-            "task_description": self.task_description
-        })
-        # Return the the task response
-        return await self.run(execution_history=execution_history, **kwargs)        
+            LOGGER.error(f'Error: Task {self.task_name} is already in the execution history. Execution history: {execution_history}')
+            return None
+        LOGGER.info(f'Task {self.task_name} is recursive and will be executed again')
+        return self.start_node or "default"
+
+    def _handle_partial_execution(self, execution_history: List[NodeResponse]) -> Optional[str]:
+        """Handles the case when the task has been partially executed before."""
+        LOGGER.info(f'Task {self.task_name} has been partially executed before. Execution history: {execution_history}')
+        last_node = self.get_last_node_of_same_id(execution_history) or {}
+        next_node = self.node_end_code_routing.get(last_node.node_name, {}).get(last_node.exit_code, (None, False))
+        return next_node[0]
+
+    def _complete_partial_execution(self, execution_history: List[NodeResponse], **kwargs) -> TaskResponse:
+        """Completes a partially executed task."""
+        content = self.get_content_string_from_node_responses(execution_history, self.node_end_code_routing)
+        return self.get_task_response(content, 0, "Task completed successfully", "complete", **kwargs)
+
+    async def a_execute_from_task_response(self, task_response: TaskResponse, **kwargs) -> TaskResponse:
+        """
+        Executes the task from a TaskResponse object, continuing from the last node in task response
+        """
+        execution_history = task_response.inner_execution_history()
+        return await self.a_execute(execution_history=execution_history, **kwargs)
     
+    def get_last_node_of_same_id(self, execution_history: List[NodeResponse]) -> Optional[NodeResponse]:
+        """
+        Returns the node with the highest execution_order value in the execution history with the same parent_task_id as the task id.
+        """
+        return max([node for node in execution_history if node.parent_task_id == self.id], key=lambda x: x.execution_order, default=None)
+    
+    def get_content_string_from_node_responses(self, node_responses: List[NodeResponse], node_end_code_routing: Optional[TasksEndCodeRouting] = None) -> str:
+        """
+        Returns a string representation of the content of the node responses, IN ORDER by execution order, with little added text
+        """
+
     def get_function(self, execution_history: Optional[List]=[], api_manager: Optional[APIManager] = None) -> Dict[str, Any]:
         """
         Returns a dictionary representing the function typedict and the function callable.
@@ -234,67 +313,56 @@ class AliceTask(BaseModel, ABC):
         """
         Returns a failed task response with the given diagnostics.
         """
+        return self.get_task_response("", 1, diagnostics, "failed", **kwargs)
+    
+    def get_task_response(self, task_outputs: str, result_code: int, diagnostics: str = None, status: str = "complete", node_references: Optional[List[NodeResponse]]=[], **kwargs) -> TaskResponse:
+        """
+        Returns a task response with the given outputs, result code, and diagnostics.
+        """
+        exec_history = kwargs.pop("execution_history", None)
+        if exec_history and isinstance(exec_history, list):
+            exec_history = simplify_execution_history(exec_history)
         exec_history = kwargs.pop("execution_history", None)
         kwargs.pop("api_manager", None)
         return TaskResponse(
             task_id = self.id if self.id else '',
             task_name=self.task_name,
             task_description=self.task_description,
-            status="failed",
-            result_code=1,
-            task_outputs=None,
+            status=status,
+            result_code=result_code,
+            task_outputs=task_outputs,
             task_inputs=kwargs,
             result_diagnostic=diagnostics,
+            node_references=node_references,
             execution_history=exec_history
         )
     
-    # async def a_run(self, **kwargs) -> TaskResponse:
-    #     """
-    #     Asynchronous version of the run method.
-    #     This method should be implemented by subclasses.
-    #     """
-    #     return self.run(**kwargs)
+    def create_user_interaction(self, node_name: str, execution_order: int) -> NodeResponse:
+        """
+        Creates a UserInteraction for the specified node and returns it wrapped in a NodeResponse.
 
-    # def execute(self, **kwargs) -> TaskResponse:
-    #     """Synchronous wrapper for a_execute"""
-    #     return asyncio.run(self.a_execute(**kwargs))
+        Args:
+            node_name (str): The name of the node for which to create the user interaction.
+            execution_order (int): The execution order for this node in the task's sequence.
 
-    # async def a_execute(self, **kwargs) -> TaskResponse:
-    #     """Executes the task and returns a TaskResponse."""
-    #     return await self.execute(**kwargs)
+        Returns:
+            NodeResponse: A NodeResponse object containing the UserInteraction.
 
-    # def execute(self, **kwargs) -> TaskResponse:
-    #     # Generate a new task ID for this execution
-    #     print(f'Executing task {self.task_name}')
-    #     task_id = self.id if self.id else str(uuid.uuid4())
-        
-    #     # Retrieve or initialize execution history
-    #     execution_history: List[Dict] = kwargs.pop("execution_history", [])
-    #     if self.required_apis and not self.validate_required_apis(kwargs.get("api_manager")):
-    #         raise ValueError("Required APIs are not active or healthy.")
-    #     # Check for recursion
-    #     if not self.recursive:
-    #         if any(task["task_name"] == self.task_name for task in execution_history):
-    #             # raise RecursionError(f"Task {self.task_name} is already in the execution history, preventing recursion.")
-    #             print(f'Error: Task {self.task_name} is already in the execution history. Execution history: {execution_history}')
-        
-    #     # Add current task to execution history
-    #     execution_history.append({
-    #         "task_name": self.task_name,
-    #         "task_id": task_id,
-    #         "task_description": self.task_description
-    #     })
-        
-    #     # Run the task
-    #     response = self.run(execution_history=execution_history, **kwargs)
-    #     return TaskResponse.model_validate(response)
-    
-    # def update_input(self, **kwargs) -> list[Any]:
-    #     """Executes the task and returns a TaskResponse."""
-    #     ...
+        Raises:
+            ValueError: If no UserCheckpoint is defined for the specified node.
+        """
+        if node_name not in self.user_checkpoints:
+            raise ValueError(f"No UserCheckpoint defined for node '{node_name}'")
 
-    # @abstractmethod
-    # def stream(self, **kwargs) -> TaskResponse:
-    #     """Streams the task process and returns a TaskResponse."""
-    #     ...
+        checkpoint = self.user_checkpoints[node_name]
+        user_interaction = UserInteraction(
+            user_checkpoint_id=checkpoint.id,
+            task_response_id=self.id
+        )
 
+        return NodeResponse(
+            parent_task_id=self.id,
+            node_name=node_name,
+            execution_order=execution_order,
+            references=References(user_interactions=[user_interaction])
+        )

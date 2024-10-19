@@ -2,9 +2,11 @@ from pydantic import Field
 from typing import List, Dict, Optional, Callable, Tuple, Union
 from workflow.core.api import APIManager
 from workflow.core.agent.agent import AliceAgent
-from workflow.core.tasks.task import AliceTask
+from workflow.core.tasks.task_new import AliceTask
+from workflow.core.data_structures.task_response_new import NodeResponse
 from workflow.core.data_structures import References, MessageDict, TaskResponse, ApiType, FunctionParameters, ParameterDefinition, FunctionConfig
 from workflow.util import LOGGER
+from workflow.util.utils import generate_node_responses_summary
 
 class BasicAgentTask(AliceTask):
     """
@@ -66,7 +68,12 @@ class BasicAgentTask(AliceTask):
         exitcode = self.get_exit_code(new_messages, not is_terminated)
         return References(messages=new_messages), exitcode, start_messages
     
-    async def run(self, api_manager: APIManager, **kwargs) -> TaskResponse:     
+    async def run(self, api_manager: APIManager, **kwargs) -> TaskResponse:
+        execution_history: List[NodeResponse] = kwargs.pop("execution_history", [])
+        user_interaction = self.handle_user_checkpoints(execution_history, 'default')
+        if user_interaction:
+            str_output = generate_node_responses_summary(execution_history)
+            return self.get_task_response(str_output, 1, 'User interaction required.', 'pending', execution_history, **kwargs)
         references, exitcode, start_messages = await self.generate_agent_response(api_manager, **kwargs)
         exec_history = kwargs.pop("execution_history", None)
         if not references or len(references) == 0: 

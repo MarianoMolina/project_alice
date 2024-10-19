@@ -88,7 +88,7 @@ base_chat_module = BaseChatModule(
                 "has_code_exec": False,                
             },
             {
-                "key": "meta_alice",
+                "key": "llama_alice",
                 "name": "Alice (Meta)",
                 "system_message": "default_system_message",
                 "models": {
@@ -154,10 +154,10 @@ base_chat_module = BaseChatModule(
                 "functions": [],
             },
             {
-                "key": "meta_chat",
-                "name": "Meta Chat",
+                "key": "llama_chat",
+                "name": "Llama Chat",
                 "messages": [],
-                "alice_agent": "meta_alice",
+                "alice_agent": "llama_alice",
                 "functions": [],
             },
             {

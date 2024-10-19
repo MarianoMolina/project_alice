@@ -2,7 +2,7 @@ from typing import List, Optional, Union, Any, Dict
 from pydantic import BaseModel, Field
 from workflow.core.data_structures.message import MessageDict
 from workflow.core.data_structures.file_reference import FileReference, FileContentReference
-from workflow.core.data_structures.task_response import TaskResponse
+from workflow.core.data_structures.task_response_new import TaskResponse
 from workflow.core.data_structures.url_reference import URLReference
 from workflow.core.data_structures.user_interaction import UserInteraction
 
@@ -25,7 +25,6 @@ class References(BaseModel):
                     for item in getattr(self, key)
                     if isinstance(item, (BaseModel, str))
                 ]
-
         return data
 
     def add_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, URLReference, str, UserInteraction]):
@@ -91,9 +90,6 @@ class References(BaseModel):
         else:
             setattr(self, ref_type, None)
 
-    def __bool__(self) -> bool:
-        return any(value is not None and len(value) > 0 for value in self.__dict__.values() if isinstance(value, list))
-
     def summary(self) -> str:
         """Provide a summary of the references."""
         summary_parts = []
@@ -111,34 +107,11 @@ class References(BaseModel):
                     detailed_summary.append(f"[{attr.capitalize()}:{i}/{len(value)}] {str(item)}")
         return " ".join(detailed_summary)
 
+    def __bool__(self) -> bool:
+        return any(value is not None and len(value) > 0 for value in self.__dict__.values() if isinstance(value, list))
+
     def __str__(self) -> str:
         return self.summary()
 
     def __len__(self) -> int:
         return sum(len(value) if value else 0 for value in self.__dict__.values() if isinstance(value, list))
-    
-    def get_complete_references(self) -> 'References':
-        complete_refs = References()
-
-        def collect_nested_references(ref):
-            if isinstance(ref, MessageDict):
-                complete_refs.add_reference(ref)
-                if ref.references:
-                    ref.references.get_complete_references()
-            elif isinstance(ref, TaskResponse):
-                complete_refs.add_reference(ref)
-                if ref.references:
-                    ref.references.get_complete_references()
-            elif isinstance(ref, (FileReference, FileContentReference)):
-                complete_refs.add_reference(ref)
-                if hasattr(ref, 'transcript') and ref.transcript:
-                    collect_nested_references(ref.transcript)
-            elif isinstance(ref, (URLReference, str, UserInteraction)):
-                complete_refs.add_reference(ref)
-
-        for ref_list in self.__dict__.values():
-            if ref_list:
-                for ref in ref_list:
-                    collect_nested_references(ref)
-
-        return complete_refs

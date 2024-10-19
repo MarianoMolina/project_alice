@@ -1,6 +1,7 @@
 import json, re
 from typing import List, Any, Union, Type, Tuple, Dict
 from workflow.util.logging_config import LOGGER
+from workflow.core.data_structures.task_response_new import NodeResponse, TaskResponse, ExecutionHistoryItem
 
 def json_to_python_type_mapping(json_type: str) -> Type | Tuple[Type, ...] | None:
     type_mapping = {
@@ -182,3 +183,59 @@ def prune_messages(messages: List[Dict[str, Any]], ctx_size: int) -> List[Dict[s
                 pruned_messages[longest_index]['content'] = pruned_content
     
     return pruned_messages
+
+def complete_inner_execution_history(nodes: List[NodeResponse], base_order=0) -> List[NodeResponse]:
+    flattened = []
+    for node in sorted(nodes, key=lambda x: x.execution_order):
+        new_node = NodeResponse(
+            parent_task_id=node.parent_task_id,
+            node_name=node.node_name,
+            execution_order=base_order + len(flattened),
+            exit_code=node.exit_code,
+            references=node.references
+        )
+        flattened.append(new_node)
+        if isinstance(node, TaskResponse):
+            inner_nodes = complete_inner_execution_history(node.node_references, base_order + len(flattened))
+            flattened.extend(inner_nodes)
+    return flattened
+
+def generate_node_responses_summary(node_responses: List[NodeResponse], verbose: bool = False) -> str:
+    sorted_nodes = sorted(node_responses, key=lambda x: x.execution_order)
+    
+    if verbose:
+        summaries = []
+        for i, node in enumerate(sorted_nodes, 1):
+            node_summary = f"Node {i} (Order: {node.execution_order}, Name: {node.node_name}, Exit: {node.exit_code}):"
+            references_summary = node.references.summary() if node.references else "No references"
+            node_summary += f"\n    {references_summary}"
+            summaries.append(node_summary)
+        return "\n\n".join(summaries)
+    else:
+        summaries = []
+        for node in sorted_nodes:
+            references_summary = node.references.summary() if node.references else "No refs"
+            summaries.append(f"{node.node_name}({node.execution_order}):{references_summary}")
+        return "\n\n".join(summaries)
+
+
+def get_traceback() -> str:
+    """
+    Get the traceback information for the current exception.
+
+    Returns:
+        str: A string containing the formatted traceback.
+    """
+    import traceback
+    return traceback.format_exc()
+
+def simplify_execution_history(execution_history: List[NodeResponse]) -> List[ExecutionHistoryItem]:
+    """
+    Returns a simplified list of execution history items from a list of node responses.
+    """
+    return [ExecutionHistoryItem(
+        parent_task_id=node.parent_task_id,
+        node_name=node.node_name,
+        execution_order=node.execution_order,
+        exit_code=node.exit_code
+    ) for node in execution_history]

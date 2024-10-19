@@ -8,7 +8,7 @@ export interface ApiTypeConfig {
 
 export const API_TYPE_CONFIGS: Record<ApiType, ApiTypeConfig> = {
   [ApiType.LLM_MODEL]: {
-    api_name: [ApiName.OPENAI, ApiName.AZURE, ApiName.ANTHROPIC, ApiName.LM_STUDIO, ApiName.GEMINI, ApiName.MISTRAL, ApiName.META, ApiName.COHERE, ApiName.GROQ],
+    api_name: [ApiName.OPENAI, ApiName.AZURE, ApiName.ANTHROPIC, ApiName.LM_STUDIO, ApiName.GEMINI, ApiName.MISTRAL, ApiName.LLAMA, ApiName.COHERE, ApiName.GROQ],
     apiConfig: {
       api_key: '',
       base_url: '',
@@ -49,14 +49,14 @@ export const API_TYPE_CONFIGS: Record<ApiType, ApiTypeConfig> = {
     },
   },
   [ApiType.IMG_VISION]: {
-    api_name: [ApiName.OPENAI_VISION, ApiName.ANTHROPIC_VISION, ApiName.LM_STUDIO_VISION, ApiName.GEMINI_VISION, ApiName.MISTRAL_VISION, ApiName.META_VISION, ApiName.GROQ_VISION],
+    api_name: [ApiName.OPENAI_VISION, ApiName.ANTHROPIC_VISION, ApiName.LM_STUDIO_VISION, ApiName.GEMINI_VISION, ApiName.MISTRAL_VISION, ApiName.LLAMA_VISION, ApiName.GROQ_VISION],
     apiConfig: {
       api_key: '',
       base_url: '',
     },
   },
   [ApiType.IMG_GENERATION]: {
-    api_name: [ApiName.OPENAI_VISION, ApiName.LM_STUDIO_VISION, ApiName.GEMINI_IMG_GEN, ApiName.PIXART_IMG_GEN],
+    api_name: [ApiName.OPENAI_VISION, ApiName.GEMINI_IMG_GEN, ApiName.PIXART_IMG_GEN],
     apiConfig: {
       api_key: '',
       base_url: '',
@@ -77,7 +77,7 @@ export const API_TYPE_CONFIGS: Record<ApiType, ApiTypeConfig> = {
     },
   },
   [ApiType.EMBEDDINGS]: {
-    api_name: [ApiName.OPENAI_EMBEDDINGS, ApiName.MISTRAL_EMBEDDINGS, ApiName.GEMINI_EMBEDDINGS],
+    api_name: [ApiName.OPENAI_EMBEDDINGS, ApiName.MISTRAL_EMBEDDINGS, ApiName.GEMINI_EMBEDDINGS, ApiName.LM_STUDIO_EMBEDDINGS],
     apiConfig: {
       api_key: '',
       base_url: '',
@@ -99,7 +99,7 @@ export const LLM_PROVIDERS = {
     baseUrl: 'https://api.anthropic.com',
   },
   LMStudio: {
-    api_name: [ApiName.LM_STUDIO, ApiName.LM_STUDIO_VISION],
+    api_name: [ApiName.LM_STUDIO, ApiName.LM_STUDIO_VISION, ApiName.LM_STUDIO_EMBEDDINGS],
     baseUrl: 'http://localhost:1234/v1',
   },
   Gemini: {
@@ -110,9 +110,9 @@ export const LLM_PROVIDERS = {
     api_name: [ApiName.MISTRAL, ApiName.MISTRAL_VISION, ApiName.MISTRAL_EMBEDDINGS],
     baseUrl: 'https://api.mistral.ai',
   },
-  Meta: {
-    api_name: [ApiName.META, ApiName.META_VISION],
-    baseUrl: 'https://api.meta.ai',
+  Llama: {
+    api_name: [ApiName.LLAMA, ApiName.LLAMA_VISION],
+    baseUrl: 'https://api.llama-api.com',
   },
   Cohere: {
     api_name: [ApiName.COHERE],

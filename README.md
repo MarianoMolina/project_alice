@@ -129,6 +129,7 @@ View their outputs, run them again, change their settings, etc.
 - `Workflow`: The simplest a most complex task. Simple because all it does is run other tasks. Complex because the options are endless. Main difference is they have a tasks_end_code_routing to map the logic path and require a start_task to begin it. 
 
 ### Available APIs
+![APIS](./img/APIs.PNG "Available API endpoints")
 ```typescript
 export enum ApiName {
     OPENAI = 'openai_llm',
@@ -151,12 +152,13 @@ export enum ApiName {
     GROQ = 'groq_llm',
     GROQ_VISION = 'groq_vision',
     GROQ_TTS = 'groq_tts',
-    META = 'meta_llm',
-    META_VISION = 'meta_vision',
+    LLAMA = 'llama_llm',
+    LLAMA_VISION = 'llama_vision',
     ANTHROPIC = 'anthropic_llm',
     ANTHROPIC_VISION = 'anthropic_vision',
     LM_STUDIO = 'lm-studio_llm',
     LM_STUDIO_VISION = 'lm-studio_vision',
+    LM_STUDIO_EMBEDDINGS = 'lm-studio_embeddings',
     CUSTOM = 'Custom',
     BARK_TTS = 'bark_tts',
     PIXART_IMG_GEN = 'pixart_img_gen',
@@ -214,20 +216,20 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
 ## Future Features / Upgrades
 
 1. **Workflow generator** [Done]: Improve the interface for workflow generation. Ideally, something that allows the user to handle tasks/nodes, visualize the execution of it, etc. 
-   - [Added]: Flowchart for workflows
-   - [Added]: Basic route end code editor
+   - [Added 10/24]: Flowchart for workflows
+   - [Added 10/24]: Basic route end code editor
 
 2. **More API engines and base tasks** [Done]: BeautifulSoup to scrap websites, vision_models, text_to_image_models, text_to_speech_models, etc. This will enable a new set of tasks to be created. This includes adding more providers, like Google, Mistral, etc. 
-   - [Added]: 21 new API providers, with their corresponding models, for a total of 160 distinct entities for you to use. 
-   - [Added]: 2 new workflows -> Web Scrape and Research. 
+   - [Added 10/24]: 21 new API providers, with their corresponding models, for a total of 160 distinct entities for you to use. 
+   - [Added 10/24]: 2 new workflows -> Web Scrape and Research. 
 
 3. **File input and type interface** [Done]: Being able to add files of any type to a conversation, which makes a conversion to text of the file (stt, itt, or simply parsing for files that can be converted to a string), allowing for the user and the agents to share any type of data. This, in turn, requires the agents to also be able to produce different types of outputs, which is where the type interface logic comes in, to convert str -> any and back. 
-   - [Added]: Image and Sound file support
-   - [Added]: Both generation (TTS and Image Generation) as well as transcription (STT and Image Vision) available
+   - [Added 9/24]: Image and Sound file support
+   - [Added 9/24]: Both generation (TTS and Image Generation) as well as transcription (STT and Image Vision) available
 
 4. **Complex Information Flows**: 
    - Implement more advanced agent tools, such as ReAct and RAG agents, to enable more sophisticated reasoning and decision-making capabilities.
-   - Implement interactive workflows, where the agent could either ask for permission, or deploy a request/action conditional to user approval. 
+   - Implement interactive workflows, where the agent could either ask for permission, or deploy a request/action conditional to user approval (human in the loop)
 
 5. **Work Environments / Data Clusters**: Introduction of a feature similar to Anthropic's Artifacts but easier to update, edit, modularize, etc., providing a more structured way to manage and interact with complex data and tools within the Alice ecosystem. Idea is to use a mix of in-context and RAG-powered sources, that the user is actively able to update, trim, etc. to ensure the correct info is available at the right time. 
 
@@ -243,13 +245,13 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
    - Edge-case analysis
    - Lazy-loading on the frontend
    - Context management -> be able to predict the context size of a chat or task instance, prevent extreme cases, etc. 
-   - [Improved] Improve error handling and logging
-      - [Added]: Logging folder, and better logs from all containers
-      - [Added]: Logging managers with levels, allowing for dev and prod setups
+   - [Improved 9/24] Improve error handling and logging
+      - [Added 9/24]: Logging folder, and better logs from all containers
+      - [Added 9/24]: Logging managers with levels, allowing for dev and prod setups
 
 8. **Unify the type files**: Create a single source of truth for types, enums, etc. Either in TS or Python, and the conversion logic to the other.  
 
-9. **Make modular addition easy**: [Improved] Ideally, you should be able to sign up to a repository that has a workflow for example, and then be able to 'spawn' it in your current DB. Requires:
+9. **Make modular addition easy**: [Improved 9/24] Ideally, you should be able to sign up to a repository that has a workflow for example, and then be able to 'spawn' it in your current DB. Requires:
    - Module manager -> Select which modules you want to download and/or keep
    - Module integrator -> Select a module to create a fresh version in your DB -> What about removal? Would we want to add a variable to entities to keep track of this? 
 
