@@ -21,7 +21,7 @@ These task types cover a broad spectrum of functionalities, including search ope
   - `WebScrapeBeautifulSoupTask`: Takes a URL, retrieves it, task a string sample of the html to show an agent who creates the selectors for BeautifulSoup parsing of the content. 
   - `GenerateImageTask`: Takes an image prompt and uses the agent's img_gen model to generate an image based on it. 
   - `EmbeddingTask`: Takes a string and the agent's embeddings model to generate the vector embeddings for the text provided. 
-- `Workflow`: The simplest a most complex task. Simple because all it does is run other tasks. Complex because the options are endless. Main difference is they have a tasks_end_code_routing to map the logic path and require a start_task to begin it. 
+- `Workflow`: The simplest a most complex task. Simple because all it does is run other tasks. Complex because the options are endless. Main difference is they have a node_end_code_routing to map the logic path and require a start_node to begin it. 
 
 ## Task Interface
 
@@ -42,10 +42,10 @@ export interface AliceTask extends BaseDataseObject {
   timeout: number | null;
   prompts_to_add: { [key: string]: Prompt } | null;
   exit_code_response_map: { [key: string]: number } | null;
-  start_task?: string | null;
+  start_node?: string | null;
   required_apis?: ApiType[] | null;
   task_selection_method?: CallableFunction | null;
-  tasks_end_code_routing?: TasksEndCodeRouting | null;
+  node_end_code_routing?: TasksEndCodeRouting | null;
   max_attempts?: number;
   agent?: AliceAgent | null;
   human_input?: boolean;
@@ -77,7 +77,7 @@ In the frontend, tasks provide the following functionality:
 
 ## Task Routing
 
-The `tasks_end_code_routing` property allows workflows to perform complex decision-making based on task outcomes:
+The `node_end_code_routing` property allows workflows to perform complex decision-making based on task outcomes:
 
 ```typescript
 export type RouteMapTuple = [string | null, boolean];

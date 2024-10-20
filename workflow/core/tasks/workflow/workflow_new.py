@@ -17,9 +17,9 @@ class Workflow(AliceTask):
 
     Attributes:
         tasks (Dict[str, AliceTask]): A dictionary of tasks in the workflow.
-        start_task (Optional[str]): The name of the starting task.
+        start_node (Optional[str]): The name of the starting task.
         task_selection_method (Optional[Callable]): A method to select the next task based on the current task's response.
-        tasks_end_code_routing (Optional[Dict]): A dictionary defining task routing based on exit codes.
+        node_end_code_routing (Optional[Dict]): A dictionary defining task routing based on exit codes.
         max_attempts (int): Maximum number of failed task attempts before the workflow is considered failed.
         recursive (bool): Whether the workflow can be executed recursively.
 
@@ -34,9 +34,9 @@ class Workflow(AliceTask):
         select_next_task: Select the next task based on defined logic or routing.
     """
     tasks: Dict[str, AliceTask] = Field(..., description="A dictionary of tasks in the workflow")
-    start_task: Optional[str] = Field(None, description="The name of the starting task")
+    start_node: Optional[str] = Field(None, description="The name of the starting task")
     task_selection_method: Optional[Callable[[TaskResponse, List[Dict[str, Any]]], Optional[str]]] = Field(None, description="A method to select the next task based on the current task's response")
-    tasks_end_code_routing: Optional[Dict[str, Dict[Union[str, int], Union[Tuple[Optional[str], bool], List[Optional[Union[str, bool]]]]]]] = Field(None, description="A dictionary of tasks -> exit codes and the task to route to given each exit code and a bool to determine if the outcome represents an extra 'try' at the task. If a selection method is provided, this isn't used")
+    node_end_code_routing: Optional[Dict[str, Dict[Union[str, int], Union[Tuple[Optional[str], bool], List[Optional[Union[str, bool]]]]]]] = Field(None, description="A dictionary of tasks -> exit codes and the task to route to given each exit code and a bool to determine if the outcome represents an extra 'try' at the task. If a selection method is provided, this isn't used")
     max_attempts: int = Field(3, description="The maximum number of failed task attempts before the workflow is considered failed. Default is 3.")
     recursive: bool = Field(False, description="Whether the workflow can be executed recursively. By default, tasks are recursive but workflows are not, unless one is expected to be used within another workflow")
 
@@ -138,7 +138,7 @@ class Workflow(AliceTask):
                 - The name of the initial task (or None if not found)
                 - A boolean indicating whether this is a retry (always False for initial task)
         """
-        return self.start_task if self.start_task else self.select_next_task(None, None)[0]
+        return self.start_node if self.start_node else self.select_next_task(None, None)[0]
 
     async def execute_task(self, task_name: str, **kwargs) -> TaskResponse:
         """
@@ -173,12 +173,12 @@ class Workflow(AliceTask):
                 - A boolean indicating whether this is a retry attempt
 
         Raises:
-            ValueError: If neither task_selection_method nor tasks_end_code_routing is defined.
+            ValueError: If neither task_selection_method nor node_end_code_routing is defined.
         """
         if self.task_selection_method:
             return self.task_selection_method(response, node_references)
-        if not self.tasks_end_code_routing:
-            raise ValueError("Either the task_selection_method or the tasks_end_code_routing needs to be defined.")
+        if not self.node_end_code_routing:
+            raise ValueError("Either the task_selection_method or the node_end_code_routing needs to be defined.")
         
         if response is None:
             return self.get_initial_task_name()
@@ -186,8 +186,8 @@ class Workflow(AliceTask):
         return self.get_next_task_from_routing(response)
 
     def get_initial_task_name(self) -> Tuple[Optional[str], bool]:
-        if self.start_task:
-            return self.start_task, False
+        if self.start_node:
+            return self.start_node, False
         LOGGER.info("No start task defined, selecting the first task.")
         return next(iter(self.tasks.values())).task_name, False
 
@@ -224,11 +224,11 @@ class Workflow(AliceTask):
         
         else:  # TaskResponse
             task_name = response.task_name
-            if task_name not in self.tasks_end_code_routing:
+            if task_name not in self.node_end_code_routing:
                 raise ValueError(f"Task {task_name} not found in the workflow routing.")
 
             result_code = response.result_code
-            task_routing = self.tasks_end_code_routing[task_name]
+            task_routing = self.node_end_code_routing[task_name]
 
             next_task_info = self.get_next_task_info(task_routing, result_code)
             return self.parse_next_task_info(next_task_info)

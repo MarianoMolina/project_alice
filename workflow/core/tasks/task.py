@@ -30,10 +30,10 @@ class AliceTask(BaseModel, ABC):
         timeout (Optional[int]): Maximum execution time for the task.
         prompts_to_add (Optional[Dict[str, Prompt]]): Additional prompts for the task.
         exit_code_response_map (Optional[Dict[str, int]]): Mapping of responses to exit codes.
-        start_task (Optional[str]): Name of the initial subtask, if applicable.
+        start_node (Optional[str]): Name of the initial subtask, if applicable.
         required_apis (Optional[List[ApiType]]): APIs required for task execution.
         task_selection_method (Optional[Callable]): Method for selecting the next task in a workflow.
-        tasks_end_code_routing (Optional[Dict]): Routing logic for subtasks based on exit codes.
+        node_end_code_routing (Optional[Dict]): Routing logic for subtasks based on exit codes.
         max_attempts (int): Maximum number of execution attempts before failure.
         agent (Optional[AliceAgent]): The agent associated with this task.
         human_input (Optional[bool]): Whether the task requires human interaction.
@@ -76,10 +76,10 @@ class AliceTask(BaseModel, ABC):
     timeout: Optional[int] = Field(default=None, description="The timeout for the task in seconds")
     prompts_to_add: Optional[Dict[str, Prompt]] = Field(default_factory=dict, description="A dictionary of prompts to add to the task")
     exit_code_response_map: Optional[Dict[str, int]] = Field(default=None, description="A dictionary mapping exit codes to responses")
-    start_task: Optional[str] = Field(default=None, description="The name of the starting task")
+    start_node: Optional[str] = Field(default=None, description="The name of the starting task")
     required_apis: List[ApiType] = Field(default_factory=list, description="A list of required APIs for the task")
     task_selection_method: Optional[Callable[[TaskResponse, List[Dict[str, Any]]], Optional[str]]] = Field(default=None, description="A method to select the next task based on the current task's response")
-    tasks_end_code_routing: Optional[Dict[str, Dict[Union[str, int], Tuple[Optional[str], bool]]]] = Field(default=None, description="A dictionary of tasks -> exit codes and the task to route to given each exit code")
+    node_end_code_routing: Optional[Dict[str, Dict[Union[str, int], Tuple[Optional[str], bool]]]] = Field(default=None, description="A dictionary of tasks -> exit codes and the task to route to given each exit code")
     max_attempts: int = Field(default=3, description="The maximum number of failed task attempts before the workflow is considered failed")
     agent: Optional[AliceAgent] = Field(default=None, description="The agent that the task is associated with")
     human_input: bool = Field(default=False, description="Whether the task requires human input")

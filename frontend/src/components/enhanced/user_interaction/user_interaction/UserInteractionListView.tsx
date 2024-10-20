@@ -24,8 +24,8 @@ const UserInteractionListView: React.FC<UserInteractionComponentProps> = ({
             getSecondaryText={getSecondaryText}
             onView={onView}
             onInteraction={onInteraction}
-            interactionTooltip="Select URL Reference"
-            viewTooltip="View URL Reference"
+            interactionTooltip="Select User Interaction"
+            viewTooltip="View User Interaction"
             collectionElementString='UserInteraction'
         />
     );

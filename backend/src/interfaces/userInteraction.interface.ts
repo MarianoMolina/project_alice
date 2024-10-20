@@ -6,11 +6,9 @@ export interface UserResponse {
 }
 
 export interface IUserInteraction {
-    user_prompt: string;
-    execution_history: { [key: string]: any };
-    options_obj: { [key: number]: string };
+    user_checkpoint_id: Types.ObjectId;
+    task_response_id?: Types.ObjectId;
     user_response?: UserResponse;
-    task_next_obj: { [key: number]: string };
     created_by: Types.ObjectId;
     updated_by: Types.ObjectId;
 }

@@ -130,8 +130,8 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                     "web_scrape": "web_scrape_task",
                     "web_summarize": "web_summarize_task",
                 },
-                "start_task": "web_scrape",
-                "tasks_end_code_routing": {
+                "start_node": "web_scrape",
+                "node_end_code_routing": {
                     "web_scrape": {
                         0: ("web_summarize", False),
                         1: ("web_scrape", True),

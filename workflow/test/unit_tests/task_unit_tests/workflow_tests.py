@@ -61,8 +61,8 @@ def sample_workflow():
         task_name="TestWorkflow",
         task_description="A test workflow",
         tasks={"Task1": task1, "Task2": task2},
-        start_task="Task1",
-        tasks_end_code_routing={
+        start_node="Task1",
+        node_end_code_routing={
             "Task1": {0: ("Task2", False)},
             "Task2": {0: (None, False)}
         },
@@ -109,7 +109,7 @@ async def test_workflow_max_attempts(sample_workflow):
         input_variables=sample_workflow.tasks["Task1"].input_variables
     )
     
-    sample_workflow.tasks_end_code_routing["Task1"][1] = ("Task1", True)
+    sample_workflow.node_end_code_routing["Task1"][1] = ("Task1", True)
     sample_workflow.max_attempts = 3
     
     result = await sample_workflow.run(workflow_input="test", input1="test1")
@@ -183,8 +183,8 @@ def debug_workflow():
         task_name="TestWorkflow",
         task_description="A test workflow",
         tasks={"Task1": task1, "Task2": task2},
-        start_task="Task1",
-        tasks_end_code_routing={
+        start_node="Task1",
+        node_end_code_routing={
             "Task1": {0: ("Task2", False)},
             "Task2": {0: (None, False)}
         },

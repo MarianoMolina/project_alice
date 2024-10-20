@@ -315,8 +315,8 @@ coding_workflow_module = CodingWorkflowModule(
                     "execute_unit_tests": "param_execute_unit_tests",
                     "check_unit_test_results": "param_check_unit_test_results"
                 },
-                "start_task": "plan_workflow",
-                "tasks_end_code_routing": {
+                "start_node": "plan_workflow",
+                "node_end_code_routing": {
                     "plan_workflow": {
                         0: ("generate_code", False),
                         1: ("plan_workflow", True),

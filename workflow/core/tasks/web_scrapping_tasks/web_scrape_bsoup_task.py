@@ -33,12 +33,12 @@ class WebScrapeBeautifulSoupTask(BasicAgentTask):
     start_node: Optional[str] = Field(default='fetch_url', description="The name of the starting node")
     node_end_code_routing: TasksEndCodeRouting = Field(default={
         'fetch_url':{
-            0: {'generate_selectors_and_parse', False},
-            1: {'fetch_url', True},
+            0: ('generate_selectors_and_parse', False),
+            1: ('fetch_url', True),
         }, 
         'generate_selectors_and_parse':{
-            0: {'None', False},
-            1: {'generate_selectors_and', True},
+            0: ('None', False),
+            1: ('generate_selectors_and', True),
         }
     }, description="A dictionary of tasks/nodes -> exit codes and the task to route to given each exit code")
 

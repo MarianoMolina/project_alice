@@ -34,8 +34,8 @@ const UserInteractionTableView: React.FC<UserInteractionComponentProps> = ({
       onView={onView}
       onInteraction={onInteraction}
       showHeaders={showHeaders}
-      interactionTooltip="Select URL Reference"
-      viewTooltip="View URL Reference"
+      interactionTooltip="Select User Interaction"
+      viewTooltip="View User Interaction"
     />
   );
 };

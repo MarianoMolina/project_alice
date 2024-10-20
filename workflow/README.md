@@ -183,8 +183,8 @@ The Workflow container supports various task types, each designed for specific p
    - Purpose: Combine multiple tasks into a sequential or conditional flow
    - Key Properties:
      - `tasks`: Dictionary of subtasks
-     - `start_task`: The initial task to execute
-     - `tasks_end_code_routing`: Dictionary defining the flow between tasks based on exit codes
+     - `start_node`: The initial task to execute
+     - `node_end_code_routing`: Dictionary defining the flow between tasks based on exit codes
    - Usage: For creating complex processes involving multiple steps or decision points
 
 ### PromptAgentTask Variations

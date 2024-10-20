@@ -37,10 +37,10 @@ export interface AliceTask extends BaseDataseObject {
   timeout: number | null;
   prompts_to_add: { [key: string]: Prompt } | null;
   exit_code_response_map: { [key: string]: number } | null;
-  start_task?: string | null;
+  start_node?: string | null;
   required_apis?: ApiType[] | null;
   task_selection_method?: CallableFunction | null;
-  tasks_end_code_routing?: TasksEndCodeRouting | null;
+  node_end_code_routing?: TasksEndCodeRouting | null;
   max_attempts?: number;
   agent?: AliceAgent | null;
   human_input?: boolean;
@@ -63,10 +63,10 @@ export const convertToAliceTask = (data: any): AliceTask => {
     timeout: data?.timeout || null,
     prompts_to_add: data?.prompts_to_add || null,
     exit_code_response_map: data?.exit_code_response_map || null,
-    start_task: data?.start_task || null,
+    start_node: data?.start_node || null,
     required_apis: data?.required_apis || null,
     task_selection_method: data?.task_selection_method || null,
-    tasks_end_code_routing: data?.tasks_end_code_routing || null,
+    node_end_code_routing: data?.node_end_code_routing || null,
     max_attempts: data?.max_attempts || undefined,
     agent: data?.agent || null,
     human_input: data?.human_input || false,
@@ -103,31 +103,59 @@ export const getDefaultTaskForm = (taskType: TaskType): AliceTask => {
     prompts_to_add: null,
     tasks: {},
     required_apis: [],
-    exit_codes: {0: "Success", 1: "Failure"},
+    exit_codes: { 0: "Success", 1: "Failure" },
     recursive: false,
     valid_languages: [],
     timeout: null,
     exit_code_response_map: null,
-    start_task: null,
+    start_node: null,
     task_selection_method: null,
-    tasks_end_code_routing: null,
+    node_end_code_routing: null,
     max_attempts: 3
+  };
+
+
+  const agentNodeRoutes: TasksEndCodeRouting = {
+    'llm_generation': {
+      0: ['tool_call_execution', false],
+      1: ['llm_generation', true],
+    },
+    'tool_call_execution': {
+      0: ['code_execution', false],
+      1: ['tool_call_execution', true],
+    },
+    'code_execution': {
+      0: ['code_execution', true],
+      1: [null, true],
+    },
+  };
+
+  const scrapeNodeRoutes: TasksEndCodeRouting = {
+    'fetch_url': {
+      0: ['generate_selectors_and_parse', false],
+      1: ['fetch_url', true],
+    },
+    'generate_selectors_and_parse': {
+      0: ['None', false],
+      1: ['generate_selectors_and', true],
+    }
   };
 
   Logger.debug('getDefaultTaskForm', taskType);
   switch (taskType) {
+    case 'PromptAgentTask':
+      return { ...baseForm, node_end_code_routing: agentNodeRoutes };
+    case 'WebScrapeBeautifulSoupTask':
+      return { ...baseForm, node_end_code_routing: scrapeNodeRoutes };
     case 'CheckTask':
-      return { ...baseForm, exit_code_response_map: {} };
+      return { ...baseForm, exit_code_response_map: {}, node_end_code_routing: agentNodeRoutes };
     case 'CodeExecutionLLMTask':
       return { ...baseForm, valid_languages: ['python', 'javascript'], timeout: 30000 };
     case 'CodeGenerationLLMTask':
-      return { ...baseForm };
+      return { ...baseForm, node_end_code_routing: agentNodeRoutes };
     case 'Workflow':
       return { ...baseForm, recursive: true };
     case 'APITask':
-      return {
-        ...baseForm,
-      };
     default:
       return baseForm;
   }

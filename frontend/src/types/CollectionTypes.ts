@@ -22,10 +22,11 @@ import EnhancedTask from '../components/enhanced/task/task/EnhancedTask';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
 import EnhancedURLReference from '../components/enhanced/url_reference/url_reference/EnhancedURLReference';
 import { convertToUserInteraction, UserInteraction } from './UserInteractionTypes';
+import { convertToUserCheckpoint, UserCheckpoint } from './UserCheckpointTypes';
 
-export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' | 'urlreferences' | 'userinteractions';
-export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType | URLReference | UserInteraction;
-export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API' | 'User' | 'File' | 'Message' | 'URLReference' | 'UserInteraction';
+export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' | 'urlreferences' | 'userinteractions' | 'usercheckpoints';
+export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType | URLReference | UserInteraction | UserCheckpoint;
+export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API' | 'User' | 'File' | 'Message' | 'URLReference' | 'UserInteraction' | 'UserCheckpoint';
 
 export type CollectionType = {
     agents: AliceAgent;
@@ -41,6 +42,7 @@ export type CollectionType = {
     messages: MessageType;
     urlreferences: URLReference;
     userinteractions: UserInteraction;
+    usercheckpoints: UserCheckpoint;
 };
 
 export type CollectionTypeString = {
@@ -57,6 +59,7 @@ export type CollectionTypeString = {
     messages: 'Message';
     urlreferences: 'URLReference';
     userinteractions: 'UserInteraction';
+    usercheckpoints: 'UserCheckpoint';
 };
 
 export const collectionNameToElementString: Record<CollectionName, CollectionElementString> = {
@@ -72,7 +75,8 @@ export const collectionNameToElementString: Record<CollectionName, CollectionEle
     files: 'File',
     messages: 'Message',
     urlreferences: 'URLReference',
-    userinteractions: 'UserInteraction'
+    userinteractions: 'UserInteraction',
+    usercheckpoints: 'UserCheckpoint'
 };
 
 export const collectionNameToEnhancedComponent: Record<CollectionName, React.ComponentType<any>> = {
@@ -88,7 +92,8 @@ export const collectionNameToEnhancedComponent: Record<CollectionName, React.Com
     files: EnhancedFile,
     messages: EnhancedMessage,
     urlreferences: EnhancedURLReference,
-    userinteractions: EnhancedAgent
+    userinteractions: EnhancedAgent,
+    usercheckpoints: EnhancedAgent
 };
 
 // Create a runtime mapping object
@@ -105,7 +110,8 @@ export const collectionTypeMapping: Record<string, CollectionElementString> = {
     FileReference: 'File',
     MessageType: 'Message',
     URLReference: 'URLReference',
-    UserInteraction: 'UserInteraction'
+    UserInteraction: 'UserInteraction',
+    UserCheckpoint: 'UserCheckpoint'
 };
 
 
@@ -122,7 +128,8 @@ export const converters: { [K in CollectionName]: (data: any) => CollectionType[
     files: convertToFileReference,
     messages: convertToMessageType,
     urlreferences: convertToURLReference,
-    userinteractions: convertToUserInteraction
+    userinteractions: convertToUserInteraction,
+    usercheckpoints: convertToUserCheckpoint
 };
 
 export type ComponentMode = 'create' | 'edit' | 'view' | 'list' | 'shortList' | 'table';

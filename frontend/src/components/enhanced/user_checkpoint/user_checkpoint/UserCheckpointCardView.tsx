@@ -3,16 +3,16 @@ import {
     Typography,
 } from '@mui/material';
 import { Language, Description, QueryBuilder, DataObject } from '@mui/icons-material';
-import { UserInteractionComponentProps } from '../../../../types/UserInteractionTypes';
+import { UserCheckpointComponentProps } from '../../../../types/UserCheckpointTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 
-const UserInteractionCardView: React.FC<UserInteractionComponentProps> = ({
+const UserCheckpointCardView: React.FC<UserCheckpointComponentProps> = ({
     item
 }) => {
 
     if (!item) {
-        return <Typography>No User Interaction data available.</Typography>;
+        return <Typography>No User Checkpoint data available.</Typography>;
     }
 
     const listItems = [
@@ -36,24 +36,19 @@ const UserInteractionCardView: React.FC<UserInteractionComponentProps> = ({
             primary_text: "Next task",
             secondary_text: <CodeBlock language="json" code={JSON.stringify(item.task_next_obj, null, 2)} />
         },
-        {
-            icon: <DataObject />,
-            primary_text: "User Choice",
-            secondary_text: <CodeBlock language="json" code={JSON.stringify(item.user_response, null, 2)} />
-        }
     ];
 
     return (
         <CommonCardView
-            elementType='User Interaction'
-            title={'User Interaction Details'}
+            elementType='User Checkpoint'
+            title={'User Checkpoint Details'}
             id={item._id}
             listItems={listItems}
             item={item}
-            itemType='userinteractions'
+            itemType='usercheckpoints'
         >
         </CommonCardView>
     );
 };
 
-export default UserInteractionCardView;
+export default UserCheckpointCardView;

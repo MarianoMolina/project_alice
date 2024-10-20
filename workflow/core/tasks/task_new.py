@@ -34,10 +34,10 @@ class AliceTask(BaseModel, ABC):
         timeout (Optional[int]): Maximum execution time for the task.
         prompts_to_add (Optional[Dict[str, Prompt]]): Additional prompts for the task.
         exit_code_response_map (Optional[Dict[str, int]]): Mapping of responses to exit codes.
-        start_task (Optional[str]): Name of the initial subtask, if applicable.
+        start_node (Optional[str]): Name of the initial subtask, if applicable.
         required_apis (Optional[List[ApiType]]): APIs required for task execution.
         task_selection_method (Optional[Callable]): Method for selecting the next task in a workflow.
-        tasks_end_code_routing (Optional[Dict]): Routing logic for subtasks based on exit codes.
+        node_end_code_routing (Optional[Dict]): Routing logic for subtasks based on exit codes.
         max_attempts (int): Maximum number of execution attempts before failure.
         agent (Optional[AliceAgent]): The agent associated with this task.
         human_input (Optional[bool]): Whether the task requires human interaction.

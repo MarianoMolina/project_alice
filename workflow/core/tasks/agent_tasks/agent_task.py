@@ -46,16 +46,16 @@ class BasicAgentTask(AliceTask):
     start_node: Optional[str] = Field(default=None, description="The name of the starting node")
     node_end_code_routing: TasksEndCodeRouting = Field(default={
         'llm_generation':{
-            0: {'tool_call_execution', False},
-            1: {'llm_generation', True},
+            0: ('tool_call_execution', False),
+            1: ('llm_generation', True),
         }, 
         'tool_call_execution':{
-            0: {'code_execution', False},
-            1: {'tool_call_execution', True},
+            0: ('code_execution', False),
+            1: ('tool_call_execution', True),
         }, 
         'code_execution':{
-            0: {'code_execution', True},
-            1: {None, True},
+            0: ('code_execution', True),
+            1: (None, True),
         }
     }, description="A dictionary of tasks/nodes -> exit codes and the task to route to given each exit code")
 

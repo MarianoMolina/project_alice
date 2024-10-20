@@ -1,5 +1,6 @@
 import { Document, Types, Model } from 'mongoose';
 import { IFunctionParameters, IAPIEngine } from '../utils/schemas';
+import { IUserCheckpoint } from './userCheckpoint.interface';
 
 export enum TaskType {
   APITask = "APITask",
@@ -28,13 +29,13 @@ export interface ITask {
   timeout: number | null;
   prompts_to_add: Map<string, Types.ObjectId> | null;
   exit_code_response_map: Map<string, number> | null;
-  start_task: string | null;
   task_selection_method: any | null;
-  tasks_end_code_routing: Map<string, Map<string, any>> | null;
+  node_end_code_routing: Map<string, Map<string, any>> | null;
   max_attempts: number;
   agent: Types.ObjectId | null;
-  human_input: boolean;
   api_engine: IAPIEngine | null;
+  start_node: string | null;
+  user_checkpoints: Map<string, IUserCheckpoint | Types.ObjectId> | null;
   created_by: Types.ObjectId;
   updated_by: Types.ObjectId;
 }

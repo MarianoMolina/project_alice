@@ -3,11 +3,12 @@ import { IUserInteractionDocument, IUserInteractionModel } from "../interfaces/u
 import { ensureObjectIdHelper } from "../utils/utils";
 
 const userInteractionSchema = new Schema<IUserInteractionDocument, IUserInteractionModel>({
-    user_prompt: { type: String, required: true },
-    execution_history: { type: Map, of: Schema.Types.Mixed, required: true },
-    options_obj: { type: Map, of: String, required: true },
-    user_response: { type: Map, of: Schema.Types.Mixed },
-    task_next_obj: { type: Map, of: String, required: true },
+    user_checkpoint_id: { type: Schema.Types.ObjectId, ref: 'UserCheckpoint', required: true },
+    task_response_id: { type: Schema.Types.ObjectId, ref: 'TaskResponse' },
+    user_response: {
+        selected_option: { type: Number, required: true },
+        user_feedback: { type: String }
+    },
     created_by: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     updated_by: { type: Schema.Types.ObjectId, ref: 'User', required: true }
 }, { timestamps: true });
@@ -15,11 +16,9 @@ const userInteractionSchema = new Schema<IUserInteractionDocument, IUserInteract
 userInteractionSchema.methods.apiRepresentation = function (this: IUserInteractionDocument) {
     return {
         id: this._id,
-        user_prompt: this.user_prompt || null,
-        execution_history: this.execution_history || {},
-        options_obj: this.options_obj || {},
-        user_response: this.user_response || {},
-        task_next_obj: this.task_next_obj || {},        
+        user_checkpoint_id: this.user_checkpoint_id || null,
+        task_response_id: this.task_response_id || null,
+        user_response: this.user_response || {},             
         createdAt: this.createdAt || null,
         updatedAt: this.updatedAt || null,
         created_by: this.created_by || null,
@@ -28,6 +27,8 @@ userInteractionSchema.methods.apiRepresentation = function (this: IUserInteracti
 };
 
 function ensureObjectId(this: IUserInteractionDocument, next: CallbackWithoutResultAndOptionalError) {
+    this.user_checkpoint_id = ensureObjectIdHelper(this.user_checkpoint_id);
+    this.task_response_id = ensureObjectIdHelper(this.task_response_id);
     this.created_by = ensureObjectIdHelper(this.created_by);
     this.updated_by = ensureObjectIdHelper(this.updated_by);
     next();
@@ -35,6 +36,12 @@ function ensureObjectId(this: IUserInteractionDocument, next: CallbackWithoutRes
 
 function ensureObjectIdForUpdate(this: Query<any, any>, next: CallbackWithoutResultAndOptionalError) {
     const update = this.getUpdate() as any;
+    if (update.user_checkpoint_id) {
+        update.user_checkpoint_id = ensureObjectIdHelper(update.user_checkpoint_id);
+    }
+    if (update.task_response_id) {
+        update.task_response_id = ensureObjectIdHelper(update.task_response_id);
+    }
     if (update.created_by) {
         update.created_by = ensureObjectIdHelper(update.created_by);
     }

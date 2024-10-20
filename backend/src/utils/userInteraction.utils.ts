@@ -71,11 +71,9 @@ export function userInteractionsEqual(
     tr2: Partial<IUserInteractionDocument>
 ): boolean {
     const keys: (keyof IUserInteractionDocument)[] = [
-        'user_prompt',
-        'execution_history',
-        'options_obj',
+        'user_checkpoint_id',
+        'task_response_id',
         'user_response',
-        'task_next_obj',
         'created_by',
         'updated_by',
     ];

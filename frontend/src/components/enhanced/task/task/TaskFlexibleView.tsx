@@ -122,7 +122,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     }, [fetchItem]);
 
     const handleTaskEndCodeRoutingChange = useCallback((newRouting: TasksEndCodeRouting) => {
-        setForm(prevForm => ({ ...prevForm, tasks_end_code_routing: newRouting }));
+        setForm(prevForm => ({ ...prevForm, node_end_code_routing: newRouting }));
     }, []);
 
     const handleTaskSelect = useCallback(async (selectedIds: string[]) => {
@@ -314,11 +314,11 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                     <Box className={classes.endCodeRoutingContainer}>
                         <TaskEndCodeRoutingBuilder
                             tasks={Object.values(form.tasks ?? {})}
-                            routing={form.tasks_end_code_routing || {}}
+                            routing={form.node_end_code_routing || {}}
                             onChange={handleTaskEndCodeRoutingChange}
                             isViewMode={!isEditMode}
                         />
-                        <TaskFlowchart tasksEndCodeRouting={form.tasks_end_code_routing || {}} startTask={form.start_task || ''} />
+                        <TaskFlowchart tasksEndCodeRouting={form.node_end_code_routing || {}} startTask={form.start_node || ''} />
                     </Box>
                     <Typography variant="h6" className={classes.titleText}>Enable Recursion</Typography>
                     <Tooltip title="Normally, if a task being executed is present in the execution history of a task, it will be rejected, unless it is recursive. Workflows usually should have recursion enabled.">

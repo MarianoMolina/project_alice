@@ -126,7 +126,7 @@ View their outputs, run them again, change their settings, etc.
   - `WebScrapeBeautifulSoupTask`: Takes a URL, retrieves it, task a string sample of the html to show an agent who creates the selectors for BeautifulSoup parsing of the content. 
   - `GenerateImageTask`: Takes an image prompt and uses the agent's img_gen model to generate an image based on it. 
   - `EmbeddingTask`: Takes a string and the agent's embeddings model to generate the vector embeddings for the text provided. 
-- `Workflow`: The simplest a most complex task. Simple because all it does is run other tasks. Complex because the options are endless. Main difference is they have a tasks_end_code_routing to map the logic path and require a start_task to begin it. 
+- `Workflow`: The simplest a most complex task. Simple because all it does is run other tasks. Complex because the options are endless. Main difference is they have a node_end_code_routing to map the logic path and require a start_node to begin it. 
 
 ### Available APIs
 ![APIS](./img/APIs.PNG "Available API endpoints")

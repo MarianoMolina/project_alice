@@ -21,13 +21,12 @@ const taskSchema = new Schema<ITaskDocument, ITaskModel>({
     timeout: { type: Number, default: null },
     prompts_to_add: { type: Map, of: Schema.Types.ObjectId, ref: 'Prompt', default: null },
     exit_code_response_map: { type: Map, of: Number, default: null },
-    start_task: { type: String, default: null },
+    start_node: { type: String, default: null },
     task_selection_method: { type: Schema.Types.Mixed, default: null },
-    tasks_end_code_routing: { type: Map, of: Map, default: null },
+    node_end_code_routing: { type: Map, of: Map, default: null },
     max_attempts: { type: Number, default: 3 },
     required_apis: { type: [String], default: null },
     agent: { type: Schema.Types.ObjectId, ref: 'Agent', default: null },
-    human_input: { type: Boolean, default: false },
     api_engine: { type: apiEngineSchema, default: null },
     created_by: { type: Schema.Types.ObjectId, ref: 'User' },
     updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
@@ -48,14 +47,13 @@ taskSchema.methods.apiRepresentation = function (this: ITaskDocument) {
         timeout: this.timeout || null,
         prompts_to_add: this.prompts_to_add ? Object.fromEntries(this.prompts_to_add) : null,
         exit_code_response_map: this.exit_code_response_map ? Object.fromEntries(this.exit_code_response_map) : null,
-        start_task: this.start_task || null,
+        start_node: this.start_node || null,
         task_selection_method: this.task_selection_method || null,
-        tasks_end_code_routing: this.tasks_end_code_routing ? Object.fromEntries(
-            Array.from(this.tasks_end_code_routing.entries()).map(([key, value]) => [key, Object.fromEntries(value)])
+        node_end_code_routing: this.node_end_code_routing ? Object.fromEntries(
+            Array.from(this.node_end_code_routing.entries()).map(([key, value]) => [key, Object.fromEntries(value)])
         ) : null,
         max_attempts: this.max_attempts || 3,
         agent: this.agent ? (this.agent._id || this.agent) : null,
-        human_input: this.human_input || false,
         api_engine: this.api_engine || null,
         created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
         updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,
