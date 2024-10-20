@@ -2,11 +2,12 @@ from pydantic import Field
 from typing import List, Dict, Any, Tuple, Optional
 from workflow.core.api import APIManager
 from workflow.util import LOGGER
-from workflow.core.data_structures import TaskResponse, MessageDict, ApiType, References
+from workflow.core.data_structures import MessageDict, ApiType, References
 from workflow.util.utils import json_to_python_type_mapping
 from workflow.core.agent.agent import AliceAgent
 from workflow.core.tasks.agent_tasks.agent_task import BasicAgentTask
 from workflow.core.prompt import Prompt
+from workflow.core.data_structures.base_models import TasksEndCodeRouting
 from workflow.core.data_structures import FunctionParameters, ParameterDefinition
     
 class PromptAgentTask(BasicAgentTask):
@@ -205,6 +206,8 @@ class CodeExecutionLLMTask(PromptAgentTask):
     valid_languages: list[str] = Field(["python", "shell"], description="A list of valid languages for code execution")
     timeout: int = Field(50, description="The maximum time in seconds to wait for code execution")
     required_apis: Optional[List[ApiType]] = Field(None, description="A list of required APIs for the task")
+    start_node: Optional[str] = Field(default=None, description="The name of the starting node")
+    node_end_code_routing: Optional[TasksEndCodeRouting] = Field(default=None, description="A dictionary of tasks/nodes -> exit codes and the task to route to given each exit code")
 
     def get_exit_code(self, chat_output: List[MessageDict], response_code: bool) -> int:
         LOGGER.info(f"Chat output: {chat_output} \nResponse code: {response_code}")

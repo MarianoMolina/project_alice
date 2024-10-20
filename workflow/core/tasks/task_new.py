@@ -11,10 +11,7 @@ from workflow.core.data_structures.user_interaction import UserCheckpoint, UserI
 from workflow.core.data_structures.task_response_new import NodeResponse, TaskResponse
 from workflow.util.utils import simplify_execution_history
 from workflow.util import LOGGER
-
-RouteMapTuple = Tuple[Union[str, None], bool]
-RouteMap = Dict[int, RouteMapTuple]
-TasksEndCodeRouting = Dict[str, RouteMap]
+from workflow.core.data_structures.base_models import TasksEndCodeRouting
 
 class AliceTask(BaseModel, ABC):
     """
@@ -83,13 +80,13 @@ class AliceTask(BaseModel, ABC):
     timeout: Optional[int] = Field(default=None, description="The timeout for the task in seconds")
     prompts_to_add: Optional[Dict[str, Prompt]] = Field(default_factory=dict, description="A dictionary of prompts to add to the task")
     exit_code_response_map: Optional[Dict[str, int]] = Field(default=None, description="A dictionary mapping exit codes to responses")
-    start_node: Optional[str] = Field(default=None, description="The name of the starting task")
     required_apis: List[ApiType] = Field(default_factory=list, description="A list of required APIs for the task")
     task_selection_method: Optional[Callable[[TaskResponse, List[Dict[str, Any]]], Optional[str]]] = Field(default=None, description="A method to select the next task based on the current task's response. Overrides the default logic that uses task_end_code_routing.")
     node_end_code_routing: Optional[TasksEndCodeRouting] = Field(default=None, description="A dictionary of tasks/nodes -> exit codes and the task to route to given each exit code")
     max_attempts: int = Field(default=3, description="The maximum number of failed task attempts before the workflow is considered failed")
     agent: Optional[AliceAgent] = Field(default=None, description="The agent that the task is associated with, if any")
     api_engine: Optional[APIEngine] = Field(default=None, description="The API engine for the task")
+    start_node: Optional[str] = Field(default=None, description="The name of the starting node")
     user_checkpoints: Dict[str, UserCheckpoint] = Field(default_factory=dict, description="Dictionary of node to user checkpoint to implement human input for this task")
 
     @property
@@ -366,3 +363,26 @@ class AliceTask(BaseModel, ABC):
             execution_order=execution_order,
             references=References(user_interactions=[user_interaction])
         )
+    
+    def get_self_nodes_from_execution_history(self, execution_history: List[NodeResponse]) -> List[NodeResponse]:
+        """
+        Retrieves messages from the execution history that belong to this task and match the node names
+        defined in the node_end_code_routing.
+
+        Args:
+            execution_history (List[NodeResponse]): The full execution history.
+
+        Returns:
+            List[NodeResponse]: Filtered list of NodeResponses that belong to this task and match the defined nodes.
+        """
+        valid_node_names = set(self.node_end_code_routing.keys())
+        filtered_history = []
+
+        for node in execution_history:
+            if node.parent_task_id == self.id and node.node_name in valid_node_names:
+                filtered_history.append(node)
+
+        # Sort the filtered history by execution order
+        filtered_history.sort(key=lambda x: x.execution_order)
+
+        return filtered_history

@@ -34,7 +34,7 @@ class AliceAgent(BaseModel):
     def llm_model(self) -> AliceModel:
         return self.models[ModelType.CHAT] or self.models[ModelType.INSTRUCT]
     
-    async def generate_response(self, api_manager: APIManager, messages: List[MessageDict], tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = [], recursion_depth: int = 0) -> List[MessageDict]:
+    async def generate_response(self, api_manager: APIManager, node_name: Optional[str], messages: List[MessageDict], tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = [], recursion_depth: int = 0) -> List[MessageDict]:
         try:
             if recursion_depth >= self.max_consecutive_auto_reply:
                 LOGGER.info("Max recursion depth reached")
@@ -45,13 +45,18 @@ class AliceAgent(BaseModel):
                     type="text",
                     assistant_name=self.name
                 )]
-
-            # Step 1: LLM Generation
-            llm_response = await self._generate_llm_response(api_manager, messages, tools_list)
             
-            # Step 2: Tool Calls
-            tool_messages = await self._process_tool_calls(llm_response.tool_calls, tool_map, tools_list) if self.has_functions and llm_response.tool_calls else []
+            if not node_name or node_name == "default" or node_name == "llm_generation":
+                # Step 1: LLM Generation
+                llm_response = await self._generate_llm_response(api_manager, messages, tools_list)
+            else:
+                llm_response = messages[-1].model_copy()
             
+            if node_name != "code_execution":
+                # Step 2: Tool Calls
+                tool_messages = await self._process_tool_calls(llm_response.tool_calls, tool_map, tools_list) if self.has_functions and llm_response.tool_calls else []
+            else:
+                tool_messages = []
             # Step 3: Code Execution
             code_messages = await self._process_code_execution([llm_response] + tool_messages) if self.has_code_exec else []
             
@@ -91,81 +96,6 @@ class AliceAgent(BaseModel):
             assistant_name=self.name,
             creation_metadata=response.creation_metadata
         )
-    async def generate_response(self, api_manager: APIManager, messages: List[MessageDict], tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = [], recursion_depth: int = 0) -> List[MessageDict]:
-        try:
-            if recursion_depth >= self.max_consecutive_auto_reply:
-                LOGGER.info("Max recursion depth reached")
-                return [MessageDict(
-                    role="assistant",
-                    content="Maximum recursion depth reached. Terminating response generation.",
-                    generated_by="llm",
-                    type="text",
-                    assistant_name=self.name
-                )]
-
-            LOGGER.info(f"Calling generate_response_with_api_engine")
-            LOGGER.debug(f'Agent: {self.model_dump()}')
-            chat_model = self.llm_model
-            response_ref: References = await api_manager.generate_response_with_api_engine(
-                api_type=ApiType.LLM_MODEL,
-                model=chat_model,
-                messages=self._prepare_messages_for_api(messages),
-                system=self.system_message.format_prompt(),
-                tool_choice='auto' if self.has_functions else 'none',
-                tools=tools_list,
-                temperature=0.7,
-                max_tokens=4096 # TODO: Make this configurable
-            )
-
-            if not response_ref or not response_ref.messages[0]:
-                LOGGER.error("No response from API")
-                return [MessageDict(
-                    role="assistant",
-                    content="No response from API",
-                    generated_by="llm",
-                    type="text",
-                    assistant_name=self.name
-                )]
-            
-            response = response_ref.messages[0]
-            LOGGER.debug(f"API response: {response.model_dump()}")
-            
-            new_messages = []
-            content = response.content if response.content else "Using tools" if response.tool_calls else "No response from API"
-            tool_calls = response.tool_calls if self.has_functions else None
-            
-            LOGGER.debug(f"Content: {content}")
-            LOGGER.debug(f"Tool calls: {tool_calls}")
-            
-            new_messages.append(MessageDict(
-                role="assistant",
-                content=content,
-                generated_by="llm",
-                tool_calls=tool_calls,
-                type=ContentType.TEXT,
-                assistant_name=self.name,
-                creation_metadata=response.creation_metadata
-            ))
-
-            if tool_calls and self.has_functions:
-                LOGGER.debug("Processing tool calls")
-                tool_messages = await self._process_tool_calls(tool_calls, tool_map, tools_list)
-                if tool_messages:
-                    new_messages.extend(tool_messages)
-            
-            if self.has_code_exec:
-                LOGGER.debug("Processing code execution")
-                code_messages, _ = await self._process_code_execution(new_messages)
-                if code_messages:
-                    new_messages.extend(code_messages)
-            
-            return new_messages
-
-        except Exception as e:
-            LOGGER.debug(f"Error in agent.generate_response: {str(e)}")
-            LOGGER.debug(f"Traceback: {traceback.format_exc()}")
-            LOGGER.error(f"Error in agent.generating response: {str(e)}")
-            raise
         
     async def _process_tool_calls(self, tool_calls: List[ToolCall] = [], tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []) -> List[MessageDict]:
         tool_messages: List[MessageDict] = []

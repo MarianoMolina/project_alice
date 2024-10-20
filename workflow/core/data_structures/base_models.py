@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, Literal
+from typing import Optional, Literal, Tuple, Union, Dict
 from enum import Enum
 # The order of this list is used to determine which entities are created first
 EntityType = Literal["users", "models", "apis", "parameters", "prompts", "agents", "tasks", "chats", "task_responses", "files", "messages", "urlreferences"]
@@ -19,6 +19,10 @@ class ContentType(str, Enum):
     TASK_RESULT = 'task_result'
     URL_REFERENCE = 'url_reference'
     MULTIPLE = 'multiple'
+
+RouteMapTuple = Tuple[Union[str, None], bool]
+RouteMap = Dict[int, RouteMapTuple]
+TasksEndCodeRouting = Dict[str, RouteMap]
 
 class BaseDataStructure(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")

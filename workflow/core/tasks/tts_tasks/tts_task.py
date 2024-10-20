@@ -4,6 +4,7 @@ from workflow.core.tasks.agent_tasks import BasicAgentTask
 from workflow.core.data_structures import MessageDict, ApiType, References, FunctionParameters, ParameterDefinition
 from workflow.core.api import APIManager
 from workflow.util import LOGGER
+from workflow.core.data_structures.base_models import TasksEndCodeRouting
 
 class TextToSpeechTask(BasicAgentTask):
     input_variables: FunctionParameters = Field(
@@ -29,6 +30,8 @@ class TextToSpeechTask(BasicAgentTask):
         )
     )
     required_apis: List[ApiType] = Field([ApiType.TEXT_TO_SPEECH], description="A list of required APIs for the task")
+    start_node: Optional[str] = Field(default=None, description="The name of the starting node")
+    node_end_code_routing: Optional[TasksEndCodeRouting] = Field(default=None, description="A dictionary of tasks/nodes -> exit codes and the task to route to given each exit code")
 
     async def generate_agent_response(self, api_manager: APIManager, **kwargs) -> Tuple[Optional[References], int, Optional[Union[List[MessageDict], Dict[str, str]]]]:
         text: str = kwargs.get('text', "")

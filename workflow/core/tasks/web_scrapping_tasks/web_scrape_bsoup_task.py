@@ -4,6 +4,8 @@ from pydantic import Field, BaseModel, ValidationError
 from workflow.core.tasks.web_scrapping_tasks.web_scrape_utils import clean_text, fetch_webpage_and_title, preprocess_html, sample_html, extract_json, fallback_parsing_strategy, apply_parsing_strategy
 from workflow.core.data_structures import ApiType, References, TaskResponse, References, MessageDict, FunctionParameters, ParameterDefinition, ContentType, URLReference
 from workflow.core.tasks.agent_tasks import BasicAgentTask
+from workflow.core.data_structures.base_models import TasksEndCodeRouting
+from workflow.core.data_structures.task_response_new import NodeResponse
 from workflow.core.api import APIManager
 from workflow.util import LOGGER
 
@@ -19,16 +21,36 @@ class WebScrapeBeautifulSoupTask(BasicAgentTask):
                     type="string",
                     description="The URL of the webpage to scrape."
                 ),
+                "fetch_url_html_content": ParameterDefinition(
+                    type="string",
+                    description="The HTML content of the webpage retrieved if you already have it. If you do, URL will be ignored (it is still required).",
+                ),
             },
-            required=["url", "selector"]
+            required=["url"]
         )
     )
     required_apis: List[ApiType] = Field([ApiType.LLM_MODEL], description="A list of required APIs for the task")
+    start_node: Optional[str] = Field(default='fetch_url', description="The name of the starting node")
+    node_end_code_routing: TasksEndCodeRouting = Field(default={
+        'fetch_url':{
+            0: {'generate_selectors_and_parse', False},
+            1: {'fetch_url', True},
+        }, 
+        'generate_selectors_and_parse':{
+            0: {'None', False},
+            1: {'generate_selectors_and', True},
+        }
+    }, description="A dictionary of tasks/nodes -> exit codes and the task to route to given each exit code")
 
     async def generate_agent_response(self, api_manager: APIManager, **kwargs) -> Tuple[Optional[References], int, Optional[Union[List[MessageDict], Dict[str, str]]]]:
         url: str = kwargs.get('url', "")
-
-        page_content: URLReference = await self.retrieve_and_parse_webpage(url, api_manager)
+        start_node: str = kwargs.get('start_node', "default")
+        if start_node != "default" and start_node != "fetch_url":
+            execution_history: List[NodeResponse] = kwargs.get("execution_history", [])
+            self_nodes = self.get_self_nodes_from_execution_history(execution_history)
+            fetch_node = [node for node in self_nodes if node.node_name == 'fetch_url']
+            html_content = fetch_node[-1].references.url_references[-1].content if fetch_node else ""
+        page_content: URLReference = await self.retrieve_and_parse_webpage(url, api_manager, start_node=start_node, html_content=html_content)
         if not page_content:
             LOGGER.error("No output returned from API engine.")
             return {}, 1, None
@@ -54,7 +76,7 @@ class WebScrapeBeautifulSoupTask(BasicAgentTask):
             execution_history=exec_history
         )
     
-    async def retrieve_and_parse_webpage(self, url: str, api_manager: APIManager) -> URLReference:
+    async def retrieve_and_parse_webpage(self, url: str, api_manager: APIManager, start_node: Optional[str], **kwargs) -> URLReference:
         """
         Args:
             url (str): The URL of the webpage to summarize.
@@ -64,7 +86,14 @@ class WebScrapeBeautifulSoupTask(BasicAgentTask):
         """
         LOGGER.info(f"Starting summarization process for URL: {url}")
         try:
-            html_content, title = fetch_webpage_and_title(url)
+            if not start_node or start_node == "default" or start_node == "fetch_url":
+                html_content, title = fetch_webpage_and_title(url)
+            else:
+                html_content = kwargs.get("html_content", None)
+                if not html_content:
+                    LOGGER.error("No HTML content provided.")
+                    return "No HTML content provided."
+                title = kwargs.get("title", None)
             cleaned_html = preprocess_html(html_content)
             html_samples = sample_html(cleaned_html)
             selectors, creation_metadata = await self.generate_parsing_instructions(html_samples, api_manager)
