@@ -2,7 +2,7 @@ from typing import List, Optional, Union, Any, Dict
 from pydantic import BaseModel, Field
 from workflow.core.data_structures.message import MessageDict
 from workflow.core.data_structures.file_reference import FileReference, FileContentReference
-from workflow.core.data_structures.task_response_new import TaskResponse
+from workflow.core.data_structures.task_response import TaskResponse
 from workflow.core.data_structures.url_reference import URLReference
 from workflow.core.data_structures.user_interaction import UserInteraction
 

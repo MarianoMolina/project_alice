@@ -308,12 +308,12 @@ coding_workflow_module = CodingWorkflowModule(
                 "task_name": "coding_workflow",
                 "task_description": "Executes a coding workflow based on the provided prompt",
                 "tasks": {
-                    "plan_workflow": "param_plan_workflow",
-                    "generate_code": "param_generate_code",
-                    "execute_code": "param_execute_code",
-                    "generate_unit_tests": "param_generate_unit_tests",
-                    "execute_unit_tests": "param_execute_unit_tests",
-                    "check_unit_test_results": "param_check_unit_test_results"
+                    "plan_workflow": "plan_workflow",
+                    "generate_code": "generate_code",
+                    "execute_code": "execute_code",
+                    "generate_unit_tests": "generate_unit_tests",
+                    "execute_unit_tests": "execute_unit_tests",
+                    "check_unit_test_results": "check_unit_test_results"
                 },
                 "start_node": "plan_workflow",
                 "node_end_code_routing": {
@@ -354,6 +354,14 @@ coding_workflow_module = CodingWorkflowModule(
                         "prompt": "prompt_parameter",
                     },
                     "required": ["prompt"]
+                },
+                "user_checkpoints": {
+                    "generate_unit_tests": {
+                        "user_prompt": "Please approve or reject the code generated before the unit tests are generated. Provide feedback, if any, for the unit test agent to consider.",
+                        "task_next_obj": {0: "generate_unit_tests", 1: "generate_code"},
+                        "options_obj": {0: "Approve", 1: "Reject"},
+                        "request_feedback": True
+                    }
                 }
             }
         ]

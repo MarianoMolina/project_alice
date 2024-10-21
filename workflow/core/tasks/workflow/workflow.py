@@ -1,8 +1,11 @@
 from typing import Dict, Any, Optional, List, Callable, Union, Tuple
 from pydantic import Field
-from workflow.core.data_structures import TaskResponse, References
+from workflow.core.data_structures import References
+from workflow.core.data_structures.task_response import TaskResponse, NodeResponse
+from workflow.core.data_structures.user_interaction import UserInteraction
 from workflow.util import LOGGER
-from workflow.core.tasks.task_new import AliceTask
+from workflow.core.tasks.task import AliceTask
+from workflow.util.utils import generate_node_responses_summary, get_traceback
 
 class Workflow(AliceTask):
     """
@@ -60,57 +63,71 @@ class Workflow(AliceTask):
             TaskResponse: A response object containing the results of the entire workflow.
         """
         task_inputs = kwargs.copy()
-        tasks_performed, status, diagnostic = await self.execute_workflow(**kwargs)
-        return self.create_workflow_response(tasks_performed, status, diagnostic, **task_inputs)
+        execution_history = kwargs.pop('execution_history', [])
+        
+        if not execution_history:
+            initial_task_name = self.get_initial_task()
+        else:
+            node_list = [NodeResponse(**node) for node in execution_history if node.get('parent_task_id') == self.id]
+            if not node_list:
+                initial_task_name = self.get_initial_task()
+            else:
+                sorted_nodes = sorted(node_list, key=lambda x: x.execution_order)
+                last_node = sorted_nodes[-1]
+                if last_node.references.user_interactions:
+                    last_interaction = last_node.references.user_interactions[-1]
+                    initial_task_name, _ = self.select_next_task(last_interaction, sorted_nodes)
+                elif last_node.references.task_responses:
+                    last_task_response = last_node.references.task_responses[-1]
+                    initial_task_name, _ = self.select_next_task(last_task_response, sorted_nodes)
+                else:
+                    initial_task_name = self.get_initial_task()
 
-    async def execute_workflow(self, **kwargs) -> Tuple[List[TaskResponse], str, str]:
-        tasks_performed = []
+        tasks_performed, status, diagnostic = await self.execute_workflow(initial_task_name, execution_history=execution_history, **kwargs)
+        str_output = generate_node_responses_summary(tasks_performed)
+        end_code = 0 if status == "complete" else 1
+        return self.get_task_response(str_output, end_code, diagnostic, status, tasks_performed, **task_inputs)
+
+    async def execute_workflow(self, initial_task_name: str, execution_history: List[Dict[str, Any]] = None, **kwargs) -> Tuple[List[NodeResponse], str, str]:
         attempts = 1
-        current_task_name, bool = self.get_initial_task_name()
+        current_task_name = initial_task_name
+        node_references: List[NodeResponse] = []
+        execution_order: int = 0
+
+        if execution_history:
+            node_references = [NodeResponse(**node) for node in execution_history if node.get('parent_task_id') == self.id]
+            execution_order = max([node.execution_order for node in node_references]) + 1 if node_references else 0
 
         try:
             while current_task_name:
+                user_checkpoint = self.handle_user_checkpoints(node_references, current_task_name)
+                if user_checkpoint:
+                    return node_references, "pending", "User interaction checkpoint reached."
+
+                # Execute the current task and get the result
                 task_result = await self.execute_task(current_task_name, **kwargs)
+
+                node = NodeResponse(
+                    parent_task_id=self.id,
+                    node_name=current_task_name,
+                    exit_code=task_result.result_code,
+                    references=References(task_responses=[task_result]),
+                    execution_order=execution_order
+                )
+                node_references.append(node)
+                execution_order += 1
                 
-                # Update tasks_performed, ensuring only one result per task name
-                existing_task_index = next((i for i, t in enumerate(tasks_performed) if t.task_name == current_task_name), None)
-                if existing_task_index is not None:
-                    # Move existing task to references of the new task
-                    task_result.references.task_responses.append(tasks_performed.pop(existing_task_index))
-                tasks_performed.append(task_result)
-                
-                kwargs = self.update_kwargs(kwargs, task_result)
-                
-                current_task_name, try_bool = self.get_next_task(task_result, tasks_performed)
+                current_task_name, try_bool = self.select_next_task(task_result, node_references)
                 
                 if try_bool:
                     attempts += 1
                     if attempts > self.max_attempts:
-                        return tasks_performed, "failed", "Workflow ended due to maximum attempts reached."
+                        return node_references, "failed", "Workflow ended due to maximum attempts reached."
 
-            return tasks_performed, "complete", "Workflow completed successfully"
+            return node_references, "complete", "Workflow completed successfully"
 
         except Exception as e:
-            return tasks_performed, "failed", f"Error: {str(e)}\nTraceback: {self.get_traceback()}"
-
-    def update_kwargs(self, kwargs: Dict[str, Any], task_result: TaskResponse) -> Dict[str, Any]:
-        """
-        Update the keyword arguments with the results of the latest task execution.
-
-        Args:
-            kwargs (Dict[str, Any]): The current keyword arguments.
-            task_result (TaskResponse): The result of the task execution.
-
-        Returns:
-            Dict[str, Any]: Updated keyword arguments including the latest task output.
-        """
-        # Pass the task_outputs as the task name
-        kwargs[task_result.task_name] = task_result.task_outputs
-
-        # Pass the references.summary() as task_name_inner
-        kwargs[f"{task_result.task_name}_inner"] = task_result.references.summary()
-
-        return kwargs
+            return node_references, "failed", f"Error: {str(e)}\nTraceback: {get_traceback()}"
 
     def get_initial_task(self) -> Optional[str]:
         """
@@ -142,57 +159,13 @@ class Workflow(AliceTask):
             raise ValueError(f"Task {task_name} not found in the workflow.")
         return await current_task.run(**kwargs)
 
-    def get_next_task(self, task_result: TaskResponse, tasks_performed: List[TaskResponse]) -> Tuple[Optional[str], bool]:
-        """
-        Determine the next task to be executed based on the current task's result.
-
-        Args:
-            task_result (TaskResponse): The result of the most recently executed task.
-            tasks_performed (List[TaskResponse]): A list of all tasks performed so far.
-
-        Returns:
-            Tuple[Optional[str], bool]: A tuple containing:
-                - The name of the next task to execute (or None if workflow is complete)
-                - A boolean indicating whether this is a retry attempt
-        """
-        next_task_info = self.select_next_task(task_result, tasks_performed)
-        return next_task_info
-
-    def create_workflow_response(self, tasks_performed: List[TaskResponse], status: str, diagnostic: str, **kwargs) -> TaskResponse:
-        exec_history = kwargs.pop("execution_history", None)
-        kwargs.pop("api_manager", None)
-        ref = References(task_responses=tasks_performed)
-        str_output = ref.detailed_summary()
-        return TaskResponse(
-            task_id=self.id if self.id else '',
-            task_name=self.task_name,
-            task_description=self.task_description,
-            status=status,
-            result_code=1 if status == "failed" else 0,
-            task_outputs=str_output,
-            references=ref,
-            task_inputs=kwargs,
-            result_diagnostic=diagnostic,
-            execution_history=exec_history
-        )
-
-    def get_traceback(self) -> str:
-        """
-        Get the traceback information for the current exception.
-
-        Returns:
-            str: A string containing the formatted traceback.
-        """
-        import traceback
-        return traceback.format_exc()
-
-    def select_next_task(self, task_response: Optional[TaskResponse], outputs: Optional[List[Dict[str, Any]]]) -> Tuple[Optional[str], bool]:
+    def select_next_task(self, response: Optional[Union[TaskResponse, UserInteraction]], node_references: Optional[List[NodeResponse]]) -> Tuple[Optional[str], bool]:
         """
         Select the next task based on the task selection method or routing configuration.
 
         Args:
-            task_response (Optional[TaskResponse]): The response from the previous task.
-            outputs (Optional[List[Dict[str, Any]]]): A list of outputs from previous tasks.
+            response (Optional[Union[TaskResponse, UserInteraction]]): The response from the previous task or user interaction.
+            node_references (Optional[List[NodeResponse]]): A list of node references from previous executions.
 
         Returns:
             Tuple[Optional[str], bool]: A tuple containing:
@@ -203,14 +176,14 @@ class Workflow(AliceTask):
             ValueError: If neither task_selection_method nor node_end_code_routing is defined.
         """
         if self.task_selection_method:
-            return self.task_selection_method(task_response, outputs)
+            return self.task_selection_method(response, node_references)
         if not self.node_end_code_routing:
             raise ValueError("Either the task_selection_method or the node_end_code_routing needs to be defined.")
         
-        if task_response is None:
+        if response is None:
             return self.get_initial_task_name()
 
-        return self.get_next_task_from_routing(task_response)
+        return self.get_next_task_from_routing(response)
 
     def get_initial_task_name(self) -> Tuple[Optional[str], bool]:
         if self.start_node:
@@ -218,12 +191,12 @@ class Workflow(AliceTask):
         LOGGER.info("No start task defined, selecting the first task.")
         return next(iter(self.tasks.values())).task_name, False
 
-    def get_next_task_from_routing(self, task_response: TaskResponse) -> Tuple[Optional[str], bool]:
+    def get_next_task_from_routing(self, response: Union[TaskResponse, UserInteraction]) -> Tuple[Optional[str], bool]:
         """
-        Determine the next task based on the task routing configuration.
+        Determine the next task based on the routing configuration or user checkpoint.
 
         Args:
-            task_response (TaskResponse): The response from the previous task.
+            response (Union[TaskResponse, UserInteraction]): The response from the previous task or user interaction.
 
         Returns:
             Tuple[Optional[str], bool]: A tuple containing:
@@ -231,17 +204,34 @@ class Workflow(AliceTask):
                 - A boolean indicating whether this is a retry attempt
 
         Raises:
-            ValueError: If the task or its result code is not found in the routing configuration.
+            ValueError: If the task is not found in the workflow routing or if the user checkpoint is not found.
         """
-        task_name = task_response.task_name
-        if task_name not in self.node_end_code_routing:
-            raise ValueError(f"Task {task_name} not found in the workflow routing.")
+        if isinstance(response, UserInteraction):
+            # Handle user interaction routing
+            if response.user_response is None:
+                return None, False  # User interaction is not completed yet
+            
+            checkpoint = next((cp for cp in self.user_checkpoints.values() if cp.id == response.user_checkpoint_id), None)
+            if checkpoint is None:
+                raise ValueError(f"User checkpoint {response.user_checkpoint_id} not found.")
+            
+            selected_option = response.user_response.selected_option
+            if selected_option not in checkpoint.task_next_obj:
+                raise ValueError(f"Selected option {selected_option} not found in user checkpoint routing.")
+            
+            next_task = checkpoint.task_next_obj[selected_option]
+            return next_task, False  # User interactions don't have retry logic
+        
+        else:  # TaskResponse
+            task_name = response.task_name
+            if task_name not in self.node_end_code_routing:
+                raise ValueError(f"Task {task_name} not found in the workflow routing.")
 
-        result_code = task_response.result_code
-        task_routing: Dict[Union[str, int], Union[Tuple[Optional[str], bool], List[Optional[Union[str, bool]]]]] = self.node_end_code_routing[task_name]
+            result_code = response.result_code
+            task_routing = self.node_end_code_routing[task_name]
 
-        next_task_info: Union[Tuple[Optional[str], bool], List[Optional[Union[str, bool]]]] = self.get_next_task_info(task_routing, result_code)
-        return self.parse_next_task_info(next_task_info)
+            next_task_info = self.get_next_task_info(task_routing, result_code)
+            return self.parse_next_task_info(next_task_info)
 
     def get_next_task_info(self, task_routing: Dict[Union[str, int], Union[Tuple[Optional[str], bool], List[Optional[Union[str, bool]]]]], result_code: Union[str, int]) -> Union[Tuple[Optional[str], bool], List[Optional[Union[str, bool]]]]:
         """
@@ -265,9 +255,11 @@ class Workflow(AliceTask):
         except:
             raise ValueError(f"Exit code {result_code} not found in task routing.")
         
-        converted_result_code = str(result_code) if isinstance(result_code, int) else int(result_code)
+        converted_result_code = result_code if isinstance(result_code, int) else int(result_code)
         if converted_result_code in task_routing:
             return task_routing[converted_result_code]
+        elif str(converted_result_code) in task_routing:
+            return task_routing[str(converted_result_code)]
         
         raise ValueError(f"Exit code {result_code} not found in task routing.")
 

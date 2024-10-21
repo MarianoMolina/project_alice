@@ -17,10 +17,15 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                 "description": "The URL to scrape",
             },
             {
-                "key": "paramsparams",
+                "key": "web_scrape_param",
                 "type": "string",
                 "description": "The outputs of the web scrape task",
             },
+            {
+                "key": "web_scrape_content_param",
+                "type": "string",
+                "description": "The raw content of the web required if it is already retrieved. If provided, url will be ignored (it is still required).",
+            }
         ],
         "prompts": [
             {
@@ -54,7 +59,7 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "web_scrape": "paramsparams"
+                        "web_scrape": "web_scrape_param"
                     },
                     "required": ["web_scrape"]
                 }
@@ -99,6 +104,7 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                     "type": "object",
                     "properties": {
                         "url": "url_param",
+                        "fetch_url_html_content": "web_scrape_content_param"
                     },
                     "required": ["url"]
                 },
@@ -112,7 +118,7 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "web_scrape": "params_web_scrape_task",
+                        "web_scrape": "web_scrape_param",
                     },
                     "required": ["web_scrape"]
                 },

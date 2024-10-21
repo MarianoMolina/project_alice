@@ -1,8 +1,10 @@
-from typing import List, Tuple, Union, Dict, Optional
+from typing import List
 from pydantic import Field
 from workflow.core.tasks.agent_tasks import BasicAgentTask
 from workflow.core.data_structures.base_models import TasksEndCodeRouting
-from workflow.core.data_structures import MessageDict, ApiType, References, FunctionParameters, ParameterDefinition
+from workflow.core.data_structures import (
+    FunctionParameters, ParameterDefinition, MessageDict, ApiType, References, NodeResponse
+)
 from workflow.core.api import APIManager
 from workflow.util import LOGGER
 
@@ -35,17 +37,40 @@ class GenerateImageTask(BasicAgentTask):
         )
     )
     required_apis: List[ApiType] = Field([ApiType.IMG_GENERATION], description="A list of required APIs for the task")
-    start_node: Optional[str] = Field(default=None, description="The name of the starting node")
-    node_end_code_routing: Optional[TasksEndCodeRouting] = Field(default=None, description="A dictionary of tasks/nodes -> exit codes and the task to route to given each exit code")
+    start_node: str = Field(default='generate_image', description="The name of the starting node")
+    node_end_code_routing: TasksEndCodeRouting = Field(default={
+        'generate_image': {
+            0: (None, False),
+            1: ('generate_image', True),
+        }
+    }, description="A dictionary of tasks/nodes -> exit codes and the task to route to given each exit code")
 
-    async def generate_agent_response(self, api_manager: APIManager, **kwargs) ->  Tuple[Optional[References], int, Optional[Union[List[MessageDict], Dict[str, str]]]]:
+    async def execute_generate_image(self, execution_history: List[NodeResponse], node_responses: List[NodeResponse], **kwargs) -> NodeResponse:
+        api_manager: APIManager = kwargs.get("api_manager")
         prompt: str = kwargs.get('prompt', "")
         n: int = kwargs.get('n', 1)
         size: str = kwargs.get('size', "1024x1024")
         quality: str = kwargs.get('quality', "standard")
-
-        new_messages = await self.agent.generate_image(api_manager=api_manager, prompt=prompt, n=n, size=size, quality=quality)
-        if not new_messages:
-            LOGGER.error("No messages returned from agent.")
-            return {}, 1, None
-        return References(files=[new_messages]), 0, None
+        
+        try:
+            new_messages = await self.agent.generate_image(api_manager=api_manager, prompt=prompt, n=n, size=size, quality=quality)
+            if not new_messages:
+                raise ValueError("No images generated")
+            return NodeResponse(
+                parent_task_id=self.id,
+                node_name="generate_image",
+                exit_code=0,
+                references=References(files=[new_messages])
+            )
+        except Exception as e:
+            LOGGER.error(f"Error in image generation: {e}")
+            return NodeResponse(
+                parent_task_id=self.id,
+                node_name="generate_image",
+                exit_code=1,
+                references=References(messages=[MessageDict(
+                    role="system",
+                    content=f"Image generation failed: {str(e)}",
+                    generated_by="system"
+                )])
+            )

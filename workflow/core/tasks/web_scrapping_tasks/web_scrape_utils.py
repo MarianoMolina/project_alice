@@ -119,8 +119,13 @@ def apply_parsing_strategy(html: str, selectors: List[str]) -> Optional[str]:
 def fallback_parsing_strategy(html: str) -> Optional[str]:
     LOGGER.info("Applying fallback parsing strategy by extracting all <p> tags.")
     soup = BeautifulSoup(html, 'html.parser')
-    paragraphs = soup.find_all('p')
-    content = ' '.join([para.get_text(separator=' ', strip=True) for para in paragraphs])
+    selectors = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+    content_elements = []
+    for selector in selectors:
+        paragraphs = soup.select(selector)
+        LOGGER.debug(f"Applying selector '{selector}' found {len(paragraphs)} elements.")
+        content_elements.extend(paragraphs)
+    content = ' '.join([para.get_text(separator=' ', strip=True) for para in content_elements])
     if content.strip():
         LOGGER.info("Content extracted successfully using fallback method.")
         return content

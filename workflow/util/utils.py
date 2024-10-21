@@ -1,7 +1,7 @@
 import json, re
 from typing import List, Any, Union, Type, Tuple, Dict
 from workflow.util.logging_config import LOGGER
-from workflow.core.data_structures.task_response_new import NodeResponse, TaskResponse, ExecutionHistoryItem
+from workflow.core.data_structures.task_response import NodeResponse, ExecutionHistoryItem
 
 def json_to_python_type_mapping(json_type: str) -> Type | Tuple[Type, ...] | None:
     type_mapping = {
@@ -183,22 +183,6 @@ def prune_messages(messages: List[Dict[str, Any]], ctx_size: int) -> List[Dict[s
                 pruned_messages[longest_index]['content'] = pruned_content
     
     return pruned_messages
-
-def complete_inner_execution_history(nodes: List[NodeResponse], base_order=0) -> List[NodeResponse]:
-    flattened = []
-    for node in sorted(nodes, key=lambda x: x.execution_order):
-        new_node = NodeResponse(
-            parent_task_id=node.parent_task_id,
-            node_name=node.node_name,
-            execution_order=base_order + len(flattened),
-            exit_code=node.exit_code,
-            references=node.references
-        )
-        flattened.append(new_node)
-        if isinstance(node, TaskResponse):
-            inner_nodes = complete_inner_execution_history(node.node_references, base_order + len(flattened))
-            flattened.extend(inner_nodes)
-    return flattened
 
 def generate_node_responses_summary(node_responses: List[NodeResponse], verbose: bool = False) -> str:
     sorted_nodes = sorted(node_responses, key=lambda x: x.execution_order)

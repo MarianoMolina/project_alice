@@ -1,7 +1,7 @@
 from .message import MessageDict
 from .file_reference import FileReference, FileContentReference, generate_file_content_reference, get_file_content
 from .url_reference import URLReference
-from .task_response import TaskResponse
+from .task_response import TaskResponse, NodeResponse, ExecutionHistoryItem
 from .user_interaction import UserInteraction
 from .user import User, UserRoles
 from .references import References
@@ -16,6 +16,8 @@ FileReference.model_rebuild()
 FileContentReference.model_rebuild()
 URLReference.model_rebuild()
 TaskResponse.model_rebuild()
+NodeResponse.model_rebuild()
+ExecutionHistoryItem.model_rebuild()
 UserInteraction.model_rebuild()
 User.model_rebuild()
 ModelConfig.model_rebuild()
@@ -28,6 +30,6 @@ ToolFunction.model_rebuild()
 References.model_rebuild()
 
 __all__ = ['FileReference', 'ContentType', 'FileType', 'FileContentReference', 'generate_file_content_reference', 'get_file_content', 'MessageDict', 'ModelConfig',
-           'URLReference', 'TaskResponse', 'User', 'UserRoles', 'UserInteraction',
+           'URLReference', 'TaskResponse', 'User', 'UserRoles', 'UserInteraction', 'ExecutionHistoryItem', 'NodeResponse', 
            'ApiName', 'ApiType', 'ModelType', 'ParameterDefinition', 'FunctionConfig', 'FunctionParameters', 'ToolCall', 'ToolCallConfig',
            'ToolFunction', 'ensure_tool_function', 'EntityType', 'ModelApis', 'FileOutput', 'References']

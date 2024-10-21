@@ -1,7 +1,9 @@
-from typing import List, Tuple, Union, Dict, Optional
+from typing import List
 from pydantic import Field
 from workflow.core.tasks.agent_tasks import BasicAgentTask
-from workflow.core.data_structures import MessageDict, ApiType, References, FunctionParameters, ParameterDefinition
+from workflow.core.data_structures import (
+    FunctionParameters, ParameterDefinition, MessageDict, ApiType, References, NodeResponse
+)
 from workflow.core.api import APIManager
 from workflow.util import LOGGER
 from workflow.core.data_structures.base_models import TasksEndCodeRouting
@@ -30,16 +32,39 @@ class TextToSpeechTask(BasicAgentTask):
         )
     )
     required_apis: List[ApiType] = Field([ApiType.TEXT_TO_SPEECH], description="A list of required APIs for the task")
-    start_node: Optional[str] = Field(default=None, description="The name of the starting node")
-    node_end_code_routing: Optional[TasksEndCodeRouting] = Field(default=None, description="A dictionary of tasks/nodes -> exit codes and the task to route to given each exit code")
+    start_node: str = Field(default='text_to_speech', description="The name of the starting node")
+    node_end_code_routing: TasksEndCodeRouting = Field(default={
+        'text_to_speech': {
+            0: (None, False),
+            1: ('text_to_speech', True),
+        }
+    }, description="A dictionary of tasks/nodes -> exit codes and the task to route to given each exit code")
 
-    async def generate_agent_response(self, api_manager: APIManager, **kwargs) -> Tuple[Optional[References], int, Optional[Union[List[MessageDict], Dict[str, str]]]]:
+    async def execute_text_to_speech(self, execution_history: List[NodeResponse], node_responses: List[NodeResponse], **kwargs) -> NodeResponse:
+        api_manager: APIManager = kwargs.get("api_manager")
         text: str = kwargs.get('text', "")
         voice: str = kwargs.get('voice', "nova")
         speed: float = kwargs.get('speed', 1.0)
-
-        new_messages = await self.agent.generate_speech(api_manager=api_manager, input=text, voice=voice, speed=speed)
-        if not new_messages:
-            LOGGER.error("No messages returned from agent.")
-            return {}, 1, None
-        return References(files=[new_messages]), 0, None
+        
+        try:
+            new_messages = await self.agent.generate_speech(api_manager=api_manager, input=text, voice=voice, speed=speed)
+            if not new_messages:
+                raise ValueError("No speech generated")
+            return NodeResponse(
+                parent_task_id=self.id,
+                node_name="text_to_speech",
+                exit_code=0,
+                references=References(files=[new_messages])
+            )
+        except Exception as e:
+            LOGGER.error(f"Error in speech generation: {e}")
+            return NodeResponse(
+                parent_task_id=self.id,
+                node_name="text_to_speech",
+                exit_code=1,
+                references=References(messages=[MessageDict(
+                    role="system",
+                    content=f"Speech generation failed: {str(e)}",
+                    generated_by="system"
+                )])
+            )

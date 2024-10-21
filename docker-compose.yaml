@@ -2,7 +2,9 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
+    env_file:
+      - .env
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT_DOCKER}"
     depends_on:
@@ -13,16 +15,19 @@ services:
       volume-init:
         condition: service_completed_successfully
     volumes:
-      - ./.env:/app/.env:ro
+      - ./frontend:/app:delegated
+      - /app/node_modules
+      - /app/dist
     environment:
-      NODE_ENV: ${NODE_ENV:-production}
+      NODE_ENV: ${NODE_ENV:-development}
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
       PORT: ${FRONTEND_PORT_DOCKER:-4000}
-      CI: "true"
 
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT_DOCKER}"
     depends_on:
@@ -31,11 +36,14 @@ services:
       volume-init:
         condition: service_completed_successfully
     volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - /app/dist
       - ./.env:/app/.env
       - logs:/app/logs
       - shared-uploads:/app/shared-uploads
     environment:
-      NODE_ENV: ${NODE_ENV:-production}
+      NODE_ENV: ${NODE_ENV:-development}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
