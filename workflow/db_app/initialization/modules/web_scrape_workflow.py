@@ -54,14 +54,14 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
             {
                 "key": "web_summarize_task_prompt",
                 "name": "Web summarization prompt",
-                "content": "{{ web_scrape }}",
+                "content": "{{ generate_selectors_and_parse }}",
                 "is_templated": True,
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "web_scrape": "web_scrape_param"
+                        "generate_selectors_and_parse": "web_scrape_param"
                     },
-                    "required": ["web_scrape"]
+                    "required": ["generate_selectors_and_parse"]
                 }
             },
         ],
@@ -108,6 +108,16 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                     },
                     "required": ["url"]
                 },
+                "node_end_code_routing": {
+                    'fetch_url': {
+                        0: ('generate_selectors_and_parse', False),
+                        1: ('fetch_url', True),
+                    }, 
+                    'generate_selectors_and_parse': {
+                        0: (None, False),
+                        1: ('generate_selectors_and_parse', True),
+                    }
+                },
             },
             {
                 "key": "web_summarize_task",
@@ -118,14 +128,20 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "web_scrape": "web_scrape_param",
+                        "generate_selectors_and_parse": "web_scrape_param",
                     },
-                    "required": ["web_scrape"]
+                    "required": ["generate_selectors_and_parse"]
                 },
                 "required_apis": ["llm_api"],
                 "templates": {
                     "task_template": "web_summarize_task_prompt"
-                }
+                },
+                "node_end_code_routing": {
+                    'llm_generation':{
+                        0: (None, False),
+                        1: ('llm_generation', True),
+                    }, 
+                },
             },
             {
                 "key": "web_scrape_workflow",

@@ -192,8 +192,7 @@ class CodeExecutionLLMTask(PromptAgentTask):
             )
 
         try:
-            code_execs, _ = await self.agent._process_code_execution(messages)
-            exit_code = self.get_code_exec_exit_code(code_execs, True)
+            code_execs, _, exit_code = await self.agent._process_code_execution(messages)
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name="code_execution",
@@ -214,10 +213,3 @@ class CodeExecutionLLMTask(PromptAgentTask):
                 )]),
                 execution_order=len(execution_history)
             )
-
-    def get_code_exec_exit_code(self, chat_output: List[MessageDict], response_code: bool) -> int:
-        LOGGER.info(f"Chat output: {chat_output} \nResponse code: {response_code}")
-        if not chat_output or not response_code or not chat_output[-1].content or chat_output[-1].content.startswith("Error"):
-            LOGGER.warning(f"Invalid input for task {self.task_name}. Returning default failure code.")
-            return 1
-        return 0

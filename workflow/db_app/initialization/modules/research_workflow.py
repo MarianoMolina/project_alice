@@ -155,6 +155,12 @@ research_workflow_module = ResearchWorkflowModule(
                     },
                     "required": ["prompt"]
                 },
+                "node_end_code_routing": {
+                    'llm_generation':{
+                        0: (None, False),
+                        1: ('llm_generation', True),
+                    }, 
+                },
             },
             {
                 "key": "data_retrieval_task",
@@ -179,7 +185,17 @@ research_workflow_module = ResearchWorkflowModule(
                 "required_apis": ["llm_api"],
                 "templates": {
                     "task_template": "data_retrieval_task_prompt"
-                }
+                },
+                "node_end_code_routing": {
+                    'llm_generation':{
+                        0: ('tool_call_execution', False),
+                        1: ('llm_generation', True),
+                    }, 
+                    'tool_call_execution':{
+                        0: (None, False),
+                        1: ('tool_call_execution', True),
+                    }, 
+                },
             },
             {
                 "key": "research_check_task",
@@ -217,7 +233,13 @@ research_workflow_module = ResearchWorkflowModule(
                 },
                 "templates": {
                     "task_template": "research_summary_task_prompt"
-                }
+                },
+                "node_end_code_routing": {
+                    'llm_generation':{
+                        0: (None, False),
+                        1: ('llm_generation', True),
+                    }, 
+                },
             },
             {
                 "key": "research_workflow",
@@ -250,7 +272,7 @@ research_workflow_module = ResearchWorkflowModule(
                         1: ("research_summary_task", True),
                     },
                 },
-                "max_attempts": 3,
+                "max_attempts": 2,
                 "recursive": False,
                 "input_variables": {
                     "type": "object",

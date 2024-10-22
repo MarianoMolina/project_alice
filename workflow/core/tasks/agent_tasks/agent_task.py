@@ -72,7 +72,7 @@ class BasicAgentTask(AliceTask):
         
         try:
             llm_response = await self.agent._generate_llm_response(api_manager, messages, tools_list)
-            exit_code = self.get_llm_exit_code(llm_response)
+            exit_code = self.get_llm_exit_code([llm_response], True if llm_response else False)
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name="llm_generation",
@@ -156,11 +156,11 @@ class BasicAgentTask(AliceTask):
         llm_response = llm_reference.messages[-1]
 
         try:
-            code_messages, _  = await self.agent._process_code_execution([llm_response])
+            code_messages, _, exit_code  = await self.agent._process_code_execution([llm_response])
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name="code_execution",
-                exit_code=0,
+                exit_code=exit_code,
                 references=References(messages=code_messages),
                 execution_order=len(execution_history)
             )
@@ -178,8 +178,8 @@ class BasicAgentTask(AliceTask):
                 execution_order=len(execution_history)
             )
         
-    def get_llm_exit_code(self, llm_response: List[MessageDict]) -> int:
-        return 0 if llm_response else 1
+    def get_llm_exit_code(self, llm_response: List[MessageDict], response_code: bool) -> int:
+        return 0 if (llm_response and response_code) else 1
 
     def create_message_list(self, **kwargs) -> List[MessageDict]:
         """Create a list of messages from the input data."""

@@ -66,17 +66,49 @@ class TaskResponse(BaseDataStructure):
             return []
         
 def complete_inner_execution_history(nodes: List[NodeResponse], base_order=0) -> List[NodeResponse]:
+    """
+    Flattens a hierarchy of NodeResponses including task responses found in references.
+    
+    This function processes a list of NodeResponses and their nested references,
+    creating a flattened list where each node's execution order is adjusted based
+    on its position in the complete sequence.
+
+    Args:
+        nodes (List[NodeResponse]): The list of nodes to process
+        base_order (int): The starting execution order for the sequence
+
+    Returns:
+        List[NodeResponse]: A flattened list of all nodes including those from nested task responses
+    """
+    if not nodes:
+        return []
+
     flattened = []
+    current_order = base_order
+
+    # Process nodes in execution order
     for node in sorted(nodes, key=lambda x: x.execution_order):
+        # Create a new node with updated execution order
         new_node = NodeResponse(
             parent_task_id=node.parent_task_id,
             node_name=node.node_name,
-            execution_order=base_order + len(flattened),
+            execution_order=current_order,
             exit_code=node.exit_code,
             references=node.references
         )
         flattened.append(new_node)
-        if isinstance(node, TaskResponse):
-            inner_nodes = complete_inner_execution_history(node.node_references, base_order + len(flattened))
-            flattened.extend(inner_nodes)
+        current_order += 1
+
+        # Process task responses in node's references
+        if node.references and node.references.task_responses:
+            for task_response in node.references.task_responses:
+                # Recursively process node references from each task response
+                if task_response.node_references:
+                    inner_nodes = complete_inner_execution_history(
+                        task_response.node_references, 
+                        current_order
+                    )
+                    flattened.extend(inner_nodes)
+                    current_order += len(inner_nodes)
+
     return flattened

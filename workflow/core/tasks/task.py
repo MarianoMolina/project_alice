@@ -6,7 +6,7 @@ from workflow.core.agent import AliceAgent
 from workflow.core.api import APIManager, APIEngine
 from workflow.core.data_structures import (
     ApiType, FunctionParameters, ParameterDefinition, 
-    FunctionConfig, ToolFunction, References,
+    FunctionConfig, ToolFunction, References, complete_inner_execution_history,
     TaskResponse, NodeResponse, UserInteraction, UserCheckpoint, NodeResponse, TasksEndCodeRouting
 )
 from workflow.util.utils import simplify_execution_history, generate_node_responses_summary
@@ -28,7 +28,7 @@ class AliceTask(BaseModel):
     # Execution control
     start_node: Optional[str] = Field(default=None, description="Starting node name")
     recursive: bool = Field(True, description="Whether task can be executed recursively")
-    max_attempts: int = Field(3, description="Maximum attempts per node before failure")
+    max_attempts: int = Field(1, description="Maximum attempts per node before failure")
     timeout: Optional[int] = Field(default=None, description="Task timeout in seconds")
     
     # Node and execution routing
@@ -85,11 +85,11 @@ class AliceTask(BaseModel):
         description="Associated API engine"
     )
 
-    # Properties and convenience methods
     @property
     def task_type(self) -> str:
         return self.__class__.__name__
-    
+
+    # Model validation    
     @model_validator(mode='before')
     def convert_routing_lists_to_tuples(cls, values):
         """
@@ -152,6 +152,7 @@ class AliceTask(BaseModel):
             
         return values
     
+    # Serialization method
     def model_dump(self, *args, **kwargs):
         # Create a copy of the current instance's dict
         data = dict(self.__dict__)
@@ -205,6 +206,7 @@ class AliceTask(BaseModel):
             
         return dumped_data
 
+    # Execution methods
     async def run(self, execution_history: List[NodeResponse] = None, **kwargs) -> TaskResponse:
         """
         Execute the task with node-based flow and attempt tracking.
@@ -223,7 +225,7 @@ class AliceTask(BaseModel):
         
         try:
             # Validate and process inputs
-            processed_inputs, error_msg = self.validate_and_process_inputs(**kwargs)
+            processed_inputs, error_msg = self.validate_and_process_inputs(execution_history=execution_history, **kwargs)
             if error_msg:
                 return self.get_failed_task_response(error_msg, **kwargs)
 
@@ -297,7 +299,21 @@ class AliceTask(BaseModel):
 
         # Execute node method
         try:
-            return await getattr(self, method_name)(execution_history, node_responses, **kwargs)
+            node_response: NodeResponse = await getattr(self, method_name)(execution_history, node_responses, **kwargs)
+            # Update kwargs if node name exists as a variable
+            if node_name in kwargs:
+                try:
+                    value = node_response.references.detailed_summary()
+                    if node_name in self.input_variables.properties:
+                        param_type = self.input_variables.properties[node_name].type
+                        kwargs[node_name] = self._convert_value_to_type(value, node_name, param_type)
+                    else:
+                        kwargs[node_name] = value
+                    LOGGER.debug(f"Updated variable {node_name} with node output")
+                except (ValueError, TypeError) as e:
+                    LOGGER.warning(f"Failed to update variable {node_name} with node output: {e}")
+            
+            return node_response
         except Exception as e:
             LOGGER.error(f"Error executing node {node_name}: {str(e)}")
             return NodeResponse(
@@ -429,7 +445,6 @@ class AliceTask(BaseModel):
         return next_node
 
     # Response creation methods
-
     def get_task_response(self, task_outputs: str, result_code: int, diagnostics: str = None, 
                          status: str = "complete", node_references: List[NodeResponse] = None, **kwargs) -> TaskResponse:
         """Create a standardized task response."""
@@ -487,58 +502,124 @@ class AliceTask(BaseModel):
         )
     
     # Input validation
-    def validate_and_process_inputs(self, **kwargs) -> tuple[dict, Optional[str]]:
+    def validate_and_process_inputs(self, execution_history: List[NodeResponse] = None, **kwargs) -> tuple[dict, Optional[str]]:
         """
-        Validates and processes input parameters according to their defined types.
+        Validates and processes input parameters, checking both provided kwargs and execution history.
         
         Args:
-            **kwargs: Task input parameters.
+            execution_history (List[NodeResponse]): Previous execution history to check for variable values
+            **kwargs: Task input parameters
         
         Returns:
-            tuple[dict, Optional[str]]: Tuple containing processed inputs and error message (if any).
+            tuple[dict, Optional[str]]: Tuple containing processed inputs and error message (if any)
         """
-        # Validate required inputs
-        missing_params = []
-        for param_name in self.input_variables.required:
-            if param_name not in kwargs:
-                missing_params.append(param_name)
-        
-        if missing_params:
-            return {}, f"Missing required parameters: {', '.join(missing_params)}"
+        execution_history = complete_inner_execution_history(execution_history) or []
+        processed_inputs = kwargs.copy()
 
-        # Validate and cast input parameters
-        processed_inputs = {}
-        for param_name, param_value in kwargs.items():
+        # Check each required parameter
+        for param_name in self.input_variables.required:
+            # Skip if already in kwargs and no matching node exists
+            if param_name in processed_inputs and not any(
+                node.node_name == param_name for node in execution_history
+            ):
+                continue
+
+            # Look for matching node in history
+            matching_node = next(
+                (node for node in reversed(execution_history)
+                 if node.node_name == param_name and node.references),
+                None
+            )
+
+            if matching_node:
+                try:
+                    # Get value from node references
+                    value = matching_node.references.detailed_summary()
+                    param_def = self.input_variables.properties[param_name]
+                    
+                    # Convert to the correct type
+                    processed_inputs[param_name] = self._convert_value_to_type(
+                        value=value,
+                        param_name=param_name,
+                        param_type=param_def.type
+                    )
+                    LOGGER.debug(f"Using value from node {param_name} in execution history")
+                except (ValueError, TypeError) as e:
+                    return {}, f"Error converting value for parameter '{param_name}': {str(e)}"
+            
+            # If still not found, check for default value
+            elif param_name not in processed_inputs:
+                param_def = self.input_variables.properties[param_name]
+                if param_def.default is not None:
+                    processed_inputs[param_name] = param_def.default
+                else:
+                    # Log all the node names in the execution history
+                    node_names = [node.node_name for node in execution_history]
+                    LOGGER.debug(f"Missing required parameter: {param_name} \n\n Node_names: {node_names}")
+                    return {}, f"Missing required parameter: {param_name}"
+
+        # Validate and convert all provided inputs
+        for param_name, param_value in list(processed_inputs.items()):
             if param_name in self.input_variables.properties:
                 param_def = self.input_variables.properties[param_name]
                 try:
-                    # Cast the input according to its defined type
-                    if param_def.type == "string":
-                        processed_inputs[param_name] = str(param_value)
-                    elif param_def.type == "integer":
-                        processed_inputs[param_name] = int(param_value)
-                    elif param_def.type == "number":
-                        processed_inputs[param_name] = float(param_value)
-                    elif param_def.type == "object":
-                        if isinstance(param_value, str):
-                            import json
-                            processed_inputs[param_name] = json.loads(param_value)
-                        else:
-                            processed_inputs[param_name] = param_value
-                    elif param_def.type == "array":
-                        if isinstance(param_value, str):
-                            import json
-                            processed_inputs[param_name] = json.loads(param_value)
-                        elif isinstance(param_value, (list, tuple)):
-                            processed_inputs[param_name] = list(param_value)
-                        else:
-                            raise ValueError(f"Invalid value for array parameter {param_name}")
-                    else:
-                        processed_inputs[param_name] = param_value
-                except (ValueError, TypeError, json.JSONDecodeError) as e:
-                    return {}, f"Invalid value for parameter '{param_name}' ({param_def.type}): {str(e)}"
+                    processed_inputs[param_name] = self._convert_value_to_type(
+                        value=param_value,
+                        param_name=param_name,
+                        param_type=param_def.type
+                    )
+                except (ValueError, TypeError) as e:
+                    return {}, f"Invalid value for parameter '{param_name}': {str(e)}"
 
         return processed_inputs, None
+
+    def _convert_value_to_type(self, value: Any, param_name: str, param_type: str) -> Any:
+        """
+        Converts a value to the specified parameter type.
+        
+        Args:
+            value: The value to convert
+            param_name: The name of the parameter (for error messages)
+            param_type: The target type to convert to
+            
+        Returns:
+            The converted value
+            
+        Raises:
+            ValueError: If conversion fails
+        """
+        try:
+            if param_type == "string":
+                return str(value)
+            elif param_type == "integer":
+                if isinstance(value, str):
+                    # Try to convert string to float first to handle "1.0" -> 1
+                    return int(float(value))
+                return int(value)
+            elif param_type == "number":
+                return float(value)
+            elif param_type == "boolean":
+                if isinstance(value, str):
+                    return value.lower() in ("true", "1", "yes", "y")
+                return bool(value)
+            elif param_type == "array":
+                if isinstance(value, str):
+                    import json
+                    return json.loads(value)
+                if isinstance(value, (list, tuple)):
+                    return list(value)
+                raise ValueError(f"Cannot convert {type(value)} to array")
+            elif param_type == "object":
+                if isinstance(value, str):
+                    import json
+                    return json.loads(value)
+                if isinstance(value, dict):
+                    return value
+                raise ValueError(f"Cannot convert {type(value)} to object")
+            else:
+                return value
+        except Exception as e:
+            raise ValueError(f"Failed to convert {param_name} to {param_type}: {str(e)}")
 
     # API validation
     def validate_required_apis(self, api_manager: APIManager) -> bool:

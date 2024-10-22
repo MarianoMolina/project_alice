@@ -1,7 +1,7 @@
 from .message import MessageDict
 from .file_reference import FileReference, FileContentReference, generate_file_content_reference, get_file_content
 from .url_reference import URLReference
-from .task_response import TaskResponse, NodeResponse, ExecutionHistoryItem
+from .task_response import TaskResponse, NodeResponse, ExecutionHistoryItem, complete_inner_execution_history
 from .user_interaction import UserInteraction, UserCheckpoint, UserResponse
 from .user import User, UserRoles
 from .references import References
@@ -34,4 +34,4 @@ References.model_rebuild()
 __all__ = ['FileReference', 'ContentType', 'FileType', 'FileContentReference', 'generate_file_content_reference', 'get_file_content', 'MessageDict', 'ModelConfig',
            'URLReference', 'TaskResponse', 'User', 'UserRoles', 'UserInteraction', 'ExecutionHistoryItem', 'NodeResponse', 'TasksEndCodeRouting',
            'ApiName', 'ApiType', 'ModelType', 'ParameterDefinition', 'FunctionConfig', 'FunctionParameters', 'ToolCall', 'ToolCallConfig', 'UserCheckpoint', 'UserResponse',
-           'ToolFunction', 'ensure_tool_function', 'EntityType', 'ModelApis', 'FileOutput', 'References']
+           'ToolFunction', 'ensure_tool_function', 'EntityType', 'ModelApis', 'FileOutput', 'References', 'complete_inner_execution_history']

@@ -174,13 +174,12 @@ Example response format:
 }}
 """
             message: MessageDict = MessageDict(role="user", content=prompt, generated_by="tool", type="text")
-            LOGGER.info(f"Generating selectors for sample {idx}/{len(html_samples)}.")
+            LOGGER.info(f"Generating selectors for sample {idx}/{len(html_samples)}.")           
             try:
-                new_messages, _ = await self.agent.chat(api_manager=api_manager, messages=[message], max_turns=self.agent.max_consecutive_auto_reply)
-                LOGGER.info(f"LLM response: {[msg.model_dump() for msg in new_messages] if new_messages else None}")
-                instructions = new_messages[-1].content if new_messages else None
-                if new_messages and new_messages[-1].creation_metadata:
-                    creation_metadata[f"sample_{idx}"] = new_messages[-1].creation_metadata
+                new_message = await self.agent._generate_llm_response(api_manager, [message])
+                instructions = new_message.content if new_message else None
+                if new_message and new_message.creation_metadata:
+                    creation_metadata[f"sample_{idx}"] = new_message.creation_metadata
 
                 LOGGER.info(f"LLM instructions: {instructions}")
                 json_str = extract_json(instructions)

@@ -58,7 +58,7 @@ class AliceAgent(BaseModel):
             else:
                 tool_messages = []
             # Step 3: Code Execution
-            code_messages = await self._process_code_execution([llm_response] + tool_messages) if self.has_code_exec else []
+            code_messages, _, _ = await self._process_code_execution([llm_response] + tool_messages) if self.has_code_exec else []
             
             return [llm_response] + tool_messages + code_messages
 
@@ -67,7 +67,7 @@ class AliceAgent(BaseModel):
             LOGGER.error(f"Traceback: {traceback.format_exc()}")
             raise
 
-    async def _generate_llm_response(self, api_manager: APIManager, messages: List[MessageDict], tools_list: List[ToolFunction]) -> MessageDict:
+    async def _generate_llm_response(self, api_manager: APIManager, messages: List[MessageDict], tools_list: List[ToolFunction] = []) -> MessageDict:
         LOGGER.info("Generating LLM response")
         chat_model = self.llm_model
         response_ref: References = await api_manager.generate_response_with_api_engine(
@@ -224,7 +224,7 @@ class AliceAgent(BaseModel):
         LOGGER.debug(f"Total code blocs collected: {len(code_blocs)}")
         return code_blocs
 
-    async def _process_code_execution(self, messages: List[MessageDict]) -> Tuple[List[MessageDict], Dict]:
+    async def _process_code_execution(self, messages: List[MessageDict]) -> Tuple[List[MessageDict], Dict, int]:
         
         code_blocs = self.collect_code_blocs(messages)
         if not code_blocs:
@@ -253,7 +253,7 @@ class AliceAgent(BaseModel):
                 type=ContentType.TEXT, 
                 references=References(string_outputs=[merged_code, lang])
             ))
-        return executed_messages, code_by_lang
+        return executed_messages, code_by_lang, exit_code
 
     def _extract_code_blocs(self, content: str) -> List[Tuple[str, str]]:
         # Improved regex pattern

@@ -111,7 +111,7 @@ export const getDefaultTaskForm = (taskType: TaskType): AliceTask => {
     start_node: null,
     task_selection_method: null,
     node_end_code_routing: null,
-    max_attempts: 3
+    max_attempts: 1
   };
 
 

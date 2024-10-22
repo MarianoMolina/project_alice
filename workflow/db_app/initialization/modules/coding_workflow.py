@@ -196,7 +196,13 @@ coding_workflow_module = CodingWorkflowModule(
                     },
                     "required": ["prompt"]
                 },
-                "exit_codes": {0: "Success", 1: "Generation failed."}
+                "exit_codes": {0: "Success", 1: "Generation failed."},
+                "node_end_code_routing": {
+                    'llm_generation':{
+                        0: (None, False),
+                        1: ('llm_generation', True),
+                    }, 
+                },
             },
             {
                 "key": "generate_code",
@@ -269,7 +275,7 @@ coding_workflow_module = CodingWorkflowModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "generaate_code": "param_generate_code",
+                        "generate_code": "param_generate_code",
                         "generate_unit_tests": "param_generate_unit_tests",
                     },
                     "required": ["generate_unit_tests"]
@@ -346,7 +352,7 @@ coding_workflow_module = CodingWorkflowModule(
                         3: ("generate_unit_tests", True)
                     }
                 },
-                "max_attempts": 3,
+                "max_attempts": 2,
                 "recursive": False,
                 "input_variables": {
                     "type": "object",

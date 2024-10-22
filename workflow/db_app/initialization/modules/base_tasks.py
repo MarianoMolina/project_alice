@@ -191,7 +191,17 @@ base_tasks_module = BaseTasksModule(
                     },
                     "required": ["prompt"]
                 },
-                "required_apis": ["llm_api"]
+                "required_apis": ["llm_api"],
+                "node_end_code_routing": {
+                    'llm_generation':{
+                        0: ('tool_call_execution', False),
+                        1: ('llm_generation', True),
+                    }, 
+                    'tool_call_execution':{
+                        0: (None, False),
+                        1: ('tool_call_execution', True),
+                    }, 
+                },
             },
         ]
     }
