@@ -27,8 +27,6 @@ class NodeResponse(ExecutionHistoryItem):
 
 class TaskResponse(BaseDataStructure):
     task_id: Optional[str] = Field(None, description="The id of this task node")
-    parent_task_id: Optional[str] = Field(None, description="The id of the parent task if any")
-    workflow_task_response_id: Optional[str] = Field(None, description="The id of the parent workflow task response, if any")
     task_name: str = Field(..., description="The name of the task")
     task_description: str = Field(..., description="A detailed description of the task")
     status: str = Field(..., description="The current status of the task: pending, complete, or failed")

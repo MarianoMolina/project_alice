@@ -2,6 +2,17 @@ import { Document, Types, Model } from 'mongoose';
 import { IUserDocument } from './user.interface';
 import { References } from './references.interface';
 
+export interface ExecutionHistoryItem {
+    parent_task_id?: string;
+    node_name: string;
+    execution_order: number;
+    exit_code?: number;
+}
+
+export interface NodeResponse extends ExecutionHistoryItem {
+    references: References;
+}
+
 export interface ITaskResult {
     task_name: string;
     task_id: Types.ObjectId;
@@ -12,8 +23,8 @@ export interface ITaskResult {
     task_inputs: Map<string, any> | null;
     result_diagnostic: string | null;
     usage_metrics: Map<string, string> | null;
-    execution_history: Map<string, any>[];
-    references?: References;
+    execution_history?: ExecutionHistoryItem[];
+    node_references?: NodeResponse[];
     created_by: Types.ObjectId | IUserDocument;
     updated_by: Types.ObjectId | IUserDocument;
 }

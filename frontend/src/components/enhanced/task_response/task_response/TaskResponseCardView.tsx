@@ -5,6 +5,8 @@ import {
     Accordion,
     AccordionSummary,
     AccordionDetails,
+    Stack,
+    Box,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
@@ -29,6 +31,13 @@ const ExitCodeChip = styled(Chip)(({ theme }) => ({
     '&.error': {
         backgroundColor: theme.palette.error.main,
         color: theme.palette.error.contrastText,
+    },
+}));
+
+const NodeReferenceSection = styled(Box)(({ theme }) => ({
+    marginBottom: theme.spacing(2),
+    '&:last-child': {
+        marginBottom: 0,
     },
 }));
 
@@ -60,6 +69,32 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             </AccordionDetails>
         </Accordion>
     );
+
+    const renderNodeReferences = () => {
+        if (!item.node_references?.length) {
+            return <Typography>No output content available</Typography>;
+        }
+
+        return (
+            <Stack spacing={2}>
+                {item.node_references.map((nodeResponse, index) => (
+                    <NodeReferenceSection key={`${nodeResponse.node_name}-${index}`}>
+                        <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                            {nodeResponse.node_name} {nodeResponse.exit_code !== undefined && (
+                                <ExitCodeChip
+                                    size="small"
+                                    label={`Exit: ${nodeResponse.exit_code}`}
+                                    className={getExitCodeProps(nodeResponse.exit_code).className}
+                                    sx={{ ml: 1 }}
+                                />
+                            )}
+                        </Typography>
+                        <ReferencesViewer references={nodeResponse.references} />
+                    </NodeReferenceSection>
+                ))}
+            </Stack>
+        );
+    };
 
     const exitCodeProps = getExitCodeProps(item.result_code);
 
@@ -95,11 +130,11 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             icon: <Output />,
             primary_text: "Output",
             secondary_text: (
-                item.references ? (
-                    <ReferencesViewer references={item.references} />
-                ) : (
-                    <Typography>No output content available</Typography>
-                )
+                <AccordionSection
+                    title="Node Outputs"
+                    content={renderNodeReferences()}
+                    disabled={!item.node_references?.length}
+                />
             )
         },
         {
