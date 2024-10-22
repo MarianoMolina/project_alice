@@ -2,8 +2,9 @@ from typing import List, Tuple, Optional, Dict, Any
 from pydantic import Field, BaseModel
 import json
 from workflow.core.tasks.agent_tasks import BasicAgentTask
-from workflow.core.data_structures import ApiType, References, NodeResponse, MessageDict, FunctionParameters, ParameterDefinition, URLReference
-from workflow.core.data_structures.base_models import TasksEndCodeRouting
+from workflow.core.data_structures import (
+    ApiType, References, NodeResponse, MessageDict, FunctionParameters, ParameterDefinition, URLReference, TasksEndCodeRouting
+)
 from workflow.core.api import APIManager
 from workflow.core.tasks.web_scrapping_tasks.web_scrape_utils import (
     clean_text, fetch_webpage_and_title, preprocess_html, sample_html,

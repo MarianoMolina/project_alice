@@ -1,17 +1,18 @@
 from typing import List, Type
 from pydantic import Field, model_validator
-from workflow.core.api import APIManager, APIEngine, WikipediaSearchAPI, GoogleSearchAPI, ExaSearchAPI, ArxivSearchAPI, RedditSearchAPI, GoogleGraphEngine
-from workflow.core.data_structures import TaskResponse, ApiType, NodeResponse, References
-from workflow.core.tasks.node_based_task import NodeBasedTask
-from workflow.core.data_structures.base_models import TasksEndCodeRouting
+from workflow.core.api import (
+    APIManager, APIEngine, WikipediaSearchAPI, GoogleSearchAPI, ExaSearchAPI, ArxivSearchAPI, RedditSearchAPI, GoogleGraphEngine
+)
+from workflow.core.data_structures import ApiType, NodeResponse, References, TasksEndCodeRouting
+from workflow.core.tasks.task import AliceTask
 
-class APITask(NodeBasedTask):
+class APITask(AliceTask):
     """
     Represents a task that interacts with a specific API, using a node-based execution model.
 
     This class is designed to handle tasks that require interaction with external APIs.
     It validates the API configuration and uses the appropriate API engine for execution.
-    It inherits from NodeBasedTask to integrate with the node-based execution framework.
+    It inherits from AliceTask to integrate with the node-based execution framework.
 
     Attributes:
         required_apis (List[ApiType]): List containing exactly one ApiType, specifying the required API.
@@ -115,7 +116,6 @@ class APITask(NodeBasedTask):
             NodeResponse: A response object containing the results of the API task execution.
         """
         api_manager: APIManager = kwargs.get("api_manager")
-        task_inputs = kwargs.copy()
         try:
             api_data = api_manager.retrieve_api_data(self.required_apis[0])
             api_engine = self.api_engine()  # Instantiate the API engine

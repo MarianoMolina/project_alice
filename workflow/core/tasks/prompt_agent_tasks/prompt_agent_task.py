@@ -1,13 +1,13 @@
 from pydantic import Field
 from typing import List, Dict, Any, Optional
 from workflow.util import LOGGER
-from workflow.core.data_structures import MessageDict, ApiType, References, NodeResponse
+from workflow.core.data_structures import (
+    MessageDict, ApiType, References, NodeResponse, FunctionParameters, ParameterDefinition, TasksEndCodeRouting
+)
 from workflow.util.utils import json_to_python_type_mapping
 from workflow.core.agent.agent import AliceAgent
 from workflow.core.tasks.agent_tasks.agent_task import BasicAgentTask
 from workflow.core.prompt import Prompt
-from workflow.core.data_structures.base_models import TasksEndCodeRouting
-from workflow.core.data_structures import FunctionParameters, ParameterDefinition
 
 class PromptAgentTask(BasicAgentTask):
     """

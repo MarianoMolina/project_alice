@@ -2,16 +2,17 @@ from typing import List, Optional, Callable, Dict
 from pydantic import Field
 from workflow.core.agent.agent import AliceAgent
 from workflow.core.api import APIManager
-from workflow.core.data_structures import ApiType, FunctionParameters, ParameterDefinition, NodeResponse, References, MessageDict, FunctionConfig
-from workflow.core.data_structures.base_models import TasksEndCodeRouting
-from workflow.core.tasks.node_based_task.node_based_task import NodeBasedTask
+from workflow.core.data_structures import (
+    ApiType, FunctionParameters, ParameterDefinition, NodeResponse, References, MessageDict, FunctionConfig, TasksEndCodeRouting
+)
+from workflow.core.tasks.task import AliceTask
 from workflow.util import LOGGER
 
-class BasicAgentTask(NodeBasedTask):
+class BasicAgentTask(AliceTask):
     """
     A task class that integrates an AI agent for executing various subtasks.
 
-    This class extends NodeBasedTask to provide a framework for tasks that utilize
+    This class extends AliceTask to provide a framework for tasks that utilize
     an AI agent for operations such as natural language processing, function calling,
     and code execution.
 

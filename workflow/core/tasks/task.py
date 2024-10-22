@@ -1,93 +1,89 @@
 from enum import Enum
 from typing import Dict, Any, Optional, List, Callable
-from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field
 from workflow.core.prompt import Prompt
 from workflow.core.agent import AliceAgent
 from workflow.core.api import APIManager, APIEngine
-from workflow.core.data_structures import ApiType, FunctionParameters, ParameterDefinition, FunctionConfig, ToolFunction, References
-from workflow.core.data_structures.user_interaction import UserCheckpoint, UserInteraction
-from workflow.core.data_structures.task_response import NodeResponse, TaskResponse
-from workflow.util.utils import simplify_execution_history
+from workflow.core.data_structures import (
+    ApiType, FunctionParameters, ParameterDefinition, 
+    FunctionConfig, ToolFunction, References,
+    TaskResponse, NodeResponse, UserInteraction, UserCheckpoint, NodeResponse, TasksEndCodeRouting
+)
+from workflow.util.utils import simplify_execution_history, generate_node_responses_summary
 from workflow.util import LOGGER
-from workflow.core.data_structures.base_models import TasksEndCodeRouting
 
-class AliceTask(BaseModel, ABC):
+class AliceTask(BaseModel):
     """
-    An abstract base class representing a task in the Alice workflow system.
-
-    AliceTask serves as the foundation for all task types in the system. It defines
-    the basic structure and interface that all tasks must implement, including
-    execution, API validation, and function representation for use in workflows.
-
-    Attributes:
-        id (Optional[str]): Unique identifier for the task.
-        task_name (str): Name of the task.
-        task_description (str): Detailed description of what the task does.
-        input_variables (FunctionParameters): Expected input structure for the task.
-        exit_codes (Dict[int, str]): Mapping of exit codes to their meanings.
-        recursive (bool): Whether the task can be called recursively.
-        templates (Optional[Dict[str, Prompt]]): Prompts used by the task.
-        tasks (Optional[Dict[str, "AliceTask"]]): Subtasks that this task may use.
-        valid_languages (List[str]): Programming languages the task can work with.
-        timeout (Optional[int]): Maximum execution time for the task.
-        prompts_to_add (Optional[Dict[str, Prompt]]): Additional prompts for the task.
-        exit_code_response_map (Optional[Dict[str, int]]): Mapping of responses to exit codes.
-        start_node (Optional[str]): Name of the initial subtask, if applicable.
-        required_apis (Optional[List[ApiType]]): APIs required for task execution.
-        task_selection_method (Optional[Callable]): Method for selecting the next task in a workflow.
-        node_end_code_routing (Optional[Dict]): Routing logic for subtasks based on exit codes.
-        max_attempts (int): Maximum number of execution attempts before failure.
-        agent (Optional[AliceAgent]): The agent associated with this task.
-        human_input (Optional[bool]): Whether the task requires human interaction.
-
-    Methods:
-        task_type: Returns the class name of the task.
-        run: Abstract method to be implemented by subclasses for task execution.
-        validate_required_apis: Ensures all required APIs are available and healthy.
-        deep_validate_required_apis: Recursively validates APIs for this task and its subtasks.
-        a_execute: Asynchronously executes the task, handling recursion and history.
-        get_function: Returns a dictionary representing the task as a function for workflow use.
-        get_failed_task_response: Generates a TaskResponse object for a failed task execution.
-
-    The AliceTask class provides a robust framework for defining complex, multi-step
-    tasks that can be composed into workflows, with built-in support for API dependencies,
-    recursion control, and detailed execution tracking.
+    Base class for all tasks in the Alice workflow system, incorporating node-based execution.
+    
+    This class provides the foundation for creating complex, multi-step tasks with
+    built-in support for node-based execution flow, attempt tracking, recursion control,
+    API validation, and function representation, and user interactions.
     """
-    id: Optional[str] = Field(default=None, description="The task ID", alias="_id")
-    task_name: str = Field(..., description="The name of the task")
-    task_description: str = Field(..., description="A clear, concise statement of what the task entails")
+    # Basic task information
+    id: Optional[str] = Field(default=None, description="Task ID", alias="_id")
+    task_name: str = Field(..., description="Name of the task")
+    task_description: str = Field(..., description="Clear description of task purpose")
+    
+    # Execution control
+    start_node: Optional[str] = Field(default=None, description="Starting node name")
+    recursive: bool = Field(True, description="Whether task can be executed recursively")
+    max_attempts: int = Field(3, description="Maximum attempts per node before failure")
+    timeout: Optional[int] = Field(default=None, description="Task timeout in seconds")
+    
+    # Node and execution routing
+    node_end_code_routing: TasksEndCodeRouting = Field(
+        default={}, 
+        description="Routing rules between nodes based on exit codes"
+    )
+    user_checkpoints: Dict[str, UserCheckpoint] = Field(
+        default_factory=dict,
+        description="Node-specific user interaction checkpoints"
+    )
+    task_selection_method: Optional[Callable[[TaskResponse, List[NodeResponse]], Optional[str]]] = Field(
+        None, 
+        description="Optional method to select next task based on response"
+    )
+    
+    # Task configuration
     input_variables: FunctionParameters = Field(
         default_factory=lambda: FunctionParameters(
             type="object",
-            properties={
-                "prompt": ParameterDefinition(
-                    type="string",
-                    description="The input prompt for the task",
-                    default=None
-                )
-            },
+            properties={"prompt": ParameterDefinition(
+                type="string",
+                description="Input prompt",
+                default=None
+            )},
             required=["prompt"]
         ),
-        description="The input variables for the task. Default is a string prompt."
+        description="Expected input structure"
     )
-    exit_codes: Dict[int, str] = Field(default_factory=lambda: {0: "Success", 1: "Failed"}, description="A dictionary of exit codes for the task")
-    recursive: bool = Field(True, description="Whether the task can be executed recursively")
-    templates: Dict[str, Prompt] = Field(default_factory=dict, description="A dictionary of templates for the task")
-    tasks: Dict[str, "AliceTask"] = Field(default_factory=dict, description="A dictionary of task_id: task")
-    valid_languages: List[str] = Field(default_factory=list, description="A list of valid languages for the task")
-    timeout: Optional[int] = Field(default=None, description="The timeout for the task in seconds")
-    prompts_to_add: Optional[Dict[str, Prompt]] = Field(default_factory=dict, description="A dictionary of prompts to add to the task")
-    exit_code_response_map: Optional[Dict[str, int]] = Field(default=None, description="A dictionary mapping exit codes to responses")
-    required_apis: List[ApiType] = Field(default_factory=list, description="A list of required APIs for the task")
-    task_selection_method: Optional[Callable[[TaskResponse, List[Dict[str, Any]]], Optional[str]]] = Field(default=None, description="A method to select the next task based on the current task's response. Overrides the default logic that uses task_end_code_routing.")
-    node_end_code_routing: Optional[TasksEndCodeRouting] = Field(default=None, description="A dictionary of tasks/nodes -> exit codes and the task to route to given each exit code")
-    max_attempts: int = Field(default=3, description="The maximum number of failed task attempts before the workflow is considered failed")
-    agent: Optional[AliceAgent] = Field(default=None, description="The agent that the task is associated with, if any")
-    api_engine: Optional[APIEngine] = Field(default=None, description="The API engine for the task")
-    start_node: Optional[str] = Field(default=None, description="The name of the starting node")
-    user_checkpoints: Dict[str, UserCheckpoint] = Field(default_factory=dict, description="Dictionary of node to user checkpoint to implement human input for this task")
-
+    exit_codes: Dict[int, str] = Field(
+        default_factory=lambda: {0: "Success", 1: "Failed"},
+        description="Exit code meanings"
+    )
+    required_apis: List[ApiType] = Field(
+        default_factory=list,
+        description="Required API types"
+    )
+    
+    # Task components
+    templates: Dict[str, Prompt] = Field(
+        default_factory=dict,
+        description="Task prompt templates"
+    )
+    tasks: Dict[str, "AliceTask"] = Field(
+        default_factory=dict,
+        description="Subtasks"
+    )
+    agent: Optional[AliceAgent] = Field(
+        default=None,
+        description="Associated agent"
+    )
+    api_engine: Optional[APIEngine] = Field(
+        default=None,
+        description="Associated API engine"
+    )
     @property
     def task_type(self) -> str:
         return self.__class__.__name__
@@ -144,15 +140,92 @@ class AliceTask(BaseModel, ABC):
             dumped_data.pop('api_engine')
             
         return dumped_data
-    
-    @abstractmethod
-    async def run(self, execution_history: List[NodeResponse] = None, node_name: str = None, **kwargs) -> TaskResponse:
-        """
-        Runs the task and returns a TaskResponse.
-        This method must be implemented by subclasses to define their specific logic.
-        """
-        pass
 
+    async def run(self, execution_history: List[NodeResponse] = None, **kwargs) -> TaskResponse:
+        """Execute the task with node-based flow and attempt tracking."""
+        execution_history = execution_history or []
+        node_responses: List[NodeResponse] = []
+        
+        try:
+            if self.required_apis:
+                api_manager = kwargs.get("api_manager")
+                if not self.validate_required_apis(api_manager):
+                    return self.get_failed_task_response("Required APIs not available", **kwargs)
+            
+            current_node = self.start_node or next(iter(self.node_end_code_routing.keys()))
+            while current_node:
+                # Check attempt limits
+                if not self.can_retry_node(current_node, execution_history + node_responses):
+                    return self.create_final_response(
+                        node_responses,
+                        exit_code=1,
+                        diagnostics=f"Maximum attempts reached for node {current_node}",
+                        **kwargs
+                    )
+                
+                # Execute current node
+                node_response = await self.execute_node(
+                    current_node,
+                    execution_history,
+                    node_responses,
+                    **kwargs
+                )
+                
+                # Handle user interaction
+                if node_response.references and node_response.references.user_interactions:
+                    return self.create_partial_response(node_responses, "pending", **kwargs)
+                
+                node_responses.append(node_response)
+                
+                # Get next node
+                current_node = self.get_next_node(current_node, execution_history + node_responses)
+            
+            return self.create_final_response(node_responses, **kwargs)
+            
+        except Exception as e:
+            LOGGER.error(f"Error executing task {self.task_name}: {str(e)}")
+            return self.get_failed_task_response(str(e), **kwargs)
+
+    async def execute_node(self, node_name: str, execution_history: List[NodeResponse], node_responses: List[NodeResponse], **kwargs) -> NodeResponse:
+        """Execute a single node with user checkpoint handling."""
+        # Check for user interaction
+        user_interaction = self.handle_user_checkpoints(execution_history, node_name)
+        if user_interaction:
+            return user_interaction
+
+        # Get node method
+        method_name = f"execute_{node_name}"
+        if not hasattr(self, method_name):
+            return NodeResponse(
+                parent_task_id=self.id,
+                node_name=node_name,
+                exit_code=1,
+                references=References(messages=[{
+                    "role": "system",
+                    "content": f"No implementation found for node {node_name}",
+                    "generated_by": "system"
+                }]),
+                execution_order=len(execution_history) + len(node_responses)
+            )
+
+        # Execute node method
+        try:
+            return await getattr(self, method_name)(execution_history, node_responses, **kwargs)
+        except Exception as e:
+            LOGGER.error(f"Error executing node {node_name}: {str(e)}")
+            return NodeResponse(
+                parent_task_id=self.id,
+                node_name=node_name,
+                exit_code=1,
+                references=References(messages=[{
+                    "role": "system",
+                    "content": f"Error in node {node_name}: {str(e)}",
+                    "generated_by": "system"
+                }]),
+                execution_order=len(execution_history) + len(node_responses)
+            )
+    
+    # User interaction handling
     def handle_user_checkpoints(self, execution_history: List[NodeResponse] = None, node_name: str = None) -> Optional[NodeResponse]:
         """
         Handles user checkpoints. This method can be called by subclasses before their specific logic.
@@ -172,166 +245,6 @@ class AliceTask(BaseModel, ABC):
             if not completed_interaction:
                 return self.create_user_interaction(node_name, len(execution_history))
         return None
-
-    def validate_required_apis(self, api_manager: APIManager) -> bool:
-        if not self.required_apis:
-            LOGGER.debug(f"No required APIs for task {self.task_name}")
-            return True
-        for api_type in self.required_apis:
-            api = api_manager.get_api_by_type(api_type)
-            if not api or not api.is_active:
-                raise ValueError(f"Required API {api_type} is not active or not found.")
-            if api.health_status != "healthy":
-                raise ValueError(f"Required API {api_type} is not healthy.")
-        return True
-    
-    def deep_validate_required_apis(self, api_manager: APIManager) -> Dict[str, Any]:
-        result = {
-            "task_name": self.task_name,
-            "status": "valid",
-            "warnings": [],
-            "child_tasks": []
-        }
-
-        try:
-            self.validate_required_apis(api_manager)
-        except ValueError as e:
-            result["status"] = "warning"
-            result["warnings"].append(str(e))
-
-        for child_task_name, child_task in self.tasks.items():
-            child_result = child_task.deep_validate_required_apis(api_manager)
-            result["child_tasks"].append(child_result)
-            if child_result["status"] == "warning":
-                result["status"] = "warning"
-                result["warnings"].append(f"Warning in child task '{child_task_name}': {', '.join(child_result['warnings'])}")
-
-        return result
-    
-    async def a_execute(self, execution_history: List[NodeResponse] = None, **kwargs) -> TaskResponse:
-        """Executes the task and returns a TaskResponse."""
-        LOGGER.info(f'Executing task {self.task_name}')
-        execution_history = execution_history or []
-
-        try:
-            self._validate_apis(kwargs.get("api_manager"))
-        except ValueError as e:
-            return self.get_failed_task_response(str(e), **kwargs)
-
-        node_name = self._determine_next_node(execution_history)
-        if node_name is None:
-            return self._complete_partial_execution(execution_history, **kwargs)
-
-        return await self.run(execution_history=execution_history, node_name=node_name, **kwargs)
-
-    def _validate_apis(self, api_manager: Optional[APIManager]) -> None:
-        """Validates that all required APIs are active and healthy."""
-        if self.required_apis and not self.validate_required_apis(api_manager):
-            raise ValueError("Required APIs are not active or healthy.")
-
-    def _determine_next_node(self, execution_history: List[NodeResponse]) -> Optional[str]:
-        """Determines the next node to execute based on execution history."""
-        if not execution_history or not any(node.parent_task_id == self.id for node in execution_history):
-            return self.start_node or "default"
-
-        if self._is_task_completed(execution_history):
-            return self._handle_completed_task(execution_history)
-
-        return self._handle_partial_execution(execution_history)
-
-    def _is_task_completed(self, execution_history: List[NodeResponse]) -> bool:
-        """Checks if the task has been completed before."""
-        return any(node.node_name == self.task_name for node in execution_history)
-
-    def _handle_completed_task(self, execution_history: List[NodeResponse]) -> Optional[str]:
-        """Handles the case when the task has been completed before."""
-        if not self.recursive:
-            LOGGER.error(f'Error: Task {self.task_name} is already in the execution history. Execution history: {execution_history}')
-            return None
-        LOGGER.info(f'Task {self.task_name} is recursive and will be executed again')
-        return self.start_node or "default"
-
-    def _handle_partial_execution(self, execution_history: List[NodeResponse]) -> Optional[str]:
-        """Handles the case when the task has been partially executed before."""
-        LOGGER.info(f'Task {self.task_name} has been partially executed before. Execution history: {execution_history}')
-        last_node = self.get_last_node_of_same_id(execution_history) or {}
-        next_node = self.node_end_code_routing.get(last_node.node_name, {}).get(last_node.exit_code, (None, False))
-        return next_node[0]
-
-    def _complete_partial_execution(self, execution_history: List[NodeResponse], **kwargs) -> TaskResponse:
-        """Completes a partially executed task."""
-        content = self.get_content_string_from_node_responses(execution_history, self.node_end_code_routing)
-        return self.get_task_response(content, 0, "Task completed successfully", "complete", **kwargs)
-
-    async def a_execute_from_task_response(self, task_response: TaskResponse, **kwargs) -> TaskResponse:
-        """
-        Executes the task from a TaskResponse object, continuing from the last node in task response
-        """
-        execution_history = task_response.inner_execution_history()
-        return await self.a_execute(execution_history=execution_history, **kwargs)
-    
-    def get_last_node_of_same_id(self, execution_history: List[NodeResponse]) -> Optional[NodeResponse]:
-        """
-        Returns the node with the highest execution_order value in the execution history with the same parent_task_id as the task id.
-        """
-        return max([node for node in execution_history if node.parent_task_id == self.id], key=lambda x: x.execution_order, default=None)
-    
-    def get_content_string_from_node_responses(self, node_responses: List[NodeResponse], node_end_code_routing: Optional[TasksEndCodeRouting] = None) -> str:
-        """
-        Returns a string representation of the content of the node responses, IN ORDER by execution order, with little added text
-        """
-
-    def get_function(self, execution_history: Optional[List]=[], api_manager: Optional[APIManager] = None) -> Dict[str, Any]:
-        """
-        Returns a dictionary representing the function typedict and the function callable.
-        """
-        async def function_callable(**kwargs) -> TaskResponse:
-            params = {"api_manager": api_manager} if api_manager else {}
-            final_params = {"execution_history": execution_history, **params, **kwargs}
-            return await self.a_execute(**final_params)
-        
-        function_dict = FunctionConfig(
-            name=self.task_name, 
-            description=self.task_description, 
-            parameters=self.input_variables.model_dump()
-        )
-        tool_function = ToolFunction(
-            type="function",
-            function=function_dict
-        )
-        
-        return {
-            "tool_function": tool_function,
-            "function_map": {self.task_name: function_callable}
-        }
-    
-    def get_failed_task_response(self, diagnostics: str = None, **kwargs) -> TaskResponse:
-        """
-        Returns a failed task response with the given diagnostics.
-        """
-        return self.get_task_response("", 1, diagnostics, "failed", **kwargs)
-    
-    def get_task_response(self, task_outputs: str, result_code: int, diagnostics: str = None, status: str = "complete", node_references: Optional[List[NodeResponse]]=[], **kwargs) -> TaskResponse:
-        """
-        Returns a task response with the given outputs, result code, and diagnostics.
-        """
-        exec_history = kwargs.pop("execution_history", None)
-        if exec_history and isinstance(exec_history, list):
-            exec_history = simplify_execution_history(exec_history)
-        exec_history = kwargs.pop("execution_history", None)
-        kwargs.pop("api_manager", None)
-        return TaskResponse(
-            task_id = self.id if self.id else '',
-            task_name=self.task_name,
-            task_description=self.task_description,
-            status=status,
-            result_code=result_code,
-            task_outputs=task_outputs,
-            task_inputs=kwargs,
-            result_diagnostic=diagnostics,
-            node_references=node_references,
-            execution_history=exec_history
-        )
     
     def create_user_interaction(self, node_name: str, execution_order: int) -> NodeResponse:
         """
@@ -363,25 +276,160 @@ class AliceTask(BaseModel, ABC):
             references=References(user_interactions=[user_interaction])
         )
     
-    def get_self_nodes_from_execution_history(self, execution_history: List[NodeResponse]) -> List[NodeResponse]:
+    # Execution tracking
+    def count_node_attempts(self, node_name: str, execution_history: List[NodeResponse]) -> int:
+        """Count previous attempts for a specific node in this task."""
+        return sum(
+            1 for node in execution_history 
+            if node.parent_task_id == self.id 
+            and node.node_name == node_name
+        )
+
+    def can_retry_node(self, node_name: str, execution_history: List[NodeResponse]) -> bool:
+        """Determine if a node can be retried based on attempts and recursion settings."""
+        attempts = self.count_node_attempts(node_name, execution_history)
+        
+        if attempts >= self.max_attempts:
+            LOGGER.warning(f"Node {node_name} has reached maximum attempts ({self.max_attempts})")
+            return False
+            
+        if not self.recursive and attempts > 0:
+            LOGGER.warning(f"Node {node_name} cannot be retried as task is not recursive")
+            return False
+            
+        return True
+
+    def get_next_node(self, current_node: str, execution_history: List[NodeResponse]) -> Optional[str]:
         """
-        Retrieves messages from the execution history that belong to this task and match the node names
-        defined in the node_end_code_routing.
-
-        Args:
-            execution_history (List[NodeResponse]): The full execution history.
-
-        Returns:
-            List[NodeResponse]: Filtered list of NodeResponses that belong to this task and match the defined nodes.
+        Determine the next node to execute based on either the task selection method or routing configuration,
+        and attempt limits.
         """
-        valid_node_names = set(self.node_end_code_routing.keys())
-        filtered_history = []
+        if self.task_selection_method:
+            # Find the last response for the current node
+            for node in reversed(execution_history):
+                if node.node_name == current_node:
+                    if node.references and node.references.task_responses:
+                        task_response = node.references.task_responses[-1]
+                        next_task, _ = self.task_selection_method(task_response, execution_history)
+                        return next_task
+                    break
+            return None
 
-        for node in execution_history:
-            if node.parent_task_id == self.id and node.node_name in valid_node_names:
-                filtered_history.append(node)
+        # Fall back to standard routing logic
+        if current_node not in self.node_end_code_routing:
+            return None
+            
+        last_node = next(
+            (node for node in reversed(execution_history)
+             if node.parent_task_id == self.id and node.node_name == current_node),
+            None
+        )
+        if not last_node:
+            return None
+            
+        routing = self.node_end_code_routing[current_node]
+        next_node, is_retry = routing.get(last_node.exit_code, (None, False))
+        
+        if next_node and is_retry:
+            if not self.can_retry_node(current_node, execution_history):
+                LOGGER.warning(f"Cannot retry node {current_node}")
+                return None
+        elif next_node:
+            if not self.can_retry_node(next_node, execution_history):
+                LOGGER.warning(f"Cannot proceed to node {next_node} - max attempts reached")
+                return None
+                
+        return next_node
 
-        # Sort the filtered history by execution order
-        filtered_history.sort(key=lambda x: x.execution_order)
+    # Response creation methods
+    def create_partial_response(self, node_responses: List[NodeResponse], status: str, **kwargs) -> TaskResponse:
+        """Create a response for a partially completed task."""
+        return self.get_task_response(
+            task_outputs=generate_node_responses_summary(node_responses),
+            result_code=1,
+            diagnostics='Task requires user interaction',
+            status=status,
+            node_references=node_responses,
+            **kwargs
+        )
 
-        return filtered_history
+    def create_final_response(self, node_responses: List[NodeResponse], exit_code: Optional[int] = None, diagnostics: Optional[str] = None, **kwargs) -> TaskResponse:
+        """Create a response for a completed task."""
+        if exit_code is None:
+            exit_code = 1 if any(node.exit_code != 0 for node in node_responses) else 0
+            
+        if diagnostics is None:
+            diagnostics = "Task completed successfully" if exit_code == 0 else "Task execution failed"
+            
+        return self.get_task_response(
+            task_outputs=generate_node_responses_summary(node_responses),
+            result_code=exit_code,
+            diagnostics=diagnostics,
+            status="complete" if exit_code == 0 else "failed",
+            node_references=node_responses,
+            **kwargs
+        )
+
+    def get_task_response(self, task_outputs: str, result_code: int, diagnostics: str = None, 
+                         status: str = "complete", node_references: List[NodeResponse] = None, **kwargs) -> TaskResponse:
+        """Create a standardized task response."""
+        exec_history = kwargs.pop("execution_history", None)
+        if exec_history and isinstance(exec_history, list):
+            exec_history = simplify_execution_history(exec_history)
+            
+        kwargs.pop("api_manager", None)
+        
+        return TaskResponse(
+            task_id=self.id or '',
+            task_name=self.task_name,
+            task_description=self.task_description,
+            status=status,
+            result_code=result_code,
+            task_outputs=task_outputs,
+            task_inputs=kwargs,
+            result_diagnostic=diagnostics,
+            node_references=node_references or [],
+            execution_history=exec_history
+        )
+
+    # API validation
+    def validate_required_apis(self, api_manager: APIManager) -> bool:
+        """Validate that all required APIs are available and healthy."""
+        if not self.required_apis:
+            return True
+            
+        for api_type in self.required_apis:
+            api = api_manager.get_api_by_type(api_type)
+            if not api or not api.is_active:
+                LOGGER.error(f"Required API {api_type} not active or not found")
+                return False
+            if api.health_status != "healthy":
+                LOGGER.error(f"Required API {api_type} not healthy")
+                return False
+                
+        return True
+    
+    def get_failed_task_response(self, diagnostics: str = None, **kwargs) -> TaskResponse:
+        """
+        Returns a failed task response with the given diagnostics.
+        """
+        return self.get_task_response("", 1, diagnostics, "failed", **kwargs)
+    
+    # Function representation
+    def get_function(self, api_manager: Optional[APIManager] = None) -> Dict[str, Any]:
+        """Get function representation for workflow integration."""
+        async def function_callable(**kwargs) -> TaskResponse:
+            params = {"api_manager": api_manager} if api_manager else {}
+            return await self.run(**{**params, **kwargs})
+        
+        return {
+            "tool_function": ToolFunction(
+                type="function",
+                function=FunctionConfig(
+                    name=self.task_name,
+                    description=self.task_description,
+                    parameters=self.input_variables.model_dump()
+                )
+            ),
+            "function_map": {self.task_name: function_callable}
+        }

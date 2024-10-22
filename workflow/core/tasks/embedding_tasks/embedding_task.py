@@ -1,9 +1,8 @@
 from typing import List
 from pydantic import Field
 from workflow.core.tasks.agent_tasks import BasicAgentTask
-from workflow.core.data_structures.base_models import TasksEndCodeRouting
 from workflow.core.data_structures import (
-    FunctionParameters, ParameterDefinition, MessageDict, ApiType, References, NodeResponse
+    FunctionParameters, ParameterDefinition, MessageDict, ApiType, References, NodeResponse, TasksEndCodeRouting
 )
 from workflow.core.api import APIManager
 from workflow.util import LOGGER
