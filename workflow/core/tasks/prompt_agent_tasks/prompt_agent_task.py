@@ -187,7 +187,8 @@ class CodeExecutionLLMTask(PromptAgentTask):
                     role="system",
                     content="No messages to execute code from",
                     generated_by="system"
-                )])
+                )]),
+                execution_order=len(execution_history)
             )
 
         try:
@@ -197,7 +198,8 @@ class CodeExecutionLLMTask(PromptAgentTask):
                 parent_task_id=self.id,
                 node_name="code_execution",
                 exit_code=exit_code,
-                references=References(messages=code_execs)
+                references=References(messages=code_execs),
+                execution_order=len(execution_history)
             )
         except Exception as e:
             LOGGER.error(f"Error in code execution: {e}")
@@ -209,7 +211,8 @@ class CodeExecutionLLMTask(PromptAgentTask):
                     role="system",
                     content=f"Code execution failed: {str(e)}",
                     generated_by="system"
-                )])
+                )]),
+                execution_order=len(execution_history)
             )
 
     def get_code_exec_exit_code(self, chat_output: List[MessageDict], response_code: bool) -> int:

@@ -53,7 +53,8 @@ class WebScrapeBeautifulSoupTask(BasicAgentTask):
                 parent_task_id=self.id,
                 node_name="fetch_url",
                 exit_code=0,
-                references=References(url_references=[URLReference(title=title, url=url, content=html_content)])
+                references=References(url_references=[URLReference(title=title, url=url, content=html_content)]),
+                execution_order=len(execution_history)
             )
         except Exception as e:
             LOGGER.error(f"Error fetching URL: {e}")
@@ -65,7 +66,8 @@ class WebScrapeBeautifulSoupTask(BasicAgentTask):
                     role="system",
                     content=f"Failed to fetch URL: {str(e)}",
                     generated_by="system"
-                )])
+                )]),
+                execution_order=len(execution_history)
             )
 
     async def execute_generate_selectors_and_parse(self, execution_history: List[NodeResponse], node_responses: List[NodeResponse], **kwargs) -> NodeResponse:
@@ -81,7 +83,8 @@ class WebScrapeBeautifulSoupTask(BasicAgentTask):
                     role="system",
                     content="Failed to generate selectors and parse: No URL reference found",
                     generated_by="system"
-                )])
+                )]),
+                execution_order=len(execution_history)
             )
 
         url_reference = fetch_url_reference.url_references[-1]
@@ -106,7 +109,8 @@ class WebScrapeBeautifulSoupTask(BasicAgentTask):
                             url=url,
                             content=clean_text(content),
                             metadata={"selectors": selectors, "creation_metadata": creation_metadata}
-                        )])
+                        )]),
+                        execution_order=len(execution_history)
                     )
             
             # Fallback to default method
@@ -120,7 +124,8 @@ class WebScrapeBeautifulSoupTask(BasicAgentTask):
                     url=url,
                     content=clean_text(content),
                     metadata={"selectors": ["p", "h1", "h2", "h3", "h4", "h5", "h6"], "creation_metadata": {"fallback": True}}
-                )])
+                )]),
+                execution_order=len(execution_history)
             )
         except Exception as e:
             LOGGER.error(f"Error in generate_selectors_and_parse: {e}")
@@ -132,7 +137,8 @@ class WebScrapeBeautifulSoupTask(BasicAgentTask):
                     role="system",
                     content=f"Failed to generate selectors and parse: {str(e)}",
                     generated_by="system"
-                )])
+                )]),
+                execution_order=len(execution_history)
             )
 
     async def _generate_parsing_instructions(self, html_samples: List[str], api_manager: APIManager) -> Tuple[Optional[List[str]], Optional[Dict[str, Any]]]:

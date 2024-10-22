@@ -98,7 +98,6 @@ class APITask(AliceTask):
         values.api_engine = api_engine_class
         return values
 
-
     async def execute_default(self, execution_history: List[NodeResponse], node_responses: List[NodeResponse], **kwargs) -> NodeResponse:
         """
         Execute the default node, which performs the API interaction.
@@ -123,8 +122,9 @@ class APITask(AliceTask):
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name="default",
+                execution_order=len(execution_history),
                 exit_code=0,
-                references=references
+                references=references,
             )
         except Exception as e:
             import traceback
@@ -137,5 +137,6 @@ class APITask(AliceTask):
                     "role": "system",
                     "content": error_message,
                     "generated_by": "system"
-                }])
+                }]),
+                execution_order=len(execution_history)
             )

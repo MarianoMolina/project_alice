@@ -111,7 +111,7 @@ class References(BaseModel):
         return any(value is not None and len(value) > 0 for value in self.__dict__.values() if isinstance(value, list))
 
     def __str__(self) -> str:
-        return self.summary()
+        return self.detailed_summary()
 
     def __len__(self) -> int:
         return sum(len(value) if value else 0 for value in self.__dict__.values() if isinstance(value, list))

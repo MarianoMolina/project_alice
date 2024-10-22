@@ -77,7 +77,8 @@ class BasicAgentTask(AliceTask):
                 parent_task_id=self.id,
                 node_name="llm_generation",
                 exit_code=exit_code,
-                references=References(messages=llm_response)
+                execution_order=len(execution_history),
+                references=References(messages=[llm_response])
             )
         except Exception as e:
             LOGGER.error(f"Error in LLM generation: {e}")
@@ -89,10 +90,11 @@ class BasicAgentTask(AliceTask):
                     role="system",
                     content=f"LLM generation failed: {str(e)}",
                     generated_by="system"
-                )])
+                )]),
+                execution_order=len(execution_history)
             )
 
-    async def execute_tool_call(self, execution_history: List[NodeResponse], node_responses: List[NodeResponse], **kwargs) -> NodeResponse:
+    async def execute_tool_call_execution(self, execution_history: List[NodeResponse], node_responses: List[NodeResponse], **kwargs) -> NodeResponse:
         api_manager: APIManager = kwargs.get("api_manager")
         llm_reference = self.get_node_reference(node_responses, "llm_generation")
         if not llm_reference or not llm_reference.messages:
@@ -104,7 +106,8 @@ class BasicAgentTask(AliceTask):
                     role="system",
                     content="Tool call execution failed: No LLM response found",
                     generated_by="system"
-                )])
+                )]),
+                execution_order=len(execution_history)
             )
 
         llm_response = llm_reference.messages[-1]
@@ -117,7 +120,8 @@ class BasicAgentTask(AliceTask):
                 parent_task_id=self.id,
                 node_name="tool_call_execution",
                 exit_code=0,
-                references=References(messages=tool_messages)
+                references=References(messages=tool_messages),
+                execution_order=len(execution_history)
             )
         except Exception as e:
             LOGGER.error(f"Error in tool call execution: {e}")
@@ -129,12 +133,12 @@ class BasicAgentTask(AliceTask):
                     role="system",
                     content=f"Tool call execution failed: {str(e)}",
                     generated_by="system"
-                )])
+                )]),
+                execution_order=len(execution_history)
             )
 
     async def execute_code_execution(self, execution_history: List[NodeResponse], node_responses: List[NodeResponse], **kwargs) -> NodeResponse:
         llm_reference = self.get_node_reference(node_responses, "llm_generation")
-        tool_reference = self.get_node_reference(node_responses, "tool_call_execution")
 
         if not llm_reference or not llm_reference.messages:
             return NodeResponse(
@@ -145,19 +149,20 @@ class BasicAgentTask(AliceTask):
                     role="system",
                     content="Code execution failed: No LLM response found",
                     generated_by="system"
-                )])
+                )]),
+                execution_order=len(execution_history)
             )
 
         llm_response = llm_reference.messages[-1]
-        tool_messages = tool_reference.messages if tool_reference else []
 
         try:
-            code_messages = await self.agent._process_code_execution([llm_response] + tool_messages)
+            code_messages, _  = await self.agent._process_code_execution([llm_response])
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name="code_execution",
                 exit_code=0,
-                references=References(messages=code_messages)
+                references=References(messages=code_messages),
+                execution_order=len(execution_history)
             )
         except Exception as e:
             LOGGER.error(f"Error in code execution: {e}")
@@ -169,7 +174,8 @@ class BasicAgentTask(AliceTask):
                     role="system",
                     content=f"Code execution failed: {str(e)}",
                     generated_by="system"
-                )])
+                )]),
+                execution_order=len(execution_history)
             )
         
     def get_llm_exit_code(self, llm_response: List[MessageDict]) -> int:

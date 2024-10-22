@@ -59,7 +59,8 @@ class GenerateImageTask(BasicAgentTask):
                 parent_task_id=self.id,
                 node_name="generate_image",
                 exit_code=0,
-                references=References(files=[new_messages])
+                references=References(files=[new_messages]),
+                execution_order=len(execution_history)
             )
         except Exception as e:
             LOGGER.error(f"Error in image generation: {e}")
@@ -71,5 +72,6 @@ class GenerateImageTask(BasicAgentTask):
                     role="system",
                     content=f"Image generation failed: {str(e)}",
                     generated_by="system"
-                )])
+                )]),
+                execution_order=len(execution_history)
             )

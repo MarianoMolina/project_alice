@@ -191,7 +191,7 @@ def generate_node_responses_summary(node_responses: List[NodeResponse], verbose:
         summaries = []
         for i, node in enumerate(sorted_nodes, 1):
             node_summary = f"Node {i} (Order: {node.execution_order}, Name: {node.node_name}, Exit: {node.exit_code}):"
-            references_summary = node.references.summary() if node.references else "No references"
+            references_summary = node.references.detailed_summary() if node.references else "No references"
             node_summary += f"\n    {references_summary}"
             summaries.append(node_summary)
         return "\n\n".join(summaries)

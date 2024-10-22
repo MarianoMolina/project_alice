@@ -40,8 +40,9 @@ class TaskResponse(BaseDataStructure):
 
     def __str__(self) -> str:
         base_str = f"{self.task_name}: {self.task_description}\n\nTask Output:\n\n{self.task_outputs}"
-        if self.references:
-            base_str += f"\n\nReferences: {self.references.summary()}"
+        if self.node_references:
+            base_str += "\n\nInner Execution History:\n\n"
+            base_str += "\n".join([f"{item.node_name}: {item.exit_code}" for item in self.inner_execution_history()])
         return base_str
     
     def model_dump(self, *args, **kwargs):

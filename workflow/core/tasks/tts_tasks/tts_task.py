@@ -53,7 +53,8 @@ class TextToSpeechTask(BasicAgentTask):
                 parent_task_id=self.id,
                 node_name="text_to_speech",
                 exit_code=0,
-                references=References(files=[new_messages])
+                references=References(files=[new_messages]),
+                execution_order=len(execution_history)
             )
         except Exception as e:
             LOGGER.error(f"Error in speech generation: {e}")
@@ -65,5 +66,6 @@ class TextToSpeechTask(BasicAgentTask):
                     role="system",
                     content=f"Speech generation failed: {str(e)}",
                     generated_by="system"
-                )])
+                )]),
+                execution_order=len(execution_history)
             )

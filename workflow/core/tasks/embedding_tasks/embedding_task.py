@@ -41,7 +41,8 @@ class EmbeddingTask(BasicAgentTask):
                 parent_task_id=self.id,
                 node_name="generate_embedding",
                 exit_code=0,
-                references=References(files=[new_file])
+                references=References(files=[new_file]),
+                execution_order=len(execution_history)
             )
         except Exception as e:
             LOGGER.error(f"Error in embedding generation: {e}")
@@ -53,5 +54,6 @@ class EmbeddingTask(BasicAgentTask):
                     role="system",
                     content=f"Embedding generation failed: {str(e)}",
                     generated_by="system"
-                )])
+                )]),
+                execution_order=len(execution_history)
             )

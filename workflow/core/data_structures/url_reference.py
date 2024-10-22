@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from typing import Dict, Any, Optional
 from pydantic import Field, model_validator
@@ -27,4 +28,5 @@ class URLReference(BaseDataStructure):
         return values
     
     def __str__(self) -> str:
-        return f"\n\nTitle: {self.title}\n\nURL: {self.url}\n\n Content: {self.content}"
+        # stringify metadata
+        return f"\n\nTitle: {self.title}\n\nURL: {self.url}\n\nContent: {self.content}\n\nMetadata:\n\n{json.dumps(self.metadata, indent=2)}"

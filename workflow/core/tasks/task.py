@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Dict, Any, Optional, List, Callable
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from workflow.core.prompt import Prompt
 from workflow.core.agent import AliceAgent
 from workflow.core.api import APIManager, APIEngine
@@ -84,9 +84,73 @@ class AliceTask(BaseModel):
         default=None,
         description="Associated API engine"
     )
+
+    # Properties and convenience methods
     @property
     def task_type(self) -> str:
         return self.__class__.__name__
+    
+    @model_validator(mode='before')
+    def convert_routing_lists_to_tuples(cls, values):
+        """
+        Converts list-format routing values from database to tuples for internal use.
+        Handles both string-keyed and int-keyed dictionaries with robust error handling.
+        """
+        routing = values.get('node_end_code_routing')
+        if not routing:
+            return values
+            
+        try:
+            LOGGER.debug(f"Processing routing data: {routing}")
+            converted_routing = {}
+            
+            for node, routes in routing.items():
+                LOGGER.debug(f"Processing node {node} with routes: {routes}")
+                converted_routes = {}
+                
+                for code, route in routes.items():
+                    try:
+                        # Convert string codes to int
+                        code_key = int(code) if isinstance(code, str) else code
+                        
+                        # Handle different input formats
+                        if isinstance(route, (list, tuple)):
+                            if len(route) < 2:
+                                LOGGER.warning(f"Invalid route format for {node}.{code}: {route}")
+                                continue
+                                
+                            first_elem = route[0] if route[0] is not None else None
+                            second_elem = bool(route[1])  # Ensure boolean
+                            converted_routes[code_key] = (first_elem, second_elem)
+                            
+                        elif isinstance(route, dict):
+                            # Handle possible dictionary format
+                            first_elem = route.get(0) if route.get(0) is not None else None
+                            second_elem = bool(route.get(1, False))
+                            converted_routes[code_key] = (first_elem, second_elem)
+                            
+                        else:
+                            LOGGER.warning(f"Unexpected route format for {node}.{code}: {route}")
+                            continue
+                            
+                    except (ValueError, TypeError, IndexError) as e:
+                        LOGGER.error(f"Error processing route for {node}.{code}: {str(e)}")
+                        continue
+                
+                if converted_routes:  # Only add if we have valid routes
+                    converted_routing[node] = converted_routes
+                else:
+                    LOGGER.warning(f"No valid routes found for node {node}")
+            
+            LOGGER.debug(f"Converted routing: {converted_routing}")
+            values['node_end_code_routing'] = converted_routing
+            
+        except Exception as e:
+            LOGGER.error(f"Error converting routing data: {str(e)}")
+            LOGGER.error(f"Original routing data: {routing}")
+            raise ValueError(f"Failed to process routing configuration: {str(e)}")
+            
+        return values
     
     def model_dump(self, *args, **kwargs):
         # Create a copy of the current instance's dict
@@ -142,16 +206,39 @@ class AliceTask(BaseModel):
         return dumped_data
 
     async def run(self, execution_history: List[NodeResponse] = None, **kwargs) -> TaskResponse:
-        """Execute the task with node-based flow and attempt tracking."""
+        """
+        Execute the task with node-based flow and attempt tracking.
+        
+        Validates inputs, handles API validation, and manages node execution flow.
+        
+        Args:
+            execution_history (List[NodeResponse], optional): Previous execution history.
+            **kwargs: Task input parameters.
+        
+        Returns:
+            TaskResponse: The result of the task execution.
+        """
         execution_history = execution_history or []
         node_responses: List[NodeResponse] = []
         
         try:
+            # Validate and process inputs
+            processed_inputs, error_msg = self.validate_and_process_inputs(**kwargs)
+            if error_msg:
+                return self.get_failed_task_response(error_msg, **kwargs)
+
+            # Update kwargs with processed inputs
+            kwargs.update(processed_inputs)
+
+            # Validate required APIs
             if self.required_apis:
                 api_manager = kwargs.get("api_manager")
+                if not api_manager:
+                    return self.get_failed_task_response("API manager not provided", **kwargs)
                 if not self.validate_required_apis(api_manager):
                     return self.get_failed_task_response("Required APIs not available", **kwargs)
             
+            # Execute nodes
             current_node = self.start_node or next(iter(self.node_end_code_routing.keys()))
             while current_node:
                 # Check attempt limits
@@ -185,7 +272,7 @@ class AliceTask(BaseModel):
         except Exception as e:
             LOGGER.error(f"Error executing task {self.task_name}: {str(e)}")
             return self.get_failed_task_response(str(e), **kwargs)
-
+        
     async def execute_node(self, node_name: str, execution_history: List[NodeResponse], node_responses: List[NodeResponse], **kwargs) -> NodeResponse:
         """Execute a single node with user checkpoint handling."""
         # Check for user interaction
@@ -342,33 +429,6 @@ class AliceTask(BaseModel):
         return next_node
 
     # Response creation methods
-    def create_partial_response(self, node_responses: List[NodeResponse], status: str, **kwargs) -> TaskResponse:
-        """Create a response for a partially completed task."""
-        return self.get_task_response(
-            task_outputs=generate_node_responses_summary(node_responses),
-            result_code=1,
-            diagnostics='Task requires user interaction',
-            status=status,
-            node_references=node_responses,
-            **kwargs
-        )
-
-    def create_final_response(self, node_responses: List[NodeResponse], exit_code: Optional[int] = None, diagnostics: Optional[str] = None, **kwargs) -> TaskResponse:
-        """Create a response for a completed task."""
-        if exit_code is None:
-            exit_code = 1 if any(node.exit_code != 0 for node in node_responses) else 0
-            
-        if diagnostics is None:
-            diagnostics = "Task completed successfully" if exit_code == 0 else "Task execution failed"
-            
-        return self.get_task_response(
-            task_outputs=generate_node_responses_summary(node_responses),
-            result_code=exit_code,
-            diagnostics=diagnostics,
-            status="complete" if exit_code == 0 else "failed",
-            node_references=node_responses,
-            **kwargs
-        )
 
     def get_task_response(self, task_outputs: str, result_code: int, diagnostics: str = None, 
                          status: str = "complete", node_references: List[NodeResponse] = None, **kwargs) -> TaskResponse:
@@ -391,6 +451,94 @@ class AliceTask(BaseModel):
             node_references=node_references or [],
             execution_history=exec_history
         )
+    
+    def create_partial_response(self, node_responses: List[NodeResponse], status: str, **kwargs) -> TaskResponse:
+        """Create a response for a partially completed task."""
+        return self.get_task_response(
+            task_outputs=generate_node_responses_summary(node_responses, True),
+            result_code=1,
+            diagnostics='Task requires user interaction',
+            status=status,
+            node_references=node_responses,
+            **kwargs
+        )
+    
+    def get_failed_task_response(self, diagnostics: str = None, **kwargs) -> TaskResponse:
+        """
+        Returns a failed task response with the given diagnostics.
+        """
+        return self.get_task_response("", 1, diagnostics, "failed", **kwargs)
+
+    def create_final_response(self, node_responses: List[NodeResponse], exit_code: Optional[int] = None, diagnostics: Optional[str] = None, **kwargs) -> TaskResponse:
+        """Create a response for a completed task."""
+        if exit_code is None:
+            exit_code = 1 if any(node.exit_code != 0 for node in node_responses) else 0
+            
+        if diagnostics is None:
+            diagnostics = "Task completed successfully" if exit_code == 0 else "Task execution failed"
+            
+        return self.get_task_response(
+            task_outputs=generate_node_responses_summary(node_responses, True),
+            result_code=exit_code,
+            diagnostics=diagnostics,
+            status="complete" if exit_code == 0 else "failed",
+            node_references=node_responses,
+            **kwargs
+        )
+    
+    # Input validation
+    def validate_and_process_inputs(self, **kwargs) -> tuple[dict, Optional[str]]:
+        """
+        Validates and processes input parameters according to their defined types.
+        
+        Args:
+            **kwargs: Task input parameters.
+        
+        Returns:
+            tuple[dict, Optional[str]]: Tuple containing processed inputs and error message (if any).
+        """
+        # Validate required inputs
+        missing_params = []
+        for param_name in self.input_variables.required:
+            if param_name not in kwargs:
+                missing_params.append(param_name)
+        
+        if missing_params:
+            return {}, f"Missing required parameters: {', '.join(missing_params)}"
+
+        # Validate and cast input parameters
+        processed_inputs = {}
+        for param_name, param_value in kwargs.items():
+            if param_name in self.input_variables.properties:
+                param_def = self.input_variables.properties[param_name]
+                try:
+                    # Cast the input according to its defined type
+                    if param_def.type == "string":
+                        processed_inputs[param_name] = str(param_value)
+                    elif param_def.type == "integer":
+                        processed_inputs[param_name] = int(param_value)
+                    elif param_def.type == "number":
+                        processed_inputs[param_name] = float(param_value)
+                    elif param_def.type == "object":
+                        if isinstance(param_value, str):
+                            import json
+                            processed_inputs[param_name] = json.loads(param_value)
+                        else:
+                            processed_inputs[param_name] = param_value
+                    elif param_def.type == "array":
+                        if isinstance(param_value, str):
+                            import json
+                            processed_inputs[param_name] = json.loads(param_value)
+                        elif isinstance(param_value, (list, tuple)):
+                            processed_inputs[param_name] = list(param_value)
+                        else:
+                            raise ValueError(f"Invalid value for array parameter {param_name}")
+                    else:
+                        processed_inputs[param_name] = param_value
+                except (ValueError, TypeError, json.JSONDecodeError) as e:
+                    return {}, f"Invalid value for parameter '{param_name}' ({param_def.type}): {str(e)}"
+
+        return processed_inputs, None
 
     # API validation
     def validate_required_apis(self, api_manager: APIManager) -> bool:
@@ -409,11 +557,28 @@ class AliceTask(BaseModel):
                 
         return True
     
-    def get_failed_task_response(self, diagnostics: str = None, **kwargs) -> TaskResponse:
-        """
-        Returns a failed task response with the given diagnostics.
-        """
-        return self.get_task_response("", 1, diagnostics, "failed", **kwargs)
+    def deep_validate_required_apis(self, api_manager: APIManager) -> Dict[str, Any]:
+        result = {
+            "task_name": self.task_name,
+            "status": "valid",
+            "warnings": [],
+            "child_tasks": []
+        }
+
+        try:
+            self.validate_required_apis(api_manager)
+        except ValueError as e:
+            result["status"] = "warning"
+            result["warnings"].append(str(e))
+
+        for child_task_name, child_task in self.tasks.items():
+            child_result = child_task.deep_validate_required_apis(api_manager)
+            result["child_tasks"].append(child_result)
+            if child_result["status"] == "warning":
+                result["status"] = "warning"
+                result["warnings"].append(f"Warning in child task '{child_task_name}': {', '.join(child_result['warnings'])}")
+
+        return result
     
     # Function representation
     def get_function(self, api_manager: Optional[APIManager] = None) -> Dict[str, Any]:
@@ -433,3 +598,17 @@ class AliceTask(BaseModel):
             ),
             "function_map": {self.task_name: function_callable}
         }
+    
+    # Utility methods
+    def get_last_node_by_name(self, node_responses: List[NodeResponse], node_name: str) -> Optional[NodeResponse]:
+        for node in reversed(node_responses):
+            if node.node_name == node_name:
+                return node
+        return None
+
+    def get_node_reference(self, node_responses: List[NodeResponse], node_name: str) -> Optional[References]:
+        node = self.get_last_node_by_name(node_responses, node_name)
+        if node:
+            return node.references
+        LOGGER.error(f"No node found with name: {node_name}")
+        return None

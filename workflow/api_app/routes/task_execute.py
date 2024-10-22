@@ -57,7 +57,7 @@ async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(ge
         LOGGER.debug(f'task_inputs: {inputs_copy}')
         LOGGER.debug(f'task type: {type(task)}')
        
-        result = await task.a_execute(api_manager=api_manager, **inputs)
+        result = await task.run(api_manager=api_manager, **inputs)
         if not result:
             raise ValueError(f"Task execution failed for task ID {taskId}")
 
