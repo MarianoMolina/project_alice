@@ -6,6 +6,7 @@ import {
     MenuItem,
     Switch,
     TextField,
+    SelectChangeEvent,
     Typography,
 } from '@mui/material';
 import { ApiComponentProps, API, ApiType, ApiName, getDefaultApiForm, ModelApiType } from '../../../../types/ApiTypes';
@@ -121,7 +122,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
         }));
     }, [updateAvailableApiNames]);
 
-    const handleHealthStatusChange = useCallback((event: React.ChangeEvent<{ value: unknown }>) => {
+    const handleHealthStatusChange = useCallback((event: SelectChangeEvent) => {
         const value = event.target.value as API['health_status'];
         setForm(prevForm => ({
             ...prevForm,
@@ -215,7 +216,6 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                 margin="normal"
                 disabled={!isEditMode}
             />
-
             <Typography variant="h6" className={classes.titleText}>Health Status</Typography>
             <FormControl fullWidth margin="normal">
                 <InputLabel>Health Status</InputLabel>
@@ -229,7 +229,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                     <MenuItem value="unknown">Unknown</MenuItem>
                 </Select>
             </FormControl>
-
+            
             <Typography variant="h6" className={classes.titleText}>Configuration</Typography>
             {form.api_config && Object.entries(form.api_config).map(([key, value]) => (
                 <TextField
