@@ -74,10 +74,10 @@ class OpenAITextToSpeechEngine(APIEngine):
             inputs = chunk_text(input, avg_chunk_size)
         else:
             inputs.append(input)
-        responses: List[References] = [await self.api_call(client, input, voice, speed, model) for input in inputs]
-        return responses
+        responses: List[FileContentReference] = [await self.api_call(client, input, voice, speed, model) for input in inputs]
+        return References(files=responses)
     
-    async def api_call(self, client: AsyncOpenAI, input: str, voice: str = "alloy", speed: float = 1.0, model: str = None) -> References:
+    async def api_call(self, client: AsyncOpenAI, input: str, voice: str = "alloy", speed: float = 1.0, model: str = None) -> FileContentReference:
         try:
             LOGGER.debug(f"Generating speech with model {model}, voice {voice}, speed {speed}")
             response = await client.audio.speech.create(
@@ -110,7 +110,7 @@ class OpenAITextToSpeechEngine(APIEngine):
                     generated_by='tool', 
                     creation_metadata=creation_metadata)
             )
-            return References(files=[file_reference])
+            return file_reference
 
         except Exception as e:
             import traceback

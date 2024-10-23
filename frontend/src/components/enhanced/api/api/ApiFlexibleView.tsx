@@ -72,12 +72,12 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
         if (form.api_type) {
             updateAvailableApiNames(form.api_type);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [form.api_type, updateAvailableApiNames]);
     
     function isModelApiType(apiType: ApiType): apiType is ApiType & ModelApiType {
         return Object.values(ModelApiType).includes(apiType as any);
     }
+
     useEffect(() => {
         if (form.api_name) {
             const baseUrl = getLlmProviderBaseUrl(form.api_name);
@@ -91,7 +91,6 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                 }));
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [form.api_name]);
 
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,6 +120,14 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
             api_name: config.api_name[0],
         }));
     }, [updateAvailableApiNames]);
+
+    const handleHealthStatusChange = useCallback((event: React.ChangeEvent<{ value: unknown }>) => {
+        const value = event.target.value as API['health_status'];
+        setForm(prevForm => ({
+            ...prevForm,
+            health_status: value
+        }));
+    }, []);
 
     const handleApiConfigChange = useCallback((key: string, value: string) => {
         setForm(prevForm => ({
@@ -183,6 +190,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                     </FormControl>
                 </>
             )}
+            
             <Typography variant="h6" className={classes.titleText}>Name</Typography>
             <FormControl fullWidth margin="normal">
                 <InputLabel>API Name</InputLabel>
@@ -208,6 +216,20 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                 disabled={!isEditMode}
             />
 
+            <Typography variant="h6" className={classes.titleText}>Health Status</Typography>
+            <FormControl fullWidth margin="normal">
+                <InputLabel>Health Status</InputLabel>
+                <Select
+                    value={form.health_status || 'unknown'}
+                    onChange={handleHealthStatusChange}
+                    disabled={!isEditMode}
+                >
+                    <MenuItem value="healthy">Healthy</MenuItem>
+                    <MenuItem value="unhealthy">Unhealthy</MenuItem>
+                    <MenuItem value="unknown">Unknown</MenuItem>
+                </Select>
+            </FormControl>
+
             <Typography variant="h6" className={classes.titleText}>Configuration</Typography>
             {form.api_config && Object.entries(form.api_config).map(([key, value]) => (
                 <TextField
@@ -220,7 +242,6 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                     margin="normal"
                     disabled={!isEditMode}
                 />
-
             ))}
 
             {form.api_type && isModelApiType(form.api_type) && (
