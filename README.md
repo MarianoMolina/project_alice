@@ -177,7 +177,7 @@ export enum ApiName {
 }
 ```
 
-### How tasks and workflows work
+### How tasks and workflows work: An example with the Web Scraping workflow
 ![Task logic](./img/Task_logic.png "Task logic flow")
 
 ## Development

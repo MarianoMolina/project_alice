@@ -98,14 +98,15 @@ research_workflow_module = ResearchWorkflowModule(
             {
                 "key": "research_output_prompt",
                 "name": "Research Output Template",
-                "content": "{{ research_summary }}",
+                "content": "Research Brief: {{ research_brief_task }}\n\nSummary: {{ research_summary }}",
                 "is_templated": True,
                 "parameters": {
                     "type": "object",
                     "properties": {
+                        "research_brief_task": "param_research_brief_task",
                         "research_summary": "research_summary_param"
                     },
-                    "required": ["research_summary"]
+                    "required": ["research_brief_task", "research_summary"]
                 }
             }
         ],

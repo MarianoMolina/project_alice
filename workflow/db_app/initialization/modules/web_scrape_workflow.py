@@ -90,14 +90,15 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
             {
                 "key": "web_scrape_workflow_prompt",
                 "name": "Web Scrape Workflow Output Template",
-                "content": "{{ web_summarize }}",
+                "content": "Summary of URL: {{ url }}\n\n{{ web_summarize }}",
                 "is_templated": True,
                 "parameters": {
                     "type": "object",
                     "properties": {
+                        "url": "url_param",
                         "web_summarize": "web_summary_param"
                     },
-                    "required": ["web_summarize"]
+                    "required": ["url", "web_summarize"]
                 }
             }
         ],
