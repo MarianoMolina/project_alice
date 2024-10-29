@@ -17,6 +17,11 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                 "description": "The URL to scrape",
             },
             {
+                "key": "generate_selectors_and_parse_param",
+                "type": "string",
+                "description": "The clean text of the web scrape task returned by the generate_selectors_and_parse node",
+            },
+            {
                 "key": "web_scrape_param",
                 "type": "string",
                 "description": "The outputs of the web scrape task",
@@ -25,6 +30,11 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                 "key": "web_scrape_content_param",
                 "type": "string",
                 "description": "The raw content of the web required if it is already retrieved. If provided, url will be ignored (it is still required).",
+            },
+            {
+                "key": "web_summary_param",
+                "type": "string",
+                "description": "The summary of scraped web",
             }
         ],
         "prompts": [
@@ -32,6 +42,19 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                 "key": "web_scrape_selector_agent_prompt",
                 "name": "Web Scrape Selector Agent",
                 "content": get_prompt_file("web_scrape_selector_agent.prompt"),
+            },
+            {
+                "key": "web_scrape_output_prompt",
+                "name": "Web Scrape Output Template",
+                "content": "{{ generate_selectors_and_parse }}",
+                "is_templated": True,
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "generate_selectors_and_parse": "generate_selectors_and_parse_param"
+                    },
+                    "required": ["generate_selectors_and_parse"]
+                }
             },
             {
                 "key": "web_summarizer_prompt",
@@ -54,16 +77,29 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
             {
                 "key": "web_summarize_task_prompt",
                 "name": "Web summarization prompt",
-                "content": "{{ generate_selectors_and_parse }}",
+                "content": "{{ web_scrape }}",
                 "is_templated": True,
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "generate_selectors_and_parse": "web_scrape_param"
+                        "web_scrape": "web_scrape_param"
                     },
-                    "required": ["generate_selectors_and_parse"]
+                    "required": ["web_scrape"]
                 }
             },
+            {
+                "key": "web_scrape_workflow_prompt",
+                "name": "Web Scrape Workflow Output Template",
+                "content": "{{ web_summarize }}",
+                "is_templated": True,
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "web_summarize": "web_summary_param"
+                    },
+                    "required": ["web_summarize"]
+                }
+            }
         ],
         "agents": [
             {
@@ -98,7 +134,8 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                 "agent": "web_scrape_selector_agent",
                 "required_apis": ["llm_api"],
                 "templates": {
-                    "task_template": "basic_prompt_url"
+                    "task_template": "basic_prompt_url",
+                    "output_template": "web_scrape_output_prompt"
                 },
                 "input_variables": {
                     "type": "object",
@@ -128,9 +165,9 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "generate_selectors_and_parse": "web_scrape_param",
+                        "web_scrape": "web_scrape_param",
                     },
-                    "required": ["generate_selectors_and_parse"]
+                    "required": ["web_scrape"]
                 },
                 "required_apis": ["llm_api"],
                 "templates": {
@@ -172,6 +209,9 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                     },
                     "required": ["url"]
                 },
+                "templates": {
+                    "output_template": "web_scrape_workflow_prompt"
+                }
             }
         ]
     }

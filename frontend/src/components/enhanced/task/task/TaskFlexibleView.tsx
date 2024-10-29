@@ -112,6 +112,15 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
         }
     }, [fetchItem, form.templates]);
 
+    const handleOutputPromptSelect = useCallback(async (selectedIds: string[]) => {
+        if (selectedIds.length > 0) {
+            const prompt = await fetchItem('prompts', selectedIds[0]) as Prompt;
+            setForm(prevForm => ({ ...prevForm, templates: { ...prevForm.templates, output_prompt: prompt } }));
+        } else {
+            setForm(prevForm => ({ ...prevForm, templates: { ...prevForm.templates, output_prompt: null } }));
+        }
+    }, [fetchItem]);
+
     const handleAgentSelect = useCallback(async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {
             const agent = await fetchItem('agents', selectedIds[0]) as AliceAgent;
@@ -153,6 +162,21 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             showCreateButton={true}
         />
     ), [form?.templates?.task_template, isEditMode, activeAccordion, handleAccordionToggle, handlePromptSelect]);
+
+    const memoizedOutputPromptSelect = useMemo(() => (
+        <EnhancedSelect<Prompt>
+            componentType="prompts"
+            EnhancedView={PromptShortListView}
+            selectedItems={form?.templates?.output_prompt ? [form.templates.output_prompt] : []}
+            onSelect={handleOutputPromptSelect}
+            isInteractable={isEditMode}
+            label="Select Output Prompt"
+            activeAccordion={activeAccordion}
+            onAccordionToggle={handleAccordionToggle}
+            accordionEntityName="output_prompt"
+            showCreateButton={true}
+        />
+    ), [form?.templates?.output_prompt, isEditMode, activeAccordion, handleAccordionToggle, handleOutputPromptSelect]);
 
     const memoizedAgentSelect = useMemo(() => (
         <EnhancedSelect<AliceAgent>
@@ -259,6 +283,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             {memoizedTaskSelect}
             <Typography variant="h6" className={classes.titleText}>Template</Typography>
             {memoizedPromptSelect}
+            {memoizedOutputPromptSelect}
             <Typography variant="h6" className={classes.titleText}>Required APIs</Typography>
             <FormControl fullWidth margin="normal">
                 <InputLabel>Required API Types</InputLabel>
@@ -368,11 +393,8 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                     />
                 </>
             )}
-
-            {/* Add any other task-specific fields here */}
         </GenericFlexibleView>
     );
 };
 
 export default TaskFlexibleView;
-

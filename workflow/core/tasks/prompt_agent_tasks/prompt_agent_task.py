@@ -46,7 +46,7 @@ class PromptAgentTask(BasicAgentTask):
                 )
             )
         },
-        description="A dictionary of template names and their prompt objects."
+        description="A dictionary of template names and their prompt objects. task_template is used to format the agent input message, output_template is used to format the output."
     )
 
     def create_message_list(self, **kwargs) -> List[MessageDict]:
@@ -95,11 +95,6 @@ class PromptAgentTask(BasicAgentTask):
                 sanitized_input[param] = value
         
         return sanitized_input
-    
-    def get_prompt_template(self, template_name: str) -> Prompt:
-        if template_name not in self.templates or not self.templates[template_name]:
-            raise ValueError(f"Template {template_name} not found in the task templates dictionary.")
-        return self.templates[template_name]
 
 class CheckTask(PromptAgentTask):
     """

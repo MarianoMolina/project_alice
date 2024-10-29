@@ -40,7 +40,7 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
                     return (
                         <Chip
                             key={key}
-                            label={key}
+                            label={`${key}: ${value.name || value.prompt_name || key}`}
                             onClick={() => value._id && onClick(value._id)}
                             className={classes.chip}
                         />
@@ -154,4 +154,4 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
     );
 };
 
-export default TaskCardView; 
+export default TaskCardView;

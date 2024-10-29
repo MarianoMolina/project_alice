@@ -122,6 +122,23 @@ coding_workflow_module = CodingWorkflowModule(
                 "key": "execution_agent_prompt",
                 "name": "Execution Agent Prompt",
                 "content": "This agent executes the code",
+            },
+            {
+                "key": "coding_workflow_output_prompt",
+                "name": "Coding Workflow Output Template",
+                "content": "Plan: {{ plan_workflow }}\n\nCode: {{ generate_code }}\n\nExecution: {{ execute_code }}\n\nUnit Tests: {{ generate_unit_tests }}\n\nUnit Test Execution: {{ execute_unit_tests }}",
+                "is_templated": True,
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "plan_workflow": "param_plan_workflow",
+                        "generate_code": "param_generate_code",
+                        "execute_code": "param_execute_code",
+                        "generate_unit_tests": "param_generate_unit_tests",
+                        "execute_unit_tests": "param_execute_unit_tests",
+                    },
+                    "required": ["plan_workflow"]
+                }
             }
         ],
         "agents": [
@@ -368,6 +385,9 @@ coding_workflow_module = CodingWorkflowModule(
                         "options_obj": {0: "Approve", 1: "Reject"},
                         "request_feedback": True
                     }
+                },
+                "templates": {
+                    "output_template": "coding_workflow_output_prompt"
                 }
             }
         ]

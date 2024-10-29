@@ -169,7 +169,7 @@ The Workflow container supports various task types, each designed for specific p
    - Purpose: Tasks that use templated prompts for execution
    - Key Properties:
      - `agent`: The AI agent executing the task
-     - `templates`: Dictionary of prompts/templates, including a `task_template`
+     - `templates`: Dictionary of prompts/templates, including a `task_template` to format the inputs for the agent, as well as the optional `output_template` to structure the outputs of the task 
    - Usage: Suitable for tasks with structured input and output requirements
 
 3. **APITask**

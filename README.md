@@ -7,9 +7,11 @@ Alice is an agentic workflow framework that integrates task execution and intell
 
 The project consists of three main components:
 
-1. Backend (Node.js with Express - TS)
-2. Workflow (Python - Pydantic)
-3. Frontend (React - TS)
+1. Backend (Node.js with Express - TS) -> Manages the MongoDB, LM Studio generations and the file system, including serving files for the frontend. 
+2. Workflow (Python - Pydantic) -> Handles (most) of the logic, interacts with external APIs, consumes the Database through the Backend, and reads from the file system. Main endpoints are task execution and chat response generation. 
+3. Frontend (React - TS) -> UI that consumes/interacts with the DB and file system through the Backend and calls Workflow's endpoints to trigger executions. 
+
+![Container Flow](./img/Container_flow.png)
 
 ## The Goal
 1. Provide a tool to create, test and deploy agentic solutions
@@ -19,9 +21,12 @@ The project consists of three main components:
 
 ## Setup and Installation
 
-1. Ensure you have [Docker installed](https://docs.docker.com/engine/install/) on your system. On Windows, once you do, it comes with the docker-compose plugin installed by default, but [check if you have it installed](https://stackoverflow.com/questions/72928891/how-can-i-check-if-docker-compose-plugin-is-installed). Otherwise (if in Linux for example), [install it](https://docs.docker.com/compose/install/linux/). If for whatever reason the starting script doesn't start Docker (can't find it), all you need to do is open your Docker app. 
+> *Installation and platform overview videos: [Part 1](https://www.youtube.com/watch?v=ojhcb9ADJqU) - [Part 2](https://www.youtube.com/watch?v=oXGk6g_gPtU)*
 
-2. (Optional) Install LM Studio if you plan to use local models.
+
+1. Ensure you have Git and [Docker installed](https://docs.docker.com/engine/install/) on your system. On Windows, once you do, it comes with the docker-compose plugin installed by default, but [check if you have it installed](https://stackoverflow.com/questions/72928891/how-can-i-check-if-docker-compose-plugin-is-installed). Otherwise (if in Linux for example), [install it](https://docs.docker.com/compose/install/linux/). If for whatever reason the starting script doesn't start Docker (can't find it), all you need to do is open your Docker app. 
+
+2. (Optional) Install LM Studio if you plan to use local models. If you don't, you'll see some errors regarding this, but don't worry, everything else will work normally. 
 
 3. Download the repository:
    ```
@@ -171,6 +176,9 @@ export enum ApiName {
     GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph'
 }
 ```
+
+### How tasks and workflows work
+![Task logic](./img/Task_logic.png "Task logic flow")
 
 ## Development
 

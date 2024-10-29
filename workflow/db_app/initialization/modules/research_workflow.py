@@ -26,6 +26,11 @@ research_workflow_module = ResearchWorkflowModule(
                 "type": "string",
                 "description": "The research data retrieval task output",
             },
+            {
+                "key": "research_summary_param",
+                "type": "string",
+                "description": "The summary of the research data",
+            }
         ],
         "prompts": [
             {
@@ -90,6 +95,19 @@ research_workflow_module = ResearchWorkflowModule(
                     "required": ["prompt", "data_retrieval_task"]
                 }
             },
+            {
+                "key": "research_output_prompt",
+                "name": "Research Output Template",
+                "content": "{{ research_summary }}",
+                "is_templated": True,
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "research_summary": "research_summary_param"
+                    },
+                    "required": ["research_summary"]
+                }
+            }
         ],
         "agents": [
             {
@@ -280,6 +298,9 @@ research_workflow_module = ResearchWorkflowModule(
                         "prompt": "prompt_parameter",
                     },
                     "required": ["prompt"]
+                },
+                "templates": {
+                    "output_template": "research_output_prompt"
                 }
             }
         ]

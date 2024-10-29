@@ -184,7 +184,42 @@ def prune_messages(messages: List[Dict[str, Any]], ctx_size: int) -> List[Dict[s
     
     return pruned_messages
 
-def generate_node_responses_summary(node_responses: List[NodeResponse], verbose: bool = False) -> str:
+def convert_value_to_type(value: Any, param_name: str, param_type: str) -> Any:
+    """Convert a value to the specified parameter type."""
+    try:
+        if param_type == "string":
+            return str(value)
+        elif param_type == "integer":
+            if isinstance(value, str):
+                return int(float(value))
+            return int(value)
+        elif param_type == "number":
+            return float(value)
+        elif param_type == "boolean":
+            if isinstance(value, str):
+                return value.lower() in ("true", "1", "yes", "y")
+            return bool(value)
+        elif param_type == "array":
+            if isinstance(value, str):
+                import json
+                return json.loads(value)
+            if isinstance(value, (list, tuple)):
+                return list(value)
+            raise ValueError(f"Cannot convert {type(value)} to array")
+        elif param_type == "object":
+            if isinstance(value, str):
+                import json
+                return json.loads(value)
+            if isinstance(value, dict):
+                return value
+            raise ValueError(f"Cannot convert {type(value)} to object")
+        else:
+            return value
+    except Exception as e:
+        raise ValueError(f"Failed to convert {param_name} to {param_type}: {str(e)}")
+
+def generate_default_summary(node_responses: List[NodeResponse], verbose: bool = False) -> str:
+    """Generate default summary format for node responses."""
     sorted_nodes = sorted(node_responses, key=lambda x: x.execution_order)
     
     if verbose:
@@ -201,7 +236,6 @@ def generate_node_responses_summary(node_responses: List[NodeResponse], verbose:
             references_summary = node.references.summary() if node.references else "No refs"
             summaries.append(f"{node.node_name}({node.execution_order}):{references_summary}")
         return "\n\n".join(summaries)
-
 
 def get_traceback() -> str:
     """

@@ -1,15 +1,14 @@
 from enum import Enum
-from typing import Dict, Any, Optional, List, Callable
+from typing import Dict, Any, Optional, List, Callable, Tuple
 from pydantic import BaseModel, Field, model_validator
 from workflow.core.prompt import Prompt
 from workflow.core.agent import AliceAgent
 from workflow.core.api import APIManager, APIEngine
 from workflow.core.data_structures import (
-    ApiType, FunctionParameters, ParameterDefinition, 
-    FunctionConfig, ToolFunction, References, complete_inner_execution_history,
-    TaskResponse, NodeResponse, UserInteraction, UserCheckpoint, NodeResponse, TasksEndCodeRouting
+    ApiType, FunctionParameters, ParameterDefinition,  FunctionConfig, ToolFunction, References, TaskResponse, 
+    NodeResponse, UserInteraction, UserCheckpoint, NodeResponse, TasksEndCodeRouting
 )
-from workflow.util.utils import simplify_execution_history, generate_node_responses_summary
+from workflow.util.utils import simplify_execution_history, generate_default_summary, convert_value_to_type
 from workflow.util import LOGGER
 
 class AliceTask(BaseModel):
@@ -70,7 +69,7 @@ class AliceTask(BaseModel):
     # Task components
     templates: Dict[str, Prompt] = Field(
         default_factory=dict,
-        description="Task prompt templates"
+        description="Task prompt templates. output_template is used to format task output."
     )
     tasks: Dict[str, "AliceTask"] = Field(
         default_factory=dict,
@@ -469,8 +468,9 @@ class AliceTask(BaseModel):
     
     def create_partial_response(self, node_responses: List[NodeResponse], status: str, **kwargs) -> TaskResponse:
         """Create a response for a partially completed task."""
+        output_template = self.get_prompt_template("output_template")
         return self.get_task_response(
-            task_outputs=generate_node_responses_summary(node_responses, True),
+            task_outputs=generate_node_responses_summary(node_responses, True, output_template),
             result_code=1,
             diagnostics='Task requires user interaction',
             status=status,
@@ -491,9 +491,17 @@ class AliceTask(BaseModel):
             
         if diagnostics is None:
             diagnostics = "Task completed successfully" if exit_code == 0 else "Task execution failed"
+        
+        # Try to use output template if available
+        output_template = self.get_prompt_template("output_template")
+        summary = generate_node_responses_summary(
+            node_responses=node_responses, 
+            verbose=True,
+            output_prompt=output_template
+        )
             
         return self.get_task_response(
-            task_outputs=generate_node_responses_summary(node_responses, True),
+            task_outputs=summary,
             result_code=exit_code,
             diagnostics=diagnostics,
             status="complete" if exit_code == 0 else "failed",
@@ -502,76 +510,26 @@ class AliceTask(BaseModel):
         )
     
     # Input validation
-    def validate_and_process_inputs(self, execution_history: List[NodeResponse] = None, **kwargs) -> tuple[dict, Optional[str]]:
-        """
-        Validates and processes input parameters, checking both provided kwargs and execution history.
-        
-        Args:
-            execution_history (List[NodeResponse]): Previous execution history to check for variable values
-            **kwargs: Task input parameters
-        
-        Returns:
-            tuple[dict, Optional[str]]: Tuple containing processed inputs and error message (if any)
-        """
-        execution_history = complete_inner_execution_history(execution_history) or []
-        processed_inputs = kwargs.copy()
+    def get_prompt_template(self, template_name: str) -> Optional[Prompt]:
+        """Get a prompt template by name from the task's templates."""
+        if template_name not in self.templates or not self.templates[template_name]:
+            return None
+        template = self.templates[template_name]
+        if isinstance(template, dict):
+            try:
+                return Prompt(**template)
+            except Exception as e:
+                LOGGER.error(f"Error converting template dict to Prompt: {str(e)}")
+                return None
+        return template if isinstance(template, Prompt) else None
 
-        # Check each required parameter
-        for param_name in self.input_variables.required:
-            # Skip if already in kwargs and no matching node exists
-            if param_name in processed_inputs and not any(
-                node.node_name == param_name for node in execution_history
-            ):
-                continue
-
-            # Look for matching node in history
-            matching_node = next(
-                (node for node in reversed(execution_history)
-                 if node.node_name == param_name and node.references),
-                None
-            )
-
-            if matching_node:
-                try:
-                    # Get value from node references
-                    value = matching_node.references.detailed_summary()
-                    param_def = self.input_variables.properties[param_name]
-                    
-                    # Convert to the correct type
-                    processed_inputs[param_name] = self._convert_value_to_type(
-                        value=value,
-                        param_name=param_name,
-                        param_type=param_def.type
-                    )
-                    LOGGER.debug(f"Using value from node {param_name} in execution history")
-                except (ValueError, TypeError) as e:
-                    return {}, f"Error converting value for parameter '{param_name}': {str(e)}"
-            
-            # If still not found, check for default value
-            elif param_name not in processed_inputs:
-                param_def = self.input_variables.properties[param_name]
-                if param_def.default is not None:
-                    processed_inputs[param_name] = param_def.default
-                else:
-                    # Log all the node names in the execution history
-                    node_names = [node.node_name for node in execution_history]
-                    LOGGER.debug(f"Missing required parameter: {param_name} \n\n Node_names: {node_names}")
-                    return {}, f"Missing required parameter: {param_name}"
-
-        # Validate and convert all provided inputs
-        for param_name, param_value in list(processed_inputs.items()):
-            if param_name in self.input_variables.properties:
-                param_def = self.input_variables.properties[param_name]
-                try:
-                    processed_inputs[param_name] = self._convert_value_to_type(
-                        value=param_value,
-                        param_name=param_name,
-                        param_type=param_def.type
-                    )
-                except (ValueError, TypeError) as e:
-                    return {}, f"Invalid value for parameter '{param_name}': {str(e)}"
-
-        return processed_inputs, None
+    async def validate_and_process_inputs(self, execution_history: List[NodeResponse], **kwargs) -> Tuple[Dict[str, Any], Optional[str]]:
+        """Validate and process input parameters."""
+        return validate_and_process_function_inputs(
+            params=self.input_variables,
+            execution_history=execution_history,
+            kwargs=kwargs
+        )
 
     def _convert_value_to_type(self, value: Any, param_name: str, param_type: str) -> Any:
         """
@@ -693,3 +651,121 @@ class AliceTask(BaseModel):
             return node.references
         LOGGER.error(f"No node found with name: {node_name}")
         return None
+    
+
+def generate_node_responses_summary(
+    node_responses: List[NodeResponse], 
+    verbose: bool = False,
+    output_prompt: Optional[Prompt] = None
+) -> str:
+    """
+    Generate a summary of node responses, optionally using a template.
+    
+    Args:
+        node_responses: List of node responses to summarize
+        verbose: Whether to include detailed information
+        output_prompt: Optional prompt template to format the output
+        
+    Returns:
+        Formatted summary string
+    """
+    if output_prompt:
+        try:
+            # Extract variables from node responses
+            prompt_vars = {}
+            for param_name in output_prompt.input_variables:
+                matching_node = next(
+                    (node for node in reversed(node_responses)
+                     if node.node_name == param_name and node.references),
+                    None
+                )
+                if matching_node:
+                    value = matching_node.references.detailed_summary()
+                    prompt_vars[param_name] = value
+                elif param_name in output_prompt.parameters.properties:
+                    param_def = output_prompt.parameters.properties[param_name]
+                    if param_def.default is not None:
+                        prompt_vars[param_name] = param_def.default
+                    else:
+                        LOGGER.warning(f"Missing required parameter {param_name} for output template")
+                        return generate_default_summary(node_responses, verbose)
+            
+            return output_prompt.format_prompt(**prompt_vars)
+            
+        except Exception as e:
+            LOGGER.error(f"Error formatting output with template: {str(e)}")
+            return generate_default_summary(node_responses, verbose)
+    
+    return generate_default_summary(node_responses, verbose)
+    
+def validate_and_process_function_inputs(
+    params: FunctionParameters,
+    execution_history: List[NodeResponse],
+    kwargs: Dict[str, Any]
+) -> Tuple[Dict[str, Any], Optional[str]]:
+    """
+    Validates and processes input parameters against a FunctionParameters definition.
+    
+    Args:
+        params: FunctionParameters object defining expected inputs
+        execution_history: Previous execution history to check for variable values
+        kwargs: Input parameters to validate and process
+        
+    Returns:
+        Tuple containing processed inputs dict and error message (if any)
+    """
+    processed_inputs = kwargs.copy()
+
+    # Check each required parameter
+    for param_name in params.required:
+        # Skip if already in kwargs and no matching node exists
+        if param_name in processed_inputs and not any(
+            node.node_name == param_name for node in execution_history
+        ):
+            continue
+
+        # Look for matching node in history
+        matching_node = next(
+            (node for node in reversed(execution_history)
+             if node.node_name == param_name and node.references),
+            None
+        )
+
+        if matching_node:
+            try:
+                # Get value from node references
+                value = matching_node.references.detailed_summary()
+                param_def = params.properties[param_name]
+                
+                # Convert to the correct type
+                processed_inputs[param_name] = convert_value_to_type(
+                    value=value,
+                    param_name=param_name,
+                    param_type=param_def.type
+                )
+                LOGGER.debug(f"Using value from node {param_name} in execution history")
+            except (ValueError, TypeError) as e:
+                return {}, f"Error converting value for parameter '{param_name}': {str(e)}"
+        
+        # If still not found, check for default value
+        elif param_name not in processed_inputs:
+            param_def = params.properties[param_name]
+            if param_def.default is not None:
+                processed_inputs[param_name] = param_def.default
+            else:
+                return {}, f"Missing required parameter: {param_name}"
+
+    # Validate and convert all provided inputs
+    for param_name, param_value in list(processed_inputs.items()):
+        if param_name in params.properties:
+            param_def = params.properties[param_name]
+            try:
+                processed_inputs[param_name] = convert_value_to_type(
+                    value=param_value,
+                    param_name=param_name,
+                    param_type=param_def.type
+                )
+            except (ValueError, TypeError) as e:
+                return {}, f"Invalid value for parameter '{param_name}': {str(e)}"
+
+    return processed_inputs, None
