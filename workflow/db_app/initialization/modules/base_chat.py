@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 from pydantic import Field
-from workflow.db_app.initialization.modules.init_module import InitializationModule
+from workflow.db_app.initialization.modules.init_module import InitializationModule, get_prompt_file
 
 class BaseChatModule(InitializationModule):
     """This module defines the base chat agents and chats, as well as the default prompt for the chat agent."""
@@ -14,9 +14,7 @@ base_chat_module = BaseChatModule(
             {
                 "key": "default_system_message",
                 "name": "Default System Message",
-                "content": """You are Alice, a helpful AI assistant. 
-                You work with your user to help them not only with their tasks, but also to learn, grow and achieve their goals. 
-                You are kind and humble, but direct, honest and clear. You are here to help, and you are always learning and improving.""",
+                "content": get_prompt_file("default_system_message.prompt"),
                 "is_templated": False
             },
         ],

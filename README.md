@@ -233,6 +233,7 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
 1. **Workflow generator** [Done]: Improve the interface for workflow generation. Ideally, something that allows the user to handle tasks/nodes, visualize the execution of it, etc. 
    - [Added 10/24]: Flowchart for workflows
    - [Added 10/24]: Basic route end code editor
+   - [Working on]: Adding a "task visualization" logic to the flowcharts, enabling the frontend to display a *parsed* representation of the task, and its nodes, showing the available and required inputs, as they are passed in the flow. 
 
 2. **More API engines and base tasks** [Done]: BeautifulSoup to scrap websites, vision_models, text_to_image_models, text_to_speech_models, etc. This will enable a new set of tasks to be created. This includes adding more providers, like Google, Mistral, etc. 
    - [Added 10/24]: 21 new API providers, with their corresponding models, for a total of 160 distinct entities for you to use. 
@@ -245,9 +246,16 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
 4. **Complex Information Flows**: 
    - Implement more advanced agent tools, such as ReAct and RAG agents, to enable more sophisticated reasoning and decision-making capabilities.
    - Implement interactive workflows, where the agent could either ask for permission, or deploy a request/action conditional to user approval (human in the loop)
-   - [Added 10/24]: Context restrictions for LLM and TTS. 
-   
+   - [Added 11/24]: Simple think-then-respond prompts added
+   - [Added 11/24]: User Checkpoints and User interactions help define a 'pause' condition for a task and a node router based on user response. Task can now continue executing from a 'pending' task response -> Potentially could implement being able to remove a node, and set the task to continue from a specific node and produce a new task result, which can be useful when updating/improving a workflow, for example
+   - [Added 11/24]: Now all tasks execute a set of nodes, with workflows executing inner tasks, and other tasks executing class methods, with the node routing deciding the flow. This simplifies how information is passed during a task execution, since now tasks check if inputs are available in the executed nodes, and passes them to the next node that needs them. 
+   - [Working on]: RAG! Semantic and code chunking as methods to split the embeddings into the most relevant chunks, and RAG tasks that take a data cluster and a prompt, and return relevant chunks. 
+   - [Working on]: ReAct and Tree-of-thought at inference. 
+   - [Working on]: Injecting (optionally) user and context information into the agent's system prompt, like browser, user name, etc. 
+ 
 5. **Work Environments / Data Clusters**: Introduction of a feature similar to Anthropic's Artifacts but easier to update, edit, modularize, etc., providing a more structured way to manage and interact with complex data and tools within the Alice ecosystem. Idea is to use a mix of in-context and RAG-powered sources, that the user is actively able to update, trim, etc. to ensure the correct info is available at the right time. 
+   - [Working on]: Adding a "document" feature to let agents structure information a bit more concisely. This mostly affects the frontend and system prompts of the agents. 
+   - [Working on]: Data clusters are a Reference object with any number and types of references, which are embedded and available for retrieval. If a reference is updated, its embedding is also updated. 
 
 6. **Journals**: Development of a holistic view of conversations and interactions, enabling the creation of workflows that run periodically. This feature will support tasks such as:
    - Reviewing and summarizing emails
@@ -264,6 +272,7 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
    - [Improved 9/24] Improve error handling and logging
       - [Added 9/24]: Logging folder, and better logs from all containers
       - [Added 9/24]: Logging managers with levels, allowing for dev and prod setups
+   - [Added 10/24]: Context size restrictions for LLM (removes context from the middle of the conversation), TTS (splits the prompt into chunks, and returns a list of files) and embedding (naive split into max chunk size) generations. 
 
 8. **Unify the type files**: Create a single source of truth for types, enums, etc. Either in TS or Python, and the conversion logic to the other.  
 
