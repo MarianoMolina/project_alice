@@ -74,7 +74,7 @@ These components share information in one of 4 main ways, all of which have a st
   - API tasks: Reddit, Wikipedia, Google, Exa, and Arxiv search -> Retrieve information
   - Agentic tasks:
     - Prompt Agent Tasks: Including the base PromptAgentTask, and CheckTask, CodeExecutionLLMTask and CodeGenerationLLMTask
-    - Agent Tasks: WebScrapeBeautifulSoupTask, TextToSpeechTask, GenerateImageTask, and EmbeddingTask
+    - Agent Tasks: WebScrapeBeautifulSoupTask, TextToSpeechTask, GenerateImageTask, RetrievalTask and EmbeddingTask
 
 ### 2. Intelligent Chat
 - Create and manage chat conversations with AI agents
@@ -141,6 +141,7 @@ In the case of Workflows, these nodes are "inner tasks" instead of specific meth
   - `WebScrapeBeautifulSoupTask`: Takes a URL, retrieves it, takes a string sample of the html to show an agent to create selectors for BeautifulSoup, and then the parsed content is returned. Uses 2 inner nodes, called 'fetch_url' and 'generate_selectors_and_parse'. 
   - `GenerateImageTask`: Takes an image prompt and uses the agent's img_gen model to generate an image based on it. Uses a single 'generate_image' node
   - `EmbeddingTask`: Takes a string and the agent's embeddings model to generate the vector embeddings for the text provided. For now, chunking is done to the max tokens allowed. Uses a single 'generate_embedding' node
+  - `RetrievalTask`: 
 - `Workflow`: The simplest and most complex task. Simple because all it does is run other tasks. Complex because the options are endless. Main difference is they use the node_end_code_routing to map the logic path between the inner tasks available, starting from the start_node. 
 
 ### Available APIs
@@ -184,6 +185,7 @@ export enum ApiName {
     EXA_SEARCH = 'exa_search',
     ARXIV_SEARCH = 'arxiv_search',
     GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph'
+    WOLFRAM_ALPHA = 'wolfram_alpha'
 }
 ```
 
@@ -233,7 +235,7 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
 1. **Workflow generator** [Done]: Improve the interface for workflow generation. Ideally, something that allows the user to handle tasks/nodes, visualize the execution of it, etc. 
    - [Added 10/24]: Flowchart for workflows
    - [Added 10/24]: Basic route end code editor
-   - [Working on]: Adding a "task visualization" logic to the flowcharts, enabling the frontend to display a *parsed* representation of the task, and its nodes, showing the available and required inputs, as they are passed in the flow. 
+   - [Working on]: Adding a "task visualization" logic to the flowcharts, enabling the frontend to display a *parsed* representation of the task, and its nodes, showing the available and required inputs, as they are passed in the flow, as well as task_templates and output_templates to show how the content will be passed 
 
 2. **More API engines and base tasks** [Done]: BeautifulSoup to scrap websites, vision_models, text_to_image_models, text_to_speech_models, etc. This will enable a new set of tasks to be created. This includes adding more providers, like Google, Mistral, etc. 
    - [Added 10/24]: 21 new API providers, with their corresponding models, for a total of 160 distinct entities for you to use. 

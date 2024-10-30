@@ -48,6 +48,12 @@ export const API_TYPE_CONFIGS: Record<ApiType, ApiTypeConfig> = {
       api_key: '',
     },
   },
+  [ApiType.WOLFRAM_ALPHA]: {
+    api_name: [ApiName.WOLFRAM_ALPHA],
+    apiConfig: {
+      app_id: '',
+    },
+  },
   [ApiType.IMG_VISION]: {
     api_name: [ApiName.OPENAI_VISION, ApiName.ANTHROPIC_VISION, ApiName.LM_STUDIO_VISION, ApiName.GEMINI_VISION, ApiName.MISTRAL_VISION, ApiName.LLAMA_VISION, ApiName.GROQ_VISION],
     apiConfig: {

@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Optional, Literal, Dict, Any, List, TYPE_CHECKING
 from pydantic import Field, ConfigDict, field_validator
-from workflow.core.data_structures.base_models import BaseDataStructure, ContentType, FileType
+from workflow.core.data_structures.base_models import Embeddable, ContentType, FileType
 from workflow.core.data_structures.central_types import ToolCallType, ReferencesType
 
 if TYPE_CHECKING:
@@ -12,7 +12,7 @@ def get_default_references():
     from workflow.core.data_structures.references import References
     return References()
 
-class MessageDict(BaseDataStructure):
+class MessageDict(Embeddable):
     role: Literal["user", "assistant", "system", "tool"] = Field(default="user", description="Role of the message")
     content: Optional[str] = Field(default=None, description="Content of the message")
     generated_by: Literal["user", "llm", "tool", "system"] = Field(default="user", description="Who created the message")

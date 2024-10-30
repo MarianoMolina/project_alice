@@ -8,6 +8,7 @@ class ApiType(str, Enum):
     WIKIPEDIA_SEARCH = 'wikipedia_search'
     EXA_SEARCH = 'exa_search'
     ARXIV_SEARCH = 'arxiv_search'
+    WOLFRAM_ALPHA = 'wolfram_alpha'
     IMG_VISION = 'img_vision'
     IMG_GENERATION = 'img_generation'
     SPEECH_TO_TEXT = 'speech_to_text'
@@ -52,6 +53,7 @@ class ApiName(str, Enum):
     EXA_SEARCH = 'exa_search',
     ARXIV_SEARCH = 'arxiv_search'
     GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph'
+    WOLFRAM_ALPHA = 'wolfram_alpha'
 
 ModelApis: List[ApiType] = [ApiType.LLM_MODEL, ApiType.IMG_VISION, ApiType.IMG_GENERATION, ApiType.SPEECH_TO_TEXT, ApiType.TEXT_TO_SPEECH, ApiType.EMBEDDINGS]
     

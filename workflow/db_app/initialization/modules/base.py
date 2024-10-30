@@ -18,6 +18,7 @@ GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
 BACKEND_HOST = os.getenv("BACKEND_HOST")
 BACKEND_PORT = os.getenv("BACKEND_PORT")
 GOOGLE_KNOWLEDGE_GRAPH_API_KEY = os.getenv("GOOGLE_KNOWLEDGE_GRAPH_API_KEY")
+WOLFRAM_ALPHA_API_KEY = os.getenv("WOLFRAM_ALPHA_API_KEY")
 LOCAL_LLM_API_URL = f"http://{BACKEND_HOST}:{BACKEND_PORT}/lm-studio"
 
 class BaseModule(InitializationModule):
@@ -89,6 +90,16 @@ base_module = BaseModule(
                 "lm_studio_preset": "Llama 3 V3"
             },
             {
+                "key": "stella_en_1_5",
+                "short_name": "Stella 1.5",
+                "model_name": "abhishekbhakat/stella_en_1.5B_v5_GGUF",
+                "model_format": "OpenChat",
+                "ctx_size": 8192, ## Max tokens is actually 131072 -> 8192 are the dimensions, but for testing purposes we are using 8192
+                "model_type": "embeddings",
+                "api_name": "lm-studio_llm",
+                "lm_studio_preset": "Llama 3 V3"
+            },
+            {
                 "key": "Whisper_1",
                 "short_name": "Whisper",
                 "model_name": "whisper-1", # need model name here
@@ -129,7 +140,7 @@ base_module = BaseModule(
                 "short_name": "text-embedding-3-large",
                 "model_name": "text-embedding-3-large",
                 "model_format": "Base", # random value
-                "ctx_size": 8192,
+                "ctx_size": 8192, ## This is dimensions, ctx_size is larger
                 "model_type": "embeddings",
                 "api_name": "openai_embeddings",
             },
@@ -298,6 +309,17 @@ base_module = BaseModule(
                 },
                 "is_active": True,
                 "health_status": "healthy" if GOOGLE_KNOWLEDGE_GRAPH_API_KEY else "unhealthy",
+            },
+            {
+                "key": "wolfram_alpha_api",
+                "api_type": "wolfram_alpha",
+                "api_name": "wolfram_alpha",
+                "name": "Wolfram Alpha",
+                "api_config": {
+                    "api_key": WOLFRAM_ALPHA_API_KEY
+                },
+                "is_active": True,
+                "health_status": "healthy" if WOLFRAM_ALPHA_API_KEY else "unhealthy",
             },
             {
                 "key": "reddit_search",

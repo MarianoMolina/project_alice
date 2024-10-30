@@ -44,6 +44,7 @@ Non-Model APIs are used for various other functionalities that don't directly in
 - `EXA_SEARCH`: For using the Exa search engine
 - `ARXIV_SEARCH`: For searching academic papers on arXiv
 - `GOOGLE_KNOWLEDGE_GRAPH`: For searching for specific entities
+- `WOLFRAM_ALPHA`: For math and factual queries
 
 ## API Providers
 
@@ -88,6 +89,7 @@ export enum ApiName {
     EXA_SEARCH = 'exa_search',
     ARXIV_SEARCH = 'arxiv_search',
     GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph',
+    WOLFRAM_ALPHA = 'wolfram_alpha'
 }
 ```
 

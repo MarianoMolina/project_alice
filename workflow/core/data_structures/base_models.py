@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, Literal, Tuple, Union, Dict
+from typing import Optional, Literal, Tuple, Union, Dict, List
 from enum import Enum
 # The order of this list is used to determine which entities are created first
 EntityType = Literal["users", "models", "apis", "parameters", "prompts", "agents", "tasks", "chats", "task_responses", "files", "messages", "urlreferences"]
@@ -26,3 +26,16 @@ TasksEndCodeRouting = Dict[str, RouteMap]
 
 class BaseDataStructure(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")
+    # created_by: Optional[str] = Field(default=None)
+    # updated_by: Optional[str] = Field(default=None)
+    # createdAt: Optional[str] = Field(default=None)
+    # updatedAt: Optional[str] = Field(default=None)
+
+class EmbeddingChunk(BaseDataStructure):
+    vector: List[float] = Field(..., description="The embedding vector")
+    text_content: str = Field(..., description="The text content that the embedding vector represents")
+    index: int = Field(..., description="The index of the embedding chunk in the original text")
+    creation_metadata: dict = Field(default_factory=dict, description="Metadata about the creation of the embedding")
+
+class Embeddable(BaseDataStructure):
+    embedding: Optional[List[EmbeddingChunk]] = Field(None, description="The embedding chunks for the file content")

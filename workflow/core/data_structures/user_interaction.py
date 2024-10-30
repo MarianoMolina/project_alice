@@ -1,6 +1,6 @@
-from typing import Optional, Any, Dict
+from typing import Optional, Dict
 from pydantic import BaseModel, Field
-from workflow.core.data_structures.base_models import BaseDataStructure
+from workflow.core.data_structures.base_models import Embeddable, BaseDataStructure
 
 class UserResponse(BaseModel):
     selected_option: int
@@ -9,7 +9,7 @@ class UserResponse(BaseModel):
     def __str__(self) -> str:
         return f"SelectedOption: {self.selected_option}\nUserFeedback: {self.user_feedback}"
 
-class UserInteraction(BaseDataStructure):
+class UserInteraction(Embeddable):
     user_checkpoint_id: str = Field(..., description="The id of the user checkpoint")
     task_response_id: Optional[str] = None
     user_response: Optional[UserResponse] = None

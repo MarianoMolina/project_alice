@@ -8,7 +8,7 @@ from .references import References
 from .model_config import ModelConfig
 from .api_utils import ApiName, ApiType, ModelType, ModelApis
 from .parameters import ParameterDefinition, FunctionConfig, FunctionParameters, ToolCall, ToolCallConfig, ToolFunction, ensure_tool_function
-from .base_models import EntityType, FileType, ContentType, TasksEndCodeRouting
+from .base_models import EntityType, FileType, ContentType, TasksEndCodeRouting, EmbeddingChunk, Embeddable
 
 # Rebuild all models
 MessageDict.model_rebuild()
@@ -17,6 +17,8 @@ FileContentReference.model_rebuild()
 URLReference.model_rebuild()
 TaskResponse.model_rebuild()
 NodeResponse.model_rebuild()
+EmbeddingChunk.model_rebuild()
+Embeddable.model_rebuild()
 ExecutionHistoryItem.model_rebuild()
 UserInteraction.model_rebuild()
 UserCheckpoint.model_rebuild()
@@ -32,6 +34,6 @@ ToolFunction.model_rebuild()
 References.model_rebuild()
 
 __all__ = ['FileReference', 'ContentType', 'FileType', 'FileContentReference', 'generate_file_content_reference', 'get_file_content', 'MessageDict', 'ModelConfig',
-           'URLReference', 'TaskResponse', 'User', 'UserRoles', 'UserInteraction', 'ExecutionHistoryItem', 'NodeResponse', 'TasksEndCodeRouting',
+           'URLReference', 'TaskResponse', 'User', 'UserRoles', 'UserInteraction', 'ExecutionHistoryItem', 'NodeResponse', 'TasksEndCodeRouting', 'EmbeddingChunk',
            'ApiName', 'ApiType', 'ModelType', 'ParameterDefinition', 'FunctionConfig', 'FunctionParameters', 'ToolCall', 'ToolCallConfig', 'UserCheckpoint', 'UserResponse',
-           'ToolFunction', 'ensure_tool_function', 'EntityType', 'ModelApis', 'FileOutput', 'References', 'complete_inner_execution_history']
+           'ToolFunction', 'ensure_tool_function', 'EntityType', 'ModelApis', 'FileOutput', 'References', 'complete_inner_execution_history', 'Embeddable']

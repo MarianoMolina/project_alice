@@ -213,6 +213,7 @@ The Workflow container supports various task types, each designed for specific p
 2.  **WebScrapeBeautifulSoupTask**: Takes a URL, retrieves it, task a string sample of the html to show an agent who creates the selectors for BeautifulSoup parsing of the content. 
 3.  **GenerateImageTask**: Takes an image prompt and uses the agent's img_gen model to generate an image based on it. 
 4. **EmbeddingTask**: Takes a string and the agent's embeddings model to generate the vector embeddings for the text provided. 
+5. **RetrievalTask**: 
 
 
 ### Creating New Task Implementations

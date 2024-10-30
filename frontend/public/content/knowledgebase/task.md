@@ -7,7 +7,7 @@ Tasks in Alice represent specific operations or workflows that can be executed b
 The Alice system supports various task types, each designed for specific purposes:
 
 ```typescript
-export type TaskType = "APITask" | "PromptAgentTask" | "CheckTask" | "CodeGenerationLLMTask" | "CodeExecutionLLMTask" | "Workflow" | "EmbeddingTask" | "GenerateImageTask" | "TextToSpeechTask" | "WebScrapeBeautifulSoupTask";
+export type TaskType = "APITask" | "PromptAgentTask" | "CheckTask" | "CodeGenerationLLMTask" | "CodeExecutionLLMTask" | "Workflow" | "EmbeddingTask" | "RetrievalTask" | "GenerateImageTask" | "TextToSpeechTask" | "WebScrapeBeautifulSoupTask";
 ```
 
 These task types cover a broad spectrum of functionalities, including search operations, code generation and execution, text-to-speech conversion, and more. The simplest of these are the:
@@ -21,6 +21,7 @@ These task types cover a broad spectrum of functionalities, including search ope
   - `WebScrapeBeautifulSoupTask`: Takes a URL, retrieves it, task a string sample of the html to show an agent who creates the selectors for BeautifulSoup parsing of the content. 
   - `GenerateImageTask`: Takes an image prompt and uses the agent's img_gen model to generate an image based on it. 
   - `EmbeddingTask`: Takes a string and the agent's embeddings model to generate the vector embeddings for the text provided. 
+  - `RetrievalTask`: 
 - `Workflow`: The simplest a most complex task. Simple because all it does is run other tasks. Complex because the options are endless. Main difference is they have a node_end_code_routing to map the logic path and require a start_node to begin it. 
 
 ## Task Interface

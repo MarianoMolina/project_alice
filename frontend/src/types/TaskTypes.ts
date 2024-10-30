@@ -15,6 +15,7 @@ export enum TaskType {
   CodeExecutionLLMTask = "CodeExecutionLLMTask",
   Workflow = "Workflow",
   EmbeddingTask = "EmbeddingTask",
+  RetrievalTask = "RetrievalTask",
   GenerateImageTask = "GenerateImageTask",
   TextToSpeechTask = "TextToSpeechTask",
   WebScrapeBeautifulSoupTask = "WebScrapeBeautifulSoupTask"

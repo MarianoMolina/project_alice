@@ -9,7 +9,7 @@ from .anthropic_vision_engine import AnthropicVisionEngine
 from .oai_stt_engine import OpenAISpeechToTextEngine
 from .oai_timestamped_stt_engine import OpenAIAdvancedSpeechToTextEngine
 from .text_to_speech_engine import OpenAITextToSpeechEngine
-from .embedding_engine import OpenAIEmbeddingsEngine
+from .embedding_engine import EmbeddingEngine
 from .gemini_llm_engine import GeminiLLMEngine
 from .cohere_llm_engine import CohereLLMEngine
 from .gemini_vision import GeminiVisionEngine
@@ -17,8 +17,10 @@ from .gemini_embedding import GeminiEmbeddingsEngine
 from .gemini_stt import GeminiSpeechToTextEngine
 from .gemini_img_gen import GeminiImageGenerationEngine
 from .google_knowledge_graph_engine import GoogleGraphEngine
+from .wolfram_alpha_engine import WolframAlphaEngine
 from .bark_engine import BarkEngine
 from .pixart_img_gen_engine import PixArtImgGenEngine
+
 ApiEngineMap = {
     ApiType.LLM_MODEL: {
         ApiName.OPENAI: LLMEngine,
@@ -49,6 +51,9 @@ ApiEngineMap = {
     ApiType.GOOGLE_KNOWLEDGE_GRAPH: {
         ApiName.GOOGLE_KNOWLEDGE_GRAPH: GoogleGraphEngine,
     },
+    ApiType.WOLFRAM_ALPHA: {
+        ApiName.WOLFRAM_ALPHA: WolframAlphaEngine,
+    },
     ApiType.IMG_VISION: {
         ApiName.OPENAI_VISION: VisionModelEngine,
         ApiName.ANTHROPIC_VISION: AnthropicVisionEngine,
@@ -74,13 +79,13 @@ ApiEngineMap = {
         ApiName.BARK_TTS: BarkEngine
     },
     ApiType.EMBEDDINGS: {
-        ApiName.OPENAI_EMBEDDINGS: OpenAIEmbeddingsEngine,
-        ApiName.MISTRAL_EMBEDDINGS: OpenAIEmbeddingsEngine,
+        ApiName.OPENAI_EMBEDDINGS: EmbeddingEngine,
+        ApiName.MISTRAL_EMBEDDINGS: EmbeddingEngine,
         ApiName.GEMINI_EMBEDDINGS: GeminiEmbeddingsEngine,
-        ApiName.LM_STUDIO_EMBEDDINGS: OpenAIEmbeddingsEngine
+        ApiName.LM_STUDIO_EMBEDDINGS: EmbeddingEngine
     },
 }
 __all__ = ["ArxivSearchAPI", "ExaSearchAPI", "GoogleSearchAPI", "RedditSearchAPI", "WikipediaSearchAPI", "APIEngine", "GeminiImageGenerationEngine",
            "LLMEngine", "LLMOpenAI", "LLMAnthropic", "ImageGenerationEngine", "CohereLLMEngine", "GeminiVisionEngine", "GeminiEmbeddingsEngine", "GeminiSpeechToTextEngine",
-           "VisionModelEngine", "AnthropicVisionEngine", "OpenAISpeechToTextEngine", "OpenAIAdvancedSpeechToTextEngine", "BarkEngine"
-           "OpenAITextToSpeechEngine", "OpenAIEmbeddingsEngine", "GeminiLLMEngine", "CohereLLMEngine", "GoogleGraphEngine"]
+           "VisionModelEngine", "AnthropicVisionEngine", "OpenAISpeechToTextEngine", "OpenAIAdvancedSpeechToTextEngine", "BarkEngine", "WolframAlphaEngine", "PixArtImgGenEngine",
+           "OpenAITextToSpeechEngine", "EmbeddingEngine", "GeminiLLMEngine", "CohereLLMEngine", "GoogleGraphEngine"]

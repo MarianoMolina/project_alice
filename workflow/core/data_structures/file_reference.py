@@ -3,11 +3,11 @@ import base64, io, magic, os
 from typing import Union, BinaryIO, Optional
 from pydantic import Field, field_validator
 from PIL import Image
-from workflow.core.data_structures.base_models import BaseDataStructure, FileType
+from workflow.core.data_structures.base_models import FileType, Embeddable
 from workflow.core.data_structures.message import MessageDict
 from workflow.util import LOGGER
 
-class FileReference(BaseDataStructure):
+class FileReference(Embeddable):
     id: Optional[str] = Field(None, description="The unique identifier for the file reference", alias="_id")
     filename: str = Field(..., description="The name of the file reference")
     type: FileType = Field(..., description="The type of the file reference")

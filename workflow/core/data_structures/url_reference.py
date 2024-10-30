@@ -2,9 +2,9 @@ import json
 from datetime import datetime
 from typing import Dict, Any, Optional
 from pydantic import Field, model_validator
-from workflow.core.data_structures.base_models import BaseDataStructure
+from workflow.core.data_structures.base_models import Embeddable
 
-class URLReference(BaseDataStructure):
+class URLReference(Embeddable):
     id: Optional[str] = Field(None, description="The id of the search result", alias="_id")
     title: str = Field(..., description="The title of the search result")
     url: str = Field(..., description="The URL of the search result")

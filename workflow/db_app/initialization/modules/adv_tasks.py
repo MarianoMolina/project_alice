@@ -17,6 +17,16 @@ adv_tasks_module = AdvTasksModule(
                 "description": "The input text to get embeddings for. Can be a string or an array of strings."
             },
             {
+                "key": "prompt_retrieval_parameter",
+                "type": "string",
+                "description": "The prompt to retrieve similar embeddings for."
+            },
+            {
+                "key": "sumilarity_threshold_parameter",
+                "type": "number",
+                "description": "The threshold for the similarity of the embeddings."
+            },
+            {
                 "key": "prompt_img_gen",
                 "type": "string",
                 "description": "The prompt to generate an image from."
@@ -111,6 +121,23 @@ adv_tasks_module = AdvTasksModule(
                         "input": "input_parameter",
                     },
                     "required": ["input"]
+                },
+                "required_apis": ["embeddings"]
+            },
+            {
+                "key": "retrieval_task",
+                "task_type": "RetrievalTask",
+                "task_name": "retrieval_task",
+                "agent": "embedding_agent",
+                "task_description": "Retrieves similar embeddings for the input text",
+                "input_variables": {
+                    "type": "object",
+                    "properties": {
+                        "prompt": "prompt_retrieval_parameter",
+                        "max_results": "max_results_parameter",
+                        "sumilarity_threshold": "sumilarity_threshold_parameter",
+                    },
+                    "required": ["prompt"]
                 },
                 "required_apis": ["embeddings"]
             },

@@ -5,6 +5,7 @@ from workflow.core.data_structures.file_reference import FileReference, FileCont
 from workflow.core.data_structures.task_response import TaskResponse
 from workflow.core.data_structures.url_reference import URLReference
 from workflow.core.data_structures.user_interaction import UserInteraction
+from workflow.core.data_structures.base_models import EmbeddingChunk
 
 class References(BaseModel):
     messages: Optional[List[MessageDict]] = Field(default=None, description="List of message references")
@@ -13,6 +14,7 @@ class References(BaseModel):
     url_references: Optional[List[URLReference]] = Field(default=None, description="List of search result references")
     string_outputs: Optional[List[str]] = Field(default=None, description="List of string output references")
     user_interactions: Optional[List[UserInteraction]] = Field(default=None, description="List of user interaction references")
+    embeddings: Optional[List[EmbeddingChunk]] = Field(default=None, description="List of embedding references")
 
     def model_dump(self, *args, **kwargs) -> Dict[str, Any]:
         data = super().model_dump(*args, **kwargs)

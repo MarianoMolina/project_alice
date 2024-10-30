@@ -83,6 +83,10 @@ class AliceTask(BaseModel):
         default=None,
         description="Associated API engine"
     )
+    data_cluster: Optional[References] = Field(
+        default=None,
+        description="Associated data cluster"
+    )
 
     @property
     def task_type(self) -> str:

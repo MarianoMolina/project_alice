@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Optional, Dict, Any, List, TYPE_CHECKING
 from pydantic import Field, field_validator, BaseModel
-from workflow.core.data_structures.base_models import BaseDataStructure
+from workflow.core.data_structures.base_models import Embeddable
 from workflow.core.data_structures.central_types import ReferencesType
 
 if TYPE_CHECKING:
@@ -25,7 +25,7 @@ class NodeResponse(ExecutionHistoryItem):
         data['references'] = self.references.model_dump(*args, **kwargs)
         return data
 
-class TaskResponse(BaseDataStructure):
+class TaskResponse(Embeddable):
     task_id: Optional[str] = Field(None, description="The id of this task node")
     task_name: str = Field(..., description="The name of the task")
     task_description: str = Field(..., description="A detailed description of the task")

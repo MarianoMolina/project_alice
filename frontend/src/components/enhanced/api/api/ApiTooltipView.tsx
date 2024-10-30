@@ -1,7 +1,7 @@
 import React from 'react';
 import { AnimatedTooltip } from '../../../ui/aceternity/AnimatedTooltip';
 import { API, ApiComponentProps, ApiType } from '../../../../types/ApiTypes';
-import { LaptopMac, Reddit, Google, Search, Book, RemoveRedEye, Brush, Hearing, RecordVoiceOver, Tag, EditNote } from '@mui/icons-material';
+import { LaptopMac, Reddit, Google, Search, Book, RemoveRedEye, Brush, Hearing, RecordVoiceOver, Tag, EditNote, Summarize } from '@mui/icons-material';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 
 const apiIcons: Record<ApiType, React.ReactElement> = {
@@ -12,6 +12,7 @@ const apiIcons: Record<ApiType, React.ReactElement> = {
   [ApiType.EXA_SEARCH]: <Search />,
   [ApiType.ARXIV_SEARCH]: <Book />,
   [ApiType.GOOGLE_KNOWLEDGE_GRAPH]: <Search />,
+  [ApiType.WOLFRAM_ALPHA]: <Summarize />,
   [ApiType.IMG_VISION]: <RemoveRedEye />,
   [ApiType.IMG_GENERATION]: <Brush />,
   [ApiType.SPEECH_TO_TEXT]: <Hearing />,

@@ -1,4 +1,4 @@
-import json, re
+import json, re, numpy as np
 from typing import List, Any, Union, Type, Tuple, Dict
 from workflow.util.logging_config import LOGGER
 from workflow.core.data_structures.task_response import NodeResponse, ExecutionHistoryItem
@@ -257,3 +257,13 @@ def simplify_execution_history(execution_history: List[NodeResponse]) -> List[Ex
         execution_order=node.execution_order,
         exit_code=node.exit_code
     ) for node in execution_history]
+
+def cosine_similarity(vec1: List[float], vec2: List[float]) -> float:
+    """
+    Compute cosine similarity between two vectors.
+    """
+    vec1 = np.array(vec1)
+    vec2 = np.array(vec2)
+    if np.linalg.norm(vec1) == 0 or np.linalg.norm(vec2) == 0:
+        return 0.0
+    return float(np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2)))
