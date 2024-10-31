@@ -1,12 +1,13 @@
 from typing import List, Tuple, Optional, Dict, Any
 from pydantic import Field, BaseModel
 import json
-from workflow.core.tasks.agent_tasks import BasicAgentTask
+from workflow.core.tasks.task import AliceTask
+from workflow.core.agent.agent import AliceAgent
 from workflow.core.data_structures import (
     ApiType, References, NodeResponse, MessageDict, FunctionParameters, ParameterDefinition, URLReference, TasksEndCodeRouting
 )
 from workflow.core.api import APIManager
-from workflow.core.tasks.web_scrapping_tasks.web_scrape_utils import (
+from workflow.util.web_scrape_utils import (
     clean_text, fetch_webpage_and_title, preprocess_html, sample_html,
     extract_json, fallback_parsing_strategy, apply_parsing_strategy
 )
@@ -15,7 +16,8 @@ from workflow.util import LOGGER
 class SelectorModel(BaseModel):
     selectors: List[str]
 
-class WebScrapeBeautifulSoupTask(BasicAgentTask):
+class WebScrapeBeautifulSoupTask(AliceTask):
+    agent: AliceAgent = Field(..., description="The agent to use for the task")
     input_variables: FunctionParameters = Field(
         default=FunctionParameters(
             type="object",
@@ -176,7 +178,7 @@ Example response format:
             message: MessageDict = MessageDict(role="user", content=prompt, generated_by="tool", type="text")
             LOGGER.info(f"Generating selectors for sample {idx}/{len(html_samples)}.")           
             try:
-                new_message = await self.agent._generate_llm_response(api_manager, [message])
+                new_message = await self.agent.generate_llm_response(api_manager, [message])
                 instructions = new_message.content if new_message else None
                 if new_message and new_message.creation_metadata:
                     creation_metadata[f"sample_{idx}"] = new_message.creation_metadata

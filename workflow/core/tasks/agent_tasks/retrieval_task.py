@@ -1,7 +1,8 @@
 import os
 from typing import List, Dict, Any, Union
 from pydantic import Field, BaseModel
-from workflow.core.tasks.agent_tasks import BasicAgentTask
+from workflow.core.tasks.task import AliceTask
+from workflow.core.agent.agent import AliceAgent
 from workflow.core.data_structures import (
     FunctionParameters,
     ParameterDefinition,
@@ -17,7 +18,8 @@ from workflow.core.data_structures import (
 from workflow.core.api import APIManager
 from workflow.util import LOGGER, cosine_similarity, Language
 
-class RetrievalTask(BasicAgentTask):
+class RetrievalTask(AliceTask):
+    agent: AliceAgent = Field(..., description="The agent to use for the task")
     input_variables: FunctionParameters = Field(
         default=FunctionParameters(
             type="object",

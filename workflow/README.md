@@ -225,36 +225,6 @@ To create a new task implementation:
 3. Override the `run` method to implement the specific logic of your task, or whatever method you want to adjust
 4. Add any additional properties or methods specific to your task.
 
-Example of creating a new PromptAgentTask:
-
-```python
-from workflow.core.tasks import PromptAgentTask
-from workflow.core.data_structures import TaskResponse
-
-class MyCustomTask(PromptAgentTask):
-    custom_property: str = "default_value"
-
-    async def run(self, **kwargs) -> TaskResponse:
-        # Implement your task logic here
-        result = await self.agent.generate_response(
-            api_manager=kwargs['api_manager'],
-            messages=[{"role": "user", "content": kwargs['prompt']}]
-        )
-        
-        # Process the result and create a TaskResponse
-        return TaskResponse(
-            task_id=self.id,
-            task_name=self.task_name,
-            task_description=self.task_description,
-            status="complete",
-            result_code=0,
-            task_outputs=str(result),
-            task_inputs=kwargs
-        )
-
-# Don't forget to add your new task to available_task_types in task_utils.py
-```
-
 When creating new tasks, consider the following:
 
 - Ensure your task handles errors appropriately and returns a valid TaskResponse.

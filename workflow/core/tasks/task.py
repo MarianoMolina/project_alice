@@ -247,7 +247,7 @@ class AliceTask(BaseModel):
             current_node = self.start_node or next(iter(self.node_end_code_routing.keys()))
             while current_node:
                 # Check attempt limits
-                if not self.can_retry_node(current_node, execution_history + node_responses):
+                if not self.can_retry_node(current_node, execution_history):
                     return self.create_final_response(
                         node_responses,
                         exit_code=1,
@@ -267,10 +267,11 @@ class AliceTask(BaseModel):
                 if node_response.references and node_response.references.user_interactions:
                     return self.create_partial_response(node_responses, "pending", **kwargs)
                 
+                execution_history.append(node_response)
                 node_responses.append(node_response)
                 
                 # Get next node
-                current_node = self.get_next_node(current_node, execution_history + node_responses)
+                current_node = self.get_next_node(current_node, execution_history)
             
             return self.create_final_response(node_responses, **kwargs)
             
@@ -489,17 +490,24 @@ class AliceTask(BaseModel):
         return self.get_task_response("", 1, diagnostics, "failed", **kwargs)
 
     def create_final_response(self, node_responses: List[NodeResponse], exit_code: Optional[int] = None, diagnostics: Optional[str] = None, **kwargs) -> TaskResponse:
-        """Create a response for a completed task."""
+        """
+        Create a response for a completed task.
+        
+        The final exit code is determined by:
+        1. Explicitly provided exit_code parameter
+        2. Custom mapping via map_final_exit_code if implemented
+        3. Default success/failure logic (0 if all nodes succeeded, 1 otherwise)
+        """
         if exit_code is None:
-            exit_code = 1 if any(node.exit_code != 0 for node in node_responses) else 0
+            exit_code = self.map_final_exit_code(node_responses)
             
         if diagnostics is None:
-            diagnostics = "Task completed successfully" if exit_code == 0 else "Task execution failed"
+            diagnostics = self.exit_codes.get(exit_code, "Task execution completed")
         
         # Try to use output template if available
         output_template = self.get_prompt_template("output_template")
         summary = generate_node_responses_summary(
-            node_responses=node_responses, 
+            node_responses=node_responses,
             verbose=True,
             output_prompt=output_template
         )
@@ -512,7 +520,28 @@ class AliceTask(BaseModel):
             node_references=node_responses,
             **kwargs
         )
-    
+
+    def map_final_exit_code(self, node_responses: List[NodeResponse]) -> int:
+        """
+        Map node responses to final task exit code.
+        Override this method to implement custom exit code mapping.
+        
+        Default implementation:
+        - Returns 1 only if any node's exit code is not in its success codes
+        - Returns 0 otherwise (including if no nodes exist)
+        """
+        for node in node_responses:
+            if node.node_name in self.node_end_code_routing:
+                # Get all codes that don't retry (success codes)
+                success_codes = [
+                    code for code, (_, is_retry) in 
+                    self.node_end_code_routing[node.node_name].items() 
+                    if not is_retry
+                ]
+                if node.exit_code not in success_codes:
+                    return 1
+        return 0
+
     # Input validation
     def get_prompt_template(self, template_name: str) -> Optional[Prompt]:
         """Get a prompt template by name from the task's templates."""

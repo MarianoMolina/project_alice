@@ -1,4 +1,4 @@
-import docker, os, json, traceback, re
+import json, traceback, re
 from bson import ObjectId
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Dict, Any, List, Optional, Tuple, Callable, Union
@@ -10,6 +10,19 @@ from workflow.core.data_structures import (
     TaskResponse, FileReference, ContentType, MessageDict, ApiType, ModelType, FileType, References, FileContentReference, EmbeddingChunk
     )
 from workflow.util import LOGGER, run_code, LOG_LEVEL, Language
+from enum import IntEnum
+
+class ToolPermission(IntEnum):
+    NORMAL = 0       # Tools can be used normally
+    DISABLED = 1     # Tools cannot be used
+    WITH_PERMISSION = 2  # Tools require user permission
+    DRY_RUN = 3     # Tools can be called but not executed
+
+class CodePermission(IntEnum):
+    NORMAL = 0      # All valid code blocks are executed
+    DISABLED = 1    # No code execution
+    WITH_PERMISSION = 2  # Tools require user permission
+    TAGGED_ONLY = 3 # Only blocks with _execute tag are executed
 
 class AliceAgent(BaseModel):
     id: Optional[str] = Field(default=None, description="The ID of the agent", alias="_id")
@@ -27,49 +40,63 @@ class AliceAgent(BaseModel):
         },
         description="Dictionary of models associated with the agent for different tasks"
     )
-    has_functions: bool = Field(default=False, description="Whether the agent can use functions")
-    has_code_exec: bool = Field(default=False, description="Whether the agent can execute code")
+    has_functions: ToolPermission = Field(
+        default=ToolPermission.DISABLED,
+        description="Level of tool usage permission"
+    )
+    has_code_exec: CodePermission = Field(
+        default=CodePermission.DISABLED,
+        description="Level of code execution permission"
+    )
     max_consecutive_auto_reply: int = Field(default=10, description="The maximum number of consecutive auto replies")
     model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str})
+
 
     @property
     def llm_model(self) -> AliceModel:
         return self.models[ModelType.CHAT] or self.models[ModelType.INSTRUCT]
+
+    def _get_code_exec_prompt(self) -> str:
+        """Generate the appropriate code execution prompt based on permission level."""
+        if self.has_code_exec == CodePermission.NORMAL:
+            return """
+You have full access to code execution. Any code blocks you provide will be automatically executed.
+Please ensure that whenever you add a code block, you understand it will be executed immediately.
+Only provide code that is safe and appropriate to run.
+
+Example of providing executable code:
+```python
+print("This will be executed automatically")
+```
+"""
+        elif self.has_code_exec == CodePermission.TAGGED_ONLY:
+            return """
+You have access to code execution, but it requires explicit marking.
+To execute code, add '_execute' to your code block's language tag.
+Only code blocks marked with '_execute' will be executed.
+
+Example of providing executable code:
+```python_execute
+print("This will be executed")
+```
+
+Example of non-executable code:
+```python
+print("This is just for demonstration")
+```
+"""
+        return ""
+
+    def _prepare_system_message(self) -> str:
+        """Prepare the system message with appropriate permission prompts."""
+        base_message = self.system_message.format_prompt()
+        code_prompt = self._get_code_exec_prompt()
+        
+        # Combine prompts, ensuring proper spacing
+        prompts = [p for p in [base_message, code_prompt] if p]
+        return "\n\n".join(prompts)
     
-    async def generate_response(self, api_manager: APIManager, node_name: Optional[str], messages: List[MessageDict], tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = [], recursion_depth: int = 0) -> List[MessageDict]:
-        try:
-            if recursion_depth >= self.max_consecutive_auto_reply:
-                LOGGER.info("Max recursion depth reached")
-                return [MessageDict(
-                    role="assistant",
-                    content="Maximum recursion depth reached. Terminating response generation.",
-                    generated_by="llm",
-                    type="text",
-                    assistant_name=self.name
-                )]
-            
-            if not node_name or node_name == "default" or node_name == "llm_generation":
-                # Step 1: LLM Generation
-                llm_response = await self._generate_llm_response(api_manager, messages, tools_list)
-            else:
-                llm_response = messages[-1].model_copy()
-            
-            if node_name != "code_execution":
-                # Step 2: Tool Calls
-                tool_messages = await self._process_tool_calls(llm_response.tool_calls, tool_map, tools_list) if self.has_functions and llm_response.tool_calls else []
-            else:
-                tool_messages = []
-            # Step 3: Code Execution
-            code_messages, _, _ = await self._process_code_execution([llm_response] + tool_messages) if self.has_code_exec else []
-            
-            return [llm_response] + tool_messages + code_messages
-
-        except Exception as e:
-            LOGGER.error(f"Error in agent.generate_response: {str(e)}")
-            LOGGER.error(f"Traceback: {traceback.format_exc()}")
-            raise
-
-    async def _generate_llm_response(self, api_manager: APIManager, messages: List[MessageDict], tools_list: List[ToolFunction] = []) -> MessageDict:
+    async def generate_llm_response(self, api_manager: APIManager, messages: List[MessageDict], tools_list: List[ToolFunction] = []) -> MessageDict:
         LOGGER.info("Generating LLM response")
         chat_model = self.llm_model
         response_ref: References = await api_manager.generate_response_with_api_engine(
@@ -98,9 +125,83 @@ class AliceAgent(BaseModel):
             assistant_name=self.name,
             creation_metadata=response.creation_metadata
         )
+    
+    def collect_code_blocks(self, messages: List[MessageDict]) -> List[Tuple[str, str]]:
+        """Collect and filter code blocks based on permission level."""
+        LOGGER.debug(f"Entering collect_code_blocks with {len(messages)} messages")
+        code_blocks: List[Tuple[str, str]] = []
         
-    async def _process_tool_calls(self, tool_calls: List[ToolCall] = [], tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []) -> List[MessageDict]:
+        for message in messages:
+            if not message.content:
+                continue
+                
+            # Extract code blocks using regex
+            pattern = r'```(\w*)[^\S\r\n]*\n?(.*?)```'
+            matches = re.findall(pattern, message.content, re.DOTALL)
+            
+            for lang, code in matches:
+                lang = lang.strip()
+                code = code.strip()
+                
+                if not code or not lang:
+                    continue
+                    
+                # Handle tagged execution mode
+                if self.has_code_exec == CodePermission.TAGGED_ONLY:
+                    if lang.endswith('_execute'):
+                        # Strip _execute and add to blocks
+                        base_lang = lang.replace('_execute', '')
+                        code_blocks.append((base_lang, code))
+                elif self.has_code_exec == CodePermission.NORMAL:
+                    code_blocks.append((lang, code))
+                    
+        LOGGER.debug(f"Collected {len(code_blocks)} code blocks")
+        return code_blocks
+
+    async def process_code_execution(self, messages: List[MessageDict]) -> Tuple[List[MessageDict], Dict, int]:
+        """Process code execution based on permission level."""
+        if self.has_code_exec == CodePermission.DISABLED:
+            return [], {}, 0
+            
+        code_blocks = self.collect_code_blocks(messages)
+        if not code_blocks:
+            LOGGER.warning('No executable code blocks found')
+            return [], {}, 0
+
+        # Group code blocks by language
+        code_by_lang = {}
+        for lang, code in code_blocks:
+            if lang not in code_by_lang:
+                code_by_lang[lang] = []
+            code_by_lang[lang].append(code)
+
+        executed_messages = []
+        exit_code = 0
+        
+        for lang, codes in code_by_lang.items():
+            # Merge code blocks for each language
+            merged_code = "\n\n".join(codes)
+            current_exit_code, logs = self._execute_code_in_docker(merged_code, lang)
+            exit_code = current_exit_code if current_exit_code != 0 else exit_code
+            
+            executed_messages.append(MessageDict(
+                role="tool",
+                content=f"Language: {lang}\nExit Code: {current_exit_code}\nOutput:\n{logs}",
+                generated_by="tool",
+                step="code_execution",
+                type=ContentType.TEXT,
+                references=References(string_outputs=[merged_code, lang])
+            ))
+            
+        return executed_messages, code_by_lang, exit_code
+
+    async def process_tool_calls(self, tool_calls: List[ToolCall] = [], tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []) -> List[MessageDict]:
+        """Process tool calls based on permission level."""
+        if self.has_functions == ToolPermission.DISABLED:
+            return []
+            
         tool_messages: List[MessageDict] = []
+        
         for tool_call in tool_calls:
             tool_call_id = tool_call.id
             function_name = tool_call.function.name
@@ -110,47 +211,36 @@ class AliceAgent(BaseModel):
                 arguments = json.loads(arguments_str)
             except json.JSONDecodeError:
                 error_msg = f"Error decoding JSON arguments: {arguments_str}"
-                tool_messages.append(MessageDict(
-                    role="tool",
-                    content=error_msg,
-                    generated_by="tool",
-                    step=function_name,
-                    type=ContentType.TEXT
-                ))
+                tool_messages.append(self._create_tool_error_message(error_msg, function_name))
                 continue
 
             if function_name not in tool_map:
-                tool_messages.append(MessageDict(
-                    role="tool",
-                    content=f"Error: Tool '{function_name}' not found",
-                    generated_by="tool",
-                    step=function_name,
-                    type=ContentType.TEXT
-                ))
+                tool_messages.append(self._create_tool_error_message(f"Tool '{function_name}' not found", function_name))
                 continue
             
             tool_function = next((tool for tool in (ensure_tool_function(tool) for tool in tools_list) if tool.function.name == function_name), None)
             if not tool_function:
-                tool_messages.append(MessageDict(
-                    role="tool",
-                    content=f"Error: Tool function '{function_name}' not found in tools list",
-                    generated_by="tool",
-                    step=function_name,
-                    type=ContentType.TEXT
-                ))
+                tool_messages.append(self._create_tool_error_message(f"Tool function '{function_name}' not found in tools list", function_name))
                 continue
             
             valid_inputs, error_message = self._validate_tool_inputs(ensure_tool_function(tool_function), arguments)
             if not valid_inputs:
+                tool_messages.append(self._create_tool_error_message(f"Error in tool '{function_name}': {error_message}", function_name))
+                continue
+            
+            # Handle dry run mode
+            if self.has_functions == ToolPermission.DRY_RUN:
                 tool_messages.append(MessageDict(
                     role="tool",
-                    content=f"Error in tool '{function_name}': {error_message}",
+                    content=f"DRY RUN: Would execute {function_name} with arguments: {json.dumps(arguments, indent=2)}",
                     generated_by="tool",
                     step=function_name,
+                    tool_call_id=tool_call_id,
                     type=ContentType.TEXT
                 ))
                 continue
             
+            # Execute tool
             try:
                 result = await tool_map[function_name](**arguments)
                 task_result = result if isinstance(result, TaskResponse) else None
@@ -164,21 +254,25 @@ class AliceAgent(BaseModel):
                     references=References(task_responses=[task_result] if task_result else None),
                 ))
             except Exception as e:
-                tool_messages.append(MessageDict(
-                    role="tool",
-                    content=f"Error executing tool '{function_name}': {str(e)}",
-                    generated_by="tool",
-                    step=function_name,
-                    type=ContentType.TEXT
-                ))
+                tool_messages.append(self._create_tool_error_message(f"Error executing tool '{function_name}': {str(e)}", function_name))
         
         return tool_messages
-    
+
+    def _create_tool_error_message(self, error_msg: str, function_name: str) -> MessageDict:
+        """Helper method to create consistent tool error messages."""
+        return MessageDict(
+            role="tool",
+            content=error_msg,
+            generated_by="tool",
+            step=function_name,
+            type=ContentType.TEXT
+        )
+
     def _validate_tool_inputs(self, tool_function: ToolFunction, arguments: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
+        """Validate tool inputs against their schema."""
         required_params = tool_function.function.parameters.required
         properties = tool_function.function.parameters.properties
 
-        # Map string type names to Python types
         type_map = {
             "string": str,
             "integer": int,
@@ -206,76 +300,12 @@ class AliceAgent(BaseModel):
                 return False, f"Invalid type for parameter '{param}'. Expected {expected_type}, got {type(value).__name__}"
 
         return True, None
-    
-    def collect_code_blocs(self, messages: List[MessageDict]) -> List[Tuple[str, str]]:
-        LOGGER.debug(f"Entering collect_code_blocs with {len(messages)} messages")
-        code_blocs: List[Tuple[str, str]] = []
-        for i, message in enumerate(messages):
-            LOGGER.debug(f"Processing message {i+1}/{len(messages)}")
-            if not isinstance(message, MessageDict):
-                try:
-                    message = MessageDict(**message)
-                except Exception as e:
-                    LOGGER.error(f"Error parsing message: {e}")
-                    continue
-            if message.content:
-                LOGGER.debug(f"Message content length: {len(message.content)}")
-                extracted_blocs = self._extract_code_blocs(message.content)
-                LOGGER.debug(f"Extracted {len(extracted_blocs)} code blocs from message {i+1}")
-                code_blocs.extend(extracted_blocs)
-        LOGGER.debug(f"Total code blocs collected: {len(code_blocs)}")
-        return code_blocs
-
-    async def _process_code_execution(self, messages: List[MessageDict]) -> Tuple[List[MessageDict], Dict, int]:
-        
-        code_blocs = self.collect_code_blocs(messages)
-        if not code_blocs:
-            LOGGER.warning(f'No code blocs found')
-            LOGGER.debug(f'Messages with no code blocks: {messages}')
-            return [], {}
-
-        # Group code blocs by language
-        code_by_lang = {}
-        for lang, code in code_blocs:
-            if lang not in code_by_lang:
-                code_by_lang[lang] = []
-            code_by_lang[lang].append(code)
-
-        executed_messages = []
-        for lang, codes in code_by_lang.items():
-            if not lang or not isinstance(lang, str) or not isinstance(code, str): pass
-            # Merge code blocs for each language
-            merged_code = "\n\n".join(codes)
-            exit_code, logs = self._execute_code_in_docker(merged_code, lang)
-            executed_messages.append(MessageDict(
-                role="tool",
-                content=f"Language: {lang}\nExit Code: {exit_code}\nOutput:\n{logs}",
-                generated_by="tool",
-                step="code_execution",
-                type=ContentType.TEXT, 
-                references=References(string_outputs=[merged_code, lang])
-            ))
-        return executed_messages, code_by_lang, exit_code
-
-    def _extract_code_blocs(self, content: str) -> List[Tuple[str, str]]:
-        # Improved regex pattern
-        pattern = r'```(\w*)[^\S\r\n]*\n?(.*?)```'
-        matches = re.findall(pattern, content, re.DOTALL)
-        
-        code_blocs = []
-        for lang, code in matches:
-            language = lang.strip() or 'unknown'
-            code = code.strip()
-            if code and language != 'unknown':
-                code_blocs.append((language, code))
-        
-        LOGGER.debug(f"Extracted {len(code_blocs)} code blocs")
-        return code_blocs
 
     def _execute_code_in_docker(self, code: str, lang: str) -> Tuple[int, str]:
+        """Execute code in Docker container."""
         if not code or not lang:
             return 1, "Invalid code or language"
-        LOGGER.info(f"Executing code in {lang if lang else ''} - Code: \n{code}")
+        LOGGER.info(f"Executing code in {lang} - Code: \n{code}")
         try:
             logs, exit_code = run_code(code, lang, log_level=LOG_LEVEL)
             return exit_code, logs
@@ -284,11 +314,11 @@ class AliceAgent(BaseModel):
             return 1, str(e)
 
     def _prepare_messages_for_api(self, messages: List[MessageDict]) -> List[Dict[str, Any]]:
-        """Prepare messages for the API call, including the system message."""
+        """Prepare messages for the API call."""
         return [self._convert_message_dict_to_api_format(msg) for msg in messages]
 
     def _convert_message_dict_to_api_format(self, message: MessageDict) -> Dict[str, Any]:
-        """Convert a MessageDict to the format expected by the API."""
+        """Convert a MessageDict to the API format."""
         api_message = {
             "role": message.role,
             "content": message.content
@@ -298,40 +328,6 @@ class AliceAgent(BaseModel):
         if message.tool_call_id:
             api_message["tool_call_id"] = str(message.tool_call_id)
         return api_message
-    
-    async def chat(self, api_manager: APIManager, messages: Optional[List[MessageDict]] = [], initial_message: Optional[str] = None, max_turns: int = 1, tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []) -> Tuple[List[MessageDict], List[MessageDict]]:
-        start_messages = messages if messages else []
-        gen_messages = []
-        if initial_message:
-            start_messages.append(MessageDict(role="user", content=initial_message))
-        all_messages = start_messages.copy()
-
-        for turn in range(max_turns):
-            try:
-                new_messages = await self.generate_response(api_manager, all_messages, tool_map, tools_list, recursion_depth=turn)
-                all_messages.extend(new_messages)
-                gen_messages.extend(new_messages)
-                
-                if any("TERMINATE" in msg.content for msg in new_messages):
-                    break
-            except Exception as e:
-                error_message = f"Error in agent chat occurred during turn {turn + 1}: {str(e)}"
-                LOGGER.error(error_message)
-                LOGGER.error(f"Traceback: {traceback.format_exc()}")
-                
-                # Create an error message
-                error_msg = MessageDict(
-                    role="assistant",
-                    content=error_message,
-                    generated_by="system",
-                    type=ContentType.TEXT,
-                    assistant_name=self.name
-                )
-                gen_messages.append(error_msg)                
-                # Break the loop as an error occurred
-                break
-        
-        return gen_messages, start_messages
     
     async def generate_vision_response(self, api_manager: APIManager, file_references: List[FileReference], prompt: str) -> MessageDict:
         vision_model = self.models[ModelType.VISION] or api_manager.get_api_by_type(ApiType.IMG_VISION).default_model

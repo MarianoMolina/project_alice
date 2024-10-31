@@ -1,13 +1,15 @@
 from typing import List
 from pydantic import Field
-from workflow.core.tasks.agent_tasks import BasicAgentTask
+from workflow.core.tasks.task import AliceTask
+from workflow.core.agent.agent import AliceAgent
 from workflow.core.data_structures import (
     FunctionParameters, ParameterDefinition, MessageDict, ApiType, References, NodeResponse, TasksEndCodeRouting
 )
 from workflow.core.api import APIManager
 from workflow.util import LOGGER
 
-class EmbeddingTask(BasicAgentTask):
+class EmbeddingTask(AliceTask):
+    agent: AliceAgent = Field(..., description="The agent to use for the task")
     input_variables: FunctionParameters = Field(
         default=FunctionParameters(
             type="object",
