@@ -5,7 +5,6 @@ from pydantic import Field, model_validator
 from workflow.core.data_structures.base_models import Embeddable
 
 class URLReference(Embeddable):
-    id: Optional[str] = Field(None, description="The id of the search result", alias="_id")
     title: str = Field(..., description="The title of the search result")
     url: str = Field(..., description="The URL of the search result")
     content: str = Field(..., description="The content of the search result")

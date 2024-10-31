@@ -1,15 +1,15 @@
 from enum import Enum
 from typing import Dict, Any, Optional, List, Callable, Tuple
 from pydantic import BaseModel, Field, model_validator
-from workflow.core.prompt import Prompt
 from workflow.core.agent import AliceAgent
 from workflow.core.api import APIManager, APIEngine
 from workflow.core.data_structures import (
     ApiType, FunctionParameters, ParameterDefinition,  FunctionConfig, ToolFunction, References, TaskResponse, 
-    NodeResponse, UserInteraction, UserCheckpoint, NodeResponse, TasksEndCodeRouting
+    NodeResponse, UserInteraction, UserCheckpoint, NodeResponse, TasksEndCodeRouting, Prompt
 )
-from workflow.util.utils import simplify_execution_history, generate_default_summary, convert_value_to_type
-from workflow.util import LOGGER
+from workflow.util.utils import simplify_execution_history
+from workflow.util import LOGGER, convert_value_to_type
+from workflow.core.tasks.task_utils import validate_and_process_function_inputs, generate_node_responses_summary
 
 class AliceTask(BaseModel):
     """
@@ -243,8 +243,10 @@ class AliceTask(BaseModel):
                 if not self.validate_required_apis(api_manager):
                     return self.get_failed_task_response("Required APIs not available", **kwargs)
             
+            # Determine starting node based on execution history
+            current_node = self.determine_next_node(execution_history)
+
             # Execute nodes
-            current_node = self.start_node or next(iter(self.node_end_code_routing.keys()))
             while current_node:
                 # Check attempt limits
                 if not self.can_retry_node(current_node, execution_history):
@@ -310,7 +312,7 @@ class AliceTask(BaseModel):
                     value = node_response.references.detailed_summary()
                     if node_name in self.input_variables.properties:
                         param_type = self.input_variables.properties[node_name].type
-                        kwargs[node_name] = self._convert_value_to_type(value, node_name, param_type)
+                        kwargs[node_name] = convert_value_to_type(value, node_name, param_type)
                     else:
                         kwargs[node_name] = value
                     LOGGER.debug(f"Updated variable {node_name} with node output")
@@ -331,6 +333,35 @@ class AliceTask(BaseModel):
                 }]),
                 execution_order=len(execution_history) + len(node_responses)
             )
+
+    async def run_from_task_response(self, task_response: TaskResponse, **kwargs) -> TaskResponse:
+        """
+        Continues execution of a task from a previous TaskResponse.
+        
+        This method is particularly useful for handling tasks that were paused
+        due to user interactions and need to be resumed after receiving user input.
+        
+        Args:
+            task_response (TaskResponse): Previous task response to continue from
+            **kwargs: Additional task parameters
+            
+        Returns:
+            TaskResponse: Updated task response after continuing execution
+        """
+        # Validate task response status
+        if task_response.status != "pending":
+            LOGGER.warning(f"Task {self.task_name} is not pending (status: {task_response.status})")
+            return task_response
+            
+        # Get execution history from task response
+        execution_history = task_response.node_references or []
+        
+        # Update task inputs with original inputs
+        if task_response.task_inputs:
+            kwargs.update(task_response.task_inputs)
+            
+        # Continue task execution
+        return await self.run(execution_history=execution_history, **kwargs)
     
     # User interaction handling
     def handle_user_checkpoints(self, execution_history: List[NodeResponse] = None, node_name: str = None) -> Optional[NodeResponse]:
@@ -447,7 +478,44 @@ class AliceTask(BaseModel):
                 return None
                 
         return next_node
-
+    
+    def determine_next_node(self, execution_history: List[NodeResponse]) -> Optional[str]:
+        """
+        Determines the next node to execute based on execution history.
+        
+        If there's a previous node from this task in the history, determines next node
+        based on its exit code and routing rules. Otherwise, returns the start node
+        or first available node.
+        
+        Args:
+            execution_history: List of previous node executions
+            
+        Returns:
+            Optional[str]: Name of the next node to execute, or None if no valid next node
+        """
+        # Find the last node from this task
+        last_task_node = next(
+            (node for node in reversed(execution_history)
+             if node.parent_task_id == self.id),
+            None
+        )
+        
+        if last_task_node:
+            # If node has a user checkpoint with response, get next node from checkpoint
+            if last_task_node.references and last_task_node.references.user_interactions:
+                user_interaction = last_task_node.references.user_interactions[-1]
+                if user_interaction.user_response:
+                    checkpoint = self.user_checkpoints.get(last_task_node.node_name)
+                    if checkpoint:
+                        selected_option = user_interaction.user_response.selected_option
+                        return checkpoint.task_next_obj.get(selected_option)
+            
+            # Otherwise use standard routing logic
+            return self.get_next_node(last_task_node.node_name, execution_history)
+        
+        # If no previous nodes from this task, return start node or first available
+        return self.start_node or next(iter(self.node_end_code_routing.keys()))
+    
     # Response creation methods
     def get_task_response(self, task_outputs: str, result_code: int, diagnostics: str = None, 
                          status: str = "complete", node_references: List[NodeResponse] = None, **kwargs) -> TaskResponse:
@@ -564,54 +632,6 @@ class AliceTask(BaseModel):
             kwargs=kwargs
         )
 
-    def _convert_value_to_type(self, value: Any, param_name: str, param_type: str) -> Any:
-        """
-        Converts a value to the specified parameter type.
-        
-        Args:
-            value: The value to convert
-            param_name: The name of the parameter (for error messages)
-            param_type: The target type to convert to
-            
-        Returns:
-            The converted value
-            
-        Raises:
-            ValueError: If conversion fails
-        """
-        try:
-            if param_type == "string":
-                return str(value)
-            elif param_type == "integer":
-                if isinstance(value, str):
-                    # Try to convert string to float first to handle "1.0" -> 1
-                    return int(float(value))
-                return int(value)
-            elif param_type == "number":
-                return float(value)
-            elif param_type == "boolean":
-                if isinstance(value, str):
-                    return value.lower() in ("true", "1", "yes", "y")
-                return bool(value)
-            elif param_type == "array":
-                if isinstance(value, str):
-                    import json
-                    return json.loads(value)
-                if isinstance(value, (list, tuple)):
-                    return list(value)
-                raise ValueError(f"Cannot convert {type(value)} to array")
-            elif param_type == "object":
-                if isinstance(value, str):
-                    import json
-                    return json.loads(value)
-                if isinstance(value, dict):
-                    return value
-                raise ValueError(f"Cannot convert {type(value)} to object")
-            else:
-                return value
-        except Exception as e:
-            raise ValueError(f"Failed to convert {param_name} to {param_type}: {str(e)}")
-
     # API validation
     def validate_required_apis(self, api_manager: APIManager) -> bool:
         """Validate that all required APIs are available and healthy."""
@@ -684,121 +704,3 @@ class AliceTask(BaseModel):
             return node.references
         LOGGER.error(f"No node found with name: {node_name}")
         return None
-    
-
-def generate_node_responses_summary(
-    node_responses: List[NodeResponse], 
-    verbose: bool = False,
-    output_prompt: Optional[Prompt] = None
-) -> str:
-    """
-    Generate a summary of node responses, optionally using a template.
-    
-    Args:
-        node_responses: List of node responses to summarize
-        verbose: Whether to include detailed information
-        output_prompt: Optional prompt template to format the output
-        
-    Returns:
-        Formatted summary string
-    """
-    if output_prompt:
-        try:
-            # Extract variables from node responses
-            prompt_vars = {}
-            for param_name in output_prompt.input_variables:
-                matching_node = next(
-                    (node for node in reversed(node_responses)
-                     if node.node_name == param_name and node.references),
-                    None
-                )
-                if matching_node:
-                    value = matching_node.references.detailed_summary()
-                    prompt_vars[param_name] = value
-                elif param_name in output_prompt.parameters.properties:
-                    param_def = output_prompt.parameters.properties[param_name]
-                    if param_def.default is not None:
-                        prompt_vars[param_name] = param_def.default
-                    else:
-                        LOGGER.warning(f"Missing required parameter {param_name} for output template")
-                        return generate_default_summary(node_responses, verbose)
-            
-            return output_prompt.format_prompt(**prompt_vars)
-            
-        except Exception as e:
-            LOGGER.error(f"Error formatting output with template: {str(e)}")
-            return generate_default_summary(node_responses, verbose)
-    
-    return generate_default_summary(node_responses, verbose)
-    
-def validate_and_process_function_inputs(
-    params: FunctionParameters,
-    execution_history: List[NodeResponse],
-    kwargs: Dict[str, Any]
-) -> Tuple[Dict[str, Any], Optional[str]]:
-    """
-    Validates and processes input parameters against a FunctionParameters definition.
-    
-    Args:
-        params: FunctionParameters object defining expected inputs
-        execution_history: Previous execution history to check for variable values
-        kwargs: Input parameters to validate and process
-        
-    Returns:
-        Tuple containing processed inputs dict and error message (if any)
-    """
-    processed_inputs = kwargs.copy()
-
-    # Check each required parameter
-    for param_name in params.required:
-        # Skip if already in kwargs and no matching node exists
-        if param_name in processed_inputs and not any(
-            node.node_name == param_name for node in execution_history
-        ):
-            continue
-
-        # Look for matching node in history
-        matching_node = next(
-            (node for node in reversed(execution_history)
-             if node.node_name == param_name and node.references),
-            None
-        )
-
-        if matching_node:
-            try:
-                # Get value from node references
-                value = matching_node.references.detailed_summary()
-                param_def = params.properties[param_name]
-                
-                # Convert to the correct type
-                processed_inputs[param_name] = convert_value_to_type(
-                    value=value,
-                    param_name=param_name,
-                    param_type=param_def.type
-                )
-                LOGGER.debug(f"Using value from node {param_name} in execution history")
-            except (ValueError, TypeError) as e:
-                return {}, f"Error converting value for parameter '{param_name}': {str(e)}"
-        
-        # If still not found, check for default value
-        elif param_name not in processed_inputs:
-            param_def = params.properties[param_name]
-            if param_def.default is not None:
-                processed_inputs[param_name] = param_def.default
-            else:
-                return {}, f"Missing required parameter: {param_name}"
-
-    # Validate and convert all provided inputs
-    for param_name, param_value in list(processed_inputs.items()):
-        if param_name in params.properties:
-            param_def = params.properties[param_name]
-            try:
-                processed_inputs[param_name] = convert_value_to_type(
-                    value=param_value,
-                    param_name=param_name,
-                    param_type=param_def.type
-                )
-            except (ValueError, TypeError) as e:
-                return {}, f"Invalid value for parameter '{param_name}': {str(e)}"
-
-    return processed_inputs, None

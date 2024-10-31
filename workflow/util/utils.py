@@ -1,7 +1,6 @@
 import json, re, numpy as np
 from typing import List, Any, Union, Type, Tuple, Dict
 from workflow.util.logging_config import LOGGER
-from workflow.core.data_structures.task_response import NodeResponse, ExecutionHistoryItem
 
 def json_to_python_type_mapping(json_type: str) -> Type | Tuple[Type, ...] | None:
     type_mapping = {
@@ -218,25 +217,6 @@ def convert_value_to_type(value: Any, param_name: str, param_type: str) -> Any:
     except Exception as e:
         raise ValueError(f"Failed to convert {param_name} to {param_type}: {str(e)}")
 
-def generate_default_summary(node_responses: List[NodeResponse], verbose: bool = False) -> str:
-    """Generate default summary format for node responses."""
-    sorted_nodes = sorted(node_responses, key=lambda x: x.execution_order)
-    
-    if verbose:
-        summaries = []
-        for i, node in enumerate(sorted_nodes, 1):
-            node_summary = f"Node {i} (Order: {node.execution_order}, Name: {node.node_name}, Exit: {node.exit_code}):"
-            references_summary = node.references.detailed_summary() if node.references else "No references"
-            node_summary += f"\n    {references_summary}"
-            summaries.append(node_summary)
-        return "\n\n".join(summaries)
-    else:
-        summaries = []
-        for node in sorted_nodes:
-            references_summary = node.references.summary() if node.references else "No refs"
-            summaries.append(f"{node.node_name}({node.execution_order}):{references_summary}")
-        return "\n\n".join(summaries)
-
 def get_traceback() -> str:
     """
     Get the traceback information for the current exception.
@@ -247,16 +227,6 @@ def get_traceback() -> str:
     import traceback
     return traceback.format_exc()
 
-def simplify_execution_history(execution_history: List[NodeResponse]) -> List[ExecutionHistoryItem]:
-    """
-    Returns a simplified list of execution history items from a list of node responses.
-    """
-    return [ExecutionHistoryItem(
-        parent_task_id=node.parent_task_id,
-        node_name=node.node_name,
-        execution_order=node.execution_order,
-        exit_code=node.exit_code
-    ) for node in execution_history]
 
 def cosine_similarity(vec1: List[float], vec2: List[float]) -> float:
     """
@@ -267,3 +237,51 @@ def cosine_similarity(vec1: List[float], vec2: List[float]) -> float:
     if np.linalg.norm(vec1) == 0 or np.linalg.norm(vec2) == 0:
         return 0.0
     return float(np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2)))
+
+def convert_value_to_type(value: Any, param_name: str, param_type: str) -> Any:
+    """
+    Converts a value to the specified parameter type.
+    
+    Args:
+        value: The value to convert
+        param_name: The name of the parameter (for error messages)
+        param_type: The target type to convert to
+        
+    Returns:
+        The converted value
+        
+    Raises:
+        ValueError: If conversion fails
+    """
+    try:
+        if param_type == "string":
+            return str(value)
+        elif param_type == "integer":
+            if isinstance(value, str):
+                # Try to convert string to float first to handle "1.0" -> 1
+                return int(float(value))
+            return int(value)
+        elif param_type == "number":
+            return float(value)
+        elif param_type == "boolean":
+            if isinstance(value, str):
+                return value.lower() in ("true", "1", "yes", "y")
+            return bool(value)
+        elif param_type == "array":
+            if isinstance(value, str):
+                import json
+                return json.loads(value)
+            if isinstance(value, (list, tuple)):
+                return list(value)
+            raise ValueError(f"Cannot convert {type(value)} to array")
+        elif param_type == "object":
+            if isinstance(value, str):
+                import json
+                return json.loads(value)
+            if isinstance(value, dict):
+                return value
+            raise ValueError(f"Cannot convert {type(value)} to object")
+        else:
+            return value
+    except Exception as e:
+        raise ValueError(f"Failed to convert {param_name} to {param_type}: {str(e)}")

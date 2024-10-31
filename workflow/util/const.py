@@ -1,6 +1,5 @@
 import os
 from dotenv import load_dotenv
-from typing import Literal
 load_dotenv()
 
 BACKEND_PORT = os.getenv("BACKEND_PORT", 3000)

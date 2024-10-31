@@ -2,8 +2,9 @@ import re
 from bson import ObjectId
 from jinja2 import Template
 from typing import Optional, List, Any, Dict, Union
-from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
-from workflow.core.data_structures import FunctionParameters
+from pydantic import Field, field_validator, model_validator, ConfigDict
+from workflow.core.data_structures.parameters import FunctionParameters
+from workflow.core.data_structures.base_models import BaseDataStructure
 
 TYPE_MAPPING = {
     "string": str,
@@ -14,7 +15,7 @@ TYPE_MAPPING = {
     "dict": dict
 }
 
-class Prompt(BaseModel):
+class Prompt(BaseDataStructure):
     """
     Represents a prompt for language models, with support for templating and parameter validation.
 
@@ -55,24 +56,6 @@ class Prompt(BaseModel):
         >>> prompt.format_prompt(name="Alice")
         'Hello, Alice!'
     """
-import re
-from bson import ObjectId
-from jinja2 import Template
-from typing import Optional, List, Any, Dict
-from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
-from workflow.core.data_structures import FunctionParameters
-
-TYPE_MAPPING = {
-    "string": str,
-    "integer": int,
-    "float": float,
-    "boolean": bool,
-    "list": list,
-    "dict": dict
-}
-
-class Prompt(BaseModel):
-    id: Optional[str] = Field(default=None, description="The unique ID of the prompt, must match the ID in the database", alias="_id")
     name: str = Field(..., description="The name of the prompt.")
     content: str = Field(..., description="The content of the prompt.")
     is_templated: bool = Field(default=False, description="Whether the prompt is templated or not.")

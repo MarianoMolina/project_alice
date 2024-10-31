@@ -3,12 +3,11 @@ from typing import List, Dict, Any, Optional, Callable
 from workflow.util import LOGGER
 from workflow.core.api import APIManager
 from workflow.core.data_structures import (
-    MessageDict, References, NodeResponse, FunctionParameters, ParameterDefinition, FunctionConfig, ApiType, TasksEndCodeRouting
+    MessageDict, References, NodeResponse, FunctionParameters, ParameterDefinition, FunctionConfig, ApiType, TasksEndCodeRouting, Prompt
 )
 from workflow.util.utils import json_to_python_type_mapping
 from workflow.core.agent.agent import AliceAgent
 from workflow.core.tasks.task import AliceTask
-from workflow.core.prompt import Prompt
 
 from enum import IntEnum
 

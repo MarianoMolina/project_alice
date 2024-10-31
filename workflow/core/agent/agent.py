@@ -3,11 +3,9 @@ from bson import ObjectId
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Dict, Any, List, Optional, Tuple, Callable, Union
 from workflow.core.data_structures import ToolFunction, ToolCall, ensure_tool_function
-from workflow.core.prompt import Prompt
-from workflow.core.model import AliceModel
 from workflow.core.api import APIManager
 from workflow.core.data_structures import (
-    TaskResponse, FileReference, ContentType, MessageDict, ApiType, ModelType, FileType, References, FileContentReference, EmbeddingChunk
+    TaskResponse, FileReference, ContentType, MessageDict, ApiType, ModelType, FileType, References, FileContentReference, EmbeddingChunk, AliceModel, Prompt
     )
 from workflow.util import LOGGER, run_code, LOG_LEVEL, Language
 from enum import IntEnum

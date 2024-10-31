@@ -1,6 +1,5 @@
 import pytest
-from workflow.core.prompt import Prompt
-from workflow.core.data_structures import FunctionParameters, ParameterDefinition
+from workflow.core.data_structures import FunctionParameters, ParameterDefinition, Prompt
 
 def test_prompt_creation():
     prompt = Prompt(name="Test Prompt", content="This is a test prompt")

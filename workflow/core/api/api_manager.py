@@ -1,8 +1,7 @@
 from pydantic import BaseModel
 from typing import Dict, Any, Union, Optional
-from workflow.core.model import AliceModel
 from workflow.core.api.api import API
-from workflow.core.data_structures import References, ApiType, ApiName, ModelConfig, ModelApis
+from workflow.core.data_structures import References, ApiType, ApiName, ModelConfig, ModelApis, AliceModel
 from workflow.util import LOGGER
 from workflow.core.api.engines import APIEngine, ApiEngineMap
 

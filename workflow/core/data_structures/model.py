@@ -1,10 +1,11 @@
 from bson import ObjectId
 from typing import Dict, List, Optional
-from pydantic import BaseModel, Field, model_validator, ConfigDict
+from pydantic import Field, model_validator, ConfigDict
 from workflow.util.const import model_formats
-from workflow.core.data_structures import ApiName, ModelType
+from workflow.core.data_structures.api_utils import ApiName, ModelType
+from workflow.core.data_structures.base_models import BaseDataStructure
 
-class AliceModel(BaseModel):
+class AliceModel(BaseDataStructure):
     id: Optional[str] = Field(None, title="Model ID", description="The ID of the model.", alias="_id")
     short_name: str = Field(..., title="Short Name", description="The short name of the model.")
     model_name: str = Field(..., title="Model Name", description="The complete name of the model.")
