@@ -131,7 +131,7 @@ def chunk_text(input_text: str, target_chunk_size: int) -> List[str]:
 
 def est_token_count(text: str) -> int:
     """Estimate token count for a given string."""
-    return len(text) // 4  # Simple estimation
+    return len(text) // 3  # Simple estimation
 
 def est_messages_token_count(messages: List[Dict[str, Any]], tools: List[Dict[str, Any]] = None) -> int:
     """Estimate token count for a list of messages and optional tools."""
@@ -180,7 +180,7 @@ def prune_messages(messages: List[Dict[str, Any]], ctx_size: int) -> List[Dict[s
                 trim_chars = (excess_tokens * 4) + 3 + len(replace_message()) # Convert back to character estimate and add 3 more
                 pruned_content = longest_message['content'][:-trim_chars] + "..." + replace_message()
                 pruned_messages[longest_index]['content'] = pruned_content
-    
+    LOGGER.debug(f"Pruned messages: {pruned_messages}")
     return pruned_messages
 
 def convert_value_to_type(value: Any, param_name: str, param_type: str) -> Any:

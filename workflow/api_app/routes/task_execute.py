@@ -37,6 +37,7 @@ async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(ge
     inputs_copy = inputs.copy()
     task = None
     try:
+        inputs_copy.update({'user_data': db_app.user_data.get('user_obj',{})})
         task = await db_app.get_tasks(taskId)
         if not task or not task.get(taskId):
             raise ValueError(f"Task with ID {taskId} not found")
@@ -57,7 +58,7 @@ async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(ge
         LOGGER.debug(f'task_inputs: {inputs_copy}')
         LOGGER.debug(f'task type: {type(task)}')
        
-        result = await task.run(api_manager=api_manager, **inputs)
+        result = await task.run(api_manager=api_manager, **inputs_copy)
         if not result:
             raise ValueError(f"Task execution failed for task ID {taskId}")
 

@@ -18,7 +18,7 @@ export const API_TYPE_CONFIGS: Record<ApiType, ApiTypeConfig> = {
     api_name: [ApiName.REDDIT_SEARCH],
     apiConfig: {
       client_id: '',
-      secret: '',
+      client_secret: '',
     },
   },
   [ApiType.WIKIPEDIA_SEARCH]: {

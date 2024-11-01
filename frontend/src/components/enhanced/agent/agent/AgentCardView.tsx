@@ -39,12 +39,12 @@ const AgentCardView: React.FC<AgentComponentProps> = ({
         {
             icon: <Code />,
             primary_text: "Can execute code",
-            secondary_text: item.has_code_exec ? 'Yes' : 'No'
+            secondary_text: item.has_code_exec ? 'Yes' : 'No' // Correct this to show the enum value
         },
         {
             icon: <Build />,
             primary_text: "Can use tools",
-            secondary_text: item.has_functions ? 'Yes' : 'No'
+            secondary_text: item.has_tools ? 'Yes' : 'No' // Correct this to show the enum value
         },
         {
             icon: <ChatBubbleOutline />,

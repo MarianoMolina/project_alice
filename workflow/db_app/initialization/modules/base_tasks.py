@@ -49,6 +49,21 @@ base_tasks_module = BaseTasksModule(
                 "key": "limit_parameter",
                 "type": "integer",
                 "description": "Limits the number of entities to be returned. Maximum is 500. Default is 10."
+            },
+            {
+                "key": "wolfram_query_parameter",
+                "type": "string",
+                "description": "The query string to be sent to Wolfram Alpha."
+            },
+            {
+                "key": "units_parameter",
+                "type": "string",
+                "description": "Unit system to use for measurements. 'metric' or 'imperial'. Default is 'metric'."
+            },
+            {
+                "key": "format_parameter",
+                "type": "string",
+                "description": "Output format. Options are 'plaintext', 'image', 'html', 'json'. Default is 'plaintext'."
             }
         ],
         "prompts": [
@@ -67,12 +82,28 @@ base_tasks_module = BaseTasksModule(
                 "models": {
                     "chat": "gpt-4o-mini",
                 },
-                "has_code_exec": False,
-                "has_functions": True,
+                "has_code_exec": 0,
+                "has_tools": 1,
                 "max_consecutive_auto_reply": 2,
             },
         ],
         "tasks": [
+            {
+                "key": "wolfram_alpha_query_task",
+                "task_type": "APITask",
+                "task_name": "wolfram_alpha_query",
+                "task_description": "Queries Wolfram Alpha for information",
+                "input_variables": {
+                    "type": "object",
+                    "properties": {
+                        "query": "wolfram_query_parameter",
+                        "units": "units_parameter",
+                        "format": "format_parameter"
+                    },
+                    "required": ["query"]
+                },
+                "required_apis": ["wolfram_alpha"]
+            },
             {
                 "key": "knowledge_graph_search_task",
                 "task_type": "APITask",

@@ -37,6 +37,15 @@ coding_workflow_module = CodingWorkflowModule(
                 "description": "The output of the unit test execution, passed in case of a recursive call",
             }
         ],
+        "user_checkpoints": [
+            {   
+                "key": "generate_unit_tests_checkpoint",
+                "user_prompt": "Please approve or reject the code generated before the unit tests are generated. Provide feedback, if any, for the unit test agent to consider.",
+                "task_next_obj": {0: "generate_unit_tests", 1: "generate_code"},
+                "options_obj": {0: "Approve", 1: "Reject"},
+                "request_feedback": True
+            }
+        ],
         "prompts": [
             {
                 "key": "planner_agent",
@@ -150,8 +159,8 @@ coding_workflow_module = CodingWorkflowModule(
                     "chat": "GPT4o",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": False,
-                "has_code_exec": False,                
+                "has_tools": 0,
+                "has_code_exec": 0,                
             },
             {
                 "key": "coding_agent",
@@ -161,8 +170,8 @@ coding_workflow_module = CodingWorkflowModule(
                     "chat": "GPT4o",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": False,
-                "has_code_exec": False,                
+                "has_tools": 0,
+                "has_code_exec": 0,                
             },
             {
                 "key": "unit_tester_agent",
@@ -172,8 +181,8 @@ coding_workflow_module = CodingWorkflowModule(
                     "chat": "GPT4o",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": False,
-                "has_code_exec": False,                
+                "has_tools": 0,
+                "has_code_exec": 0,                
             },
             {
                 "key": "unit_test_check_agent",
@@ -183,16 +192,16 @@ coding_workflow_module = CodingWorkflowModule(
                     "chat": "GPT4o",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": False,
-                "has_code_exec": False,
+                "has_tools": 0,
+                "has_code_exec": 0,
             },
             {
                 "key": "execution_agent",
                 "name": "execution_agent",
                 "system_message": "execution_agent_prompt",
                 "max_consecutive_auto_reply": 1,
-                "has_functions": False,
-                "has_code_exec": True,
+                "has_tools": 0,
+                "has_code_exec": 0,
             }
         ],
         "tasks": [
@@ -379,12 +388,7 @@ coding_workflow_module = CodingWorkflowModule(
                     "required": ["prompt"]
                 },
                 "user_checkpoints": {
-                    "generate_unit_tests": {
-                        "user_prompt": "Please approve or reject the code generated before the unit tests are generated. Provide feedback, if any, for the unit test agent to consider.",
-                        "task_next_obj": {0: "generate_unit_tests", 1: "generate_code"},
-                        "options_obj": {0: "Approve", 1: "Reject"},
-                        "request_feedback": True
-                    }
+                    "generate_unit_tests": "generate_unit_tests_checkpoint"
                 },
                 "templates": {
                     "output_template": "coding_workflow_output_prompt"

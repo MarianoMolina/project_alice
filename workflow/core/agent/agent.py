@@ -11,14 +11,14 @@ from workflow.util import LOGGER, run_code, LOG_LEVEL, Language
 from enum import IntEnum
 
 class ToolPermission(IntEnum):
-    NORMAL = 0       # Tools can be used normally
-    DISABLED = 1     # Tools cannot be used
+    DISABLED = 0     # Tools cannot be used
+    NORMAL = 1       # Tools can be used normally
     WITH_PERMISSION = 2  # Tools require user permission
     DRY_RUN = 3     # Tools can be called but not executed
 
 class CodePermission(IntEnum):
-    NORMAL = 0      # All valid code blocks are executed
-    DISABLED = 1    # No code execution
+    NORMAL = 1      # All valid code blocks are executed
+    DISABLED = 0    # No code execution
     WITH_PERMISSION = 2  # Tools require user permission
     TAGGED_ONLY = 3 # Only blocks with _execute tag are executed
 
@@ -38,7 +38,7 @@ class AliceAgent(BaseModel):
         },
         description="Dictionary of models associated with the agent for different tasks"
     )
-    has_functions: ToolPermission = Field(
+    has_tools: ToolPermission = Field(
         default=ToolPermission.DISABLED,
         description="Level of tool usage permission"
     )
@@ -48,7 +48,6 @@ class AliceAgent(BaseModel):
     )
     max_consecutive_auto_reply: int = Field(default=10, description="The maximum number of consecutive auto replies")
     model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str})
-
 
     @property
     def llm_model(self) -> AliceModel:
@@ -85,24 +84,24 @@ print("This is just for demonstration")
 """
         return ""
 
-    def _prepare_system_message(self) -> str:
+    def _prepare_system_message(self, **kwargs) -> str:
         """Prepare the system message with appropriate permission prompts."""
-        base_message = self.system_message.format_prompt()
+        base_message = self.system_message.format_prompt(**kwargs)
         code_prompt = self._get_code_exec_prompt()
         
         # Combine prompts, ensuring proper spacing
         prompts = [p for p in [base_message, code_prompt] if p]
         return "\n\n".join(prompts)
     
-    async def generate_llm_response(self, api_manager: APIManager, messages: List[MessageDict], tools_list: List[ToolFunction] = []) -> MessageDict:
+    async def generate_llm_response(self, api_manager: APIManager, messages: List[MessageDict], tools_list: List[ToolFunction] = [], **kwargs) -> MessageDict:
         LOGGER.info("Generating LLM response")
         chat_model = self.llm_model
         response_ref: References = await api_manager.generate_response_with_api_engine(
             api_type=ApiType.LLM_MODEL,
             model=chat_model,
             messages=self._prepare_messages_for_api(messages),
-            system=self.system_message.format_prompt(),
-            tool_choice='auto' if self.has_functions else 'none',
+            system=self._prepare_system_message(**kwargs),
+            tool_choice='auto' if self.has_tools != 0 else 'none',
             tools=tools_list,
             temperature=0.7,
             max_tokens=4096  # TODO: Make this configurable
@@ -118,15 +117,15 @@ print("This is just for demonstration")
             role="assistant",
             content=content,
             generated_by="llm",
-            tool_calls=response.tool_calls if self.has_functions else None,
+            tool_calls=response.tool_calls if self.has_tools != 0 else None,
             type=ContentType.TEXT,
             assistant_name=self.name,
             creation_metadata=response.creation_metadata
         )
     
-    def collect_code_blocks(self, messages: List[MessageDict]) -> List[Tuple[str, str]]:
+    def collect_code_blocs(self, messages: List[MessageDict]) -> List[Tuple[str, str]]:
         """Collect and filter code blocks based on permission level."""
-        LOGGER.debug(f"Entering collect_code_blocks with {len(messages)} messages")
+        LOGGER.debug(f"Entering collect_code_blocs with {len(messages)} messages")
         code_blocks: List[Tuple[str, str]] = []
         
         for message in messages:
@@ -161,7 +160,7 @@ print("This is just for demonstration")
         if self.has_code_exec == CodePermission.DISABLED:
             return [], {}, 0
             
-        code_blocks = self.collect_code_blocks(messages)
+        code_blocks = self.collect_code_blocs(messages)
         if not code_blocks:
             LOGGER.warning('No executable code blocks found')
             return [], {}, 0
@@ -195,7 +194,7 @@ print("This is just for demonstration")
 
     async def process_tool_calls(self, tool_calls: List[ToolCall] = [], tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []) -> List[MessageDict]:
         """Process tool calls based on permission level."""
-        if self.has_functions == ToolPermission.DISABLED:
+        if self.has_tools == ToolPermission.DISABLED:
             return []
             
         tool_messages: List[MessageDict] = []
@@ -227,7 +226,7 @@ print("This is just for demonstration")
                 continue
             
             # Handle dry run mode
-            if self.has_functions == ToolPermission.DRY_RUN:
+            if self.has_tools == ToolPermission.DRY_RUN:
                 tool_messages.append(MessageDict(
                     role="tool",
                     content=f"DRY RUN: Would execute {function_name} with arguments: {json.dumps(arguments, indent=2)}",

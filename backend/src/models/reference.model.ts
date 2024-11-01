@@ -1,5 +1,5 @@
-import { Schema } from "mongoose";
-import { References } from "../interfaces/references.interface";
+import mongoose, { Schema } from 'mongoose';
+import { IDataClusterDocument, IDataClusterModel, References } from "../interfaces/references.interface";
 import mongooseAutopopulate from 'mongoose-autopopulate';
 
 export const referencesSchema = new Schema<References>({
@@ -12,4 +12,4 @@ export const referencesSchema = new Schema<References>({
 
 referencesSchema.plugin(mongooseAutopopulate);
 
-export default referencesSchema;
+export const DataCluster = mongoose.model<IDataClusterDocument, IDataClusterModel>('DataCluster', referencesSchema);

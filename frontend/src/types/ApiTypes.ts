@@ -1,6 +1,5 @@
 import { AliceModel, convertToAliceModel } from "./ModelTypes";
 import { BaseDataseObject, convertToUser } from "./UserTypes";
-import { FunctionParameters } from "./ParameterTypes";
 import { EnhancedComponentProps } from "./CollectionTypes";
 
 export enum ApiType {
@@ -117,11 +116,6 @@ export const convertToAPI = (data: any): API => {
         updatedAt: data?.updatedAt ? new Date(data.updatedAt) : undefined,
     };
 };
-
-export interface APIEngine {
-    required_api: ApiType;
-    input_variables: FunctionParameters;
-}
 
 export interface ApiComponentProps extends EnhancedComponentProps<API> {
 

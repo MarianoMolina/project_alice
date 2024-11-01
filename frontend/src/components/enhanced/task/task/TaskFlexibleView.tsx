@@ -380,17 +380,6 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                         </Select>
                     </FormControl>
                     <Typography variant="h6" className={classes.titleText}>Timeout</Typography>
-                    <TextField
-                        fullWidth
-                        margin="normal"
-                        name="timeout"
-                        label="Timeout (seconds)"
-                        type="number"
-                        value={form.timeout || ''}
-                        onChange={handleInputChange}
-                        inputProps={{ min: 1 }}
-                        disabled={!isEditMode}
-                    />
                 </>
             )}
         </GenericFlexibleView>

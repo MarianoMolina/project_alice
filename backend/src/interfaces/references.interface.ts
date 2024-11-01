@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { Document, Types, Model } from 'mongoose';
 import { IFileReferenceDocument } from "./file.interface";
 import { IMessageDocument } from "./message.interface";
 import { ITaskResultDocument } from "./taskResult.interface";
@@ -12,4 +12,18 @@ export interface References {
     url_references?: Types.ObjectId[] | IURLReferenceDocument[];
     string_outputs?: string[];
     user_interactions?: Types.ObjectId[] | IUserInteractionDocument[];
+}
+
+export interface ReferencesMethods {
+    apiRepresentation(): any;
+}
+
+export interface IDataClusterDocument extends References, Document, ReferencesMethods {
+    _id: Types.ObjectId;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface IDataClusterModel extends Model<IDataClusterDocument> {
+    // Add any static methods here if needed
 }

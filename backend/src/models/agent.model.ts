@@ -1,13 +1,21 @@
 import mongoose, { Schema } from 'mongoose';
-import { IAgentDocument, IAgentModel } from '../interfaces/agent.interface';
+import { IAgentDocument, IAgentModel, ToolPermission, CodePermission } from '../interfaces/agent.interface';
 import { ensureObjectIdHelper } from '../utils/utils';
 
 const agentSchema = new Schema<IAgentDocument, IAgentModel>({
   name: { type: String, required: true },
-  system_message: { type: Schema.Types.ObjectId, ref: 'Prompt', default: '66732c3eba1560b00ad0a641' },
+  system_message: { type: Schema.Types.ObjectId, ref: 'Prompt' },
   max_consecutive_auto_reply: { type: Number, default: 10 },
-  has_code_exec: { type: Boolean, default: false },
-  has_functions: { type: Boolean, default: false },
+  has_code_exec: { 
+    type: Number, 
+    enum: Object.values(CodePermission).filter(value => typeof value === 'number'),
+    default: CodePermission.DISABLED 
+  },
+  has_tools: { 
+    type: Number, 
+    enum: Object.values(ToolPermission).filter(value => typeof value === 'number'),
+    default: ToolPermission.DISABLED 
+  },
   models: { type: Map, of: Schema.Types.ObjectId, ref: 'Model', default: {} },
   created_by: { type: Schema.Types.ObjectId, ref: 'User' },
   updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
@@ -20,8 +28,8 @@ agentSchema.methods.apiRepresentation = function(this: IAgentDocument) {
     id: this._id,
     name: this.name || null,
     system_message: this.system_message || null,
-    has_functions: this.has_functions || false,
-    has_code_exec: this.has_code_exec || false,
+    has_tools: this.has_tools || 0,
+    has_code_exec: this.has_code_exec || 0,
     max_consecutive_auto_reply: this.max_consecutive_auto_reply || 10,
     models: this.models || {},
     created_by: this.created_by || null,

@@ -2,9 +2,11 @@ import { Response, Router } from 'express';
 import { Model, Document, Types } from 'mongoose';
 import { AuthRequest } from '../interfaces/auth.interface';
 import adminOnly from '../middleware/admin.middleware';
+import Logger from './logger';
+import Agent from '../models/agent.model';
 
 type RouteHandler = (req: AuthRequest, res: Response) => Promise<void>;
-type ModelName = 'Agent' | 'Model' | 'Task' | 'Prompt' | 'TaskResult' | 'AliceChat' | 'API' | 'ParameterDefinition' | 'User' | 'FileReference' | 'Message' | 'URLReference' | 'UserInteraction' | 'UserCheckpoint';
+type ModelName = 'Agent' | 'Model' | 'Task' | 'Prompt' | 'TaskResult' | 'AliceChat' | 'API' | 'ParameterDefinition' | 'User' | 'FileReference' | 'Message' | 'URLReference' | 'UserInteraction' | 'UserCheckpoint' | 'DataCluster';
 
 interface RouteOptions<T extends Document> {
   createItem?: (data: Partial<T>, userId: string) => Promise<T | null>;
@@ -34,6 +36,10 @@ export function createRoutes<T extends Document, K extends ModelName>(
         }
         saved_item = await options.createItem(req.body, req.user?.userId);
       } else {
+        if (modelName == 'Agent') {
+          Logger.debug("Incoming agent data:", req.body);
+          Logger.debug("has_code_exec value:", req.body.has_code_exec, "type:", typeof req.body.has_code_exec);
+        }
         const item = new model({
           ...req.body,
           created_by: req.user?.userId,

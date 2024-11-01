@@ -119,8 +119,8 @@ research_workflow_module = ResearchWorkflowModule(
                     "chat": "GPT4o",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": False,
-                "has_code_exec": False,                
+                "has_tools": 0,
+                "has_code_exec": 0,                
             },
             {
                 "key": "data_retrieval_expert",
@@ -130,8 +130,8 @@ research_workflow_module = ResearchWorkflowModule(
                     "chat": "gpt-4o-mini",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": True,
-                "has_code_exec": False,                
+                "has_tools": 1,
+                "has_code_exec": 0,                
             },
             {
                 "key": "research_check",
@@ -141,8 +141,8 @@ research_workflow_module = ResearchWorkflowModule(
                     "chat": "GPT4o",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": False,
-                "has_code_exec": False,                
+                "has_tools": 0,
+                "has_code_exec": 0,                
             },
             {
                 "key": "research_summarizer_agent",
@@ -152,8 +152,8 @@ research_workflow_module = ResearchWorkflowModule(
                     "chat": "GPT4o",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": False,
-                "has_code_exec": False,
+                "has_tools": 0,
+                "has_code_exec": 0,
             },
         ],
         "tasks": [
@@ -200,6 +200,8 @@ research_workflow_module = ResearchWorkflowModule(
                     "wikipedia_search": "wikipedia_search",
                     "google_search": "google_search",
                     "arxiv_search": "arxiv_search",
+                    "wolfram_alpha_query": "wolfram_alpha_query_task",
+                    "knowledge_graph_search": "knowledge_graph_search_task"
                 },
                 "required_apis": ["llm_api"],
                 "templates": {
@@ -223,7 +225,7 @@ research_workflow_module = ResearchWorkflowModule(
                 "task_description": "Checks the data retrieval results and generates a conclusion",
                 "agent": "research_check",
                 "exit_code_response_map": {"APPROVED": 0, "REJECTED": 2},
-                "exit_codes": {0: "Data retrieval approved", 1: "Response generation failed", 2: "Deta retrieval rejected"},
+                "exit_codes": {0: "Data retrieval approved", 1: "Response generation failed", 2: "Data retrieval rejected"},
                 "input_variables": {
                     "type": "object",
                     "properties": {
@@ -284,7 +286,7 @@ research_workflow_module = ResearchWorkflowModule(
                     "research_check_task": {
                         0: ("research_summary_task", False),
                         1: ("research_check_task", True),
-                        2: ("research_summary_task", True),
+                        2: ("research_summary_task", False),
                     },
                     "research_summary_task": {
                         0: (None, False),

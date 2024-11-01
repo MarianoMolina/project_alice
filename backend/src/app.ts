@@ -21,6 +21,7 @@ import Logger from './utils/logger';
 import FileRoutes from './routes/file.route';
 import MessageRoutes from './routes/message.route';
 import URLReferenceRoutes from './routes/urlReference.route';
+import UserCheckpointRoutes from './routes/userCheckpoint.route';
 import UserInteractionRoutes from './routes/userInteraction.route';
 import './models';
 
@@ -67,6 +68,7 @@ app.use('/api/parameters', ParametersRoutes);
 app.use('/api/files', FileRoutes);
 app.use('/api/messages', MessageRoutes);
 app.use('/api/urlreferences', URLReferenceRoutes)
+app.use('/api/usercheckpoints', UserCheckpointRoutes);
 app.use('/api/userinteractions', UserInteractionRoutes);
 
 export default app;

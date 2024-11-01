@@ -1,6 +1,7 @@
 import { Document, Types, Model } from 'mongoose';
-import { IFunctionParameters, IAPIEngine } from '../utils/schemas';
+import { IFunctionParameters } from '../utils/functionSchema';
 import { IUserCheckpoint } from './userCheckpoint.interface';
+import { References } from './references.interface';
 
 export enum TaskType {
   APITask = "APITask",
@@ -21,22 +22,19 @@ export interface ITask {
   task_description: string;
   task_type: TaskType;
   input_variables: IFunctionParameters | null;
-  exit_codes: Map<string, string>;
-  recursive: boolean;
-  templates: Map<string, Types.ObjectId> | null;
-  required_apis: Array<string> | null;
-  tasks: Map<string, Types.ObjectId> | null;
-  valid_languages: string[];
-  timeout: number | null;
-  prompts_to_add: Map<string, Types.ObjectId> | null;
-  exit_code_response_map: Map<string, number> | null;
-  task_selection_method: any | null;
-  node_end_code_routing: Map<string, Map<string, any>> | null;
-  max_attempts: number;
   agent: Types.ObjectId | null;
-  api_engine: IAPIEngine | null;
-  start_node: string | null;
+  tasks: Map<string, Types.ObjectId> | null;
+  templates: Map<string, Types.ObjectId> | null;
   user_checkpoints: Map<string, IUserCheckpoint | Types.ObjectId> | null;
+  data_cluster?: References;
+  required_apis: Array<string> | null;
+  max_attempts: number;
+  recursive: boolean;
+  start_node: string | null;
+  node_end_code_routing: Map<string, Map<string, any>> | null;
+  exit_codes: Map<string, string>;
+  exit_code_response_map: Map<string, number> | null;
+  valid_languages: string[];
   created_by: Types.ObjectId;
   updated_by: Types.ObjectId;
 }

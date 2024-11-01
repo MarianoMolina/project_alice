@@ -3,9 +3,11 @@ import { Prompt } from "./PromptTypes";
 import { FunctionParameters } from "./ParameterTypes";
 import { ApiType } from './ApiTypes';
 import { EnhancedComponentProps } from "./CollectionTypes";
-import { API, APIEngine } from './ApiTypes';
+import { API } from './ApiTypes';
 import { BaseDataseObject } from "./UserTypes";
 import Logger from "../utils/Logger";
+import { UserCheckpoint } from "./UserCheckpointTypes";
+import { References } from "./ReferenceTypes";
 
 export enum TaskType {
   APITask = "APITask",
@@ -29,23 +31,20 @@ export interface AliceTask extends BaseDataseObject {
   task_name: string;
   task_description: string;
   task_type: TaskType;
+  agent?: AliceAgent | null;
   input_variables: FunctionParameters | null;
   exit_codes: { [key: string]: string };
-  recursive: boolean;
   templates: { [key: string]: Prompt | null };
   tasks: { [key: string]: AliceTask };
   valid_languages: string[];
-  timeout: number | null;
-  prompts_to_add: { [key: string]: Prompt } | null;
   exit_code_response_map: { [key: string]: number } | null;
   start_node?: string | null;
   required_apis?: ApiType[] | null;
-  task_selection_method?: CallableFunction | null;
   node_end_code_routing?: TasksEndCodeRouting | null;
+  user_checkpoints?: { [key: string]: UserCheckpoint };
+  data_cluster?: References;
+  recursive: boolean;
   max_attempts?: number;
-  agent?: AliceAgent | null;
-  human_input?: boolean;
-  api_engine?: APIEngine | null;
 }
 
 export const convertToAliceTask = (data: any): AliceTask => {
@@ -61,17 +60,14 @@ export const convertToAliceTask = (data: any): AliceTask => {
       ? Object.fromEntries(Object.entries(data.tasks).map(([key, value]: [string, any]) => [key, value || value]))
       : {},
     valid_languages: data?.valid_languages || [],
-    timeout: data?.timeout || null,
-    prompts_to_add: data?.prompts_to_add || null,
     exit_code_response_map: data?.exit_code_response_map || null,
     start_node: data?.start_node || null,
     required_apis: data?.required_apis || null,
-    task_selection_method: data?.task_selection_method || null,
     node_end_code_routing: data?.node_end_code_routing || null,
     max_attempts: data?.max_attempts || undefined,
     agent: data?.agent || null,
-    human_input: data?.human_input || false,
-    api_engine: data?.api_engine || null,
+    user_checkpoints: data?.user_checkpoints || {},
+    data_cluster: data?.data_cluster || {},
     created_by: data?.created_by || '',
     updated_by: data?.updated_by || '',
     createdAt: data?.createdAt ? new Date(data.createdAt) : undefined,
@@ -98,19 +94,15 @@ export const getDefaultTaskForm = (taskType: TaskType): AliceTask => {
     task_description: '',
     task_type: taskType,
     agent: null,
-    human_input: false,
     input_variables: null,
     templates: {},
-    prompts_to_add: null,
     tasks: {},
     required_apis: [],
     exit_codes: { 0: "Success", 1: "Failure" },
     recursive: false,
     valid_languages: [],
-    timeout: null,
     exit_code_response_map: null,
     start_node: null,
-    task_selection_method: null,
     node_end_code_routing: null,
     max_attempts: 1
   };
@@ -151,7 +143,7 @@ export const getDefaultTaskForm = (taskType: TaskType): AliceTask => {
     case 'CheckTask':
       return { ...baseForm, exit_code_response_map: {}, node_end_code_routing: agentNodeRoutes };
     case 'CodeExecutionLLMTask':
-      return { ...baseForm, valid_languages: ['python', 'javascript'], timeout: 30000 };
+      return { ...baseForm, valid_languages: ['python', 'javascript'] };
     case 'CodeGenerationLLMTask':
       return { ...baseForm, node_end_code_routing: agentNodeRoutes };
     case 'Workflow':

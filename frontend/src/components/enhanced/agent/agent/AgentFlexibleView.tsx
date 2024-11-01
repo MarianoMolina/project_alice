@@ -1,13 +1,17 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
     TextField,
-    FormControlLabel,
-    Switch,
     Typography,
+    MenuItem,
+    Select,
+    FormControl,
+    InputLabel,
+    SelectChangeEvent,
 } from '@mui/material';
 import { AgentComponentProps, AliceAgent, getDefaultAgentForm } from '../../../../types/AgentTypes';
 import { Prompt } from '../../../../types/PromptTypes';
 import { AliceModel, ModelType } from '../../../../types/ModelTypes';
+import { ToolPermission, CodePermission } from '../../../../types/AgentTypes';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import PromptShortListView from '../../prompt/prompt/PromptShortListView';
 import ModelShortListView from '../../model/model/ModelShortListView';
@@ -47,10 +51,10 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     }, [item, onChange]);
 
     const isEditMode = mode === 'edit' || mode === 'create';
+
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         if (name === 'max_consecutive_auto_reply') {
-            // Only allow non-negative integers
             const numValue = parseInt(value, 10);
             if (!isNaN(numValue) && numValue >= 0) {
                 setForm(prevForm => ({ ...prevForm, [name]: numValue }));
@@ -60,9 +64,12 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
         }
     }, []);
 
-    const handleCheckboxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, checked } = e.target;
-        setForm(prevForm => ({ ...prevForm, [name]: checked }));
+    const handleSelectChange = useCallback((e: SelectChangeEvent) => {
+        const { name, value } = e.target;
+        if (name) {
+            const numericValue = parseInt(value as string, 10);
+            setForm(prevForm => ({ ...prevForm, [name]: numericValue }));
+        }
     }, []);
 
     const handleModelChange = useCallback(async (selectedIds: string[]) => {
@@ -117,7 +124,6 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             onView={(id) => selectCardItem("Prompt", id)}
             accordionEntityName="system-message"
         />
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     ), [form.system_message, handlePromptChange, isEditMode, activeAccordion, handleAccordionToggle, selectCardItem]);
 
     const memoizedModelSelect = useMemo(() => (
@@ -134,7 +140,6 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             onView={(id) => selectCardItem("Model", id)}
             accordionEntityName="models"
         />
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     ), [form.models, handleModelChange, isEditMode, activeAccordion, handleAccordionToggle, selectCardItem]);
 
     return (
@@ -173,30 +178,38 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
                 margin="normal"
                 disabled={!isEditMode}
             />
-            <Typography variant="h6" className={classes.titleText}>Code Execution</Typography>
-            <FormControlLabel
-                control={
-                    <Switch
-                        name="has_code_exec"
-                        checked={form.has_code_exec || false}
-                        onChange={handleCheckboxChange}
-                        disabled={!isEditMode}
-                    />
-                }
-                label="Can execute code"
-            />
             <Typography variant="h6" className={classes.titleText}>Tool Execution</Typography>
-            <FormControlLabel
-                control={
-                    <Switch
-                        name="has_functions"
-                        checked={form.has_functions || false}
-                        onChange={handleCheckboxChange}
-                        disabled={!isEditMode}
-                    />
-                }
-                label="Can use tools"
-            />
+            <FormControl fullWidth margin="normal">
+                <InputLabel>Tool Permission</InputLabel>
+                <Select
+                    name="has_tools"
+                    value={form.has_tools?.toString() ?? ToolPermission.DISABLED.toString()}
+                    onChange={handleSelectChange}
+                    disabled={!isEditMode}
+                    label="Tool Permission"
+                >
+                    <MenuItem value={ToolPermission.NORMAL.toString()}>Normal</MenuItem>
+                    <MenuItem value={ToolPermission.DISABLED.toString()}>Disabled</MenuItem>
+                    <MenuItem value={ToolPermission.WITH_PERMISSION.toString()}>With Permission</MenuItem>
+                    <MenuItem value={ToolPermission.DRY_RUN.toString()}>Dry Run</MenuItem>
+                </Select>
+            </FormControl>
+            <Typography variant="h6" className={classes.titleText}>Code Execution</Typography>
+            <FormControl fullWidth margin="normal">
+                <InputLabel>Code Permission</InputLabel>
+                <Select
+                    name="has_code_exec"
+                    value={form.has_code_exec?.toString() ?? CodePermission.NORMAL.toString()}
+                    onChange={handleSelectChange}
+                    disabled={!isEditMode}
+                    label="Code Permission"
+                >
+                    <MenuItem value={CodePermission.NORMAL.toString()}>Normal</MenuItem>
+                    <MenuItem value={CodePermission.DISABLED.toString()}>Disabled</MenuItem>
+                    <MenuItem value={CodePermission.WITH_PERMISSION.toString()}>With Permission</MenuItem>
+                    <MenuItem value={CodePermission.TAGGED_ONLY.toString()}>Tagged Only</MenuItem>
+                </Select>
+            </FormControl>
         </GenericFlexibleView>
     );
 };

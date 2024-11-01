@@ -86,21 +86,6 @@ async def test_workflow_execution(sample_workflow):
     assert len(result.task_content.content) == 2  # Two tasks executed
 
 @pytest.mark.asyncio
-async def test_workflow_task_selection(sample_workflow):
-    # Override task_selection_method for testing
-    def custom_selection(task_response, outputs):
-        if task_response is None or task_response.task_name == "Task1":
-            return "Task2", False
-        return None, False
-    
-    sample_workflow.task_selection_method = custom_selection
-    
-    result = await sample_workflow.run(workflow_input="test", input1="test1", input2="test2")
-    
-    assert result.status == "complete"
-    assert len(result.task_content.content) == 2
-
-@pytest.mark.asyncio
 async def test_workflow_max_attempts(sample_workflow):
     # Replace Task1 with FailingMockTask
     sample_workflow.tasks["Task1"] = FailingMockTask(

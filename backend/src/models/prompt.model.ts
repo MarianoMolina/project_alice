@@ -1,5 +1,5 @@
 import mongoose, { Schema, CallbackWithoutResultAndOptionalError, Query } from 'mongoose';
-import { functionParametersSchema, IFunctionParameters } from '../utils/schemas';
+import { functionParametersSchema } from '../utils/functionSchema';
 import { ensureObjectIdForProperties, ensureObjectIdHelper } from '../utils/utils';
 import { IPromptDocument, IPromptModel } from '../interfaces/prompt.interface';
 

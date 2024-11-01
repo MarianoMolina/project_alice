@@ -114,11 +114,9 @@ class LLMEngine(APIEngine):
         estimated_tokens = est_messages_token_count(messages, tools)
         if estimated_tokens > api_data.ctx_size:
             LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning. ")
+            messages = prune_messages(messages, api_data.ctx_size)
         elif estimated_tokens > 0.8 * api_data.ctx_size:
             LOGGER.warning(f"Estimated tokens ({estimated_tokens}) are over 80% of context size ({api_data.ctx_size}).")
-        # Prune messages if estimated tokens exceed context size
-        if estimated_tokens > api_data.ctx_size:
-            messages = prune_messages(messages, api_data.ctx_size)
 
         try:
             # Prepare the API call parameters

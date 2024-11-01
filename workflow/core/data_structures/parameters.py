@@ -23,9 +23,9 @@ class ParameterDefinition(BaseModel):
 
 class FunctionParameters(BaseModel):
     """Parameters of a function as defined by the OpenAI API"""
-    type: Annotated[Literal["object"], Field("object", description="Type of the parameters")]
+    type: Annotated[Literal["object"], Field(default="object", description="Type of the parameters")]
     properties: Annotated[Dict[str, ParameterDefinition], Field(description="Dict of parameters name to their type, description, and default value")]
-    required: Annotated[List[str], Field(description="Required parameters")]
+    required: Annotated[List[str], Field(default_factory=list, description="Required parameters")]
 
     def model_dump(self, **kwargs):
         input_schema = {

@@ -1,5 +1,4 @@
 import { Types } from 'mongoose';
-import { IAPIEngine } from './schemas';
 
 export type ObjectWithId = { _id: Types.ObjectId | string } | Types.ObjectId | string;
 
@@ -38,8 +37,4 @@ export function ensureObjectIdForProperties(properties: Map<string, Types.Object
   }
 
   return propertiesMap;
-}
-
-export function ensureObjectIdForAPIEngine(apiEngine: IAPIEngine) {
-  ensureObjectIdForProperties(apiEngine.input_variables.properties);
 }

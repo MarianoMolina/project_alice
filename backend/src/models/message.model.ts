@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 import { IMessageDocument, IMessageModel, ContentType } from '../interfaces/message.interface';
 import { ensureObjectIdHelper } from '../utils/utils';
 import mongooseAutopopulate from 'mongoose-autopopulate';
-import referencesSchema from './reference.model';
+import { referencesSchema } from './reference.model';
 
 const messageSchema = new Schema<IMessageDocument, IMessageModel>({
   content: { type: String, description: "Content of the message" },

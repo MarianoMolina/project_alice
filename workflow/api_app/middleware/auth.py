@@ -26,6 +26,7 @@ async def auth_middleware(request: Request, call_next):
     if not validation["valid"]:
         raise HTTPException(status_code=401, detail=validation["message"])
 
-    db_app.user_token = token  # Set only the token part for the db_app
+    db_app.user_data['user_token'] = token  # Set only the token part for the db_app
+    db_app.user_data['user_obj'] = validation["user"]  # Set the user for the db_app
     response = await call_next(request)
     return response

@@ -1,5 +1,5 @@
 import { Document, Types, Model } from 'mongoose';
-import { IFunctionParameters } from '../utils/schemas';
+import { IFunctionParameters } from '../utils/functionSchema';
 
 export interface IPrompt {
     name: string;

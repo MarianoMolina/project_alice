@@ -3,6 +3,7 @@ import { IMessageDocument } from './message.interface';
 import { ITaskDocument } from './task.interface';
 import { IAgentDocument } from './agent.interface';
 import { IUserDocument } from './user.interface';
+import { IUserCheckpointDocument } from './userCheckpoint.interface';
 
 // ChangeHistory interfaces
 export interface IChangeHistory {
@@ -25,6 +26,7 @@ export interface IAliceChat {
     changeHistory: IChangeHistoryDocument[];
     alice_agent: Types.ObjectId | IAgentDocument;
     functions: Types.ObjectId[] | ITaskDocument[];
+    user_checkpoints: { [key: string]: Types.ObjectId[] | IUserCheckpointDocument };
     created_by: Types.ObjectId | IUserDocument;
     updated_by: Types.ObjectId | IUserDocument;
 }

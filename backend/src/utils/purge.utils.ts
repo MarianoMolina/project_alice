@@ -10,6 +10,8 @@ import ParameterDefinition from '../models/parameter.model';
 import FileReference from '../models/file.model';
 import Message from '../models/message.model';
 import URLReference from '../models/urlReference.model';
+import UserCheckpoint from '../models/userCheckpoint.model';
+import UserInteraction from '../models/userInteraction.model';
 import Logger from './logger';
 import { deleteFile } from './file.utils';
 
@@ -19,7 +21,7 @@ const workflow_name = process.env.WORKFLOW_NAME || 'workflow';
 export async function purgeAndReinitialize(userId: string, token: string): Promise<void> {
   Logger.info('Purging data for userId:', userId);
 
-  const models = [Agent, API, Chat, Model, Prompt, Task, TaskResult, ParameterDefinition, Message, URLReference];
+  const models = [Agent, API, Chat, Model, Prompt, Task, TaskResult, ParameterDefinition, Message, URLReference, UserCheckpoint, UserInteraction];
   
   // Handle file deletions separately
   const fileReferences = await FileReference.find({ created_by: userId });

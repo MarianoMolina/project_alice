@@ -2,7 +2,9 @@ from pydantic import BaseModel, Field
 from typing import Optional, Literal, Tuple, Union, Dict, List
 from enum import Enum
 # The order of this list is used to determine which entities are created first
-EntityType = Literal["users", "models", "apis", "parameters", "prompts", "agents", "tasks", "chats", "task_responses", "files", "messages", "urlreferences"]
+# Also modify the collection_map in db.py if you add new entities
+# As well as the init_manager.py dictionaries
+EntityType = Literal["users", "models", "apis", "parameters", "prompts", "user_checkpoints", "agents", "tasks", "chats", "task_responses", "files", "messages", "urlreferences", "user_interactions"]
 
 class FileType(str, Enum):
     IMAGE = 'image'

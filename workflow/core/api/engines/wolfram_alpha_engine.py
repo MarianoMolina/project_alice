@@ -43,7 +43,7 @@ class WolframAlphaEngine(APIEngine):
         description="Inputs: 'query' string for the search, optional 'units', and optional 'format'.",
     )
 
-    required_api: ApiType = Field(ApiType.WEB_SEARCH, title="The API engine required")
+    required_api: ApiType = Field(ApiType.WOLFRAM_ALPHA, title="The API engine required")
 
     async def generate_api_response(
         self,
@@ -79,56 +79,54 @@ class WolframAlphaEngine(APIEngine):
         if format not in valid_formats:
             raise ValueError(f"Format must be one of {valid_formats}")
 
+        query_params = {
+            'input': query,
+            'units': units,
+            'format': format,
+
+        }
         # Prepare the API request parameters
         params = {
             'appid': app_id,
             'input': query,
             'units': units,
             'format': format,
-            'output': 'JSON',  # Requesting JSON output for easier parsing
         }
 
         # Build the URL with encoded parameters
-        service_url = 'https://api.wolframalpha.com/v2/query'
+        service_url = 'https://api.wolframalpha.com/v1/llm-api'
         url = service_url + '?' + urllib.parse.urlencode(params)
 
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.get(url) as resp:
                     if resp.status != 200:
-                        error_text = await resp.text()
+                        error_text = await resp.text() # Generate a message with this text and return that
+                        msg = MessageDict(
+                            role="assistant",
+                            content=error_text,
+                            generated_by="tool",
+                            type=ContentType.TEXT,
+                            creation_metadata={
+                                "source": "Wolfram Alpha - Error Message",
+                                "parameters": query_params,
+                            },
+                        )
                         LOGGER.error(f"Error from API: {resp.status} {error_text}")
-                        raise Exception(f"API request failed with status {resp.status}")
-                    response_data = await resp.json()
+                        return References(messages=[msg])
+                    LOGGER.debug(f"Response status: {resp.read()}")
+                    response_data = await resp.read()
 
-                    # Check if the query was successful
-                    if not response_data.get('queryresult', {}).get('success', False):
-                        error_msg = response_data.get('queryresult', {}).get('error', {}).get('msg', 'Unknown error')
-                        LOGGER.error(f"Wolfram Alpha query failed: {error_msg}")
-                        raise Exception(f"Wolfram Alpha query failed: {error_msg}")
-
-                    # Extract relevant information from the response
-                    pods = response_data['queryresult'].get('pods', [])
-                    result_texts = []
-
-                    for pod in pods:
-                        title = pod.get('title', '')
-                        subpods = pod.get('subpods', [])
-                        for subpod in subpods:
-                            plaintext = subpod.get('plaintext', '')
-                            if plaintext:
-                                result_texts.append(f"{title}:\n{plaintext}")
-
-                    content = "\n\n".join(result_texts)
-
+                    LOGGER.debug(f"Response data: {response_data}")
                     # Create a MessageDict with the content
                     msg = MessageDict(
                         role="assistant",
-                        content=content,
-                        generated_by="wolfram_alpha",
+                        content=response_data,
+                        generated_by="tool",
                         type=ContentType.TEXT,
                         creation_metadata={
                             "source": "Wolfram Alpha",
+                            "parameters": query_params,
                         },
                     )
 

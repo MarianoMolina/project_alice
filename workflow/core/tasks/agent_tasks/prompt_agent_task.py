@@ -5,7 +5,7 @@ from workflow.core.api import APIManager
 from workflow.core.data_structures import (
     MessageDict, References, NodeResponse, FunctionParameters, ParameterDefinition, FunctionConfig, ApiType, TasksEndCodeRouting, Prompt
 )
-from workflow.util.utils import json_to_python_type_mapping
+from workflow.util.utils import json_to_python_type_mapping, get_traceback
 from workflow.core.agent.agent import AliceAgent
 from workflow.core.tasks.task import AliceTask
 
@@ -167,7 +167,7 @@ class PromptAgentTask(AliceTask):
         
         try:
             llm_response = await self.agent.generate_llm_response(api_manager, messages, tools_list)
-            exit_code = self.get_llm_exit_code([llm_response], True if llm_response else False)
+            exit_code = self.get_llm_exit_code(llm_response)
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name="llm_generation",
@@ -177,13 +177,15 @@ class PromptAgentTask(AliceTask):
             )
         except Exception as e:
             LOGGER.error(f"Error in LLM generation: {e}")
+            traceback_str = get_traceback()
+            LOGGER.error(traceback_str)
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name="llm_generation",
                 exit_code=1,
                 references=References(messages=[MessageDict(
                     role="system",
-                    content=f"LLM generation failed: {str(e)}",
+                    content=f"LLM generation failed: {str(e)}" + "\n" + traceback_str,
                     generated_by="system"
                 )]),
                 execution_order=len(execution_history)
@@ -264,7 +266,7 @@ class PromptAgentTask(AliceTask):
                 execution_order=len(execution_history)
             )
         
-    def get_llm_exit_code(self, message: MessageDict) -> LLMExitCode:
+    def get_llm_exit_code(self, message: MessageDict) -> int:
         """Determine LLM exit code based on content and available routes."""
         if not message or not message.content:
             return self._get_available_exit_code(LLMExitCode.FAILURE, "llm_generation")
@@ -273,7 +275,7 @@ class PromptAgentTask(AliceTask):
         has_code = bool(self.agent.collect_code_blocs([message]))
 
         # Check agent capabilities
-        if has_tool_calls and not self.agent.has_functions:
+        if has_tool_calls and not self.agent.has_tools:
             has_tool_calls = False
         if has_code and not self.agent.has_code_exec:
             has_code = False

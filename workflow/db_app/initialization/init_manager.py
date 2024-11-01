@@ -4,8 +4,8 @@ from typing import get_type_hints, get_origin, get_args, Dict, Any, Union, Optio
 from pydantic import BaseModel, Field, ConfigDict, ValidationError
 from workflow.db_app.app import BackendAPI
 from workflow.util.logging_config import LOGGER
-from workflow.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, ParameterDefinition, FunctionParameters, API, TaskResponse, User
-from workflow.core.data_structures import EntityType
+from workflow.core import AliceAgent, AliceChat, AliceTask, API
+from workflow.core.data_structures import EntityType, ParameterDefinition, FunctionParameters, TaskResponse, User, UserCheckpoint, Prompt, AliceModel, UserInteraction
 from workflow.core.tasks import available_task_types
 
 class DBInitManager(BaseModel):
@@ -41,34 +41,40 @@ class DBInitManager(BaseModel):
         "users": {}, 
         "models": {}, 
         "prompts": {}, 
+        "user_checkpoints": {},
         "agents": {}, 
         "tasks": {}, 
         "chats": {}, 
         "parameters": {}, 
         "task_responses": {},
-        "apis": {}
+        "apis": {},
+        "user_interactions": {},
     }, description="Map of entity keys to entity objects")
     entity_obj_key_map: Dict[EntityType, Dict[str, BaseModel]] = Field(default_factory=lambda: {
         "users": {}, 
         "models": {}, 
         "prompts": {}, 
+        "user_checkpoints": {},
         "agents": {}, 
         "tasks": {}, 
         "chats": {}, 
         "parameters": {}, 
         "task_responses": {},
-        "apis": {}
+        "apis": {},
+        "user_interactions": {},
     }, description="Map of entity keys to Pydantic model instances")
     entity_class_map: Dict[str, BaseModel] = Field(default_factory=lambda: {
         "agents": AliceAgent,
         "chats": AliceChat,
         "prompts": Prompt,
+        "user_checkpoints": UserCheckpoint,
         "models": AliceModel,
         "tasks": AliceTask,
         "users": User,
         "parameters": ParameterDefinition, 
         "task_responses": TaskResponse,
-        "apis": API
+        "apis": API,
+        "user_interactions": UserInteraction,
     }, description="Map of entity types to Pydantic model classes")
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -77,7 +83,9 @@ class DBInitManager(BaseModel):
         
     def get_entity_instance(self, entity_type: EntityType, entity_data: dict) -> BaseModel:
         EntityClass = self._get_entity_class(entity_type)
+        LOGGER.debug(f"get_entity_instance: Creating entity instance for {entity_type}: {entity_data}")
         entity_data_copy = self.clean_entity_object(deepcopy(entity_data))
+        LOGGER.debug(f"Cleaned entity data: {entity_data_copy}")
         entity_data_copy.pop("key", None)
         try:
             if entity_type == "tasks":
@@ -92,7 +100,10 @@ class DBInitManager(BaseModel):
             raise ValueError(f"Error creating entity instance for {entity_type}: {str(e)}")
         
     def clean_entity_object(self, entity_data: dict) -> dict:
-        return {k: v for k, v in entity_data.items() if v}
+        return {
+            k: v for k, v in entity_data.items() 
+            if v is not None and v != "" and (not hasattr(v, '__len__') or len(v) > 0)
+        }
 
     def get_entity_by_key(self, entity_type: EntityType, key: str) -> Dict[str, Any]:
         entity = self.entity_key_map[entity_type].get(key).copy
@@ -238,7 +249,9 @@ class DBInitManager(BaseModel):
             elif isinstance(value, dict):
                 resolved_data[field] = self._resolve_dict_value(field_type, origin, args, value)
                 LOGGER.debug(f"Resolved string value for {field}: {resolved_data[field]}")
-        
+            else:
+                LOGGER.debug(f"Field {field} is not a string, list, or dict: {value}")
+                resolved_data[field] = value
         if 'key' in resolved_data:
             resolved_data.pop('key')
 

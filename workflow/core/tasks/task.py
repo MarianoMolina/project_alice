@@ -7,9 +7,8 @@ from workflow.core.data_structures import (
     ApiType, FunctionParameters, ParameterDefinition,  FunctionConfig, ToolFunction, References, TaskResponse, 
     NodeResponse, UserInteraction, UserCheckpoint, NodeResponse, TasksEndCodeRouting, Prompt
 )
-from workflow.util.utils import simplify_execution_history
 from workflow.util import LOGGER, convert_value_to_type
-from workflow.core.tasks.task_utils import validate_and_process_function_inputs, generate_node_responses_summary
+from workflow.core.tasks.task_utils import validate_and_process_function_inputs, generate_node_responses_summary, simplify_execution_history
 
 class AliceTask(BaseModel):
     """
@@ -39,11 +38,7 @@ class AliceTask(BaseModel):
         default_factory=dict,
         description="Node-specific user interaction checkpoints"
     )
-    task_selection_method: Optional[Callable[[TaskResponse, List[NodeResponse]], Optional[str]]] = Field(
-        None, 
-        description="Optional method to select next task based on response"
-    )
-    
+
     # Task configuration
     input_variables: FunctionParameters = Field(
         default_factory=lambda: FunctionParameters(
@@ -65,7 +60,11 @@ class AliceTask(BaseModel):
         default_factory=list,
         description="Required API types"
     )
-    
+    exit_code_response_map: Optional[Dict[str, int]] = Field(
+        default=None,
+        description="A dictionary of exit codes mapped to string responses for the task."
+    )
+
     # Task components
     templates: Dict[str, Prompt] = Field(
         default_factory=dict,
@@ -228,7 +227,7 @@ class AliceTask(BaseModel):
         
         try:
             # Validate and process inputs
-            processed_inputs, error_msg = self.validate_and_process_inputs(execution_history=execution_history, **kwargs)
+            processed_inputs, error_msg = await self.validate_and_process_inputs(execution_history=execution_history, **kwargs)
             if error_msg:
                 return self.get_failed_task_response(error_msg, **kwargs)
 
@@ -442,16 +441,16 @@ class AliceTask(BaseModel):
         Determine the next node to execute based on either the task selection method or routing configuration,
         and attempt limits.
         """
-        if self.task_selection_method:
-            # Find the last response for the current node
-            for node in reversed(execution_history):
-                if node.node_name == current_node:
-                    if node.references and node.references.task_responses:
-                        task_response = node.references.task_responses[-1]
-                        next_task, _ = self.task_selection_method(task_response, execution_history)
-                        return next_task
-                    break
-            return None
+        # if self.task_selection_method:
+        #     # Find the last response for the current node
+        #     for node in reversed(execution_history):
+        #         if node.node_name == current_node:
+        #             if node.references and node.references.task_responses:
+        #                 task_response = node.references.task_responses[-1]
+        #                 next_task, _ = self.task_selection_method(task_response, execution_history)
+        #                 return next_task
+        #             break
+        #     return None
 
         # Fall back to standard routing logic
         if current_node not in self.node_end_code_routing:
@@ -563,11 +562,12 @@ class AliceTask(BaseModel):
         
         The final exit code is determined by:
         1. Explicitly provided exit_code parameter
-        2. Custom mapping via map_final_exit_code if implemented
-        3. Default success/failure logic (0 if all nodes succeeded, 1 otherwise)
+        2. Mapping via map_final_exit_code -> Default success/failure logic ->
+            Success (0) if all their nodes have at least one node response with an exit code that doesn't constitute a 'retry', Failure (1) otherwise
         """
         if exit_code is None:
             exit_code = self.map_final_exit_code(node_responses)
+            LOGGER.debug(f"Final exit code for task {self.task_name}: {exit_code}")
             
         if diagnostics is None:
             diagnostics = self.exit_codes.get(exit_code, "Task execution completed")
@@ -593,21 +593,35 @@ class AliceTask(BaseModel):
         """
         Map node responses to final task exit code.
         Override this method to implement custom exit code mapping.
-        
-        Default implementation:
-        - Returns 1 only if any node's exit code is not in its success codes
+
+        Updated implementation:
+        - For each node, consider only its last execution
+        - Returns the exit code of the last node if all nodes have the same exit code
+        - Returns 1 only if any node's last exit code is not in its success codes
         - Returns 0 otherwise (including if no nodes exist)
         """
+        # Build a dict of last node_responses for nodes in node_end_code_routing
+        last_node_responses = {}
         for node in node_responses:
             if node.node_name in self.node_end_code_routing:
-                # Get all codes that don't retry (success codes)
-                success_codes = [
-                    code for code, (_, is_retry) in 
-                    self.node_end_code_routing[node.node_name].items() 
-                    if not is_retry
-                ]
-                if node.exit_code not in success_codes:
-                    return 1
+                last_node_responses[node.node_name] = node
+
+        # Now get the set of exit codes from the last_node_responses
+        exit_codes = set(node.exit_code for node in last_node_responses.values())
+        if len(exit_codes) == 1:
+            return next(iter(exit_codes))
+
+        for node_name, node in last_node_responses.items():
+            # Get all codes that don't retry (success codes)
+            LOGGER.debug(f"Checking success codes for node {node_name}")
+            success_codes = [
+                code for code, (_, is_retry) in
+                self.node_end_code_routing[node_name].items()
+                if not is_retry
+            ]
+            LOGGER.debug(f"Node name: {node_name}\nExit code: {node.exit_code}\nSuccess codes: {success_codes}")
+            if node.exit_code not in success_codes:
+                return 1
         return 0
 
     # Input validation

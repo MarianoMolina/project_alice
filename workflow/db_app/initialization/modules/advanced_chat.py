@@ -21,8 +21,8 @@ advanced_chat_module = AdvancedChatModule(
                     "embeddings": "gemini_text_embedding",
                     "tts": "tts-1",
                 },
-                "has_code_exec": False,
-                "has_functions": True,
+                "has_tools": 1,
+                "has_code_exec": 0,
                 "max_consecutive_auto_reply": 1,
             },
             {
@@ -35,9 +35,9 @@ advanced_chat_module = AdvancedChatModule(
                     "embeddings": "oai_embedding_large",
                     "tts": "tts-1",
                 },
+                "has_tools": 1,
+                "has_code_exec": 0,
                 "max_consecutive_auto_reply": 1,
-                "has_functions": True,
-                "has_code_exec": False,
             },
         ],
         "chats": [

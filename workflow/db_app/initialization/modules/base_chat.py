@@ -10,12 +10,26 @@ class BaseChatModule(InitializationModule):
 
 base_chat_module = BaseChatModule(
     data = {
+        "parameters": [
+            {
+                "key": "user_name_parameter",
+                "type": "string",
+                "description": "The name of the user."
+            }
+        ],
         "prompts": [
             {
                 "key": "default_system_message",
                 "name": "Default System Message",
                 "content": get_prompt_file("default_system_message.prompt"),
-                "is_templated": False
+                "is_templated": True,
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "user_name": "user_name_parameter"
+                    },
+                    "required": []
+                }
             },
         ],
         "agents": [
@@ -27,8 +41,8 @@ base_chat_module = BaseChatModule(
                     "chat": "GPT4o",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": True,
-                "has_code_exec": False,
+                "has_tools": 1,
+                "has_code_exec": 0,
             },
             {
                 "key": "claude_alice",
@@ -38,8 +52,8 @@ base_chat_module = BaseChatModule(
                     "chat": "Claude3.5",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": True,
-                "has_code_exec": False,
+                "has_tools": 1,
+                "has_code_exec": 0,
             },
             {
                 "key": "lm_studio_alice",
@@ -49,8 +63,8 @@ base_chat_module = BaseChatModule(
                     "chat": "Llama3_1_8B",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": True,
-                "has_code_exec": False,
+                "has_tools": 1,
+                "has_code_exec": 0,
             },
             {
                 "key": "gemini_alice",
@@ -60,8 +74,8 @@ base_chat_module = BaseChatModule(
                     "chat": "gemini_1.5_flash",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": True,
-                "has_code_exec": False,
+                "has_tools": 1,
+                "has_code_exec": 0,
             },
             {
                 "key": "mistral_alice",
@@ -71,8 +85,8 @@ base_chat_module = BaseChatModule(
                     "chat": "mistral_small",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": True,
-                "has_code_exec": False,
+                "has_tools": 1,
+                "has_code_exec": 0,
             },
             {
                 "key": "cohere_alice",
@@ -82,8 +96,8 @@ base_chat_module = BaseChatModule(
                     "chat": "command-r-plus",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": True,
-                "has_code_exec": False,                
+                "has_tools": 1,
+                "has_code_exec": 0,                
             },
             {
                 "key": "llama_alice",
@@ -93,8 +107,8 @@ base_chat_module = BaseChatModule(
                     "chat": "llama3.2_90b",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": True,
-                "has_code_exec": False,
+                "has_tools": 1,
+                "has_code_exec": 0,
             },
             {
                 "key": "groq_alice",
@@ -104,8 +118,8 @@ base_chat_module = BaseChatModule(
                     "chat": "llama-3.1-70b-versatile",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": True,
-                "has_code_exec": False,
+                "has_tools": 1,
+                "has_code_exec": 0,
             }
         ],
         "chats": [

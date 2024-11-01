@@ -111,8 +111,8 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                     "chat": "GPT4o",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": False,
-                "has_code_exec": False,                
+                "has_tools": 0,
+                "has_code_exec": 0,                
             },
             {
                 "key": "web_summarizer_agent",
@@ -122,8 +122,8 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                     "chat": "GPT4o",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": False,
-                "has_code_exec": False,                
+                "has_tools": 0,
+                "has_code_exec": 0,                
             },
         ],
         "tasks": [

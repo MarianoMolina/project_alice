@@ -21,12 +21,12 @@ const AgentTableView: React.FC<AgentComponentProps> = ({
     },
     {
       header: 'Tool',
-      render: (agent: AliceAgent) => agent.has_functions ? 'Yes' : 'No',
-      sortKey: 'has_functions'
+      render: (agent: AliceAgent) => agent.has_tools ? 'Yes' : 'No', // Correct this to show the enum value
+      sortKey: 'has_tools'
     },
     {
       header: 'Code',
-      render: (agent: AliceAgent) => agent.has_code_exec ? 'Yes' : 'No',
+      render: (agent: AliceAgent) => agent.has_code_exec ? 'Yes' : 'No', // Correct this to show the enum value
       sortKey: 'has_code_exec'
     }
   ];

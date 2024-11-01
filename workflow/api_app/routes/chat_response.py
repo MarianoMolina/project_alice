@@ -46,7 +46,7 @@ async def chat_response(chat_id: str, db_app: BackendAPI = Depends(get_db_app)) 
     if api_check_result["status"] == "warning":
         LOGGER.warning(f'API Warning: {api_check_result["warnings"]}')
    
-    responses = await chat_data[chat_id].generate_response(api_manager)
+    responses = await chat_data[chat_id].generate_response(api_manager, user_data=db_app.user_data.get('user_obj'))
    
     LOGGER.debug(f'Responses: {responses}')
    

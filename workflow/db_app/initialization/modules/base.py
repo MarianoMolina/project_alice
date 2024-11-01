@@ -18,7 +18,7 @@ GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
 BACKEND_HOST = os.getenv("BACKEND_HOST")
 BACKEND_PORT = os.getenv("BACKEND_PORT")
 GOOGLE_KNOWLEDGE_GRAPH_API_KEY = os.getenv("GOOGLE_KNOWLEDGE_GRAPH_API_KEY")
-WOLFRAM_ALPHA_API_KEY = os.getenv("WOLFRAM_ALPHA_API_KEY")
+WOLFRAM_ALPHA_APP_ID = os.getenv("WOLFRAM_ALPHA_APP_ID")
 LOCAL_LLM_API_URL = f"http://{BACKEND_HOST}:{BACKEND_PORT}/lm-studio"
 
 class BaseModule(InitializationModule):
@@ -316,10 +316,10 @@ base_module = BaseModule(
                 "api_name": "wolfram_alpha",
                 "name": "Wolfram Alpha",
                 "api_config": {
-                    "api_key": WOLFRAM_ALPHA_API_KEY
+                    "app_id": WOLFRAM_ALPHA_APP_ID
                 },
                 "is_active": True,
-                "health_status": "healthy" if WOLFRAM_ALPHA_API_KEY else "unhealthy",
+                "health_status": "healthy" if WOLFRAM_ALPHA_APP_ID else "unhealthy",
             },
             {
                 "key": "reddit_search",

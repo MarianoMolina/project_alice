@@ -1,5 +1,4 @@
 import { Schema, Types } from 'mongoose';
-import { ApiType } from '../interfaces/api.interface';
 
 interface IFunctionParameters {
   type: 'object';
@@ -28,22 +27,5 @@ const functionParametersSchema = new Schema<IFunctionParameters>({
   }
 }, { _id: false });
 
-interface IAPIEngine {
-  required_api: ApiType;
-  input_variables: IFunctionParameters;
-}
 
-const apiEngineSchema = new Schema<IAPIEngine>({
-  required_api: {
-    type: String,
-    required: true,
-    enum: Object.values(ApiType),
-    description: "Required API for the task"
-  },
-  input_variables: {
-    type: functionParametersSchema,
-    required: true,
-    description: "Input variables for the API"
-  }
-}, { _id: false });
-export { functionParametersSchema, IFunctionParameters, apiEngineSchema, IAPIEngine };
+export { functionParametersSchema, IFunctionParameters };

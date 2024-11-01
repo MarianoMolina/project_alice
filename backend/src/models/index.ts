@@ -10,3 +10,5 @@ import './task.model';
 import './taskResult.model';
 import './user.model';
 import './urlReference.model';
+import './userCheckpoint.model';
+import './userInteraction.model';

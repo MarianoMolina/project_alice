@@ -1,8 +1,9 @@
 import mongoose, { Schema } from 'mongoose';
-import { functionParametersSchema, apiEngineSchema } from '../utils/schemas';
-import { ensureObjectIdForProperties, ensureObjectIdForAPIEngine } from '../utils/utils';
+import { functionParametersSchema } from '../utils/functionSchema';
+import { ensureObjectIdForProperties } from '../utils/utils';
 import { ITaskDocument, ITaskModel, TaskType } from '../interfaces/task.interface';
 import { ensureObjectIdHelper } from '../utils/utils';
+import { referencesSchema } from './reference.model';
 
 const taskSchema = new Schema<ITaskDocument, ITaskModel>({
     task_name: { type: String, required: true },
@@ -18,16 +19,14 @@ const taskSchema = new Schema<ITaskDocument, ITaskModel>({
     templates: { type: Map, of: Schema.Types.ObjectId, ref: 'Prompt', default: null },
     tasks: { type: Map, of: Schema.Types.ObjectId, ref: 'Task', default: null },
     valid_languages: [String],
-    timeout: { type: Number, default: null },
-    prompts_to_add: { type: Map, of: Schema.Types.ObjectId, ref: 'Prompt', default: null },
     exit_code_response_map: { type: Map, of: Number, default: null },
     start_node: { type: String, default: null },
-    task_selection_method: { type: Schema.Types.Mixed, default: null },
     node_end_code_routing: { type: Map, of: Map, default: null },
     max_attempts: { type: Number, default: 1 },
     required_apis: { type: [String], default: null },
     agent: { type: Schema.Types.ObjectId, ref: 'Agent', default: null },
-    api_engine: { type: apiEngineSchema, default: null },
+    user_checkpoints: { type: Map, of: Schema.Types.ObjectId, ref: 'UserCheckpoint', default: null },
+    data_cluster: { type: referencesSchema, default: () => ({}) },
     created_by: { type: Schema.Types.ObjectId, ref: 'User' },
     updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
@@ -44,17 +43,13 @@ taskSchema.methods.apiRepresentation = function (this: ITaskDocument) {
         templates: this.templates ? Object.fromEntries(this.templates) : null,
         tasks: this.tasks ? Object.fromEntries(this.tasks) : null,
         valid_languages: this.valid_languages || [],
-        timeout: this.timeout || null,
-        prompts_to_add: this.prompts_to_add ? Object.fromEntries(this.prompts_to_add) : null,
         exit_code_response_map: this.exit_code_response_map ? Object.fromEntries(this.exit_code_response_map) : null,
         start_node: this.start_node || null,
-        task_selection_method: this.task_selection_method || null,
         node_end_code_routing: this.node_end_code_routing ? Object.fromEntries(
             Array.from(this.node_end_code_routing.entries()).map(([key, value]) => [key, Object.fromEntries(value)])
         ) : null,
         max_attempts: this.max_attempts || 1,
         agent: this.agent ? (this.agent._id || this.agent) : null,
-        api_engine: this.api_engine || null,
         created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
         updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,
         createdAt: this.createdAt || null,
@@ -77,15 +72,14 @@ function ensureObjectIdForSave(this: ITaskDocument, next: mongoose.CallbackWitho
             this.tasks.set(key, ensureObjectIdHelper(value));
         }
     }
-    if (this.prompts_to_add) {
-        for (const [key, value] of this.prompts_to_add.entries()) {
-            this.prompts_to_add.set(key, ensureObjectIdHelper(value));
-        }
-    }
     if (this.input_variables && this.input_variables.properties) {
         this.input_variables.properties = ensureObjectIdForProperties(this.input_variables.properties);
     }
-    if (this.api_engine) ensureObjectIdForAPIEngine(this.api_engine);
+    if (this.user_checkpoints) {
+        for (const [key, value] of this.user_checkpoints.entries()) {
+            this.user_checkpoints.set(key, ensureObjectIdHelper(value));
+        }
+    }
     next();
 }
 
@@ -102,17 +96,14 @@ function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.
             Object.entries(update.tasks).map(([key, value]) => [key, ensureObjectIdHelper(value)])
         );
     }
-    if (update.prompts_to_add) {
-        update.prompts_to_add = Object.fromEntries(
-            Object.entries(update.prompts_to_add).map(([key, value]) => [key, ensureObjectIdHelper(value)])
+    if (update.user_checkpoints) {
+        update.user_checkpoints = Object.fromEntries(
+            Object.entries(update.user_checkpoints).map(([key, value]) => [key, ensureObjectIdHelper(value)])
         );
     }
     update.agent = ensureObjectIdHelper(update.agent);
     update.created_by = ensureObjectIdHelper(update.created_by);
     update.updated_by = ensureObjectIdHelper(update.updated_by);
-
-    if (update.api_engine) ensureObjectIdForAPIEngine(update.api_engine);
-
     if (update && update.input_variables && update.input_variables.properties) {
         update.input_variables.properties = ensureObjectIdForProperties(update.input_variables.properties);
     }
@@ -133,11 +124,10 @@ function autoPopulate(this: mongoose.Query<any, any>, next: mongoose.CallbackWit
         model: 'Task'
     });
     this.populate({
-        path: 'prompts_to_add',
-        options: { strictPopulate: false }
+        path: 'user_checkpoints.$*',
+        model: 'UserCheckpoint'
     });
     this.populate('input_variables.properties');
-    this.populate('api_engine.input_variables.properties');
     next();
 }
 

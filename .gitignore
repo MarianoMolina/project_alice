@@ -6,5 +6,6 @@ venv
 .env
 .cache
 .vscode
+myDockerCompose.log
 __pycache__
 shared-uploads

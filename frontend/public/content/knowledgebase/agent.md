@@ -35,7 +35,7 @@ This flexible structure enables the agent to switch between different models (ch
 
 The agent's behavior and abilities are further defined by several boolean flags and settings:
 
-- `has_functions`: Determines whether the agent can use tools, functions, or tasks.
+- `has_tools`: Determines whether the agent can use tools, functions, or tasks.
 - `has_code_exec`: Indicates if the agent is allowed to execute code blocks.
 - `max_consecutive_auto_reply`: Controls the number of consecutive automated replies the agent can make.
 
@@ -61,11 +61,23 @@ Beyond the models, the agent's main differentiating factor at the moment is the 
 Here's the TypeScript interface that defines the structure of an Alice Agent:
 
 ```typescript
+export enum ToolPermission {
+  DISABLED = 0,
+  NORMAL = 1,
+  WITH_PERMISSION = 2,
+  DRY_RUN = 3
+}
+export enum CodePermission {
+  DISABLED = 0,
+  NORMAL = 1,
+  WITH_PERMISSION = 2,
+  TAGGED_ONLY = 3
+}
 export interface AliceAgent extends BaseDataseObject {
   _id?: string;
   name: string;
   system_message: Prompt;
-  has_functions: boolean;
+  has_tools: boolean;
   has_code_exec: boolean;
   max_consecutive_auto_reply?: number;
   models?: { [key in ModelType]?: AliceModel };

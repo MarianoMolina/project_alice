@@ -16,6 +16,9 @@ const modelMapping: { [key: string]: string } = {
   apis: 'API',
   parameterdefinitions: 'ParameterDefinition',
   urlreferences: 'URLReference',
+  files: 'FileReference',
+  usercheckpoints: 'UserCheckpoint',
+  userinteractions: 'UserInteraction',
 };
 
 // Get all collections in the database

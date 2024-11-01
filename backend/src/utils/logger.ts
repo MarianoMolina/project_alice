@@ -8,8 +8,8 @@ enum LogLevel {
   DEBUG = 3
 }
 
-class Logger {
-  private static instance: Logger;
+class LoggerClass {
+  private static instance: LoggerClass;
   private logDir: string;
   private logFile: string;
   private level: LogLevel;
@@ -21,11 +21,11 @@ class Logger {
     this.initializeLogDirectory();
   }
 
-  public static getInstance(component: 'frontend' | 'backend'): Logger {
-    if (!Logger.instance) {
-      Logger.instance = new Logger(component);
+  public static getInstance(component: 'frontend' | 'backend'): LoggerClass {
+    if (!LoggerClass.instance) {
+      LoggerClass.instance = new LoggerClass(component);
     }
-    return Logger.instance;
+    return LoggerClass.instance;
   }
 
   private initializeLogDirectory() {
@@ -75,6 +75,6 @@ class Logger {
   }
 }
 
-const logger = Logger.getInstance('backend');
+const Logger = LoggerClass.getInstance('backend');
 
-export default logger;
+export default Logger;

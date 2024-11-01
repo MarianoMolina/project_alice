@@ -5,7 +5,7 @@ import {
     Chip,
     ListItemButton,
 } from '@mui/material';
-import { Category, Description, Functions, Person, ApiRounded, Sos, Settings, Logout, ExitToApp } from '@mui/icons-material';
+import { Category, Description, Functions, Person, ApiRounded, Settings, Logout, ExitToApp } from '@mui/icons-material';
 import { TaskComponentProps } from '../../../../types/TaskTypes';
 import useStyles from '../TaskStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
@@ -71,11 +71,6 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
             secondary_text: renderChips(item.templates as ChipRecord, (id) => selectCardItem && selectCardItem('Prompt', id), "No templates available")
         },
         {
-            icon: <Description />,
-            primary_text: "Prompts to Add",
-            secondary_text: renderChips(item.prompts_to_add as ChipRecord, (id) => selectCardItem && selectCardItem('Prompt', id), "No prompts to add")
-        },
-        {
             icon: <Functions />,
             primary_text: "Subtasks",
             secondary_text: renderChips(item.tasks as ChipRecord, (id) => selectCardItem && selectCardItem('Task', id), "No subtasks available")
@@ -126,11 +121,6 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
                     ))}
                 </Box>
             )
-        },
-        {
-            icon: <Sos />,
-            primary_text: "Human Input Required",
-            secondary_text: item.human_input ? 'Yes' : 'No'
         },
         {
             icon: <ExitToApp />,

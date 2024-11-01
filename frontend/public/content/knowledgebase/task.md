@@ -45,12 +45,9 @@ export interface AliceTask extends BaseDataseObject {
   exit_code_response_map: { [key: string]: number } | null;
   start_node?: string | null;
   required_apis?: ApiType[] | null;
-  task_selection_method?: CallableFunction | null;
   node_end_code_routing?: TasksEndCodeRouting | null;
   max_attempts?: number;
   agent?: AliceAgent | null;
-  human_input?: boolean;
-  api_engine?: APIEngine | null;
 }
 ```
 

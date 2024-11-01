@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { ExecutionHistoryItem, ITaskResultDocument, ITaskResultModel, NodeResponse } from '../interfaces/taskResult.interface';
-import referencesSchema from './reference.model';
+import { referencesSchema } from './reference.model';
 import mongooseAutopopulate from 'mongoose-autopopulate';
 import { ensureObjectIdHelper } from '../utils/utils';
 

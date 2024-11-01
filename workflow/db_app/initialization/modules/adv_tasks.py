@@ -70,8 +70,8 @@ adv_tasks_module = AdvTasksModule(
                 "models": {
                     "embeddings": "oai_embedding_large",
                 },
-                "has_code_exec": False,
-                "has_functions": True,
+                "has_code_exec": 0,
+                "has_tools": 0,
                 "max_consecutive_auto_reply": 1,
             },
             {
@@ -81,8 +81,8 @@ adv_tasks_module = AdvTasksModule(
                 "models": {
                     "img_gen": "Dall-E-3",
                 },
-                "has_code_exec": False,
-                "has_functions": False,
+                "has_code_exec": 0,
+                "has_tools": 0,
                 "max_consecutive_auto_reply": 1,
             },
             {
@@ -92,8 +92,8 @@ adv_tasks_module = AdvTasksModule(
                 "models": {
                     "tts": "tts-1",
                 },
-                "has_code_exec": False,
-                "has_functions": True,
+                "has_code_exec": 0,
+                "has_tools": 0,
                 "max_consecutive_auto_reply": 1,
             },
             {
@@ -103,8 +103,8 @@ adv_tasks_module = AdvTasksModule(
                 "models": {
                     "img_gen": "gemini_img_gen_imagen_3",
                 },
-                "has_code_exec": False,
-                "has_functions": False,
+                "has_code_exec": 0,
+                "has_tools": 0,
                 "max_consecutive_auto_reply": 1,
             }
         ],

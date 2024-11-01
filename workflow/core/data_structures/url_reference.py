@@ -28,4 +28,4 @@ class URLReference(Embeddable):
     
     def __str__(self) -> str:
         # stringify metadata
-        return f"\n\nTitle: {self.title}\n\nURL: {self.url}\n\nContent: {self.content}\n\nMetadata:\n\n{json.dumps(self.metadata, indent=2)}"
+        return f"\n\nTitle: {self.title}\n\nURL: {self.url}\n\nContent: {self.content}" # \n\nMetadata:\n\n{json.dumps(self.metadata, indent=2)}

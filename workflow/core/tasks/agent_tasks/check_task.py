@@ -23,12 +23,12 @@ class CheckTask(PromptAgentTask):
         }
     }, description="A dictionary of tasks/nodes -> exit codes and the task to route to given each exit code")
 
-    def get_llm_exit_code(self, chat_output: List[MessageDict], response_code: bool) -> int:
-        if not response_code or not chat_output or not chat_output[-1].content:
+    def get_llm_exit_code(self, message: MessageDict) -> int:
+        if not message:
             LOGGER.warning(f"Invalid input for task {self.task_name}. Returning default failure code.")
             return 1
 
-        content = chat_output[-1].content.upper()
+        content = message.content.upper()
         for key, value in self.exit_code_response_map.items():
             normalized_key = ' '.join(key.upper().split())  # Normalize whitespace
             if normalized_key in content:
