@@ -18,6 +18,12 @@ class CodeExecExitCode(IntEnum):
     EXECUTION_ERROR = 1     # Code failed to execute (syntax/runtime error)
     VALIDATION_ERROR = 2    # Code executed but returned errors/failed tests
 
+class CodeGenerationExitCode(IntEnum):
+    SUCCESS = 0             # Code generated and executed successfully
+    GENERATION_FAILED = 1   # Failed to generate code
+    EXECUTION_FAILED = 2    # Code execution failed
+    NO_CODE_BLOCKS = 3      # Generated response contained no valid code blocks
+
 class CodeGenerationLLMTask(PromptAgentTask):
     """
     A task specifically designed for generating and executing code from a given prompt.
@@ -35,9 +41,6 @@ class CodeGenerationLLMTask(PromptAgentTask):
     2: Code execution failed
     3: Generated response contained no valid code blocks
     """
-    agent: AliceAgent = Field(..., description="The agent to use for the task")
-    task_name: str = Field("generate_code", description="The name of the task")
-    start_node: str = Field(default='llm_generation', description="The name of the starting node")
     node_end_code_routing: TasksEndCodeRouting = Field(
         default={
             'llm_generation': {
@@ -55,12 +58,12 @@ class CodeGenerationLLMTask(PromptAgentTask):
     )
     exit_codes: Dict[int, str] = Field(
         default_factory=lambda: {
-            0: "Code generated and executed successfully",
-            1: "Generation failed",
-            2: "Code execution failed",
-            3: "No valid code blocks in response"
+            CodeGenerationExitCode.SUCCESS: "Code generated and executed successfully",
+            CodeGenerationExitCode.GENERATION_FAILED: "Generation failed",
+            CodeGenerationExitCode.EXECUTION_FAILED: "Code execution failed",
+            CodeGenerationExitCode.NO_CODE_BLOCKS: "No valid code blocks in response"
         },
-        description="Exit code meanings"
+        description="Exit code options and descriptions"
     )
 
     def get_llm_exit_code(self, message: MessageDict) -> LLMCodeGenExitCode:

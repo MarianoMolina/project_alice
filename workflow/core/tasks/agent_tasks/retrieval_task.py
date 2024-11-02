@@ -16,7 +16,7 @@ from workflow.core.data_structures import (
     Embeddable
 )
 from workflow.core.api import APIManager
-from workflow.util import LOGGER, cosine_similarity, Language
+from workflow.util import LOGGER, cosine_similarity, Language, get_traceback
 
 class RetrievalTask(AliceTask):
     agent: AliceAgent = Field(..., description="The agent to use for the task")
@@ -103,7 +103,7 @@ class RetrievalTask(AliceTask):
                 exit_code=1,
                 references=References(messages=[MessageDict(
                     role="system",
-                    content=f"Failed to ensure embeddings: {str(e)}",
+                    content=f"Failed to ensure embeddings: {str(e)}\n\n" + get_traceback(),
                     generated_by="system"
                 )]),
                 execution_order=len(execution_history)

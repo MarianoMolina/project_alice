@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Box } from '@mui/material';
-import { Add, Person, Category, Settings, Description, Functions, Assignment, Api, AttachFile, Message, QuestionAnswer, Link } from '@mui/icons-material';
+import { Add, Person, Category, Settings, Description, Functions, Assignment, Api, AttachFile, Message, QuestionAnswer, Link, Feedback, LiveHelp } from '@mui/icons-material';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH, TASK_SIDEBAR_WIDTH_TABLE, TASK_SIDEBAR_WIDTH_COMPACT } from '../utils/Constants';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
 import { ComponentMode, CollectionElement, CollectionElementString } from '../types/CollectionTypes';
@@ -20,6 +20,8 @@ import EnhancedMessage from '../components/enhanced/message/message/EnhancedMess
 import EnhancedURLReference from '../components/enhanced/url_reference/url_reference/EnhancedURLReference';
 import Logger from '../utils/Logger';
 import ToggleBox from '../components/ui/sidetab_header/ToggleBox';
+import EnhancedUserCheckpoint from '../components/enhanced/user_checkpoint/user_checkpoint/EnhancedUserCheckpoint';
+import EnhancedUserInteraction from '../components/enhanced/user_interaction/user_interaction/EnhancedUserInteraction';
 
 const Database: React.FC = () => {
     const classes = useStyles();
@@ -81,6 +83,8 @@ const Database: React.FC = () => {
         { name: 'Prompt' as CollectionElementString, icon: Description, group: 'Core' },
         { name: 'Task' as CollectionElementString, icon: Functions, group: 'Core' },
         { name: 'TaskResponse' as CollectionElementString, icon: Assignment, group: 'Ref' },
+        { name: 'UserCheckpoint' as CollectionElementString, icon: LiveHelp, group: 'Core' },
+        { name: 'UserInteraction' as CollectionElementString, icon: Feedback, group: 'Ref' },
         { name: 'URLReference' as CollectionElementString, icon: Link, group: 'Ref' },
     ];
 
@@ -133,6 +137,10 @@ const Database: React.FC = () => {
                                 return <EnhancedMessage {...commonListProps} />;
                             case 'URLReference':
                                 return <EnhancedURLReference {...commonListProps} />;
+                            case 'UserCheckpoint':
+                                return <EnhancedUserCheckpoint {...commonListProps} />;
+                            case 'UserInteraction':
+                                return <EnhancedUserInteraction {...commonListProps} />;
                             default:
                                 return null;
                         }
@@ -179,6 +187,10 @@ const Database: React.FC = () => {
                 return <EnhancedMessage {...commonProps} />;
             case 'URLReference':
                 return <EnhancedURLReference {...commonProps} />;
+            case 'UserCheckpoint':
+                return <EnhancedUserCheckpoint {...commonProps} />;
+            case 'UserInteraction':
+                return <EnhancedUserInteraction {...commonProps} />;
             default:
                 return null;
         }

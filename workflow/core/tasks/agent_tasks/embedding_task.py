@@ -6,7 +6,7 @@ from workflow.core.data_structures import (
     FunctionParameters, ParameterDefinition, MessageDict, ApiType, References, NodeResponse, TasksEndCodeRouting
 )
 from workflow.core.api import APIManager
-from workflow.util import LOGGER
+from workflow.util import LOGGER, get_traceback, Language
 
 class EmbeddingTask(AliceTask):
     agent: AliceAgent = Field(..., description="The agent to use for the task")
@@ -36,7 +36,7 @@ class EmbeddingTask(AliceTask):
         input_text: str = kwargs.get('input', "")
         
         try:
-            new_file = await self.agent.generate_embeddings(api_manager=api_manager, input=input_text)
+            new_file = await self.agent.generate_embeddings(api_manager=api_manager, input=input_text, language=Language.TEXT)
             if not new_file:
                 raise ValueError("No embeddings generated")
             return NodeResponse(
@@ -54,7 +54,7 @@ class EmbeddingTask(AliceTask):
                 exit_code=1,
                 references=References(messages=[MessageDict(
                     role="system",
-                    content=f"Embedding generation failed: {str(e)}",
+                    content=f"Embedding generation failed: {str(e)}\n\n" + get_traceback(),
                     generated_by="system"
                 )]),
                 execution_order=len(execution_history)

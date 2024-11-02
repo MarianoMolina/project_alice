@@ -1,6 +1,6 @@
 from pydantic import Field
 from typing import List, Optional
-from workflow.util import LOGGER
+from workflow.util import LOGGER, get_traceback
 from workflow.core.data_structures import (
     MessageDict, ApiType, References, NodeResponse, TasksEndCodeRouting
 )
@@ -58,7 +58,7 @@ class CodeExecutionLLMTask(PromptAgentTask):
                 exit_code=1,
                 references=References(messages=[MessageDict(
                     role="system",
-                    content=f"Code execution failed: {str(e)}",
+                    content=f"Code execution failed: {str(e)}\n\n" + get_traceback(),
                     generated_by="system"
                 )]),
                 execution_order=len(execution_history)

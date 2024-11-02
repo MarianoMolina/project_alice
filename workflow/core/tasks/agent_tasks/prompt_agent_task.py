@@ -62,28 +62,8 @@ class PromptAgentTask(AliceTask):
         ),
         description="Inputs that the agent will require. Default is a 'prompt' string."
     )
-    templates: Dict[str, Any] = Field(
-        default={
-            "task_template": Prompt(
-                name="basic_prompt",
-                content="{{prompt}}",
-                is_templated=True,
-                parameters=FunctionParameters(
-                    type="object",
-                    properties={
-                        "prompt": ParameterDefinition(
-                            type="string",
-                            description="The input prompt for the task",
-                            default=None
-                        )
-                    },
-                    required=["prompt"]
-                )
-            )
-        },
-        description="A dictionary of template names and their prompt objects. task_template is used to format the agent input message, output_template is used to format the output."
-    )
-    start_node: Optional[str] = Field(default='llm_generation', description="The name of the starting node")
+    templates: Dict[str, Any] = Field(..., description="A dictionary of template names and their prompt objects. task_template is used to format the agent input message, output_template is used to format the output.")
+    start_node: str = Field(default='llm_generation', description="The name of the starting node")
     node_end_code_routing: TasksEndCodeRouting = Field(
         default={
             'llm_generation': {
@@ -260,7 +240,7 @@ class PromptAgentTask(AliceTask):
                 exit_code=1,
                 references=References(messages=[MessageDict(
                     role="system",
-                    content=f"Code execution failed: {str(e)}",
+                    content=f"Code execution failed: {str(e)}\n\n" + get_traceback(),
                     generated_by="system"
                 )]),
                 execution_order=len(execution_history)

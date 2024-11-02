@@ -12,7 +12,7 @@ from workflow.core.data_structures import (
     ModelConfig,
 )
 from workflow.core.api.engines.api_engine import APIEngine
-from workflow.util import LOGGER, chunk_text
+from workflow.util import LOGGER, chunk_text, get_traceback
 import base64
 import re
 import asyncio
@@ -106,13 +106,12 @@ class BarkEngine(APIEngine):
             return References(files=all_files, messages=all_messages)
 
         except Exception as e:
-            import traceback
-            LOGGER.error(f"Error in Bark audio generation: {traceback.format_exc()}")
+            LOGGER.error(f"Error in Bark audio generation: {get_traceback()}")
             return References(
                 messages=[
                     MessageDict(
                         role="system",
-                        content=f"Error in Bark audio generation: {str(e)}",
+                        content=f"Error in Bark audio generation: {str(e)}\n\n" + get_traceback(),
                         type=ContentType.TEXT,
                     )
                 ]
@@ -198,15 +197,13 @@ class BarkEngine(APIEngine):
             return References(files=[file_reference])
 
         except Exception as e:
-            import traceback
-
-            LOGGER.error(f"Error generating audio: {traceback.format_exc()}")
+            LOGGER.error(f"Error generating audio: {get_traceback()}")
             LOGGER.error(f"Error in Bark audio generation: {str(e)}")
             return References(
                 messages=[
                     MessageDict(
                         role="system",
-                        content=f"Error in Bark audio generation: {str(e)}",
+                        content=f"Error in Bark audio generation: {str(e)}\n\n" + get_traceback(),
                         type=ContentType.TEXT,
                     )
                 ]

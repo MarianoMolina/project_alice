@@ -6,7 +6,7 @@ from workflow.core.data_structures import (
     FunctionParameters, ParameterDefinition, MessageDict, ApiType, References, NodeResponse, TasksEndCodeRouting
 )
 from workflow.core.api import APIManager
-from workflow.util import LOGGER
+from workflow.util import LOGGER, get_traceback
 
 class GenerateImageTask(AliceTask):
     agent: AliceAgent = Field(..., description="The agent to use for the task")
@@ -72,7 +72,7 @@ class GenerateImageTask(AliceTask):
                 exit_code=1,
                 references=References(messages=[MessageDict(
                     role="system",
-                    content=f"Image generation failed: {str(e)}",
+                    content=f"Image generation failed: {str(e)}\n\n" + get_traceback(),
                     generated_by="system"
                 )]),
                 execution_order=len(execution_history)

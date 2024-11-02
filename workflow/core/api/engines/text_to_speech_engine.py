@@ -4,7 +4,7 @@ from pydantic import Field
 from openai import AsyncOpenAI
 from workflow.core.data_structures import ModelConfig, ApiType, FileContentReference, MessageDict, ContentType, FileType, References, FunctionParameters, ParameterDefinition
 from workflow.core.api.engines.api_engine import APIEngine
-from workflow.util import LOGGER, chunk_text
+from workflow.util import LOGGER, chunk_text, get_traceback
 
 class OpenAITextToSpeechEngine(APIEngine):
     input_variables: FunctionParameters = Field(
@@ -113,7 +113,9 @@ class OpenAITextToSpeechEngine(APIEngine):
             return References(files=[file_reference])
 
         except Exception as e:
-            import traceback
-            LOGGER.error(f"Error generating speech: {traceback.format_exc()}")
+            LOGGER.error(f"Error generating speech: {get_traceback()}")
             LOGGER.error(f"Error in OpenAI text-to-speech API call: {str(e)}")
-            return References(messages=[MessageDict(role='system', content=f"Error in OpenAI text-to-speech API call: {str(e)}", type=ContentType.TEXT)])
+            return References(messages=[MessageDict(
+                role='system', 
+                content=f"Error in OpenAI text-to-speech API call: {str(e)}\n\n" + get_traceback(), 
+                type=ContentType.TEXT)])

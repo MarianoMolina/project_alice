@@ -30,7 +30,7 @@ class Workflow(AliceTask):
 
             # Execute the task using the common input validation logic
             task_result = await current_task.run(
-                execution_history=execution_history + node_responses,
+                execution_history=execution_history,
                 **kwargs
             )
 
@@ -40,7 +40,7 @@ class Workflow(AliceTask):
                 node_name=node_name,
                 exit_code=task_result.result_code,
                 references=References(task_responses=[task_result]),
-                execution_order=len(execution_history) + len(node_responses)
+                execution_order=len(execution_history)
             )
 
             return node_response
@@ -54,7 +54,7 @@ class Workflow(AliceTask):
                 references=References(
                     messages=[{
                         "role": "system",
-                        "content": f"Error executing task: {str(e)}",
+                        "content": f"Error executing task: {str(e)}\n\n" + get_traceback(),
                         "generated_by": "system"
                     }]
                 ),

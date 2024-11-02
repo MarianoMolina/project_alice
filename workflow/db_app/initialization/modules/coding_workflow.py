@@ -22,20 +22,10 @@ coding_workflow_module = CodingWorkflowModule(
                 "description": "The code that was generated",
             },
             {
-                "key": "param_execute_code",
-                "type": "string",
-                "description": "The code execution output that was generated",
-            },
-            {
                 "key": "param_generate_unit_tests",
                 "type": "string",
                 "description": "The unit test code that was generated, passed in case of a recursive call",
             },
-            {
-                "key": "param_execute_unit_tests",
-                "type": "string",
-                "description": "The output of the unit test execution, passed in case of a recursive call",
-            }
         ],
         "user_checkpoints": [
             {   
@@ -63,7 +53,7 @@ coding_workflow_module = CodingWorkflowModule(
                 "content": get_prompt_file("unit_tester_agent.prompt"),
             },
             {
-                "key": "code_generation_task",
+                "key": "code_generation_task_prompt",
                 "name": "Code Generation Task",
                 "content": get_prompt_file("code_generation_task.prompt"),
                 "is_templated": True,
@@ -72,37 +62,9 @@ coding_workflow_module = CodingWorkflowModule(
                     "properties": {
                         "plan_workflow": "param_plan_workflow",
                         "generate_code": "param_generate_code",
-                        "execute_code": "param_execute_code",
                         "generate_unit_tests": "param_generate_unit_tests",
                     },
                     "required": ["plan_workflow"]
-                }
-            },
-            {
-                "key": "code_execution_task",
-                "name": "Code Execution Task",
-                "content": "This is the code:\n\n{{ generate_code }}",
-                "is_templated": True,
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "generate_code": "param_generate_code",
-                    },
-                    "required": ["generate_code"]
-                }
-            },
-            {
-                "key": "test_execution_task",
-                "name": "Test Code Execution Task",
-                "content": get_prompt_file('unit_test_execution_task.prompt'),
-                "is_templated": True,
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "generate_code": "param_generate_code",
-                        "generate_unit_tests": "param_generate_unit_tests",
-                    },
-                    "required": ["generate_unit_tests"]
                 }
             },
             {
@@ -120,31 +82,22 @@ coding_workflow_module = CodingWorkflowModule(
                     "properties": {
                         "plan_workflow": "param_plan_workflow",
                         "generate_code": "param_generate_code",
-                        "execute_code": "param_execute_code",
                         "generate_unit_tests": "param_generate_unit_tests",
-                        "execute_unit_tests": "param_execute_unit_tests",
                     },
-                    "required": ["generate_unit_tests", "generate_code", "execute_unit_tests", "plan_workflow", "execute_code"]
+                    "required": ["generate_unit_tests", "generate_code", "plan_workflow"]
                 }
             }, 
             {
-                "key": "execution_agent_prompt",
-                "name": "Execution Agent Prompt",
-                "content": "This agent executes the code",
-            },
-            {
                 "key": "coding_workflow_output_prompt",
                 "name": "Coding Workflow Output Template",
-                "content": "Plan: {{ plan_workflow }}\n\nCode: {{ generate_code }}\n\nExecution: {{ execute_code }}\n\nUnit Tests: {{ generate_unit_tests }}\n\nUnit Test Execution: {{ execute_unit_tests }}",
+                "content": "Plan: {{ plan_workflow }}\n\nCode: {{ generate_code }}\n\nUnit Tests: {{ generate_unit_tests }}\n\n",
                 "is_templated": True,
                 "parameters": {
                     "type": "object",
                     "properties": {
                         "plan_workflow": "param_plan_workflow",
                         "generate_code": "param_generate_code",
-                        "execute_code": "param_execute_code",
                         "generate_unit_tests": "param_generate_unit_tests",
-                        "execute_unit_tests": "param_execute_unit_tests",
                     },
                     "required": ["plan_workflow"]
                 }
@@ -169,9 +122,9 @@ coding_workflow_module = CodingWorkflowModule(
                 "models": {
                     "chat": "GPT4o",
                 },
-                "max_consecutive_auto_reply": 1,
+                "max_consecutive_auto_reply": 2,
                 "has_tools": 0,
-                "has_code_exec": 0,                
+                "has_code_exec": 1,                
             },
             {
                 "key": "unit_tester_agent",
@@ -180,9 +133,9 @@ coding_workflow_module = CodingWorkflowModule(
                 "models": {
                     "chat": "GPT4o",
                 },
-                "max_consecutive_auto_reply": 1,
+                "max_consecutive_auto_reply": 2,
                 "has_tools": 0,
-                "has_code_exec": 0,                
+                "has_code_exec": 1,                
             },
             {
                 "key": "unit_test_check_agent",
@@ -195,14 +148,6 @@ coding_workflow_module = CodingWorkflowModule(
                 "has_tools": 0,
                 "has_code_exec": 0,
             },
-            {
-                "key": "execution_agent",
-                "name": "execution_agent",
-                "system_message": "execution_agent_prompt",
-                "max_consecutive_auto_reply": 1,
-                "has_tools": 0,
-                "has_code_exec": 0,
-            }
         ],
         "tasks": [
             {
@@ -241,34 +186,14 @@ coding_workflow_module = CodingWorkflowModule(
                     "properties": {
                         "plan_workflow": "param_plan_workflow",
                         "generate_code": "param_generate_code",
-                        "execute_code": "param_execute_code",
                         "generate_unit_tests": "param_generate_unit_tests",
                     },
                     "required": ["plan_workflow"]
                 },
                 "required_apis": ["llm_api"],
                 "templates": {
-                    "task_template": "code_generation_task"
+                    "task_template": "code_generation_task_prompt"
                 },
-                "exit_codes": {0: "Success", 1: "Generation failed.", 2: "No code blocks in response"}
-            },
-            {
-                "key": "execute_code",
-                "task_type": "CodeExecutionLLMTask",
-                "task_name": "execute_code",
-                "task_description": "Executes the code available in a list of message dicts",
-                "agent": "execution_agent",
-                "input_variables": {
-                    "type": "object",
-                    "properties": {
-                        "generate_code": "param_generate_code",
-                    },
-                    "required": ["generate_code"]
-                },
-                "templates": {
-                    "task_template": "code_execution_task"
-                },
-                "exit_codes": {0: "Success", 1: "Execution failed."}
             },
             {
                 "key": "generate_unit_tests",
@@ -281,35 +206,14 @@ coding_workflow_module = CodingWorkflowModule(
                     "properties": {
                         "plan_workflow": "param_plan_workflow",
                         "generate_code": "param_generate_code",
-                        "execute_code": "param_execute_code",
                         "generate_unit_tests": "param_generate_unit_tests",
-                        "execute_unit_tests": "param_execute_unit_tests",
                     },
                     "required": ["generate_code", "execute_code"]
                 },
                 "templates": {
-                    "task_template": "code_generation_task"
+                    "task_template": "code_generation_task_prompt"
                 },
                 "exit_codes": {0: "Success", 1: "Generation failed.", 2: "No code blocks in response"}
-            },
-            {
-                "key": "execute_unit_tests",
-                "task_type": "CodeExecutionLLMTask",
-                "task_name": "execute_unit_tests",
-                "task_description": "Executes the code available in a list of message dicts",
-                "agent": "execution_agent",
-                "input_variables": {
-                    "type": "object",
-                    "properties": {
-                        "generate_code": "param_generate_code",
-                        "generate_unit_tests": "param_generate_unit_tests",
-                    },
-                    "required": ["generate_unit_tests"]
-                },
-                "templates": {
-                    "task_template": "test_execution_task"
-                },
-                "exit_codes": {0: "Success", 1: "Execution failed."}
             },
             {
                 "key": "check_unit_test_results",
@@ -322,11 +226,9 @@ coding_workflow_module = CodingWorkflowModule(
                     "properties": {
                         "plan_workflow": "param_plan_workflow",
                         "generate_code": "param_generate_code",
-                        "execute_code": "param_execute_code",
                         "generate_unit_tests": "param_generate_unit_tests",
-                        "execute_unit_tests": "param_execute_unit_tests",
                     },
-                    "required": ["generate_unit_tests", "generate_code", "execute_unit_tests"]
+                    "required": ["generate_unit_tests", "generate_code"]
                 },
                 "exit_code_response_map": {"TEST FAILED": 2, "ALL TESTS PASSED": 0, "TEST CODE ERROR": 3},
                 "exit_codes": {0: "Test Passed", 1: "Response generation failed", 2: "Test Failed", 3: "Test Code Error"},
@@ -338,13 +240,11 @@ coding_workflow_module = CodingWorkflowModule(
                 "key": "coding_workflow",
                 "task_type": "Workflow",
                 "task_name": "coding_workflow",
-                "task_description": "Executes a coding workflow based on the provided prompt",
+                "task_description": "Workflow for creating code. Provide a prompt detailing the requirements and language for the code.",
                 "tasks": {
                     "plan_workflow": "plan_workflow",
                     "generate_code": "generate_code",
-                    "execute_code": "execute_code",
                     "generate_unit_tests": "generate_unit_tests",
-                    "execute_unit_tests": "execute_unit_tests",
                     "check_unit_test_results": "check_unit_test_results"
                 },
                 "start_node": "plan_workflow",
@@ -354,22 +254,16 @@ coding_workflow_module = CodingWorkflowModule(
                         1: ("plan_workflow", True),
                     },
                     "generate_code": {
-                        0: ("execute_code", False),
-                        1: ("generate_code", True),
-                        2: ("generate_code", True)
-                    },
-                    "execute_code": {
                         0: ("generate_unit_tests", False),
                         1: ("generate_code", True),
+                        2: ("generate_unit_tests", True),
+                        3: (None, True),
                     },
                     "generate_unit_tests": {
-                        0: ("execute_unit_tests", False),
-                        1: ("generate_unit_tests", True),
-                        2: ("generate_unit_tests", True)
-                    },
-                    "execute_unit_tests": {
                         0: ("check_unit_test_results", False),
                         1: ("generate_unit_tests", True),
+                        2: ("check_unit_test_results", True),
+                        3: (None, True)
                     },
                     "check_unit_test_results": {
                         0: (None, False),

@@ -1,4 +1,4 @@
-import base64, json, re, numpy as np
+import base64, json, re
 from pydantic import Field
 from typing import List
 from openai import AsyncOpenAI
@@ -9,7 +9,6 @@ from workflow.core.data_structures import (
     MessageDict,
     FileContentReference,
     EmbeddingChunk,
-    FileType,
     ContentType,
     References,
     FunctionParameters,
@@ -76,6 +75,9 @@ class EmbeddingEngine(APIEngine):
         client = AsyncOpenAI(api_key=api_data.api_key, base_url=api_data.base_url)
         model = api_data.model
 
+        LOGGER.debug(f"Generating embeddings for {len(inputs)} inputs using model: {model}")
+        LOGGER.debug(f"Inputs: {inputs}")
+
         # Check if total tokens exceed context size
         total_tokens = sum(est_token_count(input) for input in inputs)
         if total_tokens > api_data.ctx_size:
@@ -120,6 +122,8 @@ class EmbeddingEngine(APIEngine):
         """
         Splits the input text into semantically meaningful chunks using embeddings.
         """
+        if est_token_count(input_text) < 600:
+            return [input_text]
         # Step 1: Setup initial sentences
         sentences = self.setup_initial_sentences(input_text)
 

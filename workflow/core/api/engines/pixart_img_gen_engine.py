@@ -18,7 +18,7 @@ from workflow.core.data_structures import (
     ModelConfig,
 )
 from workflow.core.api.engines.api_engine import APIEngine
-from workflow.util import LOGGER, chunk_text
+from workflow.util import LOGGER, get_traceback
 
 
 class PixArtImgGenEngine(APIEngine):
@@ -193,14 +193,12 @@ class PixArtImgGenEngine(APIEngine):
             return References(files=file_references)
 
         except Exception as e:
-            import traceback
-
-            LOGGER.error(f"Error in PixArt image generation: {traceback.format_exc()}")
+            LOGGER.error(f"Error in PixArt image generation: {get_traceback()}")
             return References(
                 messages=[
                     MessageDict(
                         role="system",
-                        content=f"Error in PixArt image generation: {str(e)}",
+                        content=f"Error in PixArt image generation: {str(e)}\n\n" + get_traceback(),
                         type=ContentType.TEXT,
                     )
                 ]

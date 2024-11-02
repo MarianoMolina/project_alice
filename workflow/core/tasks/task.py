@@ -7,7 +7,7 @@ from workflow.core.data_structures import (
     ApiType, FunctionParameters, ParameterDefinition,  FunctionConfig, ToolFunction, References, TaskResponse, 
     NodeResponse, UserInteraction, UserCheckpoint, NodeResponse, TasksEndCodeRouting, Prompt
 )
-from workflow.util import LOGGER, convert_value_to_type
+from workflow.util import LOGGER, convert_value_to_type, get_traceback
 from workflow.core.tasks.task_utils import validate_and_process_function_inputs, generate_node_responses_summary, simplify_execution_history
 
 class AliceTask(BaseModel):
@@ -53,8 +53,11 @@ class AliceTask(BaseModel):
         description="Expected input structure"
     )
     exit_codes: Dict[int, str] = Field(
-        default_factory=lambda: {0: "Success", 1: "Failed"},
-        description="Exit code meanings"
+        default_factory=lambda: {
+            0: "Success", 
+            1: "Failed"
+            },
+        description="Exit code options and descriptions"
     )
     required_apis: List[ApiType] = Field(
         default_factory=list,
@@ -217,7 +220,7 @@ class AliceTask(BaseModel):
         
         Args:
             execution_history (List[NodeResponse], optional): Previous execution history.
-            **kwargs: Task input parameters.
+            **kwargs: Task input parameters, including api_manager.
         
         Returns:
             TaskResponse: The result of the task execution.
@@ -299,7 +302,7 @@ class AliceTask(BaseModel):
                     "content": f"No implementation found for node {node_name}",
                     "generated_by": "system"
                 }]),
-                execution_order=len(execution_history) + len(node_responses)
+                execution_order=len(execution_history)
             )
 
         # Execute node method
@@ -327,10 +330,10 @@ class AliceTask(BaseModel):
                 exit_code=1,
                 references=References(messages=[{
                     "role": "system",
-                    "content": f"Error in node {node_name}: {str(e)}",
+                    "content": f"Error in node {node_name}: {str(e)}\n\n" + get_traceback(),
                     "generated_by": "system"
                 }]),
-                execution_order=len(execution_history) + len(node_responses)
+                execution_order=len(execution_history)
             )
 
     async def run_from_task_response(self, task_response: TaskResponse, **kwargs) -> TaskResponse:
@@ -542,7 +545,7 @@ class AliceTask(BaseModel):
         """Create a response for a partially completed task."""
         output_template = self.get_prompt_template("output_template")
         return self.get_task_response(
-            task_outputs=generate_node_responses_summary(node_responses, True, output_template),
+            task_outputs=generate_node_responses_summary(node_responses, True, output_template, **kwargs),
             result_code=1,
             diagnostics='Task requires user interaction',
             status=status,
@@ -577,7 +580,8 @@ class AliceTask(BaseModel):
         summary = generate_node_responses_summary(
             node_responses=node_responses,
             verbose=True,
-            output_prompt=output_template
+            output_prompt=output_template,
+            **kwargs
         )
             
         return self.get_task_response(

@@ -5,17 +5,7 @@ This is your last attempt at drafting this code:
 {{ generate_code }}
 {% endif %}
 
-{% if execute_code %}
-This is code execution output:
-{{ execute_code }}
-{% endif %}
-
 {% if generate_unit_tests %}
 This is the unit test code:
 {{ generate_unit_tests }}
-{% endif %}
-
-{% if execute_unit_tests %}
-This is the execution output for both code snippets:
-{{ execute_unit_tests }}
 {% endif %}

@@ -1,9 +1,8 @@
-import traceback
 from enum import Enum
 from bson import ObjectId
 from pydantic import BaseModel, Field, ConfigDict, model_validator
 from typing import List, Optional, Dict, Callable, Any
-from workflow.util import LOGGER
+from workflow.util import LOGGER, get_traceback
 from workflow.core.data_structures import MessageDict, ToolFunction, ContentType, References, UserInteraction, UserCheckpoint, Prompt, User
 from workflow.core.agent import AliceAgent
 from workflow.core.api import APIManager
@@ -127,7 +126,7 @@ class AliceChat(BaseModel):
             # Start new chat turn sequence
             return await self._execute_chat_turns(api_manager, user_data)
         except Exception as e:
-            error_msg = f"Error in chat generate_response: {str(e)}\nTraceback: {traceback.format_exc()}"
+            error_msg = f"Error in chat generate_response: {str(e)}\nTraceback: {get_traceback()}"
             LOGGER.error(error_msg)
             return [self._create_error_message(error_msg)]
 
@@ -156,7 +155,7 @@ class AliceChat(BaseModel):
                 turn_count += 1
                 
             except Exception as e:
-                error_msg = f"Error in turn {turn_count}: {str(e)}\nTraceback: {traceback.format_exc()}"
+                error_msg = f"Error in turn {turn_count}: {str(e)}\nTraceback: {get_traceback()}"
                 LOGGER.error(error_msg)
                 all_generated_messages.append(self._create_error_message(error_msg))
                 break
@@ -199,7 +198,7 @@ class AliceChat(BaseModel):
             return turn_messages
 
         except Exception as e:
-            error_msg = f"Error in turn execution: {str(e)}\nTraceback: {traceback.format_exc()}"
+            error_msg = f"Error in turn execution: {str(e)}\nTraceback: {get_traceback()}"
             LOGGER.error(error_msg)
             return [self._create_error_message(error_msg)]
 

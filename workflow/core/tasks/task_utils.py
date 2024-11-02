@@ -38,7 +38,8 @@ def generate_default_summary(node_responses: List[NodeResponse], verbose: bool =
 def generate_node_responses_summary(
     node_responses: List[NodeResponse], 
     verbose: bool = False,
-    output_prompt: Optional[Prompt] = None
+    output_prompt: Optional[Prompt] = None,
+    **kwargs: Any
 ) -> str:
     """
     Generate a summary of node responses, optionally using a template.
@@ -71,8 +72,10 @@ def generate_node_responses_summary(
                     else:
                         LOGGER.warning(f"Missing required parameter {param_name} for output template")
                         return generate_default_summary(node_responses, verbose)
-            
-            return output_prompt.format_prompt(**prompt_vars)
+            kwargs.pop('api_manager', None)
+            kwargs.pop('execution_history', None)
+            kwargs.update(prompt_vars)
+            return output_prompt.format_prompt(**kwargs)
             
         except Exception as e:
             LOGGER.error(f"Error formatting output with template: {str(e)}")

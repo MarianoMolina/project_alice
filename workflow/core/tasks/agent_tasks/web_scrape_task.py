@@ -11,7 +11,7 @@ from workflow.util.web_scrape_utils import (
     clean_text, fetch_webpage_and_title, preprocess_html, sample_html,
     extract_json, fallback_parsing_strategy, apply_parsing_strategy
 )
-from workflow.util import LOGGER
+from workflow.util import LOGGER, get_traceback
 
 class SelectorModel(BaseModel):
     selectors: List[str]
@@ -66,7 +66,7 @@ class WebScrapeBeautifulSoupTask(AliceTask):
                 exit_code=1,
                 references=References(messages=[MessageDict(
                     role="system",
-                    content=f"Failed to fetch URL: {str(e)}",
+                    content=f"Failed to fetch URL: {str(e)}\n\n" + get_traceback(),
                     generated_by="system"
                 )]),
                 execution_order=len(execution_history)
@@ -137,7 +137,7 @@ class WebScrapeBeautifulSoupTask(AliceTask):
                 exit_code=1,
                 references=References(messages=[MessageDict(
                     role="system",
-                    content=f"Failed to generate selectors and parse: {str(e)}",
+                    content=f"Failed to generate selectors and parse: {str(e)}\n\n" + get_traceback(),
                     generated_by="system"
                 )]),
                 execution_order=len(execution_history)

@@ -111,6 +111,11 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             )
         },
         {
+            icon: exitCodeProps.icon,
+            primary_text: "Status",
+            secondary_text: item.status
+        },
+        {
             icon: <AccessTime />,
             primary_text: "Execution Time",
             secondary_text: item.createdAt ? new Date(item.createdAt).toLocaleString() : 'N/A'
