@@ -1,7 +1,6 @@
-import { BaseDataseObject } from "./UserTypes";
 import { AliceModel, ModelType } from "./ModelTypes";
 import { Prompt } from "./PromptTypes";
-import { EnhancedComponentProps } from "./CollectionTypes";
+import { BaseDatabaseObject, convertToBaseDatabaseObject, convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
 
 export enum ToolPermission {
   DISABLED = 0,
@@ -16,8 +15,7 @@ export enum CodePermission {
   TAGGED_ONLY = 3
 }
 
-export interface AliceAgent extends BaseDataseObject {
-  _id?: string;
+export interface AliceAgent extends BaseDatabaseObject, Embeddable {
   name: string;
   system_message: Prompt;
   has_tools: ToolPermission;
@@ -26,21 +24,16 @@ export interface AliceAgent extends BaseDataseObject {
   models?: { [key in ModelType]?: AliceModel };
 }
 
-export const convertToAliceAgent = (data: any): AliceAgent => {
-  return {
-    _id: data?._id || undefined,
-    name: data?.name || '',
-    system_message: data?.system_message || {},
-    has_tools: data?.has_tools || 0,
-    has_code_exec: data?.has_code_exec || 0,
-    max_consecutive_auto_reply: data?.max_consecutive_auto_reply || undefined,
-    models: data?.models || {},
-    created_by: data?.created_by || undefined,
-    updated_by: data?.updated_by || undefined,
-    createdAt: data?.createdAt ? new Date(data.createdAt) : undefined,
-    updatedAt: data?.updatedAt ? new Date(data.updatedAt) : undefined,
-  };
-};
+export const convertToAliceAgent = (data: AliceAgent): AliceAgent => ({
+  ...convertToBaseDatabaseObject(data),
+  ...convertToEmbeddable(data),
+  name: data.name || '',
+  system_message: data.system_message || {},
+  has_tools: data.has_tools || 0,
+  has_code_exec: data.has_code_exec || 0,
+  max_consecutive_auto_reply: data.max_consecutive_auto_reply,
+  models: data.models || {},
+});
 
 export interface AgentComponentProps extends EnhancedComponentProps<AliceAgent> {
 }

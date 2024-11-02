@@ -36,14 +36,14 @@ class EmbeddingTask(AliceTask):
         input_text: str = kwargs.get('input', "")
         
         try:
-            new_file = await self.agent.generate_embeddings(api_manager=api_manager, input=input_text, language=Language.TEXT)
-            if not new_file:
+            embedding_chunks = await self.agent.generate_embeddings(api_manager=api_manager, input=input_text, language=Language.TEXT)
+            if not embedding_chunks or len(embedding_chunks) == 0:
                 raise ValueError("No embeddings generated")
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name="generate_embedding",
                 exit_code=0,
-                references=References(files=[new_file]),
+                references=References(embeddings=embedding_chunks),
                 execution_order=len(execution_history)
             )
         except Exception as e:

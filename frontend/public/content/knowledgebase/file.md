@@ -14,7 +14,7 @@ export enum FileType {
     FILE = "file",
 }
 
-export interface FileReference extends BaseDataseObject {
+export interface FileReference extends BaseDatabaseObject {
     _id: string;
     filename: string;
     type: FileType;

@@ -48,14 +48,14 @@ class TextToSpeechTask(AliceTask):
         speed: float = kwargs.get('speed', 1.0)
         
         try:
-            new_messages = await self.agent.generate_speech(api_manager=api_manager, input=text, voice=voice, speed=speed)
-            if not new_messages:
+            new_files = await self.agent.generate_speech(api_manager=api_manager, input=text, voice=voice, speed=speed)
+            if not new_files:
                 raise ValueError("No speech generated")
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name="text_to_speech",
                 exit_code=0,
-                references=References(files=[new_messages]),
+                references=References(files=new_files),
                 execution_order=len(execution_history)
             )
         except Exception as e:

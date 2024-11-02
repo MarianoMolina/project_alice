@@ -271,7 +271,7 @@ base_module = BaseModule(
                 "api_name": "groq_tts",
             },
             {
-                "key": "groq_llama_3.2_11b_vision",
+                "key": "groq_llama_3_2_11b_vision",
                 "short_name": "Llama 3.2 11b Vision",
                 "model_name": "llama-3.2-11b-vision-preview",
                 "model_format": "Llama3",
@@ -671,7 +671,7 @@ base_module = BaseModule(
                 },
                 "is_active": True,
                 "health_status": "healthy" if GROQ_API_KEY else "unhealthy",
-                "default_model": "groq_llama_3.2_11b_vision",
+                "default_model": "groq_llama_3_2_11b_vision",
             },
             {
                 "key": "groq_tts",

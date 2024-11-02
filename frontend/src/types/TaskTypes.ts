@@ -2,9 +2,8 @@ import { AliceAgent } from "./AgentTypes";
 import { Prompt } from "./PromptTypes";
 import { FunctionParameters } from "./ParameterTypes";
 import { ApiType } from './ApiTypes';
-import { EnhancedComponentProps } from "./CollectionTypes";
+import { BaseDatabaseObject, convertToBaseDatabaseObject, EnhancedComponentProps } from "./CollectionTypes";
 import { API } from './ApiTypes';
-import { BaseDataseObject } from "./UserTypes";
 import Logger from "../utils/Logger";
 import { UserCheckpoint } from "./UserCheckpointTypes";
 import { References } from "./ReferenceTypes";
@@ -26,8 +25,7 @@ export type RouteMapTuple = [string | null, boolean];
 export type RouteMap = { [key: number]: RouteMapTuple };
 export type TasksEndCodeRouting = { [key: string]: RouteMap };
 
-export interface AliceTask extends BaseDataseObject {
-  _id?: string;
+export interface AliceTask extends BaseDatabaseObject {
   task_name: string;
   task_description: string;
   task_type: TaskType;
@@ -49,6 +47,7 @@ export interface AliceTask extends BaseDataseObject {
 
 export const convertToAliceTask = (data: any): AliceTask => {
   return {
+    ...convertToBaseDatabaseObject(data),
     task_name: data?.task_name || '',
     task_description: data?.task_description || '',
     task_type: data?.task_type || '',
@@ -68,11 +67,6 @@ export const convertToAliceTask = (data: any): AliceTask => {
     agent: data?.agent || null,
     user_checkpoints: data?.user_checkpoints || {},
     data_cluster: data?.data_cluster || {},
-    created_by: data?.created_by || '',
-    updated_by: data?.updated_by || '',
-    createdAt: data?.createdAt ? new Date(data.createdAt) : undefined,
-    updatedAt: data?.updatedAt ? new Date(data.updatedAt) : undefined,
-    _id: data?._id || undefined,
   };
 };
 

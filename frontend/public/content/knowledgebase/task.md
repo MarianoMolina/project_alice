@@ -29,7 +29,7 @@ These task types cover a broad spectrum of functionalities, including search ope
 Each task in the system is represented by the `AliceTask` interface:
 
 ```typescript
-export interface AliceTask extends BaseDataseObject {
+export interface AliceTask extends BaseDatabaseObject {
   _id?: string;
   task_name: string;
   task_description: string;

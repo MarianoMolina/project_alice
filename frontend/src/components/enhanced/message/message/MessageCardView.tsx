@@ -4,7 +4,7 @@ import {
     Box,
 } from '@mui/material';
 import { Person, AccessTime, AttachFile, TextSnippet, Engineering, PersonPin, Functions } from '@mui/icons-material';
-import { MessageComponentProps } from '../../../../types/MessageTypes';
+import { MessageComponentProps, MessageGenerators, RoleType } from '../../../../types/MessageTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { References } from '../../../../types/ReferenceTypes';
 import useStyles from '../MessageStyles';
@@ -83,11 +83,11 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
     };
     
     const getMessageClass = () => {
-        if (item.generated_by === 'tool') return classes.toolMessage;
+        if (item.generated_by === MessageGenerators.TOOL) return classes.toolMessage;
         switch (item.role) {
-            case 'user':
+            case RoleType.USER:
                 return classes.userMessage;
-            case 'assistant':
+            case RoleType.ASSISTANT:
             default:
                 return classes.assistantMessage;
         }

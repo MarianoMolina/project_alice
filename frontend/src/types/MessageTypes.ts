@@ -1,10 +1,14 @@
-import { EnhancedComponentProps } from "./CollectionTypes";
+import { BaseDatabaseObject, convertToBaseDatabaseObject, convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
 import { FileType } from "./FileTypes";
 import { ToolCall } from "./ParameterTypes";
 import { References } from "./ReferenceTypes";
-import { BaseDataseObject } from "./UserTypes";
 
-export type RoleType = 'user' | 'assistant' | 'system' | 'tool';
+export enum RoleType {
+    USER = 'user',
+    ASSISTANT = 'assistant',
+    SYSTEM = 'system',
+    TOOL = 'tool'
+}
 
 export enum ContentType {
     TEXT = 'text',
@@ -17,41 +21,38 @@ export enum ContentType {
     URL_REFERENCE = 'url_reference'
 }
 
-export interface MessageType extends BaseDataseObject {
-    _id?: string;
+export enum MessageGenerators {
+    USER = 'user',
+    LLM = 'llm',
+    TOOL = 'tool',
+    SYSTEM = 'system'
+}
+
+export interface MessageType extends BaseDatabaseObject, Embeddable {
     role: RoleType;
     content: string;
-    generated_by: 'user' | 'llm' | 'tool' | 'system';
+    generated_by: MessageGenerators;
     step?: string;
     assistant_name?: string;
-    context?: Record<string, any>;
     type?: ContentType;
-    request_type?: string | null;
     tool_calls?: ToolCall[];
-    function_call?: { [key: string]: string };
     creation_metadata?: Record<string, any>;
     references?: References;
 }
 
 export const convertToMessageType = (data: any): MessageType => {
     return {
+        ...convertToBaseDatabaseObject(data),
+        ...convertToEmbeddable(data),
         role: data?.role || 'user',
         content: data?.content || '',
-        generated_by: data?.generated_by || 'user',
+        generated_by: data?.generated_by || MessageGenerators.USER,
         step: data?.step || undefined,
         assistant_name: data?.assistant_name || undefined,
-        context: data?.context || {},
         type: data?.type || 'text',
-        request_type: data?.request_type || null,
         tool_calls: data?.tool_calls || [],
-        function_call: data?.function_call || {},
         references: data?.references || {} as References,
         creation_metadata: data?.creation_metadata || {},
-        created_by: data?.created_by || null,
-        updated_by: data?.updated_by || null,
-        createdAt: data?.createdAt ? new Date(data.createdAt) : undefined,
-        updatedAt: data?.updatedAt ? new Date(data.updatedAt) : undefined,
-        _id: data?._id || undefined,
     };
 };
 
@@ -59,15 +60,14 @@ export interface MessageComponentProps extends EnhancedComponentProps<MessageTyp
 }
 
 export const getDefaultMessageForm = (): MessageType => ({
-    role: 'user',
+    role: RoleType.USER,
     content: '',
-    generated_by: 'user',
-    context: {},
+    generated_by: MessageGenerators.USER,
     type: ContentType.TEXT,
     tool_calls: [],
-    function_call: {},
     references: {},
     creation_metadata: {},
+    embeddings: [],
     created_by: undefined,
     updated_by: undefined,
 });

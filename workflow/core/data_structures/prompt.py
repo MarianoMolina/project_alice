@@ -78,19 +78,6 @@ class Prompt(BaseDataStructure):
             return []
         return list(set(self.parameters.properties.keys()) - set(self.partial_variables.keys()))
 
-    def format(self, **kwargs: Any) -> str:
-        """Format the prompt with the inputs using Jinja2 templating."""
-        all_variables = {**self.partial_variables, **kwargs}
-        
-        # Add default values for any missing parameters
-        if self.parameters:
-            for param_name, param in self.parameters.properties.items():
-                if param_name not in all_variables and param.default is not None:
-                    all_variables[param_name] = param.default
-        
-        template = Template(self.content)
-        return template.render(**all_variables)
-
     def validate_input(self, **kwargs: Any) -> Union[bool, str]:
         """Validate the input against the prompt's parameters."""
         if not self.is_templated or not self.parameters:
@@ -117,6 +104,19 @@ class Prompt(BaseDataStructure):
                 return f"Parameter {param_name} should be of type {param_def.type}"
         
         return True
+    
+    def format(self, **kwargs: Any) -> str:
+        """Format the prompt with the inputs using Jinja2 templating."""
+        all_variables = {**self.partial_variables, **kwargs}
+        
+        # Add default values for any missing parameters
+        if self.parameters:
+            for param_name, param in self.parameters.properties.items():
+                if param_name not in all_variables and param.default is not None:
+                    all_variables[param_name] = param.default
+        
+        template = Template(self.content)
+        return template.render(**all_variables)
 
     def format_prompt(self, **kwargs: Any) -> str:
         """Validate input (if templated) and format the prompt."""

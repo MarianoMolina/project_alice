@@ -1,12 +1,13 @@
 import { Document, Model, Types } from "mongoose";
+import { IUserDocument } from "./user.interface";
 
 export interface IURLReference {
   title: string;
   url: string;
   content: string;
   metadata: { [key: string]: string };
-  created_by: Types.ObjectId;
-  updated_by: Types.ObjectId;
+  created_by: Types.ObjectId | IUserDocument;
+  updated_by: Types.ObjectId | IUserDocument;
 }
 
 export interface IURLReferenceMethods {

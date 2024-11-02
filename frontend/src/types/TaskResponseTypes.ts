@@ -1,6 +1,5 @@
-import { EnhancedComponentProps } from "./CollectionTypes";
+import { BaseDatabaseObject, convertToBaseDatabaseObject, convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
 import { References } from "./ReferenceTypes";
-import { BaseDataseObject } from "./UserTypes";
 
 export interface ExecutionHistoryItem {
     parent_task_id?: string;
@@ -13,8 +12,7 @@ export interface NodeResponse extends ExecutionHistoryItem {
     references: References;
 }
 
-export interface TaskResponse extends BaseDataseObject {
-    _id?: string;
+export interface TaskResponse extends BaseDatabaseObject, Embeddable {
     task_name: string;
     task_id: string;
     task_description: string;
@@ -30,6 +28,8 @@ export interface TaskResponse extends BaseDataseObject {
 
 export const convertToTaskResponse = (data: any): TaskResponse => {
     return {
+        ...convertToBaseDatabaseObject(data),
+        ...convertToEmbeddable(data),
         task_name: data?.task_name || '',
         task_description: data?.task_description || '',
         task_id: data?.task_id || '',
@@ -41,11 +41,6 @@ export const convertToTaskResponse = (data: any): TaskResponse => {
         usage_metrics: data?.usage_metrics || {},
         execution_history: data?.execution_history || [],
         node_references: data?.node_references || [],
-        created_by: data?.created_by || '',
-        updated_by: data?.updated_by || '',
-        createdAt: data?.createdAt || '',
-        updatedAt: data?.updatedAt || '',
-        _id: data?._id || undefined,
     };
 };
 

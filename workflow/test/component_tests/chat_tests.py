@@ -183,8 +183,6 @@ class ChatTests(TestModule):
             LOGGER.info(f"Role: {msg.role}, Content: {msg.content[:100]}...")  # Log first 100 chars of content
             if msg.tool_calls:
                 LOGGER.info(f"Tool Calls: {msg.tool_calls}")
-            if msg.function_call:
-                LOGGER.info(f"Function Call: {msg.function_call}")
 
 def get_first_n_chars(obj: Any, n: int = 100) -> str:
     return json.dumps(safe_serialize(obj))[:n]

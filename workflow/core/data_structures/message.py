@@ -1,4 +1,5 @@
 from __future__ import annotations
+from enum import Enum
 from typing import Optional, Literal, Dict, Any, List, TYPE_CHECKING
 from pydantic import Field, ConfigDict, field_validator
 from workflow.core.data_structures.base_models import Embeddable, ContentType, FileType
@@ -12,18 +13,27 @@ def get_default_references():
     from workflow.core.data_structures.references import References
     return References()
 
+class MessageGenerators(str, Enum):
+    USER = "user"
+    LLM = "llm"
+    TOOL = "tool"
+    SYSTEM = "system"
+
+class RoleTypes(str, Enum):
+    USER = "user"
+    ASSISTANT = "assistant"
+    SYSTEM = "system"
+    TOOL = "tool"
+
 class MessageDict(Embeddable):
-    role: Literal["user", "assistant", "system", "tool"] = Field(default="user", description="Role of the message")
+    role: RoleTypes = Field(default=RoleTypes.USER, description="Role of the message")
     content: Optional[str] = Field(default=None, description="Content of the message")
-    generated_by: Literal["user", "llm", "tool", "system"] = Field(default="user", description="Who created the message")
+    generated_by: MessageGenerators = Field(default=MessageGenerators.USER, description="The entity that generated the message")
     step: Optional[str] = Field(default="", description="Process that is creating this message, usually the task_name or tool_name")
     assistant_name: Optional[str] = Field(default="", description="Name of the assistant")
     type: ContentType = Field(default=ContentType.TEXT, description="Type of the message")
     tool_calls: Optional[List[ToolCallType]] = Field(default=None, description="List of tool calls in the message")
     tool_call_id: Optional[str] = Field(None, description="The id of the tool call that generated this task response")
-    context: Optional[Dict[str, Any]] = Field(default=None, description="Context of the message")
-    function_call: Optional[Dict[str, Any]] = Field(default=None, description="Function call in the message")
-    request_type: Optional[str] = Field(default=None, description="Request type of the message, if any. Can be 'approval', 'confirmation', etc.")
     references: Optional[ReferencesType] = Field(default_factory=get_default_references, description="References associated with this message")
     creation_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Metadata about the creation of the message, like cost, tokens, end reason, etc.")
 

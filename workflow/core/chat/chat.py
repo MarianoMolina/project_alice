@@ -1,9 +1,9 @@
 from enum import Enum
 from bson import ObjectId
-from pydantic import BaseModel, Field, ConfigDict, model_validator
+from pydantic import Field, ConfigDict, model_validator
 from typing import List, Optional, Dict, Callable, Any
 from workflow.util import LOGGER, get_traceback
-from workflow.core.data_structures import MessageDict, ToolFunction, ContentType, References, UserInteraction, UserCheckpoint, Prompt, User
+from workflow.core.data_structures import MessageDict, ToolFunction, ContentType, References, UserInteraction, UserCheckpoint, Prompt, User, BaseDataStructure
 from workflow.core.agent import AliceAgent
 from workflow.core.api import APIManager
 from workflow.core.tasks import AliceTask
@@ -12,7 +12,7 @@ class CheckpointType(str, Enum):
     TOOL_CALL = "tool_call"
     CODE_EXECUTION = "code_execution"
 
-class AliceChat(BaseModel):
+class AliceChat(BaseDataStructure):
     """
     Represents a chat session with an AI assistant, managing the conversation flow and execution.
 

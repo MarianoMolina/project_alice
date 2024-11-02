@@ -1,4 +1,5 @@
 import { Types, Model, Document } from 'mongoose';
+import { IUserDocument } from './user.interface';
 
 export enum ApiType {
   LLM_MODEL = 'llm_api',
@@ -64,8 +65,8 @@ export interface IAPI {
   health_status: 'healthy' | 'unhealthy' | 'unknown';
   default_model?: Types.ObjectId; 
   api_config?: Map<string, any>;
-  created_by?: Types.ObjectId;
-  updated_by?: Types.ObjectId;
+  created_by: Types.ObjectId | IUserDocument;
+  updated_by: Types.ObjectId | IUserDocument;
 }
 
 export interface IAPIMethods {

@@ -1,8 +1,9 @@
 from pydantic import BaseModel, Field
 from typing import Annotated, Optional, Any, Literal, Dict, List, Union
 from anthropic.types import ToolParam
+from workflow.core.data_structures.base_models import BaseDataStructure
 
-class ParameterDefinition(BaseModel):
+class ParameterDefinition(BaseDataStructure):
     id: Optional[str] = Field(None, description="The parameter ID", alias="_id")
     type: Annotated[str, Field(description="Type of the parameter")]
     description: Annotated[str, Field(description="Description of the parameter")]

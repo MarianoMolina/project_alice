@@ -23,6 +23,7 @@ import MessageRoutes from './routes/message.route';
 import URLReferenceRoutes from './routes/urlReference.route';
 import UserCheckpointRoutes from './routes/userCheckpoint.route';
 import UserInteractionRoutes from './routes/userInteraction.route';
+import EmbeddingChunkRoutes from './routes/embeddingChunk.route';
 import './models';
 
 dotenv.config();
@@ -70,5 +71,6 @@ app.use('/api/messages', MessageRoutes);
 app.use('/api/urlreferences', URLReferenceRoutes)
 app.use('/api/usercheckpoints', UserCheckpointRoutes);
 app.use('/api/userinteractions', UserInteractionRoutes);
+app.use('/api/embeddingchunks', EmbeddingChunkRoutes);
 
 export default app;

@@ -7,7 +7,7 @@ Chats represent ongoing conversations between users and AI agents. They encapsul
 Each chat in the system is represented by the `AliceChat` interface:
 
 ```typescript
-export interface AliceChat extends BaseDataseObject {
+export interface AliceChat extends BaseDatabaseObject {
     _id: string;
     name: string;
     messages: MessageType[];

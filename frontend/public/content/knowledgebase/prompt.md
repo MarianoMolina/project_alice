@@ -7,7 +7,7 @@ Prompts are pre-defined text templates used to guide AI models in generating spe
 Each prompt in the system is represented by the `Prompt` interface:
 
 ```typescript
-export interface Prompt extends BaseDataseObject {
+export interface Prompt extends BaseDatabaseObject {
     _id?: string;
     name: string;
     content: string;

@@ -1,12 +1,13 @@
 import { Document, Model, Types } from "mongoose";
+import { IUserDocument } from "./user.interface";
 
 export interface IUserCheckpoint {
     user_prompt: string;
     options_obj: { [key: number]: string };
     task_next_obj: { [key: number]: string };
     request_feedback: boolean;
-    created_by: Types.ObjectId;
-    updated_by: Types.ObjectId;
+    created_by: Types.ObjectId | IUserDocument;
+    updated_by: Types.ObjectId | IUserDocument;
 }
 
 export interface IUserCheckpointMethods {

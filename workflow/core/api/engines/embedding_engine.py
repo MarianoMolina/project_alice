@@ -62,13 +62,13 @@ class EmbeddingEngine(APIEngine):
             chunks = splitter.split_text(input)
 
         # Step 2: Generate embeddings for the chunks
-        file_references = await self.generate_embedding(chunks, api_data)
+        embedding_chunks = await self.generate_embedding(chunks, api_data)
 
-        return References(files=file_references)
+        return References(embeddings=embedding_chunks)
 
     async def generate_embedding(
         self, inputs: List[str], api_data: ModelConfig
-    ) -> List[FileContentReference]:
+    ) -> List[EmbeddingChunk]:
         """
         Generates embeddings for the given inputs using OpenAI's API.
         """
@@ -98,7 +98,7 @@ class EmbeddingEngine(APIEngine):
             embeddings = [data.embedding for data in response.data]
 
             # Create EmbeddingChunks objects for each input
-            chunks = []
+            chunks: List[EmbeddingChunk] = []
             for idx, (input_text, embedding) in enumerate(zip(inputs, embeddings)):
                 creation_metadata = {
                     "model": model,
@@ -171,7 +171,7 @@ class EmbeddingEngine(APIEngine):
         # Extract embeddings from the references
         embeddings = []
         for ref in embeddings_references:
-            embedding_b64 = ref.content
+            embedding_b64 = ref.vector
             embedding_json = base64.b64decode(embedding_b64.encode('utf-8')).decode('utf-8')
             embedding = json.loads(embedding_json)
             embeddings.append(embedding)

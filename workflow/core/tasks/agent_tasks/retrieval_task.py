@@ -13,7 +13,8 @@ from workflow.core.data_structures import (
     TasksEndCodeRouting,
     FileContentReference,
     FileReference,
-    Embeddable
+    Embeddable, 
+    EmbeddingChunk
 )
 from workflow.core.api import APIManager
 from workflow.util import LOGGER, cosine_similarity, Language, get_traceback
@@ -253,13 +254,13 @@ class RetrievalTask(AliceTask):
 
         try:
             # Step 1: Create embedding for the prompt
-            prompt_embedding_reference: References = await self.agent.generate_embeddings(
+            embedding_chunks: List[EmbeddingChunk] = await self.agent.generate_embeddings(
                 api_manager=api_manager, input=prompt, language=Language.TEXT
             )
-            if not prompt_embedding_reference or not prompt_embedding_reference.embeddings:
+            if not embedding_chunks or len(embedding_chunks) == 0:
                 raise ValueError("Failed to generate embedding for the prompt.")
 
-            prompt_embedding_vector: List[float] = prompt_embedding_reference.embeddings[0].vector
+            prompt_embedding_vector: List[float] = embedding_chunks[0].vector
 
             # Step 2: Retrieve top embeddings from data_cluster
             top_embeddings = self.retrieve_top_embeddings(

@@ -5,7 +5,9 @@ from pydantic import BaseModel, Field, ConfigDict, ValidationError
 from workflow.db_app.app import BackendAPI
 from workflow.util.logging_config import LOGGER
 from workflow.core import AliceAgent, AliceChat, AliceTask, API
-from workflow.core.data_structures import EntityType, ParameterDefinition, FunctionParameters, TaskResponse, User, UserCheckpoint, Prompt, AliceModel, UserInteraction
+from workflow.core.data_structures import (
+    EntityType, ParameterDefinition, FunctionParameters, TaskResponse, User, UserCheckpoint, Prompt, AliceModel, UserInteraction
+    )
 from workflow.core.tasks import available_task_types
 
 class DBInitManager(BaseModel):

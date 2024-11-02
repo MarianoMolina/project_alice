@@ -1,11 +1,12 @@
 import { Document, Types, Model } from 'mongoose';
+import { IUserDocument } from './user.interface';
 
 export interface IParameterDefinition {
     type: string;
     description: string;
     default: any;
-    created_by: Types.ObjectId;
-    updated_by: Types.ObjectId;
+    created_by: Types.ObjectId | IUserDocument;
+    updated_by: Types.ObjectId | IUserDocument;
 }
 
 export interface IParameterDefinitionMethods {

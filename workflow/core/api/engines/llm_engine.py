@@ -146,12 +146,19 @@ class LLMEngine(APIEngine):
                 for tool_call in choice.message.tool_calls:
                     LOGGER.debug(f'Tool call: {ToolCall(**tool_call.model_dump())}')
 
-            tool_calls = [ToolCall(**tool_call.model_dump()) for tool_call in choice.message.tool_calls] if choice.message.tool_calls else None
+            tool_calls = [ToolCall(**tool_call.model_dump()) for tool_call in choice.message.tool_calls] if choice.message.tool_calls else []
+            function_call = choice.message.function_call.model_dump() if choice.message.function_call else None
+            if function_call: # Deprecated by OAI -> checking in case any endpoint uses it
+                try:
+                    extra_tool_call = ToolCall.model_validate(function_call) if function_call else None
+                    tool_calls.append(extra_tool_call)
+                except Exception as e:
+                    LOGGER.error(f"Error validating function call: {str(e)}\nFunction call: {function_call}")
+                    LOGGER.error(traceback.format_exc())
             msg = MessageDict(
                 role="assistant",
                 content=content,
                 tool_calls=tool_calls,
-                function_call=choice.message.function_call.model_dump() if choice.message.function_call else None,
                 generated_by="llm",
                 type=ContentType.TEXT,
                 creation_metadata={
@@ -159,7 +166,7 @@ class LLMEngine(APIEngine):
                     "usage": response.usage.model_dump(),
                     "finish_reason": choice.finish_reason,
                     "system_fingerprint": response.system_fingerprint,
-                    "cost": self.calculate_cost(response.usage.prompt_tokens, response.usage.completion_tokens, response.model)
+                    "cost": self.calculate_cost(response.usage.prompt_tokens, response.usage.completion_tokens, response.model),
                 }
             )
             return References(messages=[msg])

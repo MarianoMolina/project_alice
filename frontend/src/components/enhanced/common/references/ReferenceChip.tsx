@@ -10,8 +10,10 @@ import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import { CollectionElementString, CollectionTypeString } from '../../../../types/CollectionTypes';
 import { ToolCall } from '../../../../types/ParameterTypes';
 import ToolCallView from '../tool_call/ToolCall';
+import { EmbeddingChunk } from '../../../../types/EmbeddingChunkTypes';
+import { UserInteraction } from '../../../../types/UserInteractionTypes';
 
-type ReferenceType = MessageType | FileReference | FileContentReference | TaskResponse | URLReference | string | ToolCall;
+type ReferenceType = MessageType | FileReference | FileContentReference | TaskResponse | URLReference | string | ToolCall | EmbeddingChunk | UserInteraction;
 
 interface ReferenceChipProps {
   reference: ReferenceType;

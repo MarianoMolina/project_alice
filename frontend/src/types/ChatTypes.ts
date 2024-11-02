@@ -1,13 +1,11 @@
-import { BaseDataseObject } from './UserTypes';
 import { AliceTask, convertToAliceTask } from './TaskTypes';
 import { AliceAgent, convertToAliceAgent } from './AgentTypes';
-import { EnhancedComponentProps } from './CollectionTypes';
+import { BaseDatabaseObject, convertToBaseDatabaseObject, EnhancedComponentProps } from './CollectionTypes';
 import { convertToMessageType, MessageType } from './MessageTypes';
 import { UserCheckpoint } from './UserCheckpointTypes';
 import { References } from './ReferenceTypes';
 
-export interface AliceChat extends BaseDataseObject {
-    _id: string;
+export interface AliceChat extends BaseDatabaseObject {
     name: string;
     messages: MessageType[];
     alice_agent: AliceAgent;
@@ -18,17 +16,13 @@ export interface AliceChat extends BaseDataseObject {
 
 export const convertToAliceChat = (data: any): AliceChat => {
     return {
-        _id: data?._id || '',
+        ...convertToBaseDatabaseObject(data),
         name: data?.name || '',
         messages: (data?.messages || []).map(convertToMessageType),
         alice_agent: convertToAliceAgent(data?.alice_agent),
         functions: (data?.functions || []).map(convertToAliceTask),
         user_checkpoints: data?.user_checkpoints || {},
         data_cluster: data?.data_cluster || {},
-        created_by: data?.created_by || undefined,
-        updated_by: data?.updated_by || undefined,
-        createdAt: data?.createdAt ? new Date(data.createdAt) : undefined,
-        updatedAt: data?.updatedAt ? new Date(data.updatedAt) : undefined,
     };
 };
 

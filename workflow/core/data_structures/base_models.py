@@ -4,7 +4,7 @@ from enum import Enum
 # The order of this list is used to determine which entities are created first
 # Also modify the collection_map in db.py if you add new entities
 # As well as the init_manager.py dictionaries
-EntityType = Literal["users", "models", "apis", "parameters", "prompts", "user_checkpoints", "agents", "tasks", "chats", "task_responses", "files", "messages", "urlreferences", "user_interactions"]
+EntityType = Literal["users", "models", "apis", "parameters", "prompts", "user_checkpoints", "agents", "tasks", "chats", "task_responses", "files", "messages", "urlreferences", "user_interactions", "embedding_chunk"]
 
 class FileType(str, Enum):
     IMAGE = 'image'

@@ -1,9 +1,7 @@
-import { EnhancedComponentProps } from "./CollectionTypes";
-import { BaseDataseObject } from "./UserTypes";
+import { BaseDatabaseObject, convertToBaseDatabaseObject, EnhancedComponentProps } from "./CollectionTypes";
 
 
-export interface UserCheckpoint extends BaseDataseObject {
-    _id?: string;
+export interface UserCheckpoint extends BaseDatabaseObject {
     user_prompt: string;
     options_obj: { [key: number]: string };
     task_next_obj: { [key: number]: string };
@@ -12,15 +10,11 @@ export interface UserCheckpoint extends BaseDataseObject {
 
 export const convertToUserCheckpoint = (data: any): UserCheckpoint => {
     return {
-        _id: data?._id || undefined,
+        ...convertToBaseDatabaseObject(data),
         user_prompt: data?.user_prompt || '',
         options_obj: data?.options_obj || {},
         task_next_obj: data?.task_next_obj || {},
         request_feedback: data?.request_feedback || false,
-        created_by: data?.created_by || undefined,
-        updated_by: data?.updated_by || undefined,
-        createdAt: data?.createdAt ? new Date(data.createdAt) : undefined,
-        updatedAt: data?.updatedAt ? new Date(data.updatedAt) : undefined,
     };
 };
 

@@ -1,6 +1,6 @@
 import { AliceModel, convertToAliceModel } from "./ModelTypes";
-import { BaseDataseObject, convertToUser } from "./UserTypes";
-import { EnhancedComponentProps } from "./CollectionTypes";
+import { convertToUser } from "./UserTypes";
+import { BaseDatabaseObject, convertToBaseDatabaseObject, EnhancedComponentProps } from "./CollectionTypes";
 
 export enum ApiType {
     LLM_MODEL = 'llm_api',
@@ -79,8 +79,7 @@ export enum LlmProvider {
     COHERE = ApiName.COHERE,
 }
 
-export interface API extends BaseDataseObject{
-    _id?: string;
+export interface API extends BaseDatabaseObject{
     api_type: ApiType;
     api_name: ApiName;
     name?: string;
@@ -90,7 +89,7 @@ export interface API extends BaseDataseObject{
     api_config: { [key: string]: string };
 }
 
-export interface LLMAPI extends BaseDataseObject {
+export interface LLMAPI extends BaseDatabaseObject {
     _id?: string;
     api_type: ApiType.LLM_MODEL;
     api_name: LlmProvider;
@@ -102,7 +101,7 @@ export interface LLMAPI extends BaseDataseObject {
 }
 export const convertToAPI = (data: any): API => {
     return {
-        _id: data?._id || undefined,
+        ...convertToBaseDatabaseObject(data),
         api_type: data?.api_type || ApiType.LLM_MODEL,
         api_name: data?.api_name || '',
         name: data?.name || '',
@@ -110,10 +109,6 @@ export const convertToAPI = (data: any): API => {
         health_status: data?.health_status || 'unknown',
         default_model: (data?.default_model && Object.keys(data.default_model).length > 0) ? convertToAliceModel(data.default_model) : undefined,
         api_config: data?.api_config || {},
-        created_by: data?.created_by ? convertToUser(data.created_by) : undefined,
-        updated_by: data?.updated_by ? convertToUser(data.updated_by) : undefined,
-        createdAt: data?.createdAt ? new Date(data.createdAt) : undefined,
-        updatedAt: data?.updatedAt ? new Date(data.updatedAt) : undefined,
     };
 };
 

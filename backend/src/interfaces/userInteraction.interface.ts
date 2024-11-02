@@ -1,4 +1,7 @@
 import { Document, Model, Types } from "mongoose";
+import { IUserDocument } from "./user.interface";
+import { IUserCheckpointDocument } from "./userCheckpoint.interface";
+import { ITaskResultDocument } from "./taskResult.interface";
 
 export interface UserResponse {
     selected_option: number;
@@ -6,11 +9,11 @@ export interface UserResponse {
 }
 
 export interface IUserInteraction {
-    user_checkpoint_id: Types.ObjectId;
-    task_response_id?: Types.ObjectId;
+    user_checkpoint_id: Types.ObjectId | IUserCheckpointDocument;
+    task_response_id?: Types.ObjectId | ITaskResultDocument;
     user_response?: UserResponse;
-    created_by: Types.ObjectId;
-    updated_by: Types.ObjectId;
+    created_by: Types.ObjectId | IUserDocument;
+    updated_by: Types.ObjectId | IUserDocument;
 }
 
 export interface IUserInteractionMethods {

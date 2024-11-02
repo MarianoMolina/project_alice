@@ -1,5 +1,5 @@
 import { FileType, IFileReference, IFileReferenceDocument } from '../interfaces/file.interface';
-import { ContentType, IMessageDocument } from '../interfaces/message.interface';
+import { ContentType, IMessageDocument, MessageGenerators, RoleType } from '../interfaces/message.interface';
 import FileReference from '../models/file.model';
 import Message from '../models/message.model';
 import { updateMessage, messagesEqual } from './message.utils';
@@ -222,8 +222,8 @@ export async function createTranscriptMessage(
     const transcriptData: Partial<IMessageDocument> = {
         ...messageData,
         content: messageData.content || '',
-        role: messageData.role || 'assistant',
-        generated_by: messageData.generated_by || 'tool',
+        role: messageData.role || RoleType.ASSISTANT,
+        generated_by: messageData.generated_by || MessageGenerators.TOOL,
         type: messageData.type || ContentType.TEXT,
         created_by: new Types.ObjectId(userId),
         createdAt: new Date(),

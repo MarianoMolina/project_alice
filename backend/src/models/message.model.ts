@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { IMessageDocument, IMessageModel, ContentType } from '../interfaces/message.interface';
+import { IMessageDocument, IMessageModel, ContentType, RoleType, MessageGenerators } from '../interfaces/message.interface';
 import { ensureObjectIdHelper } from '../utils/utils';
 import mongooseAutopopulate from 'mongoose-autopopulate';
 import { referencesSchema } from './reference.model';
@@ -8,19 +8,18 @@ const messageSchema = new Schema<IMessageDocument, IMessageModel>({
   content: { type: String, description: "Content of the message" },
   role: {
     type: String,
-    enum: ["user", "assistant", "system", "tool"],
-    default: "user",
+    enum: Object.values(RoleType),
+    default: RoleType.USER,
     description: "Role of the message",
   },
   generated_by: {
     type: String,
-    enum: ["user", "llm", "tool", "system"],
-    default: "user",
+    enum: Object.values(MessageGenerators),
+    default: MessageGenerators.USER,
     description: "Source that generated the message",
   },
   step: { type: String, default: "", description: "Process that is creating this message" },
   assistant_name: { type: String, default: "", description: "Name of the assistant" },
-  context: { type: Schema.Types.Mixed, default: null, description: "Context of the message" },
   type: { 
     type: String, 
     enum: Object.values(ContentType),
@@ -29,11 +28,6 @@ const messageSchema = new Schema<IMessageDocument, IMessageModel>({
   },
   tool_calls: { type: Schema.Types.Mixed, default: [], description: "List of tool calls in the message" },
   tool_call_id: { type: String, default: null, description: "ID of the tool call, if any" },
-  request_type: {
-    type: String,
-    default: null,
-    description: "Request type of the message, if any. Can be 'approval', 'confirmation', etc.",
-  },
   references: { type: referencesSchema, default: {}, description: "References associated with the message" },
   creation_metadata: {
     type: Schema.Types.Mixed,
@@ -59,15 +53,13 @@ messageSchema.methods.apiRepresentation = function (this: IMessageDocument) {
   return {
     id: this._id,
     content: this.content || null,
-    role: this.role || "user",
-    generated_by: this.generated_by || "user",
+    role: this.role || RoleType.USER,
+    generated_by: this.generated_by || MessageGenerators.USER,
     step: this.step || "",
     assistant_name: this.assistant_name || "",
-    context: this.context || null,
     tool_calls: this.tool_calls || [],
-    type: this.type || "text",
+    type: this.type || ContentType.TEXT,
     tool_call_id: this.tool_call_id || null,
-    request_type: this.request_type || null,
     creation_metadata: this.creation_metadata || {},
     created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
     updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,

@@ -13,18 +13,29 @@ export enum ContentType {
     MULTIPLE = 'multiple',
     URL_REFERENCE = 'url_reference'
 }
+export enum RoleType {
+    USER = 'user',
+    ASSISTANT = 'assistant',
+    SYSTEM = 'system',
+    TOOL = 'tool'
+}
+
+export enum MessageGenerators {
+    USER = 'user',
+    LLM = 'llm',
+    TOOL = 'tool',
+    SYSTEM = 'system'
+}
 
 export interface IMessage {
     content?: string;
-    role: 'user' | 'assistant' | 'system' | 'tool';
-    generated_by: 'user' | 'llm' | 'tool' | 'system';
+    role: RoleType;
+    generated_by: MessageGenerators;
     step: string;
     assistant_name?: string;
-    context?: any;
     type: ContentType;
     tool_calls?: any[];
     tool_call_id?: string,
-    request_type?: string | null;
     references?: References;
     creation_metadata?: Record<string, any>;
     created_by: Types.ObjectId | IUserDocument;

@@ -15,7 +15,7 @@ export interface FunctionParameters {
 
 export type ParameterTypes = "string" | "integer" | "boolean" | "object" | "array";
 
-export interface ParameterDefinition extends BaseDataseObject {
+export interface ParameterDefinition extends BaseDatabaseObject {
     _id?: string;
     type: ParameterTypes;
     description: string;

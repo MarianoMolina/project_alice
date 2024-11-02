@@ -96,7 +96,7 @@ export enum ApiName {
 ## API Interfacee
 
 ```typescript
-export interface API extends BaseDataseObject {
+export interface API extends BaseDatabaseObject {
     _id?: string;
     api_type: ApiType;
     api_name: ApiName;

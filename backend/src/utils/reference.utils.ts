@@ -1,13 +1,16 @@
 import { Types } from 'mongoose';
+import Logger from './logger';
 import { References } from '../interfaces/references.interface';
 import { updateFile, storeFileReference } from './file.utils';
 import { updateTaskResult, createTaskResult } from './taskResult.utils';
-import Logger from './logger';
 import { createMessage, updateMessage } from './message.utils';
 import { createURLReference, updateURLReference } from './urlReference.utils';
 import { createUserInteraction, updateUserInteraction } from './userInteraction.utils';
+import { createEmbeddingChunk, updateEmbeddingChunk } from './embeddingChunk.utils';
 
 export async function processReferences(references: References | undefined, userId: string): Promise<References> {
+  Logger.debug('Processing references');
+  Logger.debug('References: '+JSON.stringify(references));
   const processedReferences: References = {};
 
   if (!references) {
@@ -46,6 +49,7 @@ export async function processReferences(references: References | undefined, user
       }
     }));
   }
+
   if (references.messages && Array.isArray(references.messages)) {
     processedReferences.messages = await Promise.all(references.messages.map(async (ref) => {
       if (typeof ref === 'string' || ref instanceof Types.ObjectId) {
@@ -64,6 +68,7 @@ export async function processReferences(references: References | undefined, user
       }
     }));
   }
+
   if (references.url_references && Array.isArray(references.url_references)) {
     processedReferences.url_references = await Promise.all(references.url_references.map(async (ref) => {
       if (typeof ref === 'string' || ref instanceof Types.ObjectId) {
@@ -100,6 +105,25 @@ export async function processReferences(references: References | undefined, user
           throw new Error('Failed to create user interaction');
         }
         return newUI._id;
+      }
+    }));
+  }
+
+  if (references.embedding_chunks && Array.isArray(references.embedding_chunks)) {
+    processedReferences.embedding_chunks = await Promise.all(references.embedding_chunks.map(async (ref) => {
+      if (typeof ref === 'string' || ref instanceof Types.ObjectId) {
+        return new Types.ObjectId(ref);
+      } else if ('_id' in ref && ref._id) {
+        const updatedChunk = await updateEmbeddingChunk(ref._id.toString(), ref, userId);
+        return updatedChunk?._id || new Types.ObjectId(ref._id);
+      } else {
+        const newChunk = await createEmbeddingChunk(ref, userId);
+        if (!newChunk) {
+          Logger.error('Failed to create embedding chunk');
+          Logger.error(JSON.stringify(ref));
+          throw new Error('Failed to create embedding chunk');
+        }
+        return newChunk._id;
       }
     }));
   }

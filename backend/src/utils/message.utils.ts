@@ -146,16 +146,14 @@ export function messagesEqual(
     'generated_by',
     'step',
     'assistant_name',
-    'context',
     'type',
-    'request_type',
     'tool_calls',
     'tool_call_id',
     'creation_metadata'
   ];
 
   for (const key of keys) {
-    if (key === 'context' || key === 'tool_calls' || key === 'creation_metadata') {
+    if (key === 'tool_calls' || key === 'creation_metadata') {
       if (JSON.stringify(msg1[key]) !== JSON.stringify(msg2[key])) {
         return false;
       }

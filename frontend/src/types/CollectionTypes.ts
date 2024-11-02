@@ -23,10 +23,12 @@ import EnhancedTaskResponse from '../components/enhanced/task_response/task_resp
 import EnhancedURLReference from '../components/enhanced/url_reference/url_reference/EnhancedURLReference';
 import { convertToUserInteraction, UserInteraction } from './UserInteractionTypes';
 import { convertToUserCheckpoint, UserCheckpoint } from './UserCheckpointTypes';
+import { convertToEmbeddingChunk, EmbeddingChunk } from './EmbeddingChunkTypes';
+import { convertToDataCluster, DataCluster } from './DataClusterTypes';
 
-export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' | 'urlreferences' | 'userinteractions' | 'usercheckpoints';
-export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType | URLReference | UserInteraction | UserCheckpoint;
-export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API' | 'User' | 'File' | 'Message' | 'URLReference' | 'UserInteraction' | 'UserCheckpoint';
+export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' | 'urlreferences' | 'userinteractions' | 'usercheckpoints' | 'dataclusters' | 'embeddingchunks';
+export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType | URLReference | UserInteraction | UserCheckpoint | DataCluster | EmbeddingChunk;
+export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API' | 'User' | 'File' | 'Message' | 'URLReference' | 'UserInteraction' | 'UserCheckpoint' | 'DataCluster' | 'EmbeddingChunk';
 
 export type CollectionType = {
     agents: AliceAgent;
@@ -43,6 +45,8 @@ export type CollectionType = {
     urlreferences: URLReference;
     userinteractions: UserInteraction;
     usercheckpoints: UserCheckpoint;
+    dataclusters: DataCluster;
+    embeddingchunks: EmbeddingChunk;
 };
 
 export type CollectionTypeString = {
@@ -60,6 +64,8 @@ export type CollectionTypeString = {
     urlreferences: 'URLReference';
     userinteractions: 'UserInteraction';
     usercheckpoints: 'UserCheckpoint';
+    dataclusters: 'DataCluster';
+    embeddingchunks: 'EmbeddingChunk';
 };
 
 export const collectionNameToElementString: Record<CollectionName, CollectionElementString> = {
@@ -76,7 +82,9 @@ export const collectionNameToElementString: Record<CollectionName, CollectionEle
     messages: 'Message',
     urlreferences: 'URLReference',
     userinteractions: 'UserInteraction',
-    usercheckpoints: 'UserCheckpoint'
+    usercheckpoints: 'UserCheckpoint',
+    dataclusters: 'DataCluster',
+    embeddingchunks: 'EmbeddingChunk'
 };
 
 export const collectionNameToEnhancedComponent: Record<CollectionName, React.ComponentType<any>> = {
@@ -93,7 +101,9 @@ export const collectionNameToEnhancedComponent: Record<CollectionName, React.Com
     messages: EnhancedMessage,
     urlreferences: EnhancedURLReference,
     userinteractions: EnhancedAgent,
-    usercheckpoints: EnhancedAgent
+    usercheckpoints: EnhancedAgent,
+    dataclusters: EnhancedAgent,
+    embeddingchunks: EnhancedAgent
 };
 
 // Create a runtime mapping object
@@ -111,7 +121,9 @@ export const collectionTypeMapping: Record<string, CollectionElementString> = {
     MessageType: 'Message',
     URLReference: 'URLReference',
     UserInteraction: 'UserInteraction',
-    UserCheckpoint: 'UserCheckpoint'
+    UserCheckpoint: 'UserCheckpoint',
+    DataCluster: 'DataCluster',
+    EmbeddingChunk: 'EmbeddingChunk'
 };
 
 
@@ -129,7 +141,9 @@ export const converters: { [K in CollectionName]: (data: any) => CollectionType[
     messages: convertToMessageType,
     urlreferences: convertToURLReference,
     userinteractions: convertToUserInteraction,
-    usercheckpoints: convertToUserCheckpoint
+    usercheckpoints: convertToUserCheckpoint,
+    dataclusters: convertToDataCluster,
+    embeddingchunks: convertToEmbeddingChunk
 };
 
 export type ComponentMode = 'create' | 'edit' | 'view' | 'list' | 'shortList' | 'table';
@@ -146,6 +160,8 @@ export interface HandleClickProps {
     handleMessageClick?: (messageId: string, item?: MessageType) => void;
     handleURLReferenceClick?: (urlReferenceId: string, item?: URLReference) => void;
     handleUserInteractionClick?: (userInteractionId: string, item?: UserInteraction) => void;
+    handleUserCheckpointClick?: (userCheckpointId: string, item?: UserCheckpoint) => void;
+    handleDataClusterClick?: (dataClusterId: string, item?: DataCluster) => void;
 }
 export interface EnhancedComponentProps<T extends CollectionElement> extends HandleClickProps {
     items: T[] | null;
@@ -159,3 +175,35 @@ export interface EnhancedComponentProps<T extends CollectionElement> extends Han
     onInteraction?: (item: T) => void;
     showHeaders?: boolean
 }
+
+export interface BasicDBObj {
+    _id?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+}
+
+export interface BaseDatabaseObject extends BasicDBObj {
+    created_by?: User;
+    updated_by?: User;
+}
+
+export interface Embeddable {
+    embeddings: EmbeddingChunk[];
+}
+
+// Generic converters that work with any type extending the base interfaces
+export const convertToBasicDBObj = <T extends Partial<BasicDBObj>>(data: T): BasicDBObj => ({
+    _id: data._id,
+    createdAt: data.createdAt ? new Date(data.createdAt) : undefined,
+    updatedAt: data.updatedAt ? new Date(data.updatedAt) : undefined,
+});
+
+export const convertToBaseDatabaseObject = <T extends Partial<BaseDatabaseObject>>(data: T): BaseDatabaseObject => ({
+    ...convertToBasicDBObj(data),
+    created_by: data.created_by,
+    updated_by: data.updated_by,
+});
+
+export const convertToEmbeddable = <T extends Partial<Embeddable>>(data: T): Embeddable => ({
+    embeddings: data.embeddings || [],
+});

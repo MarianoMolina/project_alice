@@ -1,5 +1,5 @@
-import { EnhancedComponentProps } from "./CollectionTypes";
-import { BaseDataseObject, convertToUser } from "./UserTypes";
+import { BaseDatabaseObject, convertToBaseDatabaseObject, convertToEmbeddable, EnhancedComponentProps } from "./CollectionTypes";
+import { convertToUser } from "./UserTypes";
 
 export interface FunctionParameters {
     type: "object";
@@ -7,22 +7,18 @@ export interface FunctionParameters {
     required: string[];
 }
 export type ParameterTypes = "string" | "integer" | "boolean" | "object" | "array";
-export interface ParameterDefinition extends BaseDataseObject {
-    _id?: string;
+export interface ParameterDefinition extends BaseDatabaseObject {
     type: ParameterTypes;
     description: string;
     default?: any;
 }
 export const convertToParameterDefinition = (data: any): ParameterDefinition => {
     return {
-        _id: data?._id || undefined,
+        ...convertToBaseDatabaseObject(data),
+        ...convertToEmbeddable(data),
         type: data?.type || '',
         description: data?.description || '',
         default: data?.default,
-        created_by: data?.created_by ? convertToUser(data.created_by) : undefined,
-        updated_by: data?.updated_by ? convertToUser(data.updated_by) : undefined,
-        createdAt: data?.createdAt ? new Date(data.createdAt) : undefined,
-        updatedAt: data?.updatedAt ? new Date(data.updatedAt) : undefined,
     };
 };
 

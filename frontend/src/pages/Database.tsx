@@ -76,6 +76,7 @@ const Database: React.FC = () => {
         { name: 'Agent' as CollectionElementString, icon: Person, group: 'Core' },
         { name: 'API' as CollectionElementString, icon: Api, group: 'Core' },
         { name: 'Chat' as CollectionElementString, icon: QuestionAnswer, group: 'Core' },
+        { name: 'EmbeddingChunk' as CollectionElementString, icon: Description, group: 'Ref' },
         { name: 'File' as CollectionElementString, icon: AttachFile, group: 'Ref' },
         { name: 'Message' as CollectionElementString, icon: Message, group: 'Ref' },
         { name: 'Model' as CollectionElementString, icon: Category, group: 'Core' },
@@ -83,9 +84,9 @@ const Database: React.FC = () => {
         { name: 'Prompt' as CollectionElementString, icon: Description, group: 'Core' },
         { name: 'Task' as CollectionElementString, icon: Functions, group: 'Core' },
         { name: 'TaskResponse' as CollectionElementString, icon: Assignment, group: 'Ref' },
+        { name: 'URLReference' as CollectionElementString, icon: Link, group: 'Ref' },
         { name: 'UserCheckpoint' as CollectionElementString, icon: LiveHelp, group: 'Core' },
         { name: 'UserInteraction' as CollectionElementString, icon: Feedback, group: 'Ref' },
-        { name: 'URLReference' as CollectionElementString, icon: Link, group: 'Ref' },
     ];
 
     // Active tab logic

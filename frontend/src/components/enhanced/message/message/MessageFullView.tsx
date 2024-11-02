@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography, Tooltip, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import useStyles from '../MessageStyles';
-import { MessageComponentProps } from '../../../../types/MessageTypes';
+import { MessageComponentProps, MessageGenerators, RoleType } from '../../../../types/MessageTypes';
 import { BackgroundBeams } from '../../../ui/aceternity/BackgroundBeams';
 import { hasAnyReferences } from '../../../../types/ReferenceTypes';
 import ReferenceChip from '../../common/references/ReferenceChip';
@@ -23,8 +23,8 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => 
 
     const getCreatorName = () => {
         if (message.type === 'task_result') return 'Task Response';
-        if (message.role === 'assistant') return message.assistant_name || "Assistant";
-        if (message.role === 'user') {
+        if (message.role === RoleType.ASSISTANT) return message.assistant_name || "Assistant";
+        if (message.role === RoleType.USER) {
             if (message.created_by) {
                 if (typeof message.created_by === 'string') return "User";
                 if (typeof message.created_by === 'object' && 'name' in message.created_by) return message.created_by.name;
@@ -34,11 +34,11 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => 
     };
 
     const getMessageClass = () => {
-        if (message.generated_by === 'tool') return classes.toolMessage;
+        if (message.generated_by === MessageGenerators.TOOL) return classes.toolMessage;
         switch (message.role) {
-            case 'user':
+            case RoleType.USER:
                 return classes.userMessage;
-            case 'assistant':
+            case RoleType.ASSISTANT:
             default:
                 return classes.assistantMessage;
         }
@@ -140,13 +140,6 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => 
                         <Tooltip title="Task or source that produced this message" arrow>
                             <Typography variant="caption" className={classes.metadata}>
                                 Step: {message.step}
-                            </Typography>
-                        </Tooltip>
-                    )}
-                    {message.context && Object.keys(message.context).length > 0 && (
-                        <Tooltip title="Context relevant to the creation of this message" arrow>
-                            <Typography variant="caption" className={classes.metadata}>
-                                Context: {JSON.stringify(message.context)}
                             </Typography>
                         </Tooltip>
                     )}

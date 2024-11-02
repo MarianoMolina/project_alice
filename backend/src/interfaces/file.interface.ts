@@ -16,9 +16,9 @@ export interface IFileReference {
     storage_path: string;
     transcript?: Types.ObjectId | IMessageDocument;
     content?: string;
+    last_accessed?: Date;
     created_by: Types.ObjectId | IUserDocument;
     updated_by: Types.ObjectId | IUserDocument;
-    last_accessed?: Date;
 }
 
 export interface IFileReferenceMethods {

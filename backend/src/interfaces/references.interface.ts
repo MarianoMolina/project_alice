@@ -4,6 +4,8 @@ import { IMessageDocument } from "./message.interface";
 import { ITaskResultDocument } from "./taskResult.interface";
 import { IURLReferenceDocument } from "./urlReference.interface";
 import { IUserInteractionDocument } from "./userInteraction.interface";
+import { IEmbeddingChunkDocument } from './embeddingChunk.interface';
+import { IUserDocument } from './user.interface';
 
 export interface References {
     messages?: Types.ObjectId[] | IMessageDocument[];
@@ -12,6 +14,7 @@ export interface References {
     url_references?: Types.ObjectId[] | IURLReferenceDocument[];
     string_outputs?: string[];
     user_interactions?: Types.ObjectId[] | IUserInteractionDocument[];
+    embedding_chunks?: Types.ObjectId[] | IEmbeddingChunkDocument[];
 }
 
 export interface ReferencesMethods {
@@ -20,6 +23,8 @@ export interface ReferencesMethods {
 
 export interface IDataClusterDocument extends References, Document, ReferencesMethods {
     _id: Types.ObjectId;
+    created_by: Types.ObjectId | IUserDocument;
+    updated_by: Types.ObjectId | IUserDocument;
     createdAt: Date;
     updatedAt: Date;
 }

@@ -73,7 +73,7 @@ export enum CodePermission {
   WITH_PERMISSION = 2,
   TAGGED_ONLY = 3
 }
-export interface AliceAgent extends BaseDataseObject {
+export interface AliceAgent extends BaseDatabaseObject {
   _id?: string;
   name: string;
   system_message: Prompt;

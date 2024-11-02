@@ -10,7 +10,7 @@ from .model import AliceModel
 from .prompt import Prompt
 from .api_utils import ApiName, ApiType, ModelType, ModelApis
 from .parameters import ParameterDefinition, FunctionConfig, FunctionParameters, ToolCall, ToolCallConfig, ToolFunction, ensure_tool_function
-from .base_models import EntityType, FileType, ContentType, TasksEndCodeRouting, EmbeddingChunk, Embeddable
+from .base_models import EntityType, FileType, ContentType, TasksEndCodeRouting, EmbeddingChunk, Embeddable, BaseDataStructure
 
 # Rebuild all models
 MessageDict.model_rebuild()
@@ -41,4 +41,4 @@ __all__ = ['FileReference', 'ContentType', 'FileType', 'FileContentReference', '
            'URLReference', 'TaskResponse', 'User', 'UserRoles', 'UserInteraction', 'ExecutionHistoryItem', 'NodeResponse', 'TasksEndCodeRouting', 'EmbeddingChunk',
            'ApiName', 'ApiType', 'ModelType', 'ParameterDefinition', 'FunctionConfig', 'FunctionParameters', 'ToolCall', 'ToolCallConfig', 'UserCheckpoint', 'UserResponse',
            'ToolFunction', 'ensure_tool_function', 'EntityType', 'ModelApis', 'FileOutput', 'References', 'complete_inner_execution_history', 'Embeddable',
-           'AliceModel', 'Prompt']
+           'AliceModel', 'Prompt', 'BaseDataStructure']

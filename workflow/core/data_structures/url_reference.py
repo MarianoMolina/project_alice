@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from pydantic import Field, model_validator
 from workflow.core.data_structures.base_models import Embeddable
 

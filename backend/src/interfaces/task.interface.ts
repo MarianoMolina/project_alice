@@ -2,6 +2,7 @@ import { Document, Types, Model } from 'mongoose';
 import { IFunctionParameters } from '../utils/functionSchema';
 import { IUserCheckpoint } from './userCheckpoint.interface';
 import { References } from './references.interface';
+import { IUserDocument } from './user.interface';
 
 export enum TaskType {
   APITask = "APITask",
@@ -35,8 +36,8 @@ export interface ITask {
   exit_codes: Map<string, string>;
   exit_code_response_map: Map<string, number> | null;
   valid_languages: string[];
-  created_by: Types.ObjectId;
-  updated_by: Types.ObjectId;
+  created_by: Types.ObjectId | IUserDocument;
+  updated_by: Types.ObjectId | IUserDocument;
 }
 
 

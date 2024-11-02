@@ -73,7 +73,7 @@ class References(BaseModel):
 
     def remove_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, URLReference, str, UserInteraction]) -> bool:
         """Remove a specific reference."""
-        for attr in ['messages', 'files', 'task_responses', 'url_references', 'string_outputs', 'user_interactions']:
+        for attr in ['messages', 'files', 'task_responses', 'url_references', 'string_outputs', 'user_interactions', 'embeddings']:
             ref_list = getattr(self, attr)
             if ref_list is not None and reference in ref_list:
                 ref_list.remove(reference)

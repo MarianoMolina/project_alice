@@ -7,7 +7,7 @@ URL References allow the Alice system to store and manage information about exte
 Each URL reference in the system is represented by the `URLReference` interface:
 
 ```typescript
-export interface URLReference extends BaseDataseObject {
+export interface URLReference extends BaseDatabaseObject {
     _id?: string;
     title: string;
     url: string;

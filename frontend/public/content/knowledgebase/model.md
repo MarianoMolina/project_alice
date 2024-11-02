@@ -31,7 +31,7 @@ export enum ModelType {
 Each model in the system is represented by the `AliceModel` interface:
 
 ```typescript
-export interface AliceModel extends BaseDataseObject {
+export interface AliceModel extends BaseDatabaseObject {
     _id?: string;
     short_name: string;
     model_name: string;

@@ -9,3 +9,4 @@ venv
 myDockerCompose.log
 __pycache__
 shared-uploads
+shared-types

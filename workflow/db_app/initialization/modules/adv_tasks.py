@@ -86,11 +86,44 @@ adv_tasks_module = AdvTasksModule(
                 "max_consecutive_auto_reply": 1,
             },
             {
+                "key": "pixart_gen_agent",
+                "name": "pixart_gen_agent",
+                "system_message": "default_system_message",
+                "models": {
+                    "img_gen": "pixart_sigma_model",
+                },
+                "has_code_exec": 0,
+                "has_tools": 0,
+                "max_consecutive_auto_reply": 1,
+            },
+            {
                 "key": "tts_agent",
                 "name": "tts_agent",
                 "system_message": "default_system_message",
                 "models": {
                     "tts": "tts-1",
+                },
+                "has_code_exec": 0,
+                "has_tools": 0,
+                "max_consecutive_auto_reply": 1,
+            },
+            {
+                "key": "bark_tts_agent",
+                "name": "bark_tts_agent",
+                "system_message": "default_system_message",
+                "models": {
+                    "tts": "bark_large",
+                },
+                "has_code_exec": 0,
+                "has_tools": 0,
+                "max_consecutive_auto_reply": 1,
+            },
+            {
+                "key": "groq_tts_agent",
+                "name": "groq_tts_agent",
+                "system_message": "default_system_message",
+                "models": {
+                    "tts": "groq_llama_3_2_11b_vision",
                 },
                 "has_code_exec": 0,
                 "has_tools": 0,
@@ -160,6 +193,24 @@ adv_tasks_module = AdvTasksModule(
                 "required_apis": ["img_generation"],
             },
             {
+                "key": "image_gen_task_pixart",
+                "task_type": "GenerateImageTask",
+                "task_name": "image_gen_task_pixart",
+                "agent": "pixart_gen_agent",
+                "task_description": "Generates an image from the input text",
+                "input_variables": {
+                    "type": "object",
+                    "properties": {
+                        "prompt": "prompt_img_gen",
+                        "n": "n_parameter",
+                        "size": "size_parameter",
+                        "quality": "quality_parameter"
+                    },
+                    "required": ["prompt"]
+                },
+                "required_apis": ["img_generation"],
+            },
+            {
                 "key": "image_gen_task_gemini",
                 "task_type": "GenerateImageTask",
                 "task_name": "image_gen_task_gemini",
@@ -183,6 +234,40 @@ adv_tasks_module = AdvTasksModule(
                 "task_name": "tts_task",
                 "agent": "tts_agent",
                 "task_description": "Converts text to speech using the OpenAI TTS API",
+                "input_variables": {
+                    "type": "object",
+                    "properties": {
+                        "text": "text_parameter",
+                        "voice": "voice_parameter",
+                        "speed": "speed_parameter"
+                    },
+                    "required": ["text"]
+                },
+                "required_apis": ["text_to_speech"]
+            },
+            {
+                "key": "groq_tts_task",
+                "task_type": "TextToSpeechTask",
+                "task_name": "groq_tts_task",
+                "agent": "groq_tts_agent",
+                "task_description": "Converts text to speech using the Groq TTS API",
+                "input_variables": {
+                    "type": "object",
+                    "properties": {
+                        "text": "text_parameter",
+                        "voice": "voice_parameter",
+                        "speed": "speed_parameter"
+                    },
+                    "required": ["text"]
+                },
+                "required_apis": ["text_to_speech"]
+            },
+            {
+                "key": "bark_tts_task",
+                "task_type": "TextToSpeechTask",
+                "task_name": "bark_tts_task",
+                "agent": "bark_tts_agent",
+                "task_description": "Converts text to speech using the Bark TTS API",
                 "input_variables": {
                     "type": "object",
                     "properties": {

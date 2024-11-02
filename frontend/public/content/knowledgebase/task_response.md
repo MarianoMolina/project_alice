@@ -7,7 +7,7 @@ Task Responses represent the outcomes of executed tasks, including results, stat
 Each task response in the system is represented by the `TaskResponse` interface:
 
 ```typescript
-export interface TaskResponse extends BaseDataseObject {
+export interface TaskResponse extends BaseDatabaseObject {
     _id?: string;
     task_name: string;
     task_id: string;

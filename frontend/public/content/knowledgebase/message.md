@@ -20,7 +20,7 @@ export enum ContentType {
     URL_REFERENCE = 'url_reference'
 }
 
-export interface MessageType extends BaseDataseObject {
+export interface MessageType extends BaseDatabaseObject {
     _id?: string;
     role: RoleType;
     content: string;
@@ -29,9 +29,7 @@ export interface MessageType extends BaseDataseObject {
     assistant_name?: string;
     context?: Record<string, any>;
     type?: ContentType;
-    request_type?: string | null;
     tool_calls?: ToolCall[];
-    function_call?: { [key: string]: string };
     creation_metadata?: Record<string, any>;
     references?: References;
 }
@@ -42,7 +40,7 @@ Key properties:
 - `content`: The main content of the message
 - `generated_by`: Specifies how the message was created
 - `type`: Indicates the type of content (text, image, audio, etc.)
-- `tool_calls` and `function_call`: Used for interactions with tools or functions
+- `tool_calls`: Used for interactions with tools or functions
 - `references`: Links to associated files or resources
 
 ## Functionality
