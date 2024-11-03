@@ -2,13 +2,14 @@ import { Document, Model, Types } from "mongoose";
 import { IUserDocument } from "./user.interface";
 import { IUserCheckpointDocument } from "./userCheckpoint.interface";
 import { ITaskResultDocument } from "./taskResult.interface";
+import { Embeddable } from "./embeddingChunk.interface";
 
 export interface UserResponse {
     selected_option: number;
     user_feedback?: string;
 }
 
-export interface IUserInteraction {
+export interface IUserInteraction extends Embeddable {
     user_checkpoint_id: Types.ObjectId | IUserCheckpointDocument;
     task_response_id?: Types.ObjectId | ITaskResultDocument;
     user_response?: UserResponse;

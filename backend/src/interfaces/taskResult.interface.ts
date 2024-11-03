@@ -1,6 +1,7 @@
 import { Document, Types, Model } from 'mongoose';
 import { IUserDocument } from './user.interface';
 import { References } from './references.interface';
+import { Embeddable } from './embeddingChunk.interface';
 
 export interface ExecutionHistoryItem {
     parent_task_id?: string;
@@ -13,7 +14,7 @@ export interface NodeResponse extends ExecutionHistoryItem {
     references: References;
 }
 
-export interface ITaskResult {
+export interface ITaskResult extends Embeddable {
     task_name: string;
     task_id: Types.ObjectId;
     task_description: string;

@@ -1,4 +1,3 @@
-import { convertToUser } from "./UserTypes";
 import { ApiName } from "./ApiTypes";
 import { BaseDatabaseObject, convertToBaseDatabaseObject, convertToEmbeddable, EnhancedComponentProps } from "./CollectionTypes";
 
@@ -11,7 +10,7 @@ export enum ModelType {
     EMBEDDINGS = 'embeddings',
     IMG_GEN = 'img_gen',
 }
-export interface AliceModel extends BaseDatabaseObject {
+export interface AliceModel extends BaseDatabaseObject { 
     short_name: string;
     model_name: string;
     model_format?: string;

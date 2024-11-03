@@ -5,19 +5,19 @@ enum LogLevel {
     DEBUG = 3
   }
   
-  class Logger {
-    private static instance: Logger;
+  class LoggerClass {
+    private static instance: LoggerClass;
     private level: LogLevel;
   
     private constructor() {
       this.level = this.getLogLevelFromEnv();
     }
   
-    public static getInstance(): Logger {
-      if (!Logger.instance) {
-        Logger.instance = new Logger();
+    public static getInstance(): LoggerClass {
+      if (!LoggerClass.instance) {
+        LoggerClass.instance = new LoggerClass();
       }
-      return Logger.instance;
+      return LoggerClass.instance;
     }
   
     private getLogLevelFromEnv(): LogLevel {
@@ -74,5 +74,5 @@ enum LogLevel {
     }
   }
   
-  const logger = Logger.getInstance();
-  export default logger;
+  const Logger = LoggerClass.getInstance();
+  export default Logger;

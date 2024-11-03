@@ -2,10 +2,11 @@ import { dbAxiosInstance, taskAxiosInstance } from './axiosInstance';
 import { AliceChat, convertToAliceChat } from '../types/ChatTypes';
 import { MessageType } from '../types/MessageTypes';
 import { TaskResponse, convertToTaskResponse } from '../types/TaskResponseTypes';
-import { CollectionName, CollectionType, converters } from '../types/CollectionTypes';
+import { CollectionName, CollectionType } from '../types/CollectionTypes';
 import { FileReference, FileContentReference } from '../types/FileTypes';
 import { createFileContentReference } from '../utils/FileUtils';
 import Logger from '../utils/Logger';
+import { converters } from '../utils/Converters';
 
 export const fetchItem = async <T extends CollectionName>(
   collectionName: T,

@@ -1,6 +1,6 @@
 from __future__ import annotations
 from enum import Enum
-from typing import Optional, Literal, Dict, Any, List, TYPE_CHECKING
+from typing import Optional, Dict, Any, List, TYPE_CHECKING
 from pydantic import Field, ConfigDict, field_validator
 from workflow.core.data_structures.base_models import Embeddable, ContentType, FileType
 from workflow.core.data_structures.central_types import ToolCallType, ReferencesType

@@ -45,6 +45,7 @@ const ChatAlice: React.FC = () => {
 
   const selectChatId = useCallback(async (chat: AliceChat) => {
     Logger.debug('Selected chat:', chat);
+    if (!chat._id) return;
     await handleSelectChat(chat._id);
     setActiveTab('Current Chat');
   }, [handleSelectChat]);

@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { IEmbeddingChunkDocument } from '../interfaces/embeddingChunk.interface';
+import { Embeddable, IEmbeddingChunkDocument } from '../interfaces/embeddingChunk.interface';
 import EmbeddingChunk from '../models/embeddingChunk.model';
 import Logger from './logger';
 
@@ -124,4 +124,58 @@ function objectsEqual(obj1: Record<string, any>, obj2: Record<string, any>): boo
         obj2.hasOwnProperty(key) && 
         JSON.stringify(obj1[key]) === JSON.stringify(obj2[key])
     );
+}
+
+export async function processEmbeddings(
+  embeddable: Partial<Embeddable>,
+  userId: string
+): Promise<Types.ObjectId[]> {
+  Logger.debug('Processing embeddings');
+  
+  if (!embeddable.embeddings || !Array.isArray(embeddable.embeddings)) {
+    return [];
+  }
+
+  return await Promise.all(embeddable.embeddings.map(async (embedding) => {
+    if (typeof embedding === 'string' || embedding instanceof Types.ObjectId) {
+      return new Types.ObjectId(embedding);
+    } else if ('_id' in embedding && embedding._id) {
+      const updatedEmbedding = await updateEmbeddingChunk(
+        embedding._id.toString(),
+        embedding as Partial<IEmbeddingChunkDocument>,
+        userId
+      );
+      return updatedEmbedding?._id || new Types.ObjectId(embedding._id);
+    } else {
+      const newEmbedding = await createEmbeddingChunk(
+        embedding as Partial<IEmbeddingChunkDocument>,
+        userId
+      );
+      if (!newEmbedding) {
+        Logger.error('Failed to create embedding chunk');
+        Logger.error(JSON.stringify(embedding));
+        throw new Error('Failed to create embedding chunk');
+      }
+      return newEmbedding._id;
+    }
+  }));
+}
+
+// Helper function to compare embeddings arrays for equality checks
+export function compareEmbeddings(
+  embeddings1: (Types.ObjectId | IEmbeddingChunkDocument)[] | undefined,
+  embeddings2: (Types.ObjectId | IEmbeddingChunkDocument)[] | undefined
+): boolean {
+  if (!embeddings1 && !embeddings2) return true;
+  if (!embeddings1 || !embeddings2) return false;
+  if (embeddings1.length !== embeddings2.length) return false;
+
+  return embeddings1.every((item, index) => {
+    const id1 = item instanceof Types.ObjectId ? item : item._id;
+    const id2 = embeddings2[index] instanceof Types.ObjectId 
+      ? embeddings2[index] 
+      : (embeddings2[index] as IEmbeddingChunkDocument)._id;
+    
+    return id1.equals(id2);
+  });
 }

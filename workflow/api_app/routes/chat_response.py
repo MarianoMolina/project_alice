@@ -1,4 +1,3 @@
-from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 from workflow.api_app.util.utils import deep_api_check
 from workflow.api_app.util.dependencies import get_db_app

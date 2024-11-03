@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 import { IUserInteractionDocument } from '../interfaces/userInteraction.interface';
 import UserInteraction from '../models/userInteraction.model';
 import Logger from './logger';
+import { processEmbeddings } from './embeddingChunk.utils';
 
 export async function createUserInteraction(
     userInteractionData: Partial<IUserInteractionDocument>,
@@ -19,6 +20,10 @@ export async function createUserInteraction(
         userInteractionData.updated_by = userId ? new Types.ObjectId(userId) : undefined;
         userInteractionData.createdAt = new Date();
         userInteractionData.updatedAt = new Date();
+
+        if (userInteractionData.embeddings) {
+            userInteractionData.embeddings = await processEmbeddings(userInteractionData, userId);
+        }
 
         // Create and save the task result
         const userInteraction = new UserInteraction(userInteractionData);
@@ -40,6 +45,9 @@ export async function updateUserInteraction(
         const existingUserInteraction = await UserInteraction.findById(userInteractionId);
         if (!existingUserInteraction) {
             throw new Error('Task result not found');
+        }
+        if (userInteractionData.embeddings) {
+            userInteractionData.embeddings = await processEmbeddings(userInteractionData, userId);
         }
 
         // Compare the existing task result with the new data

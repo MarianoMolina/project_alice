@@ -31,7 +31,7 @@ from concurrent.futures import ThreadPoolExecutor
 from workflow.db_app import ContainerAPI, DB_STRUCTURE
 from workflow.api_app.middleware import add_cors_middleware, auth_middleware
 from workflow.api_app.routes import health_route, task_execute, chat_response, db_init, file_transcript
-from workflow.test.component_tests import TestEnvironment, DBTests, APITests
+from workflow.test.component_tests import TestEnvironment, DBTests
 from workflow.util import LOGGER
 
 db_app = None

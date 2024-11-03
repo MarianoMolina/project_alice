@@ -7,7 +7,6 @@ from workflow.core.data_structures import (
     ModelConfig,
     ApiType,
     MessageDict,
-    FileContentReference,
     EmbeddingChunk,
     ContentType,
     References,

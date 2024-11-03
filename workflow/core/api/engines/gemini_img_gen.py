@@ -1,5 +1,4 @@
 import re
-from typing import List
 from pydantic import Field
 import google.generativeai as genai
 # from google.generativeai.vision_models import ImageGenerationModel

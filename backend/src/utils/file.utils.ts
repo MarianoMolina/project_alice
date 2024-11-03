@@ -8,6 +8,7 @@ import { Types } from 'mongoose';
 import path from 'path';
 import fs from 'fs/promises';
 import { getObjectId } from './utils';
+import { processEmbeddings } from './embeddingChunk.utils';
 
 const UPLOAD_DIR = process.env.SHARED_UPLOAD_DIR || '/app/shared-uploads';
 
@@ -258,6 +259,10 @@ export async function updateFile(
         transcriptUpdated = true;
     }
 
+    if (updateData.embeddings) {
+        updateData.embeddings = await processEmbeddings(updateData, userId);
+    }
+
     // Check if file reference needs updating
     const isEqual = fileReferencesEqual(existingFile, updateData);
     if (isEqual && !updateData.content && !transcriptUpdated) {
@@ -370,6 +375,9 @@ export async function storeFileReference(
             fileContent.filename,
             0
         );
+        if (fileContent.embeddings) {
+            fileContent.embeddings = await processEmbeddings(fileContent, userId);
+        }
 
         const fileReferenceData: Partial<IFileReferenceDocument> = {
             _id: new Types.ObjectId(fileId),

@@ -56,7 +56,7 @@ class BackendAPI(BaseModel):
         "prompts": "prompts",
         "user_checkpoints": "usercheckpoints",
         "user_interactions": "userinteractions",
-        "embedding_chunk": "embeddingchunk",
+        "embedding_chunk": "embeddingchunks",
         "tasks": "tasks",
         "chats": "chats", 
         "parameters": "parameters",

@@ -1,5 +1,4 @@
 import { AliceModel, convertToAliceModel } from "./ModelTypes";
-import { convertToUser } from "./UserTypes";
 import { BaseDatabaseObject, convertToBaseDatabaseObject, EnhancedComponentProps } from "./CollectionTypes";
 
 export enum ApiType {

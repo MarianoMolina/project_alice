@@ -7,7 +7,9 @@ export const referencesSchema = new Schema<References>({
     files: [{ type: Schema.Types.ObjectId, ref: 'FileReference', autopopulate: true }],
     task_responses: [{ type: Schema.Types.ObjectId, ref: 'TaskResult', autopopulate: true }],
     url_references: [{ type: Schema.Types.ObjectId, ref: 'URLReference', autopopulate: true }],
-    string_outputs: [String]
+    string_outputs: [String],
+    user_interactions: [{ type: Schema.Types.ObjectId, ref: 'UserInteraction', autopopulate: true }],
+    embedding_chunks: [{ type: Schema.Types.ObjectId, ref: 'EmbeddingChunk', autopopulate: true }],
 });
 
 referencesSchema.plugin(mongooseAutopopulate);

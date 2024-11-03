@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 import { IURLReferenceDocument } from '../interfaces/urlReference.interface';
 import URLReference from '../models/urlReference.model';
 import Logger from './logger';
+import { processEmbeddings } from './embeddingChunk.utils';
 
 export async function createURLReference(
     urlReferenceData: Partial<IURLReferenceDocument>,
@@ -19,6 +20,10 @@ export async function createURLReference(
     urlReferenceData.updated_by = userId ? new Types.ObjectId(userId) : undefined;
     urlReferenceData.createdAt = new Date();
     urlReferenceData.updatedAt = new Date();
+
+    if (urlReferenceData.embeddings) {
+      urlReferenceData.embeddings = await processEmbeddings(urlReferenceData, userId);
+    }
 
     // Create and save the task result
     const urlReference = new URLReference(urlReferenceData);
@@ -40,6 +45,9 @@ export async function updateURLReference(
     const existingurlReference = await URLReference.findById(urlReferenceId);
     if (!existingurlReference) {
       throw new Error('Task result not found');
+    }
+    if (urlReferenceData.embeddings) {
+      urlReferenceData.embeddings = await processEmbeddings(urlReferenceData, userId);
     }
 
     // Compare the existing task result with the new data

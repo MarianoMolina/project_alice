@@ -14,6 +14,8 @@ import UserCheckpoint from '../models/userCheckpoint.model';
 import UserInteraction from '../models/userInteraction.model';
 import Logger from './logger';
 import { deleteFile } from './file.utils';
+import EmbeddingChunk from '../models/embeddingChunk.model';
+import { DataCluster } from '../models/reference.model';
 
 const workflow_port = process.env.WORKFLOW_PORT_DOCKER || 8000;
 const workflow_name = process.env.WORKFLOW_NAME || 'workflow';
@@ -21,7 +23,7 @@ const workflow_name = process.env.WORKFLOW_NAME || 'workflow';
 export async function purgeAndReinitialize(userId: string, token: string): Promise<void> {
   Logger.info('Purging data for userId:', userId);
 
-  const models = [Agent, API, Chat, Model, Prompt, Task, TaskResult, ParameterDefinition, Message, URLReference, UserCheckpoint, UserInteraction];
+  const models = [Agent, API, Chat, Model, Prompt, Task, TaskResult, ParameterDefinition, Message, URLReference, UserCheckpoint, UserInteraction, FileReference, EmbeddingChunk, DataCluster];
   
   // Handle file deletions separately
   const fileReferences = await FileReference.find({ created_by: userId });

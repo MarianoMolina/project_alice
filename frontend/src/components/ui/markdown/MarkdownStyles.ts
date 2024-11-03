@@ -180,7 +180,7 @@ const useStyles = makeStyles((theme: Theme) => ({
         },
     },
     inlineVariable: {
-        backgroundColor: theme.palette.primary.light,
+        backgroundColor: theme.palette.primary.dark,
         padding: '2px 4px',
         borderRadius: '3px',
         fontStyle: 'italic',

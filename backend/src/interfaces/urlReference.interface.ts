@@ -1,7 +1,8 @@
 import { Document, Model, Types } from "mongoose";
 import { IUserDocument } from "./user.interface";
+import { Embeddable } from "./embeddingChunk.interface";
 
-export interface IURLReference {
+export interface IURLReference extends Embeddable {
   title: string;
   url: string;
   content: string;

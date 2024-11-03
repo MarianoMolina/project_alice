@@ -1,15 +1,19 @@
-import { AliceAgent, convertToAliceAgent } from './AgentTypes';
-import { AliceChat, convertToAliceChat } from './ChatTypes';
-import { AliceModel, convertToAliceModel } from './ModelTypes';
-import { AliceTask, convertToAliceTask } from './TaskTypes';
-import { Prompt, convertToPrompt } from './PromptTypes';
-import { TaskResponse, convertToTaskResponse } from './TaskResponseTypes';
-import { ParameterDefinition, convertToParameterDefinition } from './ParameterTypes';
-import { User, convertToUser } from './UserTypes';
-import { API, convertToAPI } from './ApiTypes';
-import { convertToFileReference, FileReference } from './FileTypes';
-import { convertToMessageType, MessageType } from './MessageTypes';
-import { convertToURLReference, URLReference } from './URLReferenceTypes';
+import { AliceAgent } from './AgentTypes';
+import { AliceChat } from './ChatTypes';
+import { AliceModel } from './ModelTypes';
+import { AliceTask } from './TaskTypes';
+import { Prompt } from './PromptTypes';
+import { TaskResponse } from './TaskResponseTypes';
+import { ParameterDefinition } from './ParameterTypes';
+import { User } from './UserTypes';
+import { API } from './ApiTypes';
+import { FileReference } from './FileTypes';
+import { MessageType } from './MessageTypes';
+import { URLReference } from './URLReferenceTypes';
+import { UserInteraction } from './UserInteractionTypes';
+import { UserCheckpoint } from './UserCheckpointTypes';
+import { EmbeddingChunk } from './EmbeddingChunkTypes';
+import { DataCluster } from './DataClusterTypes';
 import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
 import EnhancedAgent from '../components/enhanced/agent/agent/EnhancedAgent';
 import EnhancedChat from '../components/enhanced/chat/chat/EnhancedChat';
@@ -21,10 +25,6 @@ import EnhancedPrompt from '../components/enhanced/prompt/prompt/EnhancedPrompt'
 import EnhancedTask from '../components/enhanced/task/task/EnhancedTask';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
 import EnhancedURLReference from '../components/enhanced/url_reference/url_reference/EnhancedURLReference';
-import { convertToUserInteraction, UserInteraction } from './UserInteractionTypes';
-import { convertToUserCheckpoint, UserCheckpoint } from './UserCheckpointTypes';
-import { convertToEmbeddingChunk, EmbeddingChunk } from './EmbeddingChunkTypes';
-import { convertToDataCluster, DataCluster } from './DataClusterTypes';
 
 export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' | 'urlreferences' | 'userinteractions' | 'usercheckpoints' | 'dataclusters' | 'embeddingchunks';
 export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType | URLReference | UserInteraction | UserCheckpoint | DataCluster | EmbeddingChunk;
@@ -124,26 +124,6 @@ export const collectionTypeMapping: Record<string, CollectionElementString> = {
     UserCheckpoint: 'UserCheckpoint',
     DataCluster: 'DataCluster',
     EmbeddingChunk: 'EmbeddingChunk'
-};
-
-
-export const converters: { [K in CollectionName]: (data: any) => CollectionType[K] } = {
-    agents: convertToAliceAgent,
-    chats: convertToAliceChat,
-    models: convertToAliceModel,
-    tasks: convertToAliceTask,
-    prompts: convertToPrompt,
-    taskresults: convertToTaskResponse,
-    users: convertToUser,
-    parameters: convertToParameterDefinition,
-    apis: convertToAPI,
-    files: convertToFileReference,
-    messages: convertToMessageType,
-    urlreferences: convertToURLReference,
-    userinteractions: convertToUserInteraction,
-    usercheckpoints: convertToUserCheckpoint,
-    dataclusters: convertToDataCluster,
-    embeddingchunks: convertToEmbeddingChunk
 };
 
 export type ComponentMode = 'create' | 'edit' | 'view' | 'list' | 'shortList' | 'table';

@@ -3,6 +3,7 @@ import { ITaskResultDocument, NodeResponse } from '../interfaces/taskResult.inte
 import TaskResult from '../models/taskResult.model';
 import Logger from './logger';
 import { processReferences } from './reference.utils';
+import { processEmbeddings } from './embeddingChunk.utils';
 
 async function processNodeReferences(
   nodeResponses: NodeResponse[],
@@ -34,6 +35,9 @@ export async function createTaskResult(
         taskResultData.node_references,
         userId
       );
+    }
+    if (taskResultData.embeddings) {
+      taskResultData.embeddings = await processEmbeddings(taskResultData, userId);
     }
 
     // Set created_by and timestamps
@@ -70,6 +74,9 @@ export async function updateTaskResult(
         taskResultData.node_references,
         userId
       );
+    }
+    if (taskResultData.embeddings) {
+      taskResultData.embeddings = await processEmbeddings(taskResultData, userId);
     }
 
     // Compare the existing task result with the new data

@@ -1,5 +1,4 @@
 import { BaseDatabaseObject, convertToBaseDatabaseObject, convertToEmbeddable, EnhancedComponentProps } from "./CollectionTypes";
-import { convertToUser } from "./UserTypes";
 
 export interface FunctionParameters {
     type: "object";

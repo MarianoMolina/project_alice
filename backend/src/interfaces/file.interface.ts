@@ -1,6 +1,7 @@
 import { Document, Types, Model } from 'mongoose';
 import { IMessageDocument } from './message.interface';
 import { IUserDocument } from './user.interface';
+import { Embeddable } from './embeddingChunk.interface';
 
 export enum FileType {
     IMAGE = "image",
@@ -9,7 +10,7 @@ export enum FileType {
     FILE = "file",
 }
 
-export interface IFileReference {
+export interface IFileReference extends Embeddable {
     filename: string;
     type: FileType;
     file_size: number;

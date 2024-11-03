@@ -2,6 +2,7 @@ import { Model, Types, Document } from 'mongoose';
 import { IUserDocument } from "./user.interface";
 import { References } from './references.interface';
 import { FileType } from './file.interface';
+import { Embeddable } from './embeddingChunk.interface';
 
 export enum ContentType {
     TEXT = 'text',
@@ -27,7 +28,7 @@ export enum MessageGenerators {
     SYSTEM = 'system'
 }
 
-export interface IMessage {
+export interface IMessage extends Embeddable {
     content?: string;
     role: RoleType;
     generated_by: MessageGenerators;
