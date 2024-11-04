@@ -21,8 +21,8 @@ export async function createMessage(
     if (messageData.references) {
       messageData.references = await processReferences(messageData.references, userId);
     }
-    if (messageData.embeddings) {
-      messageData.embeddings = await processEmbeddings(messageData, userId);
+    if (messageData.embedding) {
+      messageData.embedding = await processEmbeddings(messageData, userId);
     }
 
     Logger.debug('Processed message data:', JSON.stringify(messageData, null, 2));
@@ -79,8 +79,8 @@ export async function updateMessage(
     if (processedMessageData.references) {
       processedMessageData.references = await processReferences(processedMessageData.references, userId);
     }
-    if (processedMessageData.embeddings) {
-      processedMessageData.embeddings = await processEmbeddings(processedMessageData, userId);
+    if (processedMessageData.embedding) {
+      processedMessageData.embedding = await processEmbeddings(processedMessageData, userId);
     }
 
     const isEqual = messagesEqual(existingMessage, processedMessageData);

@@ -269,6 +269,9 @@ class AliceTask(BaseModel):
                 
                 # Handle user interaction
                 if node_response.references and node_response.references.user_interactions:
+                    LOGGER.debug(f"User interaction detected for node {current_node}")
+                    LOGGER.debug(f"Node response user interaction: {node_response.references.user_interactions[0]}")
+                    node_responses.append(node_response)
                     return self.create_partial_response(node_responses, "pending", **kwargs)
                 
                 execution_history.append(node_response)
@@ -373,6 +376,7 @@ class AliceTask(BaseModel):
         """
         execution_history = execution_history or []
         node_name = node_name or self.start_node or "default"
+        LOGGER.debug(f"Checking user checkpoints for node {node_name}")
        
         if node_name in self.user_checkpoints:
             completed_interaction = next((
@@ -383,6 +387,7 @@ class AliceTask(BaseModel):
             ), None)
            
             if not completed_interaction:
+                LOGGER.debug(f"Creating user interaction for node {node_name}")
                 return self.create_user_interaction(node_name, len(execution_history))
         return None
     

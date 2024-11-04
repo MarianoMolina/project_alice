@@ -36,8 +36,8 @@ export async function createTaskResult(
         userId
       );
     }
-    if (taskResultData.embeddings) {
-      taskResultData.embeddings = await processEmbeddings(taskResultData, userId);
+    if (taskResultData.embedding) {
+      taskResultData.embedding = await processEmbeddings(taskResultData, userId);
     }
 
     // Set created_by and timestamps
@@ -75,8 +75,8 @@ export async function updateTaskResult(
         userId
       );
     }
-    if (taskResultData.embeddings) {
-      taskResultData.embeddings = await processEmbeddings(taskResultData, userId);
+    if (taskResultData.embedding) {
+      taskResultData.embedding = await processEmbeddings(taskResultData, userId);
     }
 
     // Compare the existing task result with the new data

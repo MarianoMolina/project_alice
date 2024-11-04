@@ -51,6 +51,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
     const isEditMode = mode === 'edit' || mode === 'create';
     const title = mode === 'create' ? 'Upload New File' : mode === 'edit' ? 'Edit File' : 'File Details';
     const saveButtonText = item?._id ? 'Update File' : 'Upload File';
+    const hasTranscriptSlot = item && item._id && item.type !== 'file';
 
     const handleFileUpdate = (updatedFile: FileContentReference) => {
         onChange(updatedFile);
@@ -58,7 +59,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
 
     const handleFileSelect = async () => {
         try {
-            const allowedTypes: FileType[] = [FileType.IMAGE, FileType.AUDIO, FileType.VIDEO];
+            const allowedTypes: FileType[] = [FileType.IMAGE, FileType.AUDIO, FileType.VIDEO, FileType.FILE];
             const file = await selectFile(allowedTypes);
             if (file) {
                 setSelectedFile(file);
@@ -139,7 +140,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
                         onUpdate={handleFileUpdate}
                     />
                 </Box>
-                {item && item._id && (
+                {item && item._id && hasTranscriptSlot && (
                     <Box mt={2}>
                         <Transcript
                             fileId={item._id}

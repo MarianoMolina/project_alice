@@ -109,8 +109,8 @@ export async function processReferences(references: References | undefined, user
     }));
   }
 
-  if (references.embedding_chunks && Array.isArray(references.embedding_chunks)) {
-    processedReferences.embedding_chunks = await Promise.all(references.embedding_chunks.map(async (ref) => {
+  if (references.embeddings && Array.isArray(references.embeddings)) {
+    processedReferences.embeddings = await Promise.all(references.embeddings.map(async (ref) => {
       if (typeof ref === 'string' || ref instanceof Types.ObjectId) {
         return new Types.ObjectId(ref);
       } else if ('_id' in ref && ref._id) {

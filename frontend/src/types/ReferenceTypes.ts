@@ -12,7 +12,7 @@ export interface References {
   url_references?: URLReference[];
   string_outputs?: string[];
   user_interactions?: UserInteraction[];
-  embedding_chunks?: EmbeddingChunk[];
+  embeddings?: EmbeddingChunk[];
 }
 
 export function hasAnyReferences(references: References): boolean {
@@ -23,7 +23,7 @@ export function hasAnyReferences(references: References): boolean {
     (references.url_references?.length ?? 0) > 0 ||
     (references.string_outputs?.length ?? 0) > 0 ||
     (references.user_interactions?.length ?? 0) > 0 ||
-    (references.embedding_chunks?.length ?? 0) > 0
+    (references.embeddings?.length ?? 0) > 0
   );
 }
 
@@ -35,6 +35,6 @@ export function howManyReferences(references: References): number {
     (references.url_references?.length ?? 0) +
     (references.string_outputs?.length ?? 0) +
     (references.user_interactions?.length ?? 0) +
-    (references.embedding_chunks?.length ?? 0)
+    (references.embeddings?.length ?? 0)
   );
 }

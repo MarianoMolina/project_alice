@@ -21,8 +21,8 @@ export async function createURLReference(
     urlReferenceData.createdAt = new Date();
     urlReferenceData.updatedAt = new Date();
 
-    if (urlReferenceData.embeddings) {
-      urlReferenceData.embeddings = await processEmbeddings(urlReferenceData, userId);
+    if (urlReferenceData.embedding) {
+      urlReferenceData.embedding = await processEmbeddings(urlReferenceData, userId);
     }
 
     // Create and save the task result
@@ -46,8 +46,8 @@ export async function updateURLReference(
     if (!existingurlReference) {
       throw new Error('Task result not found');
     }
-    if (urlReferenceData.embeddings) {
-      urlReferenceData.embeddings = await processEmbeddings(urlReferenceData, userId);
+    if (urlReferenceData.embedding) {
+      urlReferenceData.embedding = await processEmbeddings(urlReferenceData, userId);
     }
 
     // Compare the existing task result with the new data

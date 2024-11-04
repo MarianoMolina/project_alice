@@ -1,6 +1,6 @@
 import { dbAxiosInstance, taskAxiosInstance } from './axiosInstance';
 import { AliceChat, convertToAliceChat } from '../types/ChatTypes';
-import { MessageType } from '../types/MessageTypes';
+import { getDefaultMessageForm, MessageType } from '../types/MessageTypes';
 import { TaskResponse, convertToTaskResponse } from '../types/TaskResponseTypes';
 import { CollectionName, CollectionType } from '../types/CollectionTypes';
 import { FileReference, FileContentReference } from '../types/FileTypes';
@@ -89,7 +89,8 @@ export const sendMessage = async (chatId: string, message: MessageType): Promise
           if ('transcript' in reference && reference.transcript) {
             Logger.warn('Reference already has a transcript:', reference);
           }
-          else {
+          else if (reference.type !== 'file') {
+            Logger.debug('Reference is a media file:', reference);
             const transcript = await requestFileTranscript(reference._id, undefined, chatId);
             Logger.debug('Retrieved transcript:', transcript, "for reference:", reference);
           }
@@ -115,6 +116,11 @@ export const requestFileTranscript = async (fileId: string, agentId?: string, ch
     // First, check if the file already has a transcript
     const fileData = await fetchItem('files', fileId) as FileReference;
     if (fileData.transcript) Logger.warn('File already has a transcript');
+
+    if (fileData.type === 'file') {
+      Logger.warn('File is not a media file');
+      return fileData.transcript || getDefaultMessageForm();
+    }
 
     // If no transcript exists, request one from the workflow
     const response = await taskAxiosInstance.post(`/file_transcript/${fileId}`, { agent_id: agentId, chat_id: chatId });

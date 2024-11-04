@@ -14,7 +14,7 @@ export interface References {
     url_references?: Types.ObjectId[] | IURLReferenceDocument[];
     string_outputs?: string[];
     user_interactions?: Types.ObjectId[] | IUserInteractionDocument[];
-    embedding_chunks?: Types.ObjectId[] | IEmbeddingChunkDocument[];
+    embeddings?: Types.ObjectId[] | IEmbeddingChunkDocument[];
 }
 
 export interface ReferencesMethods {

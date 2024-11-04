@@ -25,5 +25,5 @@ export interface IEmbeddingChunkModel extends Model<IEmbeddingChunkDocument> {
 }
 
 export interface Embeddable {
-  embeddings: IEmbeddingChunkDocument[] | Types.ObjectId[];
+  embedding: IEmbeddingChunkDocument[] | Types.ObjectId[];
 }

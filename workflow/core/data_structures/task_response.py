@@ -100,15 +100,19 @@ def complete_inner_execution_history(nodes: List[NodeResponse], base_order=0) ->
         current_order += 1
 
         # Process task responses in node's references
-        if node.references and node.references.task_responses:
-            for task_response in node.references.task_responses:
-                # Recursively process node references from each task response
-                if task_response.node_references:
-                    inner_nodes = complete_inner_execution_history(
-                        task_response.node_references, 
-                        current_order
-                    )
-                    flattened.extend(inner_nodes)
-                    current_order += len(inner_nodes)
+        if node.references:
+            if isinstance(node.references, Dict):
+                from workflow.core.data_structures.references import References
+                node.references = References(**node.references)
+            if node.references.task_responses:
+                for task_response in node.references.task_responses:
+                    # Recursively process node references from each task response
+                    if task_response.node_references:
+                        inner_nodes = complete_inner_execution_history(
+                            task_response.node_references, 
+                            current_order
+                        )
+                        flattened.extend(inner_nodes)
+                        current_order += len(inner_nodes)
 
     return flattened

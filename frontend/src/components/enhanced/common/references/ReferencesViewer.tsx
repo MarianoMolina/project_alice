@@ -1,16 +1,14 @@
 import React from 'react';
 import { Box, Typography, Stack, Chip } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import { References } from '../../../../types/ReferenceTypes';
 import { NodeResponse } from '../../../../types/TaskResponseTypes';
 import FileViewer from '../../file/FileViewer';
 import { URLReferenceViewer } from '../../url_reference/URLReferenceViewer';
 import EnhancedMessage from '../../message/message/EnhancedMessage';
 import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
-import { styled } from '@mui/material/styles';
-
-interface ReferencesViewerProps {
-  references: References;
-}
+import EmbeddingChunkViewer from '../../embedding_chunk/EmbeddingChunkViewer';
+import UserInteractionViewer from '../../user_interaction/UserInteractionViewer';
 
 const SubSection = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(2),
@@ -45,6 +43,10 @@ const getExitCodeProps = (exitCode: number) => {
       return { label: `Exit: ${exitCode}`, className: 'warning' };
   }
 };
+
+interface ReferencesViewerProps {
+  references: References;
+}
 
 const ReferencesViewer: React.FC<ReferencesViewerProps> = ({ references }) => {
   if (!references) return null;
@@ -126,6 +128,30 @@ const ReferencesViewer: React.FC<ReferencesViewerProps> = ({ references }) => {
             <Box key={`string-output-${index}`} mb={1}>
               <CustomMarkdown>{output}</CustomMarkdown>
             </Box>
+          ))}
+        </SubSection>
+      )}
+
+      {references.user_interactions && references.user_interactions.length > 0 && (
+        <SubSection>
+          <Typography variant="h6">User Interactions</Typography>
+          {references.user_interactions.map((interaction, index) => (
+            <UserInteractionViewer 
+              key={interaction._id || `interaction-${index}`}
+              interaction={interaction}
+            />
+          ))}
+        </SubSection>
+      )}
+
+      {references.embeddings && references.embeddings.length > 0 && (
+        <SubSection>
+          <Typography variant="h6">Embeddings</Typography>
+          {references.embeddings.map((chunk, index) => (
+            <EmbeddingChunkViewer
+              key={chunk._id || `embedding-${index}`}
+              chunk={chunk}
+            />
           ))}
         </SubSection>
       )}

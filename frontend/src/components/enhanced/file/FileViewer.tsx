@@ -7,7 +7,7 @@ import { useNotification } from '../../../contexts/NotificationContext';
 import Logger from '../../../utils/Logger';
 
 interface FileViewerProps {
-  file: FileReference | FileContentReference;
+  file: Partial<FileReference> | Partial<FileContentReference>;
   editable?: boolean;
   onUpdate?: (updatedFile: FileContentReference) => void;
 }
@@ -23,7 +23,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ file, editable = false, onUpdat
       setIsLoading(true);
       setError(null);
       try {
-        if ('content' in file) {
+        if ('content' in file && file.content) {
           setContent(file.content);
         } else if (file._id) {
           const blob = await retrieveFile(file._id);
@@ -46,7 +46,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ file, editable = false, onUpdat
   
 
   const handleUpdateFile = async () => {
-    const allowedTypes = [file.type as FileType];
+    const allowedTypes = file.type ? [file.type as FileType] : Object.values(FileType);
     const newFile = await selectFile(allowedTypes);
     if (!newFile) return;
     const updatedFile = await updateFile(newFile, file._id);

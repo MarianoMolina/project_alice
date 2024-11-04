@@ -21,8 +21,8 @@ export async function createUserInteraction(
         userInteractionData.createdAt = new Date();
         userInteractionData.updatedAt = new Date();
 
-        if (userInteractionData.embeddings) {
-            userInteractionData.embeddings = await processEmbeddings(userInteractionData, userId);
+        if (userInteractionData.embedding) {
+            userInteractionData.embedding = await processEmbeddings(userInteractionData, userId);
         }
 
         // Create and save the task result
@@ -46,8 +46,8 @@ export async function updateUserInteraction(
         if (!existingUserInteraction) {
             throw new Error('Task result not found');
         }
-        if (userInteractionData.embeddings) {
-            userInteractionData.embeddings = await processEmbeddings(userInteractionData, userId);
+        if (userInteractionData.embedding) {
+            userInteractionData.embedding = await processEmbeddings(userInteractionData, userId);
         }
 
         // Compare the existing task result with the new data

@@ -67,7 +67,7 @@ export const getDefaultMessageForm = (): MessageType => ({
     tool_calls: [],
     references: {},
     creation_metadata: {},
-    embeddings: [],
+    embedding: [],
     created_by: undefined,
     updated_by: undefined,
 });

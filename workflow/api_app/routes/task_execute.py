@@ -64,9 +64,6 @@ async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(ge
 
         # Process and update file content references
         LOGGER.debug(f'task_result: {result.model_dump()}')
-
-        # LOGGER.debug(f'result after checking references: {result.model_dump()}')
-        LOGGER.debug(f'References: {[ref.model_dump() for ref in result.node_references]}')
         LOGGER.debug(f'type: {type(result)}')
         db_result = await db_app.create_entity_in_db('task_responses', result.model_dump(exclude={'id'}))
 

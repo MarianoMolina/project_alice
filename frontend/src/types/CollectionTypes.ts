@@ -168,7 +168,7 @@ export interface BaseDatabaseObject extends BasicDBObj {
 }
 
 export interface Embeddable {
-    embeddings: EmbeddingChunk[];
+    embedding: EmbeddingChunk[];
 }
 
 // Generic converters that work with any type extending the base interfaces
@@ -185,5 +185,5 @@ export const convertToBaseDatabaseObject = <T extends Partial<BaseDatabaseObject
 });
 
 export const convertToEmbeddable = <T extends Partial<Embeddable>>(data: T): Embeddable => ({
-    embeddings: data.embeddings || [],
+    embedding: data.embedding || [],
 });

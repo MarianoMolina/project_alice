@@ -356,7 +356,7 @@ class RetrievalTask(AliceTask):
             embedding_chunks = group['embedding_chunks']
             embedding_chunks.sort(key=lambda c: c.index)
             # Update the reference's embedding with only the selected chunks
-            group['reference'].embedding = embedding_chunks
+            group['reference'].embeddings = embedding_chunks
 
             # Add the reference to the result_references
             field_name = group['reference_type']

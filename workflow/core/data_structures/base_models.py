@@ -13,10 +13,10 @@ class FileType(str, Enum):
     FILE = 'file'
 
 class ContentType(str, Enum):
-    IMAGE = FileType.IMAGE
-    AUDIO = FileType.AUDIO
-    VIDEO = FileType.VIDEO
-    FILE = FileType.FILE
+    IMAGE = FileType.IMAGE.value
+    AUDIO = FileType.AUDIO.value
+    VIDEO = FileType.VIDEO.value
+    FILE = FileType.FILE.value
     TEXT = 'text'
     TASK_RESULT = 'task_result'
     URL_REFERENCE = 'url_reference'

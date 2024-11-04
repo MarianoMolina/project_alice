@@ -259,8 +259,8 @@ export async function updateFile(
         transcriptUpdated = true;
     }
 
-    if (updateData.embeddings) {
-        updateData.embeddings = await processEmbeddings(updateData, userId);
+    if (updateData.embedding) {
+        updateData.embedding = await processEmbeddings(updateData, userId);
     }
 
     // Check if file reference needs updating
@@ -375,8 +375,8 @@ export async function storeFileReference(
             fileContent.filename,
             0
         );
-        if (fileContent.embeddings) {
-            fileContent.embeddings = await processEmbeddings(fileContent, userId);
+        if (fileContent.embedding) {
+            fileContent.embedding = await processEmbeddings(fileContent, userId);
         }
 
         const fileReferenceData: Partial<IFileReferenceDocument> = {

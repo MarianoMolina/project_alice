@@ -277,7 +277,7 @@ research_workflow_module = ResearchWorkflowModule(
                 "node_end_code_routing": {
                     "research_brief_task": {
                         0: ("data_retrieval_task", False),
-                        1: ("plan_workflow", True),
+                        1: ("research_brief_task", True),
                     },
                     "data_retrieval_task": {
                         0: ("research_check_task", False),

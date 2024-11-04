@@ -11,6 +11,7 @@ import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { useNotification } from '../../../../contexts/NotificationContext';
+import Logger from '../../../../utils/Logger';
 
 const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => {
     const classes = useStyles();
@@ -45,6 +46,7 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => 
     };
 
     const renderMessageContent = () => {
+        Logger.debug('MessageFullView', 'renderMessageContent', message.content);
         return (
             <>
                 <CustomMarkdown className={classes.markdownText}>{message.content}</CustomMarkdown>

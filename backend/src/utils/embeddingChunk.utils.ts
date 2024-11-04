@@ -132,11 +132,11 @@ export async function processEmbeddings(
 ): Promise<Types.ObjectId[]> {
   Logger.debug('Processing embeddings');
   
-  if (!embeddable.embeddings || !Array.isArray(embeddable.embeddings)) {
+  if (!embeddable.embedding || !Array.isArray(embeddable.embedding)) {
     return [];
   }
 
-  return await Promise.all(embeddable.embeddings.map(async (embedding) => {
+  return await Promise.all(embeddable.embedding.map(async (embedding) => {
     if (typeof embedding === 'string' || embedding instanceof Types.ObjectId) {
       return new Types.ObjectId(embedding);
     } else if ('_id' in embedding && embedding._id) {

@@ -1,13 +1,18 @@
 import mongoose, { CallbackWithoutResultAndOptionalError, Query, Schema } from "mongoose";
 import { IUserInteractionDocument, IUserInteractionModel } from "../interfaces/userInteraction.interface";
 import { ensureObjectIdHelper } from "../utils/utils";
-
 const userInteractionSchema = new Schema<IUserInteractionDocument, IUserInteractionModel>({
     user_checkpoint_id: { type: Schema.Types.ObjectId, ref: 'UserCheckpoint', required: true },
     task_response_id: { type: Schema.Types.ObjectId, ref: 'TaskResponse' },
     user_response: {
-        selected_option: { type: Number, required: true },
-        user_feedback: { type: String }
+        type: Schema.Types.Mixed, default: null, validate: {
+            validator: function (v) {
+                return v === null 
+                    || (typeof v === 'object' && (v.selected_option === undefined 
+                    || typeof v.selected_option === 'number') && (v.user_feedback === undefined 
+                    || typeof v.user_feedback === 'string'));
+            }
+        },
     },
     created_by: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     updated_by: { type: Schema.Types.ObjectId, ref: 'User', required: true }
@@ -18,7 +23,7 @@ userInteractionSchema.methods.apiRepresentation = function (this: IUserInteracti
         id: this._id,
         user_checkpoint_id: this.user_checkpoint_id || null,
         task_response_id: this.task_response_id || null,
-        user_response: this.user_response || {},             
+        user_response: this.user_response || {},
         createdAt: this.createdAt || null,
         updatedAt: this.updatedAt || null,
         created_by: this.created_by || null,

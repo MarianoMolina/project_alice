@@ -17,13 +17,13 @@ const DataClusterCardView: React.FC<DataClusterComponentProps> = ({
     }
 
     const renderEmbeddingChips = () => {
-        if (!item.embedding_chunks || item.embedding_chunks.length === 0) {
+        if (!item.embeddings || item.embeddings.length === 0) {
             return <Typography color="text.secondary">No embedding chunks</Typography>;
         }
 
         return (
             <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
-                {item.embedding_chunks.map((chunk, index) => (
+                {item.embeddings.map((chunk, index) => (
                     <ReferenceChip
                         key={chunk._id}
                         reference={chunk}
@@ -48,7 +48,7 @@ const DataClusterCardView: React.FC<DataClusterComponentProps> = ({
             secondary_text: (
                 <Box sx={{ mt: 1 }}>
                     <Typography variant="body2">
-                        {item.embedding_chunks?.map(chunk => chunk.text_content).join(' ') || 'No content available'}
+                        {item.embeddings?.map(chunk => chunk.text_content).join(' ') || 'No content available'}
                     </Typography>
                 </Box>
             )

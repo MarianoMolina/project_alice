@@ -1,11 +1,11 @@
-import { FileContentReference, FileType } from '../types/FileTypes';
+import { FileContentReference, FileReference, FileType } from '../types/FileTypes';
 import Logger from './Logger';
 
 export const FileTypeExtensionsMap: Record<FileType, string[]> = {
     [FileType.IMAGE]: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'],
     [FileType.AUDIO]: ['mp3', 'wav', 'ogg', 'flac'],
     [FileType.VIDEO]: ['mp4', 'avi', 'mov', 'wmv', 'webm'],
-    [FileType.FILE]: ['txt', 'md', 'csv', 'json'],
+    [FileType.FILE]: ['txt', 'md', 'csv', 'json', 'tsx', 'ts', 'js', 'html', 'css', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip', 'rar', '7z', 'tar', 'gz'],
 };
 
 
@@ -123,6 +123,8 @@ export const selectFile = async (
     allowedTypes: FileType[] = Object.values(FileType)
 ): Promise<File | null> => {
     return new Promise((resolve) => {
+        Logger.info('Selecting file...');
+        Logger.debug('Allowed file types:', allowedTypes);
         const input = document.createElement('input');
         input.type = 'file';
         const allowedExtensions = allowedTypes.flatMap(type => FileTypeExtensionsMap[type]);
@@ -150,3 +152,78 @@ export const bytesToMB = (bytes: number): string => {
     const mb = bytes / (1024 * 1024);
     return mb.toPrecision(3) + ' MB';
 };
+
+export async function getFileStringContent(
+    file: FileReference, 
+    fileContent?: string | Blob
+): Promise<string> {
+    // Handle media files with transcripts
+    if ([FileType.IMAGE, FileType.AUDIO, FileType.VIDEO].includes(file.type)) {
+        if (file.transcript?.content) {
+            return file.transcript.content;
+        }
+        return `[${file.type} file: ${file.filename}]`;
+    }
+
+    // Handle text-based files
+    if (file.type === FileType.FILE) {
+        if (!fileContent) {
+            // If we don't have the content but have content in transcript, use that
+            if (file.transcript?.content) {
+                return file.transcript.content;
+            }
+            return `[file: ${file.filename}]`;
+        }
+
+        try {
+            const mimeType = getMimeType(file.filename);
+            
+            // Handle text-based formats including TypeScript files
+            if (mimeType.startsWith('text/') || 
+                mimeType === 'application/json' || 
+                mimeType === 'application/xml' ||
+                mimeType === 'application/javascript' ||
+                file.filename.endsWith('.ts') ||
+                file.filename.endsWith('.tsx')) {
+                
+                if (fileContent instanceof Blob) {
+                    return await fileContent.text();
+                } 
+                
+                if (typeof fileContent === 'string') {
+                    // Handle base64 encoded content
+                    if (fileContent.startsWith('data:')) {
+                        const base64Content = fileContent.split(',')[1];
+                        return atob(base64Content);
+                    }
+                    // Plain text content
+                    return fileContent;
+                }
+            }
+
+            // Handle other file types...
+            return `[File: ${file.filename}]`;
+        } catch (error) {
+            Logger.error('Error reading file content:', error);
+            return `[Error reading file: ${file.filename}]`;
+        }
+    }
+
+    return `[Unknown file type: ${file.filename}]`;
+}
+
+// Helper function to extract text content from base64
+export function getTextFromBase64(base64Content: string): string {
+    try {
+        const decoded = atob(base64Content.split(',')[1]);
+        return decoded;
+    } catch (error) {
+        Logger.error('Error decoding base64 content:', error);
+        return '[Error decoding file content]';
+    }
+}
+
+export function getFileDescription(file: FileReference): string {
+    const sizeInMB = (file.file_size / (1024 * 1024)).toFixed(2);
+    return `${file.filename} (${sizeInMB} MB)`;
+}

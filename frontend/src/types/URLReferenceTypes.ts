@@ -15,7 +15,6 @@ export const convertToURLReference = (data: any): URLReference => {
         url: data?.url || '',
         content: data?.content || '',
         metadata: data?.metadata || {},
-        embeddings: data?.embeddings || [],
     };
 };
 
