@@ -2,15 +2,6 @@ import { Theme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
 
 const useStyles = makeStyles((theme: Theme) => ({
-    rootLog: {
-        backgroundColor: '#000',
-        color: '#00ff00',
-        fontFamily: 'monospace',
-        padding: theme.spacing(2),
-        borderRadius: theme.shape.borderRadius,
-        maxHeight: '200px',
-        overflowY: 'auto',
-    },
     lineLog: {
         margin: 0,
         lineHeight: 1.5,
@@ -189,6 +180,40 @@ const useStyles = makeStyles((theme: Theme) => ({
     hr: {
         margin: `${theme.spacing(2, 0)} !important`,
         backgroundColor: theme.palette.divider,
+    },
+    rootLog: {
+        backgroundColor: '#000',
+        color: '#00ff00',
+        fontFamily: 'monospace',
+        padding: theme.spacing(2),
+        borderRadius: theme.shape.borderRadius,
+        maxHeight: '200px',
+        overflowY: 'auto',
+    },
+    userMessage: {
+        backgroundColor: theme.palette.primary.main,
+        color: theme.palette.primary.contrastText,
+        padding: theme.spacing(2),
+        borderRadius: theme.shape.borderRadius,
+    },
+    assistantMessage: {
+        backgroundColor: theme.palette.secondary.main,
+        color: theme.palette.secondary.contrastText,
+        padding: theme.spacing(2),
+        borderRadius: theme.shape.borderRadius,
+    },
+    toolMessage: {
+        backgroundColor: theme.palette.secondary.dark,
+        color: theme.palette.primary.dark,
+        padding: theme.spacing(2),
+        borderRadius: theme.shape.borderRadius,
+    },
+    systemMessage: {
+        backgroundColor: theme.palette.grey[900],
+        color: theme.palette.common.white,
+        padding: theme.spacing(2),
+        borderRadius: theme.shape.borderRadius,
+        borderLeft: `4px solid ${theme.palette.error.main}`,
     },
 }));
 

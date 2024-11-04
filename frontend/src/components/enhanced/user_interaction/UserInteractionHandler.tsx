@@ -16,8 +16,8 @@ const UserInteractionHandler: React.FC<UserInteractionHandlerProps> = ({ userInt
   const handleUserInteraction = () => {
     openDialog({
       title: 'User Interaction Required',
-      content: userInteraction.user_prompt,
-      buttons: Object.entries(userInteraction.options_obj).map(([key, value]) => ({
+      content: userInteraction.user_checkpoint_id.user_prompt,
+      buttons: Object.entries(userInteraction.user_checkpoint_id.options_obj).map(([key, value]) => ({
         text: value,
         action: () => {
           const response: UserResponse = {
@@ -50,7 +50,7 @@ const UserInteractionHandler: React.FC<UserInteractionHandlerProps> = ({ userInt
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>
             <Typography variant="body2" noWrap>
-              {truncatePrompt(userInteraction.user_prompt)}
+              {truncatePrompt(userInteraction.user_checkpoint_id.user_prompt)}
             </Typography>
             <Typography variant="caption" color="text.secondary">
               {formatDate(userInteraction.createdAt)}

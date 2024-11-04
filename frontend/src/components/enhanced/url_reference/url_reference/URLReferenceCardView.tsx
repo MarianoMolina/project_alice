@@ -9,6 +9,7 @@ import CommonCardView from '../../common/enhanced_component/CardView';
 import useStyles from '../URLReferenceStyles';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
+import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 
 const URLReferenceCardView: React.FC<URLReferenceComponentProps> = ({
     item
@@ -37,7 +38,7 @@ const URLReferenceCardView: React.FC<URLReferenceComponentProps> = ({
         {
             icon: <Description />,
             primary_text: "Content",
-            secondary_text: <CustomMarkdown className={classes.urlReferenceContent} children={item.content} />
+            secondary_text: <AliceMarkdown showCopyButton children={item.content} />
         },
         {
             icon: <DataObject />,

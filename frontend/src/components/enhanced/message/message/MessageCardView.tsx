@@ -11,6 +11,7 @@ import useStyles from '../MessageStyles';
 import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import ReferenceChip from '../../common/references/ReferenceChip';
+import AliceMarkdown, { CustomBlockType } from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 
 const hasAnyReferences = (references: References | undefined): boolean => {
     if (!references) return false;
@@ -38,42 +39,42 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
                 <Typography variant="subtitle2">References:</Typography>
                 <Box display="flex" flexWrap="wrap" gap={1}>
                     {item.references.messages?.map((msg, index) => (
-                        <ReferenceChip 
-                            key={`msg-${index}`} 
-                            reference={msg} 
-                            type="Message" 
+                        <ReferenceChip
+                            key={`msg-${index}`}
+                            reference={msg}
+                            type="Message"
                             view={true}
                         />
                     ))}
                     {item.references.files?.map((file, index) => (
-                        <ReferenceChip 
-                            key={`file-${index}`} 
-                            reference={file} 
-                            type="File" 
+                        <ReferenceChip
+                            key={`file-${index}`}
+                            reference={file}
+                            type="File"
                             view={true}
                         />
                     ))}
                     {item.references.task_responses?.map((task, index) => (
-                        <ReferenceChip 
-                            key={`task-${index}`} 
-                            reference={task} 
-                            type="TaskResponse" 
+                        <ReferenceChip
+                            key={`task-${index}`}
+                            reference={task}
+                            type="TaskResponse"
                             view={true}
                         />
                     ))}
                     {item.references.url_references?.map((url, index) => (
-                        <ReferenceChip 
-                            key={`url-${index}`} 
-                            reference={url} 
-                            type="URLReference" 
+                        <ReferenceChip
+                            key={`url-${index}`}
+                            reference={url}
+                            type="URLReference"
                             view={true}
                         />
                     ))}
                     {item.references.string_outputs?.map((str, index) => (
                         <ReferenceChip
-                            key={`str-${index}`} 
-                            reference={str} 
-                            type="string_output" 
+                            key={`str-${index}`}
+                            reference={str}
+                            type="string_output"
                             view={true}
                         />
                     ))}
@@ -81,7 +82,7 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
             </Box>
         );
     };
-    
+
     const getMessageClass = () => {
         if (item.generated_by === MessageGenerators.TOOL) return classes.toolMessage;
         switch (item.role) {
@@ -97,7 +98,13 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
         {
             icon: <TextSnippet />,
             primary_text: "Content",
-            secondary_text: <CustomMarkdown className={`${classes.messageSmall} ${getMessageClass()}`}>{item.content}</CustomMarkdown>
+            secondary_text:
+                <AliceMarkdown
+                    enabledBlocks={[CustomBlockType.ALICE_DOCUMENT, CustomBlockType.ANALYSIS]}
+                    role={item.role}
+                >
+                    {item.content}
+                </AliceMarkdown>
         },
         {
             icon: <Person />,

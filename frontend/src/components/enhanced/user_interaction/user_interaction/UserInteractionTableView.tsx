@@ -12,7 +12,7 @@ const UserInteractionTableView: React.FC<UserInteractionComponentProps> = ({
   const columns = [
     {
       header: 'Prompt',
-      render: (userInteraction: UserInteraction) => userInteraction.user_prompt.substring(0, 50),
+      render: (userInteraction: UserInteraction) => userInteraction.user_checkpoint_id.user_prompt.substring(0, 50),
       sortKey: 'user_prompt'
     },
     {

@@ -104,9 +104,9 @@ research_workflow_module = ResearchWorkflowModule(
                     "type": "object",
                     "properties": {
                         "research_brief_task": "param_research_brief_task",
-                        "research_summary": "research_summary_param"
+                        "research_summary_task": "research_summary_param"
                     },
-                    "required": ["research_brief_task", "research_summary"]
+                    "required": ["research_brief_task", "research_summary_task"]
                 }
             }
         ],

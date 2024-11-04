@@ -321,46 +321,42 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                 isEditMode={isEditMode}
             />
             {/* Workflow specific fields */}
-            {taskType === 'Workflow' && (
-                <>
-                    <Typography variant="h6" className={classes.titleText}>Max attempts</Typography>
-                    <TextField
-                        fullWidth
-                        margin="normal"
-                        name="max_attempts"
-                        label="Max Attempts"
-                        type="number"
-                        value={form.max_attempts || ''}
-                        onChange={handleInputChange}
-                        inputProps={{ min: 1 }}
-                        disabled={!isEditMode}
-                    />
-                    <Typography variant="h6" className={classes.titleText}>Exit Code Routing</Typography>
-                    <Box className={classes.endCodeRoutingContainer}>
-                        <TaskEndCodeRoutingBuilder
-                            tasks={Object.values(form.tasks ?? {})}
-                            routing={form.node_end_code_routing || {}}
-                            onChange={handleTaskEndCodeRoutingChange}
-                            isViewMode={!isEditMode}
+            <Typography variant="h6" className={classes.titleText}>Node End Code Routing</Typography>
+            <Box className={classes.endCodeRoutingContainer}>
+                <TaskEndCodeRoutingBuilder
+                    tasks={Object.values(form.tasks ?? {})}
+                    routing={form.node_end_code_routing || {}}
+                    onChange={handleTaskEndCodeRoutingChange}
+                    isViewMode={!isEditMode}
+                />
+                <TaskFlowchart tasksEndCodeRouting={form.node_end_code_routing || {}} startTask={form.start_node || ''} />
+            </Box>
+            <Typography variant="h6" className={classes.titleText}>Max attempts</Typography>
+            <TextField
+                fullWidth
+                margin="normal"
+                name="max_attempts"
+                label="Max Attempts"
+                type="number"
+                value={form.max_attempts || ''}
+                onChange={handleInputChange}
+                inputProps={{ min: 1 }}
+                disabled={!isEditMode}
+            />
+            <Typography variant="h6" className={classes.titleText}>Enable Recursion</Typography>
+            <Tooltip title="Normally, if a task being executed is present in the execution history of a task, it will be rejected, unless it is recursive. Workflows usually should have recursion enabled.">
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={form.recursive || false}
+                            onChange={handleCheckboxChange}
+                            name="recursive"
+                            disabled={!isEditMode}
                         />
-                        <TaskFlowchart tasksEndCodeRouting={form.node_end_code_routing || {}} startTask={form.start_node || ''} />
-                    </Box>
-                    <Typography variant="h6" className={classes.titleText}>Enable Recursion</Typography>
-                    <Tooltip title="Normally, if a task being executed is present in the execution history of a task, it will be rejected, unless it is recursive. Workflows usually should have recursion enabled.">
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={form.recursive || false}
-                                    onChange={handleCheckboxChange}
-                                    name="recursive"
-                                    disabled={!isEditMode}
-                                />
-                            }
-                            label="Recursive"
-                        />
-                    </Tooltip>
-                </>
-            )}
+                    }
+                    label="Recursive"
+                />
+            </Tooltip>
 
             {/* CodeExecutionLLMTask specific fields */}
             {taskType === 'CodeExecutionLLMTask' && (

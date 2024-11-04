@@ -8,7 +8,7 @@ const UserInteractionShortListView: React.FC<UserInteractionComponentProps> = ({
     onInteraction,
     onView,
 }) => {
-    const getPrimaryText = (userInteraction: UserInteraction) => userInteraction.user_prompt.substring(0, 50);
+    const getPrimaryText = (userInteraction: UserInteraction) => userInteraction.user_checkpoint_id.user_prompt.substring(0, 50);
     const getSecondaryText = (userInteraction: UserInteraction) => userInteraction.user_response ? 'User responded' : 'No user response';
 
     return (

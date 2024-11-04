@@ -411,7 +411,6 @@ class AliceTask(BaseModel):
         checkpoint = self.user_checkpoints[node_name]
         user_interaction = UserInteraction(
             user_checkpoint_id=checkpoint.id,
-            task_response_id=self.id
         )
 
         return NodeResponse(

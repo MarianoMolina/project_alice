@@ -34,6 +34,9 @@ import { URLReference } from '../../../../types/URLReferenceTypes';
 import URLReferenceCardView from '../../url_reference/url_reference/URLReferenceCardView';
 import EnhancedURLReference from '../../url_reference/url_reference/EnhancedURLReference';
 import Logger from '../../../../utils/Logger';
+import EnhancedUserCheckpoint from '../../user_checkpoint/user_checkpoint/EnhancedUserCheckpoint';
+import EnhancedUserInteraction from '../../user_interaction/user_interaction/EnhancedUserInteraction';
+import EnhancedEmbeddingChunk from '../../embedding_chunk/embedding_chunk/EnhancedEmbeddingChunk';
 
 const EnhancedCardDialog: React.FC = () => {
   const { selectedCardItem, selectedCardItemType, handleClose, selectCardItem } = useCardDialog();
@@ -53,6 +56,9 @@ const EnhancedCardDialog: React.FC = () => {
       handleFileClick: (id: string, item?: FileReference) => selectCardItem('File', id, item),
       handleMessageClick: (id: string, item?: MessageType) => selectCardItem('Message', id, item),
       handleURLReferenceClick: (id: string, item?: URLReference) => selectCardItem('URLReference', id, item),
+      handleUserCheckpoint: (id: string) => selectCardItem('UserCheckpoint', id),
+      handleUserInteraction: (id: string) => selectCardItem('UserInteraction', id),
+      handleEmbeddingChunk: (id: string) => selectCardItem('EmbeddingChunk', id),
     };
 
     const commonProps = {
@@ -94,6 +100,12 @@ const EnhancedCardDialog: React.FC = () => {
           return <EnhancedMessage itemId={selectedCardItem._id} {...commonProps} />;
         case 'URLReference':
           return <EnhancedURLReference itemId={selectedCardItem._id} {...commonProps} />;
+        case 'UserCheckpoint':
+          return <EnhancedUserCheckpoint itemId={selectedCardItem._id} {...commonProps} />;
+        case 'UserInteraction':
+          return <EnhancedUserInteraction itemId={selectedCardItem._id} {...commonProps} />;
+        case 'EmbeddingChunk':
+          return <EnhancedEmbeddingChunk itemId={selectedCardItem._id} {...commonProps} />;
         default:
           return null;
       }
@@ -164,6 +176,24 @@ const EnhancedCardDialog: React.FC = () => {
           return (
             <Box className="max-w-full">
               <URLReferenceCardView item={selectedCardItem as CollectionType['urlreferences']} {...cardViewProps} />;
+            </Box>
+          );
+        case 'UserCheckpoint':
+          return (
+            <Box className="max-w-full">
+              <EnhancedUserCheckpoint itemId={selectedCardItem._id} {...commonProps} />
+            </Box>
+          );
+        case 'UserInteraction':
+          return (
+            <Box className="max-w-full">
+              <EnhancedUserInteraction itemId={selectedCardItem._id} {...commonProps} />
+            </Box>
+          );
+        case 'EmbeddingChunk':
+          return (
+            <Box className="max-w-full">
+              <EnhancedEmbeddingChunk itemId={selectedCardItem._id} {...commonProps} />
             </Box>
           );
         default:

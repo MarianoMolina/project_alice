@@ -1,7 +1,22 @@
 # Alice: Advanced Language Intelligence and Cognitive Engine
+*Version 0.3*
+
 ![Alice LOGO](./frontend/public/logo_alice.ico)
 
 Alice is an agentic workflow framework that integrates task execution and intelligent chat capabilities. It provides a flexible environment for creating, managing, and deploying AI agents for various purposes, leveraging a microservices architecture with MongoDB for data persistence.
+
+> What's new? v0.3 brings:
+> - RAG: Support for RAG with the new Retrieval Task, and new structures Data Clusters and Embedding Chunk. Support for local embeddings without needing LM Studio.  
+> - HITL: Human-in-the-loop mechanics to tasks
+> - COT: A basic Chain-of-thought implementation: [analysis] tags are parsed on the frontend, and added to the agent's system prompts allowing them think through requests more effectively
+> - DOCUMENTS: Alice Documents, represented by the [aliceDocument] tag, are parsed on the frontend and added to the agent's system prompts allowing them to structure their responses better
+> - NODE FLOW: Fully implemented node execution logic to tasks, making workflows simply a case where the nodes are other tasks. This allows for greater clarity on what each task is doing and why
+> - APIS: New APIs for Wolfram Alpha, Google's Knowledge Graph, PixArt Image Generation (local), Bark TTS (local)
+
+> What's next? Planned developments for v0.4 (find detailed info below):
+> - Agent using computer
+> - Communication APIs -> Gmail, potentially messaging
+> - Recurring tasks -> Tasks that run periodically, accumulating information in their Data Cluster
 
 ## Project Structure
 
@@ -22,7 +37,6 @@ The project consists of three main components:
 ## Setup and Installation
 
 > *Installation and platform overview videos: [Part 1](https://www.youtube.com/watch?v=ojhcb9ADJqU) - [Part 2](https://www.youtube.com/watch?v=oXGk6g_gPtU)*
-
 
 1. Ensure you have Git and [Docker installed](https://docs.docker.com/engine/install/) on your system. On Windows, once you do, it comes with the docker-compose plugin installed by default, but [check if you have it installed](https://stackoverflow.com/questions/72928891/how-can-i-check-if-docker-compose-plugin-is-installed). Otherwise (if in Linux for example), [install it](https://docs.docker.com/compose/install/linux/). If for whatever reason the starting script doesn't start Docker (can't find it), all you need to do is open your Docker app. 
 
@@ -56,11 +70,13 @@ The framework is based around 4 main components:
 - Tasks that leverage agents, other tasks and APIs to produce an output
 - Chats, that leverage tasks and agents, to produce a conversational experience
 
-These components share information in one of 4 main ways, all of which have a string representation:
+These components share information in one of 6 main ways, all of which have a string representation:
 - Files (All file types have a method for generating a 'transcript' for the file, and files generated through prompts keep it as a representation)
 - Messages
 - Task Results
 - URL References
+- User Interactions
+- Embeddings
 
 ## Features
 
@@ -230,34 +246,36 @@ Contributions are welcome! Please follow these steps:
 
 If you've created new tasks, workflows, or initialization modules that you'd like to share, please include them in your pull request along with appropriate documentation. We're particularly interested in contributions that expand the capabilities of the workflow initialization process, allowing users to start with a richer set of pre-configured entities.
 
-## Future Features / Upgrades
+## Future Features / Upgrades / History
 
-1. **Workflow generator** [Done]: Improve the interface for workflow generation. Ideally, something that allows the user to handle tasks/nodes, visualize the execution of it, etc. 
+1. **Workflow generator** [Done - Upgrading]: Improve the interface for workflow generation. Ideally, something that allows the user to handle tasks/nodes, visualize the execution of it, etc. 
    - [Added 10/24]: Flowchart for workflows
    - [Added 10/24]: Basic route end code editor
    - [Working on]: Adding a "task visualization" logic to the flowcharts, enabling the frontend to display a *parsed* representation of the task, and its nodes, showing the available and required inputs, as they are passed in the flow, as well as task_templates and output_templates to show how the content will be passed 
 
-2. **More API engines and base tasks** [Done]: BeautifulSoup to scrap websites, vision_models, text_to_image_models, text_to_speech_models, etc. This will enable a new set of tasks to be created. This includes adding more providers, like Google, Mistral, etc. 
+2. **More API engines and base tasks** [Done - Upgrading]: BeautifulSoup to scrap websites, vision_models, text_to_image_models, text_to_speech_models, etc. This will enable a new set of tasks to be created. This includes adding more providers, like Google, Mistral, etc. 
    - [Added 10/24]: 21 new API providers, with their corresponding models, for a total of 160 distinct entities for you to use. 
    - [Added 10/24]: 2 new workflows -> Web Scrape and Research. 
+   - [Added 11/24]: 1 new Task Type (RetrievalTask) and 4 new APIs (Wolfram Alpha, Google's Knowledge Graph, PixArt Image Generation (local), Bark TTS (local))
 
 3. **File input and type interface** [Done]: Being able to add files of any type to a conversation, which makes a conversion to text of the file (stt, itt, or simply parsing for files that can be converted to a string), allowing for the user and the agents to share any type of data. This, in turn, requires the agents to also be able to produce different types of outputs, which is where the type interface logic comes in, to convert str -> any and back. 
    - [Added 9/24]: Image and Sound file support
    - [Added 9/24]: Both generation (TTS and Image Generation) as well as transcription (STT and Image Vision) available
 
-4. **Complex Information Flows**: 
+4. **Complex Information Flows** [In Progress]: 
    - Implement more advanced agent tools, such as ReAct and RAG agents, to enable more sophisticated reasoning and decision-making capabilities.
    - Implement interactive workflows, where the agent could either ask for permission, or deploy a request/action conditional to user approval (human in the loop)
-   - [Added 11/24]: Simple think-then-respond prompts added
    - [Added 11/24]: User Checkpoints and User interactions help define a 'pause' condition for a task and a node router based on user response. Task can now continue executing from a 'pending' task response -> Potentially could implement being able to remove a node, and set the task to continue from a specific node and produce a new task result, which can be useful when updating/improving a workflow, for example
    - [Added 11/24]: Now all tasks execute a set of nodes, with workflows executing inner tasks, and other tasks executing class methods, with the node routing deciding the flow. This simplifies how information is passed during a task execution, since now tasks check if inputs are available in the executed nodes, and passes them to the next node that needs them. 
-   - [Working on]: RAG! Semantic and code chunking as methods to split the embeddings into the most relevant chunks, and RAG tasks that take a data cluster and a prompt, and return relevant chunks. 
+   - [Added 11/24]: RAG! Semantic and code chunking as methods to split the embeddings into the most relevant chunks, and RAG tasks that take a data cluster and a prompt, and return relevant chunks. 
    - [Working on]: ReAct and Tree-of-thought at inference. 
+      - [Added 11/24]: Basic Chain-of-thought implementation
    - [Working on]: Injecting (optionally) user and context information into the agent's system prompt, like browser, user name, etc. 
- 
-5. **Work Environments / Data Clusters**: Introduction of a feature similar to Anthropic's Artifacts but easier to update, edit, modularize, etc., providing a more structured way to manage and interact with complex data and tools within the Alice ecosystem. Idea is to use a mix of in-context and RAG-powered sources, that the user is actively able to update, trim, etc. to ensure the correct info is available at the right time. 
-   - [Working on]: Adding a "document" feature to let agents structure information a bit more concisely. This mostly affects the frontend and system prompts of the agents. 
-   - [Working on]: Data clusters are a Reference object with any number and types of references, which are embedded and available for retrieval. If a reference is updated, its embedding is also updated. 
+      - [Added 11/24]: User name is being injected now
+
+5. **Work Environments / Data Clusters** [Done]: Introduction of a feature similar to Anthropic's Artifacts but easier to update, edit, modularize, etc., providing a more structured way to manage and interact with complex data and tools within the Alice ecosystem. Idea is to use a mix of in-context and RAG-powered sources, that the user is actively able to update, trim, etc. to ensure the correct info is available at the right time. 
+   - [Added 11/24]: AliceDocuments let agents structure information a bit more concisely. This mostly affects the frontend and system prompts of the agents. 
+   - [Added 11/24]: Data clusters are a Reference object with any number and types of references, which are embedded and available for retrieval. If a reference is updated, its embedding is also updated. 
 
 6. **Journals**: Development of a holistic view of conversations and interactions, enabling the creation of workflows that run periodically. This feature will support tasks such as:
    - Reviewing and summarizing emails
@@ -267,7 +285,7 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
    - Generating periodic reports and insights
    - Updating RAG-sources
 
-7. **Improvements and fixes**: There are several misc areas I think are crucial in the mid-term to tackle:
+7. **Improvements and fixes** [In Progress]: There are several misc areas I think are crucial in the mid-term to tackle:
    - Edge-case analysis
    - Lazy-loading on the frontend
    - Context management -> be able to predict the context size of a chat or task instance, prevent extreme cases, etc. 
@@ -277,10 +295,12 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
    - [Added 10/24]: Context size restrictions for LLM (removes context from the middle of the conversation), TTS (splits the prompt into chunks, and returns a list of files) and embedding (naive split into max chunk size) generations. 
 
 8. **Unify the type files**: Create a single source of truth for types, enums, etc. Either in TS or Python, and the conversion logic to the other.  
+   - Gave this a try and ended up hating myself. 
 
-9. **Make modular addition easy**: [Improved 9/24] Ideally, you should be able to sign up to a repository that has a workflow for example, and then be able to 'spawn' it in your current DB. Requires:
+9. **Make modular addition easy**: Ideally, you should be able to sign up to a repository that has a workflow for example, and then be able to 'spawn' it in your current DB. Requires:
    - Module manager -> Select which modules you want to download and/or keep
    - Module integrator -> Select a module to create a fresh version in your DB -> What about removal? Would we want to add a variable to entities to keep track of this? 
+   - [Improved 9/24]: Improved the module logic, simplifying it a bit
 
 10. **Cost management**: Currently, the completion metadata is stored, but not much is done with it. Goals are:
    - Good tracking of costs

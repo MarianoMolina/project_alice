@@ -12,15 +12,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     fileAction: {
         marginTop: theme.spacing(2),
     },
-    messageSmall: {
-        marginBottom: theme.spacing(1),
-        padding: theme.spacing(1),
-        borderRadius: theme.shape.borderRadius,
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-    },
     toolMessage: {
         backgroundColor: theme.palette.secondary.dark,
         color: theme.palette.primary.dark,

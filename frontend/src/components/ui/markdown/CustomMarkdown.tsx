@@ -1,18 +1,17 @@
 import React from 'react';
 import Markdown, { Components } from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import remarkCustomBlocks from './custom_block/CustomBlock';
 import {
   Typography,
   Link as MuiLink,
   Divider,
 } from '@mui/material';
 import useStyles from './MarkdownStyles';
-import { PluggableList } from 'unified';
 import { CodeBlock } from './CodeBlock';
-import { BlockDefinitions, CustomMarkdownProps } from './CustomMarkdownTypes';
-import { AnalysisBlockComponent } from './custom_block/AnalysisBlock';
-import { AliceDocumentBlockComponent } from './custom_block/AliceDocumentBlock';
+
+export interface CustomMarkdownProps {
+  className?: string;
+  children: string;
+}
 
 const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) => {
   const classes = useStyles();
@@ -32,20 +31,31 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
       <Typography
         component="ol"
         className={classes.markdownText}
-        style={{ listStyleType: ordered ? 'decimal' : 'disc', paddingLeft: '1rem' }}
-        {...props}
+        style={{ 
+          listStyleType: typeof ordered === 'boolean' && ordered ? 'decimal' : 'disc',
+          paddingLeft: '1rem' 
+        }}
+        {...(ordered ? {} : props)} // Remove ordered from props if it exists
       />
     ),
     ul: ({ node, ordered, ...props }) => (
       <Typography
         component="ul"
         className={classes.markdownText}
-        style={{ listStyleType: ordered ? 'decimal' : 'disc', paddingLeft: '1rem' }}
-        {...props}
+        style={{ 
+          listStyleType: typeof ordered === 'boolean' && ordered ? 'decimal' : 'disc',
+          paddingLeft: '1rem' 
+        }}
+        {...(ordered ? {} : props)} // Remove ordered from props if it exists
       />
     ),
-    li: ({ node, ...props }) => (
-      <Typography component="li" className={classes.markdownText} style={{ paddingLeft: '1rem' }} {...props} />
+    li: ({ node, ordered, ...props }) => ( // Add ordered to destructuring
+      <Typography 
+        component="li" 
+        className={classes.markdownText} 
+        style={{ paddingLeft: '1rem' }} 
+        {...(ordered ? {} : props)} // Remove ordered from props if it exists
+      />
     ),
     hr: ({ node, ...props }) => <Divider className={classes.hr} {...props} />,
     code({ node, inline, className, children, ...props }) {
@@ -68,39 +78,10 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
         <CodeBlock language="" code={String(children)} {...props} />
       );
     },
-    div: ({ node, className, children, ...props }) => {
-      if (className === 'custom-block custom-block-analysis') {
-        return <AnalysisBlockComponent node={node} {...props} />;
-      } else if (className === 'custom-block custom-block-aliceDocument') {
-        return <AliceDocumentBlockComponent node={node} {...props} />;
-      } else {
-        return (
-          <div className={className} {...props}>
-            {children}
-          </div>
-        );
-      }
-    },
   };
-
-  const customBlockConfig: BlockDefinitions = {
-    analysis: {
-      classes: 'custom-block-analysis',
-      containerElement: 'div',
-    },
-    aliceDocument: {
-      classes: 'custom-block-aliceDocument',
-      containerElement: 'div',
-    },
-  };
-
-  const plugins: PluggableList = [
-    remarkGfm,
-    [remarkCustomBlocks, customBlockConfig],
-  ];
 
   return (
-    <Markdown className={className} remarkPlugins={plugins} components={components}>
+    <Markdown className={className} components={components}>
       {children}
     </Markdown>
   );

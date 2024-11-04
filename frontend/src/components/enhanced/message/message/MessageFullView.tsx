@@ -8,10 +8,9 @@ import { hasAnyReferences } from '../../../../types/ReferenceTypes';
 import ReferenceChip from '../../common/references/ReferenceChip';
 import { CopyAll, Visibility } from '@mui/icons-material';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
-import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { useNotification } from '../../../../contexts/NotificationContext';
-import Logger from '../../../../utils/Logger';
+import AliceMarkdown, { CustomBlockType } from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 
 const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => {
     const classes = useStyles();
@@ -46,10 +45,9 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => 
     };
 
     const renderMessageContent = () => {
-        Logger.debug('MessageFullView', 'renderMessageContent', message.content);
         return (
             <>
-                <CustomMarkdown className={classes.markdownText}>{message.content}</CustomMarkdown>
+                <AliceMarkdown role={message.role} enabledBlocks={[CustomBlockType.ALICE_DOCUMENT, CustomBlockType.ANALYSIS]}>{message.content}</AliceMarkdown>
                 {message.tool_calls && message.tool_calls.length > 0 && (
                     <>
                         <Typography variant="subtitle2">Tool Calls:</Typography>

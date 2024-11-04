@@ -31,6 +31,7 @@ Where:
     text/python
     text/js
     text/xml
+    text/bash
 - 'title' is the human-readable title, which can be repeated when updating a document
 
 If you're unsure about any part of the request or if multiple interpretations are possible, please state your assumptions clearly.

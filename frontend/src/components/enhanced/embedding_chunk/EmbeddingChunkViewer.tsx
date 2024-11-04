@@ -3,7 +3,7 @@ import { Box, Typography, Paper, Chip } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { EmbeddingChunk } from '../../../types/EmbeddingChunkTypes';
 import { CopyButton } from '../../ui/markdown/CopyButton';
-import CustomMarkdown from '../../ui/markdown/CustomMarkdown';
+import AliceMarkdown from '../../ui/markdown/alice_markdown/AliceMarkdown';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
@@ -41,7 +41,7 @@ const EmbeddingChunkViewer: React.FC<EmbeddingChunkViewerProps> = ({ chunk }) =>
 
       <Content>
         <SectionLabel variant="subtitle1">TEXT CONTENT:</SectionLabel>
-        <CustomMarkdown>{chunk.text_content}</CustomMarkdown>
+        <AliceMarkdown showCopyButton>{chunk.text_content}</AliceMarkdown>
       </Content>
 
       <Content>

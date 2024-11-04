@@ -7,6 +7,7 @@ import FileViewer from '../FileViewer';
 import useStyles from '../FileStyles';
 import { bytesToMB } from '../../../../utils/FileUtils';
 import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
+import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 
 const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
     const classes = useStyles();
@@ -34,7 +35,7 @@ const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
         {
             icon: <TextSnippet />,
             primary_text: "Transcript",
-            secondary_text: item.transcript ? <CustomMarkdown className={`${classes.messageSmall} ${classes.toolMessage}`}>{item.transcript.content}</CustomMarkdown> : 'N/A'
+            secondary_text: item.transcript ? <AliceMarkdown showCopyButton>{item.transcript.content}</AliceMarkdown> : 'N/A'
         },
         {
             icon: <AttachFile />,

@@ -22,6 +22,7 @@ import Logger from '../utils/Logger';
 import ToggleBox from '../components/ui/sidetab_header/ToggleBox';
 import EnhancedUserCheckpoint from '../components/enhanced/user_checkpoint/user_checkpoint/EnhancedUserCheckpoint';
 import EnhancedUserInteraction from '../components/enhanced/user_interaction/user_interaction/EnhancedUserInteraction';
+import EnhancedEmbeddingChunk from '../components/enhanced/embedding_chunk/embedding_chunk/EnhancedEmbeddingChunk';
 
 const Database: React.FC = () => {
     const classes = useStyles();
@@ -142,6 +143,8 @@ const Database: React.FC = () => {
                                 return <EnhancedUserCheckpoint {...commonListProps} />;
                             case 'UserInteraction':
                                 return <EnhancedUserInteraction {...commonListProps} />;
+                            case 'EmbeddingChunk':
+                                return <EnhancedEmbeddingChunk {...commonListProps} />;
                             default:
                                 return null;
                         }
@@ -192,6 +195,8 @@ const Database: React.FC = () => {
                 return <EnhancedUserCheckpoint {...commonProps} />;
             case 'UserInteraction':
                 return <EnhancedUserInteraction {...commonProps} />;
+            case 'EmbeddingChunk':
+                return <EnhancedEmbeddingChunk {...commonProps} />;
             default:
                 return null;
         }

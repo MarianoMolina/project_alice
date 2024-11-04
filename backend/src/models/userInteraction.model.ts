@@ -3,7 +3,7 @@ import { IUserInteractionDocument, IUserInteractionModel } from "../interfaces/u
 import { ensureObjectIdHelper } from "../utils/utils";
 const userInteractionSchema = new Schema<IUserInteractionDocument, IUserInteractionModel>({
     user_checkpoint_id: { type: Schema.Types.ObjectId, ref: 'UserCheckpoint', required: true },
-    task_response_id: { type: Schema.Types.ObjectId, ref: 'TaskResponse' },
+    task_response_id: { type: Schema.Types.ObjectId, ref: 'TaskResult' },
     user_response: {
         type: Schema.Types.Mixed, default: null, validate: {
             validator: function (v) {
@@ -58,7 +58,7 @@ function ensureObjectIdForUpdate(this: Query<any, any>, next: CallbackWithoutRes
 
 
 function autoPopulate(this: Query<any, any>, next: CallbackWithoutResultAndOptionalError) {
-    this.populate('created_by updated_by');
+    this.populate('created_by updated_by user_checkpoint_id task_response_id');
     next();
 }
 

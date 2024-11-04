@@ -69,7 +69,7 @@ const ReferenceChip: React.FC<ReferenceChipProps> = ({
       
       case 'UserInteraction':
         const interaction = reference as UserInteraction;
-        return `Interaction: ${interaction.user_prompt.substring(0, 20)}...`;
+        return `Interaction: ${interaction.user_checkpoint_id.user_prompt.substring(0, 20)}...`;
       
       case 'EmbeddingChunk':
         const chunk = reference as EmbeddingChunk;

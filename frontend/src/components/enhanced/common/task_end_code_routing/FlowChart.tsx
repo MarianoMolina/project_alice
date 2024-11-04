@@ -215,7 +215,7 @@ const Flowchart: React.FC<FlowchartProps> = ({ tasksEndCodeRouting, startTask })
         return (
             <Box className={classes.flowChartContainer}>
                 <Typography variant="h6">
-                    Workflow Flowchart
+                    Node Flowchart
                 </Typography>
                 <Alert severity="info" sx={{ width: '100%', marginTop: 10 }}>
                     No tasks found to build the flowchart.
@@ -244,7 +244,7 @@ const Flowchart: React.FC<FlowchartProps> = ({ tasksEndCodeRouting, startTask })
                 <Controls />
                 <Background color="#aaa" gap={16} />
                 <Typography variant="h6" sx={{ position: 'absolute', top: 10, left: 10, zIndex: 4 }}>
-                    Workflow Flowchart
+                    Node Flowchart
                 </Typography>
             </ReactFlow>
         </Box>
