@@ -12,26 +12,19 @@ import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import { CollectionElementString, CollectionTypeString } from '../../../../types/CollectionTypes';
 import { ToolCall } from '../../../../types/ParameterTypes';
 import ToolCallView from '../tool_call/ToolCall';
+import { ReferenceType } from '../../../../types/ReferenceTypes';
 
-type ReferenceType = 
-  | MessageType 
-  | FileReference 
-  | FileContentReference 
-  | TaskResponse 
-  | URLReference 
-  | UserInteraction 
-  | EmbeddingChunk 
+export type ReferenceExtType = 
+  | ReferenceType
   | ToolCall 
-  | string;
 
 type ReferenceTypeString = 
   | CollectionTypeString[keyof CollectionTypeString] 
   | 'string_output' 
   | 'tool_call'
-  | 'string';
 
 interface ReferenceChipProps {
-  reference: ReferenceType;
+  reference: ReferenceExtType;
   type: ReferenceTypeString;
   view?: boolean;
   className?: string;

@@ -1,6 +1,6 @@
 import mongoose, { CallbackWithoutResultAndOptionalError, Query, Schema } from "mongoose";
 import { IUserInteractionDocument, IUserInteractionModel } from "../interfaces/userInteraction.interface";
-import { ensureObjectIdHelper } from "../utils/utils";
+import { getObjectId } from "../utils/utils";
 const userInteractionSchema = new Schema<IUserInteractionDocument, IUserInteractionModel>({
     user_checkpoint_id: { type: Schema.Types.ObjectId, ref: 'UserCheckpoint', required: true },
     task_response_id: { type: Schema.Types.ObjectId, ref: 'TaskResult' },
@@ -32,26 +32,26 @@ userInteractionSchema.methods.apiRepresentation = function (this: IUserInteracti
 };
 
 function ensureObjectId(this: IUserInteractionDocument, next: CallbackWithoutResultAndOptionalError) {
-    this.user_checkpoint_id = ensureObjectIdHelper(this.user_checkpoint_id);
-    this.task_response_id = ensureObjectIdHelper(this.task_response_id);
-    this.created_by = ensureObjectIdHelper(this.created_by);
-    this.updated_by = ensureObjectIdHelper(this.updated_by);
+    this.user_checkpoint_id = getObjectId(this.user_checkpoint_id);
+    this.task_response_id = getObjectId(this.task_response_id);
+    this.created_by = getObjectId(this.created_by);
+    this.updated_by = getObjectId(this.updated_by);
     next();
 }
 
 function ensureObjectIdForUpdate(this: Query<any, any>, next: CallbackWithoutResultAndOptionalError) {
     const update = this.getUpdate() as any;
     if (update.user_checkpoint_id) {
-        update.user_checkpoint_id = ensureObjectIdHelper(update.user_checkpoint_id);
+        update.user_checkpoint_id = getObjectId(update.user_checkpoint_id);
     }
     if (update.task_response_id) {
-        update.task_response_id = ensureObjectIdHelper(update.task_response_id);
+        update.task_response_id = getObjectId(update.task_response_id);
     }
     if (update.created_by) {
-        update.created_by = ensureObjectIdHelper(update.created_by);
+        update.created_by = getObjectId(update.created_by);
     }
     if (update.updated_by) {
-        update.updated_by = ensureObjectIdHelper(update.updated_by);
+        update.updated_by = getObjectId(update.updated_by);
     }
     next();
 };

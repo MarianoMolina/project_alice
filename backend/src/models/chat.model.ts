@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { IChangeHistoryDocument, IAliceChatDocument, IAliceChatModel } from '../interfaces/chat.interface';
-import { ensureObjectIdHelper } from '../utils/utils';
+import { getObjectId } from '../utils/utils';
 
 // ChangeHistory schema
 const changeHistorySchema = new Schema<IChangeHistoryDocument>({
@@ -59,23 +59,23 @@ function ensureObjectIdForSave(
   this: IAliceChatDocument,
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
-  if (this.alice_agent) this.alice_agent = ensureObjectIdHelper(this.alice_agent);
-  if (this.created_by) this.created_by = ensureObjectIdHelper(this.created_by);
-  if (this.updated_by) this.updated_by = ensureObjectIdHelper(this.updated_by);
+  if (this.alice_agent) this.alice_agent = getObjectId(this.alice_agent);
+  if (this.created_by) this.created_by = getObjectId(this.created_by);
+  if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
   if (this.agent_tools) {
-    this.agent_tools = this.agent_tools.map((func) => ensureObjectIdHelper(func));
+    this.agent_tools = this.agent_tools.map((func) => getObjectId(func));
   }
   if (this.retrieval_tools) {
-    this.retrieval_tools = this.retrieval_tools.map((func) => ensureObjectIdHelper(func));
+    this.retrieval_tools = this.retrieval_tools.map((func) => getObjectId(func));
   }
-  if (this.data_cluster) this.data_cluster = ensureObjectIdHelper(this.data_cluster);
+  if (this.data_cluster) this.data_cluster = getObjectId(this.data_cluster);
   if (this.messages) {
-    this.messages = this.messages.map((message) => ensureObjectIdHelper(message));
+    this.messages = this.messages.map((message) => getObjectId(message));
   }
   if (this.user_checkpoints && Object.keys(this.user_checkpoints).length > 0) {
     const newCheckpoints: { [key: string]: any } = {};
     for (const key in this.user_checkpoints) {
-      newCheckpoints[key] = ensureObjectIdHelper(this.user_checkpoints[key]);
+      newCheckpoints[key] = getObjectId(this.user_checkpoints[key]);
     }
     this.user_checkpoints = newCheckpoints;
   }
@@ -87,23 +87,23 @@ function ensureObjectIdForUpdate(
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
   const update = this.getUpdate() as any;
-  if (update.alice_agent) update.alice_agent = ensureObjectIdHelper(update.alice_agent);
-  if (update.created_by) update.created_by = ensureObjectIdHelper(update.created_by);
-  if (update.updated_by) update.updated_by = ensureObjectIdHelper(update.updated_by);
+  if (update.alice_agent) update.alice_agent = getObjectId(update.alice_agent);
+  if (update.created_by) update.created_by = getObjectId(update.created_by);
+  if (update.updated_by) update.updated_by = getObjectId(update.updated_by);
   if (update.agent_tools) {
-    update.agent_tools = update.agent_tools.map((func: any) => ensureObjectIdHelper(func));
+    update.agent_tools = update.agent_tools.map((func: any) => getObjectId(func));
   }
   if (update.retrieval_tools) {
-    update.retrieval_tools = update.retrieval_tools.map((func: any) => ensureObjectIdHelper(func));
+    update.retrieval_tools = update.retrieval_tools.map((func: any) => getObjectId(func));
   }
-  if (update.data_cluster) update.data_cluster = ensureObjectIdHelper(update.data_cluster);
+  if (update.data_cluster) update.data_cluster = getObjectId(update.data_cluster);
   if (update.messages) {
-    update.messages = update.messages.map((message: any) => ensureObjectIdHelper(message));
+    update.messages = update.messages.map((message: any) => getObjectId(message));
   }
   if (update.user_checkpoints && Object.keys(update.user_checkpoints).length > 0) {
     const newCheckpoints: { [key: string]: any } = {};
     for (const key in update.user_checkpoints) {
-      newCheckpoints[key] = ensureObjectIdHelper(update.user_checkpoints[key]);
+      newCheckpoints[key] = getObjectId(update.user_checkpoints[key]);
     }
     update.user_checkpoints = newCheckpoints;
   }

@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 import { functionParametersSchema } from '../utils/functionSchema';
 import { ensureObjectIdForProperties } from '../utils/utils';
 import { ITaskDocument, ITaskModel, TaskType } from '../interfaces/task.interface';
-import { ensureObjectIdHelper } from '../utils/utils';
+import { getObjectId } from '../utils/utils';
 import { referencesSchema } from './reference.model';
 
 const taskSchema = new Schema<ITaskDocument, ITaskModel>({
@@ -58,18 +58,18 @@ taskSchema.methods.apiRepresentation = function (this: ITaskDocument) {
 };
 
 function ensureObjectIdForSave(this: ITaskDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {
-    this.agent = ensureObjectIdHelper(this.agent);
-    this.created_by = ensureObjectIdHelper(this.created_by);
-    this.updated_by = ensureObjectIdHelper(this.updated_by);
+    this.agent = getObjectId(this.agent);
+    this.created_by = getObjectId(this.created_by);
+    this.updated_by = getObjectId(this.updated_by);
 
     if (this.templates) {
         for (const [key, value] of this.templates.entries()) {
-            this.templates.set(key, ensureObjectIdHelper(value));
+            this.templates.set(key, getObjectId(value));
         }
     }
     if (this.tasks) {
         for (const [key, value] of this.tasks.entries()) {
-            this.tasks.set(key, ensureObjectIdHelper(value));
+            this.tasks.set(key, getObjectId(value));
         }
     }
     if (this.input_variables && this.input_variables.properties) {
@@ -77,7 +77,7 @@ function ensureObjectIdForSave(this: ITaskDocument, next: mongoose.CallbackWitho
     }
     if (this.user_checkpoints) {
         for (const [key, value] of this.user_checkpoints.entries()) {
-            this.user_checkpoints.set(key, ensureObjectIdHelper(value));
+            this.user_checkpoints.set(key, getObjectId(value));
         }
     }
     next();
@@ -88,22 +88,22 @@ function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.
 
     if (update.templates) {
         update.templates = Object.fromEntries(
-            Object.entries(update.templates).map(([key, value]) => [key, ensureObjectIdHelper(value)])
+            Object.entries(update.templates).map(([key, value]) => [key, getObjectId(value)])
         );
     }
     if (update.tasks) {
         update.tasks = Object.fromEntries(
-            Object.entries(update.tasks).map(([key, value]) => [key, ensureObjectIdHelper(value)])
+            Object.entries(update.tasks).map(([key, value]) => [key, getObjectId(value)])
         );
     }
     if (update.user_checkpoints) {
         update.user_checkpoints = Object.fromEntries(
-            Object.entries(update.user_checkpoints).map(([key, value]) => [key, ensureObjectIdHelper(value)])
+            Object.entries(update.user_checkpoints).map(([key, value]) => [key, getObjectId(value)])
         );
     }
-    update.agent = ensureObjectIdHelper(update.agent);
-    update.created_by = ensureObjectIdHelper(update.created_by);
-    update.updated_by = ensureObjectIdHelper(update.updated_by);
+    update.agent = getObjectId(update.agent);
+    update.created_by = getObjectId(update.created_by);
+    update.updated_by = getObjectId(update.updated_by);
     if (update && update.input_variables && update.input_variables.properties) {
         update.input_variables.properties = ensureObjectIdForProperties(update.input_variables.properties);
     }

@@ -172,6 +172,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
     inlineVariable: {
         backgroundColor: theme.palette.primary.dark,
+        color: theme.palette.primary.contrastText,
         padding: '2px 4px',
         borderRadius: '3px',
         fontStyle: 'italic',

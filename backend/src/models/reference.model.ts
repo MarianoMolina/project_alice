@@ -1,7 +1,7 @@
 import mongoose, { CallbackWithoutResultAndOptionalError, Schema } from 'mongoose';
 import { IDataClusterDocument, IDataClusterModel, References } from "../interfaces/references.interface";
 import mongooseAutopopulate from 'mongoose-autopopulate';
-import { ensureObjectIdHelper } from '../utils/utils';
+import { getObjectId } from '../utils/utils';
 
 export const referencesSchema = new Schema<References>({
     messages: [{ type: Schema.Types.ObjectId, ref: 'Message', autopopulate: true }],
@@ -15,22 +15,22 @@ export const referencesSchema = new Schema<References>({
 
 function ensureObjectIdForSave(this: IDataClusterDocument, next: CallbackWithoutResultAndOptionalError) {
     if (this.messages) {
-        this.messages = this.messages.map((obj) => ensureObjectIdHelper(obj));
+        this.messages = this.messages.map((obj) => getObjectId(obj));
     }
     if (this.files) {
-        this.files = this.files.map((obj) => ensureObjectIdHelper(obj));
+        this.files = this.files.map((obj) => getObjectId(obj));
     }
     if (this.task_responses) {
-        this.task_responses = this.task_responses.map((obj) => ensureObjectIdHelper(obj));
+        this.task_responses = this.task_responses.map((obj) => getObjectId(obj));
     }
     if (this.url_references) {
-        this.url_references = this.url_references.map((obj) => ensureObjectIdHelper(obj));
+        this.url_references = this.url_references.map((obj) => getObjectId(obj));
     }
     if (this.user_interactions) {
-        this.user_interactions = this.user_interactions.map((obj) => ensureObjectIdHelper(obj));
+        this.user_interactions = this.user_interactions.map((obj) => getObjectId(obj));
     }
     if (this.embeddings) {
-        this.embeddings = this.embeddings.map((obj) => ensureObjectIdHelper(obj));
+        this.embeddings = this.embeddings.map((obj) => getObjectId(obj));
     }
     next();
 }
@@ -41,22 +41,22 @@ function ensureObjectIdForUpdate(
   ) {
     const update = this.getUpdate() as any;
     if (update.messages) {
-        update.messages = update.messages.map((obj: any) => ensureObjectIdHelper(obj));
+        update.messages = update.messages.map((obj: any) => getObjectId(obj));
     }
     if (update.files) {
-        update.files = update.files.map((obj: any) => ensureObjectIdHelper(obj));
+        update.files = update.files.map((obj: any) => getObjectId(obj));
     }
     if (update.task_responses) {
-        update.task_responses = update.task_responses.map((obj: any) => ensureObjectIdHelper(obj));
+        update.task_responses = update.task_responses.map((obj: any) => getObjectId(obj));
     }
     if (update.url_references) {
-        update.url_references = update.url_references.map((obj: any) => ensureObjectIdHelper(obj));
+        update.url_references = update.url_references.map((obj: any) => getObjectId(obj));
     }
     if (update.user_interactions) {
-        update.user_interactions = update.user_interactions.map((obj: any) => ensureObjectIdHelper(obj));
+        update.user_interactions = update.user_interactions.map((obj: any) => getObjectId(obj));
     }
     if (update.embeddings) {
-        update.embeddings = update.embeddings.map((obj: any) => ensureObjectIdHelper(obj));
+        update.embeddings = update.embeddings.map((obj: any) => getObjectId(obj));
     }
     next();
 };

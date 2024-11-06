@@ -5,6 +5,7 @@ import DataClusterCardView from './DataClusterCardView';
 import DataClusterShortListView from './DataClusterShortListView';
 import { DataCluster, DataClusterComponentProps } from '../../../../types/DataClusterTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import DataClusterFlexibleView from './DataClusterFlexibleView';
 
 type BaseDataClusterMode = BaseDbElementProps<DataCluster>['mode'];
 type ExtendedDataClusterMode = 'list' | 'shortList' | 'card' | 'table';
@@ -44,6 +45,7 @@ const EnhancedDataCluster: React.FC<EnhancedDataClusterProps> = (props) => {
       case 'create':
       case 'edit':
       case 'view':
+        return <DataClusterFlexibleView {...commonProps} />;
       case 'card':
         return <DataClusterCardView {...commonProps} />;
       case 'shortList':

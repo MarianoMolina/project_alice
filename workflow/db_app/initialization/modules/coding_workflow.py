@@ -208,7 +208,7 @@ coding_workflow_module = CodingWorkflowModule(
                         "generate_code": "param_generate_code",
                         "generate_unit_tests": "param_generate_unit_tests",
                     },
-                    "required": ["generate_code", "execute_code"]
+                    "required": ["generate_code"]
                 },
                 "templates": {
                     "task_template": "code_generation_task_prompt"

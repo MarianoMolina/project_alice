@@ -109,7 +109,11 @@ class MessageDict(Embeddable):
         if self.tool_calls:
             data['tool_calls'] = [tool_call.model_dump(*args, **kwargs) for tool_call in self.tool_calls]
         if self.references:
-            data['references'] = self.references.model_dump(*args, **kwargs)
+            if isinstance(self.references, dict):
+                from workflow.core.data_structures.references import References
+                data['references'] = References(**self.references).model_dump(*args, **kwargs)
+            else:
+                data['references'] = self.references.model_dump(*args, **kwargs)
         return data
    
     def add_reference(self, reference: Any):

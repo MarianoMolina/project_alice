@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { IMessageDocument, IMessageModel, ContentType, RoleType, MessageGenerators } from '../interfaces/message.interface';
-import { ensureObjectIdHelper } from '../utils/utils';
+import { getObjectId } from '../utils/utils';
 import mongooseAutopopulate from 'mongoose-autopopulate';
 import { referencesSchema } from './reference.model';
 
@@ -75,20 +75,20 @@ function ensureObjectIdForSave(
 ) {
   if (this.references) {
     if (this.references.messages) {
-      this.references.messages = this.references.messages.map(message => ensureObjectIdHelper(message));
+      this.references.messages = this.references.messages.map(message => getObjectId(message));
     }
     if (this.references.files) {
-      this.references.files = this.references.files.map(file => ensureObjectIdHelper(file));
+      this.references.files = this.references.files.map(file => getObjectId(file));
     }
     if (this.references.task_responses) {
-      this.references.task_responses = this.references.task_responses.map(taskResponse => ensureObjectIdHelper(taskResponse));
+      this.references.task_responses = this.references.task_responses.map(taskResponse => getObjectId(taskResponse));
     }
     if (this.references.url_references) {
-      this.references.url_references = this.references.url_references.map(searchResult => ensureObjectIdHelper(searchResult));
+      this.references.url_references = this.references.url_references.map(searchResult => getObjectId(searchResult));
     }
   }
-  this.created_by = ensureObjectIdHelper(this.created_by);
-  this.updated_by = ensureObjectIdHelper(this.updated_by);
+  this.created_by = getObjectId(this.created_by);
+  this.updated_by = getObjectId(this.updated_by);
   next();
 }
 
@@ -99,20 +99,20 @@ function ensureObjectIdForUpdate(
   const update = this.getUpdate() as any;
   if (update.references) {
     if (update.references.messages) {
-      update.references.messages = update.references.messages.map((message: any) => ensureObjectIdHelper(message));
+      update.references.messages = update.references.messages.map((message: any) => getObjectId(message));
     }
     if (update.references.files) {
-      update.references.files = update.references.files.map((file: any) => ensureObjectIdHelper(file));
+      update.references.files = update.references.files.map((file: any) => getObjectId(file));
     }
     if (update.references.task_responses) {
-      update.references.task_responses = update.references.task_responses.map((taskResponse: any) => ensureObjectIdHelper(taskResponse));
+      update.references.task_responses = update.references.task_responses.map((taskResponse: any) => getObjectId(taskResponse));
     }
     if (update.references.url_references) {
-      update.references.url_references = update.references.url_references.map((searchResult: any) => ensureObjectIdHelper(searchResult));
+      update.references.url_references = update.references.url_references.map((searchResult: any) => getObjectId(searchResult));
     }
   }
-  update.created_by = ensureObjectIdHelper(update.created_by);
-  update.updated_by = ensureObjectIdHelper(update.updated_by);
+  update.created_by = getObjectId(update.created_by);
+  update.updated_by = getObjectId(update.updated_by);
   next();
 }
 

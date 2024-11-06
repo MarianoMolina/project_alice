@@ -1,6 +1,6 @@
 import mongoose, { CallbackWithoutResultAndOptionalError, Query, Schema } from "mongoose";
 import { IURLReferenceDocument, IURLReferenceModel } from "../interfaces/urlReference.interface";
-import { ensureObjectIdHelper } from "../utils/utils";
+import { getObjectId } from "../utils/utils";
 
 const urlReferenceSchema = new Schema<IURLReferenceDocument, IURLReferenceModel>({
     title: { type: String, required: true },
@@ -26,18 +26,18 @@ urlReferenceSchema.methods.apiRepresentation = function (this: IURLReferenceDocu
 };
 
 function ensureObjectId(this: IURLReferenceDocument, next: CallbackWithoutResultAndOptionalError) {
-    this.created_by = ensureObjectIdHelper(this.created_by);
-    this.updated_by = ensureObjectIdHelper(this.updated_by);
+    this.created_by = getObjectId(this.created_by);
+    this.updated_by = getObjectId(this.updated_by);
     next();
 }
 
 function ensureObjectIdForUpdate(this: Query<any, any>, next: CallbackWithoutResultAndOptionalError) {
     const update = this.getUpdate() as any;
     if (update.created_by) {
-        update.created_by = ensureObjectIdHelper(update.created_by);
+        update.created_by = getObjectId(update.created_by);
     }
     if (update.updated_by) {
-        update.updated_by = ensureObjectIdHelper(update.updated_by);
+        update.updated_by = getObjectId(update.updated_by);
     }
     next();
 };

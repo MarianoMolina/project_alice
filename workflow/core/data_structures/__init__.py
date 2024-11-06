@@ -1,7 +1,8 @@
 from .message import MessageDict
 from .file_reference import FileReference, FileContentReference, generate_file_content_reference, get_file_content
 from .url_reference import URLReference
-from .task_response import TaskResponse, NodeResponse, ExecutionHistoryItem, complete_inner_execution_history
+from .task_response import TaskResponse, complete_inner_execution_history
+from .node_response import NodeResponse, ExecutionHistoryItem
 from .user_interaction import UserInteraction, UserCheckpoint, UserResponse
 from .user import User, UserRoles
 from .references import References

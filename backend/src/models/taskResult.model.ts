@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 import { ExecutionHistoryItem, ITaskResultDocument, ITaskResultModel, NodeResponse } from '../interfaces/taskResult.interface';
 import { referencesSchema } from './reference.model';
 import mongooseAutopopulate from 'mongoose-autopopulate';
-import { ensureObjectIdHelper } from '../utils/utils';
+import { getObjectId } from '../utils/utils';
 
 // Create a schema for ExecutionHistoryItem
 const executionHistoryItemSchema = new Schema<ExecutionHistoryItem>({
@@ -68,22 +68,22 @@ function ensureObjectIdForSave(
       if (nodeResponse.references) {
         const refs = nodeResponse.references as any;
         if (refs.messages) {
-          refs.messages = refs.messages.map((message: any) => ensureObjectIdHelper(message));
+          refs.messages = refs.messages.map((message: any) => getObjectId(message));
         }
         if (refs.files) {
-          refs.files = refs.files.map((file: any) => ensureObjectIdHelper(file));
+          refs.files = refs.files.map((file: any) => getObjectId(file));
         }
         if (refs.task_responses) {
-          refs.task_responses = refs.task_responses.map((taskResponse: any) => ensureObjectIdHelper(taskResponse));
+          refs.task_responses = refs.task_responses.map((taskResponse: any) => getObjectId(taskResponse));
         }
         if (refs.url_references) {
-          refs.url_references = refs.url_references.map((searchResult: any) => ensureObjectIdHelper(searchResult));
+          refs.url_references = refs.url_references.map((searchResult: any) => getObjectId(searchResult));
         }
       }
     });
   }
-  this.created_by = ensureObjectIdHelper(this.created_by);
-  this.updated_by = ensureObjectIdHelper(this.updated_by);
+  this.created_by = getObjectId(this.created_by);
+  this.updated_by = getObjectId(this.updated_by);
   next();
 }
 
@@ -97,22 +97,22 @@ function ensureObjectIdForUpdate(
     update.node_references.forEach((nodeResponse: any) => {
       if (nodeResponse.references) {
         if (nodeResponse.references.messages) {
-          nodeResponse.references.messages = nodeResponse.references.messages.map((message: any) => ensureObjectIdHelper(message));
+          nodeResponse.references.messages = nodeResponse.references.messages.map((message: any) => getObjectId(message));
         }
         if (nodeResponse.references.files) {
-          nodeResponse.references.files = nodeResponse.references.files.map((file: any) => ensureObjectIdHelper(file));
+          nodeResponse.references.files = nodeResponse.references.files.map((file: any) => getObjectId(file));
         }
         if (nodeResponse.references.task_responses) {
-          nodeResponse.references.task_responses = nodeResponse.references.task_responses.map((taskResponse: any) => ensureObjectIdHelper(taskResponse));
+          nodeResponse.references.task_responses = nodeResponse.references.task_responses.map((taskResponse: any) => getObjectId(taskResponse));
         }
         if (nodeResponse.references.url_references) {
-          nodeResponse.references.url_references = nodeResponse.references.url_references.map((searchResult: any) => ensureObjectIdHelper(searchResult));
+          nodeResponse.references.url_references = nodeResponse.references.url_references.map((searchResult: any) => getObjectId(searchResult));
         }
       }
     });
   }
-  update.created_by = ensureObjectIdHelper(update.created_by);
-  update.updated_by = ensureObjectIdHelper(update.updated_by);
+  update.created_by = getObjectId(update.created_by);
+  update.updated_by = getObjectId(update.updated_by);
   next();
 }
 

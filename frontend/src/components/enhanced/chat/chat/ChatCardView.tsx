@@ -12,7 +12,7 @@ import CommonCardView from '../../common/enhanced_component/CardView';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import MessageShortListView from '../../message/message/MessageShortListView';
 import { hasAnyReferences } from '../../../../types/ReferenceTypes';
-import DataClusterManager from '../../data_cluster/DataClusterManager';
+import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 
 const ChatCardView: React.FC<ChatComponentProps> = ({
   item,

@@ -50,8 +50,8 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
         }
     };
 
-    const AccordionSection = ({ title, content, disabled = false }: { title: string, content: React.ReactNode, disabled?: boolean }) => (
-        <Accordion disabled={disabled}>
+    const AccordionSection = ({ title, content, disabled = false, expanded = false }: { title: string, content: React.ReactNode, disabled?: boolean, expanded?: boolean }) => (
+        <Accordion disabled={disabled} defaultExpanded={expanded}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant="h6">{title}</Typography>
             </AccordionSummary>
@@ -97,6 +97,19 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             )
         },
         {
+            icon: <DataObject />,
+            primary_text: "Raw Output",
+            secondary_text: (
+                <AccordionSection
+                    title="Raw Output"
+                    content={
+                        <AliceMarkdown showCopyButton>{item.task_outputs as string}</AliceMarkdown>
+                    }
+                    disabled={!item.task_outputs}
+                />
+            )
+        },
+        {
             icon: <Output />,
             primary_text: "Output",
             secondary_text: (
@@ -117,19 +130,6 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
                     title="Diagnostics"
                     content={<CommandLineLog content={item.result_diagnostic ?? ''} />}
                     disabled={!item.result_diagnostic}
-                />
-            )
-        },
-        {
-            icon: <DataObject />,
-            primary_text: "Raw Output",
-            secondary_text: (
-                <AccordionSection
-                    title="Raw Output"
-                    content={
-                        <AliceMarkdown showCopyButton>{item.task_outputs as string}</AliceMarkdown>
-                    }
-                    disabled={!item.task_outputs}
                 />
             )
         },

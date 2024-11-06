@@ -1,5 +1,5 @@
 from typing import List, Optional, Union, Any, Dict
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from workflow.core.data_structures.message import MessageDict
 from workflow.core.data_structures.file_reference import FileReference, FileContentReference
 from workflow.core.data_structures.task_response import TaskResponse
@@ -16,6 +16,49 @@ class References(BaseModel):
     user_interactions: Optional[List[UserInteraction]] = Field(default=None, description="List of user interaction references")
     embeddings: Optional[List[EmbeddingChunk]] = Field(default=None, description="List of embedding references")
 
+    @field_validator('messages', 'files', 'task_responses', 'url_references', 'user_interactions', 'embeddings')
+    @classmethod
+    def validate_reference_list(cls, value: Optional[List[Union[Dict, BaseModel]]], info: Any) -> Optional[List[Any]]:
+        if value is None:
+            return None
+
+        # Get the appropriate model class based on the field name
+        model_map = {
+            'messages': MessageDict,
+            'task_responses': TaskResponse,
+            'url_references': URLReference,
+            'user_interactions': UserInteraction,
+            'embeddings': EmbeddingChunk
+        }
+        
+        if info.field_name == 'files':
+            validated_items = []
+            for item in value:
+                if isinstance(item, (FileReference, FileContentReference)):
+                    validated_items.append(item)
+                elif isinstance(item, dict):
+                    # If it has content, it's a FileContentReference, otherwise FileReference
+                    model_class = FileContentReference if 'content' in item else FileReference
+                    validated_items.append(model_class(**item))
+                else:
+                    raise ValueError(f"Invalid file reference format: {item}")
+            return validated_items
+            
+        model_class = model_map.get(info.field_name)
+        if not model_class:
+            return value
+
+        validated_items = []
+        for item in value:
+            if isinstance(item, dict):
+                validated_items.append(model_class(**item))
+            elif isinstance(item, model_class):
+                validated_items.append(item)
+            else:
+                raise ValueError(f"Invalid {info.field_name} format: {item}")
+
+        return validated_items
+    
     def model_dump(self, *args, **kwargs) -> Dict[str, Any]:
         data = super().model_dump(*args, **kwargs)
         for key in ['messages', 'files', 'task_responses', 'url_references', 'string_outputs', 'user_interactions']:

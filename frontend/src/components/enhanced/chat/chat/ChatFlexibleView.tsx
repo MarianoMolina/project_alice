@@ -16,7 +16,7 @@ import MessageListView from '../../message/message/MessageListView';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import Logger from '../../../../utils/Logger';
 import useStyles from '../ChatStyles';
-import DataClusterManager from '../../data_cluster/DataClusterManager';
+import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 
 const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     item,

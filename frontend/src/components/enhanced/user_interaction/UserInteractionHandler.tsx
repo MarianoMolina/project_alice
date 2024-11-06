@@ -4,14 +4,20 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import { UserInteraction, UserResponse } from '../../../types/UserInteractionTypes';
 import { useDialog } from '../../../contexts/DialogCustomContext';
+import { useApi } from '../../../contexts/ApiContext';
+import Logger from '../../../utils/Logger';
 
 interface UserInteractionHandlerProps {
   userInteraction: UserInteraction;
-  onUserResponse: (response: UserResponse) => void;
+  onUserResponse?: (interaction: UserInteraction) => void;
 }
 
-const UserInteractionHandler: React.FC<UserInteractionHandlerProps> = ({ userInteraction, onUserResponse }) => {
+const UserInteractionHandler: React.FC<UserInteractionHandlerProps> = ({ 
+  userInteraction, 
+  onUserResponse 
+}) => {
   const { openDialog } = useDialog();
+  const { updateUserInteraction } = useApi();
 
   const handleUserInteraction = () => {
     openDialog({
@@ -19,11 +25,24 @@ const UserInteractionHandler: React.FC<UserInteractionHandlerProps> = ({ userInt
       content: userInteraction.user_checkpoint_id.user_prompt,
       buttons: Object.entries(userInteraction.user_checkpoint_id.options_obj).map(([key, value]) => ({
         text: value,
-        action: () => {
-          const response: UserResponse = {
-            selected_option: parseInt(key),
-          };
-          onUserResponse(response);
+        action: async () => {
+          try {
+            const response: UserResponse = {
+              selected_option: parseInt(key),
+            };
+            
+            const updatedInteraction = await updateUserInteraction(
+              userInteraction._id as string, 
+              { user_response: response }
+            );
+            
+            Logger.debug('User interaction updated:', updatedInteraction);
+            
+            // Call the optional callback with the updated interaction
+            onUserResponse?.(updatedInteraction);
+          } catch (error) {
+            Logger.error('Error handling user response:', error);
+          }
         },
         color: 'primary',
         variant: key === '0' ? 'contained' : 'outlined',

@@ -253,8 +253,8 @@ class AliceChat(BaseDataStructure):
                 # Create new checkpoint
                 checkpoint = self.user_checkpoints[CheckpointType.TOOL_CALL]
                 interaction = UserInteraction(
-                    user_checkpoint_id=CheckpointType.TOOL_CALL,
-                    task_response_id=str(ObjectId())
+                    user_checkpoint_id=checkpoint,
+                    task_response_id=self.id
                 )
                 return [self._create_checkpoint_message(checkpoint, interaction)]
             elif user_interaction.user_response and user_interaction.user_response.selected_option != 0:

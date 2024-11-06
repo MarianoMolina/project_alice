@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { IAgentDocument, IAgentModel, ToolPermission, CodePermission } from '../interfaces/agent.interface';
-import { ensureObjectIdHelper } from '../utils/utils';
+import { getObjectId } from '../utils/utils';
 
 const agentSchema = new Schema<IAgentDocument, IAgentModel>({
   name: { type: String, required: true },
@@ -52,7 +52,7 @@ function ensureObjectIdForSave(this: IAgentDocument, next: mongoose.CallbackWith
 
   if (this.models) {
     for (const [key, value] of this.models.entries()) {
-        this.models.set(key, ensureObjectIdHelper(value));
+        this.models.set(key, getObjectId(value));
     }
 }
   next();
@@ -71,7 +71,7 @@ function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.
   }
   if (update.models) {
     update.models = Object.fromEntries(
-        Object.entries(update.models).map(([key, value]) => [key, ensureObjectIdHelper(value)])
+        Object.entries(update.models).map(([key, value]) => [key, getObjectId(value)])
     );
 }
   next();

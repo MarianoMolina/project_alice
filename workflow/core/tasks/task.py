@@ -283,8 +283,8 @@ class AliceTask(BaseModel):
             return self.create_final_response(node_responses, **kwargs)
             
         except Exception as e:
-            LOGGER.error(f"Error executing task {self.task_name}: {str(e)}")
-            return self.get_failed_task_response(str(e), **kwargs)
+            LOGGER.error(f"Error executing task {self.task_name}: {str(e)}\n{get_traceback()}")
+            return self.get_failed_task_response(str(e)+ get_traceback(), **kwargs)
         
     async def execute_node(self, node_name: str, execution_history: List[NodeResponse], node_responses: List[NodeResponse], **kwargs) -> NodeResponse:
         """Execute a single node with user checkpoint handling."""
@@ -410,7 +410,7 @@ class AliceTask(BaseModel):
 
         checkpoint = self.user_checkpoints[node_name]
         user_interaction = UserInteraction(
-            user_checkpoint_id=checkpoint.id,
+            user_checkpoint_id=checkpoint,
         )
 
         return NodeResponse(
@@ -707,7 +707,7 @@ class AliceTask(BaseModel):
                 function=FunctionConfig(
                     name=self.task_name,
                     description=self.task_description,
-                    parameters=self.input_variables.model_dump()
+                    parameters=self.input_variables.model_dump(by_alias=True),
                 )
             ),
             "function_map": {self.task_name: function_callable}

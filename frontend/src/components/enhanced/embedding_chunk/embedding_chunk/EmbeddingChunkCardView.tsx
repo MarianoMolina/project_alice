@@ -23,7 +23,7 @@ const EmbeddingChunkCardView: React.FC<EmbeddingChunkComponentProps> = ({
         {
             icon: <Language />,
             primary_text: "Index",
-            secondary_text: item.index || 'No index available'
+            secondary_text: item.index == 0 ? 0 : item.index || 'No index available'
         },
         {
             icon: <Language />,

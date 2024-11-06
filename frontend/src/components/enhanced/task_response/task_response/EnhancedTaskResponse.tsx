@@ -5,7 +5,7 @@ import TaskResponseCardView from './TaskResponseCardView';
 import { TaskResponse } from '../../../../types/TaskResponseTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
 import { TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
-import TaskResponseShortList from './TaskResponseShortListView';
+import TaskResponseShortListView from './TaskResponseShortListView';
 
 type BaseTaskResponseMode = BaseDbElementProps<TaskResponse>['mode'];
 type ExtendedTaskResponseMode = 'list' | 'shortList' | 'card' | 'table';
@@ -45,7 +45,7 @@ const EnhancedTaskResponse: React.FC<EnhancedTaskResponseProps> = (props) => {
 
     switch (props.mode) {
       case 'shortList':
-        return <TaskResponseShortList {...commonProps} />;
+        return <TaskResponseShortListView {...commonProps} />;
       case 'list':
         return <TaskResponseListView {...commonProps} />;
       case 'table':

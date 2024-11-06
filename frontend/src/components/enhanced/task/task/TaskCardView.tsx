@@ -11,7 +11,7 @@ import useStyles from '../TaskStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import TaskFlowchart from '../../common/task_end_code_routing/FlowChart';
-import DataClusterManager from '../../data_cluster/DataClusterManager';
+import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 import { hasAnyReferences } from '../../../../types/ReferenceTypes';
 
 interface ChipItem {

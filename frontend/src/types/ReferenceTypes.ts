@@ -5,6 +5,16 @@ import { TaskResponse } from "./TaskResponseTypes";
 import { URLReference } from "./URLReferenceTypes";
 import { UserInteraction } from "./UserInteractionTypes";
 
+export type ReferenceType =
+  | MessageType
+  | FileReference
+  | FileContentReference
+  | TaskResponse
+  | URLReference
+  | UserInteraction
+  | EmbeddingChunk
+  | string;
+
 export interface References {
   messages?: MessageType[];
   files?: (FileReference | FileContentReference)[];

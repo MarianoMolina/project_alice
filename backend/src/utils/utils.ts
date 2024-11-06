@@ -1,7 +1,5 @@
 import { Types } from 'mongoose';
 
-export type ObjectWithId = { _id: Types.ObjectId | string } | Types.ObjectId | string;
-
 export function getObjectId(id: any): Types.ObjectId {
   if (id instanceof Types.ObjectId) {
     return id;
@@ -9,16 +7,11 @@ export function getObjectId(id: any): Types.ObjectId {
     return new Types.ObjectId(id);
   } else if (id && id._id) {
     return getObjectId(id._id);
+  } else if (id && id.id) {
+    return getObjectId(id.id);
   } else {
     throw new Error(`Invalid ID: ${id}`);
   }
-}
-
-export function ensureObjectIdHelper(value: any): Types.ObjectId | any {
-  if (value && typeof value === 'object' && '_id' in value) {
-    return value._id;
-  }
-  return value;
 }
 
 export function ensureObjectIdForProperties(properties: Map<string, Types.ObjectId> | { [key: string]: any }) {
@@ -33,7 +26,7 @@ export function ensureObjectIdForProperties(properties: Map<string, Types.Object
   }
 
   for (const [key, value] of propertiesMap.entries()) {
-    propertiesMap.set(key, ensureObjectIdHelper(value));
+    propertiesMap.set(key, getObjectId(value));
   }
 
   return propertiesMap;

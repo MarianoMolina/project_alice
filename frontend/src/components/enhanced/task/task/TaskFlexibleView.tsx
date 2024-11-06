@@ -30,7 +30,7 @@ import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import TaskFlowchart from '../../common/task_end_code_routing/FlowChart';
 import useStyles from '../TaskStyles';
 import ExitCodeManager from '../../common/exit_code_manager/ExitCodeManager';
-import DataClusterManager from '../../data_cluster/DataClusterManager';
+import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 
 const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     item,

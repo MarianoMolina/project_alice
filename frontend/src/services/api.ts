@@ -29,6 +29,26 @@ export const fetchItem = async <T extends CollectionName>(
     throw error;
   }
 };
+export const resumeTask = async (taskResponseId: string, additionalInputs: Record<string, any> = {}): Promise<TaskResponse> => {
+  try {
+    Logger.debug('Resuming task response:', taskResponseId, 'with inputs:', additionalInputs);
+    const taskResponse = await fetchItem('taskresults', taskResponseId) as TaskResponse;
+    
+    if (taskResponse.status !== 'pending') {
+      throw new Error(`Cannot resume task response with status: ${taskResponse.status}`);
+    }
+    
+    const response = await taskAxiosInstance.post('/resume_task', {
+      task_response_id: taskResponseId,
+      additional_inputs: additionalInputs
+    });
+    
+    return convertToTaskResponse(response.data);
+  } catch (error) {
+    Logger.error('Error resuming task:', error);
+    throw error;
+  }
+};
 
 export const createItem = async <T extends CollectionName>(
   collectionName: T,

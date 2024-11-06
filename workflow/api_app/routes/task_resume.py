@@ -103,19 +103,19 @@ async def resume_task_endpoint(
         import traceback
         LOGGER.error(f'Error: {e}\nTraceback: {traceback.format_exc()}')
     
-    # Create failure response
-    result = TaskResponse(
-        task_id=original_response.task_id if 'original_response' in locals() else None,
-        task_name=task.task_name if 'task' in locals() else "Unknown",
-        task_description=task.task_description if 'task' in locals() else "Task resumption failed",
-        status="failed",
-        result_code=1,
-        task_outputs=None,
-        task_inputs=inputs if 'inputs' in locals() else {},
-        result_diagnostic=str(f'Error: {e}\nTraceback: {traceback.format_exc()}'),
-        usage_metrics=None,
-        execution_history=None
-    )
-    
-    db_result = await db_app.create_entity_in_db('task_responses', result.model_dump(exclude={'id'}))
-    return db_result
+        # Create failure response
+        result = TaskResponse(
+            task_id=original_response.task_id if 'original_response' in locals() else None,
+            task_name=task.task_name if 'task' in locals() else "Unknown",
+            task_description=task.task_description if 'task' in locals() else "Task resumption failed",
+            status="failed",
+            result_code=1,
+            task_outputs=None,
+            task_inputs=inputs if 'inputs' in locals() else {},
+            result_diagnostic=str(f'Error: {e}\nTraceback: {traceback.format_exc()}'),
+            usage_metrics=None,
+            execution_history=None
+        )
+        
+        updated_ref = await db_app.create_entity_in_db('task_responses', result.model_dump(exclude={'id'}))
+        return TaskResponse(**updated_ref)

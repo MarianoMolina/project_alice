@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { IFileReferenceDocument, IFileReferenceModel, FileType } from '../interfaces/file.interface';
-import { ensureObjectIdHelper } from '../utils/utils';
+import { getObjectId } from '../utils/utils';
 
 const fileReferenceSchema = new Schema<IFileReferenceDocument, IFileReferenceModel>({
   filename: { type: String, required: true },
@@ -34,13 +34,13 @@ function ensureObjectIdForFile(
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
   if (this.created_by) {
-    this.created_by = ensureObjectIdHelper(this.created_by);
+    this.created_by = getObjectId(this.created_by);
   }
   if (this.updated_by) {
-    this.updated_by = ensureObjectIdHelper(this.updated_by);
+    this.updated_by = getObjectId(this.updated_by);
   }
   if (this.transcript) {
-    this.transcript = ensureObjectIdHelper(this.transcript);
+    this.transcript = getObjectId(this.transcript);
   }
   next();
 }
@@ -51,13 +51,13 @@ function ensureObjectIdForUpdateFile(
 ) {
   const update = this.getUpdate() as any;
   if (update.created_by) {
-    update.created_by = ensureObjectIdHelper(update.created_by);
+    update.created_by = getObjectId(update.created_by);
   }
   if (update.updated_by) {
-    update.updated_by = ensureObjectIdHelper(update.updated_by);
+    update.updated_by = getObjectId(update.updated_by);
   }
   if (update.transcript) {
-    update.transcript = ensureObjectIdHelper(update.transcript);
+    update.transcript = getObjectId(update.transcript);
   }
   next();
 }

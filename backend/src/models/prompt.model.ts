@@ -1,6 +1,6 @@
 import mongoose, { Schema, CallbackWithoutResultAndOptionalError, Query } from 'mongoose';
 import { functionParametersSchema } from '../utils/functionSchema';
-import { ensureObjectIdForProperties, ensureObjectIdHelper } from '../utils/utils';
+import { ensureObjectIdForProperties, getObjectId } from '../utils/utils';
 import { IPromptDocument, IPromptModel } from '../interfaces/prompt.interface';
 
 const promptSchema = new Schema<IPromptDocument, IPromptModel>({
@@ -36,8 +36,8 @@ promptSchema.methods.apiRepresentation = function (this: IPromptDocument) {
 };
 
 function ensureObjectId(this: IPromptDocument, next: CallbackWithoutResultAndOptionalError) {
-  this.created_by = ensureObjectIdHelper(this.created_by);
-  this.updated_by = ensureObjectIdHelper(this.updated_by);
+  this.created_by = getObjectId(this.created_by);
+  this.updated_by = getObjectId(this.updated_by);
   if (this.is_templated && this.parameters?.properties) {
     this.parameters.properties = ensureObjectIdForProperties(this.parameters.properties);
   }
@@ -49,10 +49,10 @@ function ensureObjectIdForUpdate(this: Query<any, any>, next: CallbackWithoutRes
   const update = this.getUpdate() as any;
 
   if (update.created_by) {
-    update.created_by = ensureObjectIdHelper(update.created_by);
+    update.created_by = getObjectId(update.created_by);
   }
   if (update.updated_by) {
-    update.updated_by = ensureObjectIdHelper(update.updated_by);
+    update.updated_by = getObjectId(update.updated_by);
   }
 
   if (update.parameters && update.parameters.properties) {

@@ -12,7 +12,8 @@ import {
     retrieveFile as apiRetrieveFile,
     requestFileTranscript as apiRequestFileTranscript,
     updateMessageInChat as apiUpdateMessageInChat,
-    deleteItem as apiDeleteItem
+    deleteItem as apiDeleteItem,
+    resumeTask as apiResumeTask
 } from '../services/api';
 import { useNotification } from './NotificationContext';
 import { useCardDialog } from './CardDialogContext';
@@ -24,6 +25,7 @@ import { FileReference, FileContentReference } from '../types/FileTypes';
 import { useDialog } from './DialogCustomContext';
 import Logger from '../utils/Logger';
 import { globalEventEmitter } from '../utils/EventEmitter';
+import { UserInteraction } from '../types/UserInteractionTypes';
 
 interface ApiContextType {
     fetchItem: typeof apiFetchItem;
@@ -38,6 +40,11 @@ interface ApiContextType {
     retrieveFile: typeof apiRetrieveFile;
     requestFileTranscript: typeof apiRequestFileTranscript;
     updateMessageInChat: typeof apiUpdateMessageInChat;
+    resumeTask: typeof apiResumeTask;
+    updateUserInteraction: (
+        interactionId: string,
+        itemData: Partial<UserInteraction>
+    ) => Promise<UserInteraction>;
     deleteItem: <T extends CollectionName>(collectionName: T, itemId: string) => Promise<boolean>;
 }
 
@@ -190,6 +197,28 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     }, [addNotification]);
 
+    const resumeTask = useCallback(async (
+        taskResponseId: string, 
+        additionalInputs: Record<string, any> = {}
+    ): Promise<TaskResponse> => {
+        try {
+            const result = await apiResumeTask(taskResponseId, additionalInputs);
+            addNotification('Task resumed successfully', 'success', 5000, {
+                label: 'View Result',
+                onClick: () => selectCardItem('TaskResponse', result._id as string)
+            });
+            emitEvent('updated', 'taskresults', result);
+            return result;
+        } catch (error) {
+            if (error instanceof Error && error.message.includes('Cannot resume task')) {
+                addNotification(error.message, 'error');
+            } else {
+                addNotification('Error resuming task', 'error');
+            }
+            throw error;
+        }
+    }, [addNotification, selectCardItem]);
+    
     const uploadFileContentReference = useCallback(async (itemData: Partial<FileContentReference>): Promise<FileReference> => {
         try {
             const result = await apiUploadFileContentReference(itemData);
@@ -270,6 +299,39 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     }, [addNotification, openDialog, updateItem]);
 
+    const updateUserInteraction = useCallback(async (
+        interactionId: string,
+        itemData: Partial<UserInteraction>
+    ): Promise<UserInteraction> => {
+        try {
+            // Use existing updateItem method
+            const result = await updateItem('userinteractions', interactionId, itemData);
+            
+            // If there's a user response and a task_response_id, check if we need to resume the task
+            if (result.user_response && result.task_response_id) {
+                const taskResponse = await apiFetchItem('taskresults', result.task_response_id) as TaskResponse;
+                
+                if (taskResponse.status === 'pending') {
+                    Logger.debug('Associated task is pending, attempting to resume with user response');
+                    await resumeTask(result.task_response_id, {
+                        user_interaction: result
+                    });
+                    
+                    // Additional notification for task resumption
+                    addNotification('Associated task resumed', 'info', 5000, {
+                        label: 'View Task',
+                        onClick: () => selectCardItem('TaskResponse', result.task_response_id)
+                    });
+                }
+            }
+            
+            return result;
+        } catch (error) {
+            addNotification('Error updating user interaction', 'error');
+            throw error;
+        }
+    }, [updateItem, apiFetchItem, resumeTask, addNotification, selectCardItem]);
+    
     const updateMessageInChat = useCallback(async (chatId: string, message: MessageType): Promise<MessageType> => {
         try {
             const result = await apiUpdateMessageInChat(chatId, message);
@@ -308,6 +370,8 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         updateFile,
         retrieveFile: apiRetrieveFile,
         requestFileTranscript,
+        resumeTask,
+        updateUserInteraction,
         updateMessageInChat
     };
 

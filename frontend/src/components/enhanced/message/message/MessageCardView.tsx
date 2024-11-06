@@ -8,7 +8,7 @@ import CommonCardView from '../../common/enhanced_component/CardView';
 import { References } from '../../../../types/ReferenceTypes';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import AliceMarkdown, { CustomBlockType } from '../../../ui/markdown/alice_markdown/AliceMarkdown';
-import DataClusterManager from '../../data_cluster/DataClusterManager';
+import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 
 const hasAnyReferences = (references: References | undefined): boolean => {
     if (!references) return false;

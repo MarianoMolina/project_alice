@@ -11,7 +11,7 @@ import {
 import { MessageComponentProps, MessageType, getDefaultMessageForm } from '../../../../types/MessageTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import useStyles from '../MessageStyles';
-import DataClusterManager from '../../data_cluster/DataClusterManager';
+import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 
 const MessageFlexibleView: React.FC<MessageComponentProps> = ({
     item,
@@ -120,7 +120,14 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
                 </Select>
             </FormControl>
             <Typography variant="h6" className={classes.titleText}>References</Typography>
-            <DataClusterManager dataCluster={form.references} isEditable={true} onDataClusterChange={(dataCluster)=>setForm(prevForm => ({ ...prevForm, data_cluster: dataCluster }))} flatten={false} />
+            <DataClusterManager 
+            dataCluster={form.references} 
+            isEditable={true} 
+            onDataClusterChange={(dataCluster)=>setForm(prevForm => ({ ...prevForm, data_cluster: dataCluster }))} 
+            flatten={false} 
+            showSelect={false}
+            showCreate={false}
+            />
         </GenericFlexibleView>
     );
 };

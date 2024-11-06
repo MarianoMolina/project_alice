@@ -71,22 +71,13 @@ adv_tasks_module = AdvTasksModule(
         ],
         "agents": [
             {
-                "key": "embedding_agent",
-                "name": "embedding_agent",
+                "key": "oai_agent",
+                "name": "oai_agent",
                 "system_message": "default_system_message",
                 "models": {
                     "embeddings": "oai_embedding_large",
-                },
-                "has_code_exec": 0,
-                "has_tools": 0,
-                "max_consecutive_auto_reply": 1,
-            },
-            {
-                "key": "image_gen_agent",
-                "name": "image_gen_dalle_agent",
-                "system_message": "default_system_message",
-                "models": {
                     "img_gen": "Dall-E-3",
+                    "tts": "tts-1",
                 },
                 "has_code_exec": 0,
                 "has_tools": 0,
@@ -98,17 +89,6 @@ adv_tasks_module = AdvTasksModule(
                 "system_message": "default_system_message",
                 "models": {
                     "img_gen": "pixart_sigma_model",
-                },
-                "has_code_exec": 0,
-                "has_tools": 0,
-                "max_consecutive_auto_reply": 1,
-            },
-            {
-                "key": "tts_agent",
-                "name": "tts_agent",
-                "system_message": "default_system_message",
-                "models": {
-                    "tts": "tts-1",
                 },
                 "has_code_exec": 0,
                 "has_tools": 0,
@@ -153,7 +133,7 @@ adv_tasks_module = AdvTasksModule(
                 "key": "embedding_task",
                 "task_type": "EmbeddingTask",
                 "task_name": "embedding_task",
-                "agent": "embedding_agent",
+                "agent": "oai_agent",
                 "task_description": "Generates embeddings for the input text",
                 "input_variables": {
                     "type": "object",
@@ -168,7 +148,7 @@ adv_tasks_module = AdvTasksModule(
                 "key": "retrieval_task",
                 "task_type": "RetrievalTask",
                 "task_name": "retrieval_task",
-                "agent": "embedding_agent",
+                "agent": "oai_agent",
                 "task_description": "Retrieves similar embeddings for the input text",
                 "input_variables": {
                     "type": "object",
@@ -185,7 +165,7 @@ adv_tasks_module = AdvTasksModule(
                 "key": "image_gen_task",
                 "task_type": "GenerateImageTask",
                 "task_name": "image_gen_task_dall_e",
-                "agent": "image_gen_agent",
+                "agent": "oai_agent",
                 "task_description": "Generates an image from the input text",
                 "input_variables": {
                     "type": "object",
@@ -239,7 +219,7 @@ adv_tasks_module = AdvTasksModule(
                 "key": "tts_task",
                 "task_type": "TextToSpeechTask",
                 "task_name": "tts_task",
-                "agent": "tts_agent",
+                "agent": "oai_agent",
                 "task_description": "Converts text to speech using the OpenAI TTS API",
                 "input_variables": {
                     "type": "object",
