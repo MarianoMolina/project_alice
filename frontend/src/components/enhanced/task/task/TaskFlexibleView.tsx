@@ -30,6 +30,7 @@ import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import TaskFlowchart from '../../common/task_end_code_routing/FlowChart';
 import useStyles from '../TaskStyles';
 import ExitCodeManager from '../../common/exit_code_manager/ExitCodeManager';
+import DataClusterManager from '../../data_cluster/DataClusterManager';
 
 const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     item,
@@ -357,6 +358,14 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                     label="Recursive"
                 />
             </Tooltip>
+            
+            <Typography variant="h6" className={classes.titleText}>Data Cluster</Typography>
+            <DataClusterManager
+                dataCluster={form.data_cluster}
+                isEditable={true}
+                onDataClusterChange={(dataCluster) => setForm(prevForm => ({ ...prevForm, data_cluster: dataCluster }))}
+                flatten={false}
+            />
 
             {/* CodeExecutionLLMTask specific fields */}
             {taskType === 'CodeExecutionLLMTask' && (

@@ -5,7 +5,6 @@ import {
     Accordion,
     AccordionSummary,
     AccordionDetails,
-    Box,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
@@ -14,7 +13,6 @@ import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import { styled } from '@mui/material/styles';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { AccessTime, CheckCircle, Error, Warning, Output, Code, BugReport, DataObject, Analytics } from '@mui/icons-material';
-import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
 import NodeResponsesViewer from '../../common/references/NodeResponsesViewer';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 
@@ -31,13 +29,6 @@ const ExitCodeChip = styled(Chip)(({ theme }) => ({
     '&.error': {
         backgroundColor: theme.palette.error.main,
         color: theme.palette.error.contrastText,
-    },
-}));
-
-const NodeReferenceSection = styled(Box)(({ theme }) => ({
-    marginBottom: theme.spacing(2),
-    '&:last-child': {
-        marginBottom: 0,
     },
 }));
 

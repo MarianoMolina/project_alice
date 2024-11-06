@@ -61,7 +61,7 @@ class GenerateImageTask(AliceTask):
                 parent_task_id=self.id,
                 node_name="generate_image",
                 exit_code=0,
-                references=References(files=[new_messages]),
+                references=References(files=new_messages),
                 execution_order=len(execution_history)
             )
         except Exception as e:

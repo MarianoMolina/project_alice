@@ -130,3 +130,41 @@ export async function processReferences(references: References | undefined, user
 
   return processedReferences;
 }
+
+function compareArrays<T extends Types.ObjectId | { _id: Types.ObjectId } | string>(
+  arr1: T[] | undefined,
+  arr2: T[] | undefined
+): boolean {
+  if (!arr1 && !arr2) return true;
+  if (!arr1 || !arr2) return false;
+  if (arr1.length !== arr2.length) return false;
+
+  return arr1.every((item, index) => {
+    const item1 = item instanceof Types.ObjectId ? item : (item as { _id: Types.ObjectId })._id;
+    const item2 = arr2[index] instanceof Types.ObjectId ? arr2[index] : (arr2[index] as { _id: Types.ObjectId })._id;
+
+    if (item1 instanceof Types.ObjectId && item2 instanceof Types.ObjectId) {
+      return item1.equals(item2);
+    }
+    return item1 === item2;
+  });
+}
+
+export function compareReferences(ref1: References | undefined, ref2: References | undefined): boolean {
+  if (!ref1 && !ref2) return true;
+  if (!ref1 || !ref2) return false;
+
+  const keys: (keyof References)[] = ['messages', 'files', 'task_responses', 'url_references', 'string_outputs'];
+
+  for (const key of keys) {
+    if (key === 'string_outputs') {
+      if (!compareArrays(ref1[key], ref2[key])) return false;
+    } else {
+      const arr1 = ref1[key] as (Types.ObjectId | { _id: Types.ObjectId })[] | undefined;
+      const arr2 = ref2[key] as (Types.ObjectId | { _id: Types.ObjectId })[] | undefined;
+      if (!compareArrays(arr1, arr2)) return false;
+    }
+  }
+
+  return true;
+}

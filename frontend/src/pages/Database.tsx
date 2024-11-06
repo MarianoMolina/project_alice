@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Box } from '@mui/material';
-import { Add, Person, Category, Settings, Description, Functions, Assignment, Api, AttachFile, Message, QuestionAnswer, Link, Feedback, LiveHelp } from '@mui/icons-material';
+import { Add, Person, Category, Settings, Description, Functions, Assignment, Api, AttachFile, Message, QuestionAnswer, Link, Feedback, LiveHelp, Diversity2 } from '@mui/icons-material';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH, TASK_SIDEBAR_WIDTH_TABLE, TASK_SIDEBAR_WIDTH_COMPACT } from '../utils/Constants';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
 import { ComponentMode, CollectionElement, CollectionElementString } from '../types/CollectionTypes';
@@ -23,6 +23,7 @@ import ToggleBox from '../components/ui/sidetab_header/ToggleBox';
 import EnhancedUserCheckpoint from '../components/enhanced/user_checkpoint/user_checkpoint/EnhancedUserCheckpoint';
 import EnhancedUserInteraction from '../components/enhanced/user_interaction/user_interaction/EnhancedUserInteraction';
 import EnhancedEmbeddingChunk from '../components/enhanced/embedding_chunk/embedding_chunk/EnhancedEmbeddingChunk';
+import EnhancedDataCluster from '../components/enhanced/data_cluster/data_cluster/EnhancedDataCluster';
 
 const Database: React.FC = () => {
     const classes = useStyles();
@@ -77,6 +78,7 @@ const Database: React.FC = () => {
         { name: 'Agent' as CollectionElementString, icon: Person, group: 'Core' },
         { name: 'API' as CollectionElementString, icon: Api, group: 'Core' },
         { name: 'Chat' as CollectionElementString, icon: QuestionAnswer, group: 'Core' },
+        { name: 'DataCluster' as CollectionElementString, icon: Diversity2, group: 'Refs' },
         { name: 'EmbeddingChunk' as CollectionElementString, icon: Description, group: 'Ref' },
         { name: 'File' as CollectionElementString, icon: AttachFile, group: 'Ref' },
         { name: 'Message' as CollectionElementString, icon: Message, group: 'Ref' },
@@ -145,6 +147,8 @@ const Database: React.FC = () => {
                                 return <EnhancedUserInteraction {...commonListProps} />;
                             case 'EmbeddingChunk':
                                 return <EnhancedEmbeddingChunk {...commonListProps} />;
+                            case 'DataCluster':
+                                return <EnhancedDataCluster {...commonListProps} />;
                             default:
                                 return null;
                         }
@@ -197,6 +201,8 @@ const Database: React.FC = () => {
                 return <EnhancedUserInteraction {...commonProps} />;
             case 'EmbeddingChunk':
                 return <EnhancedEmbeddingChunk {...commonProps} />;
+            case 'DataCluster':
+                return <EnhancedDataCluster {...commonProps} />;
             default:
                 return null;
         }

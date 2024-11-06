@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
     TextField,
     FormControl,
@@ -9,19 +9,9 @@ import {
     Typography
 } from '@mui/material';
 import { MessageComponentProps, MessageType, getDefaultMessageForm } from '../../../../types/MessageTypes';
-import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
-import URLReferenceShortListView from '../../url_reference/url_reference/URLReferenceShortListView';
-import FileShortListView from '../../file/file/FileShortListView';
-import TaskResponseShortListView from '../../task_response/task_response/TaskResponseShortListView';
-import MessageShortListView from './MessageShortListView';
-import { useApi } from '../../../../contexts/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import { FileReference } from '../../../../types/FileTypes';
-import { TaskResponse } from '../../../../types/TaskResponseTypes';
-import { URLReference } from '../../../../types/URLReferenceTypes';
-import { CollectionName } from '../../../../types/CollectionTypes';
-import { References } from '../../../../types/ReferenceTypes';
 import useStyles from '../MessageStyles';
+import DataClusterManager from '../../data_cluster/DataClusterManager';
 
 const MessageFlexibleView: React.FC<MessageComponentProps> = ({
     item,
@@ -30,9 +20,7 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
     handleSave,
     handleDelete
 }) => {
-    const { fetchItem } = useApi();
     const [form, setForm] = useState<Partial<MessageType>>(item || getDefaultMessageForm());
-    const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const classes = useStyles();
 
@@ -63,32 +51,6 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
         setForm(prevForm => ({ ...prevForm, [name]: value }));
     }, []);
 
-    const handleReferencesChange = useCallback(async (type: CollectionName, selectedIds: string[]) => {
-        const fetchedItems = await Promise.all(selectedIds.map(id => fetchItem(type, id)));
-        setForm(prevForm => {
-            let updatedReferences: References = { ...prevForm.references };
-            switch (type) {
-                case 'messages':
-                    updatedReferences.messages = fetchedItems as MessageType[];
-                    break;
-                case 'files':
-                    updatedReferences.files = fetchedItems as FileReference[];
-                    break;
-                case 'taskresults':
-                    updatedReferences.task_responses = fetchedItems as TaskResponse[];
-                    break;
-                case 'urlreferences':
-                    updatedReferences.url_references = fetchedItems as URLReference[];
-                    break;
-            }
-            return { ...prevForm, references: updatedReferences };
-        });
-    }, [fetchItem]);
-
-    const handleAccordionToggle = useCallback((accordion: string | null) => {
-        setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
-    }, []);
-
     const handleLocalSave = useCallback(() => {
         onChange(form);
         setIsSaving(true);
@@ -102,70 +64,6 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
 
     const title = mode === 'create' ? 'Create New Message' : mode === 'edit' ? 'Edit Message' : 'Message Details';
     const saveButtonText = form._id ? 'Update Message' : 'Create Message';
-
-    const memoizedMessageSelect = useMemo(() => (
-        <EnhancedSelect<MessageType>
-            componentType="messages"
-            EnhancedView={MessageShortListView}
-            selectedItems={form.references?.messages || []}
-            onSelect={(ids) => handleReferencesChange('messages', ids)}
-            isInteractable={isEditMode}
-            multiple
-            label="Referenced Messages"
-            activeAccordion={activeAccordion}
-            onAccordionToggle={handleAccordionToggle}
-            accordionEntityName="referenced-messages"
-        />
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    ), [form.references?.messages, handleReferencesChange, isEditMode, activeAccordion, handleAccordionToggle]);
-
-    const memoizedFileSelect = useMemo(() => (
-        <EnhancedSelect<FileReference>
-            componentType="files"
-            EnhancedView={FileShortListView}
-            selectedItems={form.references?.files as FileReference[] || []}
-            onSelect={(ids) => handleReferencesChange('files', ids)}
-            isInteractable={isEditMode}
-            multiple
-            label="File References"
-            activeAccordion={activeAccordion}
-            onAccordionToggle={handleAccordionToggle}
-            accordionEntityName="file-references"
-        />
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    ), [form.references?.files, handleReferencesChange, isEditMode, activeAccordion, handleAccordionToggle]);
-
-    const memoizedTaskResponseSelect = useMemo(() => (
-        <EnhancedSelect<TaskResponse>
-            componentType="taskresults"
-            EnhancedView={TaskResponseShortListView}
-            selectedItems={form.references?.task_responses || []}
-            onSelect={(ids) => handleReferencesChange('taskresults', ids)}
-            isInteractable={isEditMode}
-            multiple
-            label="Task Responses"
-            activeAccordion={activeAccordion}
-            onAccordionToggle={handleAccordionToggle}
-            accordionEntityName="task-responses"
-        />
-    // eslint-disable-next-line react-hooks/exhaustive-deps 
-    ), [form.references?.task_responses, handleReferencesChange, isEditMode, activeAccordion, handleAccordionToggle]);
-
-    const memoizedURLReferenceSelect = useMemo(() => (
-        <EnhancedSelect<URLReference>
-            componentType="urlreferences"
-            EnhancedView={URLReferenceShortListView}
-            selectedItems={form.references?.url_references || []}
-            onSelect={(ids) => handleReferencesChange('urlreferences', ids)}
-            isInteractable={isEditMode}
-            multiple
-            label="Search Results"
-            activeAccordion={activeAccordion}
-            onAccordionToggle={handleAccordionToggle}
-            accordionEntityName="search-results"
-        />
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    ), [form.references?.url_references, handleReferencesChange, isEditMode, activeAccordion, handleAccordionToggle]);
 
     return (
         <GenericFlexibleView
@@ -222,10 +120,7 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
                 </Select>
             </FormControl>
             <Typography variant="h6" className={classes.titleText}>References</Typography>
-            {memoizedMessageSelect}
-            {memoizedFileSelect}
-            {memoizedTaskResponseSelect}
-            {memoizedURLReferenceSelect}
+            <DataClusterManager dataCluster={form.references} isEditable={true} onDataClusterChange={(dataCluster)=>setForm(prevForm => ({ ...prevForm, data_cluster: dataCluster }))} flatten={false} />
         </GenericFlexibleView>
     );
 };

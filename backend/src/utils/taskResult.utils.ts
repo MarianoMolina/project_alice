@@ -6,61 +6,151 @@ import { processReferences } from './reference.utils';
 import { processEmbeddings } from './embeddingChunk.utils';
 import { References } from '../interfaces/references.interface';
 
+// Track processed items to prevent infinite loops
+class ReferenceProcessor {
+  private processedIds: Set<string> = new Set();
+  private processingDepth: number = 0;
+  private readonly MAX_DEPTH = 10; // Maximum nesting depth to prevent infinite recursion
+
+  constructor() {
+    this.processedIds = new Set();
+    this.processingDepth = 0;
+  }
+
+  hasProcessed(id: string): boolean {
+    return this.processedIds.has(id);
+  }
+
+  markAsProcessed(id: string): void {
+    this.processedIds.add(id);
+  }
+
+  incrementDepth(): void {
+    this.processingDepth++;
+  }
+
+  decrementDepth(): void {
+    this.processingDepth--;
+  }
+
+  isMaxDepthReached(): boolean {
+    return this.processingDepth >= this.MAX_DEPTH;
+  }
+
+  getCurrentDepth(): number {
+    return this.processingDepth;
+  }
+}
+
 // Helper function to process user interactions within references
 async function processUserInteractionsInReferences(
   references: References | undefined, 
-  taskResultId: string
+  taskResultId: string,
+  processor: ReferenceProcessor,
+  path: string = 'root'
 ): Promise<References | undefined> {
   if (!references) return undefined;
 
-  // Process user interactions directly in the references
-  if (references.user_interactions?.length) {
-    for (const interaction of references.user_interactions) {
-      if (typeof interaction !== 'string' && !(interaction instanceof Types.ObjectId)) {
-        if (!interaction.task_response_id) {
-          interaction.task_response_id = new Types.ObjectId(taskResultId);
+  Logger.debug(`Processing references at path: ${path}, depth: ${processor.getCurrentDepth()}`);
+
+  if (processor.isMaxDepthReached()) {
+    Logger.warn(`Max depth reached at path: ${path}. Stopping further processing.`);
+    return references;
+  }
+
+  processor.incrementDepth();
+
+  try {
+    // Process user interactions directly in the references
+    if (references.user_interactions?.length) {
+      Logger.debug(`Processing ${references.user_interactions.length} user interactions at ${path}`);
+      for (const interaction of references.user_interactions) {
+        if (typeof interaction !== 'string' && !(interaction instanceof Types.ObjectId)) {
+          if (!interaction.task_response_id) {
+            Logger.debug(`Setting task_response_id for user interaction at ${path}`);
+            interaction.task_response_id = new Types.ObjectId(taskResultId);
+          }
         }
       }
     }
-  }
 
-  // Recursively process user interactions in messages
-  if (references.messages?.length) {
-    for (const message of references.messages) {
-      if (typeof message !== 'string' && !(message instanceof Types.ObjectId)) {
-        if (message.references) {
-          message.references = await processUserInteractionsInReferences(message.references, taskResultId) as References;
+    // Recursively process user interactions in messages
+    if (references.messages?.length) {
+      Logger.debug(`Processing ${references.messages.length} messages at ${path}`);
+      for (let i = 0; i < references.messages.length; i++) {
+        const message = references.messages[i];
+        if (typeof message !== 'string' && !(message instanceof Types.ObjectId)) {
+          if (message._id && processor.hasProcessed(message._id.toString())) {
+            Logger.debug(`Skipping already processed message: ${message._id} at ${path}`);
+            continue;
+          }
+
+          if (message._id) {
+            processor.markAsProcessed(message._id.toString());
+          }
+
+          if (message.references) {
+            message.references = await processUserInteractionsInReferences(
+              message.references, 
+              taskResultId, 
+              processor,
+              `${path}.messages[${i}]`
+            ) as References;
+          }
         }
       }
     }
-  }
 
-  // Recursively process user interactions in task_responses
-  if (references.task_responses?.length) {
-    for (const taskResponse of references.task_responses) {
-      if (typeof taskResponse !== 'string' && !(taskResponse instanceof Types.ObjectId)) {
-        if (taskResponse.node_references?.length) {
-          taskResponse.node_references = await processNodeReferencesWithInteractions(
-            taskResponse.node_references,
-            taskResultId
-          );
+    // Recursively process user interactions in task_responses
+    if (references.task_responses?.length) {
+      Logger.debug(`Processing ${references.task_responses.length} task responses at ${path}`);
+      for (let i = 0; i < references.task_responses.length; i++) {
+        const taskResponse = references.task_responses[i];
+        if (typeof taskResponse !== 'string' && !(taskResponse instanceof Types.ObjectId)) {
+          if (taskResponse._id && processor.hasProcessed(taskResponse._id.toString())) {
+            Logger.debug(`Skipping already processed task response: ${taskResponse._id} at ${path}`);
+            continue;
+          }
+
+          if (taskResponse._id) {
+            processor.markAsProcessed(taskResponse._id.toString());
+          }
+
+          if (taskResponse.node_references?.length) {
+            taskResponse.node_references = await processNodeReferencesWithInteractions(
+              taskResponse.node_references,
+              taskResultId,
+              processor,
+              `${path}.task_responses[${i}]`
+            );
+          }
         }
       }
     }
-  }
 
-  return references;
+    return references;
+  } finally {
+    processor.decrementDepth();
+  }
 }
 
 // Helper function to process node references and their nested user interactions
 async function processNodeReferencesWithInteractions(
   nodeResponses: NodeResponse[],
-  taskResultId: string
+  taskResultId: string,
+  processor: ReferenceProcessor,
+  path: string = 'root'
 ): Promise<NodeResponse[]> {
-  return Promise.all(nodeResponses.map(async (nodeResponse) => ({
+  Logger.debug(`Processing node references with interactions at path: ${path}`);
+  return Promise.all(nodeResponses.map(async (nodeResponse, index) => ({
     ...nodeResponse,
     references: nodeResponse.references ? 
-      await processUserInteractionsInReferences(nodeResponse.references, taskResultId) as References : 
+      await processUserInteractionsInReferences(
+        nodeResponse.references, 
+        taskResultId, 
+        processor,
+        `${path}.nodeResponse[${index}]`
+      ) as References : 
       nodeResponse.references
   })));
 }
@@ -70,18 +160,28 @@ async function processNodeReferences(
   userId: string,
   taskResultId?: string
 ): Promise<NodeResponse[]> {
+  Logger.debug(`Starting processNodeReferences with taskResultId: ${taskResultId}`);
+  
   // First process user interactions if taskResultId is provided
   if (taskResultId) {
-    nodeResponses = await processNodeReferencesWithInteractions(nodeResponses, taskResultId);
+    const processor = new ReferenceProcessor();
+    nodeResponses = await processNodeReferencesWithInteractions(
+      nodeResponses,
+      taskResultId,
+      processor
+    );
   }
 
   // Then process the references normally
-  return Promise.all(nodeResponses.map(async (nodeResponse) => ({
-    ...nodeResponse,
-    references: nodeResponse.references ? 
-      await processReferences(nodeResponse.references, userId) : 
-      nodeResponse.references
-  })));
+  return Promise.all(nodeResponses.map(async (nodeResponse) => {
+    Logger.debug(`Processing references for node: ${nodeResponse.node_name}`);
+    return {
+      ...nodeResponse,
+      references: nodeResponse.references ? 
+        await processReferences(nodeResponse.references, userId) : 
+        nodeResponse.references
+    };
+  }));
 }
 
 export async function createTaskResult(
@@ -100,6 +200,7 @@ export async function createTaskResult(
     const nodeReferences = taskResultData.node_references;
     delete taskResultData.node_references;
 
+    Logger.debug('Creating initial task result without node references');
     // Create initial task result without node references
     const taskResult = new TaskResult({
       ...taskResultData,
@@ -108,15 +209,18 @@ export async function createTaskResult(
       updatedAt: new Date()
     });
     await taskResult.save();
+    Logger.debug(`Initial task result created with ID: ${taskResult._id}`);
 
     // If we had node references, process them with the new task result ID
     if (nodeReferences?.length) {
+      Logger.debug(`Processing ${nodeReferences.length} node references`);
       const processedNodeReferences = await processNodeReferences(
         nodeReferences,
         userId,
         taskResult._id.toString()
       );
 
+      Logger.debug('Updating task result with processed node references');
       // Update task result with processed references
       return await TaskResult.findByIdAndUpdate(
         taskResult._id,
@@ -128,6 +232,7 @@ export async function createTaskResult(
     return taskResult;
   } catch (error) {
     Logger.error('Error creating task result:', error);
+    Logger.error(error instanceof Error && error.stack ? error.stack : 'No stack trace available');
     return null;
   }
 }

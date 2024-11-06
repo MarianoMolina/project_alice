@@ -12,11 +12,13 @@ Alice is an agentic workflow framework that integrates task execution and intell
 > - DOCUMENTS: Alice Documents, represented by the [aliceDocument] tag, are parsed on the frontend and added to the agent's system prompts allowing them to structure their responses better
 > - NODE FLOW: Fully implemented node execution logic to tasks, making workflows simply a case where the nodes are other tasks. This allows for greater clarity on what each task is doing and why
 > - APIS: New APIs for Wolfram Alpha, Google's Knowledge Graph, PixArt Image Generation (local), Bark TTS (local)
+> - DATA CLUSTERS: Now chats and tasks can hold updatable data clusters that hold embeddable references like messages, files, task responses, etc. You can add any reference in your environment to a data cluster to give your agents/tasks access to it.
 
 > What's next? Planned developments for v0.4 (find detailed info below):
 > - Agent using computer
 > - Communication APIs -> Gmail, potentially messaging
 > - Recurring tasks -> Tasks that run periodically, accumulating information in their Data Cluster
+> - CUDA support for the Workflow container -> Run a wide variety of local models, with a lot more flexibility
 
 ## Project Structure
 
@@ -271,7 +273,7 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
    - [Working on]: ReAct and Tree-of-thought at inference. 
       - [Added 11/24]: Basic Chain-of-thought implementation
    - [Working on]: Injecting (optionally) user and context information into the agent's system prompt, like browser, user name, etc. 
-      - [Added 11/24]: User name is being injected now
+      - [Added 11/24]: User name is being injected now, and the User Data is being passed into tasks and chats, meaning we can add arbitrary variables to the user account (like general instructions) and retrieve them. 
 
 5. **Work Environments / Data Clusters** [Done]: Introduction of a feature similar to Anthropic's Artifacts but easier to update, edit, modularize, etc., providing a more structured way to manage and interact with complex data and tools within the Alice ecosystem. Idea is to use a mix of in-context and RAG-powered sources, that the user is actively able to update, trim, etc. to ensure the correct info is available at the right time. 
    - [Added 11/24]: AliceDocuments let agents structure information a bit more concisely. This mostly affects the frontend and system prompts of the agents. 

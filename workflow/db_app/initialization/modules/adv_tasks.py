@@ -54,7 +54,14 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "voice_parameter",
                 "type": "string",
-                "description": "The voice to use for the speech."
+                "description": "The voice to use for the speech.",
+                "default": "nova"
+            },
+            {
+                "key": "voice_bark_parameter",
+                "type": "string",
+                "description": "The voice to use for the speech.",
+                "default": "v2/en_speaker_6"
             },
             {
                 "key": "speed_parameter",
@@ -272,7 +279,7 @@ adv_tasks_module = AdvTasksModule(
                     "type": "object",
                     "properties": {
                         "text": "text_parameter",
-                        "voice": "voice_parameter",
+                        "voice": "voice_bark_parameter",
                         "speed": "speed_parameter"
                     },
                     "required": ["text"]

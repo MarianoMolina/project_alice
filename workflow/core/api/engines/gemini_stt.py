@@ -24,7 +24,7 @@ class GeminiSpeechToTextEngine(APIEngine):
             required=["file_reference"]
         )
     )
-    required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
+    required_api: ApiType = Field(ApiType.SPEECH_TO_TEXT, title="The API engine required")
 
     async def generate_api_response(self, api_data: ModelConfig, file_reference: FileReference, prompt: str = "Transcribe and describe this audio clip") -> References:
         """

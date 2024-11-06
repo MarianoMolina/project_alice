@@ -12,10 +12,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     fileAction: {
         marginTop: theme.spacing(2),
     },
-    toolMessage: {
-        backgroundColor: theme.palette.secondary.dark,
-        color: theme.palette.primary.dark,
-    },
 }));
 
 export default useStyles;

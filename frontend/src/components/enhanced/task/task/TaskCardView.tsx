@@ -5,12 +5,14 @@ import {
     Chip,
     ListItemButton,
 } from '@mui/material';
-import { Category, Description, Functions, Person, ApiRounded, Settings, Logout, ExitToApp } from '@mui/icons-material';
+import { Category, Description, Functions, Person, ApiRounded, Settings, Logout, ExitToApp, AttachFile } from '@mui/icons-material';
 import { TaskComponentProps } from '../../../../types/TaskTypes';
 import useStyles from '../TaskStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import TaskFlowchart from '../../common/task_end_code_routing/FlowChart';
+import DataClusterManager from '../../data_cluster/DataClusterManager';
+import { hasAnyReferences } from '../../../../types/ReferenceTypes';
 
 interface ChipItem {
     _id?: string;
@@ -121,6 +123,11 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
                     ))}
                 </Box>
             )
+        },
+        {
+            icon: <AttachFile />,
+            primary_text: "References",
+            secondary_text: item.data_cluster && hasAnyReferences(item.data_cluster) ? <DataClusterManager dataCluster={item.data_cluster} /> : <Typography>"N/A"</Typography>,
         },
         {
             icon: <ExitToApp />,

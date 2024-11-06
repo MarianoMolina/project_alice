@@ -6,15 +6,12 @@ import {
 import { Language, Description, QueryBuilder, DataObject } from '@mui/icons-material';
 import { URLReferenceComponentProps } from '../../../../types/URLReferenceTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import useStyles from '../URLReferenceStyles';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
-import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 
 const URLReferenceCardView: React.FC<URLReferenceComponentProps> = ({
     item
 }) => {
-    const classes = useStyles();
 
     if (!item) {
         return <Typography>No URL Reference data available.</Typography>;

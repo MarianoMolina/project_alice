@@ -2,10 +2,9 @@ import React from 'react';
 import {
     Typography,
 } from '@mui/material';
-import { Language, Description, QueryBuilder, DataObject } from '@mui/icons-material';
+import { Language, QueryBuilder } from '@mui/icons-material';
 import { EmbeddingChunkComponentProps } from '../../../../types/EmbeddingChunkTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 
 const EmbeddingChunkCardView: React.FC<EmbeddingChunkComponentProps> = ({
     item
@@ -18,8 +17,18 @@ const EmbeddingChunkCardView: React.FC<EmbeddingChunkComponentProps> = ({
     const listItems = [
         {
             icon: <Language />,
-            primary_text: "User Prompt",
-            secondary_text: item.text_content || 'No user prompt available'
+            primary_text: "Content",
+            secondary_text: item.text_content || 'No content available'
+        },
+        {
+            icon: <Language />,
+            primary_text: "Index",
+            secondary_text: item.index || 'No index available'
+        },
+        {
+            icon: <Language />,
+            primary_text: "Vector",
+            secondary_text: item.vector || 'No vector available'
         },
         {
             icon: <QueryBuilder />,

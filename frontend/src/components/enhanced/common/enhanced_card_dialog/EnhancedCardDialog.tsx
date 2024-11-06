@@ -37,6 +37,11 @@ import Logger from '../../../../utils/Logger';
 import EnhancedUserCheckpoint from '../../user_checkpoint/user_checkpoint/EnhancedUserCheckpoint';
 import EnhancedUserInteraction from '../../user_interaction/user_interaction/EnhancedUserInteraction';
 import EnhancedEmbeddingChunk from '../../embedding_chunk/embedding_chunk/EnhancedEmbeddingChunk';
+import EnhancedDataCluster from '../../data_cluster/data_cluster/EnhancedDataCluster';
+import UserCheckpointCardView from '../../user_checkpoint/user_checkpoint/UserCheckpointCardView';
+import UserInteractionCardView from '../../user_interaction/user_interaction/UserInteractionCardView';
+import EmbeddingChunkCardView from '../../embedding_chunk/embedding_chunk/EmbeddingChunkCardView';
+import DataClusterCardView from '../../data_cluster/data_cluster/DataClusterCardView';
 
 const EnhancedCardDialog: React.FC = () => {
   const { selectedCardItem, selectedCardItemType, handleClose, selectCardItem } = useCardDialog();
@@ -59,6 +64,7 @@ const EnhancedCardDialog: React.FC = () => {
       handleUserCheckpoint: (id: string) => selectCardItem('UserCheckpoint', id),
       handleUserInteraction: (id: string) => selectCardItem('UserInteraction', id),
       handleEmbeddingChunk: (id: string) => selectCardItem('EmbeddingChunk', id),
+      handleDataCluster: (id: string) => selectCardItem('DataCluster', id),
     };
 
     const commonProps = {
@@ -106,6 +112,8 @@ const EnhancedCardDialog: React.FC = () => {
           return <EnhancedUserInteraction itemId={selectedCardItem._id} {...commonProps} />;
         case 'EmbeddingChunk':
           return <EnhancedEmbeddingChunk itemId={selectedCardItem._id} {...commonProps} />;
+        case 'DataCluster':
+          return <EnhancedDataCluster itemId={selectedCardItem._id} {...commonProps} />;
         default:
           return null;
       }
@@ -181,19 +189,25 @@ const EnhancedCardDialog: React.FC = () => {
         case 'UserCheckpoint':
           return (
             <Box className="max-w-full">
-              <EnhancedUserCheckpoint itemId={selectedCardItem._id} {...commonProps} />
+              <UserCheckpointCardView item={selectedCardItem as CollectionType['usercheckpoints']} {...cardViewProps} />
             </Box>
           );
         case 'UserInteraction':
           return (
             <Box className="max-w-full">
-              <EnhancedUserInteraction itemId={selectedCardItem._id} {...commonProps} />
+              <UserInteractionCardView item={selectedCardItem as CollectionType['userinteractions']} {...cardViewProps} />
             </Box>
           );
         case 'EmbeddingChunk':
           return (
             <Box className="max-w-full">
-              <EnhancedEmbeddingChunk itemId={selectedCardItem._id} {...commonProps} />
+              <EmbeddingChunkCardView item={selectedCardItem as CollectionType['embeddingchunks']} {...cardViewProps} />
+            </Box>
+          );
+        case 'DataCluster':
+          return (
+            <Box className="max-w-full">
+              <DataClusterCardView item={selectedCardItem as CollectionType['dataclusters']} {...cardViewProps} />
             </Box>
           );
         default:

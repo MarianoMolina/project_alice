@@ -1,11 +1,7 @@
-import re
-import torch
-import gc
-import base64
+import torch, gc, base64, os
 from typing import List, Optional
 from pydantic import Field
 from diffusers import PixArtAlphaPipeline
-from transformers import T5EncoderModel
 from workflow.core.data_structures import (
     ApiType,
     FileContentReference,
@@ -17,11 +13,10 @@ from workflow.core.data_structures import (
     ParameterDefinition,
     ModelConfig,
 )
-from workflow.core.api.engines.api_engine import APIEngine
-from workflow.util import LOGGER, get_traceback
+from workflow.core.api.engines.image_gen_engine import ImageGenerationEngine
+from workflow.util import LOGGER, get_traceback, check_cuda_availability
 
-
-class PixArtImgGenEngine(APIEngine):
+class PixArtImgGenEngine(ImageGenerationEngine):
     input_variables: FunctionParameters = Field(
         default=FunctionParameters(
             type="object",
@@ -39,26 +34,23 @@ class PixArtImgGenEngine(APIEngine):
                     description="The number of images to generate.",
                     default=1,
                 ),
+                "size": ParameterDefinition(
+                    type="string",
+                    description="The size of the generated images.",
+                    default="1024x1024"
+                ),
+                "quality": ParameterDefinition(
+                    type="string",
+                    description="The quality of the image generation.",
+                    default="standard"
+                ),
             },
             required=["prompt"],
         )
     )
     required_api: ApiType = Field(
-        ApiType.LLM_MODEL, title="The API engine required"
+        ApiType.IMG_GENERATION, title="The API engine required"
     )
-
-    def generate_filename(self, prompt: str, model: str, index: int) -> str:
-        """
-        Generate a descriptive filename based on the prompt and model.
-        """
-        # Sanitize and truncate the prompt for the filename
-        sanitized_prompt = re.sub(r"[^\w\s-]", "", prompt.lower())
-        truncated_prompt = '_'.join(sanitized_prompt.split())
-
-        # Construct the filename
-        filename = f"{truncated_prompt[:70]}_{model}_{index}.png"
-
-        return filename
 
     async def generate_api_response(
         self,
@@ -66,111 +58,73 @@ class PixArtImgGenEngine(APIEngine):
         prompt: str,
         negative_prompt: Optional[str] = None,
         n: int = 1,
+        **kwargs,
     ) -> References:
         """
         Generates images using the PixArtAlphaPipeline.
-        
-        Args:
-            api_data (ModelConfig): Configuration data for the API (e.g., model name).
-            prompt (str): A text description of the desired image(s).
-            negative_prompt (Optional[str]): A negative text description to avoid certain aspects.
-            n (int): The number of images to generate.
-        
-        Returns:
-            References: Generated image information wrapped in a References object.
         """
+        LOGGER.info(f"Starting image generation with prompt: '{prompt}', negative_prompt: '{negative_prompt}', n: {n}")
+        
         model_name = api_data.model
         if not model_name:
-            LOGGER.error("No model specified.")
+            LOGGER.error("No model specified in api_data")
             raise ValueError("No model specified.")
 
-        try:
-            # Load text encoder in 8-bit precision to save VRAM
-            text_encoder = T5EncoderModel.from_pretrained(
-                model_name,
-                subfolder="text_encoder",
-                load_in_8bit=True,
-                device_map="auto",
-            )
-            pipe = PixArtAlphaPipeline.from_pretrained(
-                model_name,
-                text_encoder=text_encoder,
-                transformer=None,
-                device_map="auto",
-            )
+        LOGGER.info(f"Using model: {model_name}")
 
-            # Encode the prompt (this will use the text encoder)
-            with torch.no_grad():
-                prompt_embeds, prompt_attention_mask, negative_embeds, negative_prompt_attention_mask = pipe.encode_prompt(
-                    prompt=prompt,
-                    negative_prompt=negative_prompt,
-                )
+        # Check CUDA availability
+        cuda_available = check_cuda_availability()
+        device = "cuda" if cuda_available else "cpu"
+        LOGGER.info(f"Using device: {device}")
 
-            # Remove text encoder and pipe to free up VRAM
-            def flush():
-                gc.collect()
+        def flush():
+            LOGGER.debug("Performing memory flush")
+            gc.collect()
+            if cuda_available:
                 torch.cuda.empty_cache()
+                LOGGER.debug(f"Current CUDA memory allocated: {torch.cuda.memory_allocated() / 1e9:.2f}GB")
 
-            del text_encoder
-            del pipe
-            flush()
-
-            # Load the pipeline without the text encoder
+        try:
+            # Load the pipeline
+            LOGGER.info("Loading PixArtAlphaPipeline")
             pipe = PixArtAlphaPipeline.from_pretrained(
                 model_name,
-                text_encoder=None,
-                torch_dtype=torch.float16,
-            ).to("cuda")
-
-            # Generate images in batches if n > 1
+                cache_dir="/app/model_cache",
+                local_files_only=False,
+                token=os.getenv("HUGGINGFACE_TOKEN"),
+                torch_dtype=torch.float32 if device == "cpu" else torch.float16,
+            ).to(device)
+            
+            LOGGER.info("Generating images")
             images = []
-            batch_size = 1  # Adjust batch size as needed
+            batch_size = 1
             total_batches = (n + batch_size - 1) // batch_size
 
             for batch_num in range(total_batches):
                 current_batch_size = min(batch_size, n - batch_num * batch_size)
+                LOGGER.info(f"Processing batch {batch_num + 1}/{total_batches} with size {current_batch_size}")
 
-                # Generate latents
-                latents_output = pipe(
-                    negative_prompt=None,
-                    prompt_embeds=prompt_embeds,
-                    negative_prompt_embeds=negative_embeds,
-                    prompt_attention_mask=prompt_attention_mask,
-                    negative_prompt_attention_mask=negative_prompt_attention_mask,
+                images_batch = pipe(
+                    prompt=prompt,
+                    negative_prompt=negative_prompt,
                     num_images_per_prompt=current_batch_size,
-                    output_type="latent",
-                )
+                ).images
 
-                latents = latents_output.images
-
-                # Remove transformer to free up VRAM
-                del pipe.transformer
-                flush()
-
-                # Decode latents to images
-                with torch.no_grad():
-                    images_batch = pipe.vae.decode(
-                        latents / pipe.vae.config.scaling_factor, return_dict=False
-                    )[0]
-                images_batch = pipe.image_processor.postprocess(images_batch, output_type="pil")
-
+                LOGGER.info(f"Successfully generated {len(images_batch)} images in batch")
                 images.extend(images_batch)
 
-            # Cleanup
-            del pipe
-            flush()
-
-            # Create FileContentReferences
+            LOGGER.info("Creating file references")
             file_references: List[FileContentReference] = []
             for index, image in enumerate(images):
-                # Convert image to bytes
+                LOGGER.debug(f"Processing image {index + 1}/{len(images)}")
                 import io
-
                 image_bytes = io.BytesIO()
                 image.save(image_bytes, format="PNG")
                 image_bytes = image_bytes.getvalue()
 
-                filename = self.generate_filename(prompt, model_name, index + 1)
+                filename = self.generate_filename(prompt, model_name, index + 1, 'png')
+                LOGGER.debug(f"Generated filename: {filename}")
+                
                 file_references.append(
                     FileContentReference(
                         filename=filename,
@@ -190,10 +144,12 @@ class PixArtImgGenEngine(APIEngine):
                     )
                 )
 
+            LOGGER.info(f"Successfully created {len(file_references)} file references")
             return References(files=file_references)
 
         except Exception as e:
-            LOGGER.error(f"Error in PixArt image generation: {get_traceback()}")
+            LOGGER.error(f"Error in PixArt image generation: {str(e)}")
+            LOGGER.error(f"Full traceback: {get_traceback()}")
             return References(
                 messages=[
                     MessageDict(
@@ -205,5 +161,7 @@ class PixArtImgGenEngine(APIEngine):
             )
 
         finally:
-            # Ensure all resources are cleaned up
+            LOGGER.info("Cleaning up resources")
+            if 'pipe' in locals():
+                del pipe
             flush()

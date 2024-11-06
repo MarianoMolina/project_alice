@@ -6,7 +6,7 @@ from workflow.util import LOGGER, get_traceback
 from workflow.core.data_structures import MessageDict, ToolFunction, ContentType, References, UserInteraction, UserCheckpoint, Prompt, User, BaseDataStructure
 from workflow.core.agent import AliceAgent
 from workflow.core.api import APIManager
-from workflow.core.tasks import AliceTask
+from workflow.core.tasks import AliceTask, RetrievalTask
 
 class CheckpointType(str, Enum):
     TOOL_CALL = "tool_call"
@@ -25,7 +25,8 @@ class AliceChat(BaseDataStructure):
         name (str): The name of the chat session.
         messages (Optional[List[MessageDict]]): List of messages in the conversation history.
         alice_agent (AliceAgent): The main AI agent for the chat.
-        functions (Optional[List[AliceTask]]): List of available functions/tasks for the agent.
+        agent_tools (Optional[List[AliceTask]]): List of available tools/tasks for the agent.
+        retrieval_tools (Optional[RetrievalTask]): Optional retrieval task for accessing data cluster.
 
     Methods:
         tool_list(api_manager: APIManager) -> List[FunctionConfig]:
@@ -49,8 +50,8 @@ class AliceChat(BaseDataStructure):
             ),
         ), 
         description="The Alice agent object. Default is base Alice Agent.")
-    functions: Optional[List[AliceTask]] = Field([], description="List of functions to be registered with the agent")
-    model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str})
+    agent_tools: Optional[List[AliceTask]] = Field([], description="List of tools to be registered with the agent")
+    retrieval_tools: Optional[List[AliceTask]] = Field(None, description="Optional retrieval task for accessing data cluster")
     user_checkpoints: Dict[str, UserCheckpoint] = Field(
         default_factory=dict,
         description="Node-specific user interaction checkpoints"
@@ -59,6 +60,7 @@ class AliceChat(BaseDataStructure):
         default=None,
         description="Associated data cluster"
     )
+    model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str})
 
     @model_validator(mode='after')
     def initialize_default_checkpoints(self) -> 'AliceChat':
@@ -87,20 +89,57 @@ class AliceChat(BaseDataStructure):
         # Handle alice_agent
         data['alice_agent'] = self.alice_agent.model_dump(*args, **kwargs)
         
-        # Handle functions
-        if self.functions:
-            data['functions'] = [function.model_dump(*args, **kwargs) for function in self.functions]
+        # Handle agent_tools
+        if self.agent_tools:
+            data['agent_tools'] = [tool.model_dump(*args, **kwargs) for tool in self.agent_tools]
+            
+        # Handle retrieval_tools
+        if self.retrieval_tools:
+            data['retrieval_tools'] = [retrieval_tool.model_dump(*args, **kwargs) for retrieval_tool in self.retrieval_tools]
         
         return data
     
-    def tool_list(self, api_manager: APIManager) -> List[ToolFunction]:
-        return [func.get_function(api_manager)["tool_function"].model_dump() for func in self.functions] if self.functions else None
+    def get_available_tools(self, api_manager: APIManager) -> List[ToolFunction]:
+        """Returns a list of all available tools including the retrieval task if applicable."""
+        tools = []
+        
+        # Add regular tools
+        if self.agent_tools:
+            tools.extend([func.get_function(api_manager)["tool_function"].model_dump() for func in self.agent_tools])
+        
+        # Add retrieval task if present and data cluster is not empty
+        if self.retrieval_tools and self.data_cluster and bool(self.data_cluster):
+            # Ensure retrieval task has current data cluster
+            for tool in self.retrieval_tools:
+                if (tool.data_cluster is None or 
+                    tool.data_cluster != self.data_cluster):  # Now uses References.__eq__
+                    LOGGER.debug("Updating retrieval task data cluster")
+                    tool.data_cluster = self.data_cluster
+                tools.append(tool.get_function(api_manager)["tool_function"].model_dump())
+            
+        return tools if tools else None
     
-    def tool_map(self, api_manager: APIManager) -> Optional[Dict[str, Callable]]:
+    def get_tool_map(self, api_manager: APIManager) -> Optional[Dict[str, Callable]]:
+        """Combines all available function maps including the retrieval task if applicable."""
         combined_function_map = {}
-        for func in self.functions:
-            function_details = func.get_function(api_manager=api_manager)
-            combined_function_map.update(function_details["function_map"])
+        
+        # Add regular tools
+        if self.agent_tools:
+            for tool in self.agent_tools:
+                function_details = tool.get_function(api_manager=api_manager)
+                combined_function_map.update(function_details["function_map"])
+        
+        # Add retrieval task if present and data cluster is not empty
+        if self.retrieval_tools and self.data_cluster and bool(self.data_cluster):
+            for tool in self.retrieval_tools:
+                # Ensure retrieval task has current data cluster
+                if (tool.data_cluster is None or 
+                    tool.data_cluster != self.data_cluster):  # Now uses References.__eq__
+                    LOGGER.debug("Updating retrieval task data cluster")
+                    tool.data_cluster = self.data_cluster
+                function_details = tool.get_function(api_manager=api_manager)
+                combined_function_map.update(function_details["function_map"])
+            
         return combined_function_map
 
     async def generate_response(self, api_manager: APIManager, new_message: Optional[str] = None, user_data: Optional[User] = None) -> List[MessageDict]:
@@ -171,7 +210,7 @@ class AliceChat(BaseDataStructure):
             llm_message = await self._generate_llm_response(
                 api_manager,
                 self.messages + previous_messages,
-                self.tool_list(api_manager),
+                self.get_available_tools(api_manager),
                 user_data=user_data
             )
             turn_messages.append(llm_message)

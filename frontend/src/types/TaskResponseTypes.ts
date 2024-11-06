@@ -1,5 +1,5 @@
 import { BaseDatabaseObject, convertToBaseDatabaseObject, convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
-import { References } from "./ReferenceTypes";
+import { DataCluster, convertToDataCluster } from "./DataClusterTypes";
 
 export interface ExecutionHistoryItem {
     parent_task_id?: string;
@@ -9,7 +9,7 @@ export interface ExecutionHistoryItem {
 }
 
 export interface NodeResponse extends ExecutionHistoryItem {
-    references: References;
+    references: DataCluster;
 }
 
 export interface TaskResponse extends BaseDatabaseObject, Embeddable {
@@ -18,7 +18,7 @@ export interface TaskResponse extends BaseDatabaseObject, Embeddable {
     task_description: string;
     status: 'pending' | 'complete' | 'failed';
     result_code: number;
-    task_outputs?: string; 
+    task_outputs?: string;
     task_inputs?: { [key: string]: any };
     result_diagnostic?: string;
     usage_metrics?: { [key: string]: any };
@@ -40,10 +40,14 @@ export const convertToTaskResponse = (data: any): TaskResponse => {
         result_diagnostic: data?.result_diagnostic || '',
         usage_metrics: data?.usage_metrics || {},
         execution_history: data?.execution_history || [],
-        node_references: data?.node_references || [],
+        node_references: data?.node_references ? data.node_references.map((node: any) => ({
+                ...node,
+                references: convertToDataCluster(node.references),
+            })
+        ) : [],
     };
 };
 
 export interface TaskResponseComponentProps extends EnhancedComponentProps<TaskResponse> {
-    
+
 }

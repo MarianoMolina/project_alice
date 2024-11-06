@@ -1,11 +1,9 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { References } from '../../../../types/ReferenceTypes';
-import { NodeResponse } from '../../../../types/TaskResponseTypes';
 import FileViewer from '../../file/FileViewer';
 import { URLReferenceViewer } from '../../url_reference/URLReferenceViewer';
 import EnhancedMessage from '../../message/message/EnhancedMessage';
-import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
 import EmbeddingChunkViewer from '../../embedding_chunk/EmbeddingChunkViewer';
 import UserInteractionViewer from '../../user_interaction/UserInteractionViewer';
 import NodeResponsesViewer from './NodeResponsesViewer';

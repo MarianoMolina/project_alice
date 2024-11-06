@@ -117,3 +117,82 @@ class References(BaseModel):
 
     def __len__(self) -> int:
         return sum(len(value) if value else 0 for value in self.__dict__.values() if isinstance(value, list))
+    
+    def __eq__(self, other: Any) -> bool:
+        """
+        Compare two References objects for equality.
+        Two References objects are considered equal if they have the same content
+        in their respective fields, regardless of order.
+        """
+        if not isinstance(other, References):
+            return False
+            
+        # Compare each field
+        fields_to_compare = [
+            'messages', 'files', 'task_responses', 'url_references', 
+            'string_outputs', 'user_interactions', 'embeddings'
+        ]
+        
+        for field in fields_to_compare:
+            self_items = getattr(self, field) or []
+            other_items = getattr(other, field) or []
+            
+            # If one is None and the other isn't, they're not equal
+            if bool(self_items) != bool(other_items):
+                return False
+                
+            # If both are None or empty, continue to next field
+            if not self_items and not other_items:
+                continue
+                
+            # Compare lengths
+            if len(self_items) != len(other_items):
+                return False
+                
+            # For string outputs, compare sets
+            if field == 'string_outputs':
+                if set(self_items) != set(other_items):
+                    return False
+                continue
+                
+            # For other fields, compare the actual objects
+            # Convert to sets of their string representations for order-independent comparison
+            self_set = {str(item) for item in self_items}
+            other_set = {str(item) for item in other_items}
+            if self_set != other_set:
+                return False
+                
+        return True
+
+    def is_subset(self, other: 'References') -> bool:
+        """
+        Check if this References object is a subset of another References object.
+        """
+        if not isinstance(other, References):
+            return False
+            
+        for field in self.__fields__:
+            self_items = getattr(self, field) or []
+            other_items = getattr(other, field) or []
+            
+            # If this field is empty in self, continue
+            if not self_items:
+                continue
+                
+            # If self has items but other doesn't, it can't be a subset
+            if not other_items:
+                return False
+                
+            # For string outputs, use set operations
+            if field == 'string_outputs':
+                if not set(self_items).issubset(set(other_items)):
+                    return False
+                continue
+                
+            # For other fields, compare the actual objects
+            self_set = {str(item) for item in self_items}
+            other_set = {str(item) for item in other_items}
+            if not self_set.issubset(other_set):
+                return False
+                
+        return True

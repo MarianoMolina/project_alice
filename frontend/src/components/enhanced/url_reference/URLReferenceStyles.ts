@@ -91,14 +91,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     flexDirection: 'column',
     overflow: 'hidden',
   },
-  userMessage: {
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
-  },
-  toolMessage: {
-    backgroundColor: theme.palette.secondary.dark,
-    color: theme.palette.primary.dark,
-  },
   titleText: {
     marginTop: `${theme.spacing(2)} !important`,
   }

@@ -1,10 +1,11 @@
-import re
 from pydantic import Field
 from typing import List
 from openai import AsyncOpenAI
-from workflow.core.data_structures import ModelConfig, ApiType, FileContentReference, MessageDict, ContentType, FileType, References, FunctionParameters, ParameterDefinition
+from workflow.core.data_structures import (
+    ModelConfig, ApiType, FileContentReference, MessageDict, ContentType, FileType, References, FunctionParameters, ParameterDefinition
+    )
 from workflow.core.api.engines.api_engine import APIEngine
-from workflow.util import LOGGER
+from workflow.util import LOGGER, sanitize_and_limit_string
 
 class ImageGenerationEngine(APIEngine):
     input_variables: FunctionParameters = Field(
@@ -35,19 +36,6 @@ class ImageGenerationEngine(APIEngine):
         )
     )
     required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
-
-    def generate_filename(self, prompt: str, model: str, index: int) -> str:
-        """
-        Generate a descriptive filename based on the prompt and model.
-        """
-        # Sanitize and truncate the prompt for the filename
-        sanitized_prompt = re.sub(r'[^\w\s-]', '', prompt.lower())
-        truncated_prompt = '_'.join(sanitized_prompt.split())
-        
-        # Construct the filename
-        filename = f"{truncated_prompt[:70]}_{model}_{index}.png"
-        
-        return filename
 
     async def generate_api_response(self, api_data: ModelConfig, prompt: str, n: int = 1, size: str = "1024x1024", quality: str = "standard") -> References:
         """
@@ -85,7 +73,7 @@ class ImageGenerationEngine(APIEngine):
             # Create FileContentReferences
             file_references: List[FileContentReference] = []
             for index, image_data in enumerate(response.data):
-                filename = self.generate_filename(prompt, model, index + 1)
+                filename = self.generate_filename(prompt, model, index + 1, 'png')
                 file_references.append(FileContentReference(
                     filename=filename,
                     type=FileType.IMAGE,

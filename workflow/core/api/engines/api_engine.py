@@ -1,7 +1,8 @@
 from abc import abstractmethod
 from pydantic import BaseModel, Field
 from workflow.core.data_structures import References, ApiType, FunctionParameters
-from typing import Dict, Any
+from typing import Dict, Any, Optional
+from workflow.util import sanitize_and_limit_string
 
 class APIEngine(BaseModel):
     """
@@ -39,3 +40,31 @@ class APIEngine(BaseModel):
             NotImplementedError: If the method is not implemented by a subclass.
         """
         pass
+
+    def generate_filename(self, prompt: str, model: Optional[str], index: Optional[int], extension: str = 'png') -> str:
+        """
+        Generate a descriptive filename based on the prompt and model.
+        Sanitizes both prompt and model strings to ensure safe filenames.
+        
+        Args:
+            prompt (str): The input prompt to use in filename
+            model (str): The model identifier to use in filename
+            index (int): Index number for the file
+            extension (str): The file extension to use (default: 'png')
+            
+        Returns:
+            str: A sanitized filename string
+        """
+        # Sanitize both prompt and model strings
+        sanitized_prompt = sanitize_and_limit_string(prompt, 70)
+        sanitized_model = sanitize_and_limit_string(model)
+        
+        # Construct the filename with truncated prompt
+        filename = f"{sanitized_prompt}"
+        if sanitized_model:
+            filename += f"_{sanitized_model}"
+        if index is not None:
+            filename += f"_{index}"
+        filename += f".{extension}"
+        
+        return filename

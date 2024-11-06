@@ -13,14 +13,6 @@ fastapi-cors
 # Docker
 docker
 
-# Utilities
-pydantic
-jinja2
-pillow
-python-dotenv
-python-magic
-pymongo # BSON
-
 # Third party APIs
 openai
 google-api-python-client
@@ -33,8 +25,23 @@ praw
 exa_py
 arxiv
 
+# Utilities
+pydantic
+jinja2
+pillow
+python-dotenv
+python-magic
+pymongo # BSON
+
 # Local generation
 transformers
 diffusers
-torch
+--extra-index-url https://download.pytorch.org/whl/cu118
+sentencepiece
+ftfy
+torch>=2.1.0+cu118
+torchvision>=0.16.0+cu118
 scipy
+accelerate>=0.26.0
+bitsandbytes>=0.41.1
+safetensors

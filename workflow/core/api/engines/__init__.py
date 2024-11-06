@@ -8,7 +8,7 @@ from .vision_model_engine import VisionModelEngine
 from .anthropic_vision_engine import AnthropicVisionEngine
 from .oai_stt_engine import OpenAISpeechToTextEngine
 from .oai_timestamped_stt_engine import OpenAIAdvancedSpeechToTextEngine
-from .text_to_speech_engine import OpenAITextToSpeechEngine
+from .text_to_speech_engine import TextToSpeechEngine
 from .embedding_engine import EmbeddingEngine
 from .gemini_llm_engine import GeminiLLMEngine
 from .cohere_llm_engine import CohereLLMEngine
@@ -74,8 +74,8 @@ ApiEngineMap = {
         ApiName.GEMINI_STT: GeminiSpeechToTextEngine
     },
     ApiType.TEXT_TO_SPEECH: {
-        ApiName.OPENAI_TTS: OpenAITextToSpeechEngine,
-        ApiName.GROQ_TTS: OpenAITextToSpeechEngine,
+        ApiName.OPENAI_TTS: TextToSpeechEngine,
+        ApiName.GROQ_TTS: TextToSpeechEngine,
         ApiName.BARK_TTS: BarkEngine
     },
     ApiType.EMBEDDINGS: {
@@ -88,4 +88,4 @@ ApiEngineMap = {
 __all__ = ["ArxivSearchAPI", "ExaSearchAPI", "GoogleSearchAPI", "RedditSearchAPI", "WikipediaSearchAPI", "APIEngine", "GeminiImageGenerationEngine",
            "LLMEngine", "LLMOpenAI", "LLMAnthropic", "ImageGenerationEngine", "CohereLLMEngine", "GeminiVisionEngine", "GeminiEmbeddingsEngine", "GeminiSpeechToTextEngine",
            "VisionModelEngine", "AnthropicVisionEngine", "OpenAISpeechToTextEngine", "OpenAIAdvancedSpeechToTextEngine", "BarkEngine", "WolframAlphaEngine", "PixArtImgGenEngine",
-           "OpenAITextToSpeechEngine", "EmbeddingEngine", "GeminiLLMEngine", "CohereLLMEngine", "GoogleGraphEngine"]
+           "TextToSpeechEngine", "EmbeddingEngine", "GeminiLLMEngine", "CohereLLMEngine", "GoogleGraphEngine"]

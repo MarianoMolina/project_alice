@@ -2,7 +2,7 @@ import React from 'react';
 import {
     Typography,
 } from '@mui/material';
-import { Language, Description, QueryBuilder, DataObject, Functions } from '@mui/icons-material';
+import { Language, QueryBuilder, DataObject, Functions } from '@mui/icons-material';
 import { UserInteractionComponentProps } from '../../../../types/UserInteractionTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
@@ -24,7 +24,7 @@ const UserInteractionCardView: React.FC<UserInteractionComponentProps> = ({
         {
             icon: <Functions />,
             primary_text: "Task Response",
-            secondary_text: item.task_response_id ? `${item.task_response_id.task_name} - ${item.task_response_id._id}` : 'No task response available'
+            secondary_text: item.task_response_id ? item.task_response_id : 'No task response available'
         },
         {
             icon: <DataObject />,

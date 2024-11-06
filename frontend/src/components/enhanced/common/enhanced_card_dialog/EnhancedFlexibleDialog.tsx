@@ -14,6 +14,10 @@ import EnhancedURLReference from '../../url_reference/url_reference/EnhancedURLR
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import { ComponentMode } from '../../../../types/CollectionTypes';
 import Logger from '../../../../utils/Logger';
+import EnhancedUserCheckpoint from '../../user_checkpoint/user_checkpoint/EnhancedUserCheckpoint';
+import EnhancedUserInteraction from '../../user_interaction/user_interaction/EnhancedUserInteraction';
+import EnhancedEmbeddingChunk from '../../embedding_chunk/embedding_chunk/EnhancedEmbeddingChunk';
+import EnhancedDataCluster from '../../data_cluster/data_cluster/EnhancedDataCluster';
 
 const EnhancedFlexibleDialog: React.FC = () => {
   const { 
@@ -40,6 +44,10 @@ const EnhancedFlexibleDialog: React.FC = () => {
       handleFileClick: (id: string) => selectCardItem('File', id),
       handleMessageClick: (id: string) => selectCardItem('Message', id),
       handleURLReferenceClick: (id: string) => selectCardItem('URLReference', id),
+      handleUserCheckpointClick: (id: string) => selectCardItem('UserCheckpoint', id),
+      handleUserInteractionClick: (id: string) => selectCardItem('UserInteraction', id),
+      handleEmbeddingChunkClick: (id: string) => selectCardItem('EmbeddingChunk', id),
+      handleDataClusterClick: (id: string) => selectCardItem('DataCluster', id),
     };
 
     const commonProps = {
@@ -77,6 +85,14 @@ const EnhancedFlexibleDialog: React.FC = () => {
           return <EnhancedMessage itemId={selectedFlexibleItem._id} {...commonProps} />;
         case 'URLReference':
           return <EnhancedURLReference itemId={selectedFlexibleItem._id} {...commonProps} />;
+        case 'UserCheckpoint':
+          return <EnhancedUserCheckpoint itemId={selectedFlexibleItem._id} {...commonProps} />;
+        case 'UserInteraction':
+          return <EnhancedUserInteraction itemId={selectedFlexibleItem._id} {...commonProps} />;
+        case 'EmbeddingChunk':
+          return <EnhancedEmbeddingChunk itemId={selectedFlexibleItem._id} {...commonProps} />;
+        case 'DataCluster':
+          return <EnhancedDataCluster itemId={selectedFlexibleItem._id} {...commonProps} />;
         default:
           return null;
       }
@@ -104,6 +120,14 @@ const EnhancedFlexibleDialog: React.FC = () => {
           return <EnhancedMessage {...commonProps} />;
         case 'URLReference':
           return <EnhancedURLReference {...commonProps} />;
+        case 'UserCheckpoint':
+          return <EnhancedUserCheckpoint {...commonProps} />;
+        case 'UserInteraction':
+          return <EnhancedUserInteraction {...commonProps} />;
+        case 'EmbeddingChunk':
+          return <EnhancedEmbeddingChunk {...commonProps} />;
+        case 'DataCluster':
+          return <EnhancedDataCluster {...commonProps} />;
         default:
           return null;
       }

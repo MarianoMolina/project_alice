@@ -1,4 +1,4 @@
-import base64, json, re
+import re
 from pydantic import Field
 from typing import List
 from openai import AsyncOpenAI
@@ -123,6 +123,7 @@ class EmbeddingEngine(APIEngine):
         """
         if est_token_count(input_text) < 600:
             return [input_text]
+            
         # Step 1: Setup initial sentences
         sentences = self.setup_initial_sentences(input_text)
 
@@ -130,10 +131,10 @@ class EmbeddingEngine(APIEngine):
         combined_sentences = self.create_combined_sentences(sentences)
 
         # Step 3: Generate embeddings for combined sentences using generate_embedding
-        embeddings = await self.get_embeddings_for_sentences(combined_sentences, api_data)
+        embedding_chunks = await self.get_embeddings_for_sentences(combined_sentences, api_data)
 
         # Step 4: Find breakpoints using cosine similarity
-        breakpoints = self.find_breakpoints(embeddings, combined_sentences)
+        breakpoints = self.find_breakpoints([chunk.vector for chunk in embedding_chunks], combined_sentences)
 
         # Step 5: Return final chunks based on breakpoints
         chunks = self.return_final_chunks(breakpoints, sentences)
@@ -160,21 +161,13 @@ class EmbeddingEngine(APIEngine):
 
     async def get_embeddings_for_sentences(
         self, combined_sentences: List[str], api_data: ModelConfig
-    ) -> List[List[float]]:
+    ) -> List[EmbeddingChunk]:
         """
         Generates embeddings for the combined sentences using generate_embedding.
         """
         # Generate embeddings for the combined sentences
-        embeddings_references = await self.generate_embedding(combined_sentences, api_data)
-
-        # Extract embeddings from the references
-        embeddings = []
-        for ref in embeddings_references:
-            embedding_b64 = ref.vector
-            embedding_json = base64.b64decode(embedding_b64.encode('utf-8')).decode('utf-8')
-            embedding = json.loads(embedding_json)
-            embeddings.append(embedding)
-        return embeddings
+        embedding_chunks = await self.generate_embedding(combined_sentences, api_data)
+        return embedding_chunks
 
     def find_breakpoints(
         self, embeddings: List[List[float]], combined_sentences: List[str]

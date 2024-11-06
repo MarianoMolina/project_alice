@@ -4,13 +4,14 @@ import EditIcon from '@mui/icons-material/Edit';
 import useStyles from '../MessageStyles';
 import { MessageComponentProps, MessageGenerators, RoleType } from '../../../../types/MessageTypes';
 import { BackgroundBeams } from '../../../ui/aceternity/BackgroundBeams';
-import { hasAnyReferences } from '../../../../types/ReferenceTypes';
 import ReferenceChip from '../../common/references/ReferenceChip';
 import { CopyAll, Visibility } from '@mui/icons-material';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { useNotification } from '../../../../contexts/NotificationContext';
 import AliceMarkdown, { CustomBlockType } from '../../../ui/markdown/alice_markdown/AliceMarkdown';
+import DataClusterManager from '../../data_cluster/DataClusterManager';
+import { hasAnyReferences } from '../../../../types/ReferenceTypes';
 
 const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => {
     const classes = useStyles();
@@ -61,35 +62,6 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => 
             </>
         );
     };
-
-    const renderReferences = () => {
-        if (!message.references || !hasAnyReferences(message.references)) return null;
-
-        return (
-            <Box className={classes.referencesContainer}>
-                <Typography variant="subtitle2">References:</Typography>
-
-                <Box display="flex" flexWrap="wrap" gap={1}>
-                    {message.references.messages?.map((msg, index) => (
-                        <ReferenceChip key={`msg-${index}`} reference={msg} type="Message" view />
-                    ))}
-                    {message.references.files?.map((file, index) => (
-                        <ReferenceChip key={`file-${index}`} reference={file} type="File" view />
-                    ))}
-                    {message.references.task_responses?.map((task, index) => (
-                        <ReferenceChip key={`task-${index}`} reference={task} type="TaskResponse" view />
-                    ))}
-                    {message.references.url_references?.map((url, index) => (
-                        <ReferenceChip key={`url-${index}`} reference={url} type="URLReference" view />
-                    ))}
-                    {message.references.string_outputs?.map((str, index) => (
-                        <ReferenceChip key={`str-${index}`} reference={str} type="string_output" view />
-                    ))}
-                </Box>
-            </Box>
-        );
-    }; 
-
     return (
         <Box className={`${classes.message} ${getMessageClass()}`}>
             <BackgroundBeams className="absolute inset-0 w-full h-full" />
@@ -134,7 +106,9 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => 
                     </Box>
                 </Box>
                 {renderMessageContent()}
-                {renderReferences()}
+                {message.references && hasAnyReferences(message.references) &&
+                    <DataClusterManager dataCluster={message.references} isEditable={false} />
+                }
                 <Box className={classes.metadataContainer}>
                     {message.step && (
                         <Tooltip title="Task or source that produced this message" arrow>

@@ -2,7 +2,6 @@ import React from 'react';
 import { Box, Typography, Link, Paper, Chip } from '@mui/material';
 import useStyles from './URLReferenceStyles';
 import { URLReference } from '../../../types/URLReferenceTypes';
-import CustomMarkdown from '../../ui/markdown/CustomMarkdown';
 import { CopyButton } from '../../ui/markdown/CopyButton';
 import AliceMarkdown from '../../ui/markdown/alice_markdown/AliceMarkdown';
 

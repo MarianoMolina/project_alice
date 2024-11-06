@@ -12,8 +12,6 @@ import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import { CollectionElementString, CollectionTypeString } from '../../../../types/CollectionTypes';
 import { ToolCall } from '../../../../types/ParameterTypes';
 import ToolCallView from '../tool_call/ToolCall';
-import UserInteractionViewer from '../../user_interaction/UserInteractionViewer';
-import EmbeddingChunkViewer from '../../embedding_chunk/EmbeddingChunkViewer';
 
 type ReferenceType = 
   | MessageType 
@@ -29,9 +27,8 @@ type ReferenceType =
 type ReferenceTypeString = 
   | CollectionTypeString[keyof CollectionTypeString] 
   | 'string_output' 
-  | 'tool_call' 
-  | 'UserInteraction' 
-  | 'EmbeddingChunk';
+  | 'tool_call'
+  | 'string';
 
 interface ReferenceChipProps {
   reference: ReferenceType;
@@ -87,7 +84,7 @@ const ReferenceChip: React.FC<ReferenceChipProps> = ({
   };
 
   const handleView = () => {
-    if (['string_output', 'tool_call', 'UserInteraction', 'EmbeddingChunk'].includes(type)) {
+    if (['string_output', 'tool_call'].includes(type)) {
       setDialogOpen(true);
     } else if (typeof reference === 'object' && '_id' in reference) {
       selectCardItem(type as CollectionElementString, reference._id);
@@ -108,12 +105,6 @@ const ReferenceChip: React.FC<ReferenceChipProps> = ({
       case 'tool_call':
         return <ToolCallView toolCall={reference as ToolCall} />;
       
-      case 'UserInteraction':
-        return <UserInteractionViewer interaction={reference as UserInteraction} />;
-      
-      case 'EmbeddingChunk':
-        return <EmbeddingChunkViewer chunk={reference as EmbeddingChunk} />;
-      
       default:
         return null;
     }
@@ -123,10 +114,6 @@ const ReferenceChip: React.FC<ReferenceChipProps> = ({
     switch (type) {
       case 'tool_call':
         return 'Tool Call';
-      case 'UserInteraction':
-        return 'User Interaction';
-      case 'EmbeddingChunk':
-        return 'Embedding Chunk';
       case 'string_output':
         return 'String Output';
       default:

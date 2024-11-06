@@ -291,7 +291,7 @@ base_module = BaseModule(
             {
                 "key": "pixart_sigma_model",
                 "short_name": "Pixart Sigma",
-                "model_name": "PixArt-alpha/PixArt-Sigma-XL-2-2K-MS",
+                "model_name": "PixArt-alpha/PixArt-Sigma-XL-2-1024-MS",
                 "model_format": "OpenChat", # random value
                 "ctx_size": 1024, # random value
                 "model_type": "img_gen",
@@ -701,7 +701,7 @@ base_module = BaseModule(
             {
                 "key": "pixart_img_gen",
                 "api_type": "img_generation",
-                "api_name": "pixart_img_gen",
+                "api_name": "pixart_img_gen", # This should probably be called diffusers_img_gen
                 "name": "Pixart Image Generation",
                 "api_config": {
                     "api_key": "pixart",

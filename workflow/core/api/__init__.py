@@ -3,10 +3,10 @@ from .api_manager import APIManager
 from .engines import (
     ArxivSearchAPI, ExaSearchAPI, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI, 
     APIEngine, LLMEngine, LLMAnthropic, VisionModelEngine, ImageGenerationEngine, AnthropicVisionEngine, 
-    OpenAISpeechToTextEngine, OpenAIAdvancedSpeechToTextEngine, OpenAITextToSpeechEngine, 
+    OpenAISpeechToTextEngine, OpenAIAdvancedSpeechToTextEngine, TextToSpeechEngine, 
     EmbeddingEngine, GoogleGraphEngine, WolframAlphaEngine
     )
 __all__ = ["API", "APIManager", "ArxivSearchAPI", "ExaSearchAPI", "GoogleSearchAPI", "RedditSearchAPI", 
            "WikipediaSearchAPI", "APIEngine", "LLMEngine", "LLMAnthropic", "ImageGenerationEngine", 
            "VisionModelEngine", "AnthropicVisionEngine", "OpenAISpeechToTextEngine", "OpenAIAdvancedSpeechToTextEngine", 
-           "OpenAITextToSpeechEngine", "EmbeddingEngine", "GoogleGraphEngine", "WolframAlphaEngine"]
+           "TextToSpeechEngine", "EmbeddingEngine", "GoogleGraphEngine", "WolframAlphaEngine"]

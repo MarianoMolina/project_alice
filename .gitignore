@@ -1,5 +1,5 @@
-logs
-tmp
+logs/
+tmp/
 .venv
 venv
 .pytest_cache
@@ -8,6 +8,7 @@ venv
 .vscode
 myDockerCompose.log
 __pycache__
-shared-uploads
-shared-types
-agent_computer_use
+shared-uploads/
+shared-types/
+agent_computer_use/
+model_cache/

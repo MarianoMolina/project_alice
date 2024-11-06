@@ -1,5 +1,4 @@
 import { BaseDatabaseObject, convertToBaseDatabaseObject, convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
-import { TaskResponse } from "./TaskResponseTypes";
 import { UserCheckpoint } from "./UserCheckpointTypes";
 
 export interface UserResponse {
@@ -8,7 +7,7 @@ export interface UserResponse {
 }
 
 export interface UserInteraction extends BaseDatabaseObject, Embeddable {
-    task_response_id: TaskResponse;
+    task_response_id: string;
     user_checkpoint_id: UserCheckpoint;
     user_response?: UserResponse;
 }

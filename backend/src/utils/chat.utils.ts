@@ -5,6 +5,8 @@ import { updateMessage, createMessage } from './message.utils';
 import { getObjectId } from './utils';
 import Logger from './logger';
 import { IMessageDocument } from '../interfaces/message.interface';
+import { createDataCluster, updateDataCluster } from './data_cluster';
+import { DataCluster } from '../models/reference.model';
 
 export async function createChat(
     chatData: Partial<IAliceChatDocument>,
@@ -20,6 +22,39 @@ export async function createChat(
                 } else {
                     throw new Error('Failed to create message');
                 }
+            }
+        }
+
+        // Handle data cluster
+        if (chatData.data_cluster) {
+            if (typeof chatData.data_cluster === 'string') {
+                const cluster = await DataCluster.findById(chatData.data_cluster);
+                if (!cluster) {
+                    throw new Error('Data cluster not found');
+                }
+                chatData.data_cluster = cluster;
+            } else if (chatData.data_cluster instanceof Types.ObjectId) {
+                const cluster = await DataCluster.findById(chatData.data_cluster);
+                if (!cluster) {
+                    throw new Error('Data cluster not found');
+                }
+                chatData.data_cluster = cluster;
+            } else if ('_id' in chatData.data_cluster) {
+                const updatedCluster = await updateDataCluster(
+                    chatData.data_cluster._id.toString(),
+                    chatData.data_cluster,
+                    userId
+                );
+                if (!updatedCluster) {
+                    throw new Error('Failed to update data cluster');
+                }
+                chatData.data_cluster = updatedCluster;
+            } else {
+                const newCluster = await createDataCluster(chatData.data_cluster, userId);
+                if (!newCluster) {
+                    throw new Error('Failed to create data cluster');
+                }
+                chatData.data_cluster = newCluster;
             }
         }
 
@@ -59,7 +94,7 @@ export async function updateChat(
 
         // Check for changes in 'alice_agent' and 'functions'
         checkAndUpdateChanges(originalChat, chatData, changeHistoryData, 'alice_agent');
-        checkArrayChangesAndUpdate(originalChat, chatData, changeHistoryData, 'functions');
+        checkArrayChangesAndUpdate(originalChat, chatData, changeHistoryData, 'agent_tools');
 
         // Handle messages
         let messageIds: Types.ObjectId[] = [];
@@ -89,6 +124,55 @@ export async function updateChat(
         } else {
             // No messages provided, keep original messages
             messageIds = originalChat.messages as Types.ObjectId[];
+        }
+
+        // Handle data cluster update
+        if (chatData.data_cluster) {
+            if (typeof chatData.data_cluster === 'string') {
+                const cluster = await DataCluster.findById(chatData.data_cluster);
+                if (!cluster) {
+                    throw new Error('Data cluster not found');
+                }
+                chatData.data_cluster = cluster;
+            } else if (chatData.data_cluster instanceof Types.ObjectId) {
+                const cluster = await DataCluster.findById(chatData.data_cluster);
+                if (!cluster) {
+                    throw new Error('Data cluster not found');
+                }
+                chatData.data_cluster = cluster;
+            } else if ('_id' in chatData.data_cluster) {
+                if (originalChat.data_cluster instanceof Types.ObjectId) {
+                    const originalCluster = await DataCluster.findById(originalChat.data_cluster);
+                    if (!originalCluster) {
+                        throw new Error('Original data cluster not found');
+                    }
+                    originalChat.data_cluster = originalCluster;
+                }
+                
+                if (originalChat.data_cluster._id.equals(chatData.data_cluster._id)) {
+                    const updatedCluster = await updateDataCluster(
+                        chatData.data_cluster._id.toString(),
+                        chatData.data_cluster,
+                        userId
+                    );
+                    if (!updatedCluster) {
+                        throw new Error('Failed to update data cluster');
+                    }
+                    chatData.data_cluster = updatedCluster;
+                } else {
+                    const newCluster = await createDataCluster(chatData.data_cluster, userId);
+                    if (!newCluster) {
+                        throw new Error('Failed to create new data cluster');
+                    }
+                    chatData.data_cluster = newCluster;
+                }
+            } else {
+                const newCluster = await createDataCluster(chatData.data_cluster, userId);
+                if (!newCluster) {
+                    throw new Error('Failed to create new data cluster');
+                }
+                chatData.data_cluster = newCluster;
+            }
         }
 
         // Update change history if there are changes

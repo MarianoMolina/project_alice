@@ -2,6 +2,24 @@ import json, re, numpy as np
 from typing import List, Any, Union, Type, Tuple, Dict
 from workflow.util.logging_config import LOGGER
 
+def check_cuda_availability() -> bool:
+    try:
+        import torch
+    except ImportError:
+        LOGGER.warning("PyTorch is not installed. Running in CPU mode.")
+        return False
+    if not torch.cuda.is_available():
+        LOGGER.warning("CUDA is not available. Running in CPU mode.")
+        return False
+    try:
+        test_tensor = torch.zeros(1).cuda()
+        del test_tensor
+        LOGGER.info("CUDA is available and working properly.")
+        return True
+    except Exception as e:
+        LOGGER.warning(f"CUDA initialization failed: {str(e)}")
+        return False
+    
 def json_to_python_type_mapping(json_type: str) -> Type | Tuple[Type, ...] | None:
     type_mapping = {
         "string": str,
@@ -69,13 +87,19 @@ def get_language_matching(language: str) -> Union[str, None]:
     LOGGER.warning(f"No matching language found for: {language}")
     return None
 
-def sanitize_and_limit_prompt(prompt: str, limit: int = 50) -> str:
+def sanitize_and_limit_string(prompt: str, limit: int = 50) -> str:
     # Sanitize the prompt
-    sanitized_prompt = re.sub(r'[^a-zA-Z0-9\s_-]', '_', prompt)
+    sanitized_prompt = sanitize_string(prompt)
     # Limit to the first n characters
     limited_sanitized_prompt = sanitized_prompt[:limit]
-    LOGGER.debug(f"Sanitized and limited prompt: {limited_sanitized_prompt}")
     return limited_sanitized_prompt
+
+
+def sanitize_string(s: str) -> str:
+    # Remove special characters and convert to lowercase
+    sanitized = re.sub(r'[^\w\s-]', '', s.lower())
+    # Replace whitespace with underscores
+    return '_'.join(sanitized.split())
 
 def chunk_text(input_text: str, target_chunk_size: int) -> List[str]:
     """

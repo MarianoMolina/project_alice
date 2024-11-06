@@ -67,11 +67,4 @@ const DataClusterCardView: React.FC<DataClusterComponentProps> = ({
     );
 };
 
-// Add some basic styles to ensure proper chip display
-const styles = {
-    referenceChip: {
-        margin: '4px',
-    }
-};
-
 export default DataClusterCardView;

@@ -25,6 +25,10 @@ import EnhancedPrompt from '../components/enhanced/prompt/prompt/EnhancedPrompt'
 import EnhancedTask from '../components/enhanced/task/task/EnhancedTask';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
 import EnhancedURLReference from '../components/enhanced/url_reference/url_reference/EnhancedURLReference';
+import EnhancedUserInteraction from '../components/enhanced/user_interaction/user_interaction/EnhancedUserInteraction';
+import EnhancedUserCheckpoint from '../components/enhanced/user_checkpoint/user_checkpoint/EnhancedUserCheckpoint';
+import EnhancedDataCluster from '../components/enhanced/data_cluster/data_cluster/EnhancedDataCluster';
+import EnhancedEmbeddingChunk from '../components/enhanced/embedding_chunk/embedding_chunk/EnhancedEmbeddingChunk';
 
 export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' | 'urlreferences' | 'userinteractions' | 'usercheckpoints' | 'dataclusters' | 'embeddingchunks';
 export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType | URLReference | UserInteraction | UserCheckpoint | DataCluster | EmbeddingChunk;
@@ -100,10 +104,10 @@ export const collectionNameToEnhancedComponent: Record<CollectionName, React.Com
     files: EnhancedFile,
     messages: EnhancedMessage,
     urlreferences: EnhancedURLReference,
-    userinteractions: EnhancedAgent,
-    usercheckpoints: EnhancedAgent,
-    dataclusters: EnhancedAgent,
-    embeddingchunks: EnhancedAgent
+    userinteractions: EnhancedUserInteraction,
+    usercheckpoints: EnhancedUserCheckpoint,
+    dataclusters: EnhancedDataCluster,
+    embeddingchunks: EnhancedEmbeddingChunk
 };
 
 // Create a runtime mapping object

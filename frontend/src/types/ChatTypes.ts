@@ -3,15 +3,16 @@ import { AliceAgent, convertToAliceAgent } from './AgentTypes';
 import { BaseDatabaseObject, convertToBaseDatabaseObject, EnhancedComponentProps } from './CollectionTypes';
 import { convertToMessageType, MessageType } from './MessageTypes';
 import { UserCheckpoint } from './UserCheckpointTypes';
-import { References } from './ReferenceTypes';
+import { convertToDataCluster, DataCluster } from './DataClusterTypes';
 
 export interface AliceChat extends BaseDatabaseObject {
     name: string;
     messages: MessageType[];
     alice_agent: AliceAgent;
-    functions?: AliceTask[];
+    agent_tools?: AliceTask[];
     user_checkpoints?: { [key: string]: UserCheckpoint };
-    data_cluster?: References;
+    data_cluster?: DataCluster;
+    retrieval_tools?: AliceTask[];
 }
 
 export const convertToAliceChat = (data: any): AliceChat => {
@@ -20,9 +21,10 @@ export const convertToAliceChat = (data: any): AliceChat => {
         name: data?.name || '',
         messages: (data?.messages || []).map(convertToMessageType),
         alice_agent: convertToAliceAgent(data?.alice_agent),
-        functions: (data?.functions || []).map(convertToAliceTask),
-        user_checkpoints: data?.user_checkpoints || {},
-        data_cluster: data?.data_cluster || {},
+        agent_tools: (data?.agent_tools || []).map(convertToAliceTask),
+        user_checkpoints: data?.user_checkpoints || undefined,
+        data_cluster: data?.data_cluster ? convertToDataCluster(data?.data_cluster) : undefined,
+        retrieval_tools: (data?.retrieval_tools || []).map(convertToAliceTask),
     };
 };
 
@@ -39,7 +41,8 @@ export const getDefaultChatForm = (): Partial<AliceChat> => ({
     name: '',
     messages: [],
     alice_agent: undefined,
-    functions: [],
+    agent_tools: [],
     user_checkpoints: {},
     data_cluster: {},
+    retrieval_tools: undefined,
 });

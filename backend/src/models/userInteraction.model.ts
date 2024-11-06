@@ -58,7 +58,7 @@ function ensureObjectIdForUpdate(this: Query<any, any>, next: CallbackWithoutRes
 
 
 function autoPopulate(this: Query<any, any>, next: CallbackWithoutResultAndOptionalError) {
-    this.populate('created_by updated_by user_checkpoint_id task_response_id');
+    this.populate('created_by updated_by user_checkpoint_id');
     next();
 }
 

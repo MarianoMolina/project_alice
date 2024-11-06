@@ -7,6 +7,7 @@ import { API } from './ApiTypes';
 import Logger from "../utils/Logger";
 import { UserCheckpoint } from "./UserCheckpointTypes";
 import { References } from "./ReferenceTypes";
+import { convertToDataCluster } from "./DataClusterTypes";
 
 export enum TaskType {
   APITask = "APITask",
@@ -66,7 +67,7 @@ export const convertToAliceTask = (data: any): AliceTask => {
     max_attempts: data?.max_attempts || undefined,
     agent: data?.agent || null,
     user_checkpoints: data?.user_checkpoints || {},
-    data_cluster: data?.data_cluster || {},
+    data_cluster: data?.data_cluster ? convertToDataCluster(data.data_cluster) : undefined,
   };
 };
 

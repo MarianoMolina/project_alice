@@ -4,13 +4,14 @@ import { ITaskDocument } from './task.interface';
 import { IAgentDocument } from './agent.interface';
 import { IUserDocument } from './user.interface';
 import { IUserCheckpointDocument } from './userCheckpoint.interface';
+import { IDataClusterDocument } from './references.interface';
 
 // ChangeHistory interfaces
 export interface IChangeHistory {
     previous_agent: Types.ObjectId | null | IAgentDocument;
     updated_agent: Types.ObjectId | null | IAgentDocument;
-    previous_functions: Types.ObjectId[] | ITaskDocument[];
-    updated_functions: Types.ObjectId[] | ITaskDocument[];
+    previous_agent_tools: Types.ObjectId[] | ITaskDocument[];
+    updated_agent_tools: Types.ObjectId[] | ITaskDocument[];
     changed_by: Types.ObjectId | IUserDocument;
     timestamp: Date;
 }
@@ -25,7 +26,9 @@ export interface IAliceChat {
     messages: Types.ObjectId[] | IMessageDocument[];
     changeHistory: IChangeHistoryDocument[];
     alice_agent: Types.ObjectId | IAgentDocument;
-    functions: Types.ObjectId[] | ITaskDocument[];
+    agent_tools: Types.ObjectId[] | ITaskDocument[];
+    retrieval_tools: Types.ObjectId[] | ITaskDocument[];
+    data_cluster: Types.ObjectId | IDataClusterDocument;
     user_checkpoints: { [key: string]: Types.ObjectId[] | IUserCheckpointDocument };
     created_by: Types.ObjectId | IUserDocument;
     updated_by: Types.ObjectId | IUserDocument;

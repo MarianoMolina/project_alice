@@ -1,7 +1,7 @@
 import { BaseDatabaseObject, convertToBaseDatabaseObject, convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
+import { convertToDataCluster, DataCluster } from "./DataClusterTypes";
 import { FileType } from "./FileTypes";
 import { ToolCall } from "./ParameterTypes";
-import { References } from "./ReferenceTypes";
 
 export enum RoleType {
     USER = 'user',
@@ -37,7 +37,7 @@ export interface MessageType extends BaseDatabaseObject, Embeddable {
     type?: ContentType;
     tool_calls?: ToolCall[];
     creation_metadata?: Record<string, any>;
-    references?: References;
+    references?: DataCluster;
 }
 
 export const convertToMessageType = (data: any): MessageType => {
@@ -51,7 +51,7 @@ export const convertToMessageType = (data: any): MessageType => {
         assistant_name: data?.assistant_name || undefined,
         type: data?.type || 'text',
         tool_calls: data?.tool_calls || [],
-        references: data?.references || {} as References,
+        references: data?.references ? convertToDataCluster(data.references) : undefined,
         creation_metadata: data?.creation_metadata || {},
     };
 };
@@ -65,7 +65,7 @@ export const getDefaultMessageForm = (): MessageType => ({
     generated_by: MessageGenerators.USER,
     type: ContentType.TEXT,
     tool_calls: [],
-    references: {},
+    references: undefined,
     creation_metadata: {},
     embedding: [],
     created_by: undefined,

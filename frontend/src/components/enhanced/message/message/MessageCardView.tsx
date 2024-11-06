@@ -1,17 +1,14 @@
 import React from 'react';
 import {
     Typography,
-    Box,
 } from '@mui/material';
 import { Person, AccessTime, AttachFile, TextSnippet, Engineering, PersonPin, Functions } from '@mui/icons-material';
-import { MessageComponentProps, MessageGenerators, RoleType } from '../../../../types/MessageTypes';
+import { MessageComponentProps } from '../../../../types/MessageTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { References } from '../../../../types/ReferenceTypes';
-import useStyles from '../MessageStyles';
-import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
-import ReferenceChip from '../../common/references/ReferenceChip';
 import AliceMarkdown, { CustomBlockType } from '../../../ui/markdown/alice_markdown/AliceMarkdown';
+import DataClusterManager from '../../data_cluster/DataClusterManager';
 
 const hasAnyReferences = (references: References | undefined): boolean => {
     if (!references) return false;
@@ -27,72 +24,9 @@ const hasAnyReferences = (references: References | undefined): boolean => {
 const MessageCardView: React.FC<MessageComponentProps> = ({
     item,
 }) => {
-    const classes = useStyles();
     if (!item) {
         return <Typography>No message data available.</Typography>;
     }
-
-    const renderReferences = () => {
-        if (!item.references || !hasAnyReferences(item.references)) return 'No references';
-        return (
-            <Box>
-                <Typography variant="subtitle2">References:</Typography>
-                <Box display="flex" flexWrap="wrap" gap={1}>
-                    {item.references.messages?.map((msg, index) => (
-                        <ReferenceChip
-                            key={`msg-${index}`}
-                            reference={msg}
-                            type="Message"
-                            view={true}
-                        />
-                    ))}
-                    {item.references.files?.map((file, index) => (
-                        <ReferenceChip
-                            key={`file-${index}`}
-                            reference={file}
-                            type="File"
-                            view={true}
-                        />
-                    ))}
-                    {item.references.task_responses?.map((task, index) => (
-                        <ReferenceChip
-                            key={`task-${index}`}
-                            reference={task}
-                            type="TaskResponse"
-                            view={true}
-                        />
-                    ))}
-                    {item.references.url_references?.map((url, index) => (
-                        <ReferenceChip
-                            key={`url-${index}`}
-                            reference={url}
-                            type="URLReference"
-                            view={true}
-                        />
-                    ))}
-                    {item.references.string_outputs?.map((str, index) => (
-                        <ReferenceChip
-                            key={`str-${index}`}
-                            reference={str}
-                            type="string_output"
-                            view={true}
-                        />
-                    ))}
-                </Box>
-            </Box>
-        );
-    };
-
-    const getMessageClass = () => {
-        if (item.generated_by === MessageGenerators.TOOL) return classes.toolMessage;
-        switch (item.role) {
-            case RoleType.USER:
-                return classes.userMessage;
-            case RoleType.ASSISTANT:
-            default:
-                return classes.assistantMessage;
-        }
-    };
 
     const listItems = [
         {
@@ -124,7 +58,7 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
         {
             icon: <AttachFile />,
             primary_text: "References",
-            secondary_text: renderReferences()
+            secondary_text: item.references && hasAnyReferences(item.references) ? <DataClusterManager dataCluster={item.references} /> : <Typography>"N/A"</Typography>,
         },
         {
             icon: <Functions />,

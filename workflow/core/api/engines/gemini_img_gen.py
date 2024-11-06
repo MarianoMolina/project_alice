@@ -38,15 +38,7 @@ class GeminiImageGenerationEngine(APIEngine):
             required=["prompt"]
         )
     )
-    required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
-
-    def generate_filename(self, prompt: str, model: str, index: int) -> str:
-        """
-        Generate a descriptive filename based on the prompt and model.
-        """
-        sanitized_prompt = re.sub(r'[^\w\s-]', '', prompt.lower())
-        truncated_prompt = '_'.join(sanitized_prompt.split())
-        return f"{truncated_prompt[:70]}_{model}_{index}.png"
+    required_api: ApiType = Field(ApiType.IMG_GENERATION, title="The API engine required")
 
     async def generate_api_response(self, api_data: ModelConfig, prompt: str, n: int = 1, size: str = "1024x1024", quality: str = "standard", model: str = "imagen-3.0-generate-001") -> References:
         """
@@ -77,7 +69,7 @@ class GeminiImageGenerationEngine(APIEngine):
 
         #     file_references: List[FileContentReference] = []
         #     for index, image in enumerate(result.images):
-        #         filename = self.generate_filename(prompt, model, index + 1)
+        #         filename = self.generate_filename(prompt, model, index + 1, 'png')
         #         # Convert the image to base64
         #         import io
         #         import base64

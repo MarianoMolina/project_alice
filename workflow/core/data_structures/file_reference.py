@@ -26,10 +26,8 @@ class FileReference(Embeddable):
     
     def model_dump(self, *args, **kwargs):
         data = super().model_dump(*args, **kwargs)
-        LOGGER.debug(f"Data after super().model_dump: {data}")
         if self.transcript:
             data['transcript'] = self.transcript.model_dump(*args, **kwargs)
-        LOGGER.debug(f"Data after processing transcript: {data}")
         return data
 
     class Config:

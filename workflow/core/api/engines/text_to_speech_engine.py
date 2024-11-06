@@ -1,12 +1,14 @@
-import base64, re
+import base64
 from typing import List
 from pydantic import Field
 from openai import AsyncOpenAI
-from workflow.core.data_structures import ModelConfig, ApiType, FileContentReference, MessageDict, ContentType, FileType, References, FunctionParameters, ParameterDefinition
+from workflow.core.data_structures import (
+    ModelConfig, ApiType, FileContentReference, MessageDict, ContentType, FileType, References, FunctionParameters, ParameterDefinition
+    )
 from workflow.core.api.engines.api_engine import APIEngine
 from workflow.util import LOGGER, chunk_text, get_traceback
 
-class OpenAITextToSpeechEngine(APIEngine):
+class TextToSpeechEngine(APIEngine):
     input_variables: FunctionParameters = Field(
         default=FunctionParameters(
             type="object",
@@ -29,25 +31,9 @@ class OpenAITextToSpeechEngine(APIEngine):
             required=["input"]
         )
     )
-    required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
+    required_api: ApiType = Field(ApiType.TEXT_TO_SPEECH, title="The API engine required")
 
-    def generate_filename(self, input: str, model: str, voice: str) -> str:
-        """
-        Generate a descriptive filename based on the input text, model, and voice.
-        """
-        # Sanitize and truncate the input text for the filename
-        sanitized_input = re.sub(r'[^\w\s-]', '', input.lower())
-        truncated_input = ' '.join(sanitized_input.split()[:5])  # Take first 5 words
-        
-        # Construct the filename
-        filename = f"{truncated_input}_{model}_{voice}.mp3"
-        
-        # Replace spaces with underscores and ensure it's not too long
-        filename = filename.replace(' ', '_')[:100]  # Limit to 100 characters
-        
-        return filename
-
-    async def generate_api_response(self, api_data: ModelConfig, input: str, voice: str = "alloy", speed: float = 1.0) -> References:
+    async def generate_api_response(self, api_data: ModelConfig, input: str, voice: str = "alloy", speed: float = 1.0, **kwargs) -> References:
         """
         Converts text to speech using OpenAI's API and creates a FileContentReference.
         Args:
@@ -74,10 +60,13 @@ class OpenAITextToSpeechEngine(APIEngine):
             inputs = chunk_text(input, avg_chunk_size)
         else:
             inputs.append(input)
-        responses: List[FileContentReference] = [await self.api_call(client, input, voice, speed, model) for input in inputs]
+        responses: List[FileContentReference] = [
+            await self.api_call(client, input, voice, speed, model, index) 
+            for index, input in enumerate(inputs)
+        ]
         return References(files=responses)
     
-    async def api_call(self, client: AsyncOpenAI, input: str, voice: str = "alloy", speed: float = 1.0, model: str = None) -> FileContentReference:
+    async def api_call(self, client: AsyncOpenAI, input: str, voice: str = "alloy", speed: float = 1.0, model: str = None, index: int = 0) -> FileContentReference:
         try:
             LOGGER.debug(f"Generating speech with model {model}, voice {voice}, speed {speed}")
             response = await client.audio.speech.create(
@@ -91,7 +80,7 @@ class OpenAITextToSpeechEngine(APIEngine):
             audio_data = response.read()
             
             # Generate filename if not provided
-            output_filename = self.generate_filename(input, model, voice)
+            output_filename = self.generate_filename(input, model+voice, index if index != 0 else None, 'mp3')
             
             creation_metadata = {
                     "model": model,

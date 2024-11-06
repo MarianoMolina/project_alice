@@ -16,6 +16,7 @@ import MessageListView from '../../message/message/MessageListView';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import Logger from '../../../../utils/Logger';
 import useStyles from '../ChatStyles';
+import DataClusterManager from '../../data_cluster/DataClusterManager';
 
 const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     item,
@@ -108,19 +109,35 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
         <EnhancedSelect<AliceTask>
             componentType="tasks"
             EnhancedView={TaskShortListView}
-            selectedItems={form.functions || []}
+            selectedItems={form.agent_tools || []}
             onSelect={handleFunctionsChange}
             isInteractable={isEditMode}
             multiple
-            label="Select Functions"
+            label="Select Agent Tools"
             activeAccordion={activeAccordion}
             onAccordionToggle={handleAccordionToggle}
-            accordionEntityName="functions"
+            accordionEntityName="agent_tools"
             showCreateButton={true}
         />
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    ), [form.functions, handleFunctionsChange, isEditMode, activeAccordion, handleAccordionToggle]);
+    ), [form.agent_tools, handleFunctionsChange, isEditMode, activeAccordion, handleAccordionToggle]);
 
+    const memoizedRetrievalTaskSelect = useMemo(() => (
+        <EnhancedSelect<AliceTask>
+            componentType="tasks"
+            EnhancedView={TaskShortListView}
+            selectedItems={form.agent_tools || []}
+            onSelect={handleFunctionsChange}
+            isInteractable={isEditMode}
+            multiple
+            label="Select Retrieval Tools"
+            activeAccordion={activeAccordion}
+            onAccordionToggle={handleAccordionToggle}
+            accordionEntityName="retrieval_tools"
+            showCreateButton={true}
+        />
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    ), [form.agent_tools, handleFunctionsChange, isEditMode, activeAccordion, handleAccordionToggle]);
     return (
         <GenericFlexibleView
             elementType='Chat'
@@ -144,8 +161,10 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             />
             <Typography variant="h6" className={classes.titleText}>Agent</Typography>
             {memoizedAgentSelect}
-            <Typography variant="h6" className={classes.titleText}>Tools for the Agent</Typography>
+            <Typography variant="h6" className={classes.titleText}>Agent Tools</Typography>
             {memoizedTaskSelect}
+            <Typography variant="h6" className={classes.titleText}>Retrieval Tools</Typography>
+            {memoizedRetrievalTaskSelect}
             {form.messages && form.messages.length > 0 && (
                 <>
                     <Typography variant="h6" className={classes.titleText}>Messages</Typography>
@@ -161,6 +180,14 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                     </Box>
                 </>
             )}
+            <Typography variant="h6" className={classes.titleText}>Data Cluster</Typography>
+            <DataClusterManager
+                dataCluster={form.data_cluster}
+                isEditable={true}
+                onDataClusterChange={(dataCluster) => setForm(prevForm => ({ ...prevForm, data_cluster: dataCluster }))}
+                flatten={false}
+            />
+
         </GenericFlexibleView>
     );
 };
