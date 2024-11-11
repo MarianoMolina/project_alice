@@ -25,7 +25,7 @@ export async function createUserCheckpoint(
         await userCheckpoint.save();
         return await UserCheckpoint.findById(userCheckpoint._id);
     } catch (error) {
-        Logger.error('Error creating task result:', error);
+        Logger.error('Error creating user checkpoint:', error);
         return null;
     }
 }

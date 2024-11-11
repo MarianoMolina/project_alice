@@ -89,9 +89,10 @@ async def resume_task_endpoint(
             
         # Store new response in database
         LOGGER.debug(f'Resume result: {result.model_dump()}')
+        result.id = request.task_response_id
         db_result = await db_app.create_entity_in_db(
             'task_responses',
-            result.model_dump(exclude={'id'})
+            result.model_dump(by_alias=True)
         )
         
         updated_ref = await db_app.get_entity_from_db('task_responses', db_result['_id'])
@@ -117,5 +118,5 @@ async def resume_task_endpoint(
             execution_history=None
         )
         
-        updated_ref = await db_app.create_entity_in_db('task_responses', result.model_dump(exclude={'id'}))
+        updated_ref = await db_app.create_entity_in_db('task_responses', result.model_dump(by_alias=True))
         return TaskResponse(**updated_ref)

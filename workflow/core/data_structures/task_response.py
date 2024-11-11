@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Any, List
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, BaseModel
 from workflow.core.data_structures.base_models import Embeddable
 from workflow.core.data_structures.node_response import ExecutionHistoryItem, NodeResponse
 
@@ -25,7 +25,7 @@ class TaskResponse(Embeddable):
     
     def model_dump(self, *args, **kwargs):
         data = super().model_dump(*args, **kwargs)
-        data['node_references'] = [item.model_dump(*args, **kwargs) for item in self.node_references]
+        data['node_references'] = [item.model_dump(*args, **kwargs) if isinstance(item, BaseModel) else item for item in self.node_references]
         return data
         
     def inner_execution_history(self) -> List[NodeResponse]:

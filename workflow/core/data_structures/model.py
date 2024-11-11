@@ -17,7 +17,6 @@ class AliceModel(BaseDataStructure):
     seed: Optional[int] = Field(None, description="The seed for random number generation")
     use_cache: bool = Field(True, description="Whether to use caching for the model")
     lm_studio_preset: Optional[str] = Field(None, description="The preset to use for the model in LM Studio")
-    model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str})
 
     @model_validator(mode="after")
     def validate_model_format_dict(self):

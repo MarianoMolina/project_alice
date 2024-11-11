@@ -68,17 +68,24 @@ class UserResponse(BaseModel):
         return value
 
     def __str__(self) -> str:
-        return f"SelectedOption: {self.selected_option}\nUserFeedback: {self.user_feedback}"
+        return f"SelectedOption: {self.selected_option}\nUserFeedback: {self.user_feedback if self.user_feedback else 'No feedback from the user'}"
 
 class UserInteraction(Embeddable):
+    """
+    Represents a user interaction that can belong to either a task response or a chat.
+    """
     user_checkpoint_id: UserCheckpoint = Field(..., description="The id of the user checkpoint")
-    task_response_id: Optional[str] = None
+    owner: InteractionOwner = Field(..., description="Owner (task response or chat) of this interaction")
     user_response: Optional[UserResponse] = None
+
+    def __str__(self) -> str:
+        return (f"Owner: {self.owner.type}:{self.owner.id}\n"
+                f"UserCheckpointId: {self.user_checkpoint_id.id}\n"
+                f"UserResponse: \n{str(self.user_response)}")
 
     def model_dump(self, *args, **kwargs):
         data = super().model_dump(*args, **kwargs)
         data['user_checkpoint_id'] = self.user_checkpoint_id.model_dump(*args, **kwargs)
-        return data
 
     @field_validator('task_response_id')
     @classmethod
@@ -96,6 +103,3 @@ class UserInteraction(Embeddable):
                 return str(id_value)
                 
         raise ValueError("Could not extract ID from task_response_id. Expected string, None, or object with '_id' or 'id' field")
-
-    def __str__(self) -> str:
-        return f"UserCheckpointId: {self.user_checkpoint_id.id}\nTaskResponseId: {self.task_response_id}\nUserResponse: \n{str(self.user_response)}"

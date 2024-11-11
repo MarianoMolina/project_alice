@@ -63,7 +63,7 @@ function ensureObjectIdForSave(
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
   // Handle node_references references
-  if (this.node_references) {
+  if (this.node_references && this.node_references.length > 0) {
     this.node_references.forEach(nodeResponse => {
       if (nodeResponse.references) {
         const refs = nodeResponse.references as any;

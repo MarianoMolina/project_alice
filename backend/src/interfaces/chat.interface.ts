@@ -29,7 +29,7 @@ export interface IAliceChat {
     agent_tools: Types.ObjectId[] | ITaskDocument[];
     retrieval_tools: Types.ObjectId[] | ITaskDocument[];
     data_cluster: Types.ObjectId | IDataClusterDocument;
-    user_checkpoints: { [key: string]: Types.ObjectId[] | IUserCheckpointDocument };
+    default_user_checkpoints: { [key: string]: Types.ObjectId[] | IUserCheckpointDocument };
     created_by: Types.ObjectId | IUserDocument;
     updated_by: Types.ObjectId | IUserDocument;
 }

@@ -30,7 +30,7 @@ export async function createUserInteraction(
         await userInteraction.save();
         return await UserInteraction.findById(userInteraction._id);
     } catch (error) {
-        Logger.error('Error creating task result:', error);
+        Logger.error('Error creating user interaction:', error);
         return null;
     }
 }

@@ -58,58 +58,89 @@ taskSchema.methods.apiRepresentation = function (this: ITaskDocument) {
 };
 
 function ensureObjectIdForSave(this: ITaskDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {
-    this.agent = getObjectId(this.agent);
-    this.created_by = getObjectId(this.created_by);
-    this.updated_by = getObjectId(this.updated_by);
+    try {
+        // Only convert if values exist
+        if (this.agent) this.agent = getObjectId(this.agent);
+        if (this.created_by) this.created_by = getObjectId(this.created_by);
+        if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
 
-    if (this.templates) {
-        for (const [key, value] of this.templates.entries()) {
-            this.templates.set(key, getObjectId(value));
+        // Handle Map fields with proper null checks
+        if (this.templates && this.templates instanceof Map) {
+            for (const [key, value] of this.templates.entries()) {
+                if (value) {  // Only convert non-null values
+                    this.templates.set(key, getObjectId(value));
+                }
+            }
         }
-    }
-    if (this.tasks) {
-        for (const [key, value] of this.tasks.entries()) {
-            this.tasks.set(key, getObjectId(value));
+
+        if (this.tasks && this.tasks instanceof Map) {
+            for (const [key, value] of this.tasks.entries()) {
+                if (value) {  // Only convert non-null values
+                    this.tasks.set(key, getObjectId(value));
+                }
+            }
         }
-    }
-    if (this.input_variables && this.input_variables.properties) {
-        this.input_variables.properties = ensureObjectIdForProperties(this.input_variables.properties);
-    }
-    if (this.user_checkpoints) {
-        for (const [key, value] of this.user_checkpoints.entries()) {
-            this.user_checkpoints.set(key, getObjectId(value));
+
+        // Handle input_variables with proper null checks
+        if (this.input_variables?.properties) {
+            this.input_variables.properties = ensureObjectIdForProperties(this.input_variables.properties);
         }
+
+        if (this.user_checkpoints && this.user_checkpoints instanceof Map) {
+            for (const [key, value] of this.user_checkpoints.entries()) {
+                if (value) {  // Only convert non-null values
+                    this.user_checkpoints.set(key, getObjectId(value));
+                }
+            }
+        }
+        next();
+    } catch (error) {
+        next(error instanceof Error ? error : new Error(String(error)));
     }
-    next();
 }
 
 function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
-    const update = this.getUpdate() as any;
+    try {
+        const update = this.getUpdate() as any;
+        if (!update) return next();
 
-    if (update.templates) {
-        update.templates = Object.fromEntries(
-            Object.entries(update.templates).map(([key, value]) => [key, getObjectId(value)])
-        );
+        // Handle Map fields with proper null checks
+        if (update.templates && typeof update.templates === 'object') {
+            update.templates = Object.fromEntries(
+                Object.entries(update.templates)
+                    .map(([key, value]) => [key, value ? getObjectId(value) : value])
+            );
+        }
+
+        if (update.tasks && typeof update.tasks === 'object') {
+            update.tasks = Object.fromEntries(
+                Object.entries(update.tasks)
+                    .map(([key, value]) => [key, value ? getObjectId(value) : value])
+            );
+        }
+
+        if (update.user_checkpoints && typeof update.user_checkpoints === 'object') {
+            update.user_checkpoints = Object.fromEntries(
+                Object.entries(update.user_checkpoints)
+                    .map(([key, value]) => [key, value ? getObjectId(value) : value])
+            );
+        }
+
+        // Handle single fields with proper null checks
+        if (update.agent) update.agent = getObjectId(update.agent);
+        if (update.created_by) update.created_by = getObjectId(update.created_by);
+        if (update.updated_by) update.updated_by = getObjectId(update.updated_by);
+
+        // Handle nested properties with proper null checks
+        if (update?.input_variables?.properties) {
+            update.input_variables.properties = ensureObjectIdForProperties(update.input_variables.properties);
+        }
+
+        next();
+    } catch (error) {
+        next(error instanceof Error ? error : new Error(String(error)));
     }
-    if (update.tasks) {
-        update.tasks = Object.fromEntries(
-            Object.entries(update.tasks).map(([key, value]) => [key, getObjectId(value)])
-        );
-    }
-    if (update.user_checkpoints) {
-        update.user_checkpoints = Object.fromEntries(
-            Object.entries(update.user_checkpoints).map(([key, value]) => [key, getObjectId(value)])
-        );
-    }
-    update.agent = getObjectId(update.agent);
-    update.created_by = getObjectId(update.created_by);
-    update.updated_by = getObjectId(update.updated_by);
-    if (update && update.input_variables && update.input_variables.properties) {
-        update.input_variables.properties = ensureObjectIdForProperties(update.input_variables.properties);
-    }
-    next();
 }
-
 function autoPopulate(this: mongoose.Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
     this.populate('created_by')
         .populate('updated_by')

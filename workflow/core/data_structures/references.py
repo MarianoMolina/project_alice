@@ -1,5 +1,6 @@
 from typing import List, Optional, Union, Any, Dict
 from pydantic import BaseModel, Field, field_validator
+from workflow.core.data_structures.base_models import BaseDataStructure
 from workflow.core.data_structures.message import MessageDict
 from workflow.core.data_structures.file_reference import FileReference, FileContentReference
 from workflow.core.data_structures.task_response import TaskResponse
@@ -239,3 +240,7 @@ class References(BaseModel):
                 return False
                 
         return True
+    
+class DataCluster(References, BaseDataStructure):
+    """DataCluster is a container for various types of references."""
+    pass

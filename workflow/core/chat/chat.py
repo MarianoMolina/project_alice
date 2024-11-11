@@ -1,12 +1,15 @@
 from enum import Enum
 from bson import ObjectId
-from pydantic import Field, ConfigDict, model_validator
-from typing import List, Optional, Dict, Callable, Any
+from pydantic import Field, model_validator, BaseModel
+from typing import List, Optional, Dict, Any
 from workflow.util import LOGGER, get_traceback
-from workflow.core.data_structures import MessageDict, ToolFunction, ContentType, References, UserInteraction, UserCheckpoint, Prompt, User, BaseDataStructure
+from workflow.core.data_structures import (
+    MessageDict, ToolFunction, ContentType, References, UserInteraction, FunctionConfig, 
+    UserCheckpoint, Prompt, User, BaseDataStructure, DataCluster
+    )
 from workflow.core.agent import AliceAgent
 from workflow.core.api import APIManager
-from workflow.core.tasks import AliceTask, RetrievalTask
+from workflow.core.tasks import AliceTask
 
 class CheckpointType(str, Enum):
     TOOL_CALL = "tool_call"
@@ -18,7 +21,7 @@ class AliceChat(BaseDataStructure):
 
     This class encapsulates the properties and methods needed to create and manage
     a chat session, including the conversation history, associated agents, available
-    functions, and chat execution functionality.
+    agent_tools, and chat execution functionality.
 
     Attributes:
         id (Optional[str]): The unique identifier for the chat session.
@@ -36,7 +39,7 @@ class AliceChat(BaseDataStructure):
         generate_response(api_manager: APIManager, new_message: Optional[str] = None) -> List[MessageDict]:
             Generates a response in the chat, processing any new user message.
         deep_validate_required_apis(api_manager: APIManager) -> Dict[str, Any]:
-            Performs a deep validation of all required APIs for the chat and its functions.
+            Performs a deep validation of all required APIs for the chat and its agent_tools.
     """
     id: Optional[str] = Field(default=None, description="The unique ID of the chat conversation, must match the ID in the database", alias="_id")
     name: str = Field("New Chat", description="The name of the chat conversation")
@@ -50,64 +53,117 @@ class AliceChat(BaseDataStructure):
             ),
         ), 
         description="The Alice agent object. Default is base Alice Agent.")
-    agent_tools: Optional[List[AliceTask]] = Field([], description="List of tools to be registered with the agent")
-    retrieval_tools: Optional[List[AliceTask]] = Field(None, description="Optional retrieval task for accessing data cluster")
+    agent_tools: Optional[List[AliceTask]] = Field(default_factory=list, description="List of tools to be registered with the agent")
+    retrieval_tools: Optional[List[AliceTask]] = Field(default_factory=list, description="Optional retrieval task for accessing data cluster")
     user_checkpoints: Dict[str, UserCheckpoint] = Field(
         default_factory=dict,
         description="Node-specific user interaction checkpoints"
     )
-    data_cluster: Optional[References] = Field(
+    data_cluster: Optional[DataCluster] = Field(
         default=None,
         description="Associated data cluster"
     )
-    model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str})
-
+    
     @model_validator(mode='after')
-    def initialize_default_checkpoints(self) -> 'AliceChat':
-        if not self.user_checkpoints:
-            self.user_checkpoints = {
-                CheckpointType.TOOL_CALL: UserCheckpoint(
-                    user_prompt="The assistant wants to use a tool. Do you approve?",
-                    task_next_obj={0: "tool_execution", 1: "terminate"},
-                    request_feedback=True
-                ),
-                CheckpointType.CODE_EXECUTION: UserCheckpoint(
-                    user_prompt="The assistant wants to execute code. Do you approve?",
-                    task_next_obj={0: "code_execution", 1: "terminate"},
-                    request_feedback=True
-                )
-            }
-        return self
-    
-    def model_dump(self, *args, **kwargs):
-        data = super().model_dump(*args, **kwargs)
+    def initialize_tools(self) -> 'AliceChat':
+        """
+        Ensures agent_tools and retrieval_tools are properly initialized as lists of AliceTask instances.
         
-        # Handle messages
-        if self.messages:
-            data['messages'] = [message.model_dump(*args, **kwargs) for message in self.messages]
+        This validator:
+        1. Converts None to empty list for agent_tools
+        2. Ensures retrieval_tools is either None or a list
+        3. Casts dictionary items to AliceTask instances
+        4. Validates that all items are or can be converted to AliceTask instances
+        """
+        # Handle agent_tools initialization
+        if self.agent_tools is None:
+            self.agent_tools = []
+        elif not isinstance(self.agent_tools, list):
+            raise ValueError("agent_tools must be a list or None")
         
-        # Handle alice_agent
-        data['alice_agent'] = self.alice_agent.model_dump(*args, **kwargs)
-        
-        # Handle agent_tools
-        if self.agent_tools:
-            data['agent_tools'] = [tool.model_dump(*args, **kwargs) for tool in self.agent_tools]
+        # Convert agent_tools items to AliceTask instances
+        processed_agent_tools = []
+        for tool in self.agent_tools:
+            if isinstance(tool, dict):
+                try:
+                    processed_agent_tools.append(AliceTask.model_validate(tool))
+                except Exception as e:
+                    raise ValueError(f"Failed to convert dictionary to AliceTask: {str(e)}")
+            elif isinstance(tool, AliceTask):
+                processed_agent_tools.append(tool)
+            else:
+                raise ValueError(f"Agent tools must be either dictionaries or AliceTask instances. Found: {type(tool)}")
+        self.agent_tools = processed_agent_tools
+
+        # Handle retrieval_tools initialization
+        if self.retrieval_tools is not None:
+            if not isinstance(self.retrieval_tools, list):
+                raise ValueError("retrieval_tools must be a list or None")
             
-        # Handle retrieval_tools
-        if self.retrieval_tools:
-            data['retrieval_tools'] = [retrieval_tool.model_dump(*args, **kwargs) for retrieval_tool in self.retrieval_tools]
+            # Convert retrieval_tools items to AliceTask instances
+            processed_retrieval_tools = []
+            for tool in self.retrieval_tools:
+                if isinstance(tool, dict):
+                    try:
+                        processed_retrieval_tools.append(AliceTask.model_validate(tool))
+                    except Exception as e:
+                        raise ValueError(f"Failed to convert dictionary to AliceTask: {str(e)}")
+                elif isinstance(tool, AliceTask):
+                    processed_retrieval_tools.append(tool)
+                else:
+                    raise ValueError(f"Retrieval tools must be either dictionaries or AliceTask instances. Found: {type(tool)}")
+            self.retrieval_tools = processed_retrieval_tools
+
+        return self
+
+    def model_dump(self, *args, **kwargs):
+        """
+        Serializes the AliceChat instance to a dictionary, ensuring proper handling of:
+        1. Nested BaseModel instances (passing through args/kwargs)
+        2. Enum values (converting to their string values)
+        3. Special fields like task_type
+        4. Removing api_engine from the output
+
+        Returns:
+            dict: The serialized AliceChat instance
+        """
+        # Get the base serialized data from parent class
+        data = super().model_dump(*args, **kwargs)           
+
+        # Handle lists of BaseModel instances
+        if self.messages:
+            data['messages'] = [msg.model_dump(*args, **kwargs) if isinstance(msg, BaseModel) else msg for msg in self.messages]
         
-        return data
-    
-    def get_available_tools(self, api_manager: APIManager) -> List[ToolFunction]:
-        """Returns a list of all available tools including the retrieval task if applicable."""
-        tools = []
-        
-        # Add regular tools
         if self.agent_tools:
-            tools.extend([func.get_function(api_manager)["tool_function"].model_dump() for func in self.agent_tools])
-        
-        # Add retrieval task if present and data cluster is not empty
+            data['agent_tools'] = [tool.model_dump(*args, **kwargs) if isinstance(tool, BaseModel) else tool for tool in self.agent_tools]
+            
+        if self.retrieval_tools:
+            data['retrieval_tools'] = [tool.model_dump(*args, **kwargs) if isinstance(tool, BaseModel) else tool for tool in self.retrieval_tools]
+
+        # Handle individual BaseModel instances
+        if self.alice_agent and isinstance(self.alice_agent, BaseModel):
+            data['alice_agent'] = self.alice_agent.model_dump(*args, **kwargs)
+            
+        if self.data_cluster and isinstance(self.data_cluster, BaseModel):
+            data['data_cluster'] = self.data_cluster.model_dump(*args, **kwargs)
+
+        # Handle dictionary of BaseModel instances
+        if self.user_checkpoints:
+            data['user_checkpoints'] = {
+                key: checkpoint.model_dump(*args, **kwargs) if isinstance(checkpoint, BaseModel) else checkpoint
+                for key, checkpoint in self.user_checkpoints.items()
+            }
+
+        return data
+
+    def _get_agent_tools(self, api_manager: APIManager) -> List[ToolFunction]:
+        """Returns a list of all available agent_tools."""
+        if self.agent_tools:
+            return [tool.get_function(api_manager)["tool_function"] for tool in self.agent_tools]
+        return []
+    
+    def _get_retrieval_tools(self, api_manager: APIManager) -> List[ToolFunction]:
+        """Returns a list of all available retrieval_tools."""
         if self.retrieval_tools and self.data_cluster and bool(self.data_cluster):
             # Ensure retrieval task has current data cluster
             for tool in self.retrieval_tools:
@@ -115,32 +171,23 @@ class AliceChat(BaseDataStructure):
                     tool.data_cluster != self.data_cluster):  # Now uses References.__eq__
                     LOGGER.debug("Updating retrieval task data cluster")
                     tool.data_cluster = self.data_cluster
-                tools.append(tool.get_function(api_manager)["tool_function"].model_dump())
-            
+            tools = [tool.get_function(api_manager)["tool_function"] for tool in self.retrieval_tools]
+            return tools
+        return []
+    
+    def get_available_tools(self, api_manager: APIManager) -> Optional[List[ToolFunction]]:
+        """Returns a list of all available tools including the retrieval task if applicable."""
+        tools = []
+        tools.extend(self._get_agent_tools(api_manager))
+        tools.extend(self._get_retrieval_tools(api_manager))
+
         return tools if tools else None
     
-    def get_tool_map(self, api_manager: APIManager) -> Optional[Dict[str, Callable]]:
-        """Combines all available function maps including the retrieval task if applicable."""
-        combined_function_map = {}
-        
-        # Add regular tools
-        if self.agent_tools:
-            for tool in self.agent_tools:
-                function_details = tool.get_function(api_manager=api_manager)
-                combined_function_map.update(function_details["function_map"])
-        
-        # Add retrieval task if present and data cluster is not empty
-        if self.retrieval_tools and self.data_cluster and bool(self.data_cluster):
-            for tool in self.retrieval_tools:
-                # Ensure retrieval task has current data cluster
-                if (tool.data_cluster is None or 
-                    tool.data_cluster != self.data_cluster):  # Now uses References.__eq__
-                    LOGGER.debug("Updating retrieval task data cluster")
-                    tool.data_cluster = self.data_cluster
-                function_details = tool.get_function(api_manager=api_manager)
-                combined_function_map.update(function_details["function_map"])
-            
-        return combined_function_map
+    def get_tool_list(self, api_manager: APIManager) -> List[FunctionConfig]:
+        """Returns a list of function configurations for the available tasks."""
+        if not self.agent_tools and not self.retrieval_tools:
+            return []
+        return [task.get_function(api_manager)["tool_function"].model_dump(exclude={'id', '_id'}) for task in self.get_available_tools().values()]
 
     async def generate_response(self, api_manager: APIManager, new_message: Optional[str] = None, user_data: Optional[User] = None) -> List[MessageDict]:
         """Main entry point for generating responses in the chat."""
@@ -263,8 +310,8 @@ class AliceChat(BaseDataStructure):
         # Execute tool calls
         return await self.alice_agent.process_tool_calls(
             tool_calls,
-            self.tool_map(api_manager),
-            self.tool_list(api_manager)
+            self.get_available_tools(api_manager),
+            self.get_tool_list(api_manager)
         )
 
     async def _handle_code_execution(self, api_manager: APIManager, messages: List[MessageDict]) -> List[MessageDict]:
@@ -332,7 +379,7 @@ class AliceChat(BaseDataStructure):
             role="assistant",
             content=checkpoint.user_prompt,
             generated_by="system",
-            type=ContentType.CHECKPOINT,
+            type=ContentType.TEXT,
             references=References(user_interactions=[interaction])
         )
 
@@ -342,7 +389,7 @@ class AliceChat(BaseDataStructure):
             role="assistant",
             content=f"An error occurred: {error_msg}",
             generated_by="system",
-            type=ContentType.ERROR,
+            type=ContentType.TEXT,
             assistant_name=self.alice_agent.name
         )
 
@@ -372,9 +419,16 @@ class AliceChat(BaseDataStructure):
             result["warnings"].append(str(e))
         
         # Check functions
-        for func in self.functions:
+        for func in self.agent_tools:
             func_result = func.deep_validate_required_apis(api_manager)
-            result["functions"].append(func_result)
+            result["agent_tools"].append(func_result)
+            if func_result["status"] == "warning":
+                result["status"] = "warning"
+                result["warnings"].extend(func_result["warnings"])
+
+        for func in self.retrieval_tools:
+            func_result = func.deep_validate_required_apis(api_manager)
+            result["retrieval_tools"].append(func_result)
             if func_result["status"] == "warning":
                 result["status"] = "warning"
                 result["warnings"].extend(func_result["warnings"])

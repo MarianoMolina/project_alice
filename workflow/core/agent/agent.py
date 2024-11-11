@@ -1,6 +1,7 @@
 import json, re
+from enum import Enum
 from bson import ObjectId
-from pydantic import Field, ConfigDict
+from pydantic import Field, ConfigDict, BaseModel
 from typing import Dict, Any, List, Optional, Tuple, Callable, Union
 from workflow.core.data_structures import ToolFunction, ToolCall, ensure_tool_function
 from workflow.core.api import APIManager
@@ -47,12 +48,63 @@ class AliceAgent(BaseDataStructure):
         description="Level of code execution permission"
     )
     max_consecutive_auto_reply: int = Field(default=10, description="The maximum number of consecutive auto replies")
-    model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str})
 
     @property
     def llm_model(self) -> AliceModel:
         return self.models[ModelType.CHAT] or self.models[ModelType.INSTRUCT]
-
+    
+    def model_dump(self, *args, **kwargs):
+        """
+        Serializes the AliceAgent instance to a dictionary, handling:
+        1. BaseModel instances (system_message, models)
+        2. Enum values (has_tools, has_code_exec, ModelType keys)
+        3. Nested model dictionaries
+        4. Remove api_engine if present
+        """
+        LOGGER.debug(f"AliceAgent.model_dump called")
+        LOGGER.debug(f"Models dict type: {type(self.models)}")
+        LOGGER.debug(f"Models dict keys type: {[(k, type(k)) for k in self.models.keys()]}")
+        LOGGER.debug(f"Models dict values type: {[(k, type(v)) for k,v in self.models.items()]}")
+        
+        # Inspect the models dictionary more deeply
+        for k, v in self.models.items():
+            LOGGER.debug(f"Model key {k}: {type(k)}")
+            if hasattr(k, '__dict__'):
+                LOGGER.debug(f"Key dict type: {type(vars(k.__class__))}")
+            if v and hasattr(v, '__dict__'):
+                LOGGER.debug(f"Value dict type: {type(vars(v.__class__))}")
+        try:
+            data = super().model_dump(*args, **kwargs)
+            LOGGER.debug(f"AliceAgent base dump succeeded")
+        except TypeError as e:
+            LOGGER.error(f"TypeError in AliceAgent model_dump: {str(e)}")
+            LOGGER.error(f"Models state: {vars(self.models)}")
+            raise
+            
+        # Handle system message (Prompt)
+        if self.system_message and isinstance(self.system_message, BaseModel):
+            data['system_message'] = self.system_message.model_dump(*args, **kwargs)
+            
+        # Handle models dictionary
+        if self.models:
+            data['models'] = {
+                model_type.value if isinstance(model_type, Enum) else model_type: 
+                (model.model_dump(*args, **kwargs) if isinstance(model, BaseModel) else model)
+                for model_type, model in self.models.items()
+            }
+            
+        # Handle permission enums
+        if 'has_tools' in data:
+            data['has_tools'] = int(self.has_tools)
+            
+        if 'has_code_exec' in data:
+            data['has_code_exec'] = int(self.has_code_exec)
+            
+        # Remove api_engine if present
+        data.pop('api_engine', None)
+        
+        return data
+    
     def _get_code_exec_prompt(self) -> str:
         """Generate the appropriate code execution prompt based on permission level."""
         if self.has_code_exec == CodePermission.NORMAL:

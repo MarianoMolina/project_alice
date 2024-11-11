@@ -67,6 +67,15 @@ class BackendAPI(BaseModel):
         "urlreferences": "urlreferences"
     }, description="Map of entity types to collection names")
     model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str}, arbitrary_types_allowed=True)
+    
+    def model_dump(self, *args, **kwargs):
+        # Ensure we exclude model_config from serialization
+        kwargs['exclude'] = {
+            'model_config', 
+            *kwargs.get('exclude', set())
+        }
+        
+        data = super().model_dump(*args, **kwargs)
 
     @property
     def task_types(self) -> Dict[str, AliceTask]:

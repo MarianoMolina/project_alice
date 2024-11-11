@@ -10,7 +10,7 @@ export interface AliceChat extends BaseDatabaseObject {
     messages: MessageType[];
     alice_agent: AliceAgent;
     agent_tools?: AliceTask[];
-    user_checkpoints?: { [key: string]: UserCheckpoint };
+    default_user_checkpoints?: { [key: string]: UserCheckpoint };
     data_cluster?: DataCluster;
     retrieval_tools?: AliceTask[];
 }
@@ -22,7 +22,7 @@ export const convertToAliceChat = (data: any): AliceChat => {
         messages: (data?.messages || []).map(convertToMessageType),
         alice_agent: convertToAliceAgent(data?.alice_agent),
         agent_tools: (data?.agent_tools || []).map(convertToAliceTask),
-        user_checkpoints: data?.user_checkpoints || undefined,
+        default_user_checkpoints: data?.default_user_checkpoints || undefined,
         data_cluster: data?.data_cluster ? convertToDataCluster(data?.data_cluster) : undefined,
         retrieval_tools: (data?.retrieval_tools || []).map(convertToAliceTask),
     };
@@ -42,7 +42,7 @@ export const getDefaultChatForm = (): Partial<AliceChat> => ({
     messages: [],
     alice_agent: undefined,
     agent_tools: [],
-    user_checkpoints: {},
+    default_user_checkpoints: {},
     data_cluster: {},
     retrieval_tools: undefined,
 });

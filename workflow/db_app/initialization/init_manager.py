@@ -79,6 +79,15 @@ class DBInitManager(BaseModel):
         "user_interactions": UserInteraction,
     }, description="Map of entity types to Pydantic model classes")
     model_config = ConfigDict(arbitrary_types_allowed=True)
+    
+    def model_dump(self, *args, **kwargs):
+        # Ensure we exclude model_config from serialization
+        kwargs['exclude'] = {
+            'model_config', 
+            *kwargs.get('exclude', set())
+        }
+        
+        data = super().model_dump(*args, **kwargs)
 
     def _get_entity_class(self, entity_type: EntityType) -> BaseModel:
         return self.entity_class_map.get(entity_type)

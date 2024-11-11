@@ -65,7 +65,7 @@ async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(ge
         # Process and update file content references
         LOGGER.debug(f'task_result: {result.model_dump()}')
         LOGGER.debug(f'type: {type(result)}')
-        db_result = await db_app.create_entity_in_db('task_responses', result.model_dump(exclude={'id'}))
+        db_result = await db_app.create_entity_in_db('task_responses', result.model_dump(by_alias=True))
 
         updated_ref = await db_app.get_entity_from_db('task_responses', db_result['_id'])
 
@@ -86,5 +86,5 @@ async def execute_task_endpoint(request: TaskExecutionRequest, db_app=Depends(ge
             usage_metrics=None,
             execution_history=None
         )
-        db_result = await db_app.create_entity_in_db('task_responses', result.model_dump(exclude={'id'}))
+        db_result = await db_app.create_entity_in_db('task_responses', result.model_dump(by_alias=True))
         return db_result

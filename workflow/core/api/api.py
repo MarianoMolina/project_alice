@@ -1,10 +1,10 @@
 from bson import ObjectId
-from pydantic import BaseModel, Field
+from pydantic import Field
 from typing import Optional, Dict, Any, Union
 from workflow.util import LOGGER
-from workflow.core.data_structures import ApiType, ApiName, ModelConfig, ModelApis, AliceModel
+from workflow.core.data_structures import ApiType, ApiName, ModelConfig, ModelApis, AliceModel, BaseDataStructure
 
-class API(BaseModel):
+class API(BaseDataStructure):
     """
     Represents an API configuration for various services, including LLM models and search APIs.
     This class encapsulates the properties and methods needed to define and manage

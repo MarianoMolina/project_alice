@@ -33,7 +33,11 @@ const aliceChatSchema = new Schema<IAliceChatDocument, IAliceChatModel>({
   agent_tools: [{ type: Schema.Types.ObjectId, ref: 'Task', default: [], description: "List of tools to be registered with the agent" }],
   retrieval_tools: [{ type: Schema.Types.ObjectId, ref: 'Task', default: [], description: "List of tools with access to the data cluster" }],
   data_cluster: { type: Schema.Types.ObjectId, ref: 'DataCluster', required: false, description: "Data cluster for the chat" },
-  user_checkpoints: { type: Map, of: [{ type: Schema.Types.ObjectId, ref: 'UserCheckpoint' }], default: {}, description: "Map of user checkpoints" },
+  default_user_checkpoints: {
+    type: Map,
+    of: { type: Schema.Types.ObjectId, ref: 'UserCheckpoint' },
+    default: () => new Map(),
+  }, 
   created_by: { type: Schema.Types.ObjectId, ref: 'User' },
   updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
@@ -47,7 +51,7 @@ aliceChatSchema.methods.apiRepresentation = function (this: IAliceChatDocument) 
     agent_tools: this.agent_tools.map((func) => func._id || func),
     retrieval_tools: this.retrieval_tools.map((func) => func._id || func),
     data_cluster: this.data_cluster ? (this.data_cluster._id || this.data_cluster) : null,
-    user_checkpoints: this.user_checkpoints || {},
+    default_user_checkpoints: this.default_user_checkpoints || {},
     created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
     updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,
     createdAt: this.createdAt || null,
@@ -62,22 +66,22 @@ function ensureObjectIdForSave(
   if (this.alice_agent) this.alice_agent = getObjectId(this.alice_agent);
   if (this.created_by) this.created_by = getObjectId(this.created_by);
   if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
-  if (this.agent_tools) {
+  if (this.data_cluster) this.data_cluster = getObjectId(this.data_cluster);
+  if (this.agent_tools && this.agent_tools.length > 0) {
     this.agent_tools = this.agent_tools.map((func) => getObjectId(func));
   }
-  if (this.retrieval_tools) {
+  if (this.retrieval_tools && this.retrieval_tools.length > 0) {
     this.retrieval_tools = this.retrieval_tools.map((func) => getObjectId(func));
   }
-  if (this.data_cluster) this.data_cluster = getObjectId(this.data_cluster);
-  if (this.messages) {
+  if (this.messages && this.messages.length > 0) {
     this.messages = this.messages.map((message) => getObjectId(message));
   }
-  if (this.user_checkpoints && Object.keys(this.user_checkpoints).length > 0) {
-    const newCheckpoints: { [key: string]: any } = {};
-    for (const key in this.user_checkpoints) {
-      newCheckpoints[key] = getObjectId(this.user_checkpoints[key]);
+  if (this.default_user_checkpoints && this.default_user_checkpoints instanceof Map) {
+    for (const [key, value] of this.default_user_checkpoints.entries()) {
+      if (value) {
+        this.default_user_checkpoints.set(key, getObjectId(value));
+      }
     }
-    this.user_checkpoints = newCheckpoints;
   }
   next();
 }
@@ -90,22 +94,24 @@ function ensureObjectIdForUpdate(
   if (update.alice_agent) update.alice_agent = getObjectId(update.alice_agent);
   if (update.created_by) update.created_by = getObjectId(update.created_by);
   if (update.updated_by) update.updated_by = getObjectId(update.updated_by);
-  if (update.agent_tools) {
+  if (update.data_cluster) update.data_cluster = getObjectId(update.data_cluster);
+  if (update.agent_tools && update.agent_tools.length > 0) {
     update.agent_tools = update.agent_tools.map((func: any) => getObjectId(func));
   }
-  if (update.retrieval_tools) {
+  if (update.retrieval_tools && update.retrieval_tools.length > 0) {
     update.retrieval_tools = update.retrieval_tools.map((func: any) => getObjectId(func));
   }
-  if (update.data_cluster) update.data_cluster = getObjectId(update.data_cluster);
-  if (update.messages) {
+  if (update.messages && update.messages.length > 0) {
     update.messages = update.messages.map((message: any) => getObjectId(message));
   }
-  if (update.user_checkpoints && Object.keys(update.user_checkpoints).length > 0) {
-    const newCheckpoints: { [key: string]: any } = {};
-    for (const key in update.user_checkpoints) {
-      newCheckpoints[key] = getObjectId(update.user_checkpoints[key]);
+  if (update.default_user_checkpoints && typeof update.default_user_checkpoints === 'object') {
+    const newCheckpoints = new Map();
+    for (const [key, value] of Object.entries(update.default_user_checkpoints)) {
+      if (value) {
+        newCheckpoints.set(key, getObjectId(value));
+      }
     }
-    update.user_checkpoints = newCheckpoints;
+    update.default_user_checkpoints = newCheckpoints;
   }
   next();
 }
@@ -116,7 +122,7 @@ function autoPopulate(this: mongoose.Query<any, any>) {
     .populate('retrieval_tools')
     .populate('data_cluster')
     .populate({
-      path: 'user_checkpoints.$*',
+      path: 'default_user_checkpoints.$*',
       model: 'UserCheckpoint'
     })
     .populate('messages'); // Only need to populate messages at the top level

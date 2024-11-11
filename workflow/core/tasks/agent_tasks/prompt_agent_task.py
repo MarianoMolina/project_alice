@@ -1,4 +1,4 @@
-from pydantic import Field
+from pydantic import Field, BaseModel
 from typing import List, Dict, Any, Optional, Callable
 from workflow.util import LOGGER
 from workflow.core.api import APIManager
@@ -85,6 +85,24 @@ class PromptAgentTask(AliceTask):
         }, 
         description="A dictionary of tasks/nodes -> exit codes and the task to route to given each exit code"
     )
+    def model_dump(self, *args, **kwargs):
+        try:
+            LOGGER.debug(f"PromptAgentTask.model_dump called for {self.__class__.__name__}")
+            if self.tasks:
+                for task in self.tasks.values():
+                    LOGGER.debug(f'Task state: {task.task_name} - {task}')
+                    for k, v in self.__dict__.items():
+                        if isinstance(v, BaseModel):
+                            LOGGER.debug(f"Nested BaseModel found in {k}: {type(v)}")
+                            if hasattr(v, '__dict__'):
+                                LOGGER.debug(f"Nested object {k} dict type: {type(vars(v.__class__))}")
+                # LOGGER.debug(f"Removing tasks from model dump for {self.__class__.__name__}")
+                # self.tasks = {}
+            return super().model_dump(*args, **kwargs)
+        except TypeError as e:
+            LOGGER.error(f"TypeError in AliceTask model_dump: {str(e)}")
+            LOGGER.error(f"Full task state: {vars(self)}")
+            raise
 
     def create_message_list(self, **kwargs) -> List[MessageDict]:
         template = self.get_prompt_template("task_template")
@@ -317,7 +335,7 @@ class PromptAgentTask(AliceTask):
         return min(available_codes)
     
     def tool_list(self, api_manager: APIManager) -> List[FunctionConfig]:
-        return [func.get_function(api_manager)["tool_function"] for func in self.tasks.values()] if self.tasks else None
+        return [func.get_function(api_manager)["tool_function"].model_dump(exclude={'id', '_id'}) for func in self.tasks.values()] if self.tasks else None
     
     def tool_map(self, api_manager: APIManager) -> Optional[Dict[str, Callable]]:
         combined_function_map = {}

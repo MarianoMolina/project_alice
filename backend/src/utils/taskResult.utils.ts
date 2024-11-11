@@ -65,11 +65,16 @@ async function processUserInteractionsInReferences(
     if (references.user_interactions?.length) {
       Logger.debug(`Processing ${references.user_interactions.length} user interactions at ${path}`);
       for (const interaction of references.user_interactions) {
-        if (typeof interaction !== 'string' && !(interaction instanceof Types.ObjectId)) {
-          if (!interaction.task_response_id) {
-            Logger.debug(`Setting task_response_id for user interaction at ${path}`);
-            interaction.task_response_id = new Types.ObjectId(taskResultId);
-          }
+        // Skip if it's an ObjectId or string
+        if (typeof interaction === 'string' || interaction instanceof Types.ObjectId) {
+          continue;
+        }
+
+        // Only try to set task_response_id if we have an object
+        if (interaction && typeof interaction === 'object' && !interaction.task_response_id) {
+          interaction.task_response_id = new Types.ObjectId(taskResultId);
+        } else {
+          Logger.warn(`Skipping invalid user interaction at ${path} - ${JSON.stringify(interaction)}`);
         }
       }
     }
@@ -127,6 +132,27 @@ async function processUserInteractionsInReferences(
         }
       }
     }
+
+    return references;
+  } catch (error) {
+    // Capture stack trace
+    const stack = error instanceof Error ? error.stack : new Error().stack;
+    
+    // Create detailed error message
+    const errorDetails = {
+      receivedValue: references === null ? 'null' : 
+                    references === undefined ? 'undefined' : 
+                     typeof references === 'object' ? JSON.stringify(references) : 
+                     String(references),
+      receivedType: typeof references,
+      errorMessage: error instanceof Error ? error.message : String(error),
+      stack: stack
+    };
+
+    Logger.error('Error during references processing:', {
+      error: errorDetails,
+      stack: stack
+    });
 
     return references;
   } finally {

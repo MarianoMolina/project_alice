@@ -30,7 +30,7 @@ export async function createURLReference(
     await urlReference.save();
     return await URLReference.findById(urlReference._id);
   } catch (error) {
-    Logger.error('Error creating task result:', error);
+    Logger.error('Error creating URL Reference:', error);
     return null;
   }
 }

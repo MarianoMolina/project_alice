@@ -1,5 +1,6 @@
 from __future__ import annotations
 from enum import Enum
+from bson import ObjectId
 from typing import Optional, Dict, Any, List, TYPE_CHECKING
 from pydantic import Field, ConfigDict, field_validator
 from workflow.core.data_structures.base_models import Embeddable, ContentType, FileType
@@ -36,8 +37,6 @@ class MessageDict(Embeddable):
     tool_call_id: Optional[str] = Field(None, description="The id of the tool call that generated this task response")
     references: Optional[ReferencesType] = Field(default_factory=get_default_references, description="References associated with this message")
     creation_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Metadata about the creation of the message, like cost, tokens, end reason, etc.")
-
-    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @field_validator('tool_calls')
     def validate_tool_calls(cls, v):

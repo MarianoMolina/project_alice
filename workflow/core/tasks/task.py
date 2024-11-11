@@ -1,16 +1,16 @@
 from enum import Enum
-from typing import Dict, Any, Optional, List, Callable, Tuple
+from typing import Dict, Any, Optional, List, Tuple
 from pydantic import BaseModel, Field, model_validator
 from workflow.core.agent import AliceAgent
 from workflow.core.api import APIManager, APIEngine
 from workflow.core.data_structures import (
-    ApiType, FunctionParameters, ParameterDefinition,  FunctionConfig, ToolFunction, References, TaskResponse, 
-    NodeResponse, UserInteraction, UserCheckpoint, NodeResponse, TasksEndCodeRouting, Prompt
+    ApiType, FunctionParameters, ParameterDefinition,  FunctionConfig, ToolFunction, References, TaskResponse, DataCluster,
+    NodeResponse, UserInteraction, UserCheckpoint, NodeResponse, TasksEndCodeRouting, Prompt, BaseDataStructure
 )
 from workflow.util import LOGGER, convert_value_to_type, get_traceback
 from workflow.core.tasks.task_utils import validate_and_process_function_inputs, generate_node_responses_summary, simplify_execution_history
 
-class AliceTask(BaseModel):
+class AliceTask(BaseDataStructure):
     """
     Base class for all tasks in the Alice workflow system, incorporating node-based execution.
     
@@ -85,7 +85,7 @@ class AliceTask(BaseModel):
         default=None,
         description="Associated API engine"
     )
-    data_cluster: Optional[References] = Field(
+    data_cluster: Optional[DataCluster] = Field(
         default=None,
         description="Associated data cluster"
     )
@@ -156,63 +156,82 @@ class AliceTask(BaseModel):
             raise ValueError(f"Failed to process routing configuration: {str(e)}")
             
         return values
-    
-    # Serialization method
-    def model_dump(self, *args, **kwargs):
-        # Create a copy of the current instance's dict
-        data = dict(self.__dict__)
         
-        # Handle nested tasks before calling super().model_dump()
-        if 'tasks' in data and isinstance(data['tasks'], dict):
+    def model_dump(self, *args, exclude=None, **kwargs):
+        """
+        Serializes the AliceTask instance to a dictionary, ensuring proper handling of:
+        1. Nested BaseModel instances (propagating args/kwargs)
+        2. Enum values (converting to their string values)
+        3. Special fields like task_type
+        4. Removing api_engine from the output
+        5. Special handling for tasks to avoid recursion issues
+        
+        Returns:
+            dict: The serialized AliceTask instance
+        """
+        LOGGER.debug(f"AliceTask.model_dump called for {self.__class__.__name__}")
+        LOGGER.debug(f"Dict keys: {list(self.__dict__.keys())}")
+        
+        # Create exclude set if not provided
+        if exclude is None:
+            exclude = set()
+        exclude.add('tasks')  # Exclude tasks from standard serialization
+        
+        try:
+            data = super().model_dump(*args, exclude=exclude, **kwargs)
+            LOGGER.debug(f"AliceTask base dump succeeded")
+        except TypeError as e:
+            LOGGER.error(f"TypeError in AliceTask model_dump: {str(e)}")
+            LOGGER.error(f"Full task state: {vars(self)}")
+            raise
+        
+        # Add task_type
+        data['task_type'] = self.task_type
+        
+        # Handle tasks separately
+        if self.tasks:
             data['tasks'] = {
-                task_id: task.model_dump(*args, **kwargs) if isinstance(task, AliceTask) else task
-                for task_id, task in data['tasks'].items()
+                task_id: task.model_dump(*args, **kwargs) if isinstance(task, BaseModel) else task
+                for task_id, task in self.tasks.items()
             }
-
-        # Call super().model_dump() with the updated data
-        dumped_data = super().model_dump(*args, **kwargs, exclude={'tasks'})
         
-        # Add the task_type
-        dumped_data['task_type'] = self.task_type
-
-        # Add the processed tasks back to the dumped data
-        if 'tasks' in data:
-            dumped_data['tasks'] = data['tasks']
-
-        # Handle ApiType enums or strings in required_apis
-        if 'required_apis' in dumped_data and dumped_data['required_apis']:
-            LOGGER.debug(f'Original required_apis: {dumped_data["required_apis"]}')
-            dumped_data['required_apis'] = [
-                api.value if isinstance(api, Enum) else api
-                for api in dumped_data['required_apis']
-            ]
-            LOGGER.debug(f'Updated required_apis: {dumped_data["required_apis"]}')
-
-        # Handle other potential nested AliceTask objects and enums
-        for key, value in dumped_data.items():
-            if isinstance(value, AliceTask):
-                dumped_data[key] = value.model_dump(*args, **kwargs)
-            elif isinstance(value, list):
-                dumped_data[key] = [
-                    item.value if isinstance(item, Enum) else
-                    item.model_dump(*args, **kwargs) if isinstance(item, AliceTask) else item
-                    for item in value
-                ]
-            elif isinstance(value, dict):
-                dumped_data[key] = {
-                    k: (v.value if isinstance(v, Enum) else
-                        v.model_dump(*args, **kwargs) if isinstance(v, AliceTask) else v)
-                    for k, v in value.items()
-                }
-            elif isinstance(value, Enum):
-                dumped_data[key] = value.value
-        if 'api_engine' in dumped_data and dumped_data['api_engine']:
-            dumped_data.pop('api_engine')
+        # Handle remaining nested BaseModel instances in dictionaries
+        if self.templates:
+            data['templates'] = {
+                template_id: template.model_dump(*args, **kwargs) if isinstance(template, BaseModel) else template
+                for template_id, template in self.templates.items()
+            }
             
-        return dumped_data
+        if self.user_checkpoints:
+            data['user_checkpoints'] = {
+                checkpoint_id: checkpoint.model_dump(*args, **kwargs) if isinstance(checkpoint, BaseModel) else checkpoint
+                for checkpoint_id, checkpoint in self.user_checkpoints.items()
+            }
+            
+        # Handle individual BaseModel instances
+        if self.agent and isinstance(self.agent, BaseModel):
+            data['agent'] = self.agent.model_dump(*args, **kwargs)
+            
+        if self.data_cluster and isinstance(self.data_cluster, BaseModel):
+            data['data_cluster'] = self.data_cluster.model_dump(*args, **kwargs)
+            
+        if self.input_variables and isinstance(self.input_variables, BaseModel):
+            data['input_variables'] = self.input_variables.model_dump(*args, **kwargs)
+        
+        # Handle Enum lists (required_apis)
+        if data.get('required_apis'):
+            data['required_apis'] = [
+                api.value if isinstance(api, Enum) else api 
+                for api in data['required_apis']
+            ]
+            
+        # Remove api_engine if present
+        data.pop('api_engine', None)
+            
+        return data
 
     # Execution methods
-    async def run(self, execution_history: List[NodeResponse] = None, **kwargs) -> TaskResponse:
+    async def run(self, execution_history: Optional[List[NodeResponse]] = None, node_responses: Optional[List[NodeResponse]] = None, **kwargs) -> TaskResponse:
         """
         Execute the task with node-based flow and attempt tracking.
         
@@ -226,7 +245,7 @@ class AliceTask(BaseModel):
             TaskResponse: The result of the task execution.
         """
         execution_history = execution_history or []
-        node_responses: List[NodeResponse] = []
+        node_responses: List[NodeResponse] = node_responses or []
         
         try:
             # Validate and process inputs
@@ -359,20 +378,21 @@ class AliceTask(BaseModel):
             return task_response
             
         # Get execution history from task response
-        execution_history = task_response.node_references or []
+        node_responses = task_response.node_references or []
+        execution_history = node_responses
         
         # Update task inputs with original inputs
         if task_response.task_inputs:
             kwargs.update(task_response.task_inputs)
             
         # Continue task execution
-        return await self.run(execution_history=execution_history, **kwargs)
+        return await self.run(execution_history=execution_history, node_responses=node_responses, **kwargs)
     
     # User interaction handling
     def handle_user_checkpoints(self, execution_history: List[NodeResponse] = None, node_name: str = None) -> Optional[NodeResponse]:
         """
         Handles user checkpoints. This method can be called by subclasses before their specific logic.
-        Returns a TaskResponse if a user interaction is needed, None otherwise.
+        Returns a NodeResponse if a user interaction is needed, None otherwise.
         """
         execution_history = execution_history or []
         node_name = node_name or self.start_node or "default"
@@ -448,16 +468,6 @@ class AliceTask(BaseModel):
         Determine the next node to execute based on either the task selection method or routing configuration,
         and attempt limits.
         """
-        # if self.task_selection_method:
-        #     # Find the last response for the current node
-        #     for node in reversed(execution_history):
-        #         if node.node_name == current_node:
-        #             if node.references and node.references.task_responses:
-        #                 task_response = node.references.task_responses[-1]
-        #                 next_task, _ = self.task_selection_method(task_response, execution_history)
-        #                 return next_task
-        #             break
-        #     return None
 
         # Fall back to standard routing logic
         if current_node not in self.node_end_code_routing:

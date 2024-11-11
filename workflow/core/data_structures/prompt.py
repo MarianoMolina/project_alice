@@ -61,7 +61,6 @@ class Prompt(BaseDataStructure):
     is_templated: bool = Field(default=False, description="Whether the prompt is templated or not.")
     parameters: Optional[FunctionParameters] = Field(None, description="The parameters that the prompt expects if it's templated.")
     partial_variables: Dict[str, Any] = Field(default_factory=dict, description="A dictionary of the partial variables the prompt template carries.")
-    model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str})
 
     @model_validator(mode='after')
     def validate_templated_prompt(self):
@@ -70,6 +69,12 @@ class Prompt(BaseDataStructure):
         if not self.is_templated and self.parameters:
             raise ValueError("Non-templated prompts should not have parameters defined.")
         return self
+    
+    def model_dump(self, *args, **kwargs):
+        data = super().model_dump(*args, **kwargs)
+        if self.is_templated:
+            data['parameters'] = self.parameters.model_dump(*args, **kwargs)
+        return data
 
     @property
     def input_variables(self) -> List[str]:
