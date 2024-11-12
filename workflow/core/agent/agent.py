@@ -6,7 +6,8 @@ from typing import Dict, Any, List, Optional, Tuple, Callable, Union
 from workflow.core.data_structures import ToolFunction, ToolCall, ensure_tool_function
 from workflow.core.api import APIManager
 from workflow.core.data_structures import (
-    TaskResponse, FileReference, ContentType, MessageDict, ApiType, ModelType, FileType, References, FileContentReference, EmbeddingChunk, AliceModel, Prompt, BaseDataStructure
+    TaskResponse, FileReference, ContentType, MessageDict, ApiType, ModelType, FileType, References, 
+    FileContentReference, EmbeddingChunk, AliceModel, Prompt, BaseDataStructure, RoleTypes, MessageGenerators
     )
 from workflow.util import LOGGER, run_code, LOG_LEVEL, Language
 from enum import IntEnum
@@ -166,9 +167,9 @@ print("This is just for demonstration")
         content = response.content if response.content else "Using tools" if response.tool_calls else "No response from API"
         
         return MessageDict(
-            role="assistant",
+            role=RoleTypes.ASSISTANT,
             content=content,
-            generated_by="llm",
+            generated_by=MessageGenerators.LLM,
             tool_calls=response.tool_calls if self.has_tools != 0 else None,
             type=ContentType.TEXT,
             assistant_name=self.name,
@@ -234,9 +235,9 @@ print("This is just for demonstration")
             exit_code = current_exit_code if current_exit_code != 0 else exit_code
             
             executed_messages.append(MessageDict(
-                role="tool",
+                role=RoleTypes.TOOL,
                 content=f"Language: {lang}\nExit Code: {current_exit_code}\nOutput:\n{logs}",
-                generated_by="tool",
+                generated_by=MessageGenerators.TOOL,
                 step="code_execution",
                 type=ContentType.TEXT,
                 references=References(string_outputs=[merged_code, lang])
@@ -280,9 +281,9 @@ print("This is just for demonstration")
             # Handle dry run mode
             if self.has_tools == ToolPermission.DRY_RUN:
                 tool_messages.append(MessageDict(
-                    role="tool",
+                    role=RoleTypes.TOOL,
                     content=f"DRY RUN: Would execute {function_name} with arguments: {json.dumps(arguments, indent=2)}",
-                    generated_by="tool",
+                    generated_by=MessageGenerators.TOOL,
                     step=function_name,
                     tool_call_id=tool_call_id,
                     type=ContentType.TEXT
@@ -294,9 +295,9 @@ print("This is just for demonstration")
                 result = await tool_map[function_name](**arguments)
                 task_result = result if isinstance(result, TaskResponse) else None
                 tool_messages.append(MessageDict(
-                    role="tool",
+                    role=RoleTypes.TOOL,
                     content=str(result),
-                    generated_by="tool",
+                    generated_by=MessageGenerators.TOOL,
                     step=function_name,
                     tool_call_id=tool_call_id,
                     type=ContentType.TASK_RESULT if task_result else ContentType.TEXT,
@@ -310,9 +311,9 @@ print("This is just for demonstration")
     def _create_tool_error_message(self, error_msg: str, function_name: str) -> MessageDict:
         """Helper method to create consistent tool error messages."""
         return MessageDict(
-            role="tool",
+            role=RoleTypes.TOOL,
             content=error_msg,
-            generated_by="tool",
+            generated_by=MessageGenerators.TOOL,
             step=function_name,
             type=ContentType.TEXT
         )

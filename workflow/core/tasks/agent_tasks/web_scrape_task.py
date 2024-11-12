@@ -4,7 +4,8 @@ import json
 from workflow.core.tasks.task import AliceTask
 from workflow.core.agent.agent import AliceAgent
 from workflow.core.data_structures import (
-    ApiType, References, NodeResponse, MessageDict, FunctionParameters, ParameterDefinition, URLReference, TasksEndCodeRouting
+    ApiType, References, NodeResponse, MessageDict, FunctionParameters, ParameterDefinition, URLReference, TasksEndCodeRouting, 
+    MessageGenerators, RoleTypes, ContentType
 )
 from workflow.core.api import APIManager
 from workflow.util.web_scrape_utils import (
@@ -175,7 +176,7 @@ Example response format:
     ]
 }}
 """
-            message: MessageDict = MessageDict(role="user", content=prompt, generated_by="tool", type="text")
+            message: MessageDict = MessageDict(role=RoleTypes.USER, content=prompt, generated_by=MessageGenerators.TOOL, type=ContentType.TEXT)
             LOGGER.info(f"Generating selectors for sample {idx}/{len(html_samples)}.")           
             try:
                 new_message = await self.agent.generate_llm_response(api_manager, [message])

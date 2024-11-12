@@ -1,11 +1,9 @@
 from enum import IntEnum
 from pydantic import Field
 from typing import List, Dict
-from workflow.util import LOGGER
 from workflow.core.data_structures import (
-    MessageDict, TasksEndCodeRouting, NodeResponse, References
+    MessageDict, TasksEndCodeRouting, NodeResponse, RoleTypes, MessageGenerators
 )
-from workflow.core.agent.agent import AliceAgent
 from workflow.core.tasks.agent_tasks.prompt_agent_task import PromptAgentTask
 
 class LLMCodeGenExitCode(IntEnum):
@@ -110,14 +108,14 @@ class CodeGenerationLLMTask(PromptAgentTask):
         if last_node:
             if last_node.node_name == "llm_generation" and last_node.exit_code == LLMCodeGenExitCode.NO_CODE_BLOCKS:
                 messages.append(MessageDict(
-                    role="user",
-                    generated_by="system",
+                    role=RoleTypes.USER,
+                    generated_by=MessageGenerators.SYSTEM,
                     content="No valid code blocks were found in the response. Please answer with a valid code block, or respond with 'Terminate'"
                 ))
             elif last_node.node_name == "code_execution" and last_node.exit_code != CodeExecExitCode.SUCCESS:
                 messages.append(MessageDict(
-                    role="user",
-                    generated_by="system",
+                    role=RoleTypes.USER,
+                    generated_by=MessageGenerators.SYSTEM,
                     content="The previous code execution failed. Please review the errors above and provide corrected code."
                 ))
                 

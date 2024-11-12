@@ -5,6 +5,7 @@ import Logger from './logger';
 import { processReferences } from './reference.utils';
 import { processEmbeddings } from './embeddingChunk.utils';
 import { References } from '../interfaces/references.interface';
+import { InteractionOwnerType } from '../interfaces/userInteraction.interface';
 
 // Track processed items to prevent infinite loops
 class ReferenceProcessor {
@@ -71,8 +72,11 @@ async function processUserInteractionsInReferences(
         }
 
         // Only try to set task_response_id if we have an object
-        if (interaction && typeof interaction === 'object' && !interaction.task_response_id) {
-          interaction.task_response_id = new Types.ObjectId(taskResultId);
+        if (interaction && typeof interaction === 'object' && !interaction.owner) {
+          interaction.owner =  {
+            type: InteractionOwnerType.TASK_RESPONSE,
+            id: new Types.ObjectId(taskResultId)
+          }
         } else {
           Logger.warn(`Skipping invalid user interaction at ${path} - ${JSON.stringify(interaction)}`);
         }

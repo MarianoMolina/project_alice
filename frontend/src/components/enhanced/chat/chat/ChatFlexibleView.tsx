@@ -3,8 +3,9 @@ import {
     TextField,
     Box,
     Typography,
+    Alert,
 } from '@mui/material';
-import { ChatComponentProps, AliceChat, getDefaultChatForm } from '../../../../types/ChatTypes';
+import { ChatComponentProps, AliceChat, getDefaultChatForm, CheckpointType } from '../../../../types/ChatTypes';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import AgentShortListView from '../../agent/agent/AgentShortListView';
 import TaskShortListView from '../../task/task/TaskShortListView';
@@ -17,6 +18,8 @@ import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import Logger from '../../../../utils/Logger';
 import useStyles from '../ChatStyles';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
+import { UserCheckpoint } from '../../../../types/UserCheckpointTypes';
+import UserCheckpointShortListView from '../../user_checkpoint/user_checkpoint/UserCheckpointShortListView';
 
 const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     item,
@@ -30,6 +33,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     const [form, setForm] = useState<Partial<AliceChat>>(item || getDefaultChatForm());
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [validationError, setValidationError] = useState<string | null>(null);
     const classes = useStyles();
 
     const isEditMode = mode === 'edit' || mode === 'create';
@@ -74,10 +78,83 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
     }, []);
 
+    const validateCheckpoints = useCallback(() => {
+        if (!form.default_user_checkpoints) {
+            setValidationError('Both Tool Call and Code Execution checkpoints are required');
+            return false;
+        }
+
+        const hasToolCall = !!form.default_user_checkpoints[CheckpointType.TOOL_CALL];
+        const hasCodeExec = !!form.default_user_checkpoints[CheckpointType.CODE_EXECUTION];
+
+        if (!hasToolCall || !hasCodeExec) {
+            setValidationError('Both Tool Call and Code Execution checkpoints are required');
+            return false;
+        }
+
+        setValidationError(null);
+        return true;
+    }, [form.default_user_checkpoints]);
+
+    const handleToolCallCheckpointChange = useCallback(async (selectedIds: string[]) => {
+        if (selectedIds.length > 0) {
+            const checkpoint = await fetchItem('usercheckpoints', selectedIds[0]) as UserCheckpoint;
+            setForm(prevForm => {
+                // Initialize default checkpoints if they don't exist
+                const currentCheckpoints = prevForm.default_user_checkpoints ?? {
+                    [CheckpointType.TOOL_CALL]: checkpoint,
+                    [CheckpointType.CODE_EXECUTION]: {
+                        user_prompt: '',
+                        options_obj: {},
+                        task_next_obj: {},
+                        request_feedback: false
+                    }
+                };
+    
+                return {
+                    ...prevForm,
+                    default_user_checkpoints: {
+                        ...currentCheckpoints,
+                        [CheckpointType.TOOL_CALL]: checkpoint
+                    }
+                };
+            });
+        }
+    }, [fetchItem]);
+    
+    const handleCodeExecCheckpointChange = useCallback(async (selectedIds: string[]) => {
+        if (selectedIds.length > 0) {
+            const checkpoint = await fetchItem('usercheckpoints', selectedIds[0]) as UserCheckpoint;
+            setForm(prevForm => {
+                // Initialize default checkpoints if they don't exist
+                const currentCheckpoints = prevForm.default_user_checkpoints ?? {
+                    [CheckpointType.TOOL_CALL]: {
+                        user_prompt: '',
+                        options_obj: {},
+                        task_next_obj: {},
+                        request_feedback: false
+                    },
+                    [CheckpointType.CODE_EXECUTION]: checkpoint
+                };
+    
+                return {
+                    ...prevForm,
+                    default_user_checkpoints: {
+                        ...currentCheckpoints,
+                        [CheckpointType.CODE_EXECUTION]: checkpoint
+                    }
+                };
+            });
+        }
+    }, [fetchItem]);
+
     const handleLocalSave = useCallback(() => {
-        onChange(form);
-        setIsSaving(true);
-    }, [form, onChange]);
+        if (validateCheckpoints()) {
+            onChange(form);
+            setIsSaving(true);
+        }
+    }, [form, onChange, validateCheckpoints]);
+
 
     const handleLocalDelete = useCallback(() => {
         Logger.debug('ChatFlexibleView handleLocalDelete', { item, handleDelete });
@@ -138,6 +215,37 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
         />
         // eslint-disable-next-line react-hooks/exhaustive-deps
     ), [form.agent_tools, handleFunctionsChange, isEditMode, activeAccordion, handleAccordionToggle]);
+
+    const memoizedToolCallCheckpointSelect = useMemo(() => (
+        <EnhancedSelect<UserCheckpoint>
+            componentType="usercheckpoints"
+            EnhancedView={UserCheckpointShortListView}
+            selectedItems={form.default_user_checkpoints?.[CheckpointType.TOOL_CALL] ? [form.default_user_checkpoints[CheckpointType.TOOL_CALL]] : []}
+            onSelect={handleToolCallCheckpointChange}
+            isInteractable={isEditMode}
+            label="Select Tool Call Checkpoint"
+            activeAccordion={activeAccordion}
+            onAccordionToggle={handleAccordionToggle}
+            accordionEntityName="tool_call_checkpoint"
+            showCreateButton={true}
+        />
+    ), [form.default_user_checkpoints, handleToolCallCheckpointChange, isEditMode, activeAccordion, handleAccordionToggle]);
+
+    const memoizedCodeExecCheckpointSelect = useMemo(() => (
+        <EnhancedSelect<UserCheckpoint>
+            componentType="usercheckpoints"
+            EnhancedView={UserCheckpointShortListView}
+            selectedItems={form.default_user_checkpoints?.[CheckpointType.CODE_EXECUTION] ? [form.default_user_checkpoints[CheckpointType.CODE_EXECUTION]] : []}
+            onSelect={handleCodeExecCheckpointChange}
+            isInteractable={isEditMode}
+            label="Select Code Execution Checkpoint"
+            activeAccordion={activeAccordion}
+            onAccordionToggle={handleAccordionToggle}
+            accordionEntityName="code_exec_checkpoint"
+            showCreateButton={true}
+        />
+    ), [form.default_user_checkpoints, handleCodeExecCheckpointChange, isEditMode, activeAccordion, handleAccordionToggle]);
+
     return (
         <GenericFlexibleView
             elementType='Chat'
@@ -149,6 +257,11 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             item={item as AliceChat}
             itemType='chats'
         >
+            {validationError && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                    {validationError}
+                </Alert>
+            )}
             <Typography variant="h6" className={classes.titleText}>Name</Typography>
             <TextField
                 fullWidth
@@ -180,6 +293,15 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                     </Box>
                 </>
             )}
+            <Typography variant="h6" className={classes.titleText}>Default Checkpoints</Typography>
+            <Box mb={2}>
+                <Typography variant="subtitle1" color="textSecondary">Tool Call Checkpoint</Typography>
+                {memoizedToolCallCheckpointSelect}
+            </Box>
+            <Box mb={2}>
+                <Typography variant="subtitle1" color="textSecondary">Code Execution Checkpoint</Typography>
+                {memoizedCodeExecCheckpointSelect}
+            </Box>
             <Typography variant="h6" className={classes.titleText}>Data Cluster</Typography>
             <DataClusterManager
                 dataCluster={form.data_cluster}

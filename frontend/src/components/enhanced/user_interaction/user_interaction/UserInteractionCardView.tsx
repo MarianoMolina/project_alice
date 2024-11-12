@@ -72,8 +72,8 @@ const UserInteractionCardView: React.FC<UserInteractionComponentProps> = ({
         },
         {
             icon: <Functions />,
-            primary_text: "Task Response",
-            secondary_text: item.task_response_id ? item.task_response_id : 'No task response available'
+            primary_text: "Owner",
+            secondary_text: item.owner ? `Type: ${item.owner.type ?? 'N/A'} - ID: ${item.owner.id ?? 'N/A'}` : 'No owner available'
         },
         {
             icon: <DataObject />,

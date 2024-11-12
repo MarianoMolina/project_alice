@@ -80,7 +80,7 @@ export function userInteractionsEqual(
 ): boolean {
     const keys: (keyof IUserInteractionDocument)[] = [
         'user_checkpoint_id',
-        'task_response_id',
+        'owner',
         'user_response',
         'created_by',
         'updated_by',

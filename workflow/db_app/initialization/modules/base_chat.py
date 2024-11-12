@@ -17,6 +17,22 @@ base_chat_module = BaseChatModule(
                 "description": "The name of the user."
             }
         ],
+        "user_checkpoints": [
+            {   
+                "key": "default_tool_call_checkpoint",
+                "user_prompt": "Please approve or reject the tool call created by the agent.",
+                "task_next_obj": {0: "tool_call", 1: None},
+                "options_obj": {0: "Approve", 1: "Reject"},
+                "request_feedback": False
+            },
+            {   
+                "key": "default_code_exec_checkpoint",
+                "user_prompt": "Please approve or reject the code execution requested by the agent.",
+                "task_next_obj": {0: "code_exec", 1: None},
+                "options_obj": {0: "Approve", 1: "Reject"},
+                "request_feedback": False
+            },
+        ],
         "prompts": [
             {
                 "key": "default_system_message",
@@ -126,58 +142,74 @@ base_chat_module = BaseChatModule(
             {
                 "key": "default_chat",
                 "name": "GPT4 Chat",
-                "messages": [],
                 "alice_agent": "gpt_alice",
-                "functions": [],
+                "default_user_checkpoints": {
+                    "tool_calls": "default_tool_call_checkpoint",
+                    "code_exec": "default_code_exec_checkpoint"
+                }
             },
             {
                 "key": "claude_chat",
                 "name": "Claude Chat",
-                "messages": [],
                 "alice_agent": "claude_alice",
-                "functions": [],
+                "default_user_checkpoints": {
+                    "tool_calls": "default_tool_call_checkpoint",
+                    "code_exec": "default_code_exec_checkpoint"
+                }
             },
             {
                 "key": "lm_studio_chat",
                 "name": "LMStudio Chat",
-                "messages": [],
                 "alice_agent": "lm_studio_alice",
-                "functions": [],
+                "default_user_checkpoints": {
+                    "tool_calls": "default_tool_call_checkpoint",
+                    "code_exec": "default_code_exec_checkpoint"
+                }
             },
             {
                 "key": "gemini_chat",
                 "name": "Gemini Chat",
-                "messages": [],
                 "alice_agent": "gemini_alice",
-                "functions": [],
+                "default_user_checkpoints": {
+                    "tool_calls": "default_tool_call_checkpoint",
+                    "code_exec": "default_code_exec_checkpoint"
+                }
             },
             {
                 "key": "mistral_chat",
                 "name": "Mistral Chat",
-                "messages": [],
                 "alice_agent": "mistral_alice",
-                "functions": [],
+                "default_user_checkpoints": {
+                    "tool_calls": "default_tool_call_checkpoint",
+                    "code_exec": "default_code_exec_checkpoint"
+                }
             },
             {
                 "key": "cohere_chat",
                 "name": "Cohere Chat",
-                "messages": [],
                 "alice_agent": "cohere_alice",
-                "functions": [],
+                "default_user_checkpoints": {
+                    "tool_calls": "default_tool_call_checkpoint",
+                    "code_exec": "default_code_exec_checkpoint"
+                }
             },
             {
                 "key": "llama_chat",
                 "name": "Llama Chat",
-                "messages": [],
                 "alice_agent": "llama_alice",
-                "functions": [],
+                "default_user_checkpoints": {
+                    "tool_calls": "default_tool_call_checkpoint",
+                    "code_exec": "default_code_exec_checkpoint"
+                }
             },
             {
                 "key": "groq_chat",
                 "name": "Groq Chat",
-                "messages": [],
                 "alice_agent": "groq_alice",
-                "functions": [],
+                "default_user_checkpoints": {
+                    "tool_calls": "default_tool_call_checkpoint",
+                    "code_exec": "default_code_exec_checkpoint"
+                }
             }
         ]
     }

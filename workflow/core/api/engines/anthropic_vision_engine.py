@@ -1,5 +1,5 @@
 from typing import List
-from workflow.core.data_structures import get_file_content, MessageDict, ModelConfig, FileReference, References
+from workflow.core.data_structures import get_file_content, MessageDict, ModelConfig, FileReference, References, RoleTypes, MessageGenerators, ContentType
 from workflow.core.api.engines.vision_model_engine import VisionModelEngine
 from anthropic import AsyncAnthropic
 
@@ -42,17 +42,17 @@ class AnthropicVisionEngine(VisionModelEngine):
                 max_tokens=max_tokens,
                 messages=[
                     {
-                        "role": "user",
+                        "role": RoleTypes.USER,
                         "content": content,
                     }
                 ],
             )
 
             msg = MessageDict(
-                role="assistant",
+                role=RoleTypes.ASSISTANT,
                 content=response.content[0].text,
-                generated_by="anthropic_vision_model",
-                type="text",
+                generated_by=MessageGenerators.TOOL,
+                type=ContentType.TEXT,
                 references=file_references,
                 creation_metadata={
                     "model": api_data.model,

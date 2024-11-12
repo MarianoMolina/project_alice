@@ -2,7 +2,9 @@ import base64
 from pydantic import Field
 from typing import List, Union, Optional
 from openai import AsyncOpenAI
-from workflow.core.data_structures import MessageDict, ModelConfig, FileReference, get_file_content, ApiType, References, FunctionParameters, ParameterDefinition
+from workflow.core.data_structures import (
+    MessageDict, ModelConfig, FileReference, get_file_content, ApiType, References, FunctionParameters, ParameterDefinition, 
+    RoleTypes, MessageGenerators, ContentType)
 from workflow.core.api.engines.api_engine import APIEngine
 from workflow.util import LOGGER
 
@@ -65,7 +67,7 @@ class VisionModelEngine(APIEngine):
             else:
                 LOGGER.warning(f"Failed to process image data for file {file_ref.filename}")
 
-        messages = [{"role": "user", "content": content}]
+        messages = [{"role": RoleTypes.USER, "content": content}]
 
         try:
             response = await client.chat.completions.create(
@@ -75,10 +77,10 @@ class VisionModelEngine(APIEngine):
             )
             response_content = response.choices[0].message.content
             msg = MessageDict(
-                role="assistant",
+                role=RoleTypes.ASSISTANT,
                 content=response_content,
-                generated_by="llm",
-                type="text",
+                generated_by=MessageGenerators.LLM,
+                type=ContentType.TEXT,
                 creation_metadata={
                     "model": response.model,
                     "usage": response.usage.model_dump(),

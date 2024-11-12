@@ -1,7 +1,9 @@
 from google.generativeai.types import GenerateContentResponse
 import google.generativeai as genai
 from pydantic import Field
-from workflow.core.data_structures import ModelConfig, ApiType, FileReference, MessageDict, References, FunctionParameters, ParameterDefinition
+from workflow.core.data_structures import (
+    ModelConfig, ApiType, FileReference, MessageDict, References, FunctionParameters, ParameterDefinition, MessageGenerators, RoleTypes, ContentType
+    )
 from workflow.core.api.engines.api_engine import APIEngine
 from workflow.util import LOGGER
 import io
@@ -63,10 +65,10 @@ class GeminiSpeechToTextEngine(APIEngine):
             result: GenerateContentResponse = model.generate_content([myfile, prompt])
 
             msg = MessageDict(
-                role="assistant",
+                role=RoleTypes.ASSISTANT,
                 content=result.text,
-                generated_by="tool",
-                type="text",
+                generated_by=MessageGenerators.TOOL,
+                type=ContentType.TEXT,
                 creation_metadata={
                     "model": api_data.model,
                     "prompt_tokens": result.usage_metadata.prompt_token_count,

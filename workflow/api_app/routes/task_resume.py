@@ -90,8 +90,9 @@ async def resume_task_endpoint(
         # Store new response in database
         LOGGER.debug(f'Resume result: {result.model_dump()}')
         result.id = request.task_response_id
-        db_result = await db_app.create_entity_in_db(
+        db_result = await db_app.update_entity_in_db(
             'task_responses',
+            result.id,
             result.model_dump(by_alias=True)
         )
         

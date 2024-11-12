@@ -5,7 +5,7 @@ from pydantic import Field
 from typing import Dict, Any, List, Optional
 from workflow.core.api.engines import APIEngine
 from workflow.util import LOGGER, est_messages_token_count, prune_messages
-from workflow.core.data_structures import MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall
+from workflow.core.data_structures import MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, RoleTypes, MessageGenerators
 
 class LLMEngine(APIEngine):
     """
@@ -156,10 +156,10 @@ class LLMEngine(APIEngine):
                     LOGGER.error(f"Error validating function call: {str(e)}\nFunction call: {function_call}")
                     LOGGER.error(traceback.format_exc())
             msg = MessageDict(
-                role="assistant",
+                role=RoleTypes.ASSISTANT,
                 content=content,
                 tool_calls=tool_calls,
-                generated_by="llm",
+                generated_by=MessageGenerators.LLM,
                 type=ContentType.TEXT,
                 creation_metadata={
                     "model": response.model,

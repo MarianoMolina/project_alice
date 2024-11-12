@@ -7,6 +7,7 @@ import { FileReference, FileContentReference } from '../types/FileTypes';
 import { createFileContentReference } from '../utils/FileUtils';
 import Logger from '../utils/Logger';
 import { converters } from '../utils/Converters';
+import { InteractionOwnerType, UserInteraction } from '../types/UserInteractionTypes';
 
 export const fetchItem = async <T extends CollectionName>(
   collectionName: T,
@@ -29,6 +30,7 @@ export const fetchItem = async <T extends CollectionName>(
     throw error;
   }
 };
+
 export const resumeTask = async (taskResponseId: string, additionalInputs: Record<string, any> = {}): Promise<TaskResponse> => {
   try {
     Logger.debug('Resuming task response:', taskResponseId, 'with inputs:', additionalInputs);
@@ -46,6 +48,26 @@ export const resumeTask = async (taskResponseId: string, additionalInputs: Recor
     return convertToTaskResponse(response.data);
   } catch (error) {
     Logger.error('Error resuming task:', error);
+    throw error;
+  }
+};
+
+export const resumeChat = async (interaction: UserInteraction): Promise<AliceChat> => {
+  try {
+    // Validate that this is a chat interaction
+    if (interaction.owner.type !== InteractionOwnerType.CHAT) {
+      throw new Error(`Cannot resume interaction with owner type: ${interaction.owner.type}. Expected: ${InteractionOwnerType.CHAT}`);
+    }
+
+    Logger.debug('Resuming chat with interaction:', interaction);
+    
+    const response = await taskAxiosInstance.post('/chat_resume', {
+      interaction_id: interaction._id
+    });
+    
+    return convertToAliceChat(response.data);
+  } catch (error) {
+    Logger.error('Error resuming chat:', error);
     throw error;
   }
 };

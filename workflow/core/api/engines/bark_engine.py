@@ -11,6 +11,8 @@ from workflow.core.data_structures import (
     FunctionParameters,
     ParameterDefinition,
     ModelConfig,
+    RoleTypes, 
+    MessageGenerators
 )
 from workflow.core.api.engines.text_to_speech_engine import TextToSpeechEngine
 from workflow.util import LOGGER, chunk_text, get_traceback, check_cuda_availability
@@ -228,10 +230,10 @@ class BarkEngine(TextToSpeechEngine):
 
             # Create transcript message
             transcript_message = MessageDict(
-                role="assistant",
+                role=RoleTypes.TOOL,
                 content=input_text,
                 type=ContentType.TEXT,
-                generated_by="user",
+                generated_by=MessageGenerators.USER,
                 creation_metadata=creation_metadata,
             )
 

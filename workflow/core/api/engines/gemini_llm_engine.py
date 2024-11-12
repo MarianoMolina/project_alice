@@ -3,7 +3,9 @@ from google.generativeai.types import GenerateContentResponse
 from pydantic import Field
 from typing import Dict, Any, List, Optional
 from workflow.core.api.engines import APIEngine
-from workflow.core.data_structures import MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall
+from workflow.core.data_structures import (
+    MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, RoleTypes, MessageGenerators
+    )
 from workflow.util import LOGGER, est_messages_token_count, prune_messages, est_token_count
 
 class GeminiLLMEngine(APIEngine):
@@ -70,7 +72,7 @@ class GeminiLLMEngine(APIEngine):
             # Prepare the chat history (all messages except the last one)
             history = []
             for message in messages[:-1]:
-                role = "model" if message["role"] == "assistant" else message["role"]
+                role = "model" if message["role"] == RoleTypes.ASSISTANT else message["role"]
                 history.append({"role": role, "parts": message["content"]})
 
             # Get the last message as the new input
@@ -129,10 +131,10 @@ class GeminiLLMEngine(APIEngine):
                         ))
 
             msg = MessageDict(
-                role="assistant",
+                role=RoleTypes.ASSISTANT,
                 content=response.text,
                 tool_calls=tool_calls if tool_calls else None,
-                generated_by="llm",
+                generated_by=MessageGenerators.LLM,
                 type=ContentType.TEXT,
                 creation_metadata={
                     "model": api_data.model,

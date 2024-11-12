@@ -1,4 +1,4 @@
-from .message import MessageDict
+from .message import MessageDict, MessageGenerators, RoleTypes
 from .file_reference import FileReference, FileContentReference, generate_file_content_reference, get_file_content
 from .url_reference import URLReference
 from .task_response import TaskResponse, complete_inner_execution_history
@@ -44,4 +44,4 @@ __all__ = ['FileReference', 'ContentType', 'FileType', 'FileContentReference', '
            'URLReference', 'TaskResponse', 'User', 'UserRoles', 'UserInteraction', 'ExecutionHistoryItem', 'NodeResponse', 'TasksEndCodeRouting', 'EmbeddingChunk',
            'ApiName', 'ApiType', 'ModelType', 'ParameterDefinition', 'FunctionConfig', 'FunctionParameters', 'ToolCall', 'ToolCallConfig', 'UserCheckpoint', 'UserResponse',
            'ToolFunction', 'ensure_tool_function', 'EntityType', 'ModelApis', 'FileOutput', 'References', 'complete_inner_execution_history', 'Embeddable',
-           'AliceModel', 'Prompt', 'BaseDataStructure', 'DataCluster', 'InteractionOwnerType', 'InteractionOwner']
+           'AliceModel', 'Prompt', 'BaseDataStructure', 'DataCluster', 'InteractionOwnerType', 'InteractionOwner', 'MessageGenerators', 'RoleTypes']

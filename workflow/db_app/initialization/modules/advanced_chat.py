@@ -44,16 +44,23 @@ advanced_chat_module = AdvancedChatModule(
             {
                 "key": "advanced_chat",
                 "name": "Advanced Chat (Gemini)",
-                "messages": [],
                 "alice_agent": "gemini_alice_adv", 
-                "functions": [ "web_scrape_workflow", "embedding_task", "tts_task", "research_workflow"], 
+                "agent_tools": [ "web_scrape_workflow", "tts_task", "research_workflow"],
+                "retrieval_tools": ["retrieval_task"],
+                "default_user_checkpoints": {
+                    "tool_calls": "default_tool_call_checkpoint",
+                    "code_exec": "default_code_exec_checkpoint"
+                }
             },
             {
                 "key": "advanced_chat_claude",
                 "name": "Advanced Chat (Claude)",
-                "messages": [],
                 "alice_agent": "claude_alice_adv",
-                "functions": ["coding_workflow", "image_gen_task", "embedding_task"], 
+                "agent_tools": ["coding_workflow", "image_gen_task", "search_hub"],
+                "default_user_checkpoints": {
+                    "tool_calls": "default_tool_call_checkpoint",
+                    "code_exec": "default_code_exec_checkpoint"
+                }
             },
         ]
     }

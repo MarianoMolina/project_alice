@@ -5,10 +5,10 @@ from workflow.core.api.engines import APIEngine
 from workflow.core.data_structures import (
     References,
     FunctionParameters,
-    ParameterDefinition,
+    ParameterDefinition, MessageGenerators, RoleTypes,
+    MessageDict, ContentType,
     ApiType,
 )
-from workflow.core.data_structures.message import MessageDict, ContentType
 
 LOGGER = logging.getLogger(__name__)
 
@@ -103,9 +103,9 @@ class WolframAlphaEngine(APIEngine):
                     if resp.status != 200:
                         error_text = await resp.text() # Generate a message with this text and return that
                         msg = MessageDict(
-                            role="assistant",
+                            role=RoleTypes.ASSISTANT,
                             content=error_text,
-                            generated_by="tool",
+                            generated_by=MessageGenerators.TOOL,
                             type=ContentType.TEXT,
                             creation_metadata={
                                 "source": "Wolfram Alpha - Error Message",
@@ -120,9 +120,9 @@ class WolframAlphaEngine(APIEngine):
                     LOGGER.debug(f"Response data: {response_data}")
                     # Create a MessageDict with the content
                     msg = MessageDict(
-                        role="assistant",
+                        role=RoleTypes.ASSISTANT,
                         content=response_data,
-                        generated_by="tool",
+                        generated_by=MessageGenerators.TOOL,
                         type=ContentType.TEXT,
                         creation_metadata={
                             "source": "Wolfram Alpha",

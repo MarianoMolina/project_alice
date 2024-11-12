@@ -1,6 +1,6 @@
 import base64, json, google.generativeai as genai
 from typing import List
-from workflow.core.data_structures import ModelConfig, MessageDict, FileContentReference, FileType, ContentType, References
+from workflow.core.data_structures import ModelConfig, MessageDict, FileContentReference, FileType, ContentType, References, RoleTypes, MessageGenerators
 from workflow.core.api.engines.embedding_engine import EmbeddingEngine
 from workflow.util import LOGGER, est_token_count
 
@@ -51,9 +51,9 @@ class GeminiEmbeddingsEngine(EmbeddingEngine):
                 type=FileType.FILE,
                 content=embeddings_b64,
                 transcript=MessageDict(
-                    role='user',
+                    role=RoleTypes.USER,
                     content=input if isinstance(input, str) else json.dumps(input),
-                    generated_by='user',
+                    generated_by=MessageGenerators.USER,
                     type=ContentType.TEXT,
                     creation_metadata=creation_metadata
                 )

@@ -1,6 +1,8 @@
 from pydantic import Field
 from openai import AsyncOpenAI
-from workflow.core.data_structures import ModelConfig, ApiType, FileReference, MessageDict, References, FunctionParameters, ParameterDefinition
+from workflow.core.data_structures import (
+    ModelConfig, ApiType, FileReference, MessageDict, References, FunctionParameters, ParameterDefinition, MessageGenerators, ContentType, RoleTypes
+    )
 from workflow.core.api.engines.api_engine import APIEngine
 from workflow.util import LOGGER
 
@@ -53,10 +55,10 @@ class OpenAISpeechToTextEngine(APIEngine):
                 )
 
             msg = MessageDict(
-                role="assistant",
+                role=RoleTypes.ASSISTANT,
                 content=f'Transcription: {transcription}',
-                generated_by="tool",
-                type="text",
+                generated_by=MessageGenerators.TOOL,
+                type=ContentType.TEXT,
                 creation_metadata={
                     "model": model,
                 }

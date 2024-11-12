@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Optional, Callable
 from workflow.util import LOGGER
 from workflow.core.api import APIManager
 from workflow.core.data_structures import (
-    MessageDict, References, NodeResponse, FunctionParameters, ParameterDefinition, FunctionConfig, ApiType, TasksEndCodeRouting, Prompt
+    MessageDict, References, NodeResponse, FunctionParameters, ParameterDefinition, FunctionConfig, ApiType, TasksEndCodeRouting, Prompt, ContentType, RoleTypes, MessageGenerators
 )
 from workflow.util.utils import json_to_python_type_mapping, get_traceback
 from workflow.core.agent.agent import AliceAgent
@@ -116,7 +116,7 @@ class PromptAgentTask(AliceTask):
         sanitized_inputs = self.update_inputs(**kwargs)
         input_string = template.format_prompt(**sanitized_inputs)
         LOGGER.info(f"Input string for task {self.task_name}: {input_string}")
-        msg_list = [MessageDict(content=input_string, role="user", generated_by="user", step=self.task_name)]
+        msg_list = [MessageDict(content=input_string, role=RoleTypes.USER, generated_by=MessageGenerators.USER, step=self.task_name)]
         
         # Add messages from history
         execution_history: List[NodeResponse] = kwargs.get("execution_history", [])

@@ -1,7 +1,9 @@
 import google.generativeai as genai
 from pydantic import Field
-from typing import List, Union, Optional
-from workflow.core.data_structures import MessageDict, ModelConfig, FileReference, get_file_content, ApiType, References, FunctionParameters, ParameterDefinition
+from typing import List, Optional
+from workflow.core.data_structures import (
+    MessageDict, ModelConfig, FileReference, get_file_content, ApiType, References, FunctionParameters, ParameterDefinition, RoleTypes, MessageGenerators, ContentType
+    )
 from workflow.core.api.engines.api_engine import APIEngine
 from workflow.util import LOGGER
 
@@ -66,10 +68,10 @@ class GeminiVisionEngine(APIEngine):
             )
             
             msg = MessageDict(
-                role="assistant",
+                role=RoleTypes.ASSISTANT,
                 content=response.text,
-                generated_by="llm",
-                type="text",
+                generated_by=MessageGenerators.TOOL,
+                type=ContentType.TEXT,
                 creation_metadata={
                     "model": api_data.model,
                     "prompt_tokens": response.usage_metadata.prompt_token_count,

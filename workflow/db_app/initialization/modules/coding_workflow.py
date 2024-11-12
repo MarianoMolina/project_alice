@@ -281,6 +281,55 @@ coding_workflow_module = CodingWorkflowModule(
                     },
                     "required": ["prompt"]
                 },
+                "templates": {
+                    "output_template": "coding_workflow_output_prompt"
+                }
+            },
+            {
+                "key": "coding_workflow_with_checkpoint",
+                "task_type": "Workflow",
+                "task_name": "coding_workflow",
+                "task_description": "Workflow for creating code. Provide a prompt detailing the requirements and language for the code.",
+                "tasks": {
+                    "plan_workflow": "plan_workflow",
+                    "generate_code": "generate_code",
+                    "generate_unit_tests": "generate_unit_tests",
+                    "check_unit_test_results": "check_unit_test_results"
+                },
+                "start_node": "plan_workflow",
+                "node_end_code_routing": {
+                    "plan_workflow": {
+                        0: ("generate_code", False),
+                        1: ("plan_workflow", True),
+                    },
+                    "generate_code": {
+                        0: ("generate_unit_tests", False),
+                        1: ("generate_code", True),
+                        2: ("generate_unit_tests", True),
+                        3: (None, True),
+                    },
+                    "generate_unit_tests": {
+                        0: ("check_unit_test_results", False),
+                        1: ("generate_unit_tests", True),
+                        2: ("check_unit_test_results", True),
+                        3: (None, True)
+                    },
+                    "check_unit_test_results": {
+                        0: (None, False),
+                        1: ("check_unit_test_results", True),
+                        2: ("generate_code", True),
+                        3: ("generate_unit_tests", True)
+                    }
+                },
+                "max_attempts": 2,
+                "recursive": False,
+                "input_variables": {
+                    "type": "object",
+                    "properties": {
+                        "prompt": "prompt_parameter",
+                    },
+                    "required": ["prompt"]
+                },
                 "user_checkpoints": {
                     "generate_unit_tests": "generate_unit_tests_checkpoint"
                 },

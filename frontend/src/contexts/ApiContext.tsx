@@ -13,7 +13,8 @@ import {
     requestFileTranscript as apiRequestFileTranscript,
     updateMessageInChat as apiUpdateMessageInChat,
     deleteItem as apiDeleteItem,
-    resumeTask as apiResumeTask
+    resumeTask as apiResumeTask,
+    resumeChat as apiResumeChat
 } from '../services/api';
 import { useNotification } from './NotificationContext';
 import { useCardDialog } from './CardDialogContext';
@@ -41,6 +42,7 @@ interface ApiContextType {
     requestFileTranscript: typeof apiRequestFileTranscript;
     updateMessageInChat: typeof apiUpdateMessageInChat;
     resumeTask: typeof apiResumeTask;
+    resumeChat: typeof apiResumeChat;
     updateUserInteraction: (
         interactionId: string,
         itemData: Partial<UserInteraction>
@@ -218,6 +220,21 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             throw error;
         }
     }, [addNotification, selectCardItem]);
+
+    const resumeChat = useCallback(async (interaction: UserInteraction): Promise<AliceChat> => {
+        try {
+            const result = await apiResumeChat(interaction);
+            addNotification('Chat resumed successfully', 'success', 5000, {
+                label: 'View Chat',
+                onClick: () => selectCardItem('Chat', result._id as string)
+            });
+            emitEvent('updated', 'chats', result);
+            return result;
+        } catch (error) {
+            addNotification('Error resuming chat', 'error');
+            throw error;
+        }
+    }, [addNotification]);
     
     const uploadFileContentReference = useCallback(async (itemData: Partial<FileContentReference>): Promise<FileReference> => {
         try {
@@ -308,23 +325,28 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             const result = await updateItem('userinteractions', interactionId, itemData);
             
             // If there's a user response and a task_response_id, check if we need to resume the task
-            if (result.user_response && result.task_response_id) {
-                const taskResponse = await apiFetchItem('taskresults', result.task_response_id) as TaskResponse;
+            if (result.user_response && result.owner.type === 'task_response' && result.owner.id) {
+                const taskResponse = await apiFetchItem('taskresults', result.owner.id) as TaskResponse;
                 
                 if (taskResponse.status === 'pending') {
                     Logger.debug('Associated task is pending, attempting to resume with user response');
-                    await resumeTask(result.task_response_id, {
-                        user_interaction: result
-                    });
+                    await resumeTask(result.owner.id);
                     
                     // Additional notification for task resumption
                     addNotification('Associated task resumed', 'info', 5000, {
                         label: 'View Task',
-                        onClick: () => selectCardItem('TaskResponse', result.task_response_id)
+                        onClick: () => selectCardItem('TaskResponse', result.owner.id)
                     });
                 }
             }
-            
+            if (result.user_response && result.owner.type === 'chat' && result.owner.id) {
+                Logger.debug('Associated chat is pending, attempting to resume with user response');
+                await resumeChat(result);
+                addNotification('Associated chat resumed', 'info', 5000, {
+                    label: 'View Chat',
+                    onClick: () => selectCardItem('Chat', result.owner.id)
+                });
+            }
             return result;
         } catch (error) {
             addNotification('Error updating user interaction', 'error');
@@ -372,7 +394,8 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         requestFileTranscript,
         resumeTask,
         updateUserInteraction,
-        updateMessageInChat
+        updateMessageInChat,
+        resumeChat
     };
 
     return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>;

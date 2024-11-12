@@ -40,8 +40,8 @@ const UserInteractionViewer: React.FC<UserInteractionViewerProps> = ({ interacti
   const { updateUserInteraction } = useApi();
 
   const handleViewTaskResponse = () => {
-    if (interaction.task_response_id) {
-      selectCardItem('TaskResponse', interaction.task_response_id);
+    if (interaction.owner && interaction.owner.type === 'task_response') {
+      selectCardItem('TaskResponse', interaction.owner.id as string);
     }
   };
 
@@ -91,7 +91,7 @@ const UserInteractionViewer: React.FC<UserInteractionViewerProps> = ({ interacti
               Respond
             </ViewButton>
           )}
-          {interaction.task_response_id && (
+          {interaction.owner && interaction.owner.type == 'task_response' && (
             <ViewButton
               variant="outlined"
               size="small"
@@ -108,7 +108,7 @@ const UserInteractionViewer: React.FC<UserInteractionViewerProps> = ({ interacti
         <SectionLabel variant="subtitle1">TASK:</SectionLabel>
         <Box display="flex" alignItems="center">
           <Typography variant="body1">
-            {interaction.task_response_id || 'No task response available'}
+            {interaction.owner?.id || 'No task response available'}
           </Typography>
         </Box>
       </Content>

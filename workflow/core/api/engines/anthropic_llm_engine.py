@@ -4,7 +4,7 @@ from anthropic import AsyncAnthropic
 from anthropic.types import TextBlock, ToolUseBlock, ToolParam, Message
 from workflow.core.data_structures import ToolCall, ToolCallConfig, ToolFunction
 from workflow.core.api.engines.llm_engine import LLMEngine
-from workflow.core.data_structures import MessageDict, ContentType, ModelConfig, References
+from workflow.core.data_structures import MessageDict, ContentType, ModelConfig, References, RoleTypes, MessageGenerators
 from workflow.util import LOGGER, est_messages_token_count, prune_messages
 
 ANTHROPIC_PRICING_1k = {
@@ -55,7 +55,7 @@ class LLMAnthropic(LLMEngine):
             role = msg.get("role", "")
             content = msg.get("content", "")
 
-            if role not in ["user", "assistant"]:
+            if role not in [RoleTypes.USER, RoleTypes.ASSISTANT]:
                 if i > 0 and i < len(messages) - 1:
                     prev_role = messages[i-1].get("role", "")
                     next_role = messages[i+1].get("role", "")
@@ -66,28 +66,28 @@ class LLMAnthropic(LLMEngine):
                         continue
                     else:
                         # Use the other role
-                        role = "user" if prev_role == "assistant" else "assistant"
+                        role = RoleTypes.USER if prev_role == RoleTypes.ASSISTANT else RoleTypes.ASSISTANT
                 else:
                     # If it's the first or last message, default to user
-                    role = "user"
+                    role = RoleTypes.USER
 
             adapted.append({"role": role, "content": content})
 
         # Ensure alternating user-assistant pattern and start with user
         final_adapted = []
-        expected_role = "user"
+        expected_role = RoleTypes.USER
         for msg in adapted:
             if msg["role"] == expected_role:
                 final_adapted.append(msg)
-                expected_role = "assistant" if expected_role == "user" else "user"
+                expected_role = RoleTypes.ASSISTANT if expected_role == RoleTypes.USER else RoleTypes.USER
             else:
                 # Log warning about incorrect order
                 LOGGER.warning(f"Message order issue: Expected {expected_role}, got {msg['role']}. Message content: {msg['content'][:50]}...")
 
         # Ensure it starts with a user message
-        if final_adapted and final_adapted[0]["role"] != "user":
+        if final_adapted and final_adapted[0]["role"] != RoleTypes.USER:
             LOGGER.warning("First message is not from user. Adjusting order.")
-            final_adapted.insert(0, {"role": "user", "content": "Please continue."})
+            final_adapted.insert(0, {"role": RoleTypes.USER, "content": "Please continue."})
 
         return final_adapted
     
@@ -175,10 +175,10 @@ class LLMAnthropic(LLMEngine):
             cost = self.calculate_cost(response.usage.input_tokens, response.usage.output_tokens, response.model)
 
             msg = MessageDict(
-                role="assistant",
+                role=RoleTypes.ASSISTANT,
                 content=message_text,
                 tool_calls=[tool_call for tool_call in tool_calls] if tool_calls else None,
-                generated_by="llm",
+                generated_by=MessageGenerators.LLM,
                 type=ContentType.TEXT,
                 creation_metadata={
                     "model": response.model,

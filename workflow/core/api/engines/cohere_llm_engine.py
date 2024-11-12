@@ -3,7 +3,7 @@ from cohere import NonStreamedChatResponse
 from pydantic import Field
 from typing import Dict, Any, List, Optional
 from workflow.core.api.engines import APIEngine
-from workflow.core.data_structures import MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall
+from workflow.core.data_structures import MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, RoleTypes, MessageGenerators
 from workflow.util import LOGGER, est_messages_token_count, prune_messages
 
 class CohereLLMEngine(APIEngine):
@@ -98,10 +98,10 @@ class CohereLLMEngine(APIEngine):
                 tool_calls = [ToolCall(**tool_call.model_dump()) for tool_call in response.tool_calls]
 
             msg = MessageDict(
-                role="assistant",
+                role=RoleTypes.ASSISTANT,
                 content=response.text,
                 tool_calls=tool_calls,
-                generated_by="llm",
+                generated_by=MessageGenerators.LLM,
                 type=ContentType.TEXT,
                 creation_metadata={
                     "model": api_data.model,
