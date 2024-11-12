@@ -112,9 +112,7 @@ const DataClusterEditingView: React.FC<DataClusterEditingViewProps> = ({
 
     const renderSection = (config: typeof REFERENCE_CONFIG[number]) => {
         const references = editedCluster[config.key] || [];
-        const showSection = config.key === 'string_outputs' ? 
-            references.length > 0 : 
-            true;
+        const showSection = references.length > 0 
 
         if (!showSection) return null;
 
@@ -124,7 +122,7 @@ const DataClusterEditingView: React.FC<DataClusterEditingViewProps> = ({
                     <Typography variant="subtitle1" className="font-medium">
                         {config.title}
                     </Typography>
-                    {config.key !== 'string_outputs' && config.collectionName && (
+                    {config.collectionName && (
                         <IconButton 
                             size="small" 
                             onClick={() => handleAddClick(config.key)}

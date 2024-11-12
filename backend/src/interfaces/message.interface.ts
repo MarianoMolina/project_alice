@@ -35,8 +35,6 @@ export interface IMessage extends Embeddable {
     step: string;
     assistant_name?: string;
     type: ContentType;
-    tool_calls?: any[];
-    tool_call_id?: string,
     references?: References;
     creation_metadata?: Record<string, any>;
     created_by: Types.ObjectId | IUserDocument;

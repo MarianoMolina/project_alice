@@ -27,7 +27,7 @@ class AliceTask(BaseDataStructure):
     start_node: Optional[str] = Field(default=None, description="Starting node name")
     recursive: bool = Field(True, description="Whether task can be executed recursively")
     max_attempts: int = Field(1, description="Maximum attempts per node before failure")
-    timeout: Optional[int] = Field(default=None, description="Task timeout in seconds")
+    timeout: Optional[int] = Field(default=None, description="Task timeout in seconds") # TODO: Pass timeout to model API Calls
     
     # Node and execution routing
     node_end_code_routing: TasksEndCodeRouting = Field(

@@ -21,6 +21,8 @@ const modelMapping: { [key: string]: string } = {
   userinteractions: 'UserInteraction',
   dataclusters: 'DataCluster',
   embeddingchunks: 'EmbeddingChunk',
+  toolcalls: 'ToolCall',
+  codeexecutions: 'CodeExecution'
 };
 
 // Get all collections in the database

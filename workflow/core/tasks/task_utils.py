@@ -2,8 +2,7 @@ from typing import Dict, Any, Optional, List, Tuple
 from workflow.core.data_structures import (
     FunctionParameters, NodeResponse, ExecutionHistoryItem, Prompt
 )
-from workflow.util.utils import convert_value_to_type
-from workflow.util import LOGGER
+from workflow.util import convert_value_to_type, LOGGER
 
 def simplify_execution_history(execution_history: List[NodeResponse]) -> List[ExecutionHistoryItem]:
     """

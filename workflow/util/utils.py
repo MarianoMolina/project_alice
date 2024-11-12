@@ -1,5 +1,5 @@
 import json, re, numpy as np
-from typing import List, Any, Union, Type, Tuple, Dict
+from typing import List, Any, Type, Tuple, Dict
 from workflow.util.logging_config import LOGGER
 
 def check_cuda_availability() -> bool:
@@ -43,49 +43,6 @@ def save_results_to_file(results: List[Any], file_path: str):
         json.dump(results, file, indent=2)
     LOGGER.info(f"Results saved to {file_path}")
 
-def get_language_matching(language: str) -> Union[str, None]:
-    language_map = {
-        "python": "python",
-        "py": "python",
-        "javascript": "javascript",
-        "js": "javascript",
-        "typescript": "typescript",
-        "ts": "typescript",
-        "java": "java",
-        "c": "c",
-        "c++": "cpp",
-        "cpp": "cpp",
-        "csharp": "csharp",
-        "cs": "csharp",
-        "ruby": "ruby",
-        "rb": "ruby",
-        "go": "go",
-        "golang": "go",
-        "swift": "swift",
-        "kotlin": "kotlin",
-        "kt": "kotlin",
-        "rust": "rust",
-        "rs": "rust",
-        "scala": "scala",
-        "sc": "scala",
-        "php": "php",
-        "shell": "shell",
-        "sh": "shell",
-        "bash": "shell",
-        "sql": "sql",
-        "html": "html",
-        "css": "css",
-        "markdown": "markdown",
-        "md": "markdown",
-        "json": "json",
-        "xml": "xml",
-        "yaml": "yaml",
-        "yml": "yaml",
-    }
-    if language in language_map:
-        return language_map[language]
-    LOGGER.warning(f"No matching language found for: {language}")
-    return None
 
 def sanitize_and_limit_string(prompt: str, limit: int = 50) -> str:
     # Sanitize the prompt
@@ -207,40 +164,6 @@ def prune_messages(messages: List[Dict[str, Any]], ctx_size: int) -> List[Dict[s
     LOGGER.debug(f"Pruned messages: {pruned_messages}")
     return pruned_messages
 
-def convert_value_to_type(value: Any, param_name: str, param_type: str) -> Any:
-    """Convert a value to the specified parameter type."""
-    try:
-        if param_type == "string":
-            return str(value)
-        elif param_type == "integer":
-            if isinstance(value, str):
-                return int(float(value))
-            return int(value)
-        elif param_type == "number":
-            return float(value)
-        elif param_type == "boolean":
-            if isinstance(value, str):
-                return value.lower() in ("true", "1", "yes", "y")
-            return bool(value)
-        elif param_type == "array":
-            if isinstance(value, str):
-                import json
-                return json.loads(value)
-            if isinstance(value, (list, tuple)):
-                return list(value)
-            raise ValueError(f"Cannot convert {type(value)} to array")
-        elif param_type == "object":
-            if isinstance(value, str):
-                import json
-                return json.loads(value)
-            if isinstance(value, dict):
-                return value
-            raise ValueError(f"Cannot convert {type(value)} to object")
-        else:
-            return value
-    except Exception as e:
-        raise ValueError(f"Failed to convert {param_name} to {param_type}: {str(e)}")
-
 def get_traceback() -> str:
     """
     Get the traceback information for the current exception.
@@ -261,51 +184,3 @@ def cosine_similarity(vec1: List[float], vec2: List[float]) -> float:
     if np.linalg.norm(vec1) == 0 or np.linalg.norm(vec2) == 0:
         return 0.0
     return float(np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2)))
-
-def convert_value_to_type(value: Any, param_name: str, param_type: str) -> Any:
-    """
-    Converts a value to the specified parameter type.
-    
-    Args:
-        value: The value to convert
-        param_name: The name of the parameter (for error messages)
-        param_type: The target type to convert to
-        
-    Returns:
-        The converted value
-        
-    Raises:
-        ValueError: If conversion fails
-    """
-    try:
-        if param_type == "string":
-            return str(value)
-        elif param_type == "integer":
-            if isinstance(value, str):
-                # Try to convert string to float first to handle "1.0" -> 1
-                return int(float(value))
-            return int(value)
-        elif param_type == "number":
-            return float(value)
-        elif param_type == "boolean":
-            if isinstance(value, str):
-                return value.lower() in ("true", "1", "yes", "y")
-            return bool(value)
-        elif param_type == "array":
-            if isinstance(value, str):
-                import json
-                return json.loads(value)
-            if isinstance(value, (list, tuple)):
-                return list(value)
-            raise ValueError(f"Cannot convert {type(value)} to array")
-        elif param_type == "object":
-            if isinstance(value, str):
-                import json
-                return json.loads(value)
-            if isinstance(value, dict):
-                return value
-            raise ValueError(f"Cannot convert {type(value)} to object")
-        else:
-            return value
-    except Exception as e:
-        raise ValueError(f"Failed to convert {param_name} to {param_type}: {str(e)}")

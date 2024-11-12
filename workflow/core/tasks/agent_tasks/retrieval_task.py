@@ -121,7 +121,7 @@ class RetrievalTask(AliceTask):
         """
         updated_data_cluster = References()
         fields_to_process = [field for field in data_cluster.model_fields_set
-                             if field not in ['string_outputs', 'embeddings']]
+                             if field not in ['embeddings']]
 
         for field_name in fields_to_process:
             items = getattr(data_cluster, field_name)
@@ -305,7 +305,7 @@ class RetrievalTask(AliceTask):
         embedding_matches: List[Dict[str, Any]] = []
 
         fields_to_process = [field for field in data_cluster.__fields_set__
-                             if field not in ['string_outputs', 'embeddings']]
+                             if field not in ['embeddings']]
 
         for field_name in fields_to_process:
             items = getattr(data_cluster, field_name)

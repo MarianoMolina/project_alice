@@ -4,9 +4,9 @@ from .engines import (
     ArxivSearchAPI, ExaSearchAPI, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI, 
     APIEngine, LLMEngine, LLMAnthropic, VisionModelEngine, ImageGenerationEngine, AnthropicVisionEngine, 
     OpenAISpeechToTextEngine, OpenAIAdvancedSpeechToTextEngine, TextToSpeechEngine, 
-    EmbeddingEngine, GoogleGraphEngine, WolframAlphaEngine
+    EmbeddingEngine, GoogleGraphEngine, WolframAlphaEngine, ApiEngineMap
     )
 __all__ = ["API", "APIManager", "ArxivSearchAPI", "ExaSearchAPI", "GoogleSearchAPI", "RedditSearchAPI", 
            "WikipediaSearchAPI", "APIEngine", "LLMEngine", "LLMAnthropic", "ImageGenerationEngine", 
            "VisionModelEngine", "AnthropicVisionEngine", "OpenAISpeechToTextEngine", "OpenAIAdvancedSpeechToTextEngine", 
-           "TextToSpeechEngine", "EmbeddingEngine", "GoogleGraphEngine", "WolframAlphaEngine"]
+           "TextToSpeechEngine", "EmbeddingEngine", "GoogleGraphEngine", "WolframAlphaEngine", "ApiEngineMap"]

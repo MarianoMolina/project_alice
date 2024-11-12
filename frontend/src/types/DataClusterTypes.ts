@@ -13,7 +13,6 @@ export const convertToDataCluster = (data: any): DataCluster => {
         messages: data?.messages || [],
         files: data?.files || [],
         url_references: data?.url_references || [],
-        string_outputs: data?.string_outputs || [],
         user_interactions: data?.user_interactions || [],
         embeddings: data?.embeddings || [],
     };
@@ -28,7 +27,6 @@ export const getDefaultDataClusterForm = (): Partial<DataCluster> => ({
     messages: [],
     files: [],
     url_references: [],
-    string_outputs: [],
     user_interactions: [],
     embeddings: []
 });

@@ -26,8 +26,6 @@ const messageSchema = new Schema<IMessageDocument, IMessageModel>({
     default: ContentType.TEXT, 
     description: "Type of the message" 
   },
-  tool_calls: { type: Schema.Types.Mixed, default: [], description: "List of tool calls in the message" },
-  tool_call_id: { type: String, default: null, description: "ID of the tool call, if any" },
   references: { type: referencesSchema, default: {}, description: "References associated with the message" },
   creation_metadata: {
     type: Schema.Types.Mixed,
@@ -57,9 +55,7 @@ messageSchema.methods.apiRepresentation = function (this: IMessageDocument) {
     generated_by: this.generated_by || MessageGenerators.USER,
     step: this.step || "",
     assistant_name: this.assistant_name || "",
-    tool_calls: this.tool_calls || [],
     type: this.type || ContentType.TEXT,
-    tool_call_id: this.tool_call_id || null,
     creation_metadata: this.creation_metadata || {},
     created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
     updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,

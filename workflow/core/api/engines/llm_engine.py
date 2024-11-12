@@ -146,7 +146,7 @@ class LLMEngine(APIEngine):
                 for tool_call in choice.message.tool_calls:
                     LOGGER.debug(f'Tool call: {ToolCall(**tool_call.model_dump())}')
 
-            tool_calls = [ToolCall(**tool_call.model_dump()) for tool_call in choice.message.tool_calls] if choice.message.tool_calls else []
+            tool_calls = [ToolCall(**tool_call.model_dump()) for tool_call in choice.message.tool_calls] if choice.message.tool_calls else None
             function_call = choice.message.function_call.model_dump() if choice.message.function_call else None
             if function_call: # Deprecated by OAI -> checking in case any endpoint uses it
                 try:
@@ -158,7 +158,7 @@ class LLMEngine(APIEngine):
             msg = MessageDict(
                 role=RoleTypes.ASSISTANT,
                 content=content,
-                tool_calls=tool_calls,
+                references=References(tool_calls=tool_calls),
                 generated_by=MessageGenerators.LLM,
                 type=ContentType.TEXT,
                 creation_metadata={

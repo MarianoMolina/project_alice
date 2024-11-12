@@ -6,7 +6,8 @@ from workflow.core.data_structures import (
     MessageDict, ContentType, References, ToolFunction,
     UserInteraction, UserCheckpoint, Prompt, User, 
     BaseDataStructure, DataCluster, InteractionOwner,
-    InteractionOwnerType, MessageGenerators, RoleTypes
+    InteractionOwnerType, MessageGenerators, RoleTypes,
+    CodeExecution
 )
 from workflow.core.agent import AliceAgent
 from workflow.core.api import APIManager
@@ -203,10 +204,10 @@ class AliceChat(BaseDataStructure):
                 return []
 
             # Execute appropriate action
-            if next_step == CheckpointType.TOOL_CALL and target_message.tool_calls:
+            if next_step == CheckpointType.TOOL_CALL and target_message.references.tool_calls:
                 return await self._handle_tool_calls(
                     api_manager,
-                    target_message.tool_calls,
+                    target_message.references.tool_calls,
                     skip_permission=True
                 )
             elif next_step == CheckpointType.CODE_EXECUTION:
@@ -269,10 +270,10 @@ class AliceChat(BaseDataStructure):
             turn_messages.append(llm_message)
 
             # Handle tool calls
-            if llm_message.tool_calls and self.alice_agent.has_tools:
+            if llm_message.references.tool_calls and self.alice_agent.has_tools:
                 tool_messages = await self._handle_tool_calls(
                     api_manager,
-                    llm_message.tool_calls,
+                    llm_message.references.tool_calls,
                     llm_message
                 )
                 if tool_messages:
@@ -324,8 +325,14 @@ class AliceChat(BaseDataStructure):
             return [self._create_checkpoint_message(checkpoint)]
 
         # Execute code
-        executed_messages, code_by_lang, exit_code = await self.alice_agent.process_code_execution(messages)
-        return executed_messages
+        code_executions, exit_code = await self.alice_agent.process_code_execution(messages)
+        return [MessageDict(
+            role=RoleTypes.ASSISTANT,
+            content=f"Code execution completed. Exit code: {exit_code}",
+            generated_by=MessageGenerators.SYSTEM,
+            type=ContentType.TEXT,
+            references=References(code_executions=code_executions)
+        )]
 
     def _create_checkpoint_message(self, checkpoint: UserCheckpoint) -> MessageDict:
         """Create a message containing a user checkpoint."""

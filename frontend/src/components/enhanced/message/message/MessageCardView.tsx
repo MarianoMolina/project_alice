@@ -16,8 +16,7 @@ const hasAnyReferences = (references: References | undefined): boolean => {
         references.messages?.length ||
         references.files?.length ||
         references.task_responses?.length ||
-        references.url_references?.length ||
-        references.string_outputs?.length
+        references.url_references?.length
     );
 };
 

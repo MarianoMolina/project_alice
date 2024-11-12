@@ -10,7 +10,7 @@ import { createEmbeddingChunk, updateEmbeddingChunk } from './embeddingChunk.uti
 
 export async function processReferences(references: References | undefined, userId: string): Promise<References> {
   Logger.debug('Processing references');
-  Logger.debug('References: '+JSON.stringify(references));
+  Logger.debug('References: ' + JSON.stringify(references));
   const processedReferences: References = {};
 
   if (!references) {
@@ -150,8 +150,24 @@ export async function processReferences(references: References | undefined, user
         })
     );
   }
-
-  if (references.string_outputs) processedReferences.string_outputs = references.string_outputs;
+  
+  if (references.tool_calls && Array.isArray(references.tool_calls)) {
+    processedReferences.tool_calls = await Promise.all(
+      references.tool_calls
+        .filter(ref => ref !== null)
+        .map(async (ref) => {
+          if (typeof ref === 'string' || ref instanceof Types.ObjectId) {
+            return new Types.ObjectId(ref);
+          } else if ('_id' in ref && ref._id) {
+            return new Types.ObjectId(ref._id);
+          } else {
+            Logger.error('Tool calls are not supported yet');
+            Logger.error(JSON.stringify(ref));
+            throw new Error('Tool calls are not supported yet');
+          }
+        })
+    );
+  }
 
   return processedReferences;
 }
@@ -179,16 +195,12 @@ export function compareReferences(ref1: References | undefined, ref2: References
   if (!ref1 && !ref2) return true;
   if (!ref1 || !ref2) return false;
 
-  const keys: (keyof References)[] = ['messages', 'files', 'task_responses', 'url_references', 'string_outputs'];
+  const keys: (keyof References)[] = ['messages', 'files', 'task_responses', 'url_references'];
 
   for (const key of keys) {
-    if (key === 'string_outputs') {
-      if (!compareArrays(ref1[key], ref2[key])) return false;
-    } else {
-      const arr1 = ref1[key] as (Types.ObjectId | { _id: Types.ObjectId })[] | undefined;
-      const arr2 = ref2[key] as (Types.ObjectId | { _id: Types.ObjectId })[] | undefined;
-      if (!compareArrays(arr1, arr2)) return false;
-    }
+    const arr1 = ref1[key] as (Types.ObjectId | { _id: Types.ObjectId })[] | undefined;
+    const arr2 = ref2[key] as (Types.ObjectId | { _id: Types.ObjectId })[] | undefined;
+    if (!compareArrays(arr1, arr2)) return false;
   }
 
   return true;

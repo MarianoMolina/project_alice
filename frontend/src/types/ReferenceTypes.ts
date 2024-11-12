@@ -20,7 +20,6 @@ export interface References {
   files?: (FileReference | FileContentReference)[];
   task_responses?: TaskResponse[];
   url_references?: URLReference[];
-  string_outputs?: string[];
   user_interactions?: UserInteraction[];
   embeddings?: EmbeddingChunk[];
 }
@@ -31,7 +30,6 @@ export function hasAnyReferences(references: References): boolean {
     (references.files?.length ?? 0) > 0 ||
     (references.task_responses?.length ?? 0) > 0 ||
     (references.url_references?.length ?? 0) > 0 ||
-    (references.string_outputs?.length ?? 0) > 0 ||
     (references.user_interactions?.length ?? 0) > 0 ||
     (references.embeddings?.length ?? 0) > 0
   );
@@ -43,7 +41,6 @@ export function howManyReferences(references: References): number {
     (references.files?.length ?? 0) +
     (references.task_responses?.length ?? 0) +
     (references.url_references?.length ?? 0) +
-    (references.string_outputs?.length ?? 0) +
     (references.user_interactions?.length ?? 0) +
     (references.embeddings?.length ?? 0)
   );

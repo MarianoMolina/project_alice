@@ -6,7 +6,7 @@ import Logger from './logger';
 import Agent from '../models/agent.model';
 
 type RouteHandler = (req: AuthRequest, res: Response) => Promise<void>;
-type ModelName = 'Agent' | 'Model' | 'Task' | 'Prompt' | 'TaskResult' | 'AliceChat' | 'API' | 'ParameterDefinition' | 'User' | 'FileReference' | 'Message' | 'URLReference' | 'UserInteraction' | 'UserCheckpoint' | 'DataCluster' | 'EmbeddingChunk';
+type ModelName = 'Agent' | 'Model' | 'Task' | 'Prompt' | 'TaskResult' | 'AliceChat' | 'API' | 'ParameterDefinition' | 'User' | 'FileReference' | 'Message' | 'URLReference' | 'UserInteraction' | 'UserCheckpoint' | 'DataCluster' | 'EmbeddingChunk' | 'ToolCall' | 'CodeExecution';
 
 interface RouteOptions<T extends Document> {
   createItem?: (data: Partial<T>, userId: string) => Promise<T | null>;

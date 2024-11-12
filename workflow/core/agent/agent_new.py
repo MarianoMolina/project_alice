@@ -3,9 +3,10 @@ from enum import Enum
 from pydantic import Field, BaseModel
 from typing import Dict, Any, List, Optional, Tuple, Callable, Union
 from workflow.core.data_structures import ToolFunction, ToolCall, ensure_tool_function
-from workflow.core.api import APIManager
+from workflow.core.api.api_manager_new import APIManager
+from workflow.core.data_structures.api_utils_new import ApiName, ApiType
 from workflow.core.data_structures import (
-    TaskResponse, FileReference, ContentType, MessageDict, ApiType, ModelType, FileType, References, 
+    TaskResponse, FileReference, ContentType, MessageDict, ModelType, FileType, References, 
     FileContentReference, EmbeddingChunk, AliceModel, Prompt, BaseDataStructure, RoleTypes, MessageGenerators,
     CodeBlock, CodeOutput, CodeExecution
     )
@@ -151,6 +152,7 @@ print("This is just for demonstration")
         chat_model = self.llm_model
         response_ref: References = await api_manager.generate_response_with_api_engine(
             api_type=ApiType.LLM_MODEL,
+            api_name=chat_model.api_name,
             model=chat_model,
             messages=self._prepare_messages_for_api(messages),
             system=self._prepare_system_message(**kwargs),
@@ -382,6 +384,7 @@ print("This is just for demonstration")
         
         refs: References = await api_manager.generate_response_with_api_engine(
             api_type=ApiType.IMG_VISION,
+            api_name=vision_model.api_name,
             model=vision_model,
             file_references=file_references,
             prompt=prompt
@@ -397,6 +400,7 @@ print("This is just for demonstration")
         
         refs: References = await api_manager.generate_response_with_api_engine(
             api_type=ApiType.SPEECH_TO_TEXT,
+            api_name=stt_model.api_name,
             model=stt_model,
             file_reference=file_reference
         )
@@ -411,6 +415,7 @@ print("This is just for demonstration")
         
         refs: References = await api_manager.generate_response_with_api_engine(
             api_type=ApiType.IMG_GENERATION,
+            api_name=img_gen_model.api_name,
             model=img_gen_model,
             prompt=prompt,
             n=n,
@@ -428,6 +433,7 @@ print("This is just for demonstration")
         
         refs: References = await api_manager.generate_response_with_api_engine(
             api_type=ApiType.TEXT_TO_SPEECH,
+            api_name=tts_model.api_name,
             model=tts_model,
             input=input,
             voice=voice,
@@ -444,6 +450,7 @@ print("This is just for demonstration")
         
         refs: References = await api_manager.generate_response_with_api_engine(
             api_type=ApiType.EMBEDDINGS,
+            api_name=embeddings_model.api_name,
             model=embeddings_model,
             input=input,
             language=language

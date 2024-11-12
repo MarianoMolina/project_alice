@@ -14,6 +14,7 @@ export interface IParameterDefinitionMethods {
 }
 
 export interface IParameterDefinitionDocument extends IParameterDefinition, Document, IParameterDefinitionMethods {
+    _id: Types.ObjectId; 
     createdAt: Date;
     updatedAt: Date;
 }

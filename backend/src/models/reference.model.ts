@@ -8,9 +8,10 @@ export const referencesSchema = new Schema<References>({
     files: [{ type: Schema.Types.ObjectId, ref: 'FileReference', autopopulate: true }],
     task_responses: [{ type: Schema.Types.ObjectId, ref: 'TaskResult', autopopulate: true }],
     url_references: [{ type: Schema.Types.ObjectId, ref: 'URLReference', autopopulate: true }],
-    string_outputs: [String],
     user_interactions: [{ type: Schema.Types.ObjectId, ref: 'UserInteraction', autopopulate: true }],
     embeddings: [{ type: Schema.Types.ObjectId, ref: 'EmbeddingChunk', autopopulate: true }],
+    tool_calls: [{ type: Schema.Types.ObjectId, ref: 'ToolCall', autopopulate: true }],
+    code_executions: [{ type: Schema.Types.ObjectId, ref: 'CodeExecution', autopopulate: true }],
 });
 
 function ensureObjectIdForSave(this: IDataClusterDocument, next: CallbackWithoutResultAndOptionalError) {
@@ -31,6 +32,12 @@ function ensureObjectIdForSave(this: IDataClusterDocument, next: CallbackWithout
     }
     if (this.embeddings) {
         this.embeddings = this.embeddings.map((obj) => getObjectId(obj));
+    }
+    if (this.tool_calls) {
+        this.tool_calls = this.tool_calls.map((obj) => getObjectId(obj));
+    }
+    if (this.code_executions) {
+        this.code_executions = this.code_executions.map((obj) => getObjectId(obj));
     }
     next();
 }
@@ -57,6 +64,12 @@ function ensureObjectIdForUpdate(
     }
     if (update.embeddings) {
         update.embeddings = update.embeddings.map((obj: any) => getObjectId(obj));
+    }
+    if (update.tool_calls) {
+        update.tool_calls = update.tool_calls.map((obj: any) => getObjectId(obj));
+    }
+    if (update.code_executions) {
+        update.code_executions = update.code_executions.map((obj: any) => getObjectId(obj));
     }
     next();
 };

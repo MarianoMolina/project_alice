@@ -10,7 +10,9 @@ from .model_config import ModelConfig
 from .model import AliceModel
 from .prompt import Prompt
 from .api_utils import ApiName, ApiType, ModelType, ModelApis
-from .parameters import ParameterDefinition, FunctionConfig, FunctionParameters, ToolCall, ToolCallConfig, ToolFunction, ensure_tool_function
+from .tool_calls import ToolCall, ToolCallConfig
+from .code import CodeBlock, CodeOutput, CodeExecution
+from .parameters import ParameterDefinition, FunctionConfig, FunctionParameters, ToolFunction, ensure_tool_function
 from .base_models import EntityType, FileType, ContentType, TasksEndCodeRouting, EmbeddingChunk, Embeddable, BaseDataStructure
 
 # Rebuild all models
@@ -39,9 +41,13 @@ References.model_rebuild()
 DataCluster.model_rebuild()
 AliceModel.model_rebuild()
 Prompt.model_rebuild()
+CodeBlock.model_rebuild()
+CodeOutput.model_rebuild()
+CodeExecution.model_rebuild()
 
 __all__ = ['FileReference', 'ContentType', 'FileType', 'FileContentReference', 'generate_file_content_reference', 'get_file_content', 'MessageDict', 'ModelConfig',
            'URLReference', 'TaskResponse', 'User', 'UserRoles', 'UserInteraction', 'ExecutionHistoryItem', 'NodeResponse', 'TasksEndCodeRouting', 'EmbeddingChunk',
            'ApiName', 'ApiType', 'ModelType', 'ParameterDefinition', 'FunctionConfig', 'FunctionParameters', 'ToolCall', 'ToolCallConfig', 'UserCheckpoint', 'UserResponse',
            'ToolFunction', 'ensure_tool_function', 'EntityType', 'ModelApis', 'FileOutput', 'References', 'complete_inner_execution_history', 'Embeddable',
-           'AliceModel', 'Prompt', 'BaseDataStructure', 'DataCluster', 'InteractionOwnerType', 'InteractionOwner', 'MessageGenerators', 'RoleTypes']
+           'AliceModel', 'Prompt', 'BaseDataStructure', 'DataCluster', 'InteractionOwnerType', 'InteractionOwner', 'MessageGenerators', 'RoleTypes', 'CodeBlock',
+           'CodeOutput', 'CodeExecution']

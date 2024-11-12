@@ -100,7 +100,7 @@ class CohereLLMEngine(APIEngine):
             msg = MessageDict(
                 role=RoleTypes.ASSISTANT,
                 content=response.text,
-                tool_calls=tool_calls,
+                references=References(tool_calls=tool_calls),
                 generated_by=MessageGenerators.LLM,
                 type=ContentType.TEXT,
                 creation_metadata={

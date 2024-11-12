@@ -7,17 +7,20 @@ from workflow.core.data_structures.task_response import TaskResponse
 from workflow.core.data_structures.url_reference import URLReference
 from workflow.core.data_structures.user_interaction import UserInteraction
 from workflow.core.data_structures.base_models import EmbeddingChunk
+from workflow.core.data_structures.tool_calls import ToolCall
+from workflow.core.data_structures.code import CodeExecution
 
 class References(BaseModel):
     messages: Optional[List[MessageDict]] = Field(default=None, description="List of message references")
     files: Optional[List[Union[FileReference, FileContentReference]]] = Field(default=None, description="List of file references")
     task_responses: Optional[List[TaskResponse]] = Field(default=None, description="List of task response references")
     url_references: Optional[List[URLReference]] = Field(default=None, description="List of search result references")
-    string_outputs: Optional[List[str]] = Field(default=None, description="List of string output references")
     user_interactions: Optional[List[UserInteraction]] = Field(default=None, description="List of user interaction references")
     embeddings: Optional[List[EmbeddingChunk]] = Field(default=None, description="List of embedding references")
+    code_executions: Optional[List[CodeExecution]] = Field(default=None, description="List of code execution references")
+    tool_calls: Optional[List[ToolCall]] = Field(default=None, description="List of tool call references")
 
-    @field_validator('messages', 'files', 'task_responses', 'url_references', 'user_interactions', 'embeddings')
+    @field_validator('messages', 'files', 'task_responses', 'url_references', 'user_interactions', 'embeddings', 'code_executions', 'tool_calls')
     @classmethod
     def validate_reference_list(cls, value: Optional[List[Union[Dict, BaseModel]]], info: Any) -> Optional[List[Any]]:
         if value is None:
@@ -29,7 +32,9 @@ class References(BaseModel):
             'task_responses': TaskResponse,
             'url_references': URLReference,
             'user_interactions': UserInteraction,
-            'embeddings': EmbeddingChunk
+            'embeddings': EmbeddingChunk,
+            'code_executions': CodeExecution,
+            'tool_calls': ToolCall,
         }
         
         if info.field_name == 'files':
@@ -62,18 +67,17 @@ class References(BaseModel):
     
     def model_dump(self, *args, **kwargs) -> Dict[str, Any]:
         data = super().model_dump(*args, **kwargs)
-        for key in ['messages', 'files', 'task_responses', 'url_references', 'string_outputs', 'user_interactions']:
+        for key in ['messages', 'files', 'task_responses', 'url_references', 'user_interactions', 'embeddings', 'code_executions', 'tool_calls']:
             if getattr(self, key) is not None:
                 data[key] = [
                     item.model_dump(*args, **kwargs) if isinstance(item, BaseModel)
-                    else item if isinstance(item, str)
                     else None
                     for item in getattr(self, key)
                     if isinstance(item, (BaseModel, str))
                 ]
         return data
 
-    def add_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, URLReference, str, UserInteraction]):
+    def add_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, URLReference, UserInteraction, EmbeddingChunk, CodeExecution, ToolCall]):
         """Add a reference to the appropriate list based on its type."""
         if isinstance(reference, MessageDict):
             if self.messages is None:
@@ -91,18 +95,26 @@ class References(BaseModel):
             if self.url_references is None:
                 self.url_references = []
             self.url_references.append(reference)
-        elif isinstance(reference, str):
-            if self.string_outputs is None:
-                self.string_outputs = []
-            self.string_outputs.append(reference)
         elif isinstance(reference, UserInteraction):
             if self.user_interactions is None:
                 self.user_interactions = []
             self.user_interactions.append(reference)
+        elif isinstance(reference, EmbeddingChunk):
+            if self.embeddings is None:
+                self.embeddings = []
+            self.embeddings.append(reference)
+        elif isinstance(reference, CodeExecution):
+            if self.code_executions is None:
+                self.code_executions = []
+            self.code_executions.append(reference)
+        elif isinstance(reference, ToolCall):
+            if self.tool_calls is None:
+                self.tool_calls = []
+            self.tool_calls.append(reference)
         else:
             raise ValueError(f"Unsupported reference type: {type(reference)}")
 
-    def get_references(self, ref_type: Optional[str] = None) -> Union[List[Any], Dict[str, List[Any]]]:
+    def get_references(self, ref_type: Optional[str] = None) -> Union[List[BaseModel], Dict[str, List[BaseModel]]]:
         """Get references of a specific type or all references."""
         if ref_type is None:
             return {
@@ -110,14 +122,16 @@ class References(BaseModel):
                 "files": self.files,
                 "task_responses": self.task_responses,
                 "url_references": self.url_references,
-                "string_outputs": self.string_outputs,
                 "user_interactions": self.user_interactions,
+                "embeddings": self.embeddings,
+                "code_executions": self.code_executions,
+                "tool_calls": self.tool_calls,
             }
         return getattr(self, ref_type, None)
 
-    def remove_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, URLReference, str, UserInteraction]) -> bool:
+    def remove_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, URLReference, UserInteraction, EmbeddingChunk, CodeExecution, ToolCall]) -> bool:
         """Remove a specific reference."""
-        for attr in ['messages', 'files', 'task_responses', 'url_references', 'string_outputs', 'user_interactions', 'embeddings']:
+        for attr in ['messages', 'files', 'task_responses', 'url_references', 'user_interactions', 'embeddings', 'code_executions', 'tool_calls']:
             ref_list = getattr(self, attr)
             if ref_list is not None and reference in ref_list:
                 ref_list.remove(reference)
@@ -131,8 +145,10 @@ class References(BaseModel):
             self.files = None
             self.task_responses = None
             self.url_references = None
-            self.string_outputs = None
             self.user_interactions = None
+            self.embeddings = None
+            self.code_executions = None
+            self.tool_calls = None
         else:
             setattr(self, ref_type, None)
 
@@ -173,8 +189,7 @@ class References(BaseModel):
             
         # Compare each field
         fields_to_compare = [
-            'messages', 'files', 'task_responses', 'url_references', 
-            'string_outputs', 'user_interactions', 'embeddings'
+            'messages', 'files', 'task_responses', 'url_references', 'user_interactions', 'embeddings', 'code_executions', 'tool_calls'
         ]
         
         for field in fields_to_compare:
@@ -193,12 +208,6 @@ class References(BaseModel):
             if len(self_items) != len(other_items):
                 return False
                 
-            # For string outputs, compare sets
-            if field == 'string_outputs':
-                if set(self_items) != set(other_items):
-                    return False
-                continue
-                
             # For other fields, compare the actual objects
             # Convert to sets of their string representations for order-independent comparison
             self_set = {str(item) for item in self_items}
@@ -215,7 +224,7 @@ class References(BaseModel):
         if not isinstance(other, References):
             return False
             
-        for field in self.__fields__:
+        for field in self.model_fields:
             self_items = getattr(self, field) or []
             other_items = getattr(other, field) or []
             
@@ -226,12 +235,6 @@ class References(BaseModel):
             # If self has items but other doesn't, it can't be a subset
             if not other_items:
                 return False
-                
-            # For string outputs, use set operations
-            if field == 'string_outputs':
-                if not set(self_items).issubset(set(other_items)):
-                    return False
-                continue
                 
             # For other fields, compare the actual objects
             self_set = {str(item) for item in self_items}

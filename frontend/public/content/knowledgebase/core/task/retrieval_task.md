@@ -61,7 +61,7 @@ async def ensure_embeddings_for_data_cluster(
     updated_data_cluster = References()
     fields_to_process = [
         field for field in data_cluster.model_fields_set
-        if field not in ['string_outputs', 'embeddings']
+        if field not in ['embeddings']
     ]
 ```
 

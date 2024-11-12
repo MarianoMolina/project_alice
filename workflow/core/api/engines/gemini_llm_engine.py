@@ -4,7 +4,7 @@ from pydantic import Field
 from typing import Dict, Any, List, Optional
 from workflow.core.api.engines import APIEngine
 from workflow.core.data_structures import (
-    MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, RoleTypes, MessageGenerators
+    MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, ToolCallConfig, RoleTypes, MessageGenerators
     )
 from workflow.util import LOGGER, est_messages_token_count, prune_messages, est_token_count
 
@@ -124,16 +124,16 @@ class GeminiLLMEngine(APIEngine):
                     if part.function_call:
                         tool_calls.append(ToolCall(
                             type="function",
-                            function={
-                                "name": part.function_call.name,
-                                "arguments": part.function_call.args
-                            }
+                            function=ToolCallConfig(
+                                arguments=part.function_call.args,
+                                name=part.function_call.name,
+                            )
                         ))
 
             msg = MessageDict(
                 role=RoleTypes.ASSISTANT,
                 content=response.text,
-                tool_calls=tool_calls if tool_calls else None,
+                references=References(tool_calls=tool_calls if tool_calls else None),
                 generated_by=MessageGenerators.LLM,
                 type=ContentType.TEXT,
                 creation_metadata={

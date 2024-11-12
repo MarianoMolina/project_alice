@@ -10,7 +10,6 @@ class References(BaseModel):
     files: Optional[List[Union[FileReference, FileContentReference]]]
     task_responses: Optional[List[TaskResponse]]
     url_references: Optional[List[URLReference]]
-    string_outputs: Optional[List[str]]
     user_interactions: Optional[List[UserInteraction]]
     embeddings: Optional[List[EmbeddingChunk]]
 ```
@@ -76,7 +75,7 @@ url_ref = URLReference(
 - Not embeddable by design
 ```python
 refs = References(
-    string_outputs=["Output 1", "Output 2"]
+    task_responses=["Output 1", "Output 2"]
 )
 ```
 
@@ -172,7 +171,6 @@ async def search_docs(
 # Initial data gathering
 step1_results = References(
     url_references=[web_data],
-    string_outputs=[raw_text]
 )
 
 # Analysis phase

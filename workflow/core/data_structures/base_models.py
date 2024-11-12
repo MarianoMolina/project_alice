@@ -23,6 +23,7 @@ class ContentType(str, Enum):
     TASK_RESULT = 'task_result'
     URL_REFERENCE = 'url_reference'
     MULTIPLE = 'multiple'
+    CODE_EXECUTION = 'code_execution'
 
 RouteMapTuple = Tuple[Union[str, None], bool]
 RouteMap = Dict[int, RouteMapTuple]

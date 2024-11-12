@@ -68,17 +68,6 @@ const ReferencesViewer: React.FC<ReferencesViewerProps> = ({ references }) => {
         </Box>
       )}
 
-      {references.string_outputs && references.string_outputs.length > 0 && (
-        <Box className={classes.subSection}>
-          <Typography variant="h6">String Outputs</Typography>
-          {references.string_outputs.map((output, index) => (
-            <Box key={`string-output-${index}`} mb={1}>
-              <AliceMarkdown>{output}</AliceMarkdown>
-            </Box>
-          ))}
-        </Box>
-      )}
-
       {references.user_interactions && references.user_interactions.length > 0 && (
         <Box className={classes.subSection}>
           <Typography variant="h6">User Interactions</Typography>

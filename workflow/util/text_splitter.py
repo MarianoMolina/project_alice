@@ -2,6 +2,7 @@ import re
 from typing import List, Optional
 from enum import Enum
 from workflow.util import est_token_count
+from workflow.util.logging_config import LOGGER
 
 class Language(str, Enum):
     """Enum of the programming languages."""
@@ -10,8 +11,8 @@ class Language(str, Enum):
     GO = "go"
     JAVA = "java"
     KOTLIN = "kotlin"
-    JS = "js"
-    TS = "ts"
+    JAVASCRIPT = "javascript"
+    TYPESCRIPT = "typescript"
     PHP = "php"
     PROTO = "proto"
     PYTHON = "python"
@@ -32,6 +33,111 @@ class Language(str, Enum):
     HASKELL = "haskell"
     ELIXIR = "elixir"
     POWERSHELL = "powershell"
+    SHELL = "shell"
+    SQL = "sql"    
+    CSS = "css"    
+    XML = "xml"    
+    YAML = "yaml"  
+    JSON = "json"  
+
+def get_language_matching(language: str) -> Optional[Language]:
+    """
+    Maps various language identifiers to Language enum values.
+    
+    Args:
+        language: A string representing a programming language
+        
+    Returns:
+        Language enum value if a match is found, None otherwise
+    """
+    language_map = {
+        # Python
+        "python": Language.PYTHON,
+        "py": Language.PYTHON,
+        
+        # JavaScript
+        "javascript": Language.JAVASCRIPT,
+        "js": Language.JAVASCRIPT,
+        
+        # TypeScript
+        "typescript": Language.TYPESCRIPT,
+        "ts": Language.TYPESCRIPT,
+        
+        # Java
+        "java": Language.JAVA,
+        
+        # C
+        "c": Language.C,
+        
+        # C++
+        "c++": Language.CPP,
+        "cpp": Language.CPP,
+        
+        # C#
+        "csharp": Language.CSHARP,
+        "cs": Language.CSHARP,
+        
+        # Ruby
+        "ruby": Language.RUBY,
+        "rb": Language.RUBY,
+        
+        # Go
+        "go": Language.GO,
+        "golang": Language.GO,
+        
+        # Swift
+        "swift": Language.SWIFT,
+        
+        # Kotlin
+        "kotlin": Language.KOTLIN,
+        "kt": Language.KOTLIN,
+        
+        # Rust
+        "rust": Language.RUST,
+        "rs": Language.RUST,
+        
+        # Scala
+        "scala": Language.SCALA,
+        "sc": Language.SCALA,
+        
+        # PHP
+        "php": Language.PHP,
+        
+        # Shell
+        "shell": Language.SHELL,
+        "sh": Language.SHELL,
+        "bash": Language.SHELL,
+        
+        # SQL
+        "sql": Language.SQL,
+        
+        # HTML
+        "html": Language.HTML,
+        
+        # CSS
+        "css": Language.CSS,
+        
+        # Markdown
+        "markdown": Language.MARKDOWN,
+        "md": Language.MARKDOWN,
+        
+        # JSON
+        "json": Language.JSON,
+        
+        # XML
+        "xml": Language.XML,
+        
+        # YAML
+        "yaml": Language.YAML,
+        "yml": Language.YAML,
+    }
+    
+    normalized_language = language.lower().strip()
+    if normalized_language in language_map:
+        return language_map[normalized_language]
+        
+    LOGGER.warning(f"No matching language found for: {language}")
+    return None
 
 class RecursiveTextSplitter:
     def __init__(
@@ -159,7 +265,7 @@ class RecursiveTextSplitter:
                 " ",
                 "",
             ]
-        elif language == Language.JS:
+        elif language == Language.JAVASCRIPT:  # Updated from JS
             return [
                 # Split along function definitions
                 "\nfunction ",
@@ -180,7 +286,7 @@ class RecursiveTextSplitter:
                 " ",
                 "",
             ]
-        elif language == Language.TS:
+        elif language == Language.TYPESCRIPT:  # Updated from TS
             return [
                 "\nenum ",
                 "\ninterface ",
@@ -290,30 +396,6 @@ class RecursiveTextSplitter:
                 " ",
                 "",
             ]
-        elif language == Language.ELIXIR:
-            return [
-                # Split along method function and module definition
-                "\ndef ",
-                "\ndefp ",
-                "\ndefmodule ",
-                "\ndefprotocol ",
-                "\ndefmacro ",
-                "\ndefmacrop ",
-                # Split along control flow statements
-                "\nif ",
-                "\nunless ",
-                "\nwhile ",
-                "\ncase ",
-                "\ncond ",
-                "\nwith ",
-                "\nfor ",
-                "\ndo ",
-                # Split by the normal type of lines
-                "\n\n",
-                "\n",
-                " ",
-                "",
-            ]
         elif language == Language.RUST:
             return [
                 # Split along function definitions
@@ -379,17 +461,13 @@ class RecursiveTextSplitter:
             return [
                 # First, try to split along Markdown headings (starting with level 2)
                 "\n#{1,6} ",
-                # Note the alternative syntax for headings (below) is not handled here
-                # Heading level 2
-                # ---------------
                 # End of code block
                 "```\n",
                 # Horizontal lines
                 "\n\\*\\*\\*+\n",
                 "\n---+\n",
                 "\n___+\n",
-                # Note that this splitter doesn't handle horizontal lines defined
-                # by *three or more* of ***, ---, or ___, but this is not handled
+                # Split by the normal type of lines
                 "\n\n",
                 "\n",
                 " ",
@@ -451,6 +529,36 @@ class RecursiveTextSplitter:
                 "<title",
                 "",
             ]
+        elif language == Language.SOL:
+            return [
+                # Split along compiler information definitions
+                "\npragma ",
+                "\nusing ",
+                # Split along contract definitions
+                "\ncontract ",
+                "\ninterface ",
+                "\nlibrary ",
+                # Split along method definitions
+                "\nconstructor ",
+                "\ntype ",
+                "\nfunction ",
+                "\nevent ",
+                "\nmodifier ",
+                "\nerror ",
+                "\nstruct ",
+                "\nenum ",
+                # Split along control flow statements
+                "\nif ",
+                "\nfor ",
+                "\nwhile ",
+                "\ndo while ",
+                "\nassembly ",
+                # Split by the normal type of lines
+                "\n\n",
+                "\n",
+                " ",
+                "",
+            ]
         elif language == Language.CSHARP:
             return [
                 "\ninterface ",
@@ -488,36 +596,6 @@ class RecursiveTextSplitter:
                 " ",
                 "",
             ]
-        elif language == Language.SOL:
-            return [
-                # Split along compiler information definitions
-                "\npragma ",
-                "\nusing ",
-                # Split along contract definitions
-                "\ncontract ",
-                "\ninterface ",
-                "\nlibrary ",
-                # Split along method definitions
-                "\nconstructor ",
-                "\ntype ",
-                "\nfunction ",
-                "\nevent ",
-                "\nmodifier ",
-                "\nerror ",
-                "\nstruct ",
-                "\nenum ",
-                # Split along control flow statements
-                "\nif ",
-                "\nfor ",
-                "\nwhile ",
-                "\ndo while ",
-                "\nassembly ",
-                # Split by the normal type of lines
-                "\n\n",
-                "\n",
-                " ",
-                "",
-            ]
         elif language == Language.COBOL:
             return [
                 # Split along divisions
@@ -525,11 +603,10 @@ class RecursiveTextSplitter:
                 "\nENVIRONMENT DIVISION.",
                 "\nDATA DIVISION.",
                 "\nPROCEDURE DIVISION.",
-                # Split along sections within DATA DIVISION
+                # Split along sections
                 "\nWORKING-STORAGE SECTION.",
                 "\nLINKAGE SECTION.",
                 "\nFILE SECTION.",
-                # Split along sections within PROCEDURE DIVISION
                 "\nINPUT-OUTPUT SECTION.",
                 # Split along paragraphs and common statements
                 "\nOPEN ",
@@ -567,6 +644,28 @@ class RecursiveTextSplitter:
                 " ",
                 "",
             ]
+        elif language == Language.PERL:
+            return [
+                # Split along subroutine definitions
+                "\nsub ",
+                # Split along package definitions
+                "\npackage ",
+                # Split along control flow statements
+                "\nif ",
+                "\nfor ",
+                "\nwhile ",
+                "\nforeach ",
+                "\nunless ",
+                "\nuntil ",
+                # Split along block declarations
+                "\nBEGIN ",
+                "\nEND ",
+                # Split by the normal type of lines
+                "\n\n",
+                "\n",
+                " ",
+                "",
+            ]
         elif language == Language.HASKELL:
             return [
                 # Split along function definitions
@@ -582,24 +681,45 @@ class RecursiveTextSplitter:
                 "\ndata ",
                 "\nnewtype ",
                 "\ntype ",
-                "\n:: ",
                 # Split along module declarations
                 "\nmodule ",
                 # Split along import statements
                 "\nimport ",
                 "\nqualified ",
-                "\nimport qualified ",
                 # Split along typeclass declarations
                 "\nclass ",
                 "\ninstance ",
                 # Split along case expressions
                 "\ncase ",
-                # Split along guards in function definitions
+                # Split along guards
                 "\n| ",
-                # Split along record field declarations
-                "\ndata ",
+                # Split along record fields
                 "\n= {",
                 "\n, ",
+                # Split by the normal type of lines
+                "\n\n",
+                "\n",
+                " ",
+                "",
+            ]
+        elif language == Language.ELIXIR:
+            return [
+                # Split along method function and module definition
+                "\ndef ",
+                "\ndefp ",
+                "\ndefmodule ",
+                "\ndefprotocol ",
+                "\ndefmacro ",
+                "\ndefmacrop ",
+                # Split along control flow statements
+                "\nif ",
+                "\nunless ",
+                "\nwhile ",
+                "\ncase ",
+                "\ncond ",
+                "\nwith ",
+                "\nfor ",
+                "\ndo ",
                 # Split by the normal type of lines
                 "\n\n",
                 "\n",
@@ -610,7 +730,7 @@ class RecursiveTextSplitter:
             return [
                 # Split along function definitions
                 "\nfunction ",
-                # Split along parameter declarations (escape parentheses)
+                # Split along parameter declarations
                 "\nparam ",
                 # Split along control flow statements
                 "\nif ",
@@ -618,13 +738,20 @@ class RecursiveTextSplitter:
                 "\nfor ",
                 "\nwhile ",
                 "\nswitch ",
-                # Split along class definitions (for PowerShell 5.0 and above)
+                # Split along class definitions
                 "\nclass ",
                 # Split along try-catch-finally blocks
                 "\ntry ",
                 "\ncatch ",
                 "\nfinally ",
                 # Split by normal lines and empty spaces
+                "\n\n",
+                "\n",
+                " ",
+                "",
+            ]
+        elif language == Language.TEXT:
+            return [
                 "\n\n",
                 "\n",
                 " ",

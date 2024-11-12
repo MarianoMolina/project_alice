@@ -198,12 +198,12 @@ class PromptAgentTask(AliceTask):
             return self._create_error_response("tool_call_execution", "No LLM response found", len(execution_history))
 
         try:
-            llm_response = llm_node.references.messages[-1]
+            llm_response: MessageDict = llm_node.references.messages[-1]
             tool_map = self.tool_map(api_manager)
             tools_list = self.tool_list(api_manager)
             
             tool_messages = await self.agent.process_tool_calls(
-                llm_response.tool_calls, 
+                llm_response.references.tool_calls, 
                 tool_map, 
                 tools_list
             )
@@ -242,12 +242,12 @@ class PromptAgentTask(AliceTask):
         llm_response = llm_reference.messages[-1]
 
         try:
-            code_messages, _, exit_code  = await self.agent.process_code_execution([llm_response])
+            code_executions, exit_code  = await self.agent.process_code_execution([llm_response])
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name="code_execution",
                 exit_code=exit_code,
-                references=References(messages=code_messages),
+                references=References(code_executions=code_executions),
                 execution_order=len(execution_history)
             )
         except Exception as e:

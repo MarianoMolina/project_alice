@@ -3,10 +3,9 @@ from enum import Enum
 from typing import Optional, Dict, Any, List, TYPE_CHECKING
 from pydantic import Field, field_validator
 from workflow.core.data_structures.base_models import Embeddable, ContentType, FileType
-from workflow.core.data_structures.central_types import ToolCallType, ReferencesType
+from workflow.core.data_structures.central_types import ReferencesType
 
 if TYPE_CHECKING:
-    from workflow.core.data_structures.parameters import ToolCall
     from workflow.core.data_structures.references import References
 
 def get_default_references():
@@ -32,27 +31,27 @@ class MessageDict(Embeddable):
     step: Optional[str] = Field(default="", description="Process that is creating this message, usually the task_name or tool_name")
     assistant_name: Optional[str] = Field(default="", description="Name of the assistant")
     type: ContentType = Field(default=ContentType.TEXT, description="Type of the message")
-    tool_calls: Optional[List[ToolCallType]] = Field(default=None, description="List of tool calls in the message")
-    tool_call_id: Optional[str] = Field(None, description="The id of the tool call that generated this task response")
+    # tool_calls: Optional[List[ToolCallType]] = Field(default=None, description="List of tool calls in the message")
+    # tool_call_id: Optional[str] = Field(None, description="The id of the tool call that generated this task response")
     references: Optional[ReferencesType] = Field(default_factory=get_default_references, description="References associated with this message")
     creation_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Metadata about the creation of the message, like cost, tokens, end reason, etc.")
 
-    @field_validator('tool_calls')
-    def validate_tool_calls(cls, v):
-        from workflow.core.data_structures import ToolCall
-        if v is None:
-            return v
+    # @field_validator('tool_calls')
+    # def validate_tool_calls(cls, v):
+    #     from workflow.core.data_structures import ToolCall
+    #     if v is None:
+    #         return v
         
-        validated_tool_calls = []
-        for item in v:
-            if isinstance(item, ToolCall):
-                validated_tool_calls.append(item)
-            elif isinstance(item, dict):
-                validated_tool_calls.append(ToolCall(**item))
-            else:
-                raise ValueError(f"Invalid tool call type: {type(item)}")
+    #     validated_tool_calls = []
+    #     for item in v:
+    #         if isinstance(item, ToolCall):
+    #             validated_tool_calls.append(item)
+    #         elif isinstance(item, dict):
+    #             validated_tool_calls.append(ToolCall(**item))
+    #         else:
+    #             raise ValueError(f"Invalid tool call type: {type(item)}")
         
-        return validated_tool_calls
+    #     return validated_tool_calls
     
     @field_validator('references')
     def validate_references(cls, v):
@@ -104,8 +103,8 @@ class MessageDict(Embeddable):
    
     def model_dump(self, *args, **kwargs):
         data = super().model_dump(*args, **kwargs)
-        if self.tool_calls:
-            data['tool_calls'] = [tool_call.model_dump(*args, **kwargs) for tool_call in self.tool_calls]
+        # if self.tool_calls:
+        #     data['tool_calls'] = [tool_call.model_dump(*args, **kwargs) for tool_call in self.tool_calls]
         if self.references:
             if isinstance(self.references, dict):
                 from workflow.core.data_structures.references import References

@@ -6,15 +6,18 @@ import { IURLReferenceDocument } from "./urlReference.interface";
 import { IUserInteractionDocument } from "./userInteraction.interface";
 import { IEmbeddingChunkDocument } from './embeddingChunk.interface';
 import { IUserDocument } from './user.interface';
+import { IToolCallDocument } from './toolCall.interface';
+import { ICodeExecutionDocument } from './codeExecution.interface';
 
 export interface References {
     messages?: Types.ObjectId[] | IMessageDocument[];
     files?: Types.ObjectId[] | IFileReferenceDocument[];
     task_responses?: Types.ObjectId[] | ITaskResultDocument[];
     url_references?: Types.ObjectId[] | IURLReferenceDocument[];
-    string_outputs?: string[];
     user_interactions?: Types.ObjectId[] | IUserInteractionDocument[];
     embeddings?: Types.ObjectId[] | IEmbeddingChunkDocument[];
+    tool_calls?: Types.ObjectId[] | IToolCallDocument[];
+    code_executions?: Types.ObjectId[] | ICodeExecutionDocument[];
 }
 
 export interface ReferencesMethods {

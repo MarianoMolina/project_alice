@@ -177,7 +177,7 @@ class LLMAnthropic(LLMEngine):
             msg = MessageDict(
                 role=RoleTypes.ASSISTANT,
                 content=message_text,
-                tool_calls=[tool_call for tool_call in tool_calls] if tool_calls else None,
+                references=References(tool_calls=[tool_call for tool_call in tool_calls] if tool_calls else None),
                 generated_by=MessageGenerators.LLM,
                 type=ContentType.TEXT,
                 creation_metadata={

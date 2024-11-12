@@ -68,11 +68,6 @@ export const REFERENCE_CONFIG: ReferenceTypeConfig[] = [
         EnhancedView: EmbeddingChunkShortListView,
         chipType: 'EmbeddingChunk'
     },
-    {
-        key: 'string_outputs',
-        title: 'String Outputs',
-        chipType: 'string_output'
-    }
 ];
 
 interface ActionButtonConfig {

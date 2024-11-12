@@ -14,7 +14,7 @@ from workflow.core.data_structures import (
     ParameterDefinition,
 )
 from workflow.core.api.engines.api_engine import APIEngine
-from workflow.util import LOGGER, est_token_count, Language, RecursiveTextSplitter, cosine_similarity
+from workflow.util import LOGGER, est_token_count, Language, RecursiveTextSplitter, cosine_similarity, get_language_matching
 
 class EmbeddingEngine(APIEngine):
     input_variables: FunctionParameters = Field(
@@ -44,7 +44,9 @@ class EmbeddingEngine(APIEngine):
         """
         # Validate the language input
         try:
-            language_enum = Language(language)
+            language_enum = get_language_matching(language)
+            if not language_enum:
+                raise ValueError(f"Invalid language option: {language}")
         except ValueError:
             raise ValueError(f"Invalid language option: {language}")
 

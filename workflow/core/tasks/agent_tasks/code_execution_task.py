@@ -1,6 +1,6 @@
 from pydantic import Field
 from typing import List, Optional
-from workflow.util import LOGGER, get_traceback
+from workflow.util import LOGGER, get_traceback, Language
 from workflow.core.data_structures import (
     MessageDict, ApiType, References, NodeResponse, TasksEndCodeRouting
 )
@@ -14,7 +14,7 @@ class CodeExecutionLLMTask(PromptAgentTask):
     agent: AliceAgent = Field(..., description="The agent to use for the task")
     task_name: str = Field("execute_code", description="The name of the task")
     exit_codes: dict[int, str] = Field({0: "Success", 1: "Execution failed."}, description="A dictionary of exit codes for the task")
-    valid_languages: list[str] = Field(["python", "shell"], description="A list of valid languages for code execution")
+    valid_languages: list[Language] = Field([Language.PYTHON, Language.SHELL], description="A list of valid languages for code execution")
     timeout: int = Field(50, description="The maximum time in seconds to wait for code execution")
     required_apis: Optional[List[ApiType]] = Field(None, description="A list of required APIs for the task")
     start_node: str = Field(default='code_execution', description="The name of the starting node")
@@ -42,12 +42,12 @@ class CodeExecutionLLMTask(PromptAgentTask):
             )
 
         try:
-            code_execs, _, exit_code = await self.agent.process_code_execution(messages)
+            code_execs, exit_code = await self.agent.process_code_execution(messages)
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name="code_execution",
                 exit_code=exit_code,
-                references=References(messages=code_execs),
+                references=References(code_executions=code_execs),
                 execution_order=len(execution_history)
             )
         except Exception as e:

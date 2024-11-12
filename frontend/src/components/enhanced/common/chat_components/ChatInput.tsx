@@ -41,8 +41,6 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
     if (references.task_responses?.length) types.add(ContentType.TASK_RESULT);
     if (references.url_references?.length) types.add(ContentType.URL_REFERENCE);
     if (references.messages?.length) types.add(ContentType.TEXT);
-    if (references.string_outputs?.length) types.add(ContentType.TEXT);
-
     return types.size > 1 ? ContentType.MULTIPLE : types.values().next().value || ContentType.TEXT;
   }, []);
 
@@ -137,9 +135,6 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
             break;
           case 'messages':
             label = `Message: ${(ref as MessageType).content.substring(0, 20)}...`;
-            break;
-          case 'string_outputs':
-            label = `Output: ${ref.substring(0, 20)}...`;
             break;
         }
         chips.push(
