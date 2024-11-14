@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
 class ModelConfig(BaseModel):
@@ -8,9 +8,8 @@ class ModelConfig(BaseModel):
     temperature: Optional[float] = 0.9
     timeout: Optional[int] = 300
     use_cache: Optional[bool] = False
-    tools: Optional[List[str]] = None
-    model_config = ConfigDict(protected_namespaces=())
     ctx_size: Optional[int] = 1024
+    model_config = ConfigDict(protected_namespaces=())
     
     def model_dump(self, *args, **kwargs):
         # Ensure we exclude model_config from serialization

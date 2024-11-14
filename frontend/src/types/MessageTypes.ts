@@ -1,7 +1,6 @@
-import { BaseDatabaseObject, convertToBaseDatabaseObject, convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
+import { convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
 import { convertToDataCluster, DataCluster } from "./DataClusterTypes";
 import { FileType } from "./FileTypes";
-import { ToolCall } from "./ParameterTypes";
 
 export enum RoleType {
     USER = 'user',
@@ -28,21 +27,19 @@ export enum MessageGenerators {
     SYSTEM = 'system'
 }
 
-export interface MessageType extends BaseDatabaseObject, Embeddable {
+export interface MessageType extends Embeddable {
     role: RoleType;
     content: string;
     generated_by: MessageGenerators;
     step?: string;
     assistant_name?: string;
     type?: ContentType;
-    tool_calls?: ToolCall[];
     creation_metadata?: Record<string, any>;
     references?: DataCluster;
 }
 
 export const convertToMessageType = (data: any): MessageType => {
     return {
-        ...convertToBaseDatabaseObject(data),
         ...convertToEmbeddable(data),
         role: data?.role || 'user',
         content: data?.content || '',
@@ -50,7 +47,6 @@ export const convertToMessageType = (data: any): MessageType => {
         step: data?.step || undefined,
         assistant_name: data?.assistant_name || undefined,
         type: data?.type || 'text',
-        tool_calls: data?.tool_calls || [],
         references: data?.references ? convertToDataCluster(data.references) : undefined,
         creation_metadata: data?.creation_metadata || {},
     };
@@ -64,7 +60,6 @@ export const getDefaultMessageForm = (): MessageType => ({
     content: '',
     generated_by: MessageGenerators.USER,
     type: ContentType.TEXT,
-    tool_calls: [],
     references: undefined,
     creation_metadata: {},
     embedding: [],

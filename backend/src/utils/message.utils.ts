@@ -3,12 +3,13 @@ import { IMessageDocument } from '../interfaces/message.interface';
 import Message from '../models/message.model';
 import { compareReferences, processReferences } from './reference.utils';
 import Logger from './logger';
-import { References } from '../interfaces/references.interface';
 import { processEmbeddings } from './embeddingChunk.utils';
+import { InteractionOwnerType } from '../interfaces/userInteraction.interface';
 
 export async function createMessage(
   messageData: Partial<IMessageDocument>,
-  userId: string
+  userId: string,
+  chatId?: string
 ): Promise<IMessageDocument | null> {
   try {
     Logger.debug('messageData received in createMessage:', messageData);
@@ -19,8 +20,16 @@ export async function createMessage(
     }
 
     if (messageData.references) {
-      messageData.references = await processReferences(messageData.references, userId);
+      messageData.references = await processReferences(
+        messageData.references, 
+        userId,
+        chatId ? {
+          id: chatId,
+          type: InteractionOwnerType.CHAT
+        } : undefined
+      );
     }
+
     if (messageData.embedding) {
       messageData.embedding = await processEmbeddings(messageData, userId);
     }
@@ -66,7 +75,8 @@ export async function createMessage(
 export async function updateMessage(
   messageId: string,
   messageData: Partial<IMessageDocument>,
-  userId: string
+  userId: string,
+  chatId?: string
 ): Promise<IMessageDocument | null> {
   try {
     const existingMessage = await Message.findById(messageId);
@@ -77,8 +87,16 @@ export async function updateMessage(
     const processedMessageData = { ...messageData };
 
     if (processedMessageData.references) {
-      processedMessageData.references = await processReferences(processedMessageData.references, userId);
+      processedMessageData.references = await processReferences(
+        processedMessageData.references, 
+        userId,
+        chatId ? {
+          id: chatId,
+          type: InteractionOwnerType.CHAT
+        } : undefined
+      );
     }
+
     if (processedMessageData.embedding) {
       processedMessageData.embedding = await processEmbeddings(processedMessageData, userId);
     }

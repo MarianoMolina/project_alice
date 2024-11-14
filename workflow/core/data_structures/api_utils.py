@@ -1,59 +1,159 @@
 from enum import Enum
-from typing import List
+from typing import List, TypedDict, Dict
     
 class ApiType(str, Enum):
+    """Enum for different types of API services"""
     LLM_MODEL = 'llm_api'
-    GOOGLE_SEARCH = 'google_search'
-    REDDIT_SEARCH = 'reddit_search'
-    WIKIPEDIA_SEARCH = 'wikipedia_search'
-    EXA_SEARCH = 'exa_search'
-    ARXIV_SEARCH = 'arxiv_search'
-    WOLFRAM_ALPHA = 'wolfram_alpha'
     IMG_VISION = 'img_vision'
     IMG_GENERATION = 'img_generation'
     SPEECH_TO_TEXT = 'speech_to_text'
     TEXT_TO_SPEECH = 'text_to_speech'
     EMBEDDINGS = 'embeddings'
+    WOLFRAM_ALPHA = 'wolfram_alpha'
     GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph'
+    GOOGLE_SEARCH = 'google_search'
+    REDDIT_SEARCH = 'reddit_search'
+    WIKIPEDIA_SEARCH = 'wikipedia_search'
+    EXA_SEARCH = 'exa_search'
+    ARXIV_SEARCH = 'arxiv_search'
 
 class ApiName(str, Enum):
-    OPENAI = 'openai_llm',
-    OPENAI_VISION = 'openai_vision',
-    OPENAI_IMG_GENERATION = 'openai_img_gen',
-    OPENAI_EMBEDDINGS = 'openai_embeddings',
-    OPENAI_TTS = 'openai_tts',
-    OPENAI_STT = 'openai_stt',
-    OPENAI_ASTT = 'openai_adv_stt',
-    AZURE = 'azure',
-    ANTHROPIC = 'anthropic_llm',
-    ANTHROPIC_VISION = 'anthropic_vision',
-    GEMINI = 'gemini_llm',
-    GEMINI_VISION = 'gemini_vision',
-    GEMINI_STT = 'gemini_stt',
-    GEMINI_EMBEDDINGS = 'gemini_embeddings',
-    GEMINI_IMG_GEN = 'gemini_img_gen',
-    MISTRAL = 'mistral_llm',
-    MISTRAL_VISION = 'mistral_vision',
-    MISTRAL_EMBEDDINGS = 'mistral_embeddings',
-    COHERE = 'cohere_llm',
-    LLAMA = 'llama_llm',
-    LLAMA_VISION = 'llama_vision',
-    LM_STUDIO = 'lm-studio_llm',
-    LM_STUDIO_VISION = 'lm-studio_vision',
-    LM_STUDIO_EMBEDDINGS = 'lm-studio_embeddings',
-    GROQ = 'groq_llm',
-    GROQ_VISION = 'groq_vision',
-    GROQ_TTS = 'groq_tts',
-    CUSTOM = 'Custom',
-    BARK_TTS = 'bark_tts',
-    PIXART_IMG_GEN = 'pixart_img_gen',
-    GOOGLE_SEARCH = 'google_search',
-    REDDIT_SEARCH = 'reddit_search',
-    WIKIPEDIA_SEARCH = 'wikipedia_search',
-    EXA_SEARCH = 'exa_search',
-    ARXIV_SEARCH = 'arxiv_search'
-    GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph'
-    WOLFRAM_ALPHA = 'wolfram_alpha'
+    """Simplified enum for API providers"""
+    OPENAI = 'openai'
+    ANTHROPIC = 'anthropic'
+    GEMINI = 'gemini'
+    MISTRAL = 'mistral'
+    COHERE = 'cohere'
+    LLAMA = 'llama'
+    AZURE = 'azure'
+    LM_STUDIO = 'lm_studio'
+    GROQ = 'groq'
+    BARK = 'bark'
+    PIXART = 'pixart'
+    GOOGLE_SEARCH = 'google_search'
+    REDDIT = 'reddit'
+    WIKIPEDIA = 'wikipedia'
+    EXA = 'exa'
+    ARXIV = 'arxiv'
+    GOOGLE_KNOWLEDGE = 'google_knowledge'
+    WOLFRAM = 'wolfram'
+
+# Type definitions for different API configurations
+class BaseApiConfig(TypedDict):
+    """Base configuration that applies to most AI model APIs"""
+    api_key: str
+    base_url: str
+
+class GoogleSearchConfig(TypedDict):
+    api_key: str
+    cse_id: str
+
+class RedditConfig(TypedDict):
+    client_id: str
+    client_secret: str
+
+class WolframConfig(TypedDict):
+    app_id: str
+
+class ExaConfig(TypedDict):
+    api_key: str
+
+# Map of ApiName to their required configuration structure
+API_CONFIG_TYPES: Dict[ApiName, Dict] = {
+    ApiName.OPENAI: BaseApiConfig,
+    ApiName.ANTHROPIC: BaseApiConfig,
+    ApiName.GEMINI: BaseApiConfig,
+    ApiName.MISTRAL: BaseApiConfig,
+    ApiName.COHERE: BaseApiConfig,
+    ApiName.LLAMA: BaseApiConfig,
+    ApiName.LM_STUDIO: BaseApiConfig,
+    ApiName.AZURE: BaseApiConfig,
+    ApiName.GROQ: BaseApiConfig,
+    ApiName.BARK: BaseApiConfig,
+    ApiName.PIXART: BaseApiConfig,
+    ApiName.GOOGLE_SEARCH: GoogleSearchConfig,
+    ApiName.REDDIT: RedditConfig,
+    ApiName.WIKIPEDIA: dict,
+    ApiName.EXA: ExaConfig,
+    ApiName.ARXIV: dict,
+    ApiName.GOOGLE_KNOWLEDGE: ExaConfig,
+    ApiName.WOLFRAM: WolframConfig,
+}
+
+# Map of ApiName to supported ApiTypes
+API_CAPABILITIES = {
+    ApiName.OPENAI: {
+        ApiType.LLM_MODEL,
+        ApiType.IMG_VISION,
+        ApiType.IMG_GENERATION,
+        ApiType.SPEECH_TO_TEXT,
+        ApiType.TEXT_TO_SPEECH,
+        ApiType.EMBEDDINGS
+    },
+    ApiName.ANTHROPIC: {
+        ApiType.LLM_MODEL,
+        ApiType.IMG_VISION
+    },
+    ApiName.GEMINI: {
+        ApiType.LLM_MODEL,
+        ApiType.IMG_VISION,
+        ApiType.IMG_GENERATION,
+        ApiType.SPEECH_TO_TEXT,
+        ApiType.EMBEDDINGS
+    },
+    ApiName.MISTRAL: {
+        ApiType.LLM_MODEL,
+        ApiType.IMG_VISION,
+        ApiType.EMBEDDINGS
+    },
+    ApiName.COHERE: {
+        ApiType.LLM_MODEL
+    },
+    ApiName.LLAMA: {
+        ApiType.LLM_MODEL,
+        ApiType.IMG_VISION
+    },
+    ApiName.LM_STUDIO: {
+        ApiType.LLM_MODEL,
+        ApiType.IMG_VISION,
+        ApiType.EMBEDDINGS
+    },
+    ApiName.GROQ: {
+        ApiType.LLM_MODEL,
+        ApiType.IMG_VISION,
+        ApiType.TEXT_TO_SPEECH
+    },
+    ApiName.AZURE: {
+        ApiType.LLM_MODEL
+    },
+    ApiName.BARK: {
+        ApiType.TEXT_TO_SPEECH
+    },
+    ApiName.PIXART: {
+        ApiType.IMG_GENERATION
+    },
+    ApiName.GOOGLE_SEARCH: {
+        ApiType.GOOGLE_SEARCH
+    },
+    ApiName.REDDIT: {
+        ApiType.REDDIT_SEARCH
+    },
+    ApiName.WIKIPEDIA: {
+        ApiType.WIKIPEDIA_SEARCH
+    },
+    ApiName.EXA: {
+        ApiType.EXA_SEARCH
+    },
+    ApiName.ARXIV: {
+        ApiType.ARXIV_SEARCH
+    },
+    ApiName.GOOGLE_KNOWLEDGE: {
+        ApiType.GOOGLE_KNOWLEDGE_GRAPH
+    },
+    ApiName.WOLFRAM: {
+        ApiType.WOLFRAM_ALPHA
+    },
+}
 
 ModelApis: List[ApiType] = [ApiType.LLM_MODEL, ApiType.IMG_VISION, ApiType.IMG_GENERATION, ApiType.SPEECH_TO_TEXT, ApiType.TEXT_TO_SPEECH, ApiType.EMBEDDINGS]
     

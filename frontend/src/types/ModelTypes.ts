@@ -1,5 +1,5 @@
 import { ApiName } from "./ApiTypes";
-import { BaseDatabaseObject, convertToBaseDatabaseObject, convertToEmbeddable, EnhancedComponentProps } from "./CollectionTypes";
+import { BaseDatabaseObject, convertToBaseDatabaseObject, EnhancedComponentProps } from "./CollectionTypes";
 
 export enum ModelType {
     INSTRUCT = 'instruct',
@@ -25,7 +25,6 @@ export interface AliceModel extends BaseDatabaseObject {
 export const convertToAliceModel = (data: any): AliceModel => {
     return {
         ...convertToBaseDatabaseObject(data),
-        ...convertToEmbeddable(data),
         short_name: data?.short_name || '',
         model_name: data?.model_name || '',
         model_format: data?.model_format || undefined,

@@ -8,7 +8,7 @@ export interface ToolCallConfig {
 }
 
 export interface IToolCall extends Embeddable {
-    type: string;
+    type: "function";
     function: ToolCallConfig;
     created_by: Types.ObjectId | IUserDocument;
     updated_by: Types.ObjectId | IUserDocument;

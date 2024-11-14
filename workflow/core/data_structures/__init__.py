@@ -3,13 +3,14 @@ from .file_reference import FileReference, FileContentReference, generate_file_c
 from .url_reference import URLReference
 from .task_response import TaskResponse, complete_inner_execution_history
 from .node_response import NodeResponse, ExecutionHistoryItem
-from .user_interaction import UserInteraction, UserCheckpoint, UserResponse, InteractionOwnerType, InteractionOwner
+from .user_checkpoint import UserCheckpoint
+from .user_interaction import UserInteraction, UserResponse, InteractionOwnerType, InteractionOwner
 from .user import User, UserRoles
 from .references import References, DataCluster
 from .model_config import ModelConfig
 from .model import AliceModel
 from .prompt import Prompt
-from .api_utils import ApiName, ApiType, ModelType, ModelApis
+from .api_utils import ApiName, ApiType, ModelType, ModelApis, API_CONFIG_TYPES, API_CAPABILITIES
 from .tool_calls import ToolCall, ToolCallConfig
 from .code import CodeBlock, CodeOutput, CodeExecution
 from .parameters import ParameterDefinition, FunctionConfig, FunctionParameters, ToolFunction, ensure_tool_function
@@ -50,4 +51,4 @@ __all__ = ['FileReference', 'ContentType', 'FileType', 'FileContentReference', '
            'ApiName', 'ApiType', 'ModelType', 'ParameterDefinition', 'FunctionConfig', 'FunctionParameters', 'ToolCall', 'ToolCallConfig', 'UserCheckpoint', 'UserResponse',
            'ToolFunction', 'ensure_tool_function', 'EntityType', 'ModelApis', 'FileOutput', 'References', 'complete_inner_execution_history', 'Embeddable',
            'AliceModel', 'Prompt', 'BaseDataStructure', 'DataCluster', 'InteractionOwnerType', 'InteractionOwner', 'MessageGenerators', 'RoleTypes', 'CodeBlock',
-           'CodeOutput', 'CodeExecution']
+           'CodeOutput', 'CodeExecution', 'API_CONFIG_TYPES', 'API_CAPABILITIES']

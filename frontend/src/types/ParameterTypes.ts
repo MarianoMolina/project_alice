@@ -1,4 +1,4 @@
-import { BaseDatabaseObject, convertToBaseDatabaseObject, convertToEmbeddable, EnhancedComponentProps } from "./CollectionTypes";
+import { BaseDatabaseObject, convertToBaseDatabaseObject, EnhancedComponentProps } from "./CollectionTypes";
 
 export interface FunctionParameters {
     type: "object";
@@ -14,7 +14,6 @@ export interface ParameterDefinition extends BaseDatabaseObject {
 export const convertToParameterDefinition = (data: any): ParameterDefinition => {
     return {
         ...convertToBaseDatabaseObject(data),
-        ...convertToEmbeddable(data),
         type: data?.type || '',
         description: data?.description || '',
         default: data?.default,
@@ -41,16 +40,6 @@ export interface ToolFunction {
     function: FunctionConfig;
 }
 
-export interface ToolCallConfig {
-    arguments: { [key: string]: any } | string;
-    name: string;
-}
-
-export interface ToolCall {
-    id?: string;
-    type: "function";
-    function: ToolCallConfig;
-}
 
 export type ToolParam = {
     name: string;
@@ -78,16 +67,5 @@ export const convertToToolFunction = (data: any): ToolFunction => {
     return {
         type: "function",
         function: convertToFunctionConfig(data?.function)
-    };
-};
-
-export const convertToToolCall = (data: any): ToolCall => {
-    return {
-        id: data?.id || undefined,
-        type: "function",
-        function: {
-            arguments: data?.function?.arguments || {},
-            name: data?.function?.name || ''
-        }
     };
 };

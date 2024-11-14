@@ -29,10 +29,16 @@ import EnhancedUserInteraction from '../components/enhanced/user_interaction/use
 import EnhancedUserCheckpoint from '../components/enhanced/user_checkpoint/user_checkpoint/EnhancedUserCheckpoint';
 import EnhancedDataCluster from '../components/enhanced/data_cluster/data_cluster/EnhancedDataCluster';
 import EnhancedEmbeddingChunk from '../components/enhanced/embedding_chunk/embedding_chunk/EnhancedEmbeddingChunk';
+import { CodeExecution } from './CodeExecutionTypes';
+import { APIConfig } from './ApiConfigTypes';
+import { ToolCall } from './ToolCallTypes';
+import EnhancedToolCall from '../components/enhanced/tool_calls/tool_calls/EnhancedToolCall';
+import EnhancedCodeExecution from '../components/enhanced/code_execution/code_execution/EnhancedCodeExecution';
+import EnhancedAPIConfig from '../components/enhanced/api_config/api_config/EnhancedAPIConfig';
 
-export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' | 'urlreferences' | 'userinteractions' | 'usercheckpoints' | 'dataclusters' | 'embeddingchunks';
-export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType | URLReference | UserInteraction | UserCheckpoint | DataCluster | EmbeddingChunk;
-export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API' | 'User' | 'File' | 'Message' | 'URLReference' | 'UserInteraction' | 'UserCheckpoint' | 'DataCluster' | 'EmbeddingChunk';
+export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' | 'urlreferences' | 'userinteractions' | 'usercheckpoints' | 'dataclusters' | 'embeddingchunks' | 'toolcalls' | 'codeexecutions' | 'apiconfigs';
+export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType | URLReference | UserInteraction | UserCheckpoint | DataCluster | EmbeddingChunk | ToolCall | CodeExecution | APIConfig;
+export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API' | 'User' | 'File' | 'Message' | 'URLReference' | 'UserInteraction' | 'UserCheckpoint' | 'DataCluster' | 'EmbeddingChunk' | 'ToolCall' | 'CodeExecution' | 'APIConfig';
 
 export type CollectionType = {
     agents: AliceAgent;
@@ -51,6 +57,9 @@ export type CollectionType = {
     usercheckpoints: UserCheckpoint;
     dataclusters: DataCluster;
     embeddingchunks: EmbeddingChunk;
+    toolcalls: ToolCall;
+    codeexecutions: CodeExecution;
+    apiconfigs: APIConfig;
 };
 
 export type CollectionTypeString = {
@@ -70,6 +79,8 @@ export type CollectionTypeString = {
     usercheckpoints: 'UserCheckpoint';
     dataclusters: 'DataCluster';
     embeddingchunks: 'EmbeddingChunk';
+    toolcalls: 'ToolCall';
+    codeexecutions: 'CodeExecution';
 };
 
 export const collectionNameToElementString: Record<CollectionName, CollectionElementString> = {
@@ -88,7 +99,10 @@ export const collectionNameToElementString: Record<CollectionName, CollectionEle
     userinteractions: 'UserInteraction',
     usercheckpoints: 'UserCheckpoint',
     dataclusters: 'DataCluster',
-    embeddingchunks: 'EmbeddingChunk'
+    embeddingchunks: 'EmbeddingChunk',
+    toolcalls: 'ToolCall',
+    codeexecutions: 'CodeExecution',
+    apiconfigs: 'APIConfig'
 };
 
 export const collectionNameToEnhancedComponent: Record<CollectionName, React.ComponentType<any>> = {
@@ -107,7 +121,10 @@ export const collectionNameToEnhancedComponent: Record<CollectionName, React.Com
     userinteractions: EnhancedUserInteraction,
     usercheckpoints: EnhancedUserCheckpoint,
     dataclusters: EnhancedDataCluster,
-    embeddingchunks: EnhancedEmbeddingChunk
+    embeddingchunks: EnhancedEmbeddingChunk,
+    toolcalls: EnhancedToolCall,
+    codeexecutions: EnhancedCodeExecution,
+    apiconfigs: EnhancedAPIConfig
 };
 
 // Create a runtime mapping object
@@ -127,7 +144,10 @@ export const collectionTypeMapping: Record<string, CollectionElementString> = {
     UserInteraction: 'UserInteraction',
     UserCheckpoint: 'UserCheckpoint',
     DataCluster: 'DataCluster',
-    EmbeddingChunk: 'EmbeddingChunk'
+    EmbeddingChunk: 'EmbeddingChunk',
+    ToolCall: 'ToolCall',
+    CodeExecution: 'CodeExecution',
+    APIConfig: 'APIConfig',
 };
 
 export type ComponentMode = 'create' | 'edit' | 'view' | 'list' | 'shortList' | 'table';
@@ -146,6 +166,10 @@ export interface HandleClickProps {
     handleUserInteractionClick?: (userInteractionId: string, item?: UserInteraction) => void;
     handleUserCheckpointClick?: (userCheckpointId: string, item?: UserCheckpoint) => void;
     handleDataClusterClick?: (dataClusterId: string, item?: DataCluster) => void;
+    handleEmbeddingChunkClick?: (embeddingChunkId: string, item?: EmbeddingChunk) => void;
+    handleToolCallClick?: (toolCallId: string, item?: ToolCall) => void;
+    handleCodeExecutionClick?: (codeExecutionId: string, item?: CodeExecution) => void;
+    handleAPIConfigClick?: (apiConfigId: string, item?: APIConfig) => void;
 }
 export interface EnhancedComponentProps<T extends CollectionElement> extends HandleClickProps {
     items: T[] | null;
@@ -171,7 +195,7 @@ export interface BaseDatabaseObject extends BasicDBObj {
     updated_by?: User;
 }
 
-export interface Embeddable {
+export interface Embeddable extends BaseDatabaseObject {
     embedding: EmbeddingChunk[];
 }
 
@@ -189,5 +213,6 @@ export const convertToBaseDatabaseObject = <T extends Partial<BaseDatabaseObject
 });
 
 export const convertToEmbeddable = <T extends Partial<Embeddable>>(data: T): Embeddable => ({
+    ...convertToBaseDatabaseObject(data),
     embedding: data.embedding || [],
 });

@@ -1,6 +1,6 @@
-import { BaseDatabaseObject, convertToBaseDatabaseObject, convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
+import { convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
 
-export interface URLReference extends BaseDatabaseObject, Embeddable {
+export interface URLReference extends Embeddable {
     title: string;
     url: string;
     content: string;
@@ -9,7 +9,6 @@ export interface URLReference extends BaseDatabaseObject, Embeddable {
 
 export const convertToURLReference = (data: any): URLReference => {
     return {
-        ...convertToBaseDatabaseObject(data),
         ...convertToEmbeddable(data),
         title: data?.title || '',
         url: data?.url || '',

@@ -1,7 +1,6 @@
 from typing import Dict, List
 from pydantic import Field
-from workflow.core.data_structures.api_utils_new import ApiName, ApiType, API_CONFIG_TYPES, API_CAPABILITIES
-from workflow.core.data_structures import BaseDataStructure
+from workflow.core.data_structures import BaseDataStructure, ApiName, ApiType, API_CONFIG_TYPES, API_CAPABILITIES
 
 class APIConfig(BaseDataStructure):
     """
@@ -24,6 +23,3 @@ class APIConfig(BaseDataStructure):
         Returns list of ApiTypes supported by this API configuration
         """
         return list(API_CAPABILITIES.get(self.api_name, set()))
-    
-    class Config:
-        arbitrary_types_allowed = True

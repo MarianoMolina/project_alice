@@ -1,4 +1,4 @@
-import { BaseDatabaseObject, convertToBaseDatabaseObject, convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
+import { BaseDatabaseObject, convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
 import { DataCluster, convertToDataCluster } from "./DataClusterTypes";
 
 export interface ExecutionHistoryItem {
@@ -28,7 +28,6 @@ export interface TaskResponse extends BaseDatabaseObject, Embeddable {
 
 export const convertToTaskResponse = (data: any): TaskResponse => {
     return {
-        ...convertToBaseDatabaseObject(data),
         ...convertToEmbeddable(data),
         task_name: data?.task_name || '',
         task_description: data?.task_description || '',

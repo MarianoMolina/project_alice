@@ -1,4 +1,4 @@
-import { BaseDatabaseObject, convertToBaseDatabaseObject, convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
+import { BaseDatabaseObject, convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
 import { MessageType } from "./MessageTypes";
 
 export enum FileType {
@@ -27,7 +27,6 @@ export interface FileContentReference {
 
 export const convertToFileReference = (data: any): FileReference => {
     return {
-        ...convertToBaseDatabaseObject(data),
         ...convertToEmbeddable(data),
         filename: data.filename,
         type: data.type,

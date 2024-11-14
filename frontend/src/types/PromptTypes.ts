@@ -1,6 +1,5 @@
-import { convertToUser } from './UserTypes';
 import { FunctionParameters } from './ParameterTypes';
-import { BaseDatabaseObject, convertToBaseDatabaseObject, convertToEmbeddable, EnhancedComponentProps } from './CollectionTypes';
+import { BaseDatabaseObject, convertToBaseDatabaseObject, EnhancedComponentProps } from './CollectionTypes';
 
 export interface Prompt extends BaseDatabaseObject {
     name: string;
@@ -14,11 +13,8 @@ export interface Prompt extends BaseDatabaseObject {
 export const convertToPrompt = (data: any): Prompt => {
     return {
         ...convertToBaseDatabaseObject(data),
-        ...convertToEmbeddable(data),
         name: data?.name || '',
         content: data?.content || '',
-        created_by: data?.created_by ? convertToUser(data.created_by) : undefined,
-        updated_by: data?.updated_by ? convertToUser(data.updated_by) : undefined,
         is_templated: data?.is_templated || false,
         parameters: data?.parameters || undefined,
         partial_variables: data?.partial_variables || {},

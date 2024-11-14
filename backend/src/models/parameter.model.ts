@@ -18,9 +18,10 @@ function ensureObjectId(this: IParameterDefinitionDocument, next: mongoose.Callb
   }
   next();
 }
-
-parameterDefinitionSchema.pre('save', ensureObjectId);
-parameterDefinitionSchema.pre('findOneAndUpdate', function(this: mongoose.Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
+function ensureObjectIdForUpdate(
+  this: mongoose.Query<any, any>,
+  next: mongoose.CallbackWithoutResultAndOptionalError
+) {
   const update = this.getUpdate() as any;
   if (update.created_by && update.created_by._id) {
     update.created_by = update.created_by._id;
@@ -29,12 +30,12 @@ parameterDefinitionSchema.pre('findOneAndUpdate', function(this: mongoose.Query<
     update.updated_by = update.updated_by._id;
   }
   next();
-});
-
+}
 function autoPopulate(this: mongoose.Query<any, any>) {
   this.populate('created_by updated_by');
 }
-
+parameterDefinitionSchema.pre('save', ensureObjectId);
+parameterDefinitionSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
 parameterDefinitionSchema.pre('find', autoPopulate);
 parameterDefinitionSchema.pre('findOne', autoPopulate);
 

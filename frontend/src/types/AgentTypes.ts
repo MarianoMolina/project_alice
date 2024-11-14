@@ -1,6 +1,6 @@
 import { AliceModel, ModelType } from "./ModelTypes";
 import { Prompt } from "./PromptTypes";
-import { BaseDatabaseObject, convertToBaseDatabaseObject, convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
+import { BaseDatabaseObject, convertToBaseDatabaseObject, EnhancedComponentProps } from "./CollectionTypes";
 
 export enum ToolPermission {
   DISABLED = 0,
@@ -15,7 +15,7 @@ export enum CodePermission {
   TAGGED_ONLY = 3
 }
 
-export interface AliceAgent extends BaseDatabaseObject, Embeddable {
+export interface AliceAgent extends BaseDatabaseObject {
   name: string;
   system_message: Prompt;
   has_tools: ToolPermission;
@@ -26,7 +26,6 @@ export interface AliceAgent extends BaseDatabaseObject, Embeddable {
 
 export const convertToAliceAgent = (data: AliceAgent): AliceAgent => ({
   ...convertToBaseDatabaseObject(data),
-  ...convertToEmbeddable(data),
   name: data.name || '',
   system_message: data.system_message || {},
   has_tools: data.has_tools || 0,

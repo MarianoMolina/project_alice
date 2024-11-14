@@ -25,6 +25,10 @@ import UserCheckpointRoutes from './routes/userCheckpoint.route';
 import UserInteractionRoutes from './routes/userInteraction.route';
 import EmbeddingChunkRoutes from './routes/embeddingChunk.route';
 import DataClusterRoutes from './routes/dataCluster.route';
+import ToolCallRoutes from './routes/toolCall.route';
+import CodeExecutionRoutes from './routes/codeExecution.route';
+import APIConfigRoutes from './routes/apiConfig.route';
+
 import './models';
 
 dotenv.config();
@@ -74,4 +78,7 @@ app.use('/api/usercheckpoints', UserCheckpointRoutes);
 app.use('/api/userinteractions', UserInteractionRoutes);
 app.use('/api/embeddingchunks', EmbeddingChunkRoutes);
 app.use('/api/dataclusters', DataClusterRoutes);
+app.use('/api/toolcalls', ToolCallRoutes);
+app.use('/api/codeexecutions', CodeExecutionRoutes);
+app.use('/api/apiconfigs', APIConfigRoutes);
 export default app;

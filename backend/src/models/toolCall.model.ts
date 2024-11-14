@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 import { IToolCallDocument, IToolCallModel } from '../interfaces/toolCall.interface';
 
 const toolCallSchema = new Schema<IToolCallDocument, IToolCallModel>({
-    type: { type: String, required: true, description: "Type of the parameter, like string or integer" },
+    type: { type: "String", required: true, description: "Literal function" },
     function: { type: Schema.Types.Mixed, required: true, description: "Function to be called" },
     created_by: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     updated_by: { type: Schema.Types.ObjectId, ref: 'User' }

@@ -1,4 +1,4 @@
-import { BaseDatabaseObject, convertToBaseDatabaseObject, convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
+import { convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
 import { UserCheckpoint } from "./UserCheckpointTypes";
 
 export enum InteractionOwnerType {
@@ -16,7 +16,7 @@ export interface UserResponse {
     user_feedback?: string;
 }
 
-export interface UserInteraction extends BaseDatabaseObject, Embeddable {
+export interface UserInteraction extends Embeddable {
     owner: InteractionOwner;
     user_checkpoint_id: UserCheckpoint;
     user_response?: UserResponse;
@@ -24,7 +24,6 @@ export interface UserInteraction extends BaseDatabaseObject, Embeddable {
 
 export const convertToUserInteraction = (data: any): UserInteraction => {
     return {
-        ...convertToBaseDatabaseObject(data),
         ...convertToEmbeddable(data),
         owner: {
             type: data?.owner?.type || InteractionOwnerType.TASK_RESPONSE,
