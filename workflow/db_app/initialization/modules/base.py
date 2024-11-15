@@ -19,7 +19,7 @@ BACKEND_HOST = os.getenv("BACKEND_HOST")
 BACKEND_PORT = os.getenv("BACKEND_PORT")
 GOOGLE_KNOWLEDGE_GRAPH_API_KEY = os.getenv("GOOGLE_KNOWLEDGE_GRAPH_API_KEY")
 WOLFRAM_ALPHA_APP_ID = os.getenv("WOLFRAM_ALPHA_APP_ID")
-LOCAL_LLM_API_URL = f"http://{BACKEND_HOST}:{BACKEND_PORT}/lm-studio"
+LOCAL_LLM_API_URL = f"http://{BACKEND_HOST}:{BACKEND_PORT}/lm_studio"
 
 class BaseModule(InitializationModule):
     """This module defines the base models and apis for the system, as well as the default parameter and prompt."""
@@ -76,7 +76,7 @@ base_module = BaseModule(
                 "model_name": "NousResearch/Hermes-2-Theta-Llama-3-8B-GGUF",
                 "ctx_size": 32768,
                 "model_type": "chat",
-                "api_name": "lm-studio",
+                "api_name": "lm_studio",
                 "lm_studio_preset": "Llama 3 V3"
             },
             {
@@ -86,7 +86,7 @@ base_module = BaseModule(
                 "model_name": "lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF",
                 "ctx_size": 131072,
                 "model_type": "instruct",
-                "api_name": "lm-studio",
+                "api_name": "lm_studio",
                 "lm_studio_preset": "Llama 3 V3"
             },
             {
@@ -96,7 +96,7 @@ base_module = BaseModule(
                 "model_format": "OpenChat",
                 "ctx_size": 8192, ## Max tokens is actually 131072 -> 8192 are the dimensions, but for testing purposes we are using 8192
                 "model_type": "embeddings",
-                "api_name": "lm-studio",
+                "api_name": "lm_studio",
                 "lm_studio_preset": "Llama 3 V3"
             },
             {
@@ -151,7 +151,7 @@ base_module = BaseModule(
                 "model_format": "Obsidian_Vision",
                 "ctx_size": 4096,
                 "model_type": "vision",
-                "api_name": "lm-studio"
+                "api_name": "lm_studio"
             },
             {
                 "key": "o1_openai",
@@ -160,7 +160,7 @@ base_module = BaseModule(
                 "model_format": "OpenChat", 
                 "ctx_size": 128000,
                 "model_type": "chat",
-                "api_name": "openai_llm"
+                "api_name": "openai"
             },
             {
                 "key": "mistral_small",
@@ -223,7 +223,7 @@ base_module = BaseModule(
                 "model_format": "Llama3",
                 "ctx_size": 128000,
                 "model_type": "chat",
-                "api_name": "llama_llm",
+                "api_name": "llama",
             },
             {
                 "key": "pixtral12b",
@@ -408,7 +408,23 @@ base_module = BaseModule(
             {
                 "key": "local_lm_api_config",
                 "name": "LM Studio API Config",
-                "api_name": "lm-studio",
+                "api_name": "lm_studio",
+                "data": {
+                    "base_url": LOCAL_LLM_API_URL
+                }
+            },
+            {
+                "key": "bark_api_config",
+                "name": "Bark API Config",
+                "api_name": "bark",
+                "data": {
+                    "base_url": LOCAL_LLM_API_URL
+                }
+            },
+            {
+                "key": "pixart_api_config",
+                "name": "Pixart API Config",
+                "api_name": "pixart",
                 "data": {
                     "base_url": LOCAL_LLM_API_URL
                 }
@@ -479,7 +495,7 @@ base_module = BaseModule(
                 "health_status": "healthy" if GOOGLE_API_KEY and GOOGLE_CSE_ID else "unhealthy",
             },
             {
-                "key": "openai_llm",
+                "key": "openai_api",
                 "api_type": "llm_api",
                 "api_name": "openai",
                 "name": "OpenAI API",
@@ -589,7 +605,7 @@ base_module = BaseModule(
                 "default_model": "command-r-plus",
             },
             {
-                "key": "llama_llm",
+                "key": "llama_llm_api",
                 "api_type": "llm_api",
                 "api_name": "llama",
                 "name": "LLAMA API",
@@ -601,7 +617,7 @@ base_module = BaseModule(
             {
                 "key": "local_lm_studio",
                 "api_type": "llm_api",
-                "api_name": "lm-studio",
+                "api_name": "lm_studio",
                 "name": "LM Studio API",
                 "api_config": "local_lm_api_config",
                 "is_active": True,
@@ -621,7 +637,7 @@ base_module = BaseModule(
             {
                 "key": "img_vision_lm_studio",
                 "api_type": "img_vision",
-                "api_name": "lm-studio",
+                "api_name": "lm_studio",
                 "name": "LM Studio Image Vision",
                 "api_config": "local_lm_api_config",
                 "is_active": True,
@@ -710,7 +726,7 @@ base_module = BaseModule(
             },
             {
                 "key": "groq_tts",
-                "api_type": "speech_to_text",
+                "api_type": "text_to_speech",
                 "api_name": "groq",
                 "name": "Groq Text to Speech API",
                 "api_config": "groq_api_config",
@@ -723,9 +739,7 @@ base_module = BaseModule(
                 "api_type": "text_to_speech",
                 "api_name": "bark",
                 "name": "Bark TTS",
-                "api_config": {
-                    "api_key": "bark",
-                },
+                "api_config": "bark_api_config",
                 "is_active": True,
                 "health_status": "healthy",
                 "default_model": "bark_large",
@@ -735,9 +749,7 @@ base_module = BaseModule(
                 "api_type": "img_generation",
                 "api_name": "pixart", # This should probably be called diffusers_img_gen
                 "name": "Pixart Image Generation",
-                "api_config": {
-                    "api_key": "pixart",
-                },
+                "api_config": "pixart_api_config",
                 "is_active": True,
                 "health_status": "healthy",
                 "default_model": "pixart_sigma_model",

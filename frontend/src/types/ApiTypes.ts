@@ -20,24 +20,25 @@ export enum ApiType {
 }
 
 export enum ApiName {
-    OPENAI = 'OPENAI',
-    ANTHROPIC = 'ANTHROPIC',
-    GEMINI = 'GEMINI',
-    MISTRAL = 'MISTRAL',
-    COHERE = 'COHERE',
-    LLAMA = 'LLAMA',
-    LM_STUDIO = 'LM_STUDIO',
-    AZURE = 'AZURE',
-    GROQ = 'GROQ',
-    BARK = 'BARK',
-    PIXART = 'PIXART',
-    GOOGLE_SEARCH = 'GOOGLE_SEARCH',
-    REDDIT = 'REDDIT',
-    WIKIPEDIA = 'WIKIPEDIA',
-    EXA = 'EXA',
-    ARXIV = 'ARXIV',
-    GOOGLE_KNOWLEDGE = 'GOOGLE_KNOWLEDGE',
-    WOLFRAM = 'WOLFRAM'
+    OPENAI = 'openai',
+    AZURE = 'azure',
+    GEMINI = 'gemini',
+    MISTRAL = 'mistral',
+    COHERE = 'cohere',
+    GROQ = 'groq',
+    LLAMA = 'llama',
+    ANTHROPIC = 'anthropic',
+    BARK = 'bark',
+    PIXART = 'pixart',
+    GOOGLE_SEARCH = 'google_search',
+    REDDIT = 'reddit',
+    WIKIPEDIA = 'wikipedia',
+    EXA = 'exa',
+    ARXIV = 'arxiv',
+    GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph',
+    WOLFRAM_ALPHA = 'wolfram_alpha',
+    LM_STUDIO = 'lm_studio',
+    CUSTOM = 'Custom',
 }
 
 export enum ModelApiType {

@@ -165,46 +165,124 @@ In the case of Workflows, these nodes are "inner tasks" instead of specific meth
 ### Available APIs
 ![APIS](./img/APIs.PNG "Available API endpoints")
 ```typescript
-export enum ApiName {
-    OPENAI = 'openai_llm',
-    OPENAI_VISION = 'openai_vision',
-    OPENAI_IMG_GENERATION = 'openai_img_gen',
-    OPENAI_EMBEDDINGS = 'openai_embeddings',
-    OPENAI_TTS = 'openai_tts',
-    OPENAI_STT = 'openai_stt',
-    OPENAI_ASTT = 'openai_adv_stt',
-    AZURE = 'azure',
-    MISTRAL = 'mistral_llm',
-    MISTRAL_VISION = 'mistral_vision',
-    MISTRAL_EMBEDDINGS = 'mistral_embeddings',
-    GEMINI = 'gemini_llm',
-    GEMINI_VISION = 'gemini_vision',
-    GEMINI_IMG_GEN = 'gemini_img_gen',
-    GEMINI_STT = 'gemini_stt',
-    GEMINI_EMBEDDINGS = 'gemini_embeddings',
-    COHERE = 'cohere_llm',
-    GROQ = 'groq_llm',
-    GROQ_VISION = 'groq_vision',
-    GROQ_TTS = 'groq_tts',
-    LLAMA = 'llama_llm',
-    LLAMA_VISION = 'llama_vision',
-    ANTHROPIC = 'anthropic_llm',
-    ANTHROPIC_VISION = 'anthropic_vision',
-    LM_STUDIO = 'lm-studio_llm',
-    LM_STUDIO_VISION = 'lm-studio_vision',
-    LM_STUDIO_EMBEDDINGS = 'lm-studio_embeddings',
-    CUSTOM = 'Custom',
-    BARK_TTS = 'bark_tts',
-    PIXART_IMG_GEN = 'pixart_img_gen',
-    // Non-model API providers
+export enum ApiType {
+    LLM_MODEL = 'llm_api',
     GOOGLE_SEARCH = 'google_search',
     REDDIT_SEARCH = 'reddit_search',
     WIKIPEDIA_SEARCH = 'wikipedia_search',
     EXA_SEARCH = 'exa_search',
     ARXIV_SEARCH = 'arxiv_search',
-    GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph'
-    WOLFRAM_ALPHA = 'wolfram_alpha'
+    GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph',
+    WOLFRAM_ALPHA = 'wolfram_alpha',
+    IMG_VISION = 'img_vision',
+    IMG_GENERATION = 'img_generation',
+    SPEECH_TO_TEXT = 'speech_to_text',
+    TEXT_TO_SPEECH = 'text_to_speech',
+    EMBEDDINGS = 'embeddings',
+    REQUESTS = 'requests',
 }
+export enum ApiName {
+    OPENAI = 'openai',
+    AZURE = 'azure',
+    GEMINI = 'gemini',
+    MISTRAL = 'mistral',
+    COHERE = 'cohere',
+    GROQ = 'groq',
+    LLAMA = 'llama',
+    ANTHROPIC = 'anthropic',
+    BARK = 'bark',
+    PIXART = 'pixart',
+    GOOGLE_SEARCH = 'google_search',
+    REDDIT = 'reddit',
+    WIKIPEDIA = 'wikipedia',
+    EXA = 'exa',
+    ARXIV = 'arxiv',
+    GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph',
+    WOLFRAM_ALPHA = 'wolfram_alpha',
+    LM_STUDIO = 'lm_studio',
+    CUSTOM = 'Custom',
+}
+export const API_CAPABILITIES: Record<ApiName, Set<ApiType>> = {
+  [ApiName.OPENAI]: new Set([
+    ApiType.LLM_MODEL,
+    ApiType.IMG_VISION,
+    ApiType.IMG_GENERATION,
+    ApiType.SPEECH_TO_TEXT,
+    ApiType.TEXT_TO_SPEECH,
+    ApiType.EMBEDDINGS
+  ]),
+  [ApiName.ANTHROPIC]: new Set([
+    ApiType.LLM_MODEL,
+    ApiType.IMG_VISION
+  ]),
+  [ApiName.GEMINI]: new Set([
+    ApiType.LLM_MODEL,
+    ApiType.IMG_VISION,
+    ApiType.IMG_GENERATION,
+    ApiType.SPEECH_TO_TEXT,
+    ApiType.EMBEDDINGS
+  ]),
+  [ApiName.MISTRAL]: new Set([
+    ApiType.LLM_MODEL,
+    ApiType.IMG_VISION,
+    ApiType.EMBEDDINGS
+  ]),
+  [ApiName.COHERE]: new Set([
+    ApiType.LLM_MODEL
+  ]),
+  [ApiName.LLAMA]: new Set([
+    ApiType.LLM_MODEL,
+    ApiType.IMG_VISION
+  ]),
+  [ApiName.LM_STUDIO]: new Set([
+    ApiType.LLM_MODEL,
+    ApiType.IMG_VISION,
+    ApiType.EMBEDDINGS
+  ]),
+  [ApiName.GROQ]: new Set([
+    ApiType.LLM_MODEL,
+    ApiType.IMG_VISION,
+    ApiType.TEXT_TO_SPEECH
+  ]),
+  [ApiName.AZURE]: new Set([
+    ApiType.LLM_MODEL
+  ]),
+  [ApiName.BARK]: new Set([
+    ApiType.TEXT_TO_SPEECH
+  ]),
+  [ApiName.PIXART]: new Set([
+    ApiType.IMG_GENERATION
+  ]),
+  [ApiName.GOOGLE_SEARCH]: new Set([
+    ApiType.GOOGLE_SEARCH
+  ]),
+  [ApiName.REDDIT]: new Set([
+    ApiType.REDDIT_SEARCH
+  ]),
+  [ApiName.WIKIPEDIA]: new Set([
+    ApiType.WIKIPEDIA_SEARCH
+  ]),
+  [ApiName.EXA]: new Set([
+    ApiType.EXA_SEARCH
+  ]),
+  [ApiName.ARXIV]: new Set([
+    ApiType.ARXIV_SEARCH
+  ]),
+  [ApiName.GOOGLE_KNOWLEDGE_GRAPH]: new Set([
+    ApiType.GOOGLE_KNOWLEDGE_GRAPH
+  ]),
+  [ApiName.WOLFRAM_ALPHA]: new Set([
+    ApiType.WOLFRAM_ALPHA
+  ]),
+  [ApiName.CUSTOM]: new Set([
+    ApiType.LLM_MODEL,
+    ApiType.IMG_VISION,
+    ApiType.IMG_GENERATION,
+    ApiType.SPEECH_TO_TEXT,
+    ApiType.TEXT_TO_SPEECH,
+    ApiType.EMBEDDINGS
+  ]),
+};
 ```
 
 ## Development

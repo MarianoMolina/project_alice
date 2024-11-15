@@ -95,12 +95,18 @@ class APIManager(BaseModel):
         Raises:
             ValueError: If no API is found or if there's an error in generating the response.
         """
-        LOGGER.debug(f"Chat generate_response_with_api_engine called with api_type: {api_type}, model: {model}, kwargs: {kwargs}")
+        LOGGER.debug(f"Chat generate_response_with_api_engine called with api_type: {api_type}, api_name: {api_name}, model: {model}, kwargs: {kwargs}")
         try:
             api_data = self.retrieve_api_data(api_type, api_name, model)
             LOGGER.debug(f"API data: {api_data}")
             
-            api_engine = ApiEngineMap[api_type][api_name]
+            api_engine = ApiEngineMap.get(api_type, {})
+            if api_name:
+                api_engine = api_engine.get(api_name)
+            else:
+                api_engine = next(iter(api_engine.values()), None)
+            if api_engine is None:
+                raise ValueError(f"No API engine found for {api_type} and {api_name}")
 
             # Validate inputs against the API engine's input_variables
             self._validate_inputs(api_engine, kwargs)
@@ -113,7 +119,7 @@ class APIManager(BaseModel):
             LOGGER.error(traceback.format_exc())
             raise ValueError(f"Error generating response with API engine: {str(e)}")
 
-    def _validate_inputs(self, api_engine: APIEngine, kwargs: Dict[str, Any]):
+    def _validate_inputs(self, api_engine: APIEngine, kwargs: Dict[str, Any]) -> None:
         """
         Validate the input parameters against the API engine's expected inputs.
 
@@ -127,6 +133,7 @@ class APIManager(BaseModel):
         Raises:
             ValueError: If there are missing required inputs or unexpected inputs.
         """
+        LOGGER.debug(f"Validating inputs for API engine: {api_engine.__class__.__name__}")
         expected_inputs = api_engine.input_variables.properties
         for key, value in kwargs.items():
             if key not in expected_inputs:

@@ -20,7 +20,7 @@ export enum ApiType {
 }
 
 export enum ApiName {
-  OPENAI = 'openai_llm',
+  OPENAI = 'openai',
   AZURE = 'azure',
   GEMINI = 'gemini',
   MISTRAL = 'mistral',
@@ -28,9 +28,9 @@ export enum ApiName {
   GROQ = 'groq',
   LLAMA = 'llama',
   ANTHROPIC = 'anthropic',
-  LM_STUDIO = 'lm-studio',
+  LM_STUDIO = 'lm_studio',
   CUSTOM = 'Custom',
-  BARK_TTS = 'bark',
+  BARK = 'bark',
   PIXART_IMG_GEN = 'pixart',
   GOOGLE_SEARCH = 'google_search',
   REDDIT_SEARCH = 'reddit',
@@ -44,10 +44,10 @@ export enum ApiName {
 export interface IAPI {
   api_type: ApiType;
   name: string;
-  api_name: ApiName; 
+  api_name: ApiName;
   is_active: boolean;
   health_status: 'healthy' | 'unhealthy' | 'unknown';
-  default_model?: Types.ObjectId; 
+  default_model?: Types.ObjectId;
   api_config?: Types.ObjectId | IAPIConfigDocument;
   created_by: Types.ObjectId | IUserDocument;
   updated_by: Types.ObjectId | IUserDocument;

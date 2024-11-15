@@ -28,7 +28,7 @@ base_chat_module = BaseChatModule(
             {   
                 "key": "default_code_exec_checkpoint",
                 "user_prompt": "Please approve or reject the code execution requested by the agent.",
-                "task_next_obj": {0: "code_exec", 1: None},
+                "task_next_obj": {0: "code_execution", 1: None},
                 "options_obj": {0: "Approve", 1: "Reject"},
                 "request_feedback": False
             },
@@ -58,7 +58,7 @@ base_chat_module = BaseChatModule(
                 },
                 "max_consecutive_auto_reply": 1,
                 "has_tools": 1,
-                "has_code_exec": 0,
+                "has_code_execution": 0,
             },
             {
                 "key": "claude_alice",
@@ -69,7 +69,7 @@ base_chat_module = BaseChatModule(
                 },
                 "max_consecutive_auto_reply": 1,
                 "has_tools": 1,
-                "has_code_exec": 0,
+                "has_code_execution": 0,
             },
             {
                 "key": "lm_studio_alice",
@@ -80,7 +80,7 @@ base_chat_module = BaseChatModule(
                 },
                 "max_consecutive_auto_reply": 1,
                 "has_tools": 1,
-                "has_code_exec": 0,
+                "has_code_execution": 0,
             },
             {
                 "key": "gemini_alice",
@@ -91,7 +91,7 @@ base_chat_module = BaseChatModule(
                 },
                 "max_consecutive_auto_reply": 1,
                 "has_tools": 1,
-                "has_code_exec": 0,
+                "has_code_execution": 0,
             },
             {
                 "key": "mistral_alice",
@@ -102,7 +102,7 @@ base_chat_module = BaseChatModule(
                 },
                 "max_consecutive_auto_reply": 1,
                 "has_tools": 1,
-                "has_code_exec": 0,
+                "has_code_execution": 0,
             },
             {
                 "key": "cohere_alice",
@@ -113,7 +113,7 @@ base_chat_module = BaseChatModule(
                 },
                 "max_consecutive_auto_reply": 1,
                 "has_tools": 1,
-                "has_code_exec": 0,                
+                "has_code_execution": 0,                
             },
             {
                 "key": "llama_alice",
@@ -124,7 +124,7 @@ base_chat_module = BaseChatModule(
                 },
                 "max_consecutive_auto_reply": 1,
                 "has_tools": 1,
-                "has_code_exec": 0,
+                "has_code_execution": 0,
             },
             {
                 "key": "groq_alice",
@@ -135,7 +135,7 @@ base_chat_module = BaseChatModule(
                 },
                 "max_consecutive_auto_reply": 1,
                 "has_tools": 1,
-                "has_code_exec": 0,
+                "has_code_execution": 0,
             }
         ],
         "chats": [
@@ -145,7 +145,7 @@ base_chat_module = BaseChatModule(
                 "alice_agent": "gpt_alice",
                 "default_user_checkpoints": {
                     "tool_call": "default_tool_call_checkpoint",
-                    "code_exec": "default_code_exec_checkpoint"
+                    "code_execution": "default_code_exec_checkpoint"
                 }
             },
             {
@@ -154,7 +154,7 @@ base_chat_module = BaseChatModule(
                 "alice_agent": "claude_alice",
                 "default_user_checkpoints": {
                     "tool_call": "default_tool_call_checkpoint",
-                    "code_exec": "default_code_exec_checkpoint"
+                    "code_execution": "default_code_exec_checkpoint"
                 }
             },
             {
@@ -163,7 +163,7 @@ base_chat_module = BaseChatModule(
                 "alice_agent": "lm_studio_alice",
                 "default_user_checkpoints": {
                     "tool_call": "default_tool_call_checkpoint",
-                    "code_exec": "default_code_exec_checkpoint"
+                    "code_execution": "default_code_exec_checkpoint"
                 }
             },
             {
@@ -172,7 +172,7 @@ base_chat_module = BaseChatModule(
                 "alice_agent": "gemini_alice",
                 "default_user_checkpoints": {
                     "tool_call": "default_tool_call_checkpoint",
-                    "code_exec": "default_code_exec_checkpoint"
+                    "code_execution": "default_code_exec_checkpoint"
                 }
             },
             {
@@ -181,7 +181,7 @@ base_chat_module = BaseChatModule(
                 "alice_agent": "mistral_alice",
                 "default_user_checkpoints": {
                     "tool_call": "default_tool_call_checkpoint",
-                    "code_exec": "default_code_exec_checkpoint"
+                    "code_execution": "default_code_exec_checkpoint"
                 }
             },
             {
@@ -190,7 +190,7 @@ base_chat_module = BaseChatModule(
                 "alice_agent": "cohere_alice",
                 "default_user_checkpoints": {
                     "tool_call": "default_tool_call_checkpoint",
-                    "code_exec": "default_code_exec_checkpoint"
+                    "code_execution": "default_code_exec_checkpoint"
                 }
             },
             {
@@ -199,7 +199,7 @@ base_chat_module = BaseChatModule(
                 "alice_agent": "llama_alice",
                 "default_user_checkpoints": {
                     "tool_call": "default_tool_call_checkpoint",
-                    "code_exec": "default_code_exec_checkpoint"
+                    "code_execution": "default_code_exec_checkpoint"
                 }
             },
             {
@@ -208,7 +208,7 @@ base_chat_module = BaseChatModule(
                 "alice_agent": "groq_alice",
                 "default_user_checkpoints": {
                     "tool_call": "default_tool_call_checkpoint",
-                    "code_exec": "default_code_exec_checkpoint"
+                    "code_execution": "default_code_exec_checkpoint"
                 }
             }
         ]

@@ -38,11 +38,16 @@ class ApiName(str, Enum):
     ARXIV = 'arxiv'
     GOOGLE_KNOWLEDGE = 'google_knowledge_graph'
     WOLFRAM = 'wolfram_alpha'
+    CUSTOM = 'custom'
 
 # Type definitions for different API configurations
 class BaseApiConfig(TypedDict):
     """Base configuration that applies to most AI model APIs"""
     api_key: str
+    base_url: str
+
+class LocalApiConfig(TypedDict):
+    """Configuration for local APIs"""
     base_url: str
 
 class GoogleSearchConfig(TypedDict):
@@ -67,11 +72,11 @@ API_CONFIG_TYPES: Dict[ApiName, Dict] = {
     ApiName.MISTRAL: BaseApiConfig,
     ApiName.COHERE: BaseApiConfig,
     ApiName.LLAMA: BaseApiConfig,
-    ApiName.LM_STUDIO: BaseApiConfig,
+    ApiName.LM_STUDIO: LocalApiConfig,
     ApiName.AZURE: BaseApiConfig,
     ApiName.GROQ: BaseApiConfig,
-    ApiName.BARK: BaseApiConfig,
-    ApiName.PIXART: BaseApiConfig,
+    ApiName.BARK: LocalApiConfig,
+    ApiName.PIXART: LocalApiConfig,
     ApiName.GOOGLE_SEARCH: GoogleSearchConfig,
     ApiName.REDDIT: RedditConfig,
     ApiName.WIKIPEDIA: dict,
@@ -154,6 +159,15 @@ API_CAPABILITIES = {
     ApiName.WOLFRAM: {
         ApiType.WOLFRAM_ALPHA
     },
+    ApiName.CUSTOM: {
+        ApiType.LLM_MODEL,
+        ApiType.IMG_VISION,
+        ApiType.IMG_GENERATION,
+        ApiType.SPEECH_TO_TEXT,
+        ApiType.TEXT_TO_SPEECH,
+        ApiType.EMBEDDINGS
+
+    }
 }
 
 ModelApis: List[ApiType] = [ApiType.LLM_MODEL, ApiType.IMG_VISION, ApiType.IMG_GENERATION, ApiType.SPEECH_TO_TEXT, ApiType.TEXT_TO_SPEECH, ApiType.EMBEDDINGS]

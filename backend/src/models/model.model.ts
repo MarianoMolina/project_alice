@@ -28,7 +28,7 @@ modelSchema.virtual('apiRepresentation').get(function(this: IModelDocument) {
     model_format: this.model_format || null,
     ctx_size: this.ctx_size || null,
     model_type: this.model_type || null,
-    api_name: this.api_name || 'lm-studio',
+    api_name: this.api_name || 'lm_studio',
     temperature: this.temperature || null,
     seed: this.seed || null,
     use_cache: this.use_cache || false,

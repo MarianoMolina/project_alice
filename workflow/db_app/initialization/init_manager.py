@@ -91,6 +91,7 @@ class DBInitManager(BaseModel):
         }
         
         data = super().model_dump(*args, **kwargs)
+        return data
 
     def _get_entity_class(self, entity_type: EntityType) -> BaseModel:
         return self.entity_class_map.get(entity_type)

@@ -6,7 +6,7 @@ const userCheckpointSchema = new Schema<IUserCheckpointDocument, IUserCheckpoint
     user_prompt: { type: String, required: true },
     options_obj: { type: Map, of: String, required: true },
     task_next_obj: { type: Map, of: String, required: true },
-    request_feedback: { type: Boolean, required: true },
+    request_feedback: { type: Boolean, default: false },
     created_by: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     updated_by: { type: Schema.Types.ObjectId, ref: 'User', required: true }
 }, { timestamps: true });

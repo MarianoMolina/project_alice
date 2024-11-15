@@ -11,6 +11,10 @@ interface GoogleSearchConfig {
   cse_id: string;
 }
 
+interface LocalApiConfig {
+  base_url: string;
+}
+
 interface RedditConfig {
   client_id: string;
   client_secret: string;
@@ -35,18 +39,19 @@ export type ApiConfigType = {
   [ApiName.MISTRAL]: BaseApiConfig;
   [ApiName.COHERE]: BaseApiConfig;
   [ApiName.LLAMA]: BaseApiConfig;
-  [ApiName.LM_STUDIO]: BaseApiConfig;
+  [ApiName.LM_STUDIO]: LocalApiConfig;
   [ApiName.AZURE]: BaseApiConfig;
   [ApiName.GROQ]: BaseApiConfig;
-  [ApiName.BARK]: BaseApiConfig;
-  [ApiName.PIXART]: BaseApiConfig;
+  [ApiName.BARK]: LocalApiConfig;
+  [ApiName.PIXART]: LocalApiConfig;
   [ApiName.GOOGLE_SEARCH]: GoogleSearchConfig;
   [ApiName.REDDIT]: RedditConfig;
   [ApiName.WIKIPEDIA]: EmptyConfig;
   [ApiName.EXA]: ExaConfig;
   [ApiName.ARXIV]: EmptyConfig;
-  [ApiName.GOOGLE_KNOWLEDGE]: ExaConfig;
-  [ApiName.WOLFRAM]: WolframConfig;
+  [ApiName.GOOGLE_KNOWLEDGE_GRAPH]: ExaConfig;
+  [ApiName.WOLFRAM_ALPHA]: WolframConfig;
+  [ApiName.CUSTOM]: BaseApiConfig;
 };
 
 // API capabilities mapping
@@ -116,12 +121,20 @@ export const API_CAPABILITIES: Record<ApiName, Set<ApiType>> = {
   [ApiName.ARXIV]: new Set([
     ApiType.ARXIV_SEARCH
   ]),
-  [ApiName.GOOGLE_KNOWLEDGE]: new Set([
+  [ApiName.GOOGLE_KNOWLEDGE_GRAPH]: new Set([
     ApiType.GOOGLE_KNOWLEDGE_GRAPH
   ]),
-  [ApiName.WOLFRAM]: new Set([
+  [ApiName.WOLFRAM_ALPHA]: new Set([
     ApiType.WOLFRAM_ALPHA
-  ])
+  ]),
+  [ApiName.CUSTOM]: new Set([
+    ApiType.LLM_MODEL,
+    ApiType.IMG_VISION,
+    ApiType.IMG_GENERATION,
+    ApiType.SPEECH_TO_TEXT,
+    ApiType.TEXT_TO_SPEECH,
+    ApiType.EMBEDDINGS
+  ]),
 };
 
 export const API_BASE_URLS: Partial<Record<ApiName, string>> = {

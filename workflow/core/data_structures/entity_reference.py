@@ -1,7 +1,8 @@
 from workflow.core.data_structures.base_models import Embeddable
+from yarl import URL
 from workflow.core.data_structures.api_utils import ApiType
-from pydantic import HttpUrl, Field, BaseModel
-from typing import Optional, List
+from pydantic import HttpUrl, Field, BaseModel,  field_validator
+from typing import Optional, Any, List
 from enum import Enum
 
 class ReferenceCategory(str, Enum):
@@ -25,7 +26,22 @@ class ImageReference(BaseModel):
     url: HttpUrl
     caption: Optional[str] = Field(None, description="Optional caption or description for the image.")
     license: Optional[HttpUrl] = Field(None, description="License URL for the image.")
+    model_config = {
+        "json_encoders": {
+            HttpUrl: str
+        }
+    }
 
+    @field_validator('url', 'license', mode='before')
+    @classmethod
+    def convert_url(cls, v: Any) -> Optional[str]:
+        if v is None:
+            return None
+        # Check for URL-like object (duck typing)
+        if hasattr(v, '__str__'): 
+            return str(v)
+        return v
+    
 class EntityReference(Embeddable):
     source_id: Optional[str] = Field(None, description="The unique identifier for the entity in the source system.")
     name: Optional[str] = Field(None, description="The name/title of the entity.")
@@ -37,11 +53,17 @@ class EntityReference(Embeddable):
     source: Optional[ApiType] = Field(None, description="The ApiType source of the entity.")
     connections: List[EntityConnection] = Field(default_factory=list, description="The connections of the entity.")
     metadata: Optional[dict] = Field(None, description="Additional metadata for the entity.")
-    
-    class Config:
-        allow_population_by_field_name = True
-        extra = 'allow'
 
+    @field_validator('url', mode='before')
+    @classmethod
+    def convert_url(cls, v: Any) -> Optional[str]:
+        if v is None:
+            return None
+        # Check for URL-like object (duck typing)
+        if hasattr(v, '__str__'): 
+            return str(v)
+        return v
+    
     def __str__(self) -> str:
         """
         Returns a human-readable string representation of the EntityReference.

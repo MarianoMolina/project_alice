@@ -1,5 +1,5 @@
 from bson import ObjectId
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 from typing import Optional, Literal, Tuple, Union, Dict, List
 from enum import Enum
 from workflow.util import LOGGER, get_traceback
@@ -36,9 +36,12 @@ class BaseDataStructure(BaseModel):
     
     model_config = {
         "protected_namespaces": (),
-        "json_encoders": {ObjectId: str},
+        "json_encoders": {
+            ObjectId: str,
+            HttpUrl: str
+            },
         "arbitrary_types_allowed": True,
-        "extra": "allow"
+        "extra": "allow",
     }
     
     def model_dump(self, *args, **kwargs):
@@ -49,23 +52,6 @@ class BaseDataStructure(BaseModel):
             
         kwargs['exclude'] = {
             'model_config', 
-            # '__pydantic_private__',
-            # '__pydantic_extra__',   
-            # '__pydantic_fields_set__',
-            # '__pydantic_core_schema__',
-            # '__pydantic_validator__',
-            # '__pydantic_serializer__',
-            # '__pydantic_custom_init__',
-            # '__pydantic_post_init__',
-            # '__pydantic_decorators__',
-            # '__pydantic_generic_metadata__',
-            # '__pydantic_complete__',
-            # '__pydantic_parent_namespace__',
-            # 'model_fields',
-            # 'model_computed_fields',
-            # '__private_attributes__',
-            # '__abstractmethods__',
-            # '__class_vars__',
             *kwargs.get('exclude', set())
         }
 

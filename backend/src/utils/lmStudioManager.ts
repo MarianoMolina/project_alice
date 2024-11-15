@@ -440,7 +440,7 @@ export class LMStudioManager {
     }
 
     async listAvailableModels() {
-        const dbModels = await Model.find({ api_name: 'lm-studio' });
+        const dbModels = await Model.find({ api_name: 'lm_studio', api_type: 'llm_api' });
         const downloadedModels = await this.client.system.listDownloadedModels();
         return dbModels.map(dbModel => {
             const isDownloaded = downloadedModels.some(dm => dm.path.includes(dbModel.model_name));

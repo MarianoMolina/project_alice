@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const API_URL = 'http://localhost:3000/lm-studio/chat/completions';
+const API_URL = 'http://localhost:3000/lm_studio/chat/completions';
 
 async function testChatCompletion(useTools = false, streaming = false) {
     const requestBody = {

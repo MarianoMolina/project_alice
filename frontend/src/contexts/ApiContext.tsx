@@ -234,7 +234,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             addNotification('Error resuming chat', 'error');
             throw error;
         }
-    }, [addNotification]);
+    }, [addNotification, selectCardItem]);
     
     const uploadFileContentReference = useCallback(async (itemData: Partial<FileContentReference>): Promise<FileReference> => {
         try {
@@ -352,7 +352,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             addNotification('Error updating user interaction', 'error');
             throw error;
         }
-    }, [updateItem, apiFetchItem, resumeTask, addNotification, selectCardItem]);
+    }, [updateItem, resumeTask, addNotification, selectCardItem, resumeChat]);
     
     const updateMessageInChat = useCallback(async (chatId: string, message: MessageType): Promise<MessageType> => {
         try {

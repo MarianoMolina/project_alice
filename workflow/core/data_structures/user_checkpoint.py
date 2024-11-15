@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Union
 from pydantic import Field, field_validator, ValidationInfo
 from workflow.core.data_structures.base_models import BaseDataStructure
     
@@ -8,7 +8,7 @@ class UserCheckpoint(BaseDataStructure):
         default_factory=lambda: {0: "approve", 1: "reject"},
         description="Dictionary mapping option IDs to their descriptions"
     )
-    task_next_obj: Dict[int, str] = Field(
+    task_next_obj: Dict[int, Union[str, None]] = Field(
         ...,
         description="Dictionary mapping option IDs to next task identifiers"
     )

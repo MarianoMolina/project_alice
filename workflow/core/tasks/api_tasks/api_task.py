@@ -1,9 +1,10 @@
-from typing import List, Type
+from typing import List, Type, Dict
 from pydantic import Field, model_validator
-from workflow.core.api import (
-    APIManager, APIEngine, WikipediaSearchAPI, GoogleSearchAPI, ExaSearchAPI, ArxivSearchAPI, RedditSearchAPI, GoogleGraphEngine, WolframAlphaEngine
-)
-from workflow.core.data_structures import ApiType, NodeResponse, References, TasksEndCodeRouting
+from workflow.core.api import APIEngine
+from workflow.core.api import APIManager
+from workflow.core.api.engines import ApiEngineMap
+from workflow.core.data_structures import ApiType, ApiName
+from workflow.core.data_structures import NodeResponse, References, TasksEndCodeRouting
 from workflow.core.tasks.task import AliceTask
 from workflow.util import get_traceback
 
@@ -70,22 +71,13 @@ class APITask(AliceTask):
         if api_type not in ApiType.__members__.values() or api_type == ApiType.LLM_MODEL:
             raise ValueError(f"{api_type} is not a valid API type for APITask")
 
-        # Map API types to their corresponding engine classes
-        api_engine_map = {
-            ApiType.WIKIPEDIA_SEARCH: WikipediaSearchAPI,
-            ApiType.GOOGLE_SEARCH: GoogleSearchAPI,
-            ApiType.EXA_SEARCH: ExaSearchAPI,
-            ApiType.ARXIV_SEARCH: ArxivSearchAPI,
-            ApiType.REDDIT_SEARCH: RedditSearchAPI,
-            ApiType.GOOGLE_KNOWLEDGE_GRAPH: GoogleGraphEngine,
-            ApiType.WOLFRAM_ALPHA: WolframAlphaEngine,
-        }
-
         # Get the correct API engine class
-        api_engine_class = api_engine_map.get(api_type)
-        if api_engine_class is None:
+        api_engines_dict: Dict[ApiName, APIEngine] = ApiEngineMap.get(api_type)
+        if api_engines_dict is None:
             raise ValueError(f"No API engine class found for {api_type}")
 
+        # Retrieve the first ApiName from the API engine map
+        api_engine_class = next(iter(api_engines_dict.values()))
         # Instantiate the API engine to access its input_variables
         api_engine_instance = api_engine_class()
 

@@ -49,7 +49,7 @@ advanced_chat_module = AdvancedChatModule(
                 "retrieval_tools": ["retrieval_task"],
                 "default_user_checkpoints": {
                     "tool_call": "default_tool_call_checkpoint",
-                    "code_exec": "default_code_exec_checkpoint"
+                    "code_execution": "default_code_exec_checkpoint"
                 }
             },
             {
@@ -59,7 +59,7 @@ advanced_chat_module = AdvancedChatModule(
                 "agent_tools": ["coding_workflow", "image_gen_task", "search_hub"],
                 "default_user_checkpoints": {
                     "tool_call": "default_tool_call_checkpoint",
-                    "code_exec": "default_code_exec_checkpoint"
+                    "code_execution": "default_code_exec_checkpoint"
                 }
             },
         ]

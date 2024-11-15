@@ -1,18 +1,16 @@
-from bson import ObjectId
 from typing import Dict, List, Optional
-from pydantic import Field, model_validator, ConfigDict
+from pydantic import Field, model_validator
 from workflow.util.const import model_formats
 from workflow.core.data_structures.api_utils import ApiName, ModelType
 from workflow.core.data_structures.base_models import BaseDataStructure
 
 class AliceModel(BaseDataStructure):
-    id: Optional[str] = Field(None, title="Model ID", description="The ID of the model.", alias="_id")
     short_name: str = Field(..., title="Short Name", description="The short name of the model.")
     model_name: str = Field(..., title="Model Name", description="The complete name of the model.")
     model_format: str = Field(..., title="Model Format", description="The format of the model.")
     ctx_size: int = Field(..., title="Context Size", description="The context size of the model.")
     model_type: ModelType = Field(..., title="Model Type", description="The type of the model.")
-    api_name: ApiName = Field(default='lm-studio_llm', title="API name", description="The API to use for the model.")
+    api_name: ApiName = Field(default='lm_studio', title="API name", description="The API to use for the model.")
     temperature: float = Field(0.7, description="The temperature setting for the model")
     seed: Optional[int] = Field(None, description="The seed for random number generation")
     use_cache: bool = Field(True, description="Whether to use caching for the model")

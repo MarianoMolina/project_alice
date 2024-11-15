@@ -30,7 +30,7 @@ export const convertToAliceModel = (data: any): AliceModel => {
         model_format: data?.model_format || undefined,
         ctx_size: data?.ctx_size || undefined,
         model_type: data?.model_type || 'chat',
-        api_name: data?.api_name || 'lm-studio',
+        api_name: data?.api_name || 'lm_studio',
         temperature: data?.temperature || undefined,
         seed: data?.seed || null,
         use_cache: data?.use_cache || false,
