@@ -17,13 +17,16 @@ import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/Placehold
 import { useCardDialog } from '../contexts/CardDialogContext';
 import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
 import EnhancedMessage from '../components/enhanced/message/message/EnhancedMessage';
-import EnhancedURLReference from '../components/enhanced/url_reference/url_reference/EnhancedURLReference';
 import Logger from '../utils/Logger';
 import ToggleBox from '../components/ui/sidetab_header/ToggleBox';
 import EnhancedUserCheckpoint from '../components/enhanced/user_checkpoint/user_checkpoint/EnhancedUserCheckpoint';
 import EnhancedUserInteraction from '../components/enhanced/user_interaction/user_interaction/EnhancedUserInteraction';
 import EnhancedEmbeddingChunk from '../components/enhanced/embedding_chunk/embedding_chunk/EnhancedEmbeddingChunk';
 import EnhancedDataCluster from '../components/enhanced/data_cluster/data_cluster/EnhancedDataCluster';
+import EnhancedEntityReference from '../components/enhanced/entity_reference/entity_reference/EnhancedEntityReference';
+import EnhancedAPIConfig from '../components/enhanced/api_config/api_config/EnhancedAPIConfig';
+import EnhancedCodeExecution from '../components/enhanced/code_execution/code_execution/EnhancedCodeExecution';
+import EnhancedToolCall from '../components/enhanced/tool_calls/tool_calls/EnhancedToolCall';
 
 const Database: React.FC = () => {
     const classes = useStyles();
@@ -77,9 +80,12 @@ const Database: React.FC = () => {
     const tabs = [
         { name: 'Agent' as CollectionElementString, icon: Person, group: 'Core' },
         { name: 'API' as CollectionElementString, icon: Api, group: 'Core' },
+        { name: 'APIConfig' as CollectionElementString, icon: Settings, group: 'Core' },
         { name: 'Chat' as CollectionElementString, icon: QuestionAnswer, group: 'Core' },
+        { name: 'CodeExecution' as CollectionElementString, icon: Functions, group: 'Ref' },
         { name: 'DataCluster' as CollectionElementString, icon: Diversity2, group: 'Refs' },
         { name: 'EmbeddingChunk' as CollectionElementString, icon: Description, group: 'Ref' },
+        { name: 'EntityReference' as CollectionElementString, icon: Link, group: 'Ref' },
         { name: 'File' as CollectionElementString, icon: AttachFile, group: 'Ref' },
         { name: 'Message' as CollectionElementString, icon: Message, group: 'Ref' },
         { name: 'Model' as CollectionElementString, icon: Category, group: 'Core' },
@@ -87,7 +93,7 @@ const Database: React.FC = () => {
         { name: 'Prompt' as CollectionElementString, icon: Description, group: 'Core' },
         { name: 'Task' as CollectionElementString, icon: Functions, group: 'Core' },
         { name: 'TaskResponse' as CollectionElementString, icon: Assignment, group: 'Ref' },
-        { name: 'URLReference' as CollectionElementString, icon: Link, group: 'Ref' },
+        { name: 'ToolCall' as CollectionElementString, icon: Functions, group: 'Ref' },
         { name: 'UserCheckpoint' as CollectionElementString, icon: LiveHelp, group: 'Core' },
         { name: 'UserInteraction' as CollectionElementString, icon: Feedback, group: 'Ref' },
     ];
@@ -139,8 +145,8 @@ const Database: React.FC = () => {
                                 return <EnhancedFile {...commonListProps} />;
                             case 'Message':
                                 return <EnhancedMessage {...commonListProps} />;
-                            case 'URLReference':
-                                return <EnhancedURLReference {...commonListProps} />;
+                            case 'EntityReference':
+                                return <EnhancedEntityReference {...commonListProps} />;
                             case 'UserCheckpoint':
                                 return <EnhancedUserCheckpoint {...commonListProps} />;
                             case 'UserInteraction':
@@ -149,6 +155,12 @@ const Database: React.FC = () => {
                                 return <EnhancedEmbeddingChunk {...commonListProps} />;
                             case 'DataCluster':
                                 return <EnhancedDataCluster {...commonListProps} />;
+                            case 'APIConfig':
+                                return <EnhancedAPIConfig {...commonListProps} />;
+                            case 'CodeExecution':
+                                return <EnhancedCodeExecution {...commonListProps} />;
+                            case 'ToolCall':
+                                return <EnhancedToolCall {...commonListProps} />;
                             default:
                                 return null;
                         }
@@ -193,8 +205,8 @@ const Database: React.FC = () => {
                 return <EnhancedFile {...commonProps} />;
             case 'Message':
                 return <EnhancedMessage {...commonProps} />;
-            case 'URLReference':
-                return <EnhancedURLReference {...commonProps} />;
+            case 'EntityReference':
+                return <EnhancedEntityReference {...commonProps} />;
             case 'UserCheckpoint':
                 return <EnhancedUserCheckpoint {...commonProps} />;
             case 'UserInteraction':
@@ -203,6 +215,12 @@ const Database: React.FC = () => {
                 return <EnhancedEmbeddingChunk {...commonProps} />;
             case 'DataCluster':
                 return <EnhancedDataCluster {...commonProps} />;
+            case 'APIConfig':
+                return <EnhancedAPIConfig {...commonProps} />;
+            case 'CodeExecution':
+                return <EnhancedCodeExecution {...commonProps} />;
+            case 'ToolCall':
+                return <EnhancedToolCall {...commonProps} />;
             default:
                 return null;
         }

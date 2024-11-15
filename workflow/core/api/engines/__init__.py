@@ -1,6 +1,10 @@
 from workflow.core.data_structures import ApiType, ApiName
 from .api_engine import APIEngine
-from .search_engine import ArxivSearchAPI, ExaSearchAPI, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI
+from .arxiv_search_engine import ArxivSearchAPI
+from .exa_search_engine import ExaSearchAPI
+from .reddit_search_engine import RedditSearchAPI
+from .google_search_engine import GoogleSearchAPI
+from .wikipedia_search_engine import WikipediaSearchAPI
 from .llm_engine import LLMEngine
 from .anthropic_llm_engine import LLMAnthropic
 from .image_gen_engine import ImageGenerationEngine

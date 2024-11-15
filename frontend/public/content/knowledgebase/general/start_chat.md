@@ -42,7 +42,7 @@ You can add various types of references to enrich your conversation:
    - "Add [File Reference](/knowledgebase/file)"
    - "Add [Message Reference](/knowledgebase/message)"
    - "Add [Task Results](/knowledgebase/task_response)"
-   - "Add [URL Reference](/knowledgebase/url_reference)"
+   - "Add [Entity Reference](/knowledgebase/entity_reference)"
 2. Select the item you want to reference.
 3. The reference will be added to your current message input.
 

@@ -62,28 +62,8 @@ function ensureObjectIdForSave(
   this: ITaskResultDocument,
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
-  // Handle node_references references
-  if (this.node_references && this.node_references.length > 0) {
-    this.node_references.forEach(nodeResponse => {
-      if (nodeResponse.references) {
-        const refs = nodeResponse.references as any;
-        if (refs.messages) {
-          refs.messages = refs.messages.map((message: any) => getObjectId(message));
-        }
-        if (refs.files) {
-          refs.files = refs.files.map((file: any) => getObjectId(file));
-        }
-        if (refs.task_responses) {
-          refs.task_responses = refs.task_responses.map((taskResponse: any) => getObjectId(taskResponse));
-        }
-        if (refs.url_references) {
-          refs.url_references = refs.url_references.map((searchResult: any) => getObjectId(searchResult));
-        }
-      }
-    });
-  }
-  this.created_by = getObjectId(this.created_by);
-  this.updated_by = getObjectId(this.updated_by);
+  if (this.created_by) this.created_by = getObjectId(this.created_by);
+  if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
   next();
 }
 
@@ -92,27 +72,8 @@ function ensureObjectIdForUpdate(
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
   const update = this.getUpdate() as any;
-  // Handle node_references references
-  if (update.node_references) {
-    update.node_references.forEach((nodeResponse: any) => {
-      if (nodeResponse.references) {
-        if (nodeResponse.references.messages) {
-          nodeResponse.references.messages = nodeResponse.references.messages.map((message: any) => getObjectId(message));
-        }
-        if (nodeResponse.references.files) {
-          nodeResponse.references.files = nodeResponse.references.files.map((file: any) => getObjectId(file));
-        }
-        if (nodeResponse.references.task_responses) {
-          nodeResponse.references.task_responses = nodeResponse.references.task_responses.map((taskResponse: any) => getObjectId(taskResponse));
-        }
-        if (nodeResponse.references.url_references) {
-          nodeResponse.references.url_references = nodeResponse.references.url_references.map((searchResult: any) => getObjectId(searchResult));
-        }
-      }
-    });
-  }
-  update.created_by = getObjectId(update.created_by);
-  update.updated_by = getObjectId(update.updated_by);
+  if (update.created_by) update.created_by = getObjectId(update.created_by);
+  if (update.updated_by) update.updated_by = getObjectId(update.updated_by);
   next();
 }
 

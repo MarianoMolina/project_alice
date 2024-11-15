@@ -9,7 +9,6 @@ import { User } from './UserTypes';
 import { API } from './ApiTypes';
 import { FileReference } from './FileTypes';
 import { MessageType } from './MessageTypes';
-import { URLReference } from './URLReferenceTypes';
 import { UserInteraction } from './UserInteractionTypes';
 import { UserCheckpoint } from './UserCheckpointTypes';
 import { EmbeddingChunk } from './EmbeddingChunkTypes';
@@ -24,7 +23,6 @@ import EnhancedParameter from '../components/enhanced/parameter/parameter/Enhanc
 import EnhancedPrompt from '../components/enhanced/prompt/prompt/EnhancedPrompt';
 import EnhancedTask from '../components/enhanced/task/task/EnhancedTask';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
-import EnhancedURLReference from '../components/enhanced/url_reference/url_reference/EnhancedURLReference';
 import EnhancedUserInteraction from '../components/enhanced/user_interaction/user_interaction/EnhancedUserInteraction';
 import EnhancedUserCheckpoint from '../components/enhanced/user_checkpoint/user_checkpoint/EnhancedUserCheckpoint';
 import EnhancedDataCluster from '../components/enhanced/data_cluster/data_cluster/EnhancedDataCluster';
@@ -35,10 +33,12 @@ import { ToolCall } from './ToolCallTypes';
 import EnhancedToolCall from '../components/enhanced/tool_calls/tool_calls/EnhancedToolCall';
 import EnhancedCodeExecution from '../components/enhanced/code_execution/code_execution/EnhancedCodeExecution';
 import EnhancedAPIConfig from '../components/enhanced/api_config/api_config/EnhancedAPIConfig';
+import { EntityReference } from './EntityReferenceTypes';
+import EnhancedEntityReference from '../components/enhanced/entity_reference/entity_reference/EnhancedEntityReference';
 
-export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' | 'urlreferences' | 'userinteractions' | 'usercheckpoints' | 'dataclusters' | 'embeddingchunks' | 'toolcalls' | 'codeexecutions' | 'apiconfigs';
-export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType | URLReference | UserInteraction | UserCheckpoint | DataCluster | EmbeddingChunk | ToolCall | CodeExecution | APIConfig;
-export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API' | 'User' | 'File' | 'Message' | 'URLReference' | 'UserInteraction' | 'UserCheckpoint' | 'DataCluster' | 'EmbeddingChunk' | 'ToolCall' | 'CodeExecution' | 'APIConfig';
+export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' |  'userinteractions' | 'usercheckpoints' | 'dataclusters' | 'embeddingchunks' | 'toolcalls' | 'codeexecutions' | 'apiconfigs' | 'entityreferences';
+export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType |  UserInteraction | UserCheckpoint | DataCluster | EmbeddingChunk | ToolCall | CodeExecution | APIConfig | EntityReference;
+export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API' | 'User' | 'File' | 'Message' | 'UserInteraction' | 'UserCheckpoint' | 'DataCluster' | 'EmbeddingChunk' | 'ToolCall' | 'CodeExecution' | 'APIConfig' | 'EntityReference';
 
 export type CollectionType = {
     agents: AliceAgent;
@@ -52,7 +52,6 @@ export type CollectionType = {
     apis: API;
     files: FileReference;
     messages: MessageType;
-    urlreferences: URLReference;
     userinteractions: UserInteraction;
     usercheckpoints: UserCheckpoint;
     dataclusters: DataCluster;
@@ -60,6 +59,7 @@ export type CollectionType = {
     toolcalls: ToolCall;
     codeexecutions: CodeExecution;
     apiconfigs: APIConfig;
+    entityreferences: EntityReference;
 };
 
 export type CollectionTypeString = {
@@ -74,13 +74,14 @@ export type CollectionTypeString = {
     apis: 'API';
     files: 'File';
     messages: 'Message';
-    urlreferences: 'URLReference';
     userinteractions: 'UserInteraction';
     usercheckpoints: 'UserCheckpoint';
     dataclusters: 'DataCluster';
     embeddingchunks: 'EmbeddingChunk';
     toolcalls: 'ToolCall';
     codeexecutions: 'CodeExecution';
+    apiconfigs: 'APIConfig';
+    entityreferences: 'EntityReference';
 };
 
 export const collectionNameToElementString: Record<CollectionName, CollectionElementString> = {
@@ -95,14 +96,14 @@ export const collectionNameToElementString: Record<CollectionName, CollectionEle
     apis: 'API',
     files: 'File',
     messages: 'Message',
-    urlreferences: 'URLReference',
     userinteractions: 'UserInteraction',
     usercheckpoints: 'UserCheckpoint',
     dataclusters: 'DataCluster',
     embeddingchunks: 'EmbeddingChunk',
     toolcalls: 'ToolCall',
     codeexecutions: 'CodeExecution',
-    apiconfigs: 'APIConfig'
+    apiconfigs: 'APIConfig',
+    entityreferences: 'EntityReference',
 };
 
 export const collectionNameToEnhancedComponent: Record<CollectionName, React.ComponentType<any>> = {
@@ -117,14 +118,14 @@ export const collectionNameToEnhancedComponent: Record<CollectionName, React.Com
     apis: EnhancedAPI,
     files: EnhancedFile,
     messages: EnhancedMessage,
-    urlreferences: EnhancedURLReference,
     userinteractions: EnhancedUserInteraction,
     usercheckpoints: EnhancedUserCheckpoint,
     dataclusters: EnhancedDataCluster,
     embeddingchunks: EnhancedEmbeddingChunk,
     toolcalls: EnhancedToolCall,
     codeexecutions: EnhancedCodeExecution,
-    apiconfigs: EnhancedAPIConfig
+    apiconfigs: EnhancedAPIConfig,
+    entityreferences: EnhancedEntityReference,
 };
 
 // Create a runtime mapping object
@@ -140,7 +141,6 @@ export const collectionTypeMapping: Record<string, CollectionElementString> = {
     API: 'API',
     FileReference: 'File',
     MessageType: 'Message',
-    URLReference: 'URLReference',
     UserInteraction: 'UserInteraction',
     UserCheckpoint: 'UserCheckpoint',
     DataCluster: 'DataCluster',
@@ -148,6 +148,7 @@ export const collectionTypeMapping: Record<string, CollectionElementString> = {
     ToolCall: 'ToolCall',
     CodeExecution: 'CodeExecution',
     APIConfig: 'APIConfig',
+    EntityReference: 'EntityReference',
 };
 
 export type ComponentMode = 'create' | 'edit' | 'view' | 'list' | 'shortList' | 'table';
@@ -162,7 +163,6 @@ export interface HandleClickProps {
     handleTaskResultClick?: (taskResultId: string, item?: TaskResponse) => void;
     handleFileClick?: (fileId: string, item?: FileReference) => void;
     handleMessageClick?: (messageId: string, item?: MessageType) => void;
-    handleURLReferenceClick?: (urlReferenceId: string, item?: URLReference) => void;
     handleUserInteractionClick?: (userInteractionId: string, item?: UserInteraction) => void;
     handleUserCheckpointClick?: (userCheckpointId: string, item?: UserCheckpoint) => void;
     handleDataClusterClick?: (dataClusterId: string, item?: DataCluster) => void;
@@ -170,6 +170,7 @@ export interface HandleClickProps {
     handleToolCallClick?: (toolCallId: string, item?: ToolCall) => void;
     handleCodeExecutionClick?: (codeExecutionId: string, item?: CodeExecution) => void;
     handleAPIConfigClick?: (apiConfigId: string, item?: APIConfig) => void;
+    handleEntityReferenceClick?: (entityReferenceId: string, item?: EntityReference) => void;
 }
 export interface EnhancedComponentProps<T extends CollectionElement> extends HandleClickProps {
     items: T[] | null;

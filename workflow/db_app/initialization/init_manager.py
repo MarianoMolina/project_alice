@@ -4,7 +4,7 @@ from typing import get_type_hints, get_origin, get_args, Dict, Any, Union, Optio
 from pydantic import BaseModel, Field, ConfigDict, ValidationError
 from workflow.db_app.app import BackendAPI
 from workflow.util.logging_config import LOGGER
-from workflow.core import AliceAgent, AliceChat, AliceTask, API
+from workflow.core import AliceAgent, AliceChat, AliceTask, API, APIConfig
 from workflow.core.data_structures import (
     EntityType, ParameterDefinition, FunctionParameters, TaskResponse, User, UserCheckpoint, Prompt, AliceModel, UserInteraction
     )
@@ -49,6 +49,7 @@ class DBInitManager(BaseModel):
         "chats": {}, 
         "parameters": {}, 
         "task_responses": {},
+        "api_configs": {},
         "apis": {},
         "user_interactions": {},
     }, description="Map of entity keys to entity objects")
@@ -61,6 +62,7 @@ class DBInitManager(BaseModel):
         "tasks": {}, 
         "chats": {}, 
         "parameters": {}, 
+        "api_configs": {},
         "task_responses": {},
         "apis": {},
         "user_interactions": {},
@@ -74,6 +76,7 @@ class DBInitManager(BaseModel):
         "tasks": AliceTask,
         "users": User,
         "parameters": ParameterDefinition, 
+        "api_configs": APIConfig,
         "task_responses": TaskResponse,
         "apis": API,
         "user_interactions": UserInteraction,

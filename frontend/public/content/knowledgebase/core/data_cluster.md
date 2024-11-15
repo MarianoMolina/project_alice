@@ -9,7 +9,7 @@ class References(BaseModel):
     messages: Optional[List[MessageDict]]
     files: Optional[List[Union[FileReference, FileContentReference]]]
     task_responses: Optional[List[TaskResponse]]
-    url_references: Optional[List[URLReference]]
+    entity_references: Optional[List[EntityReference]]
     user_interactions: Optional[List[UserInteraction]]
     embeddings: Optional[List[EmbeddingChunk]]
 ```
@@ -62,9 +62,9 @@ task_ref = TaskResponse(
 ### 4. URL References
 - External web content references
 ```python
-url_ref = URLReference(
+entity_ref = EntityReference(
     url="https://example.com",
-    title="Example Page",
+    name="Example Page",
     content="Page content",
     metadata={"source": "web"}
 )
@@ -120,7 +120,7 @@ if task_results.task_responses:
 context = References(
     messages=[system_message, user_message],
     files=[reference_doc],
-    url_references=[web_source]
+    entity_references=[web_source]
 )
 
 # Converting to string representation
@@ -170,7 +170,7 @@ async def search_docs(
 ```python
 # Initial data gathering
 step1_results = References(
-    url_references=[web_data],
+    entity_references=[web_data],
 )
 
 # Analysis phase
@@ -183,7 +183,7 @@ analysis_results = References(
 final_results = References(
     messages=[*step1_results.messages, *analysis_results.messages],
     task_responses=analysis_results.task_responses,
-    url_references=step1_results.url_references
+    entity_references=step1_results.entity_references
 )
 ```
 

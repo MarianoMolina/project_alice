@@ -15,7 +15,6 @@ import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/Placehold
 import { useCardDialog } from '../contexts/CardDialogContext';
 import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
 import { FileReference } from '../types/FileTypes';
-import EnhancedURLReference from '../components/enhanced/url_reference/url_reference/EnhancedURLReference';
 import EnhancedMessage from '../components/enhanced/message/message/EnhancedMessage';
 import Logger from '../utils/Logger';
 import ChatFullView from '../components/enhanced/common/chat_components/ChatFullView';
@@ -23,6 +22,7 @@ import ChatShortListView from '../components/enhanced/chat/chat/ChatShortListVie
 import ChatCardView from '../components/enhanced/chat/chat/ChatCardView';
 import { LlmProvider } from '../types/ApiTypes';
 import FilterSelect from '../components/ui/sidetab_header/FilterSelect';
+import EnhancedEntityReference from '../components/enhanced/entity_reference/entity_reference/EnhancedEntityReference';
 
 const ChatAlice: React.FC = () => {
   const classes = useStyles();
@@ -84,8 +84,8 @@ const ChatAlice: React.FC = () => {
     chatInputRef.current?.addTaskResponse(taskResponse);
   }, []);
 
-  const addURLReference = useCallback((urlReference: any) => {
-    chatInputRef.current?.addURLReference(urlReference);
+  const addEntityReference = useCallback((entityReference: any) => {
+    chatInputRef.current?.addEntityReference(entityReference);
   }, []);
 
   const addMessageReference = useCallback((message: any) => {
@@ -119,7 +119,7 @@ const ChatAlice: React.FC = () => {
       handleParameterClick: (id: string) => selectCardItem('Parameter', id),
       handleAPIClick: (id: string) => selectCardItem('API', id),
       handleMessageClick: (id: string) => selectCardItem('Message', id),
-      handleURLReferenceClick: (id: string) => selectCardItem('URLReference', id),
+      handleEntityReferenceClick: (id: string) => selectCardItem('EntityReference', id),
     };
 
     return (
@@ -188,11 +188,11 @@ const ChatAlice: React.FC = () => {
                 );
               case 'Add URL Reference':
                 return (
-                  <EnhancedURLReference
+                  <EnhancedEntityReference
                     mode={'list'}
                     fetchAll={true}
-                    onView={(urlReference) => urlReference._id && selectCardItem('URLReference', urlReference._id)}
-                    onInteraction={addURLReference}
+                    onView={(entityReference) => entityReference._id && selectCardItem('EntityReference', entityReference._id)}
+                    onInteraction={addEntityReference}
                     {...handleProps}
                   />
                 );
@@ -213,7 +213,7 @@ const ChatAlice: React.FC = () => {
         </Box>
       </Box>
     )
-  }, [selectChatId, currentChat, checkAndAddTask, addTaskResponse, addFileReference, addURLReference, addMessageReference, selectCardItem, filteredPastChats, classes.activeListContainer, classes.activeListContent, selectedApiProvider, handleApiProviderChange]);
+  }, [selectChatId, currentChat, checkAndAddTask, addTaskResponse, addFileReference, addEntityReference, addMessageReference, selectCardItem, filteredPastChats, classes.activeListContainer, classes.activeListContent, selectedApiProvider, handleApiProviderChange]);
 
   return (
     <Box className={classes.chatAliceContainer}>

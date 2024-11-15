@@ -1,8 +1,8 @@
 import React from 'react';
-import { URLReference, URLReferenceComponentProps } from '../../../../types/URLReferenceTypes';
+import { EntityReference, EntityReferenceComponentProps } from '../../../../types/EntityReferenceTypes';
 import EnhancedTableView from '../../common/enhanced_component/TableView';
 
-const URLReferenceTableView: React.FC<URLReferenceComponentProps> = ({
+const EntityReferenceTableView: React.FC<EntityReferenceComponentProps> = ({
   items,
   item,
   onInteraction,
@@ -11,24 +11,24 @@ const URLReferenceTableView: React.FC<URLReferenceComponentProps> = ({
 }) => {
   const columns = [
     {
-      header: 'Title',
-      render: (urlReference: URLReference) => urlReference.title,
-      sortKey: 'title'
+      header: 'name',
+      render: (entityReference: EntityReference) => entityReference.name ?? '',
+      sortKey: 'name'
     },
     {
       header: 'URL',
-      render: (urlReference: URLReference) => urlReference.url,
+      render: (entityReference: EntityReference) => entityReference.url,
       sortKey: 'url'
     },
     {
       header: 'Created At',
-      render: (urlReference: URLReference) => new Date(urlReference.createdAt || '').toLocaleString(),
+      render: (entityReference: EntityReference) => new Date(entityReference.createdAt || '').toLocaleString(),
       sortKey: 'createdAt'
     }
   ];
 
   return (
-    <EnhancedTableView<URLReference>
+    <EnhancedTableView<EntityReference>
       items={items}
       item={item}
       columns={columns}
@@ -41,4 +41,4 @@ const URLReferenceTableView: React.FC<URLReferenceComponentProps> = ({
   );
 };
 
-export default URLReferenceTableView;
+export default EntityReferenceTableView;

@@ -30,9 +30,9 @@ import { ParameterDefinition } from '../../../../types/ParameterTypes';
 import { API } from '../../../../types/ApiTypes';
 import { MessageType } from '../../../../types/MessageTypes';
 import { FileReference } from '../../../../types/FileTypes';
-import { URLReference } from '../../../../types/URLReferenceTypes';
-import URLReferenceCardView from '../../url_reference/url_reference/URLReferenceCardView';
-import EnhancedURLReference from '../../url_reference/url_reference/EnhancedURLReference';
+import { EntityReference } from '../../../../types/EntityReferenceTypes';
+import EntityReferenceCardView from '../../entity_reference/entity_reference/EntityReferenceCardView';
+import EnhancedEntityReference from '../../entity_reference/entity_reference/EnhancedEntityReference';
 import Logger from '../../../../utils/Logger';
 import EnhancedUserCheckpoint from '../../user_checkpoint/user_checkpoint/EnhancedUserCheckpoint';
 import EnhancedUserInteraction from '../../user_interaction/user_interaction/EnhancedUserInteraction';
@@ -60,7 +60,7 @@ const EnhancedCardDialog: React.FC = () => {
       handleAPIClick: (id: string, item?: API) => selectCardItem('API', id, item),
       handleFileClick: (id: string, item?: FileReference) => selectCardItem('File', id, item),
       handleMessageClick: (id: string, item?: MessageType) => selectCardItem('Message', id, item),
-      handleURLReferenceClick: (id: string, item?: URLReference) => selectCardItem('URLReference', id, item),
+      handleEntityReferenceClick: (id: string, item?: EntityReference) => selectCardItem('EntityReference', id, item),
       handleUserCheckpoint: (id: string) => selectCardItem('UserCheckpoint', id),
       handleUserInteraction: (id: string) => selectCardItem('UserInteraction', id),
       handleEmbeddingChunk: (id: string) => selectCardItem('EmbeddingChunk', id),
@@ -104,8 +104,8 @@ const EnhancedCardDialog: React.FC = () => {
           return <EnhancedFile itemId={selectedCardItem._id} {...commonProps} />;
         case 'Message':
           return <EnhancedMessage itemId={selectedCardItem._id} {...commonProps} />;
-        case 'URLReference':
-          return <EnhancedURLReference itemId={selectedCardItem._id} {...commonProps} />;
+        case 'EntityReference':
+          return <EnhancedEntityReference itemId={selectedCardItem._id} {...commonProps} />;
         case 'UserCheckpoint':
           return <EnhancedUserCheckpoint itemId={selectedCardItem._id} {...commonProps} />;
         case 'UserInteraction':
@@ -180,10 +180,10 @@ const EnhancedCardDialog: React.FC = () => {
               <MessageCardView item={selectedCardItem as CollectionType['messages']} {...cardViewProps} />
             </Box>
           );
-        case 'URLReference':
+        case 'EntityReference':
           return (
             <Box className="max-w-full">
-              <URLReferenceCardView item={selectedCardItem as CollectionType['urlreferences']} {...cardViewProps} />;
+              <EntityReferenceCardView item={selectedCardItem as CollectionType['entityreferences']} {...cardViewProps} />;
             </Box>
           );
         case 'UserCheckpoint':

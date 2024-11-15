@@ -5,11 +5,11 @@ import Logger from './logger';
 import { updateFile, storeFileReference } from './file.utils';
 import { updateTaskResult, createTaskResult } from './taskResult.utils';
 import { createMessage, updateMessage } from './message.utils';
-import { createURLReference, updateURLReference } from './urlReference.utils';
 import { createUserInteraction, updateUserInteraction } from './userInteraction.utils';
 import { createEmbeddingChunk, updateEmbeddingChunk } from './embeddingChunk.utils';
 import { createToolCall, updateToolCall } from './toolCall.utils';
 import { createCodeExecution, updateCodeExecution } from './codeExecution.utils';
+import { createEntityReference, updateEntityReference } from './entityReference.utils';
 
 // Add interface for owner information
 interface OwnerInfo {
@@ -40,9 +40,9 @@ const referenceUtilsMap: Record<keyof References, ReferenceUtils> = {
     create: createTaskResult,
     update: updateTaskResult
   },
-  url_references: {
-    create: createURLReference,
-    update: updateURLReference
+  entity_references: {
+    create: createEntityReference,
+    update: updateEntityReference
   },
   user_interactions: {
     create: createUserInteraction,

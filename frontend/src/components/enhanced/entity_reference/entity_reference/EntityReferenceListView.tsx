@@ -1,23 +1,23 @@
 import React from 'react';
-import { URLReference, URLReferenceComponentProps } from '../../../../types/URLReferenceTypes';
+import { EntityReference, EntityReferenceComponentProps } from '../../../../types/EntityReferenceTypes';
 import { Typography } from '@mui/material';
 import EnhancedListView from '../../common/enhanced_component/ListView';
 
-const URLReferenceListView: React.FC<URLReferenceComponentProps> = ({
+const EntityReferenceListView: React.FC<EntityReferenceComponentProps> = ({
     items,
     item,
     onInteraction,
     onView,
 }) => {
-    const getPrimaryText = (urlReference: URLReference) => urlReference.title;
-    const getSecondaryText = (urlReference: URLReference) => (
+    const getPrimaryText = (entityReference: EntityReference) => entityReference.name ?? '';
+    const getSecondaryText = (entityReference: EntityReference) => (
         <Typography component="span" variant="body2" color="textSecondary">
-            {urlReference.url}
+            {entityReference.url}
         </Typography>
     );
 
     return (
-        <EnhancedListView<URLReference>
+        <EnhancedListView<EntityReference>
             items={items}
             item={item}
             getPrimaryText={getPrimaryText}
@@ -26,9 +26,9 @@ const URLReferenceListView: React.FC<URLReferenceComponentProps> = ({
             onInteraction={onInteraction}
             interactionTooltip="Select URL Reference"
             viewTooltip="View URL Reference"
-            collectionElementString='URLReference'
+            collectionElementString='EntityReference'
         />
     );
 };
 
-export default URLReferenceListView;
+export default EntityReferenceListView;

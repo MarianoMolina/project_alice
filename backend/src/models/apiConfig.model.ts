@@ -1,5 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { IAPIConfigDocument, IAPIConfigModel } from '../interfaces/apiConfig.interface';
+import { getObjectId } from '../utils/utils';
 
 const apiConfigSchema = new Schema<IAPIConfigDocument, IAPIConfigModel>({
   name: { type: String, required: true, description: "Name of the API configuration" },
@@ -10,12 +11,9 @@ const apiConfigSchema = new Schema<IAPIConfigDocument, IAPIConfigModel>({
 }, { timestamps: true });
 
 function ensureObjectId(this: IAPIConfigDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {
-  if (this.created_by && (this.created_by as any)._id) {
-    this.created_by = (this.created_by as any)._id;
-  }
-  if (this.updated_by && (this.updated_by as any)._id) {
-    this.updated_by = (this.updated_by as any)._id;
-  }
+
+  if (this.created_by) this.created_by = getObjectId(this.created_by);
+  if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
   next();
 }
 function ensureObjectIdForUpdate(
@@ -23,12 +21,8 @@ function ensureObjectIdForUpdate(
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
   const update = this.getUpdate() as any;
-  if (update.created_by && update.created_by._id) {
-    update.created_by = update.created_by._id;
-  }
-  if (update.updated_by && update.updated_by._id) {
-    update.updated_by = update.updated_by._id;
-  }
+  if (update.created_by) update.created_by = getObjectId(update.created_by);
+  if (update.updated_by) update.updated_by = getObjectId(update.updated_by);
   next();
 }
 function autoPopulate(this: mongoose.Query<any, any>) {

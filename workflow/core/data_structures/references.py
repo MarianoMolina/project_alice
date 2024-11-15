@@ -4,23 +4,23 @@ from workflow.core.data_structures.base_models import BaseDataStructure
 from workflow.core.data_structures.message import MessageDict
 from workflow.core.data_structures.file_reference import FileReference, FileContentReference
 from workflow.core.data_structures.task_response import TaskResponse
-from workflow.core.data_structures.url_reference import URLReference
 from workflow.core.data_structures.user_interaction import UserInteraction
 from workflow.core.data_structures.base_models import EmbeddingChunk
 from workflow.core.data_structures.tool_calls import ToolCall
 from workflow.core.data_structures.code import CodeExecution
+from workflow.core.data_structures.entity_reference import EntityReference
 
 class References(BaseModel):
     messages: Optional[List[MessageDict]] = Field(default=None, description="List of message references")
     files: Optional[List[Union[FileReference, FileContentReference]]] = Field(default=None, description="List of file references")
     task_responses: Optional[List[TaskResponse]] = Field(default=None, description="List of task response references")
-    url_references: Optional[List[URLReference]] = Field(default=None, description="List of search result references")
     user_interactions: Optional[List[UserInteraction]] = Field(default=None, description="List of user interaction references")
     embeddings: Optional[List[EmbeddingChunk]] = Field(default=None, description="List of embedding references")
     code_executions: Optional[List[CodeExecution]] = Field(default=None, description="List of code execution references")
     tool_calls: Optional[List[ToolCall]] = Field(default=None, description="List of tool call references")
+    entity_references: Optional[List[EntityReference]] = Field(default=None, description="List of entity references")
 
-    @field_validator('messages', 'files', 'task_responses', 'url_references', 'user_interactions', 'embeddings', 'code_executions', 'tool_calls')
+    @field_validator('messages', 'files', 'task_responses', 'entity_references', 'user_interactions', 'embeddings', 'code_executions', 'tool_calls')
     @classmethod
     def validate_reference_list(cls, value: Optional[List[Union[Dict, BaseModel]]], info: Any) -> Optional[List[Any]]:
         if value is None:
@@ -30,7 +30,7 @@ class References(BaseModel):
         model_map = {
             'messages': MessageDict,
             'task_responses': TaskResponse,
-            'url_references': URLReference,
+            'entity_references': EntityReference,
             'user_interactions': UserInteraction,
             'embeddings': EmbeddingChunk,
             'code_executions': CodeExecution,
@@ -67,7 +67,7 @@ class References(BaseModel):
     
     def model_dump(self, *args, **kwargs) -> Dict[str, Any]:
         data = super().model_dump(*args, **kwargs)
-        for key in ['messages', 'files', 'task_responses', 'url_references', 'user_interactions', 'embeddings', 'code_executions', 'tool_calls']:
+        for key in ['messages', 'files', 'task_responses', 'entity_references', 'user_interactions', 'embeddings', 'code_executions', 'tool_calls']:
             if getattr(self, key) is not None:
                 data[key] = [
                     item.model_dump(*args, **kwargs) if isinstance(item, BaseModel)
@@ -77,7 +77,7 @@ class References(BaseModel):
                 ]
         return data
 
-    def add_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, URLReference, UserInteraction, EmbeddingChunk, CodeExecution, ToolCall]):
+    def add_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, EntityReference, UserInteraction, EmbeddingChunk, CodeExecution, ToolCall]):
         """Add a reference to the appropriate list based on its type."""
         if isinstance(reference, MessageDict):
             if self.messages is None:
@@ -91,10 +91,10 @@ class References(BaseModel):
             if self.task_responses is None:
                 self.task_responses = []
             self.task_responses.append(reference)
-        elif isinstance(reference, URLReference):
-            if self.url_references is None:
-                self.url_references = []
-            self.url_references.append(reference)
+        elif isinstance(reference, EntityReference):
+            if self.entity_references is None:
+                self.entity_references = []
+            self.entity_references.append(reference)
         elif isinstance(reference, UserInteraction):
             if self.user_interactions is None:
                 self.user_interactions = []
@@ -121,7 +121,7 @@ class References(BaseModel):
                 "messages": self.messages,
                 "files": self.files,
                 "task_responses": self.task_responses,
-                "url_references": self.url_references,
+                "entity_references": self.entity_references,
                 "user_interactions": self.user_interactions,
                 "embeddings": self.embeddings,
                 "code_executions": self.code_executions,
@@ -129,9 +129,9 @@ class References(BaseModel):
             }
         return getattr(self, ref_type, None)
 
-    def remove_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, URLReference, UserInteraction, EmbeddingChunk, CodeExecution, ToolCall]) -> bool:
+    def remove_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, EntityReference, UserInteraction, EmbeddingChunk, CodeExecution, ToolCall]) -> bool:
         """Remove a specific reference."""
-        for attr in ['messages', 'files', 'task_responses', 'url_references', 'user_interactions', 'embeddings', 'code_executions', 'tool_calls']:
+        for attr in ['messages', 'files', 'task_responses', 'entity_references', 'user_interactions', 'embeddings', 'code_executions', 'tool_calls']:
             ref_list = getattr(self, attr)
             if ref_list is not None and reference in ref_list:
                 ref_list.remove(reference)
@@ -144,7 +144,7 @@ class References(BaseModel):
             self.messages = None
             self.files = None
             self.task_responses = None
-            self.url_references = None
+            self.entity_references = None
             self.user_interactions = None
             self.embeddings = None
             self.code_executions = None
@@ -189,7 +189,7 @@ class References(BaseModel):
             
         # Compare each field
         fields_to_compare = [
-            'messages', 'files', 'task_responses', 'url_references', 'user_interactions', 'embeddings', 'code_executions', 'tool_calls'
+            'messages', 'files', 'task_responses', 'entity_references', 'user_interactions', 'embeddings', 'code_executions', 'tool_calls'
         ]
         
         for field in fields_to_compare:

@@ -16,6 +16,7 @@ class ApiType(str, Enum):
     WIKIPEDIA_SEARCH = 'wikipedia_search'
     EXA_SEARCH = 'exa_search'
     ARXIV_SEARCH = 'arxiv_search'
+    REQUESTS = 'requests'
 
 class ApiName(str, Enum):
     """Simplified enum for API providers"""
@@ -35,8 +36,8 @@ class ApiName(str, Enum):
     WIKIPEDIA = 'wikipedia'
     EXA = 'exa'
     ARXIV = 'arxiv'
-    GOOGLE_KNOWLEDGE = 'google_knowledge'
-    WOLFRAM = 'wolfram'
+    GOOGLE_KNOWLEDGE = 'google_knowledge_graph'
+    WOLFRAM = 'wolfram_alpha'
 
 # Type definitions for different API configurations
 class BaseApiConfig(TypedDict):

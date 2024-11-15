@@ -19,6 +19,7 @@ interface EnhancedSelectProps<T extends CollectionType[CollectionName]> {
   onView?: (id: string) => void;
   accordionEntityName: string;
   showCreateButton?: boolean;
+  filters?: Record<string, any>; // Add filters prop
 }
 
 function EnhancedSelect<T extends CollectionType[CollectionName]>({
@@ -32,14 +33,15 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
   activeAccordion,
   onAccordionToggle,
   accordionEntityName,
-  showCreateButton = false
+  showCreateButton = false,
+  filters // Add filters to destructuring
 }: EnhancedSelectProps<T>) {
   const classes = useStyles();
   const { selectFlexibleItem, selectCardItem } = useCardDialog();
   const [localExpanded, setLocalExpanded] = useState(false);
-  Logger.debug('EnhancedSelect', { componentType, selectedItems, isInteractable, multiple, label, activeAccordion, accordionEntityName, showCreateButton });
+  Logger.debug('EnhancedSelect', { componentType, selectedItems, isInteractable, multiple, label, activeAccordion, accordionEntityName, showCreateButton, filters });
 
-  const EnhancedComponent = collectionNameToEnhancedComponent[componentType]
+  const EnhancedComponent = collectionNameToEnhancedComponent[componentType];
 
   const accordionName = `select-${accordionEntityName}`;
   const isExpanded = activeAccordion === accordionName || localExpanded;
@@ -94,8 +96,9 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
       onInteraction={handleInteraction}
       onView={handleView}
       isInteractable={isInteractable}
+      filters={filters} // Pass filters to EnhancedComponent
     />
-  ), [EnhancedComponent, handleInteraction, handleView, isInteractable]);
+  ), [EnhancedComponent, handleInteraction, handleView, isInteractable, filters]); // Add filters to dependencies
 
   const renderSelectedItem = useCallback((item: T) => (
     <Chip

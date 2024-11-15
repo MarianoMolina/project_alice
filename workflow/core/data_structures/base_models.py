@@ -6,7 +6,7 @@ from workflow.util import LOGGER, get_traceback
 # The order of this list is used to determine which entities are created first
 # Also modify the collection_map in db.py if you add new entities
 # As well as the init_manager.py dictionaries
-EntityType = Literal["users", "models", "apis", "parameters", "prompts", "user_checkpoints", "agents", "tasks", "chats", "task_responses", "files", "messages", "urlreferences", "user_interactions", "embedding_chunks", "data_clusters"]
+EntityType = Literal["users", "models", "api_configs", "apis", "parameters", "prompts", "user_checkpoints", "agents", "tasks", "chats", "task_responses", "files", "messages", "user_interactions", "embedding_chunks", "data_clusters", "tool_calls", "code_executions"]
 
 class FileType(str, Enum):
     IMAGE = 'image'
@@ -21,7 +21,7 @@ class ContentType(str, Enum):
     FILE = FileType.FILE.value
     TEXT = 'text'
     TASK_RESULT = 'task_result'
-    URL_REFERENCE = 'url_reference'
+    ENTITY_REFERENCE = 'entity_reference'
     MULTIPLE = 'multiple'
     CODE_EXECUTION = 'code_execution'
 

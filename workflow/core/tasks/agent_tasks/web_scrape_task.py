@@ -4,8 +4,8 @@ import json
 from workflow.core.tasks.task import AliceTask
 from workflow.core.agent.agent import AliceAgent
 from workflow.core.data_structures import (
-    ApiType, References, NodeResponse, MessageDict, FunctionParameters, ParameterDefinition, URLReference, TasksEndCodeRouting, 
-    MessageGenerators, RoleTypes, ContentType
+    ApiType, References, NodeResponse, MessageDict, FunctionParameters, ParameterDefinition, TasksEndCodeRouting, 
+    MessageGenerators, RoleTypes, ContentType, EntityReference, ReferenceCategory
 )
 from workflow.core.api import APIManager
 from workflow.util.web_scrape_utils import (
@@ -56,7 +56,13 @@ class WebScrapeBeautifulSoupTask(AliceTask):
                 parent_task_id=self.id,
                 node_name="fetch_url",
                 exit_code=0,
-                references=References(url_references=[URLReference(title=title, url=url, content=html_content)]),
+                references=References(entity_references=[EntityReference(
+                    name=title, 
+                    url=url, 
+                    content=html_content, 
+                    categories=[ReferenceCategory.URL],
+                    source=ApiType.REQUESTS
+                    )]),
                 execution_order=len(execution_history)
             )
         except Exception as e:
@@ -77,7 +83,7 @@ class WebScrapeBeautifulSoupTask(AliceTask):
         api_manager: APIManager = kwargs.get("api_manager")
         fetch_url_reference = self.get_node_reference(node_responses, "fetch_url")
         
-        if not fetch_url_reference or not fetch_url_reference.url_references:
+        if not fetch_url_reference or not fetch_url_reference.entity_references:
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name="generate_selectors_and_parse",
@@ -90,10 +96,10 @@ class WebScrapeBeautifulSoupTask(AliceTask):
                 execution_order=len(execution_history)
             )
 
-        url_reference = fetch_url_reference.url_references[-1]
-        html_content = url_reference.content
-        title = url_reference.title
-        url = url_reference.url
+        entity_reference = fetch_url_reference.entity_references[-1]
+        html_content = entity_reference.content
+        title = entity_reference.name
+        url = entity_reference.url
 
         cleaned_html = preprocess_html(html_content)
         html_samples = sample_html(cleaned_html)
@@ -103,31 +109,24 @@ class WebScrapeBeautifulSoupTask(AliceTask):
             if selectors:
                 content = apply_parsing_strategy(cleaned_html, selectors)
                 if content:
+                    final_reference = entity_reference.model_copy(update={"description": clean_text(content), "metadata": {"selectors": selectors, "creation_metadata": creation_metadata}})
                     return NodeResponse(
                         parent_task_id=self.id,
                         node_name="generate_selectors_and_parse",
                         exit_code=0,
-                        references=References(url_references=[URLReference(
-                            title=title,
-                            url=url,
-                            content=clean_text(content),
-                            metadata={"selectors": selectors, "creation_metadata": creation_metadata}
-                        )]),
+                        references=References(entity_references=[final_reference]),
                         execution_order=len(execution_history)
                     )
             
             # Fallback to default method
             content = fallback_parsing_strategy(cleaned_html)
+            final_reference = entity_reference.model_copy(update={"description": clean_text(content)})
+
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name="generate_selectors_and_parse",
                 exit_code=0,
-                references=References(url_references=[URLReference(
-                    title=title,
-                    url=url,
-                    content=clean_text(content),
-                    metadata={"selectors": ["p", "h1", "h2", "h3", "h4", "h5", "h6"], "creation_metadata": {"fallback": True}}
-                )]),
+                references=References(entity_references=[final_reference]),
                 execution_order=len(execution_history)
             )
         except Exception as e:
@@ -143,7 +142,7 @@ class WebScrapeBeautifulSoupTask(AliceTask):
                 )]),
                 execution_order=len(execution_history)
             )
-
+    
     async def _generate_parsing_instructions(self, html_samples: List[str], api_manager: APIManager) -> Tuple[Optional[List[str]], Optional[Dict[str, Any]]]:
         """
         Use an LLM agent to generate CSS selectors in JSON format.

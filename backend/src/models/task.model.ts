@@ -61,8 +61,6 @@ function ensureObjectIdForSave(this: ITaskDocument, next: mongoose.CallbackWitho
     try {
         // Only convert if values exist
         if (this.agent) this.agent = getObjectId(this.agent);
-        if (this.created_by) this.created_by = getObjectId(this.created_by);
-        if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
 
         // Handle Map fields with proper null checks
         if (this.templates && this.templates instanceof Map) {
@@ -93,6 +91,8 @@ function ensureObjectIdForSave(this: ITaskDocument, next: mongoose.CallbackWitho
                 }
             }
         }
+        if (this.created_by) this.created_by = getObjectId(this.created_by);
+        if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
         next();
     } catch (error) {
         next(error instanceof Error ? error : new Error(String(error)));

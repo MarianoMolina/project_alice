@@ -2,23 +2,13 @@ import React from 'react';
 import {
     Typography,
 } from '@mui/material';
-import { Person, AccessTime, AttachFile, TextSnippet, Engineering, PersonPin, Functions } from '@mui/icons-material';
+import { Person, AccessTime, AttachFile, TextSnippet, Engineering, PersonPin } from '@mui/icons-material';
 import { MessageComponentProps } from '../../../../types/MessageTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { References } from '../../../../types/ReferenceTypes';
+import { hasAnyReferences } from '../../../../types/ReferenceTypes';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import AliceMarkdown, { CustomBlockType } from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
-
-const hasAnyReferences = (references: References | undefined): boolean => {
-    if (!references) return false;
-    return !!(
-        references.messages?.length ||
-        references.files?.length ||
-        references.task_responses?.length ||
-        references.url_references?.length
-    );
-};
 
 const MessageCardView: React.FC<MessageComponentProps> = ({
     item,
@@ -58,11 +48,6 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
             icon: <AttachFile />,
             primary_text: "References",
             secondary_text: item.references && hasAnyReferences(item.references) ? <DataClusterManager dataCluster={item.references} /> : <Typography>"N/A"</Typography>,
-        },
-        {
-            icon: <Functions />,
-            primary_text: "Tool Calls",
-            secondary_text: item.tool_calls ? <CodeBlock language="json" code={JSON.stringify(item.tool_calls, null, 2)} /> : "N/A",
         },
         {
             icon: <Person />,

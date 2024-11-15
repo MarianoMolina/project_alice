@@ -1,6 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import { IModelDocument, IModelModel, ModelType } from '../interfaces/model.interface';
 import { ApiName } from '../interfaces/api.interface';
+import { getObjectId } from '../utils/utils';
 
 const modelSchema = new Schema<IModelDocument, IModelModel>({
   short_name: { type: String, required: true },
@@ -40,23 +41,15 @@ modelSchema.virtual('apiRepresentation').get(function(this: IModelDocument) {
 });
 
 function ensureObjectIdForSave(this: IModelDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {
-  if (this.created_by && (this.created_by as any)._id) {
-    this.created_by = (this.created_by as any)._id;
-  }
-  if (this.updated_by && (this.updated_by as any)._id) {
-    this.updated_by = (this.updated_by as any)._id;
-  }
+  if (this.created_by) this.created_by = getObjectId(this.created_by);
+  if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
   next();
 }
 
 function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
   const update = this.getUpdate() as any;
-  if (update.created_by && update.created_by._id) {
-    update.created_by = update.created_by._id;
-  }
-  if (update.updated_by && update.updated_by._id) {
-    update.updated_by = update.updated_by._id;
-  }
+  if (update.created_by) update.created_by = getObjectId(update.created_by);
+  if (update.updated_by) update.updated_by = getObjectId(update.updated_by);
   next();
 }
 

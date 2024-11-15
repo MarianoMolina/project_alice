@@ -71,7 +71,7 @@ export const navigation: NavSection[] = [
             { title: 'Data Cluster', path: '/knowledgebase/core/data_cluster', type: 'title', depth: 1 },
             { title: 'Files', path: '/knowledgebase/core/file', type: 'subtitle', depth: 1 },
             { title: 'Messages', path: '/knowledgebase/core/message', type: 'subtitle', depth: 1 },
-            { title: 'URL References', path: '/knowledgebase/core/url_reference', type: 'subtitle', depth: 1 },
+            { title: 'Entity References', path: '/knowledgebase/core/entity_reference', type: 'subtitle', depth: 1 },
             { title: 'Task Responses', path: '/knowledgebase/core/task_response', type: 'subtitle', depth: 1 },
             {
                 title: 'User Interactions',

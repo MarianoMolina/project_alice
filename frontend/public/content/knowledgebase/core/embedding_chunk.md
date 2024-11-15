@@ -22,8 +22,10 @@ All reference types (except strings) implement this interface, enabling embeddin
 - MessageDict
 - FileReference
 - TaskResponse
-- URLReference
+- EntityReference
 - UserInteraction
+- Tool Calls
+- Code Executions
 
 ## Task Components
 

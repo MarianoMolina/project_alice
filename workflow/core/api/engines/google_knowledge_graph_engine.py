@@ -8,15 +8,19 @@ from workflow.core.data_structures import (
     FunctionParameters,
     ParameterDefinition,
     ApiType,
-    URLReference
+    EntityReference, 
+    ReferenceCategory, 
+    ImageReference
 )
 from workflow.util import LOGGER
+
 ALLOWED_TYPES = [
     "book", "bookseries", "educationalorganization", "event", "governmentorganization",
     "localbusiness", "movie", "movieseries", "musicalbum", "musicgroup", "musicrecording",
     "organization", "periodical", "person", "place", "sportsteam", "tvepisode", "tvseries",
-    "videogame", "videogameseries", "website"
+    "videogame", "videogameseries", "website", "thing"
 ]
+
 class GoogleGraphEngine(APIEngine):
     """
     GoogleGraphEngine for searching a single entity using the Google Knowledge Graph Search API.
@@ -101,7 +105,7 @@ class GoogleGraphEngine(APIEngine):
         service_url = 'https://kgsearch.googleapis.com/v1/entities:search'
         url = service_url + '?' + urllib.parse.urlencode(params, doseq=True)
 
-        url_references = []
+        entity_references = []
 
         async with aiohttp.ClientSession() as session:
             try:
@@ -112,30 +116,94 @@ class GoogleGraphEngine(APIEngine):
                         raise Exception(f"API request failed with status {resp.status}")
                     response_data = await resp.json()
 
-                    # Parse the response and create URLReference objects
+                    # Parse the response and create EntityReference objects
                     for element in response_data.get('itemListElement', []):
-                        result = element.get('result', {})
-                        # Extract required fields
-                        title = result.get('name', None)
-                        result_url = result.get('url', None)
-                        content = result.get('detailedDescription', {}).get('articleBody', None)
-                        metadata = {
-                            'id': result.get('@id', ''),
-                            'description': result.get('description', ''),
-                            'types': result.get('@type', []),
-                            'resultScore': element.get('resultScore', 0),
-                            'detailedDescription': result.get('detailedDescription', {}),
-                            'image': result.get('image', {}),
-                        }
-                        url_ref = URLReference(
-                            title=title if title else "No name",
-                            url=result_url if result_url else "No url",
-                            content=content if content else "No content",
-                            metadata=metadata,
-                        )
-                        url_references.append(url_ref)
+                        try:
+                            result = element.get('result', {})
+                            entity_reference = self.create_entity_from_data(result)
+                            entity_references.append(entity_reference)
+                        except Exception as e:
+                            LOGGER.error(f"Error parsing entity data: {e} -> {element}")
+                            continue
             except Exception as e:
                 LOGGER.error(f"Error fetching data for query '{query}': {e}")
                 raise
 
-        return References(url_references=url_references)
+        return References(entity_references=entity_references)
+    
+    def create_entity_from_data(self, data: dict) -> EntityReference:
+        # Complete type mapping from GKG types to ReferenceCategory
+        type_mapping = {
+            "book": ReferenceCategory.WORK,
+            "bookseries": ReferenceCategory.WORK,
+            "educationalorganization": ReferenceCategory.ORGANIZATION,
+            "event": ReferenceCategory.EVENT,
+            "governmentorganization": ReferenceCategory.ORGANIZATION,
+            "localbusiness": ReferenceCategory.ORGANIZATION,
+            "movie": ReferenceCategory.WORK,
+            "movieseries": ReferenceCategory.WORK,
+            "musicalbum": ReferenceCategory.WORK,
+            "musicgroup": ReferenceCategory.ORGANIZATION,
+            "musicrecording": ReferenceCategory.WORK,
+            "organization": ReferenceCategory.ORGANIZATION,
+            "periodical": ReferenceCategory.WORK,
+            "person": ReferenceCategory.PERSON,
+            "place": ReferenceCategory.LOCATION,
+            "sportsteam": ReferenceCategory.ORGANIZATION,
+            "tvepisode": ReferenceCategory.WORK,
+            "tvseries": ReferenceCategory.WORK,
+            "videogame": ReferenceCategory.WORK,
+            "videogameseries": ReferenceCategory.WORK,
+            "website": ReferenceCategory.URL,
+            "thing": ReferenceCategory.OTHER,
+        }
+        
+        # Map GKG types to ReferenceCategory
+        categories = []
+        for gkg_type in data.get('@type', []):
+            gkg_type_lower = gkg_type.lower()
+            category = type_mapping.get(gkg_type_lower, ReferenceCategory.OTHER)
+            if category not in categories:
+                categories.append(category)
+        
+        # Extract content from detailedDescription.articleBody
+        detailed_description = data.get('detailedDescription', {})
+        content = detailed_description.get('articleBody')
+        content_url = detailed_description.get('url')
+        content_license = detailed_description.get('license')
+        
+        # Extract images
+        images = []
+        image_data = data.get('image', {})
+        if image_data:
+            image_url = image_data.get('contentUrl') or image_data.get('url')
+            license_url = image_data.get('license')
+            if image_url:
+                image = ImageReference(
+                    url=image_url,
+                    caption=None,
+                    license=license_url
+                )
+                images.append(image)
+        
+        # Extract resultScore
+        result_score = data.get('resultScore')
+        
+        # Create the EntityReference instance
+        entity = EntityReference(
+            source_id=data.get('@id'),
+            name=data.get('name'),
+            description=data.get('description'),
+            content=content,
+            url=data.get('url'),
+            images=images,
+            categories=categories,
+            source=ApiType.GOOGLE_KNOWLEDGE_GRAPH,
+            metadata={
+                "gkg_result_score": result_score,
+                "detailed_description_url": content_url,
+                "detailed_description_license": content_license
+            }
+        )
+        
+        return entity

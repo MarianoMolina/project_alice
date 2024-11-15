@@ -25,6 +25,8 @@ import DialogComponent from './components/ui/dialog/DialogCustom';
 import EnhancedCardDialog from './components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
 import EnhancedFlexibleDialog from './components/enhanced/common/enhanced_card_dialog/EnhancedFlexibleDialog';
 import Knowledgebase from './pages/Knowledgebase';
+import StructuresPage from './pages/Structures';
+import ReferencesPage from './pages/ReferencesPage';
 
 const App: React.FC = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -66,6 +68,8 @@ const App: React.FC = () => {
                     <Route path="/chat-alice" element={<ProtectedRoute element={<ChatAlice />} />} />
                     <Route path="/start-task" element={<ProtectedRoute element={<CreateWorkflow />} />} />
                     <Route path="/database" element={<ProtectedRoute element={<Database />} />} />
+                    <Route path="/structures" element={<ProtectedRoute element={<StructuresPage />} />} />
+                    <Route path="/references" element={<ProtectedRoute element={<ReferencesPage />} />} />
                     <Route
                       path="/user-settings"
                       element={

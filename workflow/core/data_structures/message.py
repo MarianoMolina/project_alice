@@ -88,9 +88,9 @@ class MessageDict(Embeddable):
             task_responses = self.references.get_references('task_responses')
             if task_responses:
                 message_parts.extend([str(task_response) for task_response in task_responses])
-        elif msg_type == ContentType.URL_REFERENCE:
+        elif msg_type == ContentType.ENTITY_REFERENCE:
             message_parts.append(f"{role}:\n{content}")
-            url_refs = self.references.get_references('url_references')
+            url_refs = self.references.get_references('entity_references')
             if url_refs:
                 message_parts.extend([str(url_ref) for url_ref in url_refs])
         elif msg_type == ContentType.MULTIPLE:

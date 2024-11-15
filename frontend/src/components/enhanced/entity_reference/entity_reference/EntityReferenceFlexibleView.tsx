@@ -5,11 +5,11 @@ import {
     Box,
     Chip
 } from '@mui/material';
-import { getDefaultURLReferenceForm, URLReference, URLReferenceComponentProps } from '../../../../types/URLReferenceTypes';
+import { getDefaultEntityReferenceForm, EntityReference, EntityReferenceComponentProps } from '../../../../types/EntityReferenceTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import useStyles from '../URLReferenceStyles';
+import useStyles from '../EntityReferenceStyles';
 
-const URLReferenceFlexibleView: React.FC<URLReferenceComponentProps> = ({
+const EntityReferenceFlexibleView: React.FC<EntityReferenceComponentProps> = ({
     item,
     onChange,
     mode,
@@ -19,7 +19,7 @@ const URLReferenceFlexibleView: React.FC<URLReferenceComponentProps> = ({
     const classes = useStyles();
     useEffect(() => {
         if (!item || Object.keys(item).length === 0) {
-            onChange(getDefaultURLReferenceForm());
+            onChange(getDefaultEntityReferenceForm());
         }
     }, [item, onChange]);
     
@@ -41,15 +41,15 @@ const URLReferenceFlexibleView: React.FC<URLReferenceComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
-            item={item as URLReference}
-            itemType="urlreferences"
+            item={item as EntityReference}
+            itemType="entityreferences"
         >
-            <Typography variant="h6" className={classes.titleText}>Title</Typography>
+            <Typography variant="h6" className={classes.titleText}>Name</Typography>
             <TextField
                 fullWidth
                 label="Title"
-                value={item?.title || ''}
-                onChange={(e) => onChange({ title: e.target.value })}
+                value={item?.name || ''}
+                onChange={(e) => onChange({ name: e.target.value })}
                 margin="normal"
                 disabled={!isEditMode}
             />
@@ -87,4 +87,4 @@ const URLReferenceFlexibleView: React.FC<URLReferenceComponentProps> = ({
     );
 };
 
-export default URLReferenceFlexibleView;
+export default EntityReferenceFlexibleView;

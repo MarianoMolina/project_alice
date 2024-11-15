@@ -2,18 +2,18 @@ import { Document, Types, Model } from 'mongoose';
 import { IFileReferenceDocument } from "./file.interface";
 import { IMessageDocument } from "./message.interface";
 import { ITaskResultDocument } from "./taskResult.interface";
-import { IURLReferenceDocument } from "./urlReference.interface";
 import { IUserInteractionDocument } from "./userInteraction.interface";
 import { IEmbeddingChunkDocument } from './embeddingChunk.interface';
 import { IUserDocument } from './user.interface';
 import { IToolCallDocument } from './toolCall.interface';
 import { ICodeExecutionDocument } from './codeExecution.interface';
+import { IEntityReferenceDocument } from './entityReference.interface';
 
 export interface References {
     messages?: Types.ObjectId[] | IMessageDocument[];
     files?: Types.ObjectId[] | IFileReferenceDocument[];
     task_responses?: Types.ObjectId[] | ITaskResultDocument[];
-    url_references?: Types.ObjectId[] | IURLReferenceDocument[];
+    entity_references?: Types.ObjectId[] | IEntityReferenceDocument[];
     user_interactions?: Types.ObjectId[] | IUserInteractionDocument[];
     embeddings?: Types.ObjectId[] | IEmbeddingChunkDocument[];
     tool_calls?: Types.ObjectId[] | IToolCallDocument[];

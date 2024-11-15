@@ -21,7 +21,7 @@ Alice is built on several core components that work together to create a versati
 7. **Parameters**: Structured input definitions for tasks and prompts. [LINK](/knowledgebase/parameter)
 8. **Messages**: Individual units of communication within chats. [LINK](/knowledgebase/message)
 9. **Task Responses**: Results and metadata from executed tasks. [LINK](/knowledgebase/task_response)
-10. **URL References**: Managed references to external web resources. [LINK](/knowledgebase/url_reference)
+10. **Entity References**: Managed references to external web resources. [LINK](/knowledgebase/entity_reference)
 11. **Files**: Handling of various file types with AI-readable transcripts. [LINK](/knowledgebase/file)
 12. **|COMING| Data Clusters**: Group references with managed embeddings to facilitate RAG and Fine-tunning, as well as providing a reusable context.
 

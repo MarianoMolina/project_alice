@@ -26,19 +26,15 @@ userCheckpointSchema.methods.apiRepresentation = function (this: IUserCheckpoint
 };
 
 function ensureObjectId(this: IUserCheckpointDocument, next: CallbackWithoutResultAndOptionalError) {
-    this.created_by = getObjectId(this.created_by);
-    this.updated_by = getObjectId(this.updated_by);
+    if (this.created_by) this.created_by = getObjectId(this.created_by);
+    if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
     next();
 }
 
 function ensureObjectIdForUpdate(this: Query<any, any>, next: CallbackWithoutResultAndOptionalError) {
     const update = this.getUpdate() as any;
-    if (update.created_by) {
-        update.created_by = getObjectId(update.created_by);
-    }
-    if (update.updated_by) {
-        update.updated_by = getObjectId(update.updated_by);
-    }
+    if (update.created_by) update.created_by = getObjectId(update.created_by);
+    if (update.updated_by) update.updated_by = getObjectId(update.updated_by);
     next();
 };
 

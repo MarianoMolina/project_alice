@@ -64,7 +64,10 @@ class BackendAPI(BaseModel):
         "task_responses": "taskresults",
         "files": "files",
         "messages": "messages",
-        "urlreferences": "urlreferences"
+        "entity_references": "entityreferences",
+        "tool_calls": "toolcalls",
+        "code_executions": "codeexecutions",
+        "api_configs": "apiconfigs"
     }, description="Map of entity types to collection names")
     model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str}, arbitrary_types_allowed=True)
     

@@ -15,7 +15,7 @@ const modelMapping: { [key: string]: string } = {
   alicechats: 'AliceChat',
   apis: 'API',
   parameterdefinitions: 'ParameterDefinition',
-  urlreferences: 'URLReference',
+  entityreferences: 'EntityReference',
   files: 'FileReference',
   usercheckpoints: 'UserCheckpoint',
   userinteractions: 'UserInteraction',

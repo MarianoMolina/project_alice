@@ -2,7 +2,7 @@ import { Theme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
 
 const useStyles = makeStyles((theme: Theme) => ({
-  urlReferenceCard: {
+  entityReferenceCard: {
     padding: theme.spacing(2),
     marginBottom: theme.spacing(2),
     border: `1px solid ${theme.palette.divider}`,
@@ -12,7 +12,7 @@ const useStyles = makeStyles((theme: Theme) => ({
       boxShadow: theme.shadows[3],
     },
   },
-  urlReferenceContent: {
+  entityReferenceContent: {
     display: 'flex',
     flexDirection: 'column',
     backgroundColor: theme.palette.background.default,
@@ -24,21 +24,21 @@ const useStyles = makeStyles((theme: Theme) => ({
     marginTop: theme.spacing(1),
     marginBottom: theme.spacing(0.5),
   },
-  urlReferenceTitle: {
+  entityReferenceTitle: {
     marginBottom: theme.spacing(1),
   },
-  urlReferenceUrl: {
+  entityReferenceUrl: {
     color: theme.palette.text.secondary,
     marginBottom: theme.spacing(1),
     wordBreak: 'break-all',
   },
-  urlReferenceBody: {
+  entityReferenceBody: {
     marginBottom: theme.spacing(1),
     padding: theme.spacing(1),
     backgroundColor: theme.palette.background.default,
     borderRadius: theme.shape.borderRadius,
   },
-  urlReferenceMetadata: {
+  entityReferenceMetadata: {
     display: 'flex',
     flexWrap: 'wrap',
     gap: theme.spacing(0.5),

@@ -10,7 +10,7 @@ import EnhancedAPI from '../../api/api/EnhancedApi';
 import EnhancedAgent from '../../agent/agent/EnhancedAgent';
 import EnhancedFile from '../../file/file/EnhancedFile';
 import EnhancedMessage from '../../message/message/EnhancedMessage';
-import EnhancedURLReference from '../../url_reference/url_reference/EnhancedURLReference';
+import EnhancedEntityReference from '../../entity_reference/entity_reference/EnhancedEntityReference';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import { ComponentMode } from '../../../../types/CollectionTypes';
 import Logger from '../../../../utils/Logger';
@@ -43,7 +43,7 @@ const EnhancedFlexibleDialog: React.FC = () => {
       handleAPIClick: (id: string) => selectCardItem('API', id),
       handleFileClick: (id: string) => selectCardItem('File', id),
       handleMessageClick: (id: string) => selectCardItem('Message', id),
-      handleURLReferenceClick: (id: string) => selectCardItem('URLReference', id),
+      handleEntityReferenceClick: (id: string) => selectCardItem('EntityReference', id),
       handleUserCheckpointClick: (id: string) => selectCardItem('UserCheckpoint', id),
       handleUserInteractionClick: (id: string) => selectCardItem('UserInteraction', id),
       handleEmbeddingChunkClick: (id: string) => selectCardItem('EmbeddingChunk', id),
@@ -83,8 +83,8 @@ const EnhancedFlexibleDialog: React.FC = () => {
           return <EnhancedFile itemId={selectedFlexibleItem._id} {...commonProps} />;
         case 'Message':
           return <EnhancedMessage itemId={selectedFlexibleItem._id} {...commonProps} />;
-        case 'URLReference':
-          return <EnhancedURLReference itemId={selectedFlexibleItem._id} {...commonProps} />;
+        case 'EntityReference':
+          return <EnhancedEntityReference itemId={selectedFlexibleItem._id} {...commonProps} />;
         case 'UserCheckpoint':
           return <EnhancedUserCheckpoint itemId={selectedFlexibleItem._id} {...commonProps} />;
         case 'UserInteraction':
@@ -118,8 +118,8 @@ const EnhancedFlexibleDialog: React.FC = () => {
           return <EnhancedFile {...commonProps} />;
         case 'Message':
           return <EnhancedMessage {...commonProps} />;
-        case 'URLReference':
-          return <EnhancedURLReference {...commonProps} />;
+        case 'EntityReference':
+          return <EnhancedEntityReference {...commonProps} />;
         case 'UserCheckpoint':
           return <EnhancedUserCheckpoint {...commonProps} />;
         case 'UserInteraction':

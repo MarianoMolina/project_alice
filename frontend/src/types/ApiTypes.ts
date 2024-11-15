@@ -1,5 +1,6 @@
 import { AliceModel, convertToAliceModel } from "./ModelTypes";
 import { BaseDatabaseObject, convertToBaseDatabaseObject, EnhancedComponentProps } from "./CollectionTypes";
+import { APIConfig, convertToAPIConfig, getDefaultAPIConfigForm } from "./ApiConfigTypes";
 
 export enum ApiType {
     LLM_MODEL = 'llm_api',
@@ -8,13 +9,35 @@ export enum ApiType {
     WIKIPEDIA_SEARCH = 'wikipedia_search',
     EXA_SEARCH = 'exa_search',
     ARXIV_SEARCH = 'arxiv_search',
+    GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph',
+    WOLFRAM_ALPHA = 'wolfram_alpha',
     IMG_VISION = 'img_vision',
     IMG_GENERATION = 'img_generation',
     SPEECH_TO_TEXT = 'speech_to_text',
     TEXT_TO_SPEECH = 'text_to_speech',
     EMBEDDINGS = 'embeddings',
-    GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph',
-    WOLFRAM_ALPHA = 'wolfram_alpha'
+    REQUESTS = 'requests',
+}
+
+export enum ApiName {
+    OPENAI = 'OPENAI',
+    ANTHROPIC = 'ANTHROPIC',
+    GEMINI = 'GEMINI',
+    MISTRAL = 'MISTRAL',
+    COHERE = 'COHERE',
+    LLAMA = 'LLAMA',
+    LM_STUDIO = 'LM_STUDIO',
+    AZURE = 'AZURE',
+    GROQ = 'GROQ',
+    BARK = 'BARK',
+    PIXART = 'PIXART',
+    GOOGLE_SEARCH = 'GOOGLE_SEARCH',
+    REDDIT = 'REDDIT',
+    WIKIPEDIA = 'WIKIPEDIA',
+    EXA = 'EXA',
+    ARXIV = 'ARXIV',
+    GOOGLE_KNOWLEDGE = 'GOOGLE_KNOWLEDGE',
+    WOLFRAM = 'WOLFRAM'
 }
 
 export enum ModelApiType {
@@ -25,45 +48,6 @@ export enum ModelApiType {
     TEXT_TO_SPEECH = ApiType.TEXT_TO_SPEECH,
     EMBEDDINGS = ApiType.EMBEDDINGS,
     IMG_VISION = ApiType.IMG_VISION,
-}
-export enum ApiName {
-    OPENAI = 'openai_llm',
-    OPENAI_VISION = 'openai_vision',
-    OPENAI_IMG_GENERATION = 'openai_img_gen',
-    OPENAI_EMBEDDINGS = 'openai_embeddings',
-    OPENAI_TTS = 'openai_tts',
-    OPENAI_STT = 'openai_stt',
-    OPENAI_ASTT = 'openai_adv_stt',
-    AZURE = 'azure',
-    GEMINI = 'gemini_llm',
-    GEMINI_VISION = 'gemini_vision',
-    MISTRAL = 'mistral_llm',
-    MISTRAL_VISION = 'mistral_vision',
-    MISTRAL_EMBEDDINGS = 'mistral_embeddings',
-    GEMINI_STT = 'gemini_stt',
-    GEMINI_EMBEDDINGS = 'gemini_embeddings',
-    GEMINI_IMG_GEN = 'gemini_img_gen',
-    COHERE = 'cohere_llm',
-    GROQ = 'groq_llm',
-    GROQ_VISION = 'groq_vision',
-    GROQ_TTS = 'groq_tts',
-    LLAMA = 'llama_llm',
-    LLAMA_VISION = 'llama_vision',
-    ANTHROPIC = 'anthropic_llm',
-    ANTHROPIC_VISION = 'anthropic_vision',
-    LM_STUDIO = 'lm-studio_llm',
-    LM_STUDIO_VISION = 'lm-studio_vision',
-    LM_STUDIO_EMBEDDINGS = 'lm-studio_embeddings',
-    CUSTOM = 'Custom',
-    BARK_TTS = 'bark_tts',
-    PIXART_IMG_GEN = 'pixart_img_gen',
-    GOOGLE_SEARCH = 'google_search',
-    REDDIT_SEARCH = 'reddit_search',
-    WIKIPEDIA_SEARCH = 'wikipedia_search',
-    EXA_SEARCH = 'exa_search',
-    ARXIV_SEARCH = 'arxiv_search',
-    GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph',
-    WOLFRAM_ALPHA = 'wolfram_alpha'
 }
 
 export enum LlmProvider {
@@ -78,26 +62,16 @@ export enum LlmProvider {
     COHERE = ApiName.COHERE,
 }
 
-export interface API extends BaseDatabaseObject{
+export interface API extends BaseDatabaseObject {
     api_type: ApiType;
     api_name: ApiName;
     name?: string;
     is_active: boolean;
     health_status: 'healthy' | 'unhealthy' | 'unknown';
     default_model?: AliceModel;
-    api_config: { [key: string]: string };
+    api_config: APIConfig;
 }
 
-export interface LLMAPI extends BaseDatabaseObject {
-    _id?: string;
-    api_type: ApiType.LLM_MODEL;
-    api_name: LlmProvider;
-    name?: string;
-    is_active: boolean;
-    health_status: 'healthy' | 'unhealthy' | 'unknown';
-    default_model?: AliceModel;
-    api_config: { api_key: string, base_url: string };
-}
 export const convertToAPI = (data: any): API => {
     return {
         ...convertToBaseDatabaseObject(data),
@@ -107,7 +81,7 @@ export const convertToAPI = (data: any): API => {
         is_active: data?.is_active || false,
         health_status: data?.health_status || 'unknown',
         default_model: (data?.default_model && Object.keys(data.default_model).length > 0) ? convertToAliceModel(data.default_model) : undefined,
-        api_config: data?.api_config || {},
+        api_config: data?.api_config ? convertToAPIConfig(data?.api_config) : { ...getDefaultAPIConfigForm() as APIConfig },
     };
 };
 
@@ -121,5 +95,5 @@ export const getDefaultApiForm = (): Partial<API> => ({
     is_active: false,
     health_status: 'unknown',
     default_model: undefined,
-    api_config: {}
+    api_config: undefined,
 });

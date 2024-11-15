@@ -9,13 +9,16 @@ import TaskResult from '../models/taskResult.model';
 import ParameterDefinition from '../models/parameter.model';
 import FileReference from '../models/file.model';
 import Message from '../models/message.model';
-import URLReference from '../models/urlReference.model';
 import UserCheckpoint from '../models/userCheckpoint.model';
 import UserInteraction from '../models/userInteraction.model';
 import Logger from './logger';
 import { deleteFile } from './file.utils';
 import EmbeddingChunk from '../models/embeddingChunk.model';
 import { DataCluster } from '../models/reference.model';
+import EntityReference from '../models/entityReference.model';
+import ToolCall from '../models/toolCall.model';
+import CodeExecution from '../models/codeExecution.model';
+import APIConfig from '../models/apiConfig.model';
 
 const workflow_port = process.env.WORKFLOW_PORT_DOCKER || 8000;
 const workflow_name = process.env.WORKFLOW_NAME || 'workflow';
@@ -23,7 +26,7 @@ const workflow_name = process.env.WORKFLOW_NAME || 'workflow';
 export async function purgeAndReinitialize(userId: string, token: string): Promise<void> {
   Logger.info('Purging data for userId:', userId);
 
-  const models = [Agent, API, Chat, Model, Prompt, Task, TaskResult, ParameterDefinition, Message, URLReference, UserCheckpoint, UserInteraction, FileReference, EmbeddingChunk, DataCluster];
+  const models = [Agent, API, Chat, Model, Prompt, Task, TaskResult, ParameterDefinition, Message, UserCheckpoint, UserInteraction, FileReference, EmbeddingChunk, DataCluster, EntityReference, ToolCall, CodeExecution, APIConfig];
   
   // Handle file deletions separately
   const fileReferences = await FileReference.find({ created_by: userId });

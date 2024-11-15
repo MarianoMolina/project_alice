@@ -33,15 +33,9 @@ function ensureObjectIdForFile(
   this: IFileReferenceDocument,
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
-  if (this.created_by) {
-    this.created_by = getObjectId(this.created_by);
-  }
-  if (this.updated_by) {
-    this.updated_by = getObjectId(this.updated_by);
-  }
-  if (this.transcript) {
-    this.transcript = getObjectId(this.transcript);
-  }
+  if (this.created_by) this.created_by = getObjectId(this.created_by);
+  if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
+  if (this.transcript) this.transcript = getObjectId(this.transcript);
   next();
 }
 
@@ -50,12 +44,8 @@ function ensureObjectIdForUpdateFile(
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
   const update = this.getUpdate() as any;
-  if (update.created_by) {
-    update.created_by = getObjectId(update.created_by);
-  }
-  if (update.updated_by) {
-    update.updated_by = getObjectId(update.updated_by);
-  }
+  if (update.created_by) update.created_by = getObjectId(update.created_by);
+  if (update.updated_by) update.updated_by = getObjectId(update.updated_by);
   if (update.transcript) {
     update.transcript = getObjectId(update.transcript);
   }

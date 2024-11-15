@@ -11,7 +11,7 @@ import { References } from '../../../../types/ReferenceTypes';
 import MessageShortListView from '../../message/message/MessageShortListView';
 import FileShortListView from '../../file/file/FileShortListView';
 import TaskResponseShortListView from '../../task_response/task_response/TaskResponseShortListView';
-import URLReferenceShortListView from '../../url_reference/url_reference/URLReferenceShortListView';
+import EntityReferenceShortListView from '../../entity_reference/entity_reference/EntityReferenceShortListView';
 import EmbeddingChunkShortListView from '../../embedding_chunk/embedding_chunk/EmbeddingChunkShortListView';
 
 export interface DataClusterManagerProps {
@@ -55,11 +55,11 @@ export const REFERENCE_CONFIG: ReferenceTypeConfig[] = [
         chipType: 'TaskResponse'
     },
     {
-        key: 'url_references',
+        key: 'entity_references',
         title: 'URL References',
-        collectionName: 'urlreferences',
-        EnhancedView: URLReferenceShortListView,
-        chipType: 'URLReference'
+        collectionName: 'entityreferences',
+        EnhancedView: EntityReferenceShortListView,
+        chipType: 'EntityReference'
     },
     {
         key: 'embeddings',

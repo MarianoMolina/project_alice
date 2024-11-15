@@ -65,11 +65,20 @@ const Header: React.FC = () => {
                 <Task />
               </IconButton>
             </Tooltip>
-            <Tooltip title="View Database">
+            <Tooltip title="View Structures">
               <IconButton
                 color="inherit"
-                onClick={() => handleNavigation('/database')}
-                className={isActive('/database') ? classes.activeButton : ''}
+                onClick={() => handleNavigation('/structures')}
+                className={isActive('/structures') ? classes.activeButton : ''}
+              >
+                <Storage />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="View References">
+              <IconButton
+                color="inherit"
+                onClick={() => handleNavigation('/references')}
+                className={isActive('/references') ? classes.activeButton : ''}
               >
                 <Storage />
               </IconButton>

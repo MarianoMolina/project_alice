@@ -6,15 +6,15 @@ const agentSchema = new Schema<IAgentDocument, IAgentModel>({
   name: { type: String, required: true },
   system_message: { type: Schema.Types.ObjectId, ref: 'Prompt' },
   max_consecutive_auto_reply: { type: Number, default: 10 },
-  has_code_exec: { 
-    type: Number, 
+  has_code_exec: {
+    type: Number,
     enum: Object.values(CodePermission).filter(value => typeof value === 'number'),
-    default: CodePermission.DISABLED 
+    default: CodePermission.DISABLED
   },
-  has_tools: { 
-    type: Number, 
+  has_tools: {
+    type: Number,
     enum: Object.values(ToolPermission).filter(value => typeof value === 'number'),
-    default: ToolPermission.DISABLED 
+    default: ToolPermission.DISABLED
   },
   models: { type: Map, of: Schema.Types.ObjectId, ref: 'Model', default: {} },
   created_by: { type: Schema.Types.ObjectId, ref: 'User' },
@@ -23,7 +23,7 @@ const agentSchema = new Schema<IAgentDocument, IAgentModel>({
   timestamps: true
 });
 
-agentSchema.methods.apiRepresentation = function(this: IAgentDocument) {
+agentSchema.methods.apiRepresentation = function (this: IAgentDocument) {
   return {
     id: this._id,
     name: this.name || null,
@@ -40,40 +40,27 @@ agentSchema.methods.apiRepresentation = function(this: IAgentDocument) {
 };
 
 function ensureObjectIdForSave(this: IAgentDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {
-  if (this.system_message && (this.system_message as any)._id) {
-    this.system_message = (this.system_message as any)._id;
-  }
-  if (this.created_by && (this.created_by as any)._id) {
-    this.created_by = (this.created_by as any)._id;
-  }
-  if (this.updated_by && (this.updated_by as any)._id) {
-    this.updated_by = (this.updated_by as any)._id;
-  }
-
+  if (this.system_message) this.system_message = getObjectId(this.system_message);
   if (this.models) {
     for (const [key, value] of this.models.entries()) {
-        this.models.set(key, getObjectId(value));
+      this.models.set(key, getObjectId(value));
     }
-}
+  }
+  if (this.created_by) this.created_by = getObjectId(this.created_by);
+  if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
   next();
 }
 
 function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
   const update = this.getUpdate() as any;
-  if (update.system_message && update.system_message._id) {
-    update.system_message = update.system_message._id;
-  }
-  if (update.created_by && update.created_by._id) {
-    update.created_by = update.created_by._id;
-  }
-  if (update.updated_by && update.updated_by._id) {
-    update.updated_by = update.updated_by._id;
-  }
+  if (update.system_message) update.system_message = getObjectId(update.system_message);
   if (update.models) {
     update.models = Object.fromEntries(
-        Object.entries(update.models).map(([key, value]) => [key, getObjectId(value)])
+      Object.entries(update.models).map(([key, value]) => [key, getObjectId(value)])
     );
-}
+  }
+  if (update.created_by) update.created_by = getObjectId(update.created_by);
+  if (update.updated_by) update.updated_by = getObjectId(update.updated_by);
   next();
 }
 
@@ -82,7 +69,7 @@ function autoPopulate(this: mongoose.Query<any, any>) {
   this.populate({
     path: 'models',
     options: { strictPopulate: false }
-});
+  });
 }
 
 agentSchema.pre('save', ensureObjectIdForSave);

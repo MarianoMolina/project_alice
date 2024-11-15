@@ -69,22 +69,8 @@ function ensureObjectIdForSave(
   this: IMessageDocument,
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
-  if (this.references) {
-    if (this.references.messages) {
-      this.references.messages = this.references.messages.map(message => getObjectId(message));
-    }
-    if (this.references.files) {
-      this.references.files = this.references.files.map(file => getObjectId(file));
-    }
-    if (this.references.task_responses) {
-      this.references.task_responses = this.references.task_responses.map(taskResponse => getObjectId(taskResponse));
-    }
-    if (this.references.url_references) {
-      this.references.url_references = this.references.url_references.map(searchResult => getObjectId(searchResult));
-    }
-  }
-  this.created_by = getObjectId(this.created_by);
-  this.updated_by = getObjectId(this.updated_by);
+  if (this.created_by) this.created_by = getObjectId(this.created_by);
+  if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
   next();
 }
 
@@ -93,22 +79,8 @@ function ensureObjectIdForUpdate(
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
   const update = this.getUpdate() as any;
-  if (update.references) {
-    if (update.references.messages) {
-      update.references.messages = update.references.messages.map((message: any) => getObjectId(message));
-    }
-    if (update.references.files) {
-      update.references.files = update.references.files.map((file: any) => getObjectId(file));
-    }
-    if (update.references.task_responses) {
-      update.references.task_responses = update.references.task_responses.map((taskResponse: any) => getObjectId(taskResponse));
-    }
-    if (update.references.url_references) {
-      update.references.url_references = update.references.url_references.map((searchResult: any) => getObjectId(searchResult));
-    }
-  }
-  update.created_by = getObjectId(update.created_by);
-  update.updated_by = getObjectId(update.updated_by);
+  if (update.created_by) update.created_by = getObjectId(update.created_by);
+  if (update.updated_by) update.updated_by = getObjectId(update.updated_by);
   next();
 }
 

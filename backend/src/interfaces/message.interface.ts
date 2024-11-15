@@ -12,7 +12,6 @@ export enum ContentType {
     FILE = FileType.FILE,
     TASK_RESULT = 'task_result',
     MULTIPLE = 'multiple',
-    URL_REFERENCE = 'url_reference'
 }
 export enum RoleType {
     USER = 'user',

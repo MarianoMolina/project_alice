@@ -6,10 +6,10 @@ import { createFileContentReference, selectFile } from '../../../../utils/FileUt
 import { useApi } from '../../../../contexts/ApiContext';
 import { useNotification } from '../../../../contexts/NotificationContext';
 import { TaskResponse } from '../../../../types/TaskResponseTypes';
-import { URLReference } from '../../../../types/URLReferenceTypes';
 import { References } from '../../../../types/ReferenceTypes';
 import { AttachFile } from '@mui/icons-material';
 import Logger from '../../../../utils/Logger';
+import { EntityReference } from '../../../../types/EntityReferenceTypes';
 
 interface ChatInputProps {
   sendMessage: (chatId: string, message: MessageType) => Promise<void>;
@@ -20,7 +20,7 @@ interface ChatInputProps {
 export interface ChatInputRef {
   addFileReference: (file: FileReference) => void;
   addTaskResponse: (taskResponse: TaskResponse) => void;
-  addURLReference: (urlReference: URLReference) => void;
+  addEntityReference: (entityReference: EntityReference) => void;
   addMessageReference: (message: MessageType) => void;
 }
 
@@ -39,7 +39,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
       references.files.forEach(file => types.add(file.type as unknown as ContentType));
     }
     if (references.task_responses?.length) types.add(ContentType.TASK_RESULT);
-    if (references.url_references?.length) types.add(ContentType.URL_REFERENCE);
+    if (references.entity_references?.length) types.add(ContentType.MULTIPLE);
     if (references.messages?.length) types.add(ContentType.TEXT);
     return types.size > 1 ? ContentType.MULTIPLE : types.values().next().value || ContentType.TEXT;
   }, []);
@@ -76,7 +76,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
   useImperativeHandle(ref, () => ({
     addFileReference: (file: FileReference) => addReference('files', file),
     addTaskResponse: (taskResponse: TaskResponse) => addReference('task_responses', taskResponse),
-    addURLReference: (urlReference: URLReference) => addReference('url_references', urlReference),
+    addEntityReference: (entityReference: EntityReference) => addReference('entity_references', entityReference),
     addMessageReference: (message: MessageType) => addReference('messages', message),
   }));
 
@@ -130,8 +130,8 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
           case 'task_responses':
             label = `Task: ${(ref as TaskResponse).task_name}`;
             break;
-          case 'url_references':
-            label = `Search: ${(ref as URLReference).title}`;
+          case 'entity_references':
+            label = `Search: ${(ref as EntityReference).name}`;
             break;
           case 'messages':
             label = `Message: ${(ref as MessageType).content.substring(0, 20)}...`;

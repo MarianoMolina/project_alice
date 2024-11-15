@@ -2,13 +2,12 @@ import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { References } from '../../../../types/ReferenceTypes';
 import FileViewer from '../../file/FileViewer';
-import { URLReferenceViewer } from '../../url_reference/URLReferenceViewer';
+import { EntityReferenceViewer } from '../../entity_reference/EntityReferenceViewer';
 import EnhancedMessage from '../../message/message/EnhancedMessage';
 import EmbeddingChunkViewer from '../../embedding_chunk/EmbeddingChunkViewer';
 import UserInteractionViewer from '../../user_interaction/UserInteractionViewer';
 import NodeResponsesViewer from './NodeResponsesViewer';
 import { useStyles } from './ReferencesStyles';
-import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 
 interface ReferencesViewerProps {
   references: References;
@@ -59,11 +58,11 @@ const ReferencesViewer: React.FC<ReferencesViewerProps> = ({ references }) => {
         </Box>
       )}
 
-      {references.url_references && references.url_references.length > 0 && (
+      {references.entity_references && references.entity_references.length > 0 && (
         <Box className={classes.subSection}>
-          <Typography variant="h6">Search Results</Typography>
-          {references.url_references.map((result, index) => (
-            <URLReferenceViewer key={result.url || `search-result-${index}`} result={result} />
+          <Typography variant="h6">Entity References</Typography>
+          {references.entity_references.map((result, index) => (
+            <EntityReferenceViewer key={result.url || `search-result-${index}`} result={result} />
           ))}
         </Box>
       )}

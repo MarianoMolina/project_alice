@@ -11,10 +11,13 @@ import { convertToParameterDefinition } from "../types/ParameterTypes";
 import { convertToPrompt } from "../types/PromptTypes";
 import { convertToTaskResponse } from "../types/TaskResponseTypes";
 import { convertToAliceTask } from "../types/TaskTypes";
-import { convertToURLReference } from "../types/URLReferenceTypes";
 import { convertToUserCheckpoint } from "../types/UserCheckpointTypes";
 import { convertToUserInteraction } from "../types/UserInteractionTypes";
 import { convertToUser } from "../types/UserTypes";
+import { convertToEntityReference } from "../types/EntityReferenceTypes";
+import { convertToToolCall } from "../types/ToolCallTypes";
+import { convertToCodeExecution } from "../types/CodeExecutionTypes";
+import { convertToAPIConfig } from "../types/ApiConfigTypes";
 
 export const converters: { [K in CollectionName]: (data: any) => CollectionType[K] } = {
     agents: convertToAliceAgent,
@@ -28,9 +31,12 @@ export const converters: { [K in CollectionName]: (data: any) => CollectionType[
     apis: convertToAPI,
     files: convertToFileReference,
     messages: convertToMessageType,
-    urlreferences: convertToURLReference,
+    entityreferences: convertToEntityReference,
     userinteractions: convertToUserInteraction,
     usercheckpoints: convertToUserCheckpoint,
     dataclusters: convertToDataCluster,
-    embeddingchunks: convertToEmbeddingChunk
+    embeddingchunks: convertToEmbeddingChunk,
+    toolcalls: convertToToolCall,
+    codeexecutions: convertToCodeExecution,
+    apiconfigs: convertToAPIConfig,
 };

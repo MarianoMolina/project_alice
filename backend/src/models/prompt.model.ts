@@ -36,8 +36,8 @@ promptSchema.methods.apiRepresentation = function (this: IPromptDocument) {
 };
 
 function ensureObjectId(this: IPromptDocument, next: CallbackWithoutResultAndOptionalError) {
-  this.created_by = getObjectId(this.created_by);
-  this.updated_by = getObjectId(this.updated_by);
+  if (this.created_by) this.created_by = getObjectId(this.created_by);
+  if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
   if (this.is_templated && this.parameters?.properties) {
     this.parameters.properties = ensureObjectIdForProperties(this.parameters.properties);
   }
@@ -48,12 +48,8 @@ function ensureObjectId(this: IPromptDocument, next: CallbackWithoutResultAndOpt
 function ensureObjectIdForUpdate(this: Query<any, any>, next: CallbackWithoutResultAndOptionalError) {
   const update = this.getUpdate() as any;
 
-  if (update.created_by) {
-    update.created_by = getObjectId(update.created_by);
-  }
-  if (update.updated_by) {
-    update.updated_by = getObjectId(update.updated_by);
-  }
+  if (update.created_by) update.created_by = getObjectId(update.created_by);
+  if (update.updated_by) update.updated_by = getObjectId(update.updated_by);
 
   if (update.parameters && update.parameters.properties) {
     update.parameters.properties = ensureObjectIdForProperties(update.parameters.properties);

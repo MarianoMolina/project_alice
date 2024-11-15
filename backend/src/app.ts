@@ -20,7 +20,7 @@ import LmStudioRoute from './routes/lmStudio.route';
 import Logger from './utils/logger';
 import FileRoutes from './routes/file.route';
 import MessageRoutes from './routes/message.route';
-import URLReferenceRoutes from './routes/urlReference.route';
+import EntityReferenceRoutes from './routes/entityReference.route';
 import UserCheckpointRoutes from './routes/userCheckpoint.route';
 import UserInteractionRoutes from './routes/userInteraction.route';
 import EmbeddingChunkRoutes from './routes/embeddingChunk.route';
@@ -73,7 +73,7 @@ app.use('/api/users', UserRoutes);
 app.use('/api/parameters', ParametersRoutes);
 app.use('/api/files', FileRoutes);
 app.use('/api/messages', MessageRoutes);
-app.use('/api/urlreferences', URLReferenceRoutes)
+app.use('/api/entityreferences', EntityReferenceRoutes)
 app.use('/api/usercheckpoints', UserCheckpointRoutes);
 app.use('/api/userinteractions', UserInteractionRoutes);
 app.use('/api/embeddingchunks', EmbeddingChunkRoutes);

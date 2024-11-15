@@ -1,31 +1,21 @@
 import React from 'react';
-import { Chip, Dialog, DialogTitle, DialogContent, IconButton } from '@mui/material';
-import { Close, Visibility } from '@mui/icons-material';
-import ReactMarkdown from 'react-markdown';
+import { Chip } from '@mui/material';
+import { Visibility } from '@mui/icons-material';
 import { MessageType } from '../../../../types/MessageTypes';
 import { FileContentReference, FileReference } from '../../../../types/FileTypes';
 import { TaskResponse } from '../../../../types/TaskResponseTypes';
-import { URLReference } from '../../../../types/URLReferenceTypes';
+import { EntityReference } from '../../../../types/EntityReferenceTypes';
 import { UserInteraction } from '../../../../types/UserInteractionTypes';
 import { EmbeddingChunk } from '../../../../types/EmbeddingChunkTypes';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import { CollectionElementString, CollectionTypeString } from '../../../../types/CollectionTypes';
-import { ToolCall } from '../../../../types/ParameterTypes';
-import ToolCallView from '../tool_call/ToolCall';
 import { ReferenceType } from '../../../../types/ReferenceTypes';
-
-export type ReferenceExtType = 
-  | ReferenceType
-  | ToolCall 
-
-type ReferenceTypeString = 
-  | CollectionTypeString[keyof CollectionTypeString] 
-  | 'string_output' 
-  | 'tool_call'
+import { ToolCall } from '../../../../types/ToolCallTypes';
+import { CodeExecution } from '../../../../types/CodeExecutionTypes';
 
 interface ReferenceChipProps {
-  reference: ReferenceExtType;
-  type: ReferenceTypeString;
+  reference: ReferenceType;
+  type: CollectionTypeString[keyof CollectionTypeString];
   view?: boolean;
   className?: string;
   delete?: boolean;
@@ -41,7 +31,6 @@ const ReferenceChip: React.FC<ReferenceChipProps> = ({
   onDelete
 }) => {
   const { selectCardItem } = useCardDialog();
-  const [dialogOpen, setDialogOpen] = React.useState(false);
 
   const getLabel = () => {
     switch (type) {
@@ -54,8 +43,8 @@ const ReferenceChip: React.FC<ReferenceChipProps> = ({
       case 'TaskResponse':
         return `Task: ${(reference as TaskResponse).task_name}`;
       
-      case 'URLReference':
-        return (reference as URLReference).title;
+      case 'EntityReference':
+        return (reference as EntityReference).name ?? 'Entity Reference';
       
       case 'UserInteraction':
         const interaction = reference as UserInteraction;
@@ -65,10 +54,10 @@ const ReferenceChip: React.FC<ReferenceChipProps> = ({
         const chunk = reference as EmbeddingChunk;
         return `Embedding ${chunk.index}: ${chunk.text_content.substring(0, 15)}...`;
       
-      case 'string_output':
-        return (reference as string).substring(0, 20) + '...';
+      case 'CodeExecution':
+        return `Code Execution: ${(reference as CodeExecution).code_block.code.substring(0, 20)}...`;
       
-      case 'tool_call':
+      case 'ToolCall':
         return `Tool: ${(reference as ToolCall).function.name}`;
       
       default:
@@ -77,9 +66,7 @@ const ReferenceChip: React.FC<ReferenceChipProps> = ({
   };
 
   const handleView = () => {
-    if (['string_output', 'tool_call'].includes(type)) {
-      setDialogOpen(true);
-    } else if (typeof reference === 'object' && '_id' in reference) {
+    if (typeof reference === 'object' && '_id' in reference) {
       selectCardItem(type as CollectionElementString, reference._id);
     }
   };
@@ -87,30 +74,6 @@ const ReferenceChip: React.FC<ReferenceChipProps> = ({
   const handleDelete = () => {
     if (onDelete) {
       onDelete();
-    }
-  };
-
-  const renderDialogContent = () => {
-    switch (type) {
-      case 'string_output':
-        return <ReactMarkdown>{reference as string}</ReactMarkdown>;
-      
-      case 'tool_call':
-        return <ToolCallView toolCall={reference as ToolCall} />;
-      
-      default:
-        return null;
-    }
-  };
-
-  const getDialogTitle = () => {
-    switch (type) {
-      case 'tool_call':
-        return 'Tool Call';
-      case 'string_output':
-        return 'String Output';
-      default:
-        return 'Reference Details';
     }
   };
 
@@ -123,32 +86,6 @@ const ReferenceChip: React.FC<ReferenceChipProps> = ({
         onClick={view ? handleView : undefined}
         icon={view ? <Visibility /> : undefined}
       />
-      
-      <Dialog 
-        open={dialogOpen} 
-        onClose={() => setDialogOpen(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle sx={{ m: 0, p: 2, pr: 6 }}>
-          {getDialogTitle()}
-          <IconButton
-            aria-label="close"
-            onClick={() => setDialogOpen(false)}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
-          >
-            <Close />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent dividers>
-          {renderDialogContent()}
-        </DialogContent>
-      </Dialog>
     </>
   );
 };

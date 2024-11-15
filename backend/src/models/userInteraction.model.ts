@@ -45,29 +45,19 @@ userInteractionSchema.methods.apiRepresentation = function(this: IUserInteractio
 };
 
 function ensureObjectId(this: IUserInteractionDocument, next: CallbackWithoutResultAndOptionalError) {
-    this.user_checkpoint_id = getObjectId(this.user_checkpoint_id);
-    if (this.owner) {
-        this.owner.id = getObjectId(this.owner.id);
-    }
-    this.created_by = getObjectId(this.created_by);
-    this.updated_by = getObjectId(this.updated_by);
+    if (this.user_checkpoint_id) this.user_checkpoint_id = getObjectId(this.user_checkpoint_id);
+    if (this.owner) this.owner.id = getObjectId(this.owner.id);
+    if (this.created_by) this.created_by = getObjectId(this.created_by);
+    if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
     next();
 }
 
 function ensureObjectIdForUpdate(this: Query<any, any>, next: CallbackWithoutResultAndOptionalError) {
     const update = this.getUpdate() as any;
-    if (update.user_checkpoint_id) {
-        update.user_checkpoint_id = getObjectId(update.user_checkpoint_id);
-    }
-    if (update?.owner?.id) {
-        update.owner.id = getObjectId(update.owner.id);
-    }
-    if (update.created_by) {
-        update.created_by = getObjectId(update.created_by);
-    }
-    if (update.updated_by) {
-        update.updated_by = getObjectId(update.updated_by);
-    }
+    if (update.user_checkpoint_id) update.user_checkpoint_id = getObjectId(update.user_checkpoint_id);
+    if (update?.owner?.id) update.owner.id = getObjectId(update.owner.id);
+    if (update.created_by) update.created_by = getObjectId(update.created_by);
+    if (update.updated_by) update.updated_by = getObjectId(update.updated_by);
     next();
 }
 
