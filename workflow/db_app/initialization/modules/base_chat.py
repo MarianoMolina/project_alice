@@ -144,7 +144,7 @@ base_chat_module = BaseChatModule(
                 "name": "GPT4 Chat",
                 "alice_agent": "gpt_alice",
                 "default_user_checkpoints": {
-                    "tool_calls": "default_tool_call_checkpoint",
+                    "tool_call": "default_tool_call_checkpoint",
                     "code_exec": "default_code_exec_checkpoint"
                 }
             },
@@ -153,7 +153,7 @@ base_chat_module = BaseChatModule(
                 "name": "Claude Chat",
                 "alice_agent": "claude_alice",
                 "default_user_checkpoints": {
-                    "tool_calls": "default_tool_call_checkpoint",
+                    "tool_call": "default_tool_call_checkpoint",
                     "code_exec": "default_code_exec_checkpoint"
                 }
             },
@@ -162,7 +162,7 @@ base_chat_module = BaseChatModule(
                 "name": "LMStudio Chat",
                 "alice_agent": "lm_studio_alice",
                 "default_user_checkpoints": {
-                    "tool_calls": "default_tool_call_checkpoint",
+                    "tool_call": "default_tool_call_checkpoint",
                     "code_exec": "default_code_exec_checkpoint"
                 }
             },
@@ -171,7 +171,7 @@ base_chat_module = BaseChatModule(
                 "name": "Gemini Chat",
                 "alice_agent": "gemini_alice",
                 "default_user_checkpoints": {
-                    "tool_calls": "default_tool_call_checkpoint",
+                    "tool_call": "default_tool_call_checkpoint",
                     "code_exec": "default_code_exec_checkpoint"
                 }
             },
@@ -180,7 +180,7 @@ base_chat_module = BaseChatModule(
                 "name": "Mistral Chat",
                 "alice_agent": "mistral_alice",
                 "default_user_checkpoints": {
-                    "tool_calls": "default_tool_call_checkpoint",
+                    "tool_call": "default_tool_call_checkpoint",
                     "code_exec": "default_code_exec_checkpoint"
                 }
             },
@@ -189,7 +189,7 @@ base_chat_module = BaseChatModule(
                 "name": "Cohere Chat",
                 "alice_agent": "cohere_alice",
                 "default_user_checkpoints": {
-                    "tool_calls": "default_tool_call_checkpoint",
+                    "tool_call": "default_tool_call_checkpoint",
                     "code_exec": "default_code_exec_checkpoint"
                 }
             },
@@ -198,7 +198,7 @@ base_chat_module = BaseChatModule(
                 "name": "Llama Chat",
                 "alice_agent": "llama_alice",
                 "default_user_checkpoints": {
-                    "tool_calls": "default_tool_call_checkpoint",
+                    "tool_call": "default_tool_call_checkpoint",
                     "code_exec": "default_code_exec_checkpoint"
                 }
             },
@@ -207,7 +207,7 @@ base_chat_module = BaseChatModule(
                 "name": "Groq Chat",
                 "alice_agent": "groq_alice",
                 "default_user_checkpoints": {
-                    "tool_calls": "default_tool_call_checkpoint",
+                    "tool_call": "default_tool_call_checkpoint",
                     "code_exec": "default_code_exec_checkpoint"
                 }
             }

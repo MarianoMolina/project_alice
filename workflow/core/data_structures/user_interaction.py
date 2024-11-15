@@ -55,20 +55,3 @@ class UserInteraction(Embeddable):
     def model_dump(self, *args, **kwargs):
         data = super().model_dump(*args, **kwargs)
         data['user_checkpoint_id'] = self.user_checkpoint_id.model_dump(*args, **kwargs)
-
-    @field_validator('task_response_id')
-    @classmethod
-    def validate_task_response_id(cls, value: Optional[Union[str, dict, Any]]) -> Optional[str]:
-        if value is None:
-            return value
-        
-        if isinstance(value, str):
-            return value
-            
-        if isinstance(value, dict):
-            # Try to get '_id' or 'id' from the dictionary
-            id_value = value.get('_id') or value.get('id')
-            if id_value:
-                return str(id_value)
-                
-        raise ValueError("Could not extract ID from task_response_id. Expected string, None, or object with '_id' or 'id' field")

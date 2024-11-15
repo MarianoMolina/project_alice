@@ -47,6 +47,13 @@ class API(BaseDataStructure):
             raise ValueError(f"API type '{api_type}' is not supported by {api_name}. Supported types: {supported_types}")
             
         return v
+    
+    
+    def model_dump(self, *args, **kwargs):
+        data = super().model_dump(*args, **kwargs)
+        if self.api_config:
+            data['api_config'] = self.api_config.model_dump(*args, **kwargs)
+        return data
 
     def create_model_config(self, model: Optional[AliceModel] = None) -> ModelConfig:
         """Creates a ModelConfig object for model APIs"""

@@ -1,11 +1,11 @@
 import React from 'react';
+import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import { ToolCall, ToolCallComponentProps } from '../../../../types/ToolCallTypes';
 import ToolCallFlexibleView from './ToolCallFlexibleView';
 import ToolCallListView from './ToolCallListView';
 import ToolCallTableView from './ToolCallTableView';
 import ToolCallCardView from './ToolCallCardView';
 import ToolCallShortListView from './ToolCallShortListView';;
-import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
-import { ToolCallComponentProps,  ToolCall } from '../../../types/ToolCallTypes';
 
 type BaseToolCallMode = BaseDbElementProps<ToolCall>['mode'];
 type ExtendedToolCallMode = 'list' | 'shortList' | 'card' | 'table';
@@ -65,7 +65,7 @@ const EnhancedToolCall: React.FC<EnhancedToolCallProps> = (props) => {
 
   return (
     <BaseDbElement<ToolCall>
-      collectionName="ToolCalls"
+      collectionName="toolcalls"
       itemId={props.itemId}
       mode={baseDbMode}
       isInteractable={props.isInteractable}

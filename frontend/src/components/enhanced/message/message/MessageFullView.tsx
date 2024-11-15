@@ -4,7 +4,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import useStyles from '../MessageStyles';
 import { MessageComponentProps, MessageGenerators, RoleType } from '../../../../types/MessageTypes';
 import { BackgroundBeams } from '../../../ui/aceternity/BackgroundBeams';
-import ReferenceChip from '../../common/references/ReferenceChip';
 import { CopyAll, Visibility } from '@mui/icons-material';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import CopyToClipboard from 'react-copy-to-clipboard';
@@ -45,23 +44,6 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => 
         }
     };
 
-    const renderMessageContent = () => {
-        return (
-            <>
-                <AliceMarkdown role={message.role} enabledBlocks={[CustomBlockType.ALICE_DOCUMENT, CustomBlockType.ANALYSIS]}>{message.content}</AliceMarkdown>
-                {message.tool_calls && message.tool_calls.length > 0 && (
-                    <>
-                        <Typography variant="subtitle2">Tool Calls:</Typography>
-                        <Box display="flex" flexWrap="wrap" gap={1}>
-                            {message.tool_calls?.map((toolCall, index) => (
-                                <ReferenceChip key={`tool-call-${index}`} reference={toolCall} type="tool_call" view />
-                            ))}
-                        </Box>
-                    </>
-                )}
-            </>
-        );
-    };
     return (
         <Box className={`${classes.message} ${getMessageClass()}`}>
             <BackgroundBeams className="absolute inset-0 w-full h-full" />
@@ -105,7 +87,7 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => 
 
                     </Box>
                 </Box>
-                {renderMessageContent()}
+                <AliceMarkdown role={message.role} enabledBlocks={[CustomBlockType.ALICE_DOCUMENT, CustomBlockType.ANALYSIS]}>{message.content}</AliceMarkdown>
                 {message.references && hasAnyReferences(message.references) &&
                     <DataClusterManager dataCluster={message.references} isEditable={false} />
                 }

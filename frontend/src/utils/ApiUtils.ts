@@ -1,4 +1,4 @@
-import { ApiType, API, ApiName } from "../types/ApiTypes";
+import { ApiType, ApiName } from "../types/ApiTypes";
 
 // Base interfaces for API configurations
 interface BaseApiConfig {

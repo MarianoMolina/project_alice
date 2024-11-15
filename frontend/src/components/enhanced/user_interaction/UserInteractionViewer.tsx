@@ -91,7 +91,7 @@ const UserInteractionViewer: React.FC<UserInteractionViewerProps> = ({ interacti
               Respond
             </ViewButton>
           )}
-          {interaction.owner && interaction.owner.type == 'task_response' && (
+          {interaction.owner && interaction.owner.type === 'task_response' && (
             <ViewButton
               variant="outlined"
               size="small"

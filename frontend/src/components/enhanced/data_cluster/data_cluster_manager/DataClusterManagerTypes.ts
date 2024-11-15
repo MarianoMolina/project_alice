@@ -29,7 +29,7 @@ interface ReferenceTypeConfig {
     title: string;
     collectionName?: CollectionName;
     EnhancedView?: React.ComponentType<any>;
-    chipType: CollectionElementString | 'string_output';
+    chipType: CollectionElementString;
 }
 
 export const REFERENCE_CONFIG: ReferenceTypeConfig[] = [

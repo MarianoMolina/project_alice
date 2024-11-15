@@ -1,7 +1,7 @@
 import re
 from typing import List, Optional
 from enum import Enum
-from workflow.util import est_token_count
+from workflow.util.utils import est_token_count
 from workflow.util.logging_config import LOGGER
 
 class Language(str, Enum):

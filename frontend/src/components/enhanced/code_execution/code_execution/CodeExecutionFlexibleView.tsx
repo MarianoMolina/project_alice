@@ -1,16 +1,10 @@
 import React, { useCallback, useEffect } from 'react';
 import {
-    TextField,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
     Typography,
 } from '@mui/material';
 import { CodeExecutionComponentProps, CodeExecution, getDefaultCodeExecutionForm } from '../../../../types/CodeExecutionTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import Logger from '../../../../utils/Logger';
-import useStyles from '../CodeExecutionStyles';
 
 const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
     item,
@@ -19,7 +13,6 @@ const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
     handleSave,
     handleDelete
 }) => {
-    const classes = useStyles();
 
     useEffect(() => {
         if (!item || Object.keys(item).length === 0) {

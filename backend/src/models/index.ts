@@ -12,7 +12,7 @@ import './user.model';
 import './entityReference.model';
 import './userCheckpoint.model';
 import './userInteraction.model';
-import './dataCluster.model';
+import './reference.model';
 import './embeddingChunk.model';
 import './toolCall.model';
 import './codeExecution.model';

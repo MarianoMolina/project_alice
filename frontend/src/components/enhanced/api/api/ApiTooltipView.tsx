@@ -18,6 +18,7 @@ const apiIcons: Record<ApiType, React.ReactElement> = {
   [ApiType.SPEECH_TO_TEXT]: <Hearing />,
   [ApiType.TEXT_TO_SPEECH]: <RecordVoiceOver />,
   [ApiType.EMBEDDINGS]: <Tag />,
+  [ApiType.REQUESTS]: <Reddit />, // TODO: What to do with this?
 };
 
 const getBackgroundColor = (healthStatus: API['health_status']) => {

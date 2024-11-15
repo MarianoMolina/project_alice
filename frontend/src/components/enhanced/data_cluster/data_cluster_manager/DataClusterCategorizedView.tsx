@@ -21,21 +21,8 @@ const CategorizedReferenceView = memo(({
         reference: NonNullable<References[keyof References]>[number], 
         index: number, 
         type: keyof References, 
-        chipType: CollectionElementString | 'string_output'
+        chipType: CollectionElementString
     ) => {
-        if (typeof reference === 'string') {
-            return (
-                <ReferenceChip
-                    key={`${type}-${index}`}
-                    reference={reference}
-                    type="string_output"
-                    view={true}
-                    delete={false}
-                    onDelete={() => onDelete(type, index)}
-                />
-            );
-        }
-
         return (
             <ReferenceChip
                 key={reference._id || `${type}-${index}`}

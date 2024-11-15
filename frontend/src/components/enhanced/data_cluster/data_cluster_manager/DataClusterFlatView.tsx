@@ -21,20 +21,8 @@ const FlatReferenceView = memo(({
         reference: NonNullable<References[keyof References]>[number], 
         index: number, 
         type: keyof References, 
-        chipType: CollectionElementString | 'string_output'
-    ) => {
-        if (typeof reference === 'string') {
-            return (
-                <ReferenceChip
-                    key={`${type}-${index}`}
-                    reference={reference}
-                    type="string_output"
-                    view={true}
-                    delete={false}
-                    onDelete={() => onDelete(type, index)}
-                />
-            );
-        }
+        chipType: CollectionElementString
+        ) => {
 
         return (
             <ReferenceChip

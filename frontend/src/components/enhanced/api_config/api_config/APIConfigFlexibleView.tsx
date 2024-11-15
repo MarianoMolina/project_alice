@@ -1,10 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
 import {
-    TextField,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
     Typography,
 } from '@mui/material';
 import { APIConfigComponentProps, APIConfig, getDefaultAPIConfigForm } from '../../../../types/ApiConfigTypes';
