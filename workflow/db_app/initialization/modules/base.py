@@ -306,7 +306,8 @@ base_module = BaseModule(
                 "data": {
                     "api_key": OPENAI_API_KEY,
                     "base_url": "https://api.openai.com/v1"
-                }
+                },
+                "health_status": "healthy" if OPENAI_API_KEY else "unhealthy",
             },
             {
                 "key": "anthropic_api_config",
@@ -315,7 +316,8 @@ base_module = BaseModule(
                 "data": {
                     "api_key": ANTHROPIC_API_KEY,
                     "base_url": "https://api.anthropic.com"
-                }
+                },
+                "health_status": "healthy" if ANTHROPIC_API_KEY else "unhealthy",
             },
             {
                 "key": "mistral_api_config",
@@ -324,7 +326,8 @@ base_module = BaseModule(
                 "data": {
                     "api_key": MISTRAL_API_KEY,
                     "base_url": "https://api.mistral.ai/v1"
-                }
+                },
+                "health_status": "healthy" if MISTRAL_API_KEY else "unhealthy",
             },
             {
                 "key": "gemini_api_config",
@@ -333,7 +336,8 @@ base_module = BaseModule(
                 "data": {
                     "api_key": GEMINI_API_KEY,
                     "base_url": "https://api.gemini.ai"
-                }
+                },
+                "health_status": "healthy" if GEMINI_API_KEY else "unhealthy",
             },
             {
                 "key": "cohere_api_config",
@@ -342,7 +346,8 @@ base_module = BaseModule(
                 "data": {
                     "api_key": COHERE_API_KEY,
                     "base_url": "https://api.cohere.ai"
-                }
+                },
+                "health_status": "healthy" if COHERE_API_KEY else "unhealthy",
             },
             {
                 "key": "llama_api_config",
@@ -351,7 +356,8 @@ base_module = BaseModule(
                 "data": {
                     "api_key": LLAMA_API_KEY,
                     "base_url": "https://api.llama-api.com"
-                }
+                },
+                "health_status": "healthy" if LLAMA_API_KEY else "unhealthy",
             },
             {
                 "key": "groq_api_config",
@@ -360,7 +366,8 @@ base_module = BaseModule(
                 "data": {
                     "api_key": GROQ_API_KEY,
                     "base_url": "https://api.groq.com/openai/v1"
-                }
+                },
+                "health_status": "healthy" if GROQ_API_KEY else "unhealthy",
             },
             {
                 "key": "exa_api_config",
@@ -369,7 +376,8 @@ base_module = BaseModule(
                 "data": {
                     "api_key": EXA_API_KEY,
                     "base_url": "https://api.exa.ai/v1"
-                }
+                },
+                "health_status": "healthy" if EXA_API_KEY else "unhealthy",
             },
             {
                 "key": "reddit_api_config",
@@ -386,7 +394,8 @@ base_module = BaseModule(
                 "api_name": "google_knowledge_graph",
                 "data": {
                     "api_key": GOOGLE_KNOWLEDGE_GRAPH_API_KEY
-                }
+                },
+                "health_status": "healthy" if GOOGLE_KNOWLEDGE_GRAPH_API_KEY else "unhealthy",
             },
             {
                 "key": "wolfram_alpha_api_config",
@@ -394,7 +403,8 @@ base_module = BaseModule(
                 "api_name": "wolfram_alpha",
                 "data": {
                     "app_id": WOLFRAM_ALPHA_APP_ID
-                }
+                },
+                "health_status": "healthy" if WOLFRAM_ALPHA_APP_ID else "unhealthy",
             },
             {
                 "key": "google_search_api_config",
@@ -403,7 +413,8 @@ base_module = BaseModule(
                 "data": {
                     "api_key": GOOGLE_API_KEY,
                     "cse_id": GOOGLE_CSE_ID
-                }
+                },
+                "health_status": "healthy" if GOOGLE_API_KEY and GOOGLE_CSE_ID else "unhealthy",
             },
             {
                 "key": "local_lm_api_config",
@@ -411,7 +422,8 @@ base_module = BaseModule(
                 "api_name": "lm_studio",
                 "data": {
                     "base_url": LOCAL_LLM_API_URL
-                }
+                },
+                "health_status": "healthy" if LOCAL_LLM_API_URL else "unhealthy",
             },
             {
                 "key": "bark_api_config",
@@ -419,7 +431,8 @@ base_module = BaseModule(
                 "api_name": "bark",
                 "data": {
                     "base_url": LOCAL_LLM_API_URL
-                }
+                },
+                "health_status": "healthy" if LOCAL_LLM_API_URL else "unhealthy",
             },
             {
                 "key": "pixart_api_config",
@@ -427,7 +440,8 @@ base_module = BaseModule(
                 "api_name": "pixart",
                 "data": {
                     "base_url": LOCAL_LLM_API_URL
-                }
+                },
+                "health_status": "healthy" if LOCAL_LLM_API_URL else "unhealthy",
             }
         ],
         "apis": [
@@ -438,7 +452,6 @@ base_module = BaseModule(
                 "name": "Google Knowledge Graph",
                 "api_config": "google_knowledge_graph_api_config",
                 "is_active": True,
-                "health_status": "healthy" if GOOGLE_KNOWLEDGE_GRAPH_API_KEY else "unhealthy",
             },
             {
                 "key": "wolfram_alpha_api",
@@ -447,7 +460,6 @@ base_module = BaseModule(
                 "name": "Wolfram Alpha",
                 "api_config": "wolfram_alpha_api_config",
                 "is_active": True,
-                "health_status": "healthy" if WOLFRAM_ALPHA_APP_ID else "unhealthy",
             },
             {
                 "key": "reddit_search",
@@ -456,7 +468,6 @@ base_module = BaseModule(
                 "name": "Reddit Search",
                 "api_config": "reddit_api_config",
                 "is_active": True,
-                "health_status": "healthy" if REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET else "unhealthy",
             },
             {
                 "key": "exa_search",
@@ -465,7 +476,6 @@ base_module = BaseModule(
                 "name": "Exa Search",
                 "api_config": "exa_api_config",
                 "is_active": True,
-                "health_status": "healthy" if EXA_API_KEY else "unhealthy",
             },
             {
                 "key": "google_search",
@@ -474,7 +484,6 @@ base_module = BaseModule(
                 "name": "Google Search",
                 "api_config": "google_search_api_config",
                 "is_active": True,
-                "health_status": "healthy" if GOOGLE_API_KEY and GOOGLE_CSE_ID else "unhealthy",
             },
             {
                 "key": "wikipedia_search",
@@ -483,7 +492,6 @@ base_module = BaseModule(
                 "name": "Wikipedia Search",
                 "api_config": {},
                 "is_active": True,
-                "health_status": "healthy" if GOOGLE_API_KEY and GOOGLE_CSE_ID else "unhealthy",
             },
             {
                 "key": "arxiv_search",
@@ -492,7 +500,6 @@ base_module = BaseModule(
                 "name": "Arxiv Search",
                 "api_config": {},
                 "is_active": True,
-                "health_status": "healthy" if GOOGLE_API_KEY and GOOGLE_CSE_ID else "unhealthy",
             },
             {
                 "key": "openai_api",
@@ -501,7 +508,6 @@ base_module = BaseModule(
                 "name": "OpenAI API",
                 "api_config": "openai_api_config",
                 "is_active": True,
-                "health_status": "healthy" if OPENAI_API_KEY else "unhealthy",
                 "default_model": "GPT4o",
             },
             {
@@ -511,7 +517,6 @@ base_module = BaseModule(
                 "name": "Mistral API",
                 "api_config": "mistral_api_config",
                 "is_active": True,
-                "health_status": "healthy" if MISTRAL_API_KEY else "unhealthy",
                 "default_model": "mistral_small",
             },
             {
@@ -521,7 +526,6 @@ base_module = BaseModule(
                 "name": "Mistral Vision API",
                 "api_config": "mistral_api_config",
                 "is_active": True,
-                "health_status": "healthy" if MISTRAL_API_KEY else "unhealthy",
                 "default_model": "pixtral12b",
             },
             {
@@ -531,7 +535,6 @@ base_module = BaseModule(
                 "name": "Mistral Embeddings API",
                 "api_config": "mistral_api_config",
                 "is_active": True,
-                "health_status": "healthy" if MISTRAL_API_KEY else "unhealthy",
                 "default_model": "mistral-embed",
             },
             {
@@ -541,7 +544,6 @@ base_module = BaseModule(
                 "name": "Anthropic API",
                 "api_config": "anthropic_api_config",
                 "is_active": True,
-                "health_status": "healthy" if ANTHROPIC_API_KEY else "unhealthy",
                 "default_model": "Claude3.5",
             },
             {
@@ -551,7 +553,6 @@ base_module = BaseModule(
                 "name": "Gemini API",
                 "api_config": "gemini_api_config",
                 "is_active": True,
-                "health_status": "healthy" if GEMINI_API_KEY else "unhealthy",
                 "default_model": "gemini_1.5_flash",
             },
             {
@@ -561,7 +562,6 @@ base_module = BaseModule(
                 "name": "Gemini Vision API",
                 "api_config": "gemini_api_config",
                 "is_active": True,
-                "health_status": "healthy" if GEMINI_API_KEY else "unhealthy",
                 "default_model": "gemini_1.5_flash_v",
             },
             {
@@ -571,7 +571,6 @@ base_module = BaseModule(
                 "name": "Gemini Speech to Text API",
                 "api_config": "gemini_api_config",
                 "is_active": True,
-                "health_status": "healthy" if GEMINI_API_KEY else "unhealthy",
                 "default_model": "gemini_1.5_flash_stt",
             },
             {
@@ -581,7 +580,6 @@ base_module = BaseModule(
                 "name": "Gemini Embeddings API",
                 "api_config": "gemini_api_config",
                 "is_active": True,
-                "health_status": "healthy" if GEMINI_API_KEY else "unhealthy",
                 "default_model": "gemini_text_embedding",
             },
             {
@@ -591,7 +589,6 @@ base_module = BaseModule(
                 "name": "Gemini Image Generation API",
                 "api_config": "gemini_api_config",
                 "is_active": True,
-                "health_status": "healthy" if GEMINI_API_KEY else "unhealthy",
                 "default_model": "gemini_img_gen_imagen_3",
             },
             {
@@ -601,7 +598,6 @@ base_module = BaseModule(
                 "name": "Cohere API",
                 "api_config": "cohere_api_config",
                 "is_active": True,
-                "health_status": "healthy" if COHERE_API_KEY else "unhealthy",
                 "default_model": "command-r-plus",
             },
             {
@@ -611,7 +607,6 @@ base_module = BaseModule(
                 "name": "LLAMA API",
                 "api_config": "llama_api_config",
                 "is_active": True,
-                "health_status": "healthy" if LLAMA_API_KEY else "unhealthy",
                 "default_model": "llama3.2_90b",
             },
             {
@@ -621,7 +616,6 @@ base_module = BaseModule(
                 "name": "LM Studio API",
                 "api_config": "local_lm_api_config",
                 "is_active": True,
-                "health_status": "healthy" if LOCAL_LLM_API_URL else "unhealthy",
                 "default_model": "Llama3_8B_Hermes",
             },
             {
@@ -631,7 +625,6 @@ base_module = BaseModule(
                 "name": "OpenAI Image Vision",
                 "api_config": "openai_api_config",
                 "is_active": True,
-                "health_status": "healthy" if OPENAI_API_KEY else "unhealthy",
                 "default_model": "GPT4o",
             },
             {
@@ -641,7 +634,6 @@ base_module = BaseModule(
                 "name": "LM Studio Image Vision",
                 "api_config": "local_lm_api_config",
                 "is_active": True,
-                "health_status": "healthy" if LOCAL_LLM_API_URL else "unhealthy",
                 "default_model": "hermes_llava_vision"
             },
             {
@@ -651,7 +643,6 @@ base_module = BaseModule(
                 "name": "Anthropic Image Vision",
                 "api_config": "anthropic_api_config",
                 "is_active": True,
-                "health_status": "healthy" if ANTHROPIC_API_KEY else "unhealthy",
                 "default_model": "Claude3.5"
             },
             {
@@ -661,7 +652,6 @@ base_module = BaseModule(
                 "name": "Image Generation",
                 "api_config": "openai_api_config",
                 "is_active": True,
-                "health_status": "healthy" if OPENAI_API_KEY else "unhealthy",
                 "default_model": "Dall-E-3"
             },
             {
@@ -671,7 +661,6 @@ base_module = BaseModule(
                 "name": "OpenAI Speech to Text",
                 "api_config": "openai_api_config", # Since whisper is open source, do we need a key?
                 "is_active": True,
-                "health_status": "healthy",
                 "default_model": "Whisper_1"
             },
             {
@@ -680,8 +669,7 @@ base_module = BaseModule(
                 "api_name": "openai",
                 "name": "OpenAI Advanced Speech to Text",
                 "api_config": "openai_api_config",
-                "is_active": True,
-                "health_status": "healthy" if OPENAI_API_KEY else "unhealthy",      
+                "is_active": True, 
                 "default_model": "Whisper_1"          
             },
             {
@@ -691,7 +679,6 @@ base_module = BaseModule(
                 "name": "Text to Speech",
                 "api_config": "openai_api_config",
                 "is_active": True,
-                "health_status": "healthy" if OPENAI_API_KEY else "unhealthy",
                 "default_model": "tts-1"
            },
             {
@@ -701,7 +688,6 @@ base_module = BaseModule(
                 "name": "OpenAI Embeddings", 
                 "api_config": "openai_api_config",
                 "is_active": True,
-                "health_status": "healthy" if OPENAI_API_KEY else "unhealthy",
                 "default_model": "oai_embedding_large"            
             },
             {
@@ -711,7 +697,6 @@ base_module = BaseModule(
                 "name": "Groq API",
                 "api_config": "groq_api_config",
                 "is_active": True,
-                "health_status": "healthy" if GROQ_API_KEY else "unhealthy",
                 "default_model": "llama-3.1-70b-versatile",
             },
             {
@@ -721,7 +706,6 @@ base_module = BaseModule(
                 "name": "Groq Vision API",
                 "api_config": "groq_api_config",
                 "is_active": True,
-                "health_status": "healthy" if GROQ_API_KEY else "unhealthy",
                 "default_model": "groq_llama_3_2_11b_vision",
             },
             {
@@ -731,7 +715,6 @@ base_module = BaseModule(
                 "name": "Groq Text to Speech API",
                 "api_config": "groq_api_config",
                 "is_active": True,
-                "health_status": "healthy" if GROQ_API_KEY else "unhealthy",
                 "default_model": "groq_tts_whisper",
             },
             {
@@ -741,7 +724,6 @@ base_module = BaseModule(
                 "name": "Bark TTS",
                 "api_config": "bark_api_config",
                 "is_active": True,
-                "health_status": "healthy",
                 "default_model": "bark_large",
             },
             {
@@ -751,7 +733,6 @@ base_module = BaseModule(
                 "name": "Pixart Image Generation",
                 "api_config": "pixart_api_config",
                 "is_active": True,
-                "health_status": "healthy",
                 "default_model": "pixart_sigma_model",
             }
         ],

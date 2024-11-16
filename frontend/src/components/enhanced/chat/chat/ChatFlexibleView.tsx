@@ -20,6 +20,7 @@ import useStyles from '../ChatStyles';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 import { UserCheckpoint } from '../../../../types/UserCheckpointTypes';
 import UserCheckpointShortListView from '../../user_checkpoint/user_checkpoint/UserCheckpointShortListView';
+import { useAuth } from '../../../../contexts/AuthContext';
 
 const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     item,
@@ -30,6 +31,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
 }) => {
     const { fetchItem } = useApi();
     const { selectCardItem } = useCardDialog();
+    const { user } = useAuth();
     const [form, setForm] = useState<Partial<AliceChat>>(item || getDefaultChatForm());
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
@@ -39,6 +41,23 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     const isEditMode = mode === 'edit' || mode === 'create';
 
     Logger.debug('ChatFlexibleView', { item, handleDelete });
+    useEffect(() => {
+        if (mode === 'create' && user?.default_chat_config && !item) {
+            const defaultConfig = user.default_chat_config;
+            setForm(prevForm => ({
+                ...prevForm,
+                alice_agent: defaultConfig.alice_agent || undefined,
+                agent_tools: defaultConfig.agent_tools || [],
+                retrieval_tools: defaultConfig.retrieval_tools || [],
+                default_user_checkpoints: defaultConfig.default_user_checkpoints || {},
+                data_cluster: defaultConfig.data_cluster || undefined,
+            }));
+        } else if (item) {
+            setForm(item);
+        } else if (!item || Object.keys(item).length === 0) {
+            onChange(getDefaultChatForm());
+        }
+    }, [item, onChange, user, mode]);
 
     useEffect(() => {
         if (isSaving) {
@@ -46,14 +65,6 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             setIsSaving(false);
         }
     }, [isSaving, handleSave]);
-
-    useEffect(() => {
-        if (item) {
-            setForm(item);
-        } else if (!item || Object.keys(item).length === 0) {
-            onChange(getDefaultChatForm());
-        }
-    }, [item, onChange]);
 
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;

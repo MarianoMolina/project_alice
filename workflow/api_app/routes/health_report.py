@@ -79,7 +79,7 @@ async def user_health_check(request: Request, db_app=Depends(get_db_app)) -> dic
 
     # Update API health status in the database
     for api_name, result in user_test_results["APITests"]["test_results"].items():
-        api_id = [api["_id"] for api in user_apis if api["api_name"] == api_name][0]
+        api_id = [api["api_config"]["_id"] for api in user_apis if api["api_name"] == api_name][0]
         if api_id and isinstance(api_id, str):
             await db_app.update_api_health(api_id, "healthy" if result == "Success" else "unhealthy")
 

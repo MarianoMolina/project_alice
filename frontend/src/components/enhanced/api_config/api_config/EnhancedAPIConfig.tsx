@@ -6,9 +6,10 @@ import APIConfigCardView from './APIConfigCardView';
 import APIConfigShortListView from './APIConfigShortListView';
 import { APIConfig, APIConfigComponentProps } from '../../../../types/ApiConfigTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import ApiConfigTooltipView from './ApiConfigTooltipView';
 
 type BaseAPIConfigMode = BaseDbElementProps<APIConfig>['mode'];
-type ExtendedAPIConfigMode = 'list' | 'shortList' | 'card' | 'table';
+type ExtendedAPIConfigMode = 'list' | 'shortList' | 'card' | 'table' | 'tooltip';
 type EnhancedAPIConfigMode = BaseAPIConfigMode | ExtendedAPIConfigMode;
 
 interface EnhancedAPIConfigProps extends Omit<APIConfigComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
@@ -54,6 +55,8 @@ const EnhancedAPIConfig: React.FC<EnhancedAPIConfigProps> = (props) => {
         return <APIConfigTableView {...commonProps} />;
       case 'card':
         return <APIConfigCardView {...commonProps} />;
+      case 'tooltip':
+        return <ApiConfigTooltipView {...commonProps} />;
       default:
         return null;
     }

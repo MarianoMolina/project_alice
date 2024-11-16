@@ -68,7 +68,6 @@ export interface API extends BaseDatabaseObject {
     api_name: ApiName;
     name?: string;
     is_active: boolean;
-    health_status: 'healthy' | 'unhealthy' | 'unknown';
     default_model?: AliceModel;
     api_config: APIConfig;
 }
@@ -80,7 +79,6 @@ export const convertToAPI = (data: any): API => {
         api_name: data?.api_name || '',
         name: data?.name || '',
         is_active: data?.is_active || false,
-        health_status: data?.health_status || 'unknown',
         default_model: (data?.default_model && Object.keys(data.default_model).length > 0) ? convertToAliceModel(data.default_model) : undefined,
         api_config: data?.api_config ? convertToAPIConfig(data?.api_config) : { ...getDefaultAPIConfigForm() as APIConfig },
     };
@@ -94,7 +92,6 @@ export const getDefaultApiForm = (): Partial<API> => ({
     api_name: undefined,
     name: '',
     is_active: false,
-    health_status: 'unknown',
     default_model: undefined,
     api_config: undefined,
 });

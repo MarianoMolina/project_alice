@@ -16,7 +16,6 @@ class API(BaseDataStructure):
         api_name (ApiName): The specific name or provider of the API.
         name (str): A human-readable name for this API configuration.
         is_active (bool): Indicates whether this API is currently active.
-        health_status (str): The current health status of the API ("healthy", "unhealthy", or "unknown").
         default_model (Optional[AliceModel]): The default language model associated with this API.
         config (Optional[APIConfig]): The configuration for this API including required credentials.
     """
@@ -25,7 +24,6 @@ class API(BaseDataStructure):
     api_config: Optional[APIConfig] = None
     name: str
     is_active: bool = True
-    health_status: str = Field("unknown", pattern="^(healthy|unhealthy|unknown)$")
     default_model: Optional[AliceModel] = None # TODO: Add validation to match api_name and model_type
 
     @field_validator('api_config')

@@ -4,7 +4,8 @@ import { ApiName } from './ApiTypes';
 export interface APIConfig extends BaseDatabaseObject {
     name: string;
     api_name: ApiName;
-    data: Record<string, any>;
+    data: { [key: string]: any };
+    health_status: 'healthy' | 'unhealthy' | 'unknown';
 }
 
 export const convertToAPIConfig = (data: any): APIConfig => {
@@ -13,6 +14,7 @@ export const convertToAPIConfig = (data: any): APIConfig => {
         name: data?.name || '',
         api_name: data?.api_name || '',
         data: data?.data || {},
+        health_status: data?.health_status || 'unknown',
     };
 };
 
@@ -22,5 +24,6 @@ export interface APIConfigComponentProps extends EnhancedComponentProps<APIConfi
 export const getDefaultAPIConfigForm = (): Partial<APIConfig> => ({
     name: '',
     api_name: ApiName.LM_STUDIO,
-    data: {}
+    data: {},
+    health_status: 'unknown',
 });

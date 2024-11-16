@@ -42,6 +42,19 @@ import UserCheckpointCardView from '../../user_checkpoint/user_checkpoint/UserCh
 import UserInteractionCardView from '../../user_interaction/user_interaction/UserInteractionCardView';
 import EmbeddingChunkCardView from '../../embedding_chunk/embedding_chunk/EmbeddingChunkCardView';
 import DataClusterCardView from '../../data_cluster/data_cluster/DataClusterCardView';
+import { UserCheckpoint } from '../../../../types/UserCheckpointTypes';
+import { UserInteraction } from '../../../../types/UserInteractionTypes';
+import { EmbeddingChunk } from '../../../../types/EmbeddingChunkTypes';
+import { DataCluster } from '../../../../types/DataClusterTypes';
+import { ToolCall } from '../../../../types/ToolCallTypes';
+import { CodeExecution } from '../../../../types/CodeExecutionTypes';
+import { APIConfig } from '../../../../types/ApiConfigTypes';
+import EnhancedToolCall from '../../tool_calls/tool_calls/EnhancedToolCall';
+import EnhancedCodeExecution from '../../code_execution/code_execution/EnhancedCodeExecution';
+import EnhancedAPIConfig from '../../api_config/api_config/EnhancedAPIConfig';
+import ToolCallCardView from '../../tool_calls/tool_calls/ToolCallCardView';
+import CodeExecutionCardView from '../../code_execution/code_execution/CodeExecutionCardView';
+import APIConfigCardView from '../../api_config/api_config/APIConfigCardView';
 
 const EnhancedCardDialog: React.FC = () => {
   const { selectedCardItem, selectedCardItemType, handleClose, selectCardItem } = useCardDialog();
@@ -61,10 +74,13 @@ const EnhancedCardDialog: React.FC = () => {
       handleFileClick: (id: string, item?: FileReference) => selectCardItem('File', id, item),
       handleMessageClick: (id: string, item?: MessageType) => selectCardItem('Message', id, item),
       handleEntityReferenceClick: (id: string, item?: EntityReference) => selectCardItem('EntityReference', id, item),
-      handleUserCheckpoint: (id: string) => selectCardItem('UserCheckpoint', id),
-      handleUserInteraction: (id: string) => selectCardItem('UserInteraction', id),
-      handleEmbeddingChunk: (id: string) => selectCardItem('EmbeddingChunk', id),
-      handleDataCluster: (id: string) => selectCardItem('DataCluster', id),
+      handleUserCheckpointClick: (id: string, item?: UserCheckpoint) => selectCardItem('UserCheckpoint', id, item),
+      handleUserInteractionClick: (id: string, item?: UserInteraction) => selectCardItem('UserInteraction', id, item),
+      handleEmbeddingChunkClick: (id: string, item?: EmbeddingChunk) => selectCardItem('EmbeddingChunk', id, item),
+      handleDataClusterClick: (id: string, item?: DataCluster) => selectCardItem('DataCluster', id, item),
+      handleToolCallClick: (id: string, item?: ToolCall) => selectCardItem('ToolCall', id, item),
+      handleCodeExecutionClick: (id: string, item?: CodeExecution) => selectCardItem('CodeExecution', id, item),
+      handleAPIConfigClick: (id: string, item?: APIConfig) => selectCardItem('APIConfig', id, item),
     };
 
     const commonProps = {
@@ -114,6 +130,13 @@ const EnhancedCardDialog: React.FC = () => {
           return <EnhancedEmbeddingChunk itemId={selectedCardItem._id} {...commonProps} />;
         case 'DataCluster':
           return <EnhancedDataCluster itemId={selectedCardItem._id} {...commonProps} />;
+        case 'ToolCall':
+          return <EnhancedToolCall itemId={selectedCardItem._id} {...commonProps} />;
+        case 'CodeExecution':
+          return <EnhancedCodeExecution itemId={selectedCardItem._id} {...commonProps} />;
+        case 'APIConfig':
+          return <EnhancedAPIConfig itemId={selectedCardItem._id} {...commonProps} />;
+        
         default:
           return null;
       }
@@ -208,6 +231,24 @@ const EnhancedCardDialog: React.FC = () => {
           return (
             <Box className="max-w-full">
               <DataClusterCardView item={selectedCardItem as CollectionType['dataclusters']} {...cardViewProps} />
+            </Box>
+          );
+        case 'ToolCall':
+          return (
+            <Box className="max-w-full">
+              <ToolCallCardView item={selectedCardItem as CollectionType['toolcalls']} {...cardViewProps} />
+            </Box>
+          );
+        case 'CodeExecution':
+          return (
+            <Box className="max-w-full">
+              <CodeExecutionCardView item={selectedCardItem as CollectionType['codeexecutions']} {...cardViewProps} />
+            </Box>
+          );
+        case 'APIConfig':
+          return (
+            <Box className="max-w-full">
+              <APIConfigCardView item={selectedCardItem as CollectionType['apiconfigs']} {...cardViewProps} />
             </Box>
           );
         default:

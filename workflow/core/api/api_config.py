@@ -9,6 +9,7 @@ class APIConfig(BaseDataStructure):
     name: str
     api_name: ApiName
     data: Dict = Field(default_factory=dict)
+    health_status: str = Field("unknown", pattern="^(healthy|unhealthy|unknown)$")
     
     def validate_config(self) -> bool:
         """

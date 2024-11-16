@@ -6,6 +6,7 @@ export interface IAPIConfig {
     name: string;
     api_name: ApiName;
     data: Record<string, any>;
+    health_status: 'healthy' | 'unhealthy' | 'unknown';
     created_by: Types.ObjectId | IUserDocument;
     updated_by: Types.ObjectId | IUserDocument;
 }

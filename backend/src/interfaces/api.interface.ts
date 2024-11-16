@@ -46,7 +46,6 @@ export interface IAPI {
   name: string;
   api_name: ApiName;
   is_active: boolean;
-  health_status: 'healthy' | 'unhealthy' | 'unknown';
   default_model?: Types.ObjectId;
   api_config?: Types.ObjectId | IAPIConfigDocument;
   created_by: Types.ObjectId | IUserDocument;

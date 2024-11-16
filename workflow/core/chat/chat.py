@@ -151,9 +151,25 @@ class AliceChat(BaseDataStructure):
         Returns:
             dict: The serialized AliceChat instance
         """
-        data = super().model_dump(*args, **kwargs)
+        # Create a copy of kwargs to modify for super() call
+        super_kwargs = kwargs.copy()
         
-        # Handle nested BaseModel instances
+        # Add exclude field to prevent double serialization
+        exclude = super_kwargs.get('exclude', set())
+        fields_to_exclude = {
+            'messages', 
+            'agent_tools', 
+            'retrieval_tools', 
+            'alice_agent', 
+            'data_cluster',
+            'default_user_checkpoints'
+        }
+        super_kwargs['exclude'] = exclude.union(fields_to_exclude)
+        
+        # Get base data from parent class, excluding our custom-handled fields
+        data = super().model_dump(*args, **super_kwargs)
+        
+        # Manually handle special fields
         if self.messages:
             data['messages'] = [
                 msg.model_dump(*args, **kwargs) if isinstance(msg, BaseModel) else msg 

@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Optional, Callable
 from workflow.util import LOGGER
 from workflow.core.api import APIManager
 from workflow.core.data_structures import (
-    MessageDict, References, NodeResponse, FunctionParameters, ParameterDefinition, FunctionConfig, ApiType, TasksEndCodeRouting, Prompt, ContentType, RoleTypes, MessageGenerators
+    MessageDict, References, NodeResponse, FunctionParameters, ParameterDefinition, ToolFunction, ApiType, TasksEndCodeRouting, Prompt, ContentType, RoleTypes, MessageGenerators
 )
 from workflow.util.utils import json_to_python_type_mapping, get_traceback
 from workflow.core.agent.agent import AliceAgent
@@ -334,8 +334,8 @@ class PromptAgentTask(AliceTask):
         # Return the lowest available code as last resort
         return min(available_codes)
     
-    def tool_list(self, api_manager: APIManager) -> List[FunctionConfig]:
-        return [func.get_function(api_manager)["tool_function"].model_dump(exclude={'id', '_id'}) for func in self.tasks.values()] if self.tasks else None
+    def tool_list(self, api_manager: APIManager) -> List[ToolFunction]:
+        return [func.get_function(api_manager)["tool_function"] for func in self.tasks.values()] if self.tasks else None
     
     def tool_map(self, api_manager: APIManager) -> Optional[Dict[str, Callable]]:
         combined_function_map = {}

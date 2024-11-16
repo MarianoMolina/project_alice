@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import { ApiComponentProps, ApiType, ModelApiType } from '../../../../types/ApiTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { Api, Category, HealthAndSafety, PowerSettingsNew } from '@mui/icons-material';
+import { Api, Category, PowerSettingsNew } from '@mui/icons-material';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 
 type ListItemType = {
@@ -41,11 +41,6 @@ const ApiCardView: React.FC<ApiComponentProps> = ({
             icon: <Api />,
             primary_text: "API Type",
             secondary_text: item.api_type
-        },
-        {
-            icon: <HealthAndSafety />,
-            primary_text: "Status",
-            secondary_text: item.health_status
         },
         {
             icon: <PowerSettingsNew />,

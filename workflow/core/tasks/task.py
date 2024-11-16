@@ -678,7 +678,7 @@ class AliceTask(BaseDataStructure):
             if not api or not api.is_active:
                 LOGGER.error(f"Required API {api_type} not active or not found")
                 return False
-            if api.health_status != "healthy":
+            if api.api_config.health_status != "healthy":
                 LOGGER.error(f"Required API {api_type} not healthy")
                 return False
                 

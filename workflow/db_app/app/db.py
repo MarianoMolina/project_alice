@@ -256,8 +256,8 @@ class BackendAPI(BaseModel):
                 LOGGER.error(f"Error retrieving APIs: {e}")
                 return {}
             
-    async def update_api_health(self, api_id: str, health_status: str) -> bool:
-        url = f"{self.base_url}/apis/{api_id}"
+    async def update_api_config_health(self, api_config_id: str, health_status: str) -> bool:
+        url = f"{self.base_url}/apiconfigs/{api_config_id}"
         headers = self._get_headers()
         data = {"health_status": health_status}
 

@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser, registerUser, LoginResponse, initializeUserDatabase } from '../services/authService';
 import { User } from '../types/UserTypes';
 import Logger from '../utils/Logger';
+import { updateItem } from '../services/api';
 
 interface AuthContextProps {
   isAuthenticated: boolean;
@@ -13,6 +14,7 @@ interface AuthContextProps {
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   getToken: () => string | null;
+  updateUser: (userData: Partial<User>) => Promise<void>;
 }
 
 interface AuthProviderProps {
@@ -48,16 +50,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return localStorage.getItem('token');
   };
 
-  const saveUserData = (userData: LoginResponse) => {
+
+  const saveUserData = (userData: LoginResponse | User) => {
     try {
-      localStorage.setItem('user', JSON.stringify(userData.user));
-      localStorage.setItem('token', userData.token);
-      setUser(userData.user);
+      const userToSave = 'user' in userData ? userData.user : userData;
+      const token = 'token' in userData ? userData.token : getToken();
+
+      localStorage.setItem('user', JSON.stringify(userToSave));
+      if (token) localStorage.setItem('token', token);
+      
+      setUser(userToSave);
       setIsAuthenticated(true);
     } catch (error) {
       Logger.error('Error saving user data:', error);
     }
   };
+
+  const updateUser = useCallback(async (userData: Partial<User>) => {
+    try {
+      if (!user?._id) throw new Error('No user ID found');
+      const updatedUser = await updateItem('users', user._id, userData);
+      saveUserData(updatedUser);
+    } catch (error) {
+      Logger.error('Error updating user:', error);
+      throw error;
+    }
+  }, [user, updateItem]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -99,7 +117,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, loading, login, loginAndNavigate, register, logout, getToken }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, loading, login, loginAndNavigate, register, logout, getToken, updateUser  }}>
       {children}
     </AuthContext.Provider>
   );

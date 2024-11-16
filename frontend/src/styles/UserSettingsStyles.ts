@@ -6,9 +6,12 @@ const useStyles = makeStyles((theme: Theme) => ({
         display: 'flex',
         height: '100%',
     },
+    titleText: {
+        marginTop: `${theme.spacing(2)} !important`,
+    },
     card: {
         marginBottom: theme.spacing(3),
-    },
+    }, 
     userInfoHeader: {
         display: 'flex',
         alignItems: 'center',

@@ -7,10 +7,9 @@ import APIShortListView from './ApiShortListView';
 import { API } from '../../../../types/ApiTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
 import { ApiComponentProps } from '../../../../types/ApiTypes';
-import ApiTooltipView from './ApiTooltipView';
 
 type BaseApiMode = BaseDbElementProps<API>['mode'];
-type ExtendedApiMode = 'list' | 'shortList' | 'card' | 'table' | 'tooltip';
+type ExtendedApiMode = 'list' | 'shortList' | 'card' | 'table';
 type EnhancedApiMode = BaseApiMode | ExtendedApiMode;
 
 interface EnhancedApiProps extends Omit<ApiComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
@@ -56,8 +55,6 @@ const EnhancedAPI: React.FC<EnhancedApiProps> = (props: EnhancedApiProps) => {
         return <ApiTableView {...commonProps} />;
       case 'card':
         return <ApiCardView {...commonProps} />;
-      case 'tooltip':
-        return <ApiTooltipView {...commonProps} />;
       default:
         return null;
     }

@@ -4,7 +4,6 @@ import { Category, TypeSpecimen, Description } from '@mui/icons-material';
 import { CodeExecutionComponentProps } from '../../../../types/CodeExecutionTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
-import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 
 const CodeExecutionCardView: React.FC<CodeExecutionComponentProps> = ({ item }) => {
 

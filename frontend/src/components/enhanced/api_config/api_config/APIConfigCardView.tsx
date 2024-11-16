@@ -1,6 +1,6 @@
 import React from 'react';
 import { Typography } from '@mui/material';
-import { Category, TypeSpecimen, Description } from '@mui/icons-material';
+import { Category, TypeSpecimen, Description, HealthAndSafety } from '@mui/icons-material';
 import { APIConfigComponentProps } from '../../../../types/ApiConfigTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 
@@ -13,13 +13,18 @@ const APIConfigCardView: React.FC<APIConfigComponentProps> = ({ item }) => {
     const listItems = [
         {
             icon: <Description />,
-            primary_text: "Description",
+            primary_text: "Name",
             secondary_text: item.name
         },
         {
             icon: <TypeSpecimen />,
-            primary_text: "Type",
+            primary_text: "API Name",
             secondary_text: item.api_name
+        },
+        {
+            icon: <HealthAndSafety />,
+            primary_text: "Health Status",
+            secondary_text: item.health_status
         },
         {
             icon: <Category />,

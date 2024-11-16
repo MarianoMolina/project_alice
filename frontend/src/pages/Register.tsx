@@ -4,11 +4,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ApiSetup from '../components/ui/registration/ApiSetup';
 import RegistrationComplete from '../components/ui/registration/RegistrationComplete';
-import { API } from '../types/ApiTypes';
 import useStyles from '../styles/RegisterStyles';
 import Logger from '../utils/Logger';
 import { useCardDialog } from '../contexts/CardDialogContext';
 import { useApi } from '../contexts/ApiContext';
+import { APIConfig } from '../types/ApiConfigTypes';
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -18,7 +18,7 @@ const Register = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState(0);
-  const [userApis, setUserApis] = useState<API[]>([]);
+  const [userApis, setUserApis] = useState<APIConfig[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const classes = useStyles();
   const { selectFlexibleItem, selectedFlexibleItem } = useCardDialog();
@@ -26,8 +26,8 @@ const Register = () => {
 
   const updateAPIs = useCallback(async () => {
     setIsLoading(true);
-    const apis = await fetchItem('apis');
-    setUserApis(apis as API[]);
+    const apis = await fetchItem('apiconfigs');
+    setUserApis(apis as APIConfig[]);
     setIsLoading(false);
   }, [fetchItem]);
 
@@ -38,7 +38,7 @@ const Register = () => {
     fetchData();
   }, [selectedFlexibleItem, step, updateAPIs]);
 
-  const handleApiSelect = (api: API) => {
+  const handleApiSelect = (api: APIConfig) => {
     if (!api._id) return;
     selectFlexibleItem('API', 'edit', api._id);
   };

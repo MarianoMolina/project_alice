@@ -18,6 +18,9 @@ import EnhancedUserCheckpoint from '../../user_checkpoint/user_checkpoint/Enhanc
 import EnhancedUserInteraction from '../../user_interaction/user_interaction/EnhancedUserInteraction';
 import EnhancedEmbeddingChunk from '../../embedding_chunk/embedding_chunk/EnhancedEmbeddingChunk';
 import EnhancedDataCluster from '../../data_cluster/data_cluster/EnhancedDataCluster';
+import EnhancedToolCall from '../../tool_calls/tool_calls/EnhancedToolCall';
+import EnhancedCodeExecution from '../../code_execution/code_execution/EnhancedCodeExecution';
+import EnhancedAPIConfig from '../../api_config/api_config/EnhancedAPIConfig';
 
 const EnhancedFlexibleDialog: React.FC = () => {
   const { 
@@ -48,6 +51,9 @@ const EnhancedFlexibleDialog: React.FC = () => {
       handleUserInteractionClick: (id: string) => selectCardItem('UserInteraction', id),
       handleEmbeddingChunkClick: (id: string) => selectCardItem('EmbeddingChunk', id),
       handleDataClusterClick: (id: string) => selectCardItem('DataCluster', id),
+      handleToolCallClick: (id: string) => selectCardItem('ToolCall', id),
+      handleCodeExecutionClick: (id: string) => selectCardItem('CodeExecution', id),
+      handleAPIConfigClick: (id: string) => selectCardItem('APIConfig', id),
     };
 
     const commonProps = {
@@ -93,6 +99,12 @@ const EnhancedFlexibleDialog: React.FC = () => {
           return <EnhancedEmbeddingChunk itemId={selectedFlexibleItem._id} {...commonProps} />;
         case 'DataCluster':
           return <EnhancedDataCluster itemId={selectedFlexibleItem._id} {...commonProps} />;
+        case 'ToolCall':
+          return <EnhancedToolCall itemId={selectedFlexibleItem._id} {...commonProps} />;
+        case 'CodeExecution':
+          return <EnhancedCodeExecution itemId={selectedFlexibleItem._id} {...commonProps} />;
+        case 'APIConfig':
+          return <EnhancedAPIConfig itemId={selectedFlexibleItem._id} {...commonProps} />;
         default:
           return null;
       }

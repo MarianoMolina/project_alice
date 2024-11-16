@@ -83,9 +83,8 @@ export interface API extends BaseDatabaseObject {
     api_name: ApiName;
     name?: string;
     is_active: boolean;
-    health_status: 'healthy' | 'unhealthy' | 'unknown';
     default_model?: AliceModel;
-    api_config: { [key: string]: string };
+    api_config: APIConfig;
 }
 ```
 
@@ -94,6 +93,17 @@ Key points:
 - `api_name`: Specifies the provider (e.g., OPENAI, GEMINI)
 - `default_model`: For Model APIs, this specifies the default model to use
 - `api_config`: Contains provider-specific configuration (e.g., API keys, base URLs)
+
+### API Config Interface
+
+```typescript
+export interface APIConfig extends BaseDatabaseObject {
+    name: string;
+    api_name: ApiName;
+    data: { [key: string]: any };
+    health_status: 'healthy' | 'unhealthy' | 'unknown';
+}
+```
 
 ## Relationship with Agents
 

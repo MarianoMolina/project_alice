@@ -8,13 +8,13 @@ import EnhancedTaskResponse from '../components/enhanced/task_response/task_resp
 import EnhancedTask from '../components/enhanced/task/task/EnhancedTask';
 import { RecentExecution, useTask } from '../contexts/TaskContext';
 import useStyles from '../styles/StartTaskStyles';
-import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
 import { CollectionElementString } from '../types/CollectionTypes';
 import { useCardDialog } from '../contexts/CardDialogContext';
-import { API } from '../types/ApiTypes';
 import TaskShortListView from '../components/enhanced/task/task/TaskShortListView';
 import FilterSelect from '../components/ui/sidetab_header/FilterSelect';
+import EnhancedAPIConfig from '../components/enhanced/api_config/api_config/EnhancedAPIConfig';
+import { APIConfig } from '../types/ApiConfigTypes';
 
 const StartTask: React.FC = () => {
   const classes = useStyles();
@@ -145,7 +145,7 @@ const StartTask: React.FC = () => {
           <Box className={classes.apiStatusContainer}>
             <Typography variant="h6" className={classes.sectionTitle}>API Status</Typography>
             <Box className={classes.apiTooltipContainer}>
-              <EnhancedAPI mode='tooltip' fetchAll={true} onInteraction={(api: API) => api._id && triggerItemDialog('API', api._id)} />
+              <EnhancedAPIConfig mode='tooltip' fetchAll={true} onInteraction={(apiConfig: APIConfig) => apiConfig._id && triggerItemDialog('APIConfig', apiConfig._id)} />
             </Box>
           </Box>
           <Accordion
