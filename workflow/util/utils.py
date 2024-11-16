@@ -114,7 +114,7 @@ def est_token_count(text: str) -> int:
     """Estimate token count for a given string."""
     return len(text) // 3  # Simple estimation
 
-def est_messages_token_count(messages: List[Dict[str, Any]], tools: List[Dict[str, Any]] = None) -> int:
+def est_messages_token_count(messages: List[Dict[str, Any]], tools: List[Any] = None) -> int:
     """Estimate token count for a list of messages and optional tools."""
     total_tokens = sum(est_token_count(msg.get('content', '')) for msg in messages)
     if tools:

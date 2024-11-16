@@ -1,17 +1,16 @@
 from enum import Enum
 from pydantic import Field, model_validator, BaseModel
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Callable
 from workflow.util import LOGGER, get_traceback
 from workflow.core.data_structures import (
     MessageDict, ContentType, References, ToolFunction,
     UserInteraction, UserCheckpoint, Prompt, User, 
     BaseDataStructure, DataCluster, InteractionOwner,
-    InteractionOwnerType, MessageGenerators, RoleTypes,
-    CodeExecution
+    InteractionOwnerType, MessageGenerators, RoleTypes
 )
 from workflow.core.agent import AliceAgent
 from workflow.core.api import APIManager
-from workflow.core.tasks import AliceTask
+from workflow.core.tasks import AliceTask, create_task_from_json
 
 class CheckpointType(str, Enum):
     TOOL_CALL = "tool_call"
@@ -70,33 +69,76 @@ class AliceChat(BaseDataStructure):
         description="Associated data cluster"
     )
 
-    @model_validator(mode='after')
-    def initialize_tools(self) -> 'AliceChat':
+    @model_validator(mode='before')
+    @classmethod
+    def initialize_tools(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Ensures agent_tools and retrieval_tools are properly initialized as lists of AliceTask instances.
+        Initialize agent_tools and retrieval_tools before model creation.
         
         This validator:
-        1. Converts None to empty list for agent_tools
-        2. Ensures retrieval_tools is either None or a list
-        3. Casts dictionary items to AliceTask instances
-        4. Validates that all items are or can be converted to AliceTask instances
-        """
-        if not isinstance(self.agent_tools, list):
-            self.agent_tools = []
-        if not isinstance(self.retrieval_tools, list):
-            self.retrieval_tools = []
-            
-        # Convert dictionaries to AliceTask instances
-        self.agent_tools = [
-            AliceTask.model_validate(tool) if isinstance(tool, dict) else tool
-            for tool in self.agent_tools
-        ]
-        self.retrieval_tools = [
-            AliceTask.model_validate(tool) if isinstance(tool, dict) else tool
-            for tool in self.retrieval_tools
-        ]
+        1. Ensures tool lists are properly initialized
+        2. Converts dictionary items to appropriate task instances using create_task_from_json
+        3. Validates all items are valid task instances
         
-        return self
+        Args:
+            values: Dictionary of field values to validate
+            
+        Returns:
+            Dict[str, Any]: Updated values dictionary with properly initialized tools
+            
+        Raises:
+            ValueError: If tool conversion or validation fails
+        """
+        # Initialize empty lists if not present
+        agent_tools = values.get('agent_tools', [])
+        retrieval_tools = values.get('retrieval_tools', [])
+        
+        # Ensure we have lists
+        if not isinstance(agent_tools, list):
+            agent_tools = []
+        if not isinstance(retrieval_tools, list):
+            retrieval_tools = []
+            
+        # Process agent tools
+        processed_agent_tools = []
+        for tool in agent_tools:
+            if isinstance(tool, dict):
+                try:
+                    processed_tool = create_task_from_json(tool)
+                    processed_agent_tools.append(processed_tool)
+                except Exception as e:
+                    LOGGER.error(f"Failed to create agent tool: {str(e)}")
+                    raise ValueError(f"Failed to create agent tool: {str(e)}")
+            elif isinstance(tool, AliceTask):
+                processed_agent_tools.append(tool)
+            else:
+                LOGGER.error(f"Invalid agent tool type: {type(tool)}")
+                raise ValueError(f"Invalid agent tool type: {type(tool)}")
+                
+        # Process retrieval tools
+        processed_retrieval_tools = []
+        for tool in retrieval_tools:
+            if isinstance(tool, dict):
+                try:
+                    processed_tool = create_task_from_json(tool)
+                    processed_retrieval_tools.append(processed_tool)
+                except Exception as e:
+                    LOGGER.error(f"Failed to create retrieval tool: {str(e)}")
+                    raise ValueError(f"Failed to create retrieval tool: {str(e)}")
+            elif isinstance(tool, AliceTask):
+                processed_retrieval_tools.append(tool)
+            else:
+                LOGGER.error(f"Invalid retrieval tool type: {type(tool)}")
+                raise ValueError(f"Invalid retrieval tool type: {type(tool)}")
+
+        # Update values with processed tools
+        values['agent_tools'] = processed_agent_tools
+        values['retrieval_tools'] = processed_retrieval_tools
+        
+        LOGGER.debug(f"Initialized agent_tools: {processed_agent_tools} with task types {[tool.__class__.__name__ for tool in processed_agent_tools]}")
+        LOGGER.debug(f"Initialized retrieval_tools: {processed_retrieval_tools} with task types {[tool.__class__.__name__ for tool in processed_retrieval_tools]}")
+        
+        return values
 
     def model_dump(self, *args, **kwargs):
         """
@@ -264,7 +306,7 @@ class AliceChat(BaseDataStructure):
             llm_message = await self._generate_llm_response(
                 api_manager,
                 self.messages + previous_messages,
-                self._get_available_tools(api_manager),
+                self._get_available_tool_functions(api_manager),
                 user_data=user_data
             )
             turn_messages.append(llm_message)
@@ -305,8 +347,8 @@ class AliceChat(BaseDataStructure):
         # Execute tool calls
         return await self.alice_agent.process_tool_calls(
             tool_calls,
-            self._get_available_tools(api_manager),
-            self._get_tool_list(api_manager)
+            self._get_available_tool_map(api_manager),
+            self._get_available_tool_functions(api_manager),
         )
 
     async def _handle_code_execution(self, messages: List[MessageDict], skip_permission: bool = False) -> List[MessageDict]:
@@ -395,40 +437,30 @@ class AliceChat(BaseDataStructure):
             tools_list, 
             **kwargs
         )
-
-    def _get_available_tools(self, api_manager: APIManager) -> Optional[List[ToolFunction]]:
+    
+    def available_tools(self) -> Optional[List[AliceTask]]:
         """Get all available tools including retrieval tools if applicable."""
         tools = []
-        tools.extend(self._get_agent_tools(api_manager))
-        tools.extend(self._get_retrieval_tools(api_manager))
+        tools.extend(self.agent_tools)
+        tools.extend(self.retrieval_tools)
         return tools if tools else None
 
-    def _get_agent_tools(self, api_manager: APIManager) -> List[ToolFunction]:
-        """Get list of available agent tools."""
-        if self.agent_tools:
-            return [tool.get_function(api_manager)["tool_function"] 
-                   for tool in self.agent_tools]
-        return []
+    def _get_available_tool_functions(self, api_manager: APIManager) -> Optional[List[ToolFunction]]:
+        """Get all available tools including retrieval tools if applicable."""
+        tools = self.available_tools()
+        tool_functions = [tool.get_function(api_manager)["tool_function"] for tool in tools] if tools else None
+        return tool_functions if tool_functions else None
     
-    def _get_retrieval_tools(self, api_manager: APIManager) -> List[ToolFunction]:
-        """Get list of available retrieval tools."""
-        if self.retrieval_tools and self.data_cluster:
-            # Update data cluster if needed
-            for tool in self.retrieval_tools:
-                if tool.data_cluster != self.data_cluster:
-                    tool.data_cluster = self.data_cluster
-            
-            return [tool.get_function(api_manager)["tool_function"] 
-                   for tool in self.retrieval_tools]
-        return []
+    def _get_available_tool_map(self, api_manager: APIManager) -> Optional[Dict[str, Callable]]:
+        """Get a map of all available tools."""
+        tools = self.available_tools()
+        if tools:
+            tool_map = {}
+            for tool in tools:
+                tool_map.update(tool.get_function(api_manager)["function_map"])
+            return tool_map if tool_map else None
+        return None
     
-    def _get_tool_list(self, api_manager: APIManager) -> List[Dict[str, Any]]:
-        """Get list of all tool configurations."""
-        tools = self._get_available_tools(api_manager)
-        if not tools:
-            return []
-        return [tool.model_dump(exclude={'id', '_id'}) for tool in tools]
-
     def deep_validate_required_apis(self, api_manager: APIManager) -> Dict[str, Any]:
         """Validate all required APIs for the chat and its tools."""
         result = {

@@ -359,7 +359,7 @@ base_module = BaseModule(
                 "api_name": "groq",
                 "data": {
                     "api_key": GROQ_API_KEY,
-                    "base_url": "https://api.groq.ai"
+                    "base_url": "https://api.groq.com/openai/v1"
                 }
             },
             {

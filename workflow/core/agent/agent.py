@@ -149,7 +149,6 @@ print("This is just for demonstration")
     async def generate_llm_response(self, api_manager: APIManager, messages: List[MessageDict], tools_list: List[ToolFunction] = [], **kwargs) -> MessageDict:
         LOGGER.info("Generating LLM response")
         chat_model = self.llm_model
-        tool_list = [tool.get_dict() if isinstance(tool, ToolFunction) else tool for tool in tools_list] if tools_list else None
         response_ref: References = await api_manager.generate_response_with_api_engine(
             api_type=ApiType.LLM_MODEL,
             api_name=chat_model.api_name,
@@ -157,7 +156,7 @@ print("This is just for demonstration")
             messages=self._prepare_messages_for_api(messages),
             system=self._prepare_system_message(**kwargs),
             tool_choice='auto' if self.has_tools != 0 else 'none',
-            tools=tool_list,
+            tools=tools_list,
             temperature=0.7,
             max_tokens=4096  # TODO: Make this configurable
         )
@@ -266,7 +265,11 @@ print("This is just for demonstration")
             arguments_str = tool_call.function.arguments
             
             try:
-                arguments = json.loads(arguments_str)
+                if not isinstance(arguments_str, dict):
+                    LOGGER.debug(f"Decoding JSON arguments: {arguments_str}")
+                    arguments = json.loads(arguments_str)
+                else:
+                    arguments = arguments_str
             except json.JSONDecodeError:
                 error_msg = f"Error decoding JSON arguments: {arguments_str}"
                 tool_messages.append(self._create_tool_error_message(error_msg, function_name))

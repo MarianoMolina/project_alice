@@ -15,6 +15,8 @@ export const convertToDataCluster = (data: any): DataCluster => {
         entity_references: data?.entity_references || [],
         user_interactions: data?.user_interactions || [],
         embeddings: data?.embeddings || [],
+        tool_calls: data?.tool_calls || [],
+        code_executions: data?.code_executions || []
     };
 };
 
@@ -28,5 +30,7 @@ export const getDefaultDataClusterForm = (): Partial<DataCluster> => ({
     files: [],
     entity_references: [],
     user_interactions: [],
-    embeddings: []
+    embeddings: [],
+    tool_calls: [],
+    code_executions: []
 });

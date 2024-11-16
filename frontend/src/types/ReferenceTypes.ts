@@ -1,3 +1,4 @@
+import Logger from "../utils/Logger";
 import { CodeExecution } from "./CodeExecutionTypes";
 import { EmbeddingChunk } from "./EmbeddingChunkTypes";
 import { EntityReference } from "./EntityReferenceTypes";
@@ -31,6 +32,7 @@ export interface References {
 }
 
 export function hasAnyReferences(references: References): boolean {
+  Logger.debug("Checking references:", references);
   return (
     (references.messages?.length ?? 0) > 0 ||
     (references.files?.length ?? 0) > 0 ||

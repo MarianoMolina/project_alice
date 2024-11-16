@@ -5,7 +5,9 @@ from pydantic import Field
 from typing import Dict, Any, List, Optional
 from workflow.core.api.engines import APIEngine
 from workflow.util import LOGGER, est_messages_token_count, prune_messages
-from workflow.core.data_structures import MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, RoleTypes, MessageGenerators
+from workflow.core.data_structures import (
+    MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, RoleTypes, MessageGenerators, ToolFunction
+    )
 
 class LLMEngine(APIEngine):
     """
@@ -68,7 +70,7 @@ class LLMEngine(APIEngine):
     )
     required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
 
-    async def generate_api_response(self, api_data: ModelConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[Dict[str, Any]]] = None, max_tokens: Optional[int] = None, tool_choice: Optional[str] = 'auto', n: Optional[int] = 1, **kwargs) -> References:
+    async def generate_api_response(self, api_data: ModelConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[ToolFunction]] = None, max_tokens: Optional[int] = None, tool_choice: Optional[str] = 'auto', n: Optional[int] = 1, **kwargs) -> References:
         """
         Generates the API response for the task, using the provided API data and messages.
 
@@ -110,6 +112,9 @@ class LLMEngine(APIEngine):
         )
         if system:
             messages = [{"role": "system", "content": system}] + messages
+        
+        if tools:
+            tools = [tool.get_dict() for tool in tools]
 
         estimated_tokens = est_messages_token_count(messages, tools)
         if estimated_tokens > api_data.ctx_size:

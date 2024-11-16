@@ -144,7 +144,8 @@ export const sendMessage = async (chatId: string, message: MessageType): Promise
     }
 
     const response = await dbAxiosInstance.patch(`/chats/${chatId}/add_message`, { message });
-    return convertToAliceChat(response.data);
+    Logger.debug('Received response:', response.data);
+    return convertToAliceChat(response.data.chat);
   } catch (error) {
     Logger.error('Error sending message:', error);
     throw error;

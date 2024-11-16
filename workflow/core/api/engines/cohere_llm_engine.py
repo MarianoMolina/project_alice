@@ -3,7 +3,10 @@ from cohere import NonStreamedChatResponse
 from pydantic import Field
 from typing import Dict, Any, List, Optional
 from workflow.core.api.engines import APIEngine
-from workflow.core.data_structures import MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, RoleTypes, MessageGenerators
+from workflow.core.data_structures import (
+    MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, 
+    RoleTypes, MessageGenerators, ToolFunction
+    ) 
 from workflow.util import LOGGER, est_messages_token_count, prune_messages
 
 class CohereLLMEngine(APIEngine):
@@ -53,7 +56,7 @@ class CohereLLMEngine(APIEngine):
     )
     required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
 
-    async def generate_api_response(self, api_data: ModelConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[Dict[str, Any]]] = None, max_tokens: Optional[int] = None, temperature: Optional[float] = 0.7, tool_choice: Optional[str] = "auto", n: Optional[int] = 1, **kwargs) -> References:
+    async def generate_api_response(self, api_data: ModelConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[ToolFunction]] = None, max_tokens: Optional[int] = None, temperature: Optional[float] = 0.7, tool_choice: Optional[str] = "auto", n: Optional[int] = 1, **kwargs) -> References:
         if not api_data.api_key:
             raise ValueError("API key not found in API data")
 
@@ -82,7 +85,7 @@ class CohereLLMEngine(APIEngine):
             cohere_tools = []
             if tools:
                 for tool in tools:
-                    cohere_tools.append(cohere.ToolV2(type='function', function=tool))
+                    cohere_tools.append(cohere.ToolV2(type='function', function=tool.get_dict()))
 
             response: NonStreamedChatResponse = client.chat(
                 model=api_data.model,

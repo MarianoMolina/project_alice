@@ -44,9 +44,12 @@ class EmbeddingEngine(APIEngine):
         """
         # Validate the language input
         try:
-            language_enum = get_language_matching(language)
-            if not language_enum:
-                raise ValueError(f"Invalid language option: {language}")
+            if language == 'text':
+                language_enum = Language.TEXT
+            else:
+                language_enum = get_language_matching(language)
+                if not language_enum:
+                    raise ValueError(f"Invalid language option: {language}")
         except ValueError:
             raise ValueError(f"Invalid language option: {language}")
 

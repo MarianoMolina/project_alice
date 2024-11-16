@@ -34,4 +34,6 @@ Where:
     text/bash
 - 'title' is the human-readable title, which can be repeated when updating a document
 
+REMINDER: These are the ONLY html tags that will be parsed: <analysis> & <aliceDocument>. Don't use other tags unless providing XML-type code.  
+
 If you're unsure about any part of the request or if multiple interpretations are possible, please state your assumptions clearly.

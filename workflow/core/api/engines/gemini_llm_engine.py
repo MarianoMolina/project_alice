@@ -4,7 +4,8 @@ from pydantic import Field
 from typing import Dict, Any, List, Optional
 from workflow.core.api.engines import APIEngine
 from workflow.core.data_structures import (
-    MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, ToolCallConfig, RoleTypes, MessageGenerators
+    MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, ToolCallConfig, RoleTypes, MessageGenerators, 
+    ToolFunction
     )
 from workflow.util import LOGGER, est_messages_token_count, prune_messages, est_token_count
 
@@ -55,13 +56,33 @@ class GeminiLLMEngine(APIEngine):
     )
     required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
 
-    async def generate_api_response(self, api_data: ModelConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[Dict[str, Any]]] = None, max_tokens: Optional[int] = None, temperature: Optional[float] = 0.7, tool_choice: Optional[str] = "auto", n: Optional[int] = 1, **kwargs) -> References:
+    async def generate_api_response(self, api_data: ModelConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[ToolFunction]] = None, max_tokens: Optional[int] = None, temperature: Optional[float] = 0.7, tool_choice: Optional[str] = "auto", n: Optional[int] = 1, **kwargs) -> References:
         if not api_data.api_key:
             raise ValueError("API key not found in API data")
         
         LOGGER.debug(f'Gemini llm response generation with tools: {tools}')
 
         genai.configure(api_key=api_data.api_key)
+
+        function_declarations = []
+        if tools:
+            LOGGER.debug(f"Tools: {tools}")
+            # Convert tools to Gemini's function declarations format
+            for tool in tools:
+                function_declarations.append({
+                    "name": tool.function.name,
+                    "description": tool.function.description,
+                    "parameters": tool.function.parameters.get_gemini_function()
+                })
+
+        # Set up function calling configuration
+        tool_config = None
+        if function_declarations:
+            tool_config = {
+                "function_declarations": function_declarations
+            }
+        LOGGER.debug(f"Tool config: {tool_config}")
+
         estimated_tokens = est_messages_token_count(messages, tools)
         if estimated_tokens > (api_data.ctx_size - est_token_count(system)):
             LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning. ")
@@ -84,6 +105,8 @@ class GeminiLLMEngine(APIEngine):
             model_kwargs = {"model_name": api_data.model}
             if system:
                 model_kwargs["system_instruction"] = system
+            if tool_config:
+                model_kwargs["tools"] = tool_config
             
             model = genai.GenerativeModel(**model_kwargs)
 
@@ -95,29 +118,10 @@ class GeminiLLMEngine(APIEngine):
                 temperature=temperature
             )
 
-            # Convert tools to Gemini's function declarations format
-            function_declarations = []
-            if tools:
-                for tool in tools:
-                    function_declarations.append({
-                        "name": tool["function"]["name"],
-                        "description": tool["function"]["description"],
-                        "parameters": tool["function"]["parameters"]
-                    })
-
-            # Set up function calling configuration
-            tool_config = None
-            if function_declarations:
-                tool_config = {
-                    "function_declarations": function_declarations
-                }
-            LOGGER.debug(f"Tool config: {tool_config}")
-
             # Send the new message to get the response
             response: GenerateContentResponse = chat.send_message(
                 new_message,
                 generation_config=generation_config,
-                tools=tool_config
             )
 
             # Process tool calls
@@ -132,10 +136,20 @@ class GeminiLLMEngine(APIEngine):
                                 name=part.function_call.name,
                             )
                         ))
-
+            response_text: str = ''
+            try:
+                response_text = response.text
+            except Exception as e:
+                LOGGER.error(f"Error in Gemini API response processing: {str(e)}")
+                try:
+                    response_text = response.candidates[0].content.parts[0].text
+                except Exception as e:
+                    LOGGER.error(f"Error in Gemini API response processing: {str(e)}")
+                    response_text = "N/A"
+            
             msg = MessageDict(
                 role=RoleTypes.ASSISTANT,
-                content=response.text,
+                content=response_text,
                 references=References(tool_calls=tool_calls if tool_calls else None),
                 generated_by=MessageGenerators.LLM,
                 type=ContentType.TEXT,

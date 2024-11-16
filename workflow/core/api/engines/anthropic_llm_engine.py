@@ -91,7 +91,7 @@ class LLMAnthropic(LLMEngine):
 
         return final_adapted
     
-    async def generate_api_response(self, api_data: ModelConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[Dict[str, Any]]] = None, max_tokens: Optional[int] = None, tool_choice: str = 'auto', n: Optional[int] = 1, **kwargs) -> References:
+    async def generate_api_response(self, api_data: ModelConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[ToolFunction]] = None, max_tokens: Optional[int] = None, tool_choice: str = 'auto', n: Optional[int] = 1, **kwargs) -> References:
         """
         Generate a chat completion response using Anthropic's API.
 

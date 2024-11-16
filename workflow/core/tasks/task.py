@@ -315,13 +315,16 @@ class AliceTask(BaseDataStructure):
         # Get node method
         method_name = f"execute_{node_name}"
         if not hasattr(self, method_name):
+            LOGGER.error(f"No implementation found for node {node_name} as method_name {method_name} in task {self.task_name}")
+            LOGGER.debug(f"Available methods: {dir(self)}")
+            LOGGER.debug(f"Self class: {self.__class__.__name__}")
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name=node_name,
                 exit_code=1,
                 references=References(messages=[{
                     "role": "system",
-                    "content": f"No implementation found for node {node_name}",
+                    "content": f"No implementation found for node {node_name} in task {self.task_name}",
                     "generated_by": "system"
                 }]),
                 execution_order=len(execution_history)

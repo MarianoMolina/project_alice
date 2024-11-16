@@ -8,7 +8,8 @@ import AliceMarkdown from "./AliceMarkdown";
 export const AnalysisBlockComponent: React.FC<{ node: any }> = ({ node }) => {
   const [open, setOpen] = React.useState(false);
   const content = getNodeContent(node);
-  const title = 'Analysis';
+  const attributes = node.data?.attributes || {};
+  const title = attributes.title || 'Alice Document';
 
   return (
     <>

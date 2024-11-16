@@ -142,15 +142,23 @@ class DBInitManager(BaseModel):
             LOGGER.debug(f"Creating entity instance for {entity_type}: {entity_data_copy}")
             if not entity_data_copy.get('key'):
                 raise ValueError(f"Key not found for entity {entity_type}")
+            
+            # First resolve references
             resolved_data = self.resolve_references_in_data(entity_type, entity_data_copy)
             LOGGER.debug(f"Resolved data for {entity_type}: {resolved_data}")
-            if db_app:
-                LOGGER.debug(f"Creating entity in DB: {entity_type}, {resolved_data}")
-                response = await db_app.create_entity_in_db(entity_type, resolved_data)
-                resolved_data['_id'] = response.get('_id', response.get('id', ''))
-                LOGGER.debug(f"Entity created in DB with ID: {resolved_data['_id']}")
+            
+            # Create the instance with resolved data
             entity_instance = self.get_entity_instance(entity_type, resolved_data)
             LOGGER.debug(f"Created entity instance: {entity_instance}")
+            
+            if db_app:
+                # Use the full serialized instance data for DB creation
+                complete_data = entity_instance.model_dump(by_alias=True)
+                LOGGER.debug(f"Creating entity in DB: {entity_type}, {complete_data}")
+                response = await db_app.create_entity_in_db(entity_type, complete_data)
+                entity_instance.id = response.get('_id', response.get('id', ''))
+                LOGGER.debug(f"Entity created in DB with ID: {entity_instance.id}")
+            
             self.entity_obj_key_map[entity_type][entity_data_copy.get('key')] = entity_instance
             LOGGER.debug(f"Stored entity in map: {entity_type}, key: {entity_data_copy.get('key')}, value: {entity_instance}")
             return entity_instance
@@ -184,8 +192,10 @@ class DBInitManager(BaseModel):
 
         for task_class in available_task_types:
             if task_type == task_class.__name__:
-                try:
-                    return task_class(**task_dict)
+                try:                
+                    task = task_class(**task_dict)
+                    LOGGER.debug(f"Just created task: {task.model_dump()}")
+                    return task
                 except Exception as e:
                     LOGGER.error(f"Error creating task of type {task_type}: {str(e)} \n Task data: {task_dict}")
                     raise ValidationError(f"Error creating task of type {task_type}: {str(e)}")

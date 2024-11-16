@@ -13,6 +13,9 @@ import FileShortListView from '../../file/file/FileShortListView';
 import TaskResponseShortListView from '../../task_response/task_response/TaskResponseShortListView';
 import EntityReferenceShortListView from '../../entity_reference/entity_reference/EntityReferenceShortListView';
 import EmbeddingChunkShortListView from '../../embedding_chunk/embedding_chunk/EmbeddingChunkShortListView';
+import ToolCallShortListView from '../../tool_calls/tool_calls/ToolCallShortListView';
+import CodeExecutionShortListView from '../../code_execution/code_execution/CodeExecutionShortListView';
+import UserInteractionShortListView from '../../user_interaction/user_interaction/UserInteractionShortListView';
 
 export interface DataClusterManagerProps {
     dataCluster: DataCluster | undefined;
@@ -68,6 +71,24 @@ export const REFERENCE_CONFIG: ReferenceTypeConfig[] = [
         EnhancedView: EmbeddingChunkShortListView,
         chipType: 'EmbeddingChunk'
     },
+    {
+        key: 'user_interactions',
+        title: 'User Interactions',
+        EnhancedView: UserInteractionShortListView,
+        chipType: 'UserInteraction'
+    },
+    {
+        key: 'tool_calls',
+        title: 'Tool Calls',
+        EnhancedView: ToolCallShortListView,
+        chipType: 'ToolCall'
+    },
+    {
+        key: 'code_executions',
+        title: 'Code Executions',
+        EnhancedView: CodeExecutionShortListView,
+        chipType: 'CodeExecution'
+    }
 ];
 
 interface ActionButtonConfig {

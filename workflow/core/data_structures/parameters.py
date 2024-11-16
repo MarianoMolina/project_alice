@@ -32,9 +32,16 @@ class ParameterDefinition(BaseDataStructure):
         }
         if self.default is not None:
             dict_data["default"] = self.default
-        if self.id is not None:
-            dict_data["id"] = self.id
         return dict_data
+    
+    def get_gemini_parameter(self) -> Dict[str, Any]:
+        description = self.description
+        if self.default is not None:
+            description += f" (default: {self.default})"
+        return {
+            "type": self.type,
+            "description": description,
+        }
 
     @classmethod
     def model_validate(cls, obj: Any):
@@ -76,6 +83,15 @@ class FunctionParameters(BaseModel):
         if self.required:
             dict_data["required"] = self.required
         return dict_data
+    
+    def get_gemini_function(self) -> Dict[str, Any]:
+        return {
+            "type": self.type,
+            "properties": {
+                param_name: param.get_gemini_parameter()
+                for param_name, param in self.properties.items()
+            },
+        }
     
 class FunctionConfig(BaseModel):
     """A function as defined by the OpenAI API"""

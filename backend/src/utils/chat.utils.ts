@@ -195,7 +195,7 @@ export async function createMessageInChat(
     chatId: string,
     messageData: Partial<IMessageDocument>,
     userId: string
-): Promise<IMessageDocument | null> {
+): Promise<IAliceChatDocument | null> {
     try {
         Logger.info(`createMessageInChat called for chat ${chatId}`);
 
@@ -234,7 +234,7 @@ export async function createMessageInChat(
 
         Logger.info(`Message ${messageDoc._id} added to chat ${chatId}`);
 
-        return messageDoc;
+        return updatedChat;
     } catch (error) {
         Logger.error('Error in createMessageInChat:', error);
         return null;
