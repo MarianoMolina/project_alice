@@ -288,7 +288,7 @@ coding_workflow_module = CodingWorkflowModule(
             {
                 "key": "coding_workflow_with_checkpoint",
                 "task_type": "Workflow",
-                "task_name": "coding_workflow",
+                "task_name": "coding_workflow_with_checkpoint",
                 "task_description": "Workflow for creating code. Provide a prompt detailing the requirements and language for the code.",
                 "tasks": {
                     "plan_workflow": "plan_workflow",

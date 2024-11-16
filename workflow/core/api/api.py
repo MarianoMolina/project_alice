@@ -2,6 +2,7 @@ from typing import Optional, Dict, Any, Union
 from pydantic import Field, field_validator
 from workflow.core.data_structures import ApiType, ApiName, ModelConfig, ModelApis, AliceModel, BaseDataStructure
 from workflow.core.api.api_config import APIConfig
+from workflow.util import LOGGER
 
 class API(BaseDataStructure):
     """
@@ -94,7 +95,8 @@ class API(BaseDataStructure):
             raise ValueError(f"API {self.name} is not active.")
             
         if not self.api_config:
-            raise ValueError(f"No configuration provided for API {self.name}")
+            LOGGER.warning(f"No configuration provided for API {self.name}")
+            return {}
             
         if self.api_type in ModelApis:
             return self.create_model_config(model)

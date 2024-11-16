@@ -8,6 +8,8 @@ import EmbeddingChunkViewer from '../../embedding_chunk/EmbeddingChunkViewer';
 import UserInteractionViewer from '../../user_interaction/UserInteractionViewer';
 import NodeResponsesViewer from './NodeResponsesViewer';
 import { useStyles } from './ReferencesStyles';
+import EnhancedToolCall from '../../tool_calls/tool_calls/EnhancedToolCall';
+import EnhancedCodeExecution from '../../code_execution/code_execution/EnhancedCodeExecution';
 
 interface ReferencesViewerProps {
   references: References;
@@ -86,6 +88,33 @@ const ReferencesViewer: React.FC<ReferencesViewerProps> = ({ references }) => {
             <EmbeddingChunkViewer
               key={chunk._id || `embedding-${index}`}
               chunk={chunk}
+            />
+          ))}
+        </Box>
+      )}
+
+      {references.tool_calls && references.tool_calls.length > 0 && (
+        <Box className={classes.subSection}>
+          <Typography variant="h6">Tool Calls</Typography>
+          {references.tool_calls.map((toolCall, index) => (
+            <EnhancedToolCall
+              key={toolCall._id || `tool-call-${index}`}
+              mode={'card'}
+              fetchAll={false}
+              itemId={toolCall._id}
+            />
+          ))}
+        </Box>
+      )}  
+      {references.code_executions && references.code_executions.length > 0 && (
+        <Box className={classes.subSection}>
+          <Typography variant="h6">Code Executions</Typography>
+          {references.code_executions.map((codeExecution, index) => (
+            <EnhancedCodeExecution
+              key={codeExecution._id || `code-execution-${index}`}
+              mode={'card'}
+              fetchAll={false}
+              itemId={codeExecution._id}
             />
           ))}
         </Box>

@@ -58,6 +58,8 @@ class GeminiLLMEngine(APIEngine):
     async def generate_api_response(self, api_data: ModelConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[Dict[str, Any]]] = None, max_tokens: Optional[int] = None, temperature: Optional[float] = 0.7, tool_choice: Optional[str] = "auto", n: Optional[int] = 1, **kwargs) -> References:
         if not api_data.api_key:
             raise ValueError("API key not found in API data")
+        
+        LOGGER.debug(f'Gemini llm response generation with tools: {tools}')
 
         genai.configure(api_key=api_data.api_key)
         estimated_tokens = est_messages_token_count(messages, tools)
@@ -76,7 +78,7 @@ class GeminiLLMEngine(APIEngine):
                 history.append({"role": role, "parts": message["content"]})
 
             # Get the last message as the new input
-            new_message = messages[-1]["content"] if messages else ""
+            new_message = messages[-1]["content"] if messages else "" # Shouldn't we remove it if we are passing it as the new message?
 
             # Set up the model with system instruction if provided
             model_kwargs = {"model_name": api_data.model}
@@ -109,6 +111,7 @@ class GeminiLLMEngine(APIEngine):
                 tool_config = {
                     "function_declarations": function_declarations
                 }
+            LOGGER.debug(f"Tool config: {tool_config}")
 
             # Send the new message to get the response
             response: GenerateContentResponse = chat.send_message(

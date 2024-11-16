@@ -1,7 +1,8 @@
 from bson import ObjectId
-from pydantic import BaseModel, Field, HttpUrl
-from typing import Optional, Literal, Tuple, Union, Dict, List
+from pydantic import BaseModel, Field, HttpUrl, AfterValidator
+from typing import Optional, Literal, Tuple, Union, Dict, List, Annotated
 from enum import Enum
+from pydantic_core import Url
 from workflow.util import LOGGER, get_traceback
 # The order of this list is used to determine which entities are created first
 # Also modify the collection_map in db.py if you add new entities
@@ -29,6 +30,8 @@ RouteMapTuple = Tuple[Union[str, None], bool]
 RouteMap = Dict[int, RouteMapTuple]
 TasksEndCodeRouting = Dict[str, RouteMap]
 
+HttpUrlString = Annotated[HttpUrl, AfterValidator(lambda v: str(v))]
+
 class BaseDataStructure(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")
     # createdAt: Optional[str] = Field(default=None)
@@ -38,7 +41,8 @@ class BaseDataStructure(BaseModel):
         "protected_namespaces": (),
         "json_encoders": {
             ObjectId: str,
-            HttpUrl: str
+            HttpUrl: str,
+            Url: str
             },
         "arbitrary_types_allowed": True,
         "extra": "allow",

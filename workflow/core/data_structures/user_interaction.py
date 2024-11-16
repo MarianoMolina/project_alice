@@ -44,14 +44,20 @@ class UserInteraction(Embeddable):
     Represents a user interaction that can belong to either a task response or a chat.
     """
     user_checkpoint_id: UserCheckpoint = Field(..., description="The id of the user checkpoint")
-    owner: InteractionOwner = Field(..., description="Owner (task response or chat) of this interaction")
+    owner: Optional[InteractionOwner] = Field(None, description="Owner (task response or chat) of this interaction")
     user_response: Optional[UserResponse] = None
 
     def __str__(self) -> str:
-        return (f"Owner: {self.owner.type}:{self.owner.id}\n"
-                f"UserCheckpointId: {self.user_checkpoint_id.id}\n"
-                f"UserResponse: \n{str(self.user_response)}")
-
+        string = ''
+        if self.owner:
+            string += f"Owner: {self.owner.type}:{self.owner.id}\n"
+        string += f"UserCheckpointId: {self.user_checkpoint_id.id}\n"
+        if self.user_response:
+            string += f"UserResponse: \n{str(self.user_response)}"
+        else:
+            string += "UserResponse: None"
+        return string
+    
     def model_dump(self, *args, **kwargs):
         data = super().model_dump(*args, **kwargs)
         data['user_checkpoint_id'] = self.user_checkpoint_id.model_dump(*args, **kwargs)

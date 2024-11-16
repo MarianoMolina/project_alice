@@ -149,6 +149,7 @@ print("This is just for demonstration")
     async def generate_llm_response(self, api_manager: APIManager, messages: List[MessageDict], tools_list: List[ToolFunction] = [], **kwargs) -> MessageDict:
         LOGGER.info("Generating LLM response")
         chat_model = self.llm_model
+        tool_list = [tool.get_dict() if isinstance(tool, ToolFunction) else tool for tool in tools_list] if tools_list else None
         response_ref: References = await api_manager.generate_response_with_api_engine(
             api_type=ApiType.LLM_MODEL,
             api_name=chat_model.api_name,
@@ -156,7 +157,7 @@ print("This is just for demonstration")
             messages=self._prepare_messages_for_api(messages),
             system=self._prepare_system_message(**kwargs),
             tool_choice='auto' if self.has_tools != 0 else 'none',
-            tools=tools_list,
+            tools=tool_list,
             temperature=0.7,
             max_tokens=4096  # TODO: Make this configurable
         )
@@ -215,9 +216,9 @@ print("This is just for demonstration")
                         except ValueError:
                             LOGGER.error(f"Invalid language tag: {lang} - {base_lang}")
                             continue
-                        code_blocks.append(CodeBlock(code, final_lang))
+                        code_blocks.append(CodeBlock(code=code, language=final_lang))
                 elif self.has_code_exec == CodePermission.NORMAL:
-                    code_blocks.append(CodeBlock(code, lang))
+                    code_blocks.append(CodeBlock(code=code, language=lang))
                     
         LOGGER.debug(f"Collected {len(code_blocks)} code blocks")
         return code_blocks
@@ -245,11 +246,11 @@ print("This is just for demonstration")
         for lang, codes in code_by_lang.items():
             # Merge code blocks for each language
             merged_code = "\n\n".join(codes)
-            code_block = CodeBlock(merged_code, lang)
+            code_block = CodeBlock(code=merged_code, language=lang)
             current_exit_code, logs = self._execute_code_in_docker(code_block)
 
             exit_code = current_exit_code if current_exit_code != 0 else exit_code
-            code_executions.append(CodeExecution(code_block=code_block, code_output=CodeOutput(logs, current_exit_code)))
+            code_executions.append(CodeExecution(code_block=code_block, code_output=CodeOutput(output=logs, exit_code=current_exit_code)))
             
         return code_executions, exit_code
 
@@ -272,7 +273,7 @@ print("This is just for demonstration")
                 continue
 
             if function_name not in tool_map:
-                tool_messages.append(self._create_tool_error_message(f"Tool '{function_name}' not found", function_name))
+                tool_messages.append(self._create_tool_error_message(f"Tool '{function_name}' not found\nTool map: {tool_map}", function_name))
                 continue
             
             tool_function = next((tool for tool in (ensure_tool_function(tool) for tool in tools_list) if tool.function.name == function_name), None)

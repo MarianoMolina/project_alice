@@ -2,7 +2,9 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { Box } from '@mui/material';
 import {
     Add, Message, Functions, Description,
-    AttachFile, Diversity2, Assignment, Feedback
+    AttachFile, Diversity2, Assignment, Feedback,
+    Code,
+    PersonOutline
 } from '@mui/icons-material';
 import {
     TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH,
@@ -23,6 +25,7 @@ import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/Placehold
 import { useCardDialog } from '../contexts/CardDialogContext';
 import Logger from '../utils/Logger';
 import ToggleBox from '../components/ui/sidetab_header/ToggleBox';
+import EnhancedEntityReference from '../components/enhanced/entity_reference/entity_reference/EnhancedEntityReference';
 
 const ReferencesPage: React.FC = () => {
     const classes = useStyles();
@@ -38,11 +41,12 @@ const ReferencesPage: React.FC = () => {
         // Msg Group
         { name: 'Message' as CollectionElementString, icon: Message, group: 'Msg' },
         { name: 'ToolCall' as CollectionElementString, icon: Functions, group: 'Msg' },
-        { name: 'CodeExecution' as CollectionElementString, icon: Functions, group: 'Msg' },
+        { name: 'CodeExecution' as CollectionElementString, icon: Code, group: 'Msg' },
 
         // Misc Group
         { name: 'EmbeddingChunk' as CollectionElementString, icon: Description, group: 'Misc' },
         { name: 'UserInteraction' as CollectionElementString, icon: Feedback, group: 'Misc' },
+        { name: 'EntityReference' as CollectionElementString, icon: PersonOutline, group: 'Misc' },
 
         // Task Group
         { name: 'TaskResponse' as CollectionElementString, icon: Assignment, group: 'Task' },
@@ -131,6 +135,8 @@ const ReferencesPage: React.FC = () => {
                                 return <EnhancedCodeExecution {...commonListProps} />;
                             case 'ToolCall':
                                 return <EnhancedToolCall {...commonListProps} />;
+                            case 'EntityReference':
+                                return <EnhancedEntityReference {...commonListProps} />;
                             default:
                                 return null;
                         }
@@ -172,6 +178,8 @@ const ReferencesPage: React.FC = () => {
                 return <EnhancedCodeExecution {...commonProps} />;
             case 'ToolCall':
                 return <EnhancedToolCall {...commonProps} />;
+            case 'EntityReference':
+                return <EnhancedEntityReference {...commonProps} />;
             default:
                 return null;
         }

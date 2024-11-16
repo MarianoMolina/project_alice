@@ -7,16 +7,49 @@ export interface ImageReference {
     caption?: string;
 }
 
-export interface ReferenceCategory {
-    name: string;
-    type?: string;
-    description?: string;
+export enum ReferenceCategoryType {
+    // URLS
+    URL = "URL",
+    WEBSITE = "WebSite",
+    // SCHEMA TYPES
+    //// Works
+    WORK = "Work",
+    BOOK = "Book",
+    BOOK_SERIES = "BookSeries",
+    MOVIE = "Movie",
+    MOVIE_SERIES = "MovieSeries",
+    MUSIC_ALBUM = "MusicAlbum",
+    MUSIC_GROUP = "MusicGroup",
+    MUSIC_RECORDING = "MusicRecording",
+    PERIODICAL = "Periodical",
+    CONCEPT = "Concept",
+    TV_SERIES = "TVSeries",
+    TV_EPISODE = "TVEpisode",
+    VIDEO_GAME = "VideoGame",
+    VIDEO_GAME_SERIES = "VideoGameSeries",
+
+    //// Things
+    PERSON = "Person",
+    PLACE = "Place",
+    BIOLOGICAL_ENTITY = "BiologicalEntity",
+    TECHNOLOGY = "Technology",
+    NATURAL_PHENOMENON = "NaturalPhenomenon",
+    SPORTS_TEAM = "SportsTeam",
+
+    //// Organizations
+    ORGANIZATION = "Organization",
+    EDUCATIONAL_ORGANIZATION = "EducationalOrganization",
+    GOVERNMENT_ORGANIZATION = "GovernmentOrganization",
+    LOCAL_BUSINESS = "LocalBusiness",
+    LOCATION = "Location",
+    EVENT = "Event",
+
+    OTHER = "Other",
 }
 
 export interface EntityConnection {
-    entityId: string;
-    relationshipType: string;
-    metadata?: Record<string, any>;
+    entity_id: string;
+    similarity_score: number;
 }
 
 export interface EntityReference extends Embeddable {
@@ -26,7 +59,7 @@ export interface EntityReference extends Embeddable {
     content?: string;
     url?: string;
     images: ImageReference[];
-    categories: ReferenceCategory[];
+    categories: ReferenceCategoryType[];
     source?: ApiType;
     connections: EntityConnection[];
     metadata?: Record<string, any>;

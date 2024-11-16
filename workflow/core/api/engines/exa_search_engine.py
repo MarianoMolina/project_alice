@@ -34,29 +34,58 @@ class ExaSearchAPI(APISearchEngine):
         return References(entity_references=references)
     
     def create_entity_from_data(self, result_data: ExaResult, autoprompt_string: str = '') -> EntityReference:
-        # Map the result data to EntityReference fields
-        content: str = f'# Highlights: {result_data.highlights}\n' if 'highlights' in result_data and result_data.highlights else ''
-        content += f'# Text: {result_data.text}' if 'text' in result_data and result_data.text else ''
-        image: ImageReference = ImageReference(url=result_data.image) if 'image' in result_data and result_data.image else None
+        # Safely access Result object properties using getattr
+        content_parts = []
+        
+        highlights = getattr(result_data, 'highlights', None)
+        if highlights:
+            content_parts.append(f'# Highlights: {highlights}')
+        
+        text = getattr(result_data, 'text', None)
+        if text:
+            content_parts.append(f'# Text: {text}')
+        
+        content = '\n'.join(content_parts) if content_parts else ''
+        
+        # Safely handle image
+        image_url = getattr(result_data, 'image', None)
+        image = ImageReference(url=image_url) if image_url else None
+        
+        # Safely handle subpages
+        subpages = getattr(result_data, 'subpages', None)
+        subpage_entities = ([self.create_entity_from_data(subpage) for subpage in subpages] 
+                          if subpages else None)
+        
+        # Create extras dictionary with only existing attributes
+        standard_fields = {
+            "id", "title", "summary", "url", "author", 
+            "published_date", "score", "subpages"
+        }
+        
+        # Safely get all available attributes
+        extras = {}
+        for key in dir(result_data):
+            if (not key.startswith('_') and 
+                key not in standard_fields and 
+                hasattr(result_data, key)):
+                extras[key] = getattr(result_data, key)
+        
         entity = EntityReference(
             source_id=f'exa:{result_data.id}',
             name=result_data.title,
-            description=result_data.summary if 'summary' in result_data and result_data.summary else None,
-            images=[image] if image else None,
+            description=getattr(result_data, 'summary', None),
+            images=[image] if image else [],
             content=content,
             url=result_data.url,
-            categories=[ReferenceCategory.URL], 
+            categories=[ReferenceCategory.URL],
             source=ApiType.EXA_SEARCH,
             metadata={
-                'author': result_data.author,
-                'published_date': result_data.published_date,
-                'exa_score': result_data.score,
-                'subpages': [self.create_entity_from_data(subpage) for subpage in result_data.subpages] if 'subpages' in result_data and result_data.subpages else None,
-                'extras': {
-                    key: value for key, value in result_data.items() 
-                    if key not in {"id", "title", "summary", "url", "author", "published_date", "score", "subpages"}
-                    },
+                'author': getattr(result_data, 'author', None),
+                'published_date': getattr(result_data, 'published_date', None),
+                'exa_score': getattr(result_data, 'score', None),
+                'subpages': subpage_entities,
+                'extras': extras,
                 'autoprompt_string': autoprompt_string
-                },
+            },
         )
         return entity

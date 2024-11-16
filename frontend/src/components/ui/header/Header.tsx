@@ -1,7 +1,7 @@
 import React from 'react';
 import { AppBar, Toolbar, IconButton, Box, Tooltip, Button, Typography } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { SettingsApplications, Storage, Chat, Task, Home, School } from '@mui/icons-material';
+import { SettingsApplications, Storage, Task, Home, School, DocumentScanner, Forum } from '@mui/icons-material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuth } from '../../../contexts/AuthContext';
 import useStyles from './HeaderStyles';
@@ -53,7 +53,7 @@ const Header: React.FC = () => {
                 onClick={() => handleNavigation('/chat-alice')}
                 className={isActive('/chat-alice') ? classes.activeButton : ''}
               >
-                <Chat />
+                <Forum />
               </IconButton>
             </Tooltip>
             <Tooltip title="Execute Task">
@@ -80,7 +80,7 @@ const Header: React.FC = () => {
                 onClick={() => handleNavigation('/references')}
                 className={isActive('/references') ? classes.activeButton : ''}
               >
-                <Storage />
+                <DocumentScanner />
               </IconButton>
             </Tooltip>
             <Tooltip title="Knowledgebase">

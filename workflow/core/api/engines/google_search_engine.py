@@ -1,5 +1,6 @@
 from googleapiclient.discovery import build
 from typing import Dict, Any, List
+from workflow.util import LOGGER
 from workflow.core.data_structures import (
     References, ApiType, EntityReference, ReferenceCategory, ImageReference
     )    
@@ -45,10 +46,12 @@ class GoogleSearchAPI(APISearchEngine):
         if 'cse_image' in pagemap:
             for image_info in pagemap['cse_image']:
                 image_url = image_info.get('src')
-                if image_url:
+                if image_url and (image_url.startswith('http://') or image_url.startswith('https://')):
                     images.append(ImageReference(
                         url = image_url,
                     ))
+                else: 
+                    LOGGER.warning(f"Invalid image URL: {image_url}")
 
         # Determine categories based on pagemap data or content
         categories = self.determine_categories(data)

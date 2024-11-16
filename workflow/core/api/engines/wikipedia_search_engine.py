@@ -104,6 +104,10 @@ class WikipediaSearchAPI(APISearchEngine):
             )
             images.append(image)
         
+        try:
+            references = page.references
+        except Exception as e:
+            references = None
         # Create EntityReference
         entity = EntityReference(
             source_id=f"wikipedia:{page.pageid}",
@@ -116,9 +120,8 @@ class WikipediaSearchAPI(APISearchEngine):
             source=ApiType.WIKIPEDIA_SEARCH,
             metadata={
                 'page_length': len(page.content),
-                'last_edited': page.last_edited,
                 'links': page.links,
-                'references': page.references,
+                'references': references,
                 'sections': page.sections,
             },
         )

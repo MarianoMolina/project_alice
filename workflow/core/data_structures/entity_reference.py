@@ -1,21 +1,48 @@
-from workflow.core.data_structures.base_models import Embeddable
-from yarl import URL
+from workflow.core.data_structures.base_models import Embeddable, HttpUrlString
+from workflow.util import LOGGER
 from workflow.core.data_structures.api_utils import ApiType
-from pydantic import HttpUrl, Field, BaseModel,  field_validator
+from pydantic import HttpUrl, Field, BaseModel
+from pydantic_core import Url
 from typing import Optional, Any, List
 from enum import Enum
 
 class ReferenceCategory(str, Enum):
+    # URLS
     URL = "URL"
+    WEBSITE = "WebSite"
+    # SCHEMA TYPES
+    ## Works
+    WORK = "Work"
+    BOOK = "Book"
+    BOOK_SERIES = "BookSeries"
+    MOVIE = "Movie"
+    MOVIE_SERIES = "MovieSeries"
+    MUSIC_ALBUM = "MusicAlbum"
+    MUSIC_GROUP = "MusicGroup"
+    MUSIC_RECORDING = "MusicRecording"
+    PERIODICAL = "Periodical"
+    CONCEPT = "Concept"
+    TV_SERIES = "TVSeries"
+    TV_EPISODE = "TVEpisode"
+    VIDEO_GAME = "VideoGame"
+    VIDEO_GAME_SERIES = "VideoGameSeries"
+
+    ## Things
     PERSON = "Person"
+    PLACE = "Place"
+    BIOLOGICAL_ENTITY = "BiologicalEntity"
+    TECHNOLOGY = "Technology"
+    NATURAL_PHENOMENON = "NaturalPhenomenon"
+    SPORTS_TEAM = "SportsTeam"
+
+    ## Organizations
     ORGANIZATION = "Organization"
+    EDUCATIONAL_ORGANIZATION = "EducationalOrganization"
+    GOVERNMENT_ORGANIZATION = "GovernmentOrganization"
+    LOCAL_BUSINESS = "LocalBusiness"
     LOCATION = "Location"
     EVENT = "Event"
-    WORK = "Work"
-    CONCEPT = "Concept"
-    TECHNOLOGY = "Technology"
-    BIOLOGICAL_ENTITY = "Biological Entity"
-    NATURAL_PHENOMENON = "Natural Phenomenon"
+
     OTHER = "Other"
 
 class EntityConnection(BaseModel):
@@ -23,46 +50,32 @@ class EntityConnection(BaseModel):
     similarity_score: float
 
 class ImageReference(BaseModel):
-    url: HttpUrl
+    url: HttpUrlString
     caption: Optional[str] = Field(None, description="Optional caption or description for the image.")
-    license: Optional[HttpUrl] = Field(None, description="License URL for the image.")
+    license: Optional[HttpUrlString] = Field(None, description="License URL for the image.")
     model_config = {
         "json_encoders": {
-            HttpUrl: str
+            HttpUrl: str,
+            Url: str
         }
     }
-
-    @field_validator('url', 'license', mode='before')
-    @classmethod
-    def convert_url(cls, v: Any) -> Optional[str]:
-        if v is None:
-            return None
-        # Check for URL-like object (duck typing)
-        if hasattr(v, '__str__'): 
-            return str(v)
-        return v
     
 class EntityReference(Embeddable):
     source_id: Optional[str] = Field(None, description="The unique identifier for the entity in the source system.")
     name: Optional[str] = Field(None, description="The name/title of the entity.")
     description: Optional[str] = Field(None, description="A description/summary/extract, etc. of the entity.")
     content: Optional[str] = Field(None, description="The full content of the entity.")
-    url: Optional[HttpUrl] = Field(None, description="The URL of the entity.")
+    url: Optional[HttpUrlString] = Field(None, description="The URL of the entity.")
     images: List[ImageReference] = Field(default_factory=list, description="List of images related to the entity.")
     categories: List[ReferenceCategory] = Field(default_factory=list, description="The categories of the entity.")
     source: Optional[ApiType] = Field(None, description="The ApiType source of the entity.")
     connections: List[EntityConnection] = Field(default_factory=list, description="The connections of the entity.")
     metadata: Optional[dict] = Field(None, description="Additional metadata for the entity.")
 
-    @field_validator('url', mode='before')
-    @classmethod
-    def convert_url(cls, v: Any) -> Optional[str]:
-        if v is None:
-            return None
-        # Check for URL-like object (duck typing)
-        if hasattr(v, '__str__'): 
-            return str(v)
-        return v
+    def model_dump(self, *args, **kwargs):
+        LOGGER.debug(f"Dumping EntityReference: {self.name}")
+        LOGGER.debug(f"Url is: {self.url} with type {type(self.url)}")
+        return super().model_dump(*args, **kwargs)
     
     def __str__(self) -> str:
         """
@@ -88,6 +101,9 @@ class EntityReference(Embeddable):
         if self.description:
             desc = self.description[:100] + "..." if len(self.description) > 100 else self.description
             parts.append(f"Description: {desc}")
+
+        if self.url:
+            parts.append(f"URL: {self.url}")
             
         # Add source if available
         if self.source:

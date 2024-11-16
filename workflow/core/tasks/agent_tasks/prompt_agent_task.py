@@ -269,7 +269,7 @@ class PromptAgentTask(AliceTask):
         if not message or not message.content:
             return self._get_available_exit_code(LLMExitCode.FAILURE, "llm_generation")
 
-        has_tool_calls = bool(message.tool_calls)
+        has_tool_calls = bool(message.references.tool_calls)
         has_code = bool(self.agent.collect_code_blocs([message]))
 
         # Check agent capabilities

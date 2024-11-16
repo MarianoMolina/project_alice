@@ -1,5 +1,5 @@
 import mongoose, { CallbackWithoutResultAndOptionalError, Query, Schema } from "mongoose";
-import { IEntityReferenceDocument, IEntityReferenceModel } from "../interfaces/entityReference.interface";
+import { IEntityReferenceDocument, IEntityReferenceModel, ReferenceCategoryType } from "../interfaces/entityReference.interface";
 import { getObjectId } from "../utils/utils";
 import { ApiType } from "../interfaces/api.interface";
 
@@ -9,16 +9,9 @@ const imageReferenceSchema = new Schema({
   caption: String
 }, { _id: false });
 
-const referenceCategorySchema = new Schema({
-  name: { type: String, required: true },
-  type: String,
-  description: String
-}, { _id: false });
-
 const entityConnectionSchema = new Schema({
-  entityId: { type: Schema.Types.ObjectId, required: true, ref: 'EntityReference' },
-  relationshipType: { type: String, required: true },
-  metadata: { type: Map, of: Schema.Types.Mixed }
+  entity_id: { type: Schema.Types.ObjectId, required: true, ref: 'EntityReference' },
+  similarity_score: { type: Number, default: 0 },
 }, { _id: false });
 
 const entityReferenceSchema = new Schema<IEntityReferenceDocument, IEntityReferenceModel>({
@@ -28,7 +21,11 @@ const entityReferenceSchema = new Schema<IEntityReferenceDocument, IEntityRefere
   content: String,
   url: String,
   images: [imageReferenceSchema],
-  categories: [referenceCategorySchema],
+  categories: [{
+    type: String,
+    enum: Object.values(ReferenceCategoryType),
+    required: true
+  }],
   source: { type: String, enum: Object.values(ApiType) },
   connections: [entityConnectionSchema],
   metadata: { type: Map, of: Schema.Types.Mixed },
@@ -61,7 +58,7 @@ function ensureObjectId(this: IEntityReferenceDocument, next: CallbackWithoutRes
   if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
   if (this.connections) {
     this.connections.forEach(conn => {
-      conn.entityId = getObjectId(conn.entityId);
+      conn.entity_id = getObjectId(conn.entity_id);
     });
   }
   next();
@@ -73,7 +70,7 @@ function ensureObjectIdForUpdate(this: Query<any, any>, next: CallbackWithoutRes
   if (update.updated_by) update.updated_by = getObjectId(update.updated_by);
   if (update.connections) {
     update.connections.forEach((conn: any) => {
-      conn.entityId = getObjectId(conn.entityId);
+      conn.entity_id = getObjectId(conn.entity_id);
     });
   }
   next();
@@ -81,7 +78,7 @@ function ensureObjectIdForUpdate(this: Query<any, any>, next: CallbackWithoutRes
 
 function autoPopulate(this: Query<any, any>, next: CallbackWithoutResultAndOptionalError) {
   this.populate('created_by updated_by');
-  this.populate('connections.entityId');
+  this.populate('connections.entity_id');
   next();
 }
 

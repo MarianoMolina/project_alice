@@ -109,9 +109,11 @@ class APIManager(BaseModel):
                 raise ValueError(f"No API engine found for {api_type} and {api_name}")
 
             # Validate inputs against the API engine's input_variables
-            self._validate_inputs(api_engine, kwargs)
+            engine_instance: APIEngine = api_engine()
+            LOGGER.debug(f"Selected API engine: {engine_instance.__class__.__name__}")
+            self._validate_inputs(engine_instance, kwargs)
 
-            return await api_engine.generate_api_response(api_data=api_data, **kwargs)
+            return await engine_instance.generate_api_response(api_data=api_data, **kwargs)
 
         except Exception as e:
             import traceback

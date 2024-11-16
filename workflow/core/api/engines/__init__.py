@@ -53,10 +53,10 @@ ApiEngineMap = {
         ApiName.ARXIV: ArxivSearchAPI,
     },
     ApiType.GOOGLE_KNOWLEDGE_GRAPH: {
-        ApiName.GOOGLE_KNOWLEDGE: GoogleGraphEngine,
+        ApiName.GOOGLE_KNOWLEDGE_GRAPH: GoogleGraphEngine,
     },
     ApiType.WOLFRAM_ALPHA: {
-        ApiName.WOLFRAM: WolframAlphaEngine,
+        ApiName.WOLFRAM_ALPHA: WolframAlphaEngine,
     },
     ApiType.IMG_VISION: {
         ApiName.OPENAI: VisionModelEngine,

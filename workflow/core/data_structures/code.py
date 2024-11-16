@@ -25,4 +25,4 @@ class CodeExecution(Embeddable):
     code_output: Optional[CodeOutput] = Field(None, description="The output of the code execution")
 
     def __str__(self) -> str:
-        return f"{self.code_block}\n{self.output}" if self.output else str(self.code_block)
+        return f"{self.code_block}\n{self.code_output}" if self.code_output else str(self.code_block)

@@ -36,8 +36,8 @@ class ApiName(str, Enum):
     WIKIPEDIA = 'wikipedia'
     EXA = 'exa'
     ARXIV = 'arxiv'
-    GOOGLE_KNOWLEDGE = 'google_knowledge_graph'
-    WOLFRAM = 'wolfram_alpha'
+    GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph'
+    WOLFRAM_ALPHA = 'wolfram_alpha'
     CUSTOM = 'custom'
 
 # Type definitions for different API configurations
@@ -82,8 +82,8 @@ API_CONFIG_TYPES: Dict[ApiName, Dict] = {
     ApiName.WIKIPEDIA: dict,
     ApiName.EXA: ExaConfig,
     ApiName.ARXIV: dict,
-    ApiName.GOOGLE_KNOWLEDGE: ExaConfig,
-    ApiName.WOLFRAM: WolframConfig,
+    ApiName.GOOGLE_KNOWLEDGE_GRAPH: ExaConfig,
+    ApiName.WOLFRAM_ALPHA: WolframConfig,
 }
 
 # Map of ApiName to supported ApiTypes
@@ -153,10 +153,10 @@ API_CAPABILITIES = {
     ApiName.ARXIV: {
         ApiType.ARXIV_SEARCH
     },
-    ApiName.GOOGLE_KNOWLEDGE: {
+    ApiName.GOOGLE_KNOWLEDGE_GRAPH: {
         ApiType.GOOGLE_KNOWLEDGE_GRAPH
     },
-    ApiName.WOLFRAM: {
+    ApiName.WOLFRAM_ALPHA: {
         ApiType.WOLFRAM_ALPHA
     },
     ApiName.CUSTOM: {

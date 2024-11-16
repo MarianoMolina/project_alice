@@ -7,7 +7,6 @@ class ParameterDefinition(BaseDataStructure):
     """
     Defines a single parameter with its type, description, and optional default value.
     """
-    id: Optional[str] = Field(None, description="The parameter ID", alias="_id")
     type: Annotated[str, Field(description="Type of the parameter")]
     description: Annotated[str, Field(description="Description of the parameter")]
     default: Annotated[Optional[Any], Field(default=None, description="Default value of the parameter")]
@@ -26,6 +25,17 @@ class ParameterDefinition(BaseDataStructure):
             
         return data
     
+    def get_dict(self) -> Dict[str, Any]:
+        dict_data = {
+            "type": self.type,
+            "description": self.description
+        }
+        if self.default is not None:
+            dict_data["default"] = self.default
+        if self.id is not None:
+            dict_data["id"] = self.id
+        return dict_data
+
     @classmethod
     def model_validate(cls, obj: Any):
         if isinstance(obj, dict) and 'default' not in obj:
@@ -55,6 +65,18 @@ class FunctionParameters(BaseModel):
             "required": self.required
         }
     
+    def get_dict(self) -> Dict[str, Any]:
+        dict_data = {
+            "type": self.type,
+            "properties": {
+                param_name: param.get_dict()
+                for param_name, param in self.properties.items()
+            }
+        }
+        if self.required:
+            dict_data["required"] = self.required
+        return dict_data
+    
 class FunctionConfig(BaseModel):
     """A function as defined by the OpenAI API"""
     name: Annotated[str, Field(description="Name of the function")]
@@ -65,7 +87,14 @@ class FunctionConfig(BaseModel):
         return {
             "name": self.name,
             "description": self.description,
-            "input_schema": self.parameters.model_dump()
+            "input_schema": self.parameters.get_dict()
+        }
+    
+    def get_dict(self) -> Dict[str, Any]:
+        return {
+            "name": self.name,
+            "description": self.description,
+            "parameters": self.parameters.get_dict()
         }
     
     def model_dump(self, *args, **kwargs):
@@ -80,6 +109,13 @@ class ToolFunction(BaseModel):
 
     def convert_to_tool_params(self) -> ToolParam:
         return self.function.convert_to_tool_params()
+    
+    def get_dict(self) -> Dict[str, Any]:
+        dict_data = {
+            "type": self.type,
+            "function": self.function.get_dict()
+        }
+        return dict_data
     
     def model_dump(self, *args, **kwargs):
         data = super().model_dump(*args, **kwargs)
