@@ -386,7 +386,8 @@ base_module = BaseModule(
                 "data": {
                     "client_id": REDDIT_CLIENT_ID,
                     "client_secret": REDDIT_CLIENT_SECRET,
-                }
+                },
+                "health_status": "healthy" if REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET else "unhealthy",
             },
             {
                 "key": "google_knowledge_graph_api_config",
@@ -442,6 +443,20 @@ base_module = BaseModule(
                     "base_url": LOCAL_LLM_API_URL
                 },
                 "health_status": "healthy" if LOCAL_LLM_API_URL else "unhealthy",
+            },
+            {
+                "key": "wikipedia_api_config",
+                "name": "Wikipedia API Config",
+                "api_name": "wikipedia",
+                "data": {},
+                "health_status": "healthy"
+            },
+            {
+                "key": "arxiv_api_config",
+                "name": "Arxiv API Config",
+                "api_name": "arxiv",
+                "data": {},
+                "health_status": "healthy"
             }
         ],
         "apis": [
@@ -490,7 +505,7 @@ base_module = BaseModule(
                 "api_type": "wikipedia_search",
                 "api_name": "wikipedia",
                 "name": "Wikipedia Search",
-                "api_config": {},
+                "api_config": "wikipedia_api_config",
                 "is_active": True,
             },
             {
@@ -498,7 +513,7 @@ base_module = BaseModule(
                 "api_type": "arxiv_search",
                 "api_name": "arxiv",
                 "name": "Arxiv Search",
-                "api_config": {},
+                "api_config": "arxiv_api_config",
                 "is_active": True,
             },
             {

@@ -1,30 +1,30 @@
 import React from 'react';
 import { AnimatedTooltip } from '../../../ui/aceternity/AnimatedTooltip';
 import { ApiName } from '../../../../types/ApiTypes';
-import { LaptopMac, Reddit, Google, Search, Book, RemoveRedEye, Brush, Hearing, RecordVoiceOver, Tag, EditNote, Summarize } from '@mui/icons-material';
-import AutoStoriesIcon from '@mui/icons-material/AutoStories';
+import { LaptopMac, Reddit, Google, ColorLens, Edit } from '@mui/icons-material';
 import { APIConfig, APIConfigComponentProps } from '../../../../types/ApiConfigTypes';
+import { AnthropicIcon, ArxivIcon, AzureIcon, BarkIcon, CohereIcon, GeminiIcon, GroqIcon, LlamaIcon, LMStudioIcon, MistralIcon, OpenAiIcon, WikipediaIcon, WolframAlphaIcon } from '../../../../utils/CustomIcons';
 
-const apiConfigIcons: Record<ApiName, React.ReactElement> = {
+export const apiConfigIcons: Record<ApiName, React.ReactElement> = {
   [ApiName.REDDIT]: <Reddit />,
-  [ApiName.WIKIPEDIA]: <AutoStoriesIcon />,
+  [ApiName.GOOGLE_KNOWLEDGE_GRAPH]: <Google />,
   [ApiName.GOOGLE_SEARCH]: <Google />,
-  [ApiName.EXA]: <Search />,
-  [ApiName.ARXIV]: <Book />,
-  [ApiName.GOOGLE_KNOWLEDGE_GRAPH]: <Search />,
-  [ApiName.WOLFRAM_ALPHA]: <Summarize />,
-  [ApiName.OPENAI]: <EditNote />,
-  [ApiName.ANTHROPIC]: <RemoveRedEye />,
-  [ApiName.AZURE]: <Brush />,
-  [ApiName.BARK]: <Hearing />,
-  [ApiName.COHERE]: <RecordVoiceOver />,
-  [ApiName.GEMINI]: <Tag />,
-  [ApiName.GROQ]: <Reddit />, 
-  [ApiName.PIXART]: <Reddit />, 
-  [ApiName.MISTRAL]: <Reddit />, 
-  [ApiName.LLAMA]: <Reddit />, 
-  [ApiName.LM_STUDIO]: <Reddit />,
-  [ApiName.CUSTOM]: <Reddit />,
+  [ApiName.GEMINI]: <GeminiIcon />,
+  [ApiName.GROQ]: <GroqIcon />, 
+  [ApiName.ANTHROPIC]: <AnthropicIcon />,
+  [ApiName.WIKIPEDIA]: <WikipediaIcon />,
+  [ApiName.ARXIV]: <ArxivIcon />,
+  [ApiName.WOLFRAM_ALPHA]: <WolframAlphaIcon />,
+  [ApiName.OPENAI]: <OpenAiIcon />,
+  [ApiName.COHERE]: <CohereIcon />,
+  [ApiName.LLAMA]: <LlamaIcon />, 
+  [ApiName.AZURE]: <AzureIcon />,
+  [ApiName.MISTRAL]: <MistralIcon />, 
+  [ApiName.LM_STUDIO]: <LMStudioIcon />,
+  [ApiName.BARK]: <BarkIcon />,
+  [ApiName.PIXART]: <ColorLens />, 
+  [ApiName.EXA]: <AzureIcon />,
+  [ApiName.CUSTOM]: <Edit />,
 };
 
 const getBackgroundColor = (healthStatus: APIConfig['health_status']) => {

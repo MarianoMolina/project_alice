@@ -1,8 +1,9 @@
 import React from 'react';
 import { Typography } from '@mui/material';
-import { Category, TypeSpecimen, Description, HealthAndSafety } from '@mui/icons-material';
+import { Category, TypeSpecimen, Description, HealthAndSafety, DataObject } from '@mui/icons-material';
 import { APIConfigComponentProps } from '../../../../types/ApiConfigTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
+import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 
 const APIConfigCardView: React.FC<APIConfigComponentProps> = ({ item }) => {
 
@@ -30,6 +31,11 @@ const APIConfigCardView: React.FC<APIConfigComponentProps> = ({ item }) => {
             icon: <Category />,
             primary_text: "Created at",
             secondary_text: new Date(item.createdAt || '').toDateString()
+        },
+        {
+            icon: <DataObject />,
+            primary_text: "Data",
+            secondary_text: <CodeBlock code={JSON.stringify(item.data, null, 2)} language='json'/>
         }
     ];
 
