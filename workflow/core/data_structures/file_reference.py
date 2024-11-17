@@ -14,6 +14,10 @@ class FileReference(Embeddable):
     storage_path: str = Field(..., description="The path to the file in the shared volume")
     transcript: Optional[MessageDict] = Field(None, description="The transcript / description of the file content")
 
+    model_config = {
+        "populate_by_name": True,
+    }
+    
     @field_validator('transcript')
     def validate_transcript(cls, v):
         if v is None:
@@ -29,9 +33,6 @@ class FileReference(Embeddable):
         if self.transcript:
             data['transcript'] = self.transcript.model_dump(*args, **kwargs)
         return data
-
-    class Config:
-        populate_by_name = True
         
     def __str__(self) -> str:
         return self.get_content_string()

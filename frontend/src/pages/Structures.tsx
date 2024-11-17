@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Box } from '@mui/material';
 import { 
-  Add, Person, Category, Settings, Description, 
-  Functions, Api, QuestionAnswer, LiveHelp 
+  Add, Category, Settings, Description, 
+  Functions, Api, QuestionAnswer, LiveHelp, 
+  SvgIconComponent
 } from '@mui/icons-material';
 import { 
   TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH,
@@ -24,6 +25,7 @@ import { useCardDialog } from '../contexts/CardDialogContext';
 import Logger from '../utils/Logger';
 import ToggleBox from '../components/ui/sidetab_header/ToggleBox';
 import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
+import { AIAssistantIcon } from '../utils/CustomIcons';
 
 const StructuresPage: React.FC = () => {
     const classes = useStyles();
@@ -36,6 +38,11 @@ const StructuresPage: React.FC = () => {
     const [lastUpdate, setLastUpdate] = useState<number>(Date.now());
 
     const tabs = [
+        // Core Group
+        { name: 'Agent' as CollectionElementString, icon: AIAssistantIcon as SvgIconComponent, group: 'Core' },
+        { name: 'Task' as CollectionElementString, icon: Functions, group: 'Core' },
+        { name: 'Chat' as CollectionElementString, icon: QuestionAnswer, group: 'Core' },
+        
         // API Group
         { name: 'API' as CollectionElementString, icon: Api, group: 'API' },
         { name: 'APIConfig' as CollectionElementString, icon: Settings, group: 'API' },
@@ -46,10 +53,6 @@ const StructuresPage: React.FC = () => {
         { name: 'Parameter' as CollectionElementString, icon: Settings, group: 'Misc' },
         { name: 'UserCheckpoint' as CollectionElementString, icon: LiveHelp, group: 'Misc' },
         
-        // Core Group
-        { name: 'Agent' as CollectionElementString, icon: Person, group: 'Core' },
-        { name: 'Task' as CollectionElementString, icon: Functions, group: 'Core' },
-        { name: 'Chat' as CollectionElementString, icon: QuestionAnswer, group: 'Core' },
     ];
 
     const handleCreateNew = useCallback(() => {

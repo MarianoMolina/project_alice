@@ -35,7 +35,7 @@ const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
 
     return (
         <GenericFlexibleView
-            elementType='CodeExecution'
+            elementType='Code Execution'
             title={title}
             onSave={handleSave}
             onDelete={handleLocalDelete}

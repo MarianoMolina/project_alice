@@ -59,7 +59,7 @@ export const REFERENCE_CONFIG: ReferenceTypeConfig[] = [
     },
     {
         key: 'entity_references',
-        title: 'URL References',
+        title: 'Entity References',
         collectionName: 'entityreferences',
         EnhancedView: EntityReferenceShortListView,
         chipType: 'EntityReference'

@@ -22,9 +22,13 @@ const useStyles = makeStyles((theme: Theme) => ({
     position: 'relative',
     backgroundColor: `${theme.palette.background.paper} !important`,
     border: `1px solid ${theme.palette.divider} !important`,
-    transition: 'transform 0.1s ease-in-out !important',
+    transition: 'all 0.1s ease-in-out !important',
     '&:hover': {
       transform: 'translateY(-1px)',
+      '& $caption': {
+        opacity: 1,
+        visibility: 'visible',
+      },
     },
   },
   contentBox: {
@@ -48,6 +52,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     color: theme.palette.primary.contrastText,
     borderRadius: 4,
     zIndex: 1,
+    opacity: 0,
+    visibility: 'hidden',
+    transition: 'opacity 0.2s ease-in-out, visibility 0.2s ease-in-out',
   },
 }));
 

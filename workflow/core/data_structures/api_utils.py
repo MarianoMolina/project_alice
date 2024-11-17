@@ -63,7 +63,9 @@ class WolframConfig(TypedDict):
 
 class ExaConfig(TypedDict):
     api_key: str
-
+class NoConfig(TypedDict):
+    """Empty config type for APIs that don't require configuration"""
+    pass
 # Map of ApiName to their required configuration structure
 API_CONFIG_TYPES: Dict[ApiName, Dict] = {
     ApiName.OPENAI: BaseApiConfig,
@@ -79,9 +81,9 @@ API_CONFIG_TYPES: Dict[ApiName, Dict] = {
     ApiName.PIXART: LocalApiConfig,
     ApiName.GOOGLE_SEARCH: GoogleSearchConfig,
     ApiName.REDDIT: RedditConfig,
-    ApiName.WIKIPEDIA: dict,
+    ApiName.WIKIPEDIA: NoConfig,
     ApiName.EXA: ExaConfig,
-    ApiName.ARXIV: dict,
+    ApiName.ARXIV: NoConfig,
     ApiName.GOOGLE_KNOWLEDGE_GRAPH: ExaConfig,
     ApiName.WOLFRAM_ALPHA: WolframConfig,
 }

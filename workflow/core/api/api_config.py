@@ -1,6 +1,7 @@
 from typing import Dict, List
 from pydantic import Field
 from workflow.core.data_structures import BaseDataStructure, ApiName, ApiType, API_CONFIG_TYPES, API_CAPABILITIES
+from workflow.core.data_structures.api_utils import NoConfig
 
 class APIConfig(BaseDataStructure):
     """
@@ -16,6 +17,9 @@ class APIConfig(BaseDataStructure):
         Validates that the data dictionary contains all required fields for the given api_name
         """
         config_type = API_CONFIG_TYPES[self.api_name]
+        # Handle APIs that don't require configuration
+        if config_type is NoConfig:
+            return True
         required_fields = config_type.__annotations__.keys()
         return all(field in self.data for field in required_fields)
     

@@ -15,7 +15,7 @@ export const AnalysisBlockComponent: React.FC<{ node: any }> = ({ node }) => {
     <>
       <Box
         onClick={() => setOpen(true)}
-        className="cursor-pointer border rounded-md hover:bg-gray-50 transition-colors flex items-center h-12 px-4 gap-4"
+        className="cursor-pointer border rounded-md hover:bg-gray-50 transition-colors flex items-center h-12 px-4 gap-4 w-fit my-2"
       >
         <Box className="flex items-center gap-4 flex-1">
           <Psychology className="text-gray-600" />

@@ -1,4 +1,7 @@
+import { ColorLens, Download, Edit, EditNote, Google, RecordVoiceOver, Reddit, Search, Tag, Visibility } from "@mui/icons-material";
 import { ApiType, ApiName } from "../types/ApiTypes";
+import { AIIcon, AnthropicIcon, ArxivIcon, AzureIcon, BarkIcon, CohereIcon, GeminiIcon, GroqIcon, LlamaIcon, LMStudioIcon, 
+  MistralIcon, OpenAiIcon, WikipediaIcon, WolframAlphaIcon } from "./CustomIcons";
 
 // Base interfaces for API configurations
 interface BaseApiConfig {
@@ -53,7 +56,6 @@ export type ApiConfigType = {
   [ApiName.WOLFRAM_ALPHA]: WolframConfig;
   [ApiName.CUSTOM]: BaseApiConfig;
 };
-
 // API capabilities mapping
 export const API_CAPABILITIES: Record<ApiName, Set<ApiType>> = {
   [ApiName.OPENAI]: new Set([
@@ -151,3 +153,42 @@ export const API_BASE_URLS: Partial<Record<ApiName, string>> = {
 
 // Helper type to get config type for a specific API
 export type GetApiConfig<T extends ApiName> = ApiConfigType[T];
+
+export const apiNameIcons: Record<ApiName, React.ReactElement> = {
+  [ApiName.REDDIT]: <Reddit />,
+  [ApiName.GOOGLE_KNOWLEDGE_GRAPH]: <Google />,
+  [ApiName.GOOGLE_SEARCH]: <Google />,
+  [ApiName.GEMINI]: <GeminiIcon />,
+  [ApiName.GROQ]: <GroqIcon />, 
+  [ApiName.ANTHROPIC]: <AnthropicIcon />,
+  [ApiName.WIKIPEDIA]: <WikipediaIcon />,
+  [ApiName.ARXIV]: <ArxivIcon />,
+  [ApiName.WOLFRAM_ALPHA]: <WolframAlphaIcon />,
+  [ApiName.OPENAI]: <OpenAiIcon />,
+  [ApiName.COHERE]: <CohereIcon />,
+  [ApiName.LLAMA]: <LlamaIcon />, 
+  [ApiName.AZURE]: <AzureIcon />,
+  [ApiName.MISTRAL]: <MistralIcon />, 
+  [ApiName.LM_STUDIO]: <LMStudioIcon />,
+  [ApiName.BARK]: <BarkIcon />,
+  [ApiName.PIXART]: <ColorLens />, 
+  [ApiName.EXA]: <Search />,
+  [ApiName.CUSTOM]: <Edit />,
+};
+
+export const apiTypeIcons: Record<ApiType, React.ReactElement> = {
+  [ApiType.LLM_MODEL]: <AIIcon />,
+  [ApiType.IMG_VISION]: <Visibility />,
+  [ApiType.IMG_GENERATION]: <ColorLens />,
+  [ApiType.SPEECH_TO_TEXT]: <EditNote />,
+  [ApiType.TEXT_TO_SPEECH]: <RecordVoiceOver />,
+  [ApiType.EMBEDDINGS]: <Tag />,
+  [ApiType.GOOGLE_SEARCH]: <Google />,
+  [ApiType.REDDIT_SEARCH]: <Reddit />,
+  [ApiType.WIKIPEDIA_SEARCH]: <WikipediaIcon />,
+  [ApiType.ARXIV_SEARCH]: <ArxivIcon />,
+  [ApiType.EXA_SEARCH]: <Search />,
+  [ApiType.GOOGLE_KNOWLEDGE_GRAPH]: <Google />,
+  [ApiType.WOLFRAM_ALPHA]: <WolframAlphaIcon />,
+  [ApiType.REQUESTS]: <Download />,
+};

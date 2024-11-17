@@ -59,7 +59,7 @@ task_ref = TaskResponse(
 )
 ```
 
-### 4. URL References
+### 4. Entity References
 - External web content references
 ```python
 entity_ref = EntityReference(

@@ -12,7 +12,7 @@ Once you have the frontend running, you can start exploring Alice's features:
 
 3. **TASK**: Alternatively, you can check out the `Execute Task` section: here you can see all the [Tasks](/knowledgebase/task) available, which are the Tools the agents can use in your environment. You can view their details or select them for execution: If you do, you'll see the inputs the tasks takes (required and non-required), and you can execute them. This will generate a [Task Response](/knowledgebase/task_response) with the task outputs, which can be additional task responses (in the case of Workflows), or [Files](/knowledgebase/file), [Messages](/knowledgebase/message) or [Entity References](/knowledgebase/entity_reference). 
 
-4. **DATABASE**: If you want to create your own Task (or your own agent for your chat for that matter) you'll want to navigate to `View Database` section. Here you can see all the **Core** entities (agents, apis, chats, models, parameters, prompts and tasks) and **Reference** entities (files, messages, task responses and url references) in your environment. You can create or edit all the core entities here to be whatever you need. 
+4. **DATABASE**: If you want to create your own Task (or your own agent for your chat for that matter) you'll want to navigate to `View Database` section. Here you can see all the **Core** entities (agents, apis, chats, models, parameters, prompts and tasks) and **Reference** entities (files, messages, task responses and entity references) in your environment. You can create or edit all the core entities here to be whatever you need. 
 
 ## Next Steps
 

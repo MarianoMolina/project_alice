@@ -20,19 +20,14 @@ const CodeExecutionCardView: React.FC<CodeExecutionComponentProps> = ({ item }) 
         {
             icon: <TypeSpecimen />,
             primary_text: "Code",
-            secondary_text: <CodeBlock language={item.code_block.language} code={item.code_block.code}/>
+            secondary_text: <CodeBlock language={item.code_block.language} code={item.code_block.code} />
         },
-        {
-            icon: <Category />,
-            primary_text: "Created at",
-            secondary_text: new Date(item.createdAt || '').toDateString()
-        }
     ];
     if (item.code_output && item.code_output.output) {
         listItems.push({
             icon: <TypeSpecimen />,
             primary_text: "Output",
-            secondary_text: <CodeBlock language='bash' code={item.code_output.output}/>
+            secondary_text: <CodeBlock language='bash' code={item.code_output.output} />
         });
         if (item.code_output.exit_code) {
             listItems.push({
@@ -43,10 +38,16 @@ const CodeExecutionCardView: React.FC<CodeExecutionComponentProps> = ({ item }) 
         }
     }
 
+    listItems.push({
+        icon: <Category />,
+        primary_text: "Created at",
+        secondary_text: new Date(item.createdAt || '').toDateString()
+    })
+
     return (
         <CommonCardView
-            elementType='CodeExecution'
-            title="CodeExecution"
+            elementType='Code Execution'
+            title="Code Execution"
             id={item._id}
             listItems={listItems}
             item={item}

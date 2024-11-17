@@ -18,4 +18,4 @@ class ModelConfig(BaseModel):
             *kwargs.get('exclude', set())
         }
         
-        data = super().model_dump(*args, **kwargs)
+        return super().model_dump(*args, **kwargs)

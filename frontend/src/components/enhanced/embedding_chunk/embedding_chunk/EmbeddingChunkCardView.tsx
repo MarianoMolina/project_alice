@@ -11,7 +11,7 @@ const EmbeddingChunkCardView: React.FC<EmbeddingChunkComponentProps> = ({
 }) => {
 
     if (!item) {
-        return <Typography>No User Interaction data available.</Typography>;
+        return <Typography>No Embedding Chunk data available.</Typography>;
     }
 
     const listItems = [
@@ -39,8 +39,8 @@ const EmbeddingChunkCardView: React.FC<EmbeddingChunkComponentProps> = ({
 
     return (
         <CommonCardView
-            elementType='User Interaction'
-            title={'User Interaction Details'}
+            elementType='Embedding Chunk'
+            title={'Embedding Chunk'}
             id={item._id}
             listItems={listItems}
             item={item}

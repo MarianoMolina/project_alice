@@ -9,6 +9,7 @@ import ReactFlow, {
     Position,
     Background,
     EdgeTypes,
+    MiniMap,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import dagre from 'dagre';
@@ -243,6 +244,7 @@ const Flowchart: React.FC<FlowchartProps> = ({ tasksEndCodeRouting, startTask })
             >
                 <Controls />
                 <Background color="#aaa" gap={16} />
+                <MiniMap nodeStrokeWidth={3} />
                 <Typography variant="h6" sx={{ position: 'absolute', top: 10, left: 10, zIndex: 4 }}>
                     Node Flowchart
                 </Typography>

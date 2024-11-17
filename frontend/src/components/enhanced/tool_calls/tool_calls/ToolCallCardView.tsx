@@ -28,11 +28,13 @@ const ToolCallCardView: React.FC<ToolCallComponentProps> = ({ item }) => {
             secondary_text: new Date(item.createdAt || '').toDateString()
         }
     ];
-
+    const function_name = item.function?.name;
+    const title = function_name ? `Tool Call: ${function_name}` : 'Tool Call';
+    
     return (
         <CommonCardView
-            elementType='ToolCall'
-            title="ToolCall"
+            elementType='Tool Call'
+            title={title}
             id={item._id}
             listItems={listItems}
             item={item}

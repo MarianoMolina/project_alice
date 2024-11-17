@@ -14,7 +14,7 @@ const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
 }) => {
 
     if (!item) {
-        return <Typography>No URL Reference data available.</Typography>;
+        return <Typography>No Entity Reference data available.</Typography>;
     }
 
     const listItems = [
@@ -33,6 +33,11 @@ const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
             secondary_text: new Date(item.createdAt || '').toLocaleString()
         },
         {
+            icon: <DataObject />,
+            primary_text: "Description",
+            secondary_text: <AliceMarkdown showCopyButton children={item.description ?? ''} />
+        },
+        {
             icon: <Description />,
             primary_text: "Content",
             secondary_text: <AliceMarkdown showCopyButton children={item.content ?? ''} />
@@ -46,7 +51,7 @@ const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
 
     return (
         <CommonCardView
-            elementType='URL Reference'
+            elementType='Entity Reference'
             title={item.name ?? ''}
             id={item._id}
             listItems={listItems}

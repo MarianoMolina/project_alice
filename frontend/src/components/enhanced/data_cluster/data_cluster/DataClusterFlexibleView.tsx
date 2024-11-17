@@ -55,7 +55,7 @@ const DataClusterFlexibleView: React.FC<DataClusterComponentProps> = ({
 
     return (
         <GenericFlexibleView
-            elementType="DataCluster"
+            elementType="Data Cluster"
             title={title}
             onSave={handleLocalSave}
             onDelete={handleLocalDelete}

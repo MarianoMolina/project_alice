@@ -76,7 +76,7 @@ These components share information in one of 6 main ways, all of which have a st
 - Files (All file types have a method for generating a 'transcript' for the file, and files generated through prompts keep it as a representation)
 - Messages
 - Task Results
-- URL References
+- Entity References
 - User Interactions
 - Embeddings
 

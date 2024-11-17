@@ -27,7 +27,7 @@ import TaskEndCodeRoutingBuilder from '../../common/task_end_code_routing/TaskEn
 import FunctionDefinitionBuilder from '../../common/function_select/FunctionDefinitionBuilder';
 import Logger from '../../../../utils/Logger';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import TaskFlowchart from '../../common/task_end_code_routing/FlowChart';
+import TaskFlowchart from '../../common/task_end_code_routing/task_flowchart/FlowChart';
 import useStyles from '../TaskStyles';
 import ExitCodeManager from '../../common/exit_code_manager/ExitCodeManager';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
@@ -330,7 +330,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                     onChange={handleTaskEndCodeRoutingChange}
                     isViewMode={!isEditMode}
                 />
-                <TaskFlowchart tasksEndCodeRouting={form.node_end_code_routing || {}} startTask={form.start_node || ''} />
+                <TaskFlowchart task={form} />
             </Box>
             <Typography variant="h6" className={classes.titleText}>Max attempts</Typography>
             <TextField

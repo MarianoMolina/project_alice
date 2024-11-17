@@ -4,11 +4,14 @@ import {
     Switch,
     ListItemSecondaryAction,
     ListItemButton,
+    ListItemText,
 } from '@mui/material';
-import { ApiComponentProps, ApiType, ModelApiType } from '../../../../types/ApiTypes';
+import { ApiComponentProps, ApiName, ApiType, ModelApiType } from '../../../../types/ApiTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { Api, Category, PowerSettingsNew } from '@mui/icons-material';
+import { Api, Category, PowerSettingsNew, Settings } from '@mui/icons-material';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { apiNameIcons, apiTypeIcons } from '../../../../utils/ApiUtils';
+import { AIIcon } from '../../../../utils/CustomIcons';
 
 type ListItemType = {
     icon: React.ReactElement;
@@ -38,9 +41,14 @@ const ApiCardView: React.FC<ApiComponentProps> = ({
 
     const listItems: ListItemType[] = [
         {
-            icon: <Api />,
+            icon: apiTypeIcons[item.api_type] || <Api />,
             primary_text: "API Type",
             secondary_text: item.api_type
+        },
+        {
+            icon: apiNameIcons[item.api_name as ApiName] || <Category />,
+            primary_text: "API Name",
+            secondary_text: item.api_name
         },
         {
             icon: <PowerSettingsNew />,
@@ -55,13 +63,22 @@ const ApiCardView: React.FC<ApiComponentProps> = ({
                     />
                 </ListItemSecondaryAction>
             )
+        },
+        {
+            icon: <Settings />,
+            primary_text: "API Config",
+            secondary_text: item.api_config ? (
+                <ListItemButton onClick={() => item._id && selectCardItem && selectCardItem('APIConfig', item._id, item)}>
+                    <ListItemText primary={item.api_config.name} />
+                </ListItemButton>
+            ) : "N/A"
         }
     ];
 
     // Add Default Model section only if item.api_type is ModelApiType
     if (isModelApiType(item.api_type)) {
         listItems.push({
-            icon: <Category />,
+            icon: <AIIcon />,
             primary_text: "Default Model",
             secondary_text: item.default_model ? (
                 <ListItemButton onClick={() => item.default_model?._id && selectCardItem && selectCardItem('Model', item.default_model._id, item.default_model)}>

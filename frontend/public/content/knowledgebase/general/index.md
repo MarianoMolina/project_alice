@@ -30,7 +30,7 @@ Alice is built on several core components that work together to create a versati
 - **CHAT: Flexible AI Interactions**: Engage in open-ended conversations or structured task executions with AI agents.
 - **TASKS: Extensible Task Framework**: Create and execute a wide variety of tasks, from simple API calls to complex workflows.
 - **Multi-Modal Support**: Handle text, images, audio, and other file types seamlessly within the system within tasks and chats. Non-text files get transcribed so LLM-agents can "see".
-- **Context-Aware Responses**: Utilize chat history, file transcripts, URL references and task responses in the agent's context for more intelligent interactions.
+- **Context-Aware Responses**: Utilize chat history, file transcripts, entity references and task responses in the agent's context for more intelligent interactions.
 - **Integration Capabilities**: Connect with various external services and AI providers through the API system.
 - **Customizable Behavior**: Tune AI tasks and agents using prompts, parameters and models to achieve the best result.
 - **|COMING| Fine-Tune Models**: Use data-clusters to fine-tune your favorite models. 

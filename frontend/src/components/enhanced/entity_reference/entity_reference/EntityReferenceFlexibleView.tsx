@@ -30,12 +30,12 @@ const EntityReferenceFlexibleView: React.FC<EntityReferenceComponentProps> = ({
     }, [item, handleDelete]);
 
     const isEditMode = mode === 'edit' || mode === 'create';
-    const title = mode === 'create' ? 'Create New URL Reference' : mode === 'edit' ? 'Edit URL Reference' : 'URL Reference Details';
-    const saveButtonText = item?._id ? 'Update URL Reference' : 'Create URL Reference';
+    const title = mode === 'create' ? 'Create New Entity Reference' : mode === 'edit' ? 'Edit Entity Reference' : 'Entity Reference Details';
+    const saveButtonText = item?._id ? 'Update Entity Reference' : 'Create Entity Reference';
 
     return (
         <GenericFlexibleView
-            elementType="URL Reference"
+            elementType="Entity Reference"
             title={title}
             onSave={handleSave}
             onDelete={handleLocalDelete}

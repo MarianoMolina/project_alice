@@ -273,7 +273,7 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
 
     return (
         <GenericFlexibleView
-            elementType='APIConfig'
+            elementType='API Config'
             title={title}
             onSave={handleLocalSave}
             onDelete={handleLocalDelete}

@@ -440,7 +440,8 @@ class AliceTask(BaseDataStructure):
             parent_task_id=self.id,
             node_name=node_name,
             execution_order=execution_order,
-            references=References(user_interactions=[user_interaction])
+            references=References(user_interactions=[user_interaction]),
+            exit_code=0
         )
     
     # Execution tracking
@@ -450,7 +451,16 @@ class AliceTask(BaseDataStructure):
             1 for node in execution_history 
             if node.parent_task_id == self.id 
             and node.node_name == node_name
+            and self.is_exit_code_retry(node.exit_code, node.node_name)
         )
+    
+    def is_exit_code_retry(self, node_name: str, exit_code: int) -> bool:
+        """Determine if an exit code constitutes a retry for a specific node."""
+        if node_name not in self.node_end_code_routing:
+            LOGGER.warning(f"No routing rules found for node {node_name}")
+            return False
+            
+        return self.node_end_code_routing[node_name].get(exit_code, (None, False))[1]
 
     def can_retry_node(self, node_name: str, execution_history: List[NodeResponse]) -> bool:
         """Determine if a node can be retried based on attempts and recursion settings."""
@@ -678,7 +688,7 @@ class AliceTask(BaseDataStructure):
             if not api or not api.is_active:
                 LOGGER.error(f"Required API {api_type} not active or not found")
                 return False
-            if api.api_config.health_status != "healthy":
+            if api.api_config and api.api_config.health_status != "healthy":
                 LOGGER.error(f"Required API {api_type} not healthy")
                 return False
                 

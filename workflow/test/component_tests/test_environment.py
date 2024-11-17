@@ -2,6 +2,7 @@ import datetime
 from typing import Dict, Any
 from pydantic import BaseModel
 from workflow.db_app import DBStructure
+from workflow.util import LOGGER
 
 class TestModule(BaseModel):
     name: str
@@ -43,23 +44,23 @@ class TestEnvironment(BaseModel):
     
     @staticmethod
     def print_summary(summary: Dict[str, Any], module_name: str):
-        print("\n--- Test Summary ---")
-        print(f'Module: {module_name}')
-        print(f"Status: {summary['status'].upper()}")
-        print(f"Total Tests: {summary['total_tests']}")
-        print(f"Successful: {summary['success_count']}")
-        print(f"Errors: {summary['error_count']}")
-        print(f"Failures: {summary['failure_count']}")
+        LOGGER.info("\n--- Test Summary ---")
+        LOGGER.info(f'Module: {module_name}')
+        LOGGER.info(f"Status: {summary['status'].upper()}")
+        LOGGER.info(f"Total Tests: {summary['total_tests']}")
+        LOGGER.info(f"Successful: {summary['success_count']}")
+        LOGGER.info(f"Errors: {summary['error_count']}")
+        LOGGER.info(f"Failures: {summary['failure_count']}")
 
         if summary['errors']:
-            print("\nErrors:")
+            LOGGER.info("\nErrors:")
             for error in summary['errors']:
-                print(f"  - {error}")
+                LOGGER.info(f"  - {error}")
 
         if summary['failures']:
-            print("\nFailures:")
+            LOGGER.info("\nFailures:")
             for failure in summary['failures']:
-                print(f"  - {failure}")
+                LOGGER.info(f"  - {failure}")
 
     @staticmethod
     def parse_results(results: Dict[str, Any]) -> Dict[str, Any]:

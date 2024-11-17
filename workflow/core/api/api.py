@@ -25,18 +25,29 @@ class API(BaseDataStructure):
     name: str
     is_active: bool = True
     default_model: Optional[AliceModel] = None # TODO: Add validation to match api_name and model_type
+    
+    model_config = {
+        "populate_by_name": True,
+    }
 
     @field_validator('api_config')
     @classmethod
-    def validate_api_config(cls, v: Optional[APIConfig], info) -> Optional[APIConfig]:
-        """Validates that if config exists, it matches the API name and has valid configuration"""
+    def validate_api_config(cls, v: Optional[Union[Dict, APIConfig]], info) -> Optional[APIConfig]:
+        """Validates and converts api_config input to APIConfig object if needed"""
         if not v:
             return v
+            
+        # Convert dict to APIConfig if necessary
+        if isinstance(v, dict):
+            try:
+                v = APIConfig(**v)
+            except Exception as e:
+                raise ValueError(f"Failed to create APIConfig from dictionary: {str(e)}")
             
         api_name = info.data.get('api_name')
         if v.api_name != api_name:
             raise ValueError(f"Config API name '{v.api_name}' does not match API name '{api_name}'")
-            
+        
         if not v.validate_config():
             raise ValueError(f"Invalid configuration for API {api_name}")
             
@@ -46,7 +57,6 @@ class API(BaseDataStructure):
             raise ValueError(f"API type '{api_type}' is not supported by {api_name}. Supported types: {supported_types}")
             
         return v
-    
     
     def model_dump(self, *args, **kwargs):
         data = super().model_dump(*args, **kwargs)
@@ -100,6 +110,3 @@ class API(BaseDataStructure):
             return self.create_model_config(model)
         else:
             return self.api_config.data
-
-    class Config:
-        populate_by_name = True

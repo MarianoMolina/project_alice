@@ -61,3 +61,4 @@ class UserInteraction(Embeddable):
     def model_dump(self, *args, **kwargs):
         data = super().model_dump(*args, **kwargs)
         data['user_checkpoint_id'] = self.user_checkpoint_id.model_dump(*args, **kwargs)
+        return data

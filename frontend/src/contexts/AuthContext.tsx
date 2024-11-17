@@ -75,7 +75,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       Logger.error('Error updating user:', error);
       throw error;
     }
-  }, [user, updateItem, saveUserData]);
+  }, [user?._id]);
 
   const login = async (email: string, password: string) => {
     try {

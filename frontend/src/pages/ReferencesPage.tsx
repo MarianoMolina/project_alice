@@ -4,7 +4,8 @@ import {
     Add, Message, Functions, Description,
     AttachFile, Diversity2, Assignment, Feedback,
     Code,
-    PersonOutline
+    PersonOutline,
+    Build
 } from '@mui/icons-material';
 import {
     TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH,
@@ -40,19 +41,19 @@ const ReferencesPage: React.FC = () => {
     const tabs = [
         // Msg Group
         { name: 'Message' as CollectionElementString, icon: Message, group: 'Msg' },
-        { name: 'ToolCall' as CollectionElementString, icon: Functions, group: 'Msg' },
+        { name: 'ToolCall' as CollectionElementString, icon: Build, group: 'Msg' },
         { name: 'CodeExecution' as CollectionElementString, icon: Code, group: 'Msg' },
-
-        // Misc Group
-        { name: 'EmbeddingChunk' as CollectionElementString, icon: Description, group: 'Misc' },
-        { name: 'UserInteraction' as CollectionElementString, icon: Feedback, group: 'Misc' },
-        { name: 'EntityReference' as CollectionElementString, icon: PersonOutline, group: 'Misc' },
 
         // Task Group
         { name: 'TaskResponse' as CollectionElementString, icon: Assignment, group: 'Task' },
 
         // File Group
         { name: 'File' as CollectionElementString, icon: AttachFile, group: 'File' },
+
+        // Misc Group
+        { name: 'EmbeddingChunk' as CollectionElementString, icon: Description, group: 'Misc' },
+        { name: 'UserInteraction' as CollectionElementString, icon: Feedback, group: 'Misc' },
+        { name: 'EntityReference' as CollectionElementString, icon: PersonOutline, group: 'Misc' },
 
         // Refs Group
         { name: 'DataCluster' as CollectionElementString, icon: Diversity2, group: 'Refs' },

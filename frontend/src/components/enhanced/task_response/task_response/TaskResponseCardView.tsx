@@ -148,7 +148,7 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
 
     return (
         <CommonCardView
-            elementType='TaskResponse'
+            elementType='Task Response'
             title={item.task_name}
             subtitle={item.task_description}
             id={item._id}
