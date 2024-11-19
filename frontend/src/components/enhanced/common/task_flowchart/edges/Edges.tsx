@@ -1,5 +1,4 @@
 import { EdgeProps, } from 'reactflow';
-import React from 'react';
 import Logger from '../../../../../utils/Logger';
 
 // Constants for edge positioning
@@ -29,14 +28,6 @@ const calculateSourceOffset = (exitCode: string, exitCodes: string[]): number =>
     const step = totalWidth / (totalCodes - 1);
     const offset = -totalWidth / 2 + (index * step);
 
-    Logger.debug('[Edge:calculateSourceOffset] Calculation', {
-        index,
-        totalCodes,
-        totalWidth,
-        step,
-        offset
-    });
-
     return offset;
 };
 
@@ -52,13 +43,7 @@ export const DistributedSelfLoopEdge = ({
     markerEnd,
     data
 }: EdgeProps<EdgeData>) => {
-    Logger.debug('[Edge:SelfLoop] Received props', {
-        id,
-        sourceX,
-        sourceY,
-        data,
-        label
-    });
+
 
     if (!data?.exitCode || !data?.exitCodes) {
         Logger.warn('[Edge:SelfLoop] Missing required data', { id, data });
@@ -102,22 +87,6 @@ export const DistributedSelfLoopEdge = ({
                 style={style}
                 markerEnd={markerEnd}
             />
-            {/* {label && (
-                <text
-                    x={adjustedSourceX - labelOffset}
-                    y={lowerY + verticalOffset}
-                    style={{
-                        fontSize: '12px',
-                        fill: '#555',
-                        fontWeight: 700,
-                        ...labelStyle,
-                    }}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                >
-                    {label}
-                </text>
-            )} */}
         </>
     );
 };
@@ -159,24 +128,7 @@ export const DistributedDoubleBackEdge = ({
     const xOffset = -totalWidth / 2 + (index * step);
     const adjustedSourceX = sourceX + xOffset;
 
-    Logger.debug('[Edge:Doubleback] Calculated position', {
-        exitCode: data.exitCode,
-        exitCodes: data.exitCodes,
-        index,
-        totalCodes,
-        totalWidth,
-        step,
-        xOffset,
-        originalX: sourceX,
-        adjustedX: adjustedSourceX
-    });
-
-    const higherY = Math.max(targetY, sourceY);
-    const lowerY = Math.min(targetY, sourceY);
-    const verticalDisplacement = higherY - lowerY;
-    const verticalOffset = verticalDisplacement / 2;
     const horizontalOffset = nodeWidth * 2 + horizontalPadding*2;
-    const labelOffset = nodeWidth / 2 + 50;
 
     const path = `M ${adjustedSourceX},${sourceY} C ${adjustedSourceX - horizontalOffset},${sourceY + nodeHeight / 2} ${adjustedSourceX - horizontalOffset},${targetY - nodeHeight / 2} ${targetX},${targetY}`;
 
@@ -191,22 +143,6 @@ export const DistributedDoubleBackEdge = ({
                 style={style}
                 markerEnd={markerEnd}
             />
-            {/* {label && (
-                <text
-                    x={adjustedSourceX - labelOffset}
-                    y={lowerY + verticalOffset}
-                    style={{
-                        fontSize: '12px',
-                        fill: '#555',
-                        fontWeight: 700,
-                        ...labelStyle,
-                    }}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                >
-                    {label}
-                </text>
-            )} */}
         </>
     );
 };
@@ -247,18 +183,6 @@ export const DistributedDefaultEdge = ({
     const xOffset = -totalWidth / 2 + (index * step);
     const adjustedSourceX = sourceX + xOffset;
 
-    Logger.debug('[DefaultEdge] Calculated position', {
-        exitCode: data.exitCode,
-        exitCodes: data.exitCodes,
-        index,
-        totalCodes,
-        totalWidth,
-        step,
-        xOffset,
-        originalX: sourceX,
-        adjustedX: adjustedSourceX
-    });
-
     // For default edge, we just need a simple bezier curve from adjusted source to target
     const path = `M ${adjustedSourceX},${sourceY} C ${adjustedSourceX},${sourceY + 50} ${targetX},${targetY - 50} ${targetX},${targetY}`;
 
@@ -271,22 +195,6 @@ export const DistributedDefaultEdge = ({
                 style={style}
                 markerEnd={markerEnd}
             />
-            {/* {label && (
-                <text
-                    x={(adjustedSourceX + targetX) / 2}
-                    y={(sourceY + targetY) / 2}
-                    style={{
-                        fontSize: '12px',
-                        fill: '#555',
-                        fontWeight: 700,
-                        ...labelStyle,
-                    }}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                >
-                    {label}
-                </text>
-            )} */}
         </>
     );
 };

@@ -14,7 +14,6 @@ import SimpleTaskNode from './nodes/SimpleTaskNode';
 import { useEnhancedFlowState } from './hooks/useStableFlowState';
 import { createNodes } from './utils/createNodes';
 import EndNode from './nodes/EndNode';
-import useStyles from './FlowChartStyles';
 import { AliceTask } from '../../../../types/TaskTypes';
 import 'reactflow/dist/style.css';
 import { DistributedDefaultEdge, DistributedDoubleBackEdge, DistributedSelfLoopEdge } from './edges/Edges';
@@ -47,7 +46,6 @@ const Flowchart: React.FC<FlowchartProps> = ({
   minWidth = '500px',
   minHeight = '500px'
 }) => {
-  const classes = useStyles();
 
   const {
     state: { nodes, edges, nodeSizes, isInitialLayoutComplete, isDragging, shouldFitView },

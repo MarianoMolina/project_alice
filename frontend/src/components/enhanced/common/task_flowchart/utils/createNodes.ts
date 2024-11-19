@@ -60,7 +60,8 @@ export function createNodes(
         type: 'endNode',
         data: { 
           label: "End", 
-          onSizeChange: (id: string, width: number, height: number) => onSizeChange(id, width, height)
+          onSizeChange: (id: string, width: number, height: number) => onSizeChange(id, width, height),
+          output_template: task.templates?.output_template || undefined
         },
         position: { x: 0, y: 0 },
       });

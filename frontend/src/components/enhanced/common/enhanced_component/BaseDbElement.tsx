@@ -191,6 +191,7 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
       });
     };
   }, [collectionName, itemId, fetchAll, fetchData]);
+
   useEffect(() => {
     if (mode !== 'view') Logger.debug('[BaseDbElement] Effect triggered', {
       collectionName,
@@ -208,6 +209,7 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
       });
     };
   }, [collectionName, itemId, mode, fetchAll]);
+  
   // Memoize handlers to prevent unnecessary re-renders
   const handleChange = useCallback(
     (newItem: Partial<T>) => {
@@ -217,7 +219,7 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
         isIdentical: item === newItem
       });
       setItem(prevItem => ({ ...prevItem, ...newItem } as T));
-    }, [item]);
+    }, [item, mode]);
 
   const handleSave = useCallback(async () => {
     if (!item) return;

@@ -4,7 +4,6 @@ import { AliceTask, RouteMap, TasksEndCodeRouting } from '../../../../types/Task
 import RouteMapView from './RouteMapView';
 import useStyles from './RoutingStyles';
 import WarningIcon from '@mui/icons-material/Warning';
-import Logger from '../../../../utils/Logger';
 
 interface TaskEndCodeRoutingBuilderProps {
   tasks?: AliceTask[];

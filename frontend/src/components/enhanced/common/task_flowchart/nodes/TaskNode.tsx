@@ -5,7 +5,7 @@ import { apiTypeIcons } from '../../../../../utils/ApiUtils';
 import NodeTemplate from './NodeTemplate';
 import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, Divider, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { getNodeAreas } from './ShareNodes';
+import { getNodeAreas } from './shared_nodes/ShareNodes';
 import { TaskNodeData } from '../utils/FlowChartUtils';
 import theme from '../../../../../Theme';
 import { useCardDialog } from '../../../../../contexts/CardDialogContext';
@@ -89,10 +89,27 @@ const TaskNode: React.FC<NodeProps<TaskNodeData>> = ({
           <Typography>Details</Typography>
         </AccordionSummary>
         <AccordionDetails>
+
+          {/* Task Type */}
+          <Stack spacing={0.5} alignItems="center">
+            <Typography variant="caption" color={theme.palette.secondary.contrastText} fontWeight={'bold'}>
+              Task Type
+            </Typography>
+            <Chip
+              label={data.task_type}
+              size="small"
+              sx={{
+                backgroundColor: theme.palette.primary.dark,
+                color: theme.palette.secondary.light,
+                fontSize: '0.75rem'
+              }}
+            />
+          </Stack>
+
           {/* Required APIs */}
           {data.required_apis && data.required_apis.length > 0 && (
             <Stack spacing={0.5} alignItems="center">
-              <Typography variant="caption" color={theme.palette.secondary.contrastText}>
+              <Typography variant="caption" color={theme.palette.secondary.contrastText} fontWeight={'bold'}>
                 Required APIs
               </Typography>
               <Stack direction="row" spacing={0.5} flexWrap="wrap" justifyContent="center">
@@ -112,7 +129,7 @@ const TaskNode: React.FC<NodeProps<TaskNodeData>> = ({
           {/* Inner Nodes */}
           {innerNodes.length > 0 && (
             <Stack spacing={0.5} alignItems="center">
-              <Typography variant="caption" color={theme.palette.secondary.contrastText}>
+              <Typography variant="caption" color={theme.palette.secondary.contrastText} fontWeight={'bold'}>
                 Inner Nodes
               </Typography>
               <Stack direction="row" spacing={0.5} flexWrap="wrap" justifyContent="center">
@@ -132,22 +149,6 @@ const TaskNode: React.FC<NodeProps<TaskNodeData>> = ({
             </Stack>
           )}
 
-          {/* Task Type */}
-          <Stack spacing={0.5} alignItems="center">
-            <Typography variant="caption" color={theme.palette.secondary.contrastText}>
-              Task Type
-            </Typography>
-            <Chip
-              label={data.task_type}
-              size="small"
-              sx={{
-                backgroundColor: theme.palette.secondary.light,
-                color: theme.palette.primary.dark,
-                fontSize: '0.75rem'
-              }}
-            />
-          </Stack>
-
           {/* Max Attempts */}
           {data.max_attempts && (
             <Typography
@@ -158,7 +159,7 @@ const TaskNode: React.FC<NodeProps<TaskNodeData>> = ({
                 display: 'block'
               }}
             >
-              Max Attempts: {data.max_attempts}
+              <b>Max Attempts:</b> {data.max_attempts}
             </Typography>
           )}
         </AccordionDetails>

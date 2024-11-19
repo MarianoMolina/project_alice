@@ -174,9 +174,8 @@ export function useEnhancedFlowState() {
           }
         }, 100);
       });
-    }, 150),
-    [updateLayout, markInitialLayoutComplete, fitView]
-  );
+    }, 150
+  ), [updateLayout, markInitialLayoutComplete, fitView]);
 
   const handleRoutingChange = useCallback((routingSignature: string, nodes: Node[], edges: Edge[]) => {
     if (routingSignatureRef.current !== routingSignature) {

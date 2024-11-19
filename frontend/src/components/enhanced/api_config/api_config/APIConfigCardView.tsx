@@ -1,6 +1,6 @@
 import React from 'react';
 import { Typography } from '@mui/material';
-import { Category, TypeSpecimen, Description, HealthAndSafety, DataObject } from '@mui/icons-material';
+import { Category, Description, HealthAndSafety, DataObject } from '@mui/icons-material';
 import { APIConfigComponentProps } from '../../../../types/ApiConfigTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';

@@ -46,12 +46,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const getToken = () => {
+  const getToken = useCallback(() => {
     return localStorage.getItem('token');
-  };
+  }, []);
 
 
-  const saveUserData = (userData: LoginResponse | User) => {
+  const saveUserData = useCallback((userData: LoginResponse | User) => {
     try {
       const userToSave = 'user' in userData ? userData.user : userData;
       const token = 'token' in userData ? userData.token : getToken();
@@ -64,7 +64,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       Logger.error('Error saving user data:', error);
     }
-  };
+  }, [getToken]);
 
   const updateUser = useCallback(async (userData: Partial<User>) => {
     try {
@@ -75,7 +75,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       Logger.error('Error updating user:', error);
       throw error;
     }
-  }, [user?._id]);
+  }, [user?._id, saveUserData]);
 
   const login = async (email: string, password: string) => {
     try {

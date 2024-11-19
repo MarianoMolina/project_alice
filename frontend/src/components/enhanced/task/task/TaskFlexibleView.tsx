@@ -59,22 +59,12 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
 
     useEffect(() => {
         if (item && Object.keys(item).length !== 0) {
-            Logger.debug('[TaskFlexibleView]', 'Setting form from item', {
-                itemId: item._id,
-                formId: form._id,
-                isDifferent: item !== form
-            });
             setForm(item);
         }
     }, [item]);
 
     useEffect(() => {
         if (!item || Object.keys(item).length === 0) {
-            Logger.debug('[TaskFlexibleView]', 'Setting default form', {
-                taskType,
-                hadPreviousForm: !!form,
-                previousFormId: form._id
-            });
             onChange(getDefaultTaskForm(taskType));
         }
     }, [item, onChange, taskType]);
@@ -142,10 +132,6 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     }, [fetchItem]);
 
     const handleTaskEndCodeRoutingChange = useCallback((newRouting: TasksEndCodeRouting) => {
-        Logger.debug('[TaskFlexibleView]', 'Routing change', {
-            previousNodes: Object.keys(form?.node_end_code_routing || {}),
-            newNodes: Object.keys(newRouting)
-        });
         setForm(prevForm => ({ ...prevForm, node_end_code_routing: newRouting }));
     }, []);
 
@@ -161,14 +147,6 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     const handleExitCodesChange = useCallback((newExitCodes: { [key: string]: string }) => {
         setForm(prevForm => ({ ...prevForm, exit_codes: newExitCodes }));
     }, []);
-
-    // Near the return statement, before the TaskFlowchart component
-    Logger.debug('[TaskFlexibleView]', 'Rendering with form', {
-        hasForm: !!form,
-        formId: form._id,
-        routingNodes: Object.keys(form?.node_end_code_routing || {}),
-        taskName: form?.task_name
-    });
 
     const memoizedPromptSelect = useMemo(() => (
         <EnhancedSelect<Prompt>

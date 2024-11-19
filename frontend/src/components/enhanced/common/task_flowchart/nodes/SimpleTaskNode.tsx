@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { NodeProps } from 'reactflow';
 import NodeTemplate from './NodeTemplate';
-import { getNodeAreas } from './ShareNodes';
+import { getNodeAreas } from './shared_nodes/ShareNodes';
 import { BaseTaskData } from '../utils/FlowChartUtils';
 
 const SimpleTaskNode: React.FC<NodeProps<BaseTaskData>> = ({

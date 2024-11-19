@@ -20,6 +20,17 @@ export type ReferenceType =
   | ToolCall
   | string;
 
+export enum OutputType {
+  MESSAGE = "message",
+  FILE = "file",
+  TASK_RESPONSE = "task_response",
+  USER_INTERACTION = "user_interaction",
+  EMBEDDING = "embedding",
+  ENTITY_REFERENCE = "entity_reference",
+  CODE_EXECUTION = "code_execution",
+  TOOL_CALL = "tool_call",
+}
+
 export interface References {
   messages?: MessageType[];
   files?: (FileReference | FileContentReference)[];

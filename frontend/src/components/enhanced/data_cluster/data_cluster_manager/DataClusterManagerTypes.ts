@@ -74,18 +74,21 @@ export const REFERENCE_CONFIG: ReferenceTypeConfig[] = [
     {
         key: 'user_interactions',
         title: 'User Interactions',
+        collectionName: 'userinteractions',
         EnhancedView: UserInteractionShortListView,
         chipType: 'UserInteraction'
     },
     {
         key: 'tool_calls',
         title: 'Tool Calls',
+        collectionName: 'toolcalls',
         EnhancedView: ToolCallShortListView,
         chipType: 'ToolCall'
     },
     {
         key: 'code_executions',
         title: 'Code Executions',
+        collectionName: 'codeexecutions',
         EnhancedView: CodeExecutionShortListView,
         chipType: 'CodeExecution'
     }

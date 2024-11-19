@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Box } from '@mui/material';
 import {
-    Add, Message, Functions, Description,
+    Add, Message, Description,
     AttachFile, Diversity2, Assignment, Feedback,
     Code,
     PersonOutline,

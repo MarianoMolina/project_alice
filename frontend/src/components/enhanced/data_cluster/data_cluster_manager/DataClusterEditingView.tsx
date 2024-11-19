@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Box, Typography, IconButton, Dialog } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { DataCluster } from '../../../../types/DataClusterTypes';
@@ -21,6 +21,7 @@ const DataClusterEditingView: React.FC<DataClusterEditingViewProps> = ({
     const { fetchItem } = useApi();
     const [activeDialog, setActiveDialog] = useState<keyof References | null>(null);
     const [selectedIds, setSelectedIds] = useState<{ [K in keyof References]?: string[] }>({});
+    const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
 
     const handleAddClick = (referenceType: keyof References) => {
         setActiveDialog(referenceType);
@@ -72,7 +73,9 @@ const DataClusterEditingView: React.FC<DataClusterEditingViewProps> = ({
             />
         ));
     };
-
+    const handleAccordionToggle = useCallback((accordion: string | null) => {
+        setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
+    }, []);
     const renderSelectionDialog = () => {
         if (!activeDialog) return null;
 
@@ -101,8 +104,8 @@ const DataClusterEditingView: React.FC<DataClusterEditingViewProps> = ({
                         isInteractable={true}
                         multiple={true}
                         label={`Select ${config.title}`}
-                        activeAccordion={null}
-                        onAccordionToggle={() => {}}
+                        activeAccordion={activeAccordion}
+                        onAccordionToggle={handleAccordionToggle}
                         accordionEntityName={config.key}
                     />
                 </Box>
@@ -112,9 +115,6 @@ const DataClusterEditingView: React.FC<DataClusterEditingViewProps> = ({
 
     const renderSection = (config: typeof REFERENCE_CONFIG[number]) => {
         const references = editedCluster[config.key] || [];
-        const showSection = references.length > 0 
-
-        if (!showSection) return null;
 
         return (
             <Box key={config.key} className="space-y-2 mb-4">
