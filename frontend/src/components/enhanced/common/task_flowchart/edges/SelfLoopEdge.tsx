@@ -1,6 +1,9 @@
 import React from 'react';
 import { EdgeProps } from 'reactflow';
 
+export const nodeHeight = 145;
+export const nodeWidth = 500;
+
 const SelfLoopEdge: React.FC<EdgeProps> = ({
     sourceX,
     sourceY,
@@ -11,10 +14,18 @@ const SelfLoopEdge: React.FC<EdgeProps> = ({
     style = {},
     markerEnd,
 }) => {
+    // Get which of targety or sourcey is higher
+    const higherY = Math.max(targetY, sourceY)
+    const lowerY = Math.min(targetY, sourceY)
+    const verticalDisplacement = higherY - lowerY
+    const verticalOffset = verticalDisplacement / 2
+    const horizontalOffset = nodeWidth / 2 + 250
+    // const verticalOffset = nodeHeight / 2
+    const labelOffset = nodeWidth / 2 + 120
     // Define the nodes
     const node0 = { x: sourceX, y: sourceY };
-    const node1 = { x: sourceX - 175, y: sourceY + 70 };
-    const node2 = { x: sourceX - 175, y: sourceY - 110 };
+    const node1 = { x: sourceX - horizontalOffset, y: sourceY + verticalOffset };
+    const node2 = { x: sourceX - horizontalOffset, y: targetY - verticalOffset };
     const node3 = { x: targetX, y: targetY };
 
     // Construct the path
@@ -24,8 +35,8 @@ const SelfLoopEdge: React.FC<EdgeProps> = ({
     `;
 
     // Calculate label position (middle of the curve)
-    const labelX = sourceX - 130;
-    const labelY = sourceY - 20;
+    const labelX = sourceX - labelOffset;
+    const labelY = lowerY + verticalOffset;
 
     // Label background dimensions
     const labelPadding = 4;

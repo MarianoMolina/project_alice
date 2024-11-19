@@ -1,4 +1,3 @@
-// NodeTemplate.tsx
 import React, { useEffect, useRef } from 'react';
 import { Handle, Position } from 'reactflow';
 
@@ -6,7 +5,7 @@ interface NodeTemplateProps {
   inputArea?: React.ReactNode;
   centerArea?: React.ReactNode;
   outputArea?: React.ReactNode;
-  bottomArea?: React.ReactNode;
+  exitCodeArea?: React.ReactNode;
   isConnectable?: boolean;
   className?: string;
   nodeId: string;
@@ -17,7 +16,7 @@ const NodeTemplate: React.FC<NodeTemplateProps> = ({
   inputArea,
   centerArea,
   outputArea,
-  bottomArea,
+  exitCodeArea,
   isConnectable = true,
   className = '',
   nodeId,
@@ -56,26 +55,27 @@ const NodeTemplate: React.FC<NodeTemplateProps> = ({
         className="w-2 h-2"
       />
       
-      <div className="grid auto-rows-auto">
-        <div className="grid grid-cols-[minmax(100px,auto)_1fr_minmax(100px,auto)]">
-          <div className="border-r border-gray-200 p-3 min-h-[100px]">
+      <div className="grid grid-cols-[160px_300px_160px] min-h-[150px]">
+        <div className="border-r border-gray-200 flex items-center">
+          <div className="w-full px-3">
             {inputArea}
-          </div>
-
-          <div className="p-3 min-h-[100px]">
-            {centerArea}
-          </div>
-
-          <div className="border-l border-gray-200 p-3 min-h-[100px]">
-            {outputArea}
           </div>
         </div>
 
-        {bottomArea && (
-          <div className="border-t border-gray-200 w-full p-3">
-            {bottomArea}
+        <div className="flex flex-col">
+          <div className="flex-1 flex items-center justify-center px-3">
+            {centerArea}
           </div>
-        )}
+          <div className="border-t border-gray-200 pt-2">
+            {exitCodeArea}
+          </div>
+        </div>
+
+        <div className="border-l border-gray-200 flex items-center">
+          <div className="w-full px-3">
+            {outputArea}
+          </div>
+        </div>
       </div>
 
       <Handle

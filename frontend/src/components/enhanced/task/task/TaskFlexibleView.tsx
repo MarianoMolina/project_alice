@@ -27,7 +27,7 @@ import TaskEndCodeRoutingBuilder from '../../common/task_end_code_routing/TaskEn
 import FunctionDefinitionBuilder from '../../common/function_select/FunctionDefinitionBuilder';
 import Logger from '../../../../utils/Logger';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import TaskFlowchart from '../../common/task_end_code_routing/task_flowchart/FlowChart';
+import TaskFlowchart from '../../common/task_flowchart/FlowChart';
 import useStyles from '../TaskStyles';
 import ExitCodeManager from '../../common/exit_code_manager/ExitCodeManager';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
@@ -55,14 +55,22 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
 
     useEffect(() => {
         if (item && Object.keys(item).length !== 0) {
-            Logger.debug('TaskFlexibleView', 'setForm', item);
+            Logger.debug('[TaskFlexibleView]', 'Setting form from item', {
+                itemId: item._id,
+                formId: form._id,
+                isDifferent: item !== form
+            });
             setForm(item);
         }
     }, [item]);
 
     useEffect(() => {
         if (!item || Object.keys(item).length === 0) {
-            Logger.debug('TaskFlexibleView', 'getDefaultTaskForm', taskType);
+            Logger.debug('[TaskFlexibleView]', 'Setting default form', {
+                taskType,
+                hadPreviousForm: !!form,
+                previousFormId: form._id
+            });
             onChange(getDefaultTaskForm(taskType));
         }
     }, [item, onChange, taskType]);
@@ -132,6 +140,10 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     }, [fetchItem]);
 
     const handleTaskEndCodeRoutingChange = useCallback((newRouting: TasksEndCodeRouting) => {
+        Logger.debug('[TaskFlexibleView]', 'Routing change', {
+            previousNodes: Object.keys(form?.node_end_code_routing || {}),
+            newNodes: Object.keys(newRouting)
+        });
         setForm(prevForm => ({ ...prevForm, node_end_code_routing: newRouting }));
     }, []);
 
@@ -148,6 +160,13 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
         setForm(prevForm => ({ ...prevForm, exit_codes: newExitCodes }));
     }, []);
 
+    // Near the return statement, before the TaskFlowchart component
+    Logger.debug('[TaskFlexibleView]', 'Rendering with form', {
+        hasForm: !!form,
+        formId: form._id,
+        routingNodes: Object.keys(form?.node_end_code_routing || {}),
+        taskName: form?.task_name
+    });
 
     const memoizedPromptSelect = useMemo(() => (
         <EnhancedSelect<Prompt>
@@ -221,10 +240,16 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
         }
     }, [item, handleDelete]);
 
+    const memoizedFlowchartTask = useMemo(() => ({
+        ...form,
+        node_end_code_routing: form.node_end_code_routing,
+        tasks: form.tasks
+    }), [form.node_end_code_routing, form.tasks]);
+
     if (!form || Object.keys(form).length === 0) {
         return <Box>No task data available.</Box>;
     }
-
+    
     const title = mode === 'create' ? 'Create New Task' : mode === 'edit' ? 'Edit Task' : 'Task Details';
     const saveButtonText = form._id ? 'Update Task' : 'Create Task';
 
@@ -322,6 +347,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                 isEditMode={isEditMode}
             />
             {/* Workflow specific fields */}
+            
             <Typography variant="h6" className={classes.titleText}>Node End Code Routing</Typography>
             <Box className={classes.endCodeRoutingContainer}>
                 <TaskEndCodeRoutingBuilder
@@ -330,7 +356,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                     onChange={handleTaskEndCodeRoutingChange}
                     isViewMode={!isEditMode}
                 />
-                <TaskFlowchart task={form} />
+                <TaskFlowchart task={memoizedFlowchartTask} />
             </Box>
             <Typography variant="h6" className={classes.titleText}>Max attempts</Typography>
             <TextField

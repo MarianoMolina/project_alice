@@ -191,12 +191,33 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
       });
     };
   }, [collectionName, itemId, fetchAll, fetchData]);
-
+  useEffect(() => {
+    if (mode !== 'view') Logger.debug('[BaseDbElement] Effect triggered', {
+      collectionName,
+      itemId,
+      mode,
+      fetchAll
+    });
+    
+    return () => {
+      if (mode !== 'view') Logger.debug('[BaseDbElement] Effect cleanup', {
+        collectionName,
+        itemId,
+        mode,
+        fetchAll
+      });
+    };
+  }, [collectionName, itemId, mode, fetchAll]);
   // Memoize handlers to prevent unnecessary re-renders
   const handleChange = useCallback(
     (newItem: Partial<T>) => {
+      if (mode !== 'view') Logger.debug('[BaseDbElement] handleChange', {
+        prevId: item?._id,
+        newId: newItem._id,
+        isIdentical: item === newItem
+      });
       setItem(prevItem => ({ ...prevItem, ...newItem } as T));
-    }, [setItem]);
+    }, [item]);
 
   const handleSave = useCallback(async () => {
     if (!item) return;

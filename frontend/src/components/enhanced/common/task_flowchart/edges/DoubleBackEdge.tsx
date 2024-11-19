@@ -1,5 +1,6 @@
 import React from 'react';
 import { EdgeProps } from 'reactflow';
+import { nodeHeight, nodeWidth } from './SelfLoopEdge';
 
 const DoubleBackEdge: React.FC<EdgeProps> = ({
     sourceX,
@@ -11,13 +12,17 @@ const DoubleBackEdge: React.FC<EdgeProps> = ({
     style = {},
     markerEnd,
 }) => {
-    const rightOffset = 175; 
-    const heightOffset = 110;
-
-    // Calculate breakpoints
+    // Get which of targety or sourcey is higher
+    const higherY = Math.max(targetY, sourceY)
+    const lowerY = Math.min(targetY, sourceY)
+    const verticalDisplacement = higherY - lowerY
+    const verticalOffset = verticalDisplacement / 2
+    const horizontalOffset = nodeWidth * 2 + 250
+    const labelOffset = nodeWidth / 2 + 50
+    // Define the nodes
     const node0 = { x: sourceX, y: sourceY };
-    const node1 = { x: sourceX + rightOffset, y: sourceY + heightOffset};
-    const node2 = { x: sourceX + rightOffset, y: targetY - heightOffset};
+    const node1 = { x: sourceX - horizontalOffset, y: sourceY + nodeHeight / 2 };
+    const node2 = { x: sourceX - horizontalOffset, y: targetY - nodeHeight / 2 };
     const node3 = { x: targetX, y: targetY };
 
     // Construct the path
@@ -27,8 +32,8 @@ const DoubleBackEdge: React.FC<EdgeProps> = ({
     `;
 
     // Calculate label position (middle of the curve)
-    const labelX = sourceX + 130;
-    const labelY = (sourceY + targetY) / 2;
+    const labelX = sourceX - labelOffset;
+    const labelY = lowerY + verticalOffset;
 
     // Label background dimensions
     const labelPadding = 4;

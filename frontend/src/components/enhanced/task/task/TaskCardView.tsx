@@ -10,7 +10,7 @@ import { TaskComponentProps } from '../../../../types/TaskTypes';
 import useStyles from '../TaskStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
-import TaskFlowchart from '../../common/task_end_code_routing/FlowChart';
+import TaskFlowchart from '../../common/task_flowchart/FlowChart';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 import { hasAnyReferences } from '../../../../types/ReferenceTypes';
 
@@ -133,7 +133,7 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
             icon: <ExitToApp />,
             primary_text: "Exit Code Routing",
             secondary_text: (item.node_end_code_routing && Object.keys(item.node_end_code_routing).length > 0) ? 
-                <TaskFlowchart tasksEndCodeRouting={item.node_end_code_routing} startTask={item.start_node || ''}/>
+                <TaskFlowchart task={item}/>
                 : "No exit code routing defined"
         },
     ];

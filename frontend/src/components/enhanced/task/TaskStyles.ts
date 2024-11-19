@@ -82,7 +82,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   exitCodeChip: {
     margin: theme.spacing(0.5),
-    backgroundColor: theme.palette.grey[200],
   },
   dialogTitleContainer: {
     position: 'relative',
