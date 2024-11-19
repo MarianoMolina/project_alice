@@ -1,16 +1,22 @@
+import { AliceAgent } from "../../../../../types/AgentTypes";
+import { ApiType } from "../../../../../types/ApiTypes";
 import { FunctionParameters } from "../../../../../types/ParameterTypes";
 import { Prompt } from "../../../../../types/PromptTypes";
-import { AliceTask, RouteMap } from "../../../../../types/TaskTypes";
+import { AliceTask, RouteMap, TaskType } from "../../../../../types/TaskTypes";
 
 export interface BaseTaskData {
   task_name: string;
+  task_type: TaskType;
+  agent?: AliceAgent | null;
   input_variables: FunctionParameters | null;
   exit_codes: { [key: string]: string };
   templates: { [key: string]: Prompt | null };
+  required_apis?: ApiType[] | null;
   onSizeChange: (id: string, width: number, height: number) => void;
 }
 
-export interface TaskNodeData extends AliceTask, BaseTaskData {}
+export interface TaskNodeData extends AliceTask, BaseTaskData {
+}
 
 export const getTaskByName = (
   parentTask: Partial<AliceTask>,
@@ -50,15 +56,18 @@ export const getNodeData = (
   return {
     task_name: taskName,
     input_variables: parentTask.input_variables || null,
+    task_type: parentTask.task_type || TaskType.APITask,
     exit_codes: parentTask.exit_codes || {},
+    required_apis: parentTask.required_apis || null,
     templates: parentTask.templates || {},
+    agent: parentTask.agent || null,
   };
 };
 
 export const isFullTask = (
   data: AliceTask | SimpleTaskDataWithoutCallback | null
 ): data is AliceTask => {
-  return data !== null && 'task_type' in data;
+  return data !== null && ('tasks' in data || 'task_description' in data);
 };
 
 export const hasRequiredTaskData = (task: Partial<AliceTask>): task is AliceTask => {

@@ -4,9 +4,10 @@ import { AliceTask, RouteMap, TasksEndCodeRouting } from '../../../../types/Task
 import RouteMapView from './RouteMapView';
 import useStyles from './RoutingStyles';
 import WarningIcon from '@mui/icons-material/Warning';
+import Logger from '../../../../utils/Logger';
 
 interface TaskEndCodeRoutingBuilderProps {
-  tasks: AliceTask[];
+  tasks?: AliceTask[];
   routing: TasksEndCodeRouting;
   onChange: (routing: TasksEndCodeRouting) => void;
   isViewMode?: boolean;
@@ -22,7 +23,12 @@ const TaskEndCodeRoutingBuilder: React.FC<TaskEndCodeRoutingBuilderProps> = ({
   const [selectedTask, setSelectedTask] = useState<string>('');
   const classes = useStyles();
 
+  const isWorkflowMode = !!tasks && tasks.length > 0;
+  const allNodeNames = Object.keys(routing);
+
   const validateRouting = useCallback(() => {
+    if (!isWorkflowMode || isViewMode) return true;
+
     const newWarnings: string[] = [];
     tasks.forEach(task => {
       if (!routing[task.task_name]) {
@@ -35,9 +41,10 @@ const TaskEndCodeRoutingBuilder: React.FC<TaskEndCodeRoutingBuilderProps> = ({
         });
       }
     });
+    
     setWarnings(newWarnings);
     return newWarnings.length === 0;
-  }, [routing, tasks]);
+  }, [routing, tasks, isViewMode, isWorkflowMode]);
 
   useEffect(() => {
     validateRouting();
@@ -48,7 +55,7 @@ const TaskEndCodeRoutingBuilder: React.FC<TaskEndCodeRoutingBuilderProps> = ({
       ...routing,
       [taskName]: {},
     });
-    setSelectedTask(''); // Reset the select after adding a task
+    setSelectedTask('');
   };
 
   const handleRouteMapChange = (taskName: string, newRouteMap: RouteMap) => {
@@ -58,7 +65,9 @@ const TaskEndCodeRoutingBuilder: React.FC<TaskEndCodeRoutingBuilderProps> = ({
     });
   };
 
-  const unusedTasks = tasks.filter(task => !routing[task.task_name]);
+  const unusedTasks = isWorkflowMode 
+    ? tasks.filter(task => !routing[task.task_name])
+    : [];
 
   return (
     <Box className={classes.routingContainer}>
@@ -72,14 +81,16 @@ const TaskEndCodeRoutingBuilder: React.FC<TaskEndCodeRoutingBuilderProps> = ({
           </ul>
         </Alert>
       )}
-      {Object.entries(routing).map(([taskName, routeMap]) => (
+      {Object.entries(routing).map(([nodeName, routeMap]) => (
         <TaskRoutingDesign
-          key={taskName}
-          taskName={taskName}
+          key={nodeName}
+          nodeName={nodeName}
           routeMap={routeMap}
           tasks={tasks}
-          onChange={(newRouteMap) => handleRouteMapChange(taskName, newRouteMap)}
+          availableNodes={allNodeNames}
+          onChange={(newRouteMap) => handleRouteMapChange(nodeName, newRouteMap)}
           isViewMode={isViewMode}
+          isWorkflowMode={isWorkflowMode}
         />
       ))}
       {!isViewMode && unusedTasks.length > 0 && (
@@ -105,32 +116,47 @@ const TaskEndCodeRoutingBuilder: React.FC<TaskEndCodeRoutingBuilderProps> = ({
 };
 
 interface TaskRoutingDesignProps {
-  taskName: string;
+  nodeName: string;
   routeMap: RouteMap;
-  tasks: AliceTask[];
+  tasks?: AliceTask[];
+  availableNodes: string[];
   onChange: (newRouteMap: RouteMap) => void;
   isViewMode: boolean;
+  isWorkflowMode: boolean;
 }
 
 const TaskRoutingDesign: React.FC<TaskRoutingDesignProps> = ({
-  taskName,
+  nodeName,
   routeMap,
   tasks,
+  availableNodes,
   onChange,
   isViewMode,
+  isWorkflowMode,
 }) => {
-  const task = tasks.find(t => t.task_name === taskName);
   const classes = useStyles();
 
-  if (!task) return null;
+  const task = isWorkflowMode 
+    ? tasks?.find(t => t.task_name === nodeName)
+    : null;
+
+  // Convert routeMap exit codes to format expected by RouteMapView
+  const exitCodesFromRouteMap = isWorkflowMode 
+    ? (task?.exit_codes ?? {})
+    : Object.keys(routeMap).reduce((acc, exitCode) => {
+        acc[exitCode] = exitCode; // Use the exit code as its own description
+        return acc;
+      }, {} as Record<string, string>);
+
+  if (isWorkflowMode && !task) return null;
 
   return (
     <Box mt={2} className={classes.taskCard}>
-      <Typography variant="subtitle1" fontWeight={'bold'}>{taskName}</Typography>
+      <Typography variant="subtitle1" fontWeight={'bold'}>{nodeName}</Typography>
       <RouteMapView
         routeMap={routeMap}
-        exitCodes={task.exit_codes}
-        availableTasks={tasks.map(t => t.task_name)}
+        exitCodes={exitCodesFromRouteMap}
+        availableTasks={isWorkflowMode ? tasks?.map(t => t.task_name) ?? [] : availableNodes}
         onChange={onChange}
         isViewMode={isViewMode}
       />

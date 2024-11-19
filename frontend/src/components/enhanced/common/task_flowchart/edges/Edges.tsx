@@ -5,8 +5,9 @@ import Logger from '../../../../../utils/Logger';
 // Constants for edge positioning
 const EXIT_CODE_WIDTH = 16; // Width of each exit code tag
 const EXIT_CODE_MARGIN = 8; // Margin between exit code tags
-export const nodeWidth = 500;
-export const nodeHeight = 145;
+export const nodeWidth = 430;
+export const nodeHeight = 105;
+const horizontalPadding = 350;
 
 interface EdgeData {
     exitCode: string;
@@ -78,8 +79,8 @@ export const DistributedSelfLoopEdge = ({
     const higherY = Math.max(targetY, sourceY);
     const lowerY = Math.min(targetY, sourceY);
     const verticalOffset = (higherY - lowerY) / 2;
-    const horizontalOffset = nodeWidth / 2 + 250;
-    const labelOffset = nodeWidth / 2 + 120;
+    const horizontalOffset = nodeWidth / 2 + horizontalPadding;
+    // const labelOffset = nodeWidth / 2 + 120;
 
     const path = `M ${adjustedSourceX},${sourceY} C ${adjustedSourceX - horizontalOffset},${sourceY + verticalOffset} ${adjustedSourceX - horizontalOffset},${targetY - verticalOffset} ${targetX},${targetY}`;
 
@@ -88,8 +89,7 @@ export const DistributedSelfLoopEdge = ({
         path,
         adjustment: {
             verticalOffset,
-            horizontalOffset,
-            labelOffset
+            horizontalOffset
         }
     });
 
@@ -102,7 +102,7 @@ export const DistributedSelfLoopEdge = ({
                 style={style}
                 markerEnd={markerEnd}
             />
-            {label && (
+            {/* {label && (
                 <text
                     x={adjustedSourceX - labelOffset}
                     y={lowerY + verticalOffset}
@@ -117,7 +117,7 @@ export const DistributedSelfLoopEdge = ({
                 >
                     {label}
                 </text>
-            )}
+            )} */}
         </>
     );
 };
@@ -175,7 +175,7 @@ export const DistributedDoubleBackEdge = ({
     const lowerY = Math.min(targetY, sourceY);
     const verticalDisplacement = higherY - lowerY;
     const verticalOffset = verticalDisplacement / 2;
-    const horizontalOffset = nodeWidth * 2 + 250;
+    const horizontalOffset = nodeWidth * 2 + horizontalPadding*2;
     const labelOffset = nodeWidth / 2 + 50;
 
     const path = `M ${adjustedSourceX},${sourceY} C ${adjustedSourceX - horizontalOffset},${sourceY + nodeHeight / 2} ${adjustedSourceX - horizontalOffset},${targetY - nodeHeight / 2} ${targetX},${targetY}`;
@@ -191,7 +191,7 @@ export const DistributedDoubleBackEdge = ({
                 style={style}
                 markerEnd={markerEnd}
             />
-            {label && (
+            {/* {label && (
                 <text
                     x={adjustedSourceX - labelOffset}
                     y={lowerY + verticalOffset}
@@ -206,7 +206,7 @@ export const DistributedDoubleBackEdge = ({
                 >
                     {label}
                 </text>
-            )}
+            )} */}
         </>
     );
 };
@@ -271,7 +271,7 @@ export const DistributedDefaultEdge = ({
                 style={style}
                 markerEnd={markerEnd}
             />
-            {label && (
+            {/* {label && (
                 <text
                     x={(adjustedSourceX + targetX) / 2}
                     y={(sourceY + targetY) / 2}
@@ -286,7 +286,7 @@ export const DistributedDefaultEdge = ({
                 >
                     {label}
                 </text>
-            )}
+            )} */}
         </>
     );
 };

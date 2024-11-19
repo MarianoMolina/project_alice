@@ -1,5 +1,7 @@
+import { Box } from '@mui/material';
 import React, { useEffect, useRef } from 'react';
 import { Handle, Position } from 'reactflow';
+import theme from '../../../../../Theme';
 
 interface NodeTemplateProps {
   inputArea?: React.ReactNode;
@@ -43,9 +45,10 @@ const NodeTemplate: React.FC<NodeTemplateProps> = ({
   }, [nodeId, onSizeChange]);
 
   return (
-    <div 
+    <Box 
       ref={nodeRef}
       className={`bg-white rounded-lg shadow-md overflow-hidden ${className}`}
+      color={theme.palette.primary.dark}
       data-nodeid={nodeId}
     >
       <Handle
@@ -72,7 +75,7 @@ const NodeTemplate: React.FC<NodeTemplateProps> = ({
         </div>
 
         <div className="border-l border-gray-200 flex items-center">
-          <div className="w-full px-3">
+          <div className="w-full px-3 text-right">
             {outputArea}
           </div>
         </div>
@@ -84,7 +87,7 @@ const NodeTemplate: React.FC<NodeTemplateProps> = ({
         isConnectable={isConnectable}
         className="w-2 h-2"
       />
-    </div>
+    </Box>
   );
 };
 

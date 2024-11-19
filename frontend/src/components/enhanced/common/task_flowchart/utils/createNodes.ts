@@ -3,6 +3,31 @@ import { getNodeData, isFullTask } from './FlowChartUtils';
 import { AliceTask } from '../../../../../types/TaskTypes';
 import Logger from '../../../../../utils/Logger';
 
+function generateSimpleHash(obj: any): string {
+  const str = JSON.stringify(obj, Object.keys(obj).sort());
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash).toString(36).substring(0, 8);
+}
+
+function generateNodeId(
+  taskName: string, 
+  parentTask: Partial<AliceTask>,
+  routingContext: string
+): string {
+  const nodeContext = {
+    name: taskName,
+    routing: parentTask.node_end_code_routing?.[taskName] || {},
+    context: routingContext
+  };
+  const hash = generateSimpleHash(nodeContext);
+  return `${taskName}-${hash}`;
+}
+
 export function createNodes(
   task: Partial<AliceTask>,
   onSizeChange: (id: string, width: number, height: number) => void
@@ -11,34 +36,51 @@ export function createNodes(
   const edges: Edge[] = [];
   const addedNodes = new Set<string>();
   const visited = new Set<string>();
-  const nodeSequence: string[] = [];  // Track the sequence of nodes as we visit them
+  const nodeSequence: string[] = [];
+  
+  const routingContext = generateSimpleHash(task.node_end_code_routing || {});
+  Logger.debug('[Flow:createNodes] Generated routing context', { 
+    routingContext,
+    taskName: task.task_name
+  });
 
   const addNode = (nodeName: string) => {
-    if (addedNodes.has(nodeName)) return;
+    const nodeId = generateNodeId(nodeName, task, routingContext);
+    if (addedNodes.has(nodeId)) return nodeId;
     
+    Logger.debug('[Flow:createNodes] Adding node', {
+      nodeName,
+      nodeId,
+      routingContext
+    });
+
     if (nodeName === "End") {
       nodes.push({
-        id: nodeName,
+        id: nodeId,
         type: 'endNode',
-        data: { label: "End", onSizeChange },
+        data: { 
+          label: "End", 
+          onSizeChange: (id: string, width: number, height: number) => onSizeChange(id, width, height)
+        },
         position: { x: 0, y: 0 },
       });
     } else {
       const nodeData = getNodeData(task, nodeName);
       if (nodeData) {
         nodes.push({
-          id: nodeName,
+          id: nodeId,
           type: isFullTask(nodeData) ? 'taskNode' : 'simpleNode',
           data: {
             ...nodeData,
-            onSizeChange,
+            onSizeChange: (id: string, width: number, height: number) => onSizeChange(id, width, height)
           },
           position: { x: 0, y: 0 },
         });
       }
     }
     
-    addedNodes.add(nodeName);
+    addedNodes.add(nodeId);
+    return nodeId;
   };
 
   const determineEdgeType = (sourceName: string, targetName: string): string => {
@@ -57,22 +99,26 @@ export function createNodes(
   };
 
   const addEdges = (sourceName: string) => {
+    const sourceId = generateNodeId(sourceName, task, routingContext);
     const routeMap = task.node_end_code_routing?.[sourceName];
+    
     if (!routeMap) {
-      Logger.warn('[createNodes:addEdges] No route map for node', { sourceName });
+      Logger.warn('[Flow:createNodes:addEdges] No route map for node', { sourceName });
       return;
     }
 
     Object.entries(routeMap).forEach(([exitCode, [nextTask, isFailure]]) => {
       if (!nextTask) {
-        if (!addedNodes.has("End")) {
+        const endId = generateNodeId("End", task, routingContext);
+        if (!addedNodes.has(endId)) {
           addNode("End");
         }
-        const edgeId = `${sourceName}-End-${exitCode}`;
+        
+        const edgeId = `${sourceId}-${endId}-${exitCode}-${routingContext}`;
         edges.push({
           id: edgeId,
-          source: sourceName,
-          target: "End",
+          source: sourceId,
+          target: endId,
           type: 'distributedDefault',
           data: {
             exitCode,
@@ -87,22 +133,23 @@ export function createNodes(
         return;
       }
 
-      addNode(nextTask);
-      const edgeId = `${sourceName}-${nextTask}-${exitCode}`;
+      const targetId = addNode(nextTask);
+      const edgeId = `${sourceId}-${targetId}-${exitCode}-${routingContext}`;
       const edgeType = determineEdgeType(sourceName, nextTask);
       
-      Logger.debug('[createNodes:addEdges] Creating edge', {
+      Logger.debug('[Flow:createNodes:addEdges] Creating edge', {
         edgeId,
-        source: sourceName,
-        target: nextTask,
+        source: sourceId,
+        target: targetId,
         type: edgeType,
-        exitCode
+        exitCode,
+        routingContext
       });
 
       edges.push({
         id: edgeId,
-        source: sourceName,
-        target: nextTask,
+        source: sourceId,
+        target: targetId,
         type: edgeType,
         data: {
           exitCode,
@@ -121,16 +168,16 @@ export function createNodes(
     if (visited.has(nodeName)) return;
     
     visited.add(nodeName);
-    nodeSequence.push(nodeName);  // Add node to sequence as we visit it
+    nodeSequence.push(nodeName);
     
-    Logger.debug('[createNodes:traverseNodes] Added node to sequence', {
+    Logger.debug('[Flow:createNodes:traverseNodes] Processing node', {
       nodeName,
-      currentSequence: [...nodeSequence]
+      currentSequence: [...nodeSequence],
+      routingContext
     });
 
     addEdges(nodeName);
 
-    // Process connections for next nodes
     const routeMap = task.node_end_code_routing?.[nodeName];
     if (routeMap) {
       Object.entries(routeMap).forEach(([_, [nextTask]]) => {

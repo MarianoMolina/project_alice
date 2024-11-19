@@ -1,30 +1,31 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import ReactFlow, {
   Controls,
   Background,
   EdgeTypes,
   NodeTypes,
-  ReactFlowInstance
+  OnNodesChange,
+  NodeDragHandler,
+  ReactFlowInstance,
 } from 'reactflow';
 import { Alert, Box, Typography } from '@mui/material';
 import TaskNode from './nodes/TaskNode';
 import SimpleTaskNode from './nodes/SimpleTaskNode';
-import { useStableFlowState } from './hooks/useStableFlowState';
+import { useEnhancedFlowState } from './hooks/useStableFlowState';
 import { createNodes } from './utils/createNodes';
-import { applyLayout } from './utils/applyLayout';
 import EndNode from './nodes/EndNode';
 import useStyles from './FlowChartStyles';
 import { AliceTask } from '../../../../types/TaskTypes';
-import Logger from '../../../../utils/Logger';
 import 'reactflow/dist/style.css';
 import { DistributedDefaultEdge, DistributedDoubleBackEdge, DistributedSelfLoopEdge } from './edges/Edges';
+import Logger from '../../../../utils/Logger';
 
 interface FlowchartProps {
   task: Partial<AliceTask>;
-}
-
-interface FlowchartProps {
-  task: Partial<AliceTask>;
+  height?: string | number;
+  width?: string | number;
+  minWidth?: string | number;
+  minHeight?: string | number;
 }
 
 const edgeTypes: EdgeTypes = {
@@ -39,96 +40,102 @@ const nodeTypes: NodeTypes = {
   endNode: EndNode,
 };
 
-const Flowchart: React.FC<FlowchartProps> = ({ task }) => {
-  const flowInstance = useRef<ReactFlowInstance | null>(null);
+const Flowchart: React.FC<FlowchartProps> = ({ 
+  task, 
+  height = '1000px',
+  width = '100%',
+  minWidth = '500px',
+  minHeight = '500px'
+}) => {
   const classes = useStyles();
-  const prevTaskRef = useRef<Partial<AliceTask>>();
-  
+
   const {
-    state: { nodes, edges, nodeSizes, layoutComplete },
-    setInitial,
+    state: { nodes, edges, nodeSizes, isInitialLayoutComplete, isDragging, shouldFitView },
     updateSize,
-    updateLayout,
-    markLayoutComplete
-  } = useStableFlowState();
+    updateNodePosition,
+    setDragging,
+    handleRoutingChange,
+    debouncedLayoutUpdate,
+    setFlowInstance
+  } = useEnhancedFlowState();
 
-  // Track task prop changes
+  // Log key state changes
   useEffect(() => {
-    const taskChanged = task !== prevTaskRef.current;
-    Logger.debug('[FlowChart] Task prop change', {
-      taskId: task._id,
-      prevTaskId: prevTaskRef.current?._id,
-      hasChanged: taskChanged,
-      routingKeys: Object.keys(task.node_end_code_routing || {}),
-      nodeCount: nodes.length
-    });
-    prevTaskRef.current = task;
-  }, [task, nodes.length]);
-
-  // Track node creation
-  useEffect(() => {
-    Logger.debug('[FlowChart] Creating nodes effect', { 
-      taskId: task._id,
+    Logger.debug('[FlowChart] State update', {
       nodeCount: nodes.length,
-      existingNodeSizes: Array.from(nodeSizes.entries()).map(([id, size]) => ({
-        id,
-        size
-      }))
+      edgeCount: edges.length,
+      sizedNodes: nodeSizes.size,
+      isInitialLayoutComplete,
+      isDragging,
+      shouldFitView,
+      taskId: task._id,
     });
-    const initialState = createNodes(task, updateSize);
-    setInitial(initialState.nodes, initialState.edges);
-  }, [task, setInitial, updateSize]);
+  }, [nodes.length, edges.length, nodeSizes.size, isInitialLayoutComplete, isDragging, shouldFitView, task._id]);
 
-  // Track layout updates
+  // Handle routing changes
   useEffect(() => {
-    if (layoutComplete || nodes.length === 0) {
-      Logger.debug('[FlowChart] Layout effect skipped', {
-        layoutComplete,
+    Logger.debug('[FlowChart] Checking routing changes', {
+      taskId: task._id,
+      hasRouting: !!task.node_end_code_routing,
+      nodeCount: Object.keys(task.node_end_code_routing || {}).length
+    });
+
+    const { nodes: newNodes, edges: newEdges } = createNodes(task, updateSize);
+    const routingSignature = JSON.stringify(task.node_end_code_routing);
+    handleRoutingChange(routingSignature, newNodes, newEdges);
+  }, [task, handleRoutingChange, updateSize]);
+
+  // Handle node position changes
+  const onNodesChange: OnNodesChange = useCallback(changes => {
+    changes.forEach(change => {
+      if (change.type === 'position' && change.position) {
+        // Pass isDragging state to differentiate between drag updates and other position changes
+        updateNodePosition(change.id, change.position, isDragging);
+      }
+    });
+  }, [updateNodePosition, isDragging]);
+
+  // Handle node drag events
+  const onNodeDragStart: NodeDragHandler = useCallback(() => {
+    Logger.debug('[FlowChart] Node drag started');
+    setDragging(true);
+  }, [setDragging]);
+
+  const onNodeDragStop: NodeDragHandler = useCallback(() => {
+    Logger.debug('[FlowChart] Node drag stopped');
+    setDragging(false);
+  }, [setDragging]);
+
+  // Trigger layout updates when necessary
+  useEffect(() => {
+    if (!isInitialLayoutComplete && nodes.length > 0) {
+      Logger.debug('[FlowChart] Layout update check', {
         nodeCount: nodes.length,
-        sizedNodesCount: nodeSizes.size
+        sizedNodes: nodeSizes.size,
+        allNodesHaveSizes: nodes.every(node => nodeSizes.has(node.id))
       });
-      return;
+      debouncedLayoutUpdate(nodes, edges, nodeSizes);
     }
+  }, [nodes, edges, nodeSizes, isInitialLayoutComplete, debouncedLayoutUpdate]);
 
-    const allSized = nodes.every(node => nodeSizes.has(node.id));
-    Logger.debug('[FlowChart] Checking layout readiness', {
-      nodeCount: nodes.length,
-      sizedCount: nodeSizes.size,
-      allSized,
-      layoutComplete,
-      sizes: Array.from(nodeSizes.entries()).map(([id, size]) => ({
-        id,
-        size
-      }))
-    });
+  // Initialize ReactFlow instance
+  const onInit = useCallback((instance: ReactFlowInstance) => {
+    Logger.debug('[FlowChart] Flow instance initialized');
+    setFlowInstance(instance);
+  }, [setFlowInstance]);
 
-    if (allSized) {
-      Logger.debug('[FlowChart] Starting layout calculation');
-      const layoutedNodes = applyLayout(nodes, edges, nodeSizes);
-      Logger.debug('[FlowChart] Layout calculated', {
-        nodePositions: layoutedNodes.map(n => ({
-          id: n.id,
-          position: n.position
-        }))
-      });
-      updateLayout(layoutedNodes);
-      markLayoutComplete();
-      
-      // Fit view after layout is updated
-      setTimeout(() => {
-        flowInstance.current?.fitView({
-          padding: 0.2,
-          includeHiddenNodes: false,
-          duration: 200
-        });
-      }, 50);
-    }
-  }, [nodes, edges, nodeSizes, layoutComplete, updateLayout, markLayoutComplete]);
+  const containerStyle = {
+    height,
+    width,
+    minWidth,
+    minHeight,
+    flexGrow: 1,
+    flexBasis: minWidth
+  };
 
   if (!task?.node_end_code_routing || Object.keys(task.node_end_code_routing).length === 0) {
-    Logger.warn('No routing information found for task');
     return (
-      <Box className={classes.flowChartContainer}>
+      <Box sx={containerStyle}>
         <Typography variant="h6">Node Flowchart</Typography>
         <Alert severity="info" sx={{ width: '100%', marginTop: 10 }}>
           No tasks found to build the flowchart.
@@ -138,26 +145,23 @@ const Flowchart: React.FC<FlowchartProps> = ({ task }) => {
   }
 
   return (
-    <Box className={classes.flowChartContainer}>
+    <Box sx={containerStyle}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
         edgeTypes={edgeTypes}
         nodeTypes={nodeTypes}
-        onInit={(instance) => {
-          flowInstance.current = instance;
-          Logger.debug('Flow instance initialized');
-          // Initial fit view
-          instance.fitView({
-            padding: 0.2,
-            includeHiddenNodes: false,
-            duration: 200
-          });
-        }}
-        fitView={false}
+        onInit={onInit}
+        onNodesChange={onNodesChange}
+        onNodeDragStart={onNodeDragStart}
+        onNodeDragStop={onNodeDragStop}
+        fitView={shouldFitView}
+        fitViewOptions={{ padding: 0.2, duration: 200 }}
+        minZoom={0.1}
+        maxZoom={2}
         attributionPosition="bottom-left"
         nodesConnectable={false}
-        nodesDraggable={true}
+        nodesDraggable={true} // Always allow dragging
         zoomOnScroll={true}
         panOnScroll={true}
         panOnDrag={true}

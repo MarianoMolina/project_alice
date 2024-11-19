@@ -133,7 +133,7 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
             icon: <ExitToApp />,
             primary_text: "Exit Code Routing",
             secondary_text: (item.node_end_code_routing && Object.keys(item.node_end_code_routing).length > 0) ? 
-                <TaskFlowchart task={item}/>
+                <TaskFlowchart task={item} height={500} minWidth={500}/>
                 : "No exit code routing defined"
         },
     ];

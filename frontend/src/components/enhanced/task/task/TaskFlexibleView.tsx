@@ -46,6 +46,10 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     const [isSaving, setIsSaving] = useState(false);
     const classes = useStyles();
 
+    const isEditMode = mode === 'edit' || mode === 'create';
+    const title = mode === 'create' ? 'Create New Task' : mode === 'edit' ? 'Edit Task' : 'Task Details';
+    const saveButtonText = form._id ? 'Update Task' : 'Create Task';
+
     useEffect(() => {
         if (isSaving) {
             handleSave();
@@ -74,8 +78,6 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             onChange(getDefaultTaskForm(taskType));
         }
     }, [item, onChange, taskType]);
-
-    const isEditMode = mode === 'edit' || mode === 'create';
 
     const handleAccordionToggle = useCallback((accordion: string | null) => {
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
@@ -249,9 +251,6 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     if (!form || Object.keys(form).length === 0) {
         return <Box>No task data available.</Box>;
     }
-    
-    const title = mode === 'create' ? 'Create New Task' : mode === 'edit' ? 'Edit Task' : 'Task Details';
-    const saveButtonText = form._id ? 'Update Task' : 'Create Task';
 
     return (
         <GenericFlexibleView
@@ -345,18 +344,16 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                 exitCodes={form.exit_codes || {}}
                 onChange={handleExitCodesChange}
                 isEditMode={isEditMode}
-            />
-            {/* Workflow specific fields */}
-            
+            />            
             <Typography variant="h6" className={classes.titleText}>Node End Code Routing</Typography>
             <Box className={classes.endCodeRoutingContainer}>
                 <TaskEndCodeRoutingBuilder
-                    tasks={Object.values(form.tasks ?? {})}
+                    tasks={taskType === TaskType.Workflow ? Object.values(form.tasks ?? {}) : []}
                     routing={form.node_end_code_routing || {}}
                     onChange={handleTaskEndCodeRoutingChange}
-                    isViewMode={!isEditMode}
+                    isViewMode={taskType !== TaskType.Workflow ? true : !isEditMode}
                 />
-                <TaskFlowchart task={memoizedFlowchartTask} />
+                <TaskFlowchart task={memoizedFlowchartTask} height={800} />
             </Box>
             <Typography variant="h6" className={classes.titleText}>Max attempts</Typography>
             <TextField
