@@ -33,7 +33,7 @@ The project consists of three main components:
 ## The Goal
 1. Provide a tool to create, test and deploy agentic solutions
 2. A `human-language` framework where text is the primary input and the output of most operations, with the goal of making this tool easy to engage with by both users and agents
-3. Produce a model-agnostic/brand-agnostic framwork, allowing the user to set and deploy their solutions however they want
+3. Produce a model-agnostic/brand-agnostic framework, allowing the user to set and deploy their solutions however they want
 4. Offer an open-source option that helps put the control in the users hand 
 
 ## Setup and Installation
