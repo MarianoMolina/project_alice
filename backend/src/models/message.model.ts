@@ -46,7 +46,6 @@ const messageSchema = new Schema<IMessageDocument, IMessageModel>({
   },
 }, { timestamps: true });
 
-
 messageSchema.methods.apiRepresentation = function (this: IMessageDocument) {
   return {
     id: this._id,
@@ -69,8 +68,9 @@ function ensureObjectIdForSave(
   this: IMessageDocument,
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
-  if (this.created_by) this.created_by = getObjectId(this.created_by);
-  if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
+  const context = { model: 'Message', field: '' };
+  if (this.created_by) this.created_by = getObjectId(this.created_by, { ...context, field: 'created_by' });
+  if (this.updated_by) this.updated_by = getObjectId(this.updated_by, { ...context, field: 'updated_by' });
   next();
 }
 
@@ -79,14 +79,16 @@ function ensureObjectIdForUpdate(
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
   const update = this.getUpdate() as any;
-  if (update.created_by) update.created_by = getObjectId(update.created_by);
-  if (update.updated_by) update.updated_by = getObjectId(update.updated_by);
+  if (!update) return next();
+  const context = { model: 'Message', field: '' };
+  if (update.created_by) update.created_by = getObjectId(update.created_by, { ...context, field: 'created_by' });
+  if (update.updated_by) update.updated_by = getObjectId(update.updated_by, { ...context, field: 'updated_by' });
   next();
 }
 
-messageSchema.plugin(mongooseAutopopulate);
 messageSchema.pre('save', ensureObjectIdForSave);
 messageSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
+messageSchema.plugin(mongooseAutopopulate);
 
 const Message = mongoose.model<IMessageDocument, IMessageModel>('Message', messageSchema);
 

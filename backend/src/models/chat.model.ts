@@ -1,6 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import { IChangeHistoryDocument, IAliceChatDocument, IAliceChatModel } from '../interfaces/chat.interface';
-import { getObjectId } from '../utils/utils';
+import { getObjectId, getObjectIdForList, getObjectIdForMap } from '../utils/utils';
+import mongooseAutopopulate from 'mongoose-autopopulate';
 
 // ChangeHistory schema
 const changeHistorySchema = new Schema<IChangeHistoryDocument>({
@@ -27,19 +28,37 @@ changeHistorySchema.methods.apiRepresentation = function (this: IChangeHistoryDo
 // AliceChat schema
 const aliceChatSchema = new Schema<IAliceChatDocument, IAliceChatModel>({
   name: { type: String, default: "New Chat", description: "Name of the chat" },
-  messages: [{ type: Schema.Types.ObjectId, ref: 'Message' }],
+  messages: [{ type: Schema.Types.ObjectId, ref: 'Message', autopopulate: true }],
   changeHistory: [{ type: changeHistorySchema, default: [], description: "List of changes in the chat conversation" }],
-  alice_agent: { type: Schema.Types.ObjectId, ref: 'Agent', required: true, description: "The Alice agent object" },
-  agent_tools: [{ type: Schema.Types.ObjectId, ref: 'Task', default: [], description: "List of tools to be registered with the agent" }],
-  retrieval_tools: [{ type: Schema.Types.ObjectId, ref: 'Task', default: [], description: "List of tools with access to the data cluster" }],
-  data_cluster: { type: Schema.Types.ObjectId, ref: 'DataCluster', required: false, description: "Data cluster for the chat" },
+  alice_agent: { type: Schema.Types.ObjectId, ref: 'Agent', required: true, description: "The Alice agent object", autopopulate: true },
+  agent_tools: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Task',
+    default: [],
+    description: "List of tools to be registered with the agent",
+    autopopulate: true
+  }],
+  retrieval_tools: [{ 
+    type: Schema.Types.ObjectId, 
+    ref: 'Task', 
+    default: [], 
+    description: "List of tools with access to the data cluster", 
+    autopopulate: true 
+  }],
+  data_cluster: { 
+    type: Schema.Types.ObjectId, 
+    ref: 'DataCluster', 
+    required: false, 
+    description: "Data cluster for the chat", 
+    autopopulate: true 
+  },
   default_user_checkpoints: {
     type: Map,
-    of: { type: Schema.Types.ObjectId, ref: 'UserCheckpoint' },
+    of: { type: Schema.Types.ObjectId, ref: 'UserCheckpoint', autopopulate: true },
     default: () => new Map(),
-  }, 
-  created_by: { type: Schema.Types.ObjectId, ref: 'User' },
-  updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
+  },
+  created_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true },
+  updated_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true }
 }, { timestamps: true });
 
 aliceChatSchema.methods.apiRepresentation = function (this: IAliceChatDocument) {
@@ -63,25 +82,16 @@ function ensureObjectIdForSave(
   this: IAliceChatDocument,
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
-  if (this.alice_agent) this.alice_agent = getObjectId(this.alice_agent);
-  if (this.created_by) this.created_by = getObjectId(this.created_by);
-  if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
-  if (this.data_cluster) this.data_cluster = getObjectId(this.data_cluster);
-  if (this.agent_tools && this.agent_tools.length > 0) {
-    this.agent_tools = this.agent_tools.map((func) => getObjectId(func));
-  }
-  if (this.retrieval_tools && this.retrieval_tools.length > 0) {
-    this.retrieval_tools = this.retrieval_tools.map((func) => getObjectId(func));
-  }
-  if (this.messages && this.messages.length > 0) {
-    this.messages = this.messages.map((message) => getObjectId(message));
-  }
-  if (this.default_user_checkpoints && this.default_user_checkpoints instanceof Map) {
-    for (const [key, value] of this.default_user_checkpoints.entries()) {
-      if (value) {
-        this.default_user_checkpoints.set(key, getObjectId(value));
-      }
-    }
+  const context = { model: 'AliceChat', field: '' };
+  if (this.alice_agent) this.alice_agent = getObjectId(this.alice_agent, { ...context, field: 'alice_agent' });
+  if (this.created_by) this.created_by = getObjectId(this.created_by, { ...context, field: 'created_by' });
+  if (this.updated_by) this.updated_by = getObjectId(this.updated_by, { ...context, field: 'updated_by' });
+  if (this.data_cluster) this.data_cluster = getObjectId(this.data_cluster, { ...context, field: 'data_cluster' });
+  if (this.agent_tools) this.agent_tools = getObjectIdForList(this.agent_tools, { ...context, field: 'agent_tools' });
+  if (this.retrieval_tools) this.retrieval_tools = getObjectIdForList(this.retrieval_tools, { ...context, field: 'retrieval_tools' });
+  if (this.messages) this.messages = getObjectIdForList(this.messages, { ...context, field: 'messages' });
+  if (this.default_user_checkpoints) {
+    this.default_user_checkpoints = getObjectIdForMap(this.default_user_checkpoints, { ...context, field: 'default_user_checkpoints' });
   }
   next();
 }
@@ -91,47 +101,24 @@ function ensureObjectIdForUpdate(
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
   const update = this.getUpdate() as any;
-  if (update.alice_agent) update.alice_agent = getObjectId(update.alice_agent);
-  if (update.created_by) update.created_by = getObjectId(update.created_by);
-  if (update.updated_by) update.updated_by = getObjectId(update.updated_by);
-  if (update.data_cluster) update.data_cluster = getObjectId(update.data_cluster);
-  if (update.agent_tools && update.agent_tools.length > 0) {
-    update.agent_tools = update.agent_tools.map((func: any) => getObjectId(func));
-  }
-  if (update.retrieval_tools && update.retrieval_tools.length > 0) {
-    update.retrieval_tools = update.retrieval_tools.map((func: any) => getObjectId(func));
-  }
-  if (update.messages && update.messages.length > 0) {
-    update.messages = update.messages.map((message: any) => getObjectId(message));
-  }
-  if (update.default_user_checkpoints && typeof update.default_user_checkpoints === 'object') {
-    const newCheckpoints = new Map();
-    for (const [key, value] of Object.entries(update.default_user_checkpoints)) {
-      if (value) {
-        newCheckpoints.set(key, getObjectId(value));
-      }
-    }
-    update.default_user_checkpoints = newCheckpoints;
+  if (!update) return next();
+  const context = { model: 'AliceChat', field: '' };
+  if (update.alice_agent) update.alice_agent = getObjectId(update.alice_agent, { ...context, field: 'alice_agent' });
+  if (update.created_by) update.created_by = getObjectId(update.created_by, { ...context, field: 'created_by' });
+  if (update.updated_by) update.updated_by = getObjectId(update.updated_by, { ...context, field: 'updated_by' });
+  if (update.data_cluster) update.data_cluster = getObjectId(update.data_cluster, { ...context, field: 'data_cluster' });
+  if (update.agent_tools) update.agent_tools = getObjectIdForList(update.agent_tools, { ...context, field: 'agent_tools' });
+  if (update.retrieval_tools) update.retrieval_tools = getObjectIdForList(update.retrieval_tools, { ...context, field: 'retrieval_tools' });
+  if (update.messages) update.messages = getObjectIdForList(update.messages, { ...context, field: 'messages' });
+  if (update.default_user_checkpoints) {
+    update.default_user_checkpoints = getObjectIdForMap(update.default_user_checkpoints, { ...context, field: 'default_user_checkpoints' });
   }
   next();
 }
 
-function autoPopulate(this: mongoose.Query<any, any>) {
-  this.populate('alice_agent created_by updated_by')
-    .populate('agent_tools')
-    .populate('retrieval_tools')
-    .populate('data_cluster')
-    .populate({
-      path: 'default_user_checkpoints.$*',
-      model: 'UserCheckpoint'
-    })
-    .populate('messages');
-}
-
 aliceChatSchema.pre('save', ensureObjectIdForSave);
 aliceChatSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
-aliceChatSchema.pre('find', autoPopulate);
-aliceChatSchema.pre('findOne', autoPopulate);
+aliceChatSchema.plugin(mongooseAutopopulate);
 
 const AliceChat = mongoose.model<IAliceChatDocument, IAliceChatModel>('AliceChat', aliceChatSchema);
 

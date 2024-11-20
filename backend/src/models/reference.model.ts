@@ -1,7 +1,7 @@
 import mongoose, { CallbackWithoutResultAndOptionalError, Schema } from 'mongoose';
 import { IDataClusterDocument, IDataClusterModel, References } from "../interfaces/references.interface";
 import mongooseAutopopulate from 'mongoose-autopopulate';
-import { getObjectId } from '../utils/utils';
+import { getObjectId, getObjectIdForList } from '../utils/utils';
 
 // Base references schema that can be embedded in other models
 export const referencesSchema = new Schema<References>({
@@ -29,7 +29,7 @@ const dataClusterSchema = new Schema<IDataClusterDocument, IDataClusterModel>({
     updated_by: { type: Schema.Types.ObjectId, ref: 'User', required: true, autopopulate: true }
 }, { timestamps: true });
 
-// Add apiRepresentation method for DataCluster
+
 dataClusterSchema.methods.apiRepresentation = function(this: IDataClusterDocument) {
     return {
         id: this._id,
@@ -48,43 +48,48 @@ dataClusterSchema.methods.apiRepresentation = function(this: IDataClusterDocumen
     };
 };
 
-// Handle ObjectId conversion for references in both schemas
 function ensureObjectIdForSave(
     this: IDataClusterDocument,
-    next: CallbackWithoutResultAndOptionalError
+    next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
-    if (this.messages) this.messages = this.messages.map((obj) => getObjectId(obj));
-    if (this.files) this.files = this.files.map((obj) => getObjectId(obj));
-    if (this.task_responses) this.task_responses = this.task_responses.map((obj) => getObjectId(obj));
-    if (this.entity_references) this.entity_references = this.entity_references.map((obj) => getObjectId(obj));
-    if (this.user_interactions) this.user_interactions = this.user_interactions.map((obj) => getObjectId(obj));
-    if (this.embeddings) this.embeddings = this.embeddings.map((obj) => getObjectId(obj));
-    if (this.tool_calls) this.tool_calls = this.tool_calls.map((obj) => getObjectId(obj));
-    if (this.code_executions) this.code_executions = this.code_executions.map((obj) => getObjectId(obj));
-    if (this.created_by) this.created_by = getObjectId(this.created_by);
-    if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
+    const context = { model: 'DataCluster', field: '' };
+    if (this.messages) this.messages = getObjectIdForList(this.messages, { ...context, field: 'messages' });
+    if (this.files) this.files = getObjectIdForList(this.files, { ...context, field: 'files' });
+    if (this.task_responses) this.task_responses = getObjectIdForList(this.task_responses, { ...context, field: 'task_responses' });
+    if (this.entity_references) this.entity_references = getObjectIdForList(this.entity_references, { ...context, field: 'entity_references' });
+    if (this.user_interactions) this.user_interactions = getObjectIdForList(this.user_interactions, { ...context, field: 'user_interactions' });
+    if (this.embeddings) this.embeddings = getObjectIdForList(this.embeddings, { ...context, field: 'embeddings' });
+    if (this.tool_calls) this.tool_calls = getObjectIdForList(this.tool_calls, { ...context, field: 'tool_calls' });
+    if (this.code_executions) this.code_executions = getObjectIdForList(this.code_executions, { ...context, field: 'code_executions' });
+    
+    if (this.created_by) this.created_by = getObjectId(this.created_by, { ...context, field: 'created_by' });
+    if (this.updated_by) this.updated_by = getObjectId(this.updated_by, { ...context, field: 'updated_by' });
     next();
 }
 
 function ensureObjectIdForUpdate(
     this: mongoose.Query<any, any>,
-    next: CallbackWithoutResultAndOptionalError
+    next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
     const update = this.getUpdate() as any;
-    if (update.messages) update.messages = update.messages.map((obj: any) => getObjectId(obj));
-    if (update.files) update.files = update.files.map((obj: any) => getObjectId(obj));
-    if (update.task_responses) update.task_responses = update.task_responses.map((obj: any) => getObjectId(obj));
-    if (update.entity_references) update.entity_references = update.entity_references.map((obj: any) => getObjectId(obj));
-    if (update.user_interactions) update.user_interactions = update.user_interactions.map((obj: any) => getObjectId(obj));
-    if (update.embeddings) update.embeddings = update.embeddings.map((obj: any) => getObjectId(obj));
-    if (update.tool_calls) update.tool_calls = update.tool_calls.map((obj: any) => getObjectId(obj));
-    if (update.code_executions) update.code_executions = update.code_executions.map((obj: any) => getObjectId(obj));
-    if (update.created_by) update.created_by = getObjectId(update.created_by);
-    if (update.updated_by) update.updated_by = getObjectId(update.updated_by);
+    if (!update) return next();
+    const context = { model: 'DataCluster', field: '' };
+
+    const arrayFields = [
+        'messages', 'files', 'task_responses', 'entity_references',
+        'user_interactions', 'embeddings', 'tool_calls', 'code_executions'
+    ];
+
+    arrayFields.forEach(field => {
+        if (update[field]) update[field] = getObjectIdForList(update[field], { ...context, field });
+    });
+
+    if (update.created_by) update.created_by = getObjectId(update.created_by, { ...context, field: 'created_by' });
+    if (update.updated_by) update.updated_by = getObjectId(update.updated_by, { ...context, field: 'updated_by' });
     next();
 }
 
-// Apply plugins and middleware to both schemas
+// Apply plugins and middleware
 referencesSchema.plugin(mongooseAutopopulate);
 referencesSchema.pre('save', ensureObjectIdForSave);
 referencesSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);

@@ -1,15 +1,15 @@
-import mongoose, { Schema, CallbackWithoutResultAndOptionalError, Query } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import { getObjectId } from '../utils/utils';
 import { IEmbeddingChunkDocument, IEmbeddingChunkModel } from '../interfaces/embeddingChunk.interface';
+import mongooseAutopopulate from 'mongoose-autopopulate';
 
 const embeddingSchema = new Schema<IEmbeddingChunkDocument, IEmbeddingChunkModel>({
-
   vector: { type: [Number], required: true },
   text_content: { type: String, required: true },
   index: { type: Number, required: true },
   creation_metadata: { type: Map, of: Schema.Types.Mixed },
-  created_by: { type: Schema.Types.ObjectId, ref: 'User' },
-  updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
+  created_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true },
+  updated_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true }
 }, { timestamps: true });
 
 embeddingSchema.methods.apiRepresentation = function (this: IEmbeddingChunkDocument) {
@@ -26,30 +26,25 @@ embeddingSchema.methods.apiRepresentation = function (this: IEmbeddingChunkDocum
   };
 };
 
-function ensureObjectId(this: IEmbeddingChunkDocument, next: CallbackWithoutResultAndOptionalError) {
-  if (this.created_by) this.created_by = getObjectId(this.created_by);
-  if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
+function ensureObjectId(this: IEmbeddingChunkDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {
+  const context = { model: 'EmbeddingChunk', field: '' };
+  if (this.created_by) this.created_by = getObjectId(this.created_by, { ...context, field: 'created_by' });
+  if (this.updated_by) this.updated_by = getObjectId(this.updated_by, { ...context, field: 'updated_by' });
   next();
 }
 
-
-function ensureObjectIdForUpdate(this: Query<any, any>, next: CallbackWithoutResultAndOptionalError) {
+function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
   const update = this.getUpdate() as any;
-  if (update.created_by) update.created_by = getObjectId(update.created_by);
-  if (update.updated_by) update.updated_by = getObjectId(update.updated_by);
-  next();
-};
-
-
-function autoPopulate(this: Query<any, any>, next: CallbackWithoutResultAndOptionalError) {
-  this.populate('created_by updated_by');
+  if (!update) return next();
+  const context = { model: 'EmbeddingChunk', field: '' };
+  if (update.created_by) update.created_by = getObjectId(update.created_by, { ...context, field: 'created_by' });
+  if (update.updated_by) update.updated_by = getObjectId(update.updated_by, { ...context, field: 'updated_by' });
   next();
 }
 
 embeddingSchema.pre('save', ensureObjectId);
 embeddingSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
-embeddingSchema.pre('find', autoPopulate);
-embeddingSchema.pre('findOne', autoPopulate);
+embeddingSchema.plugin(mongooseAutopopulate);
 
 const EmbeddingChunk = mongoose.model<IEmbeddingChunkDocument, IEmbeddingChunkModel>('EmbeddingChunk', embeddingSchema);
 

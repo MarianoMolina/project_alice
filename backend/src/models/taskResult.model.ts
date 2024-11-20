@@ -62,8 +62,10 @@ function ensureObjectIdForSave(
   this: ITaskResultDocument,
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
-  if (this.created_by) this.created_by = getObjectId(this.created_by);
-  if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
+  const context = { model: 'TaskResult', field: '' };
+  if (this.created_by) this.created_by = getObjectId(this.created_by, { ...context, field: 'created_by' });
+  if (this.updated_by) this.updated_by = getObjectId(this.updated_by, { ...context, field: 'updated_by' });
+  if (this.task_id) this.task_id = getObjectId(this.task_id, { ...context, field: 'task_id' });
   next();
 }
 
@@ -72,8 +74,11 @@ function ensureObjectIdForUpdate(
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
   const update = this.getUpdate() as any;
-  if (update.created_by) update.created_by = getObjectId(update.created_by);
-  if (update.updated_by) update.updated_by = getObjectId(update.updated_by);
+  if (!update) return next();
+  const context = { model: 'TaskResult', field: '' };
+  if (update.created_by) update.created_by = getObjectId(update.created_by, { ...context, field: 'created_by' });
+  if (update.updated_by) update.updated_by = getObjectId(update.updated_by, { ...context, field: 'updated_by' });
+  if (update.task_id) update.task_id = getObjectId(update.task_id, { ...context, field: 'task_id' });
   next();
 }
 

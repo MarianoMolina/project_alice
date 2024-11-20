@@ -1,9 +1,15 @@
-import mongoose, { CallbackWithoutResultAndOptionalError, Query, Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { IUserInteractionDocument, IUserInteractionModel, InteractionOwnerType } from "../interfaces/userInteraction.interface";
 import { getObjectId } from "../utils/utils";
+import mongooseAutopopulate from 'mongoose-autopopulate';
 
 const userInteractionSchema = new Schema<IUserInteractionDocument, IUserInteractionModel>({
-    user_checkpoint_id: { type: Schema.Types.ObjectId, ref: 'UserCheckpoint', required: true },
+    user_checkpoint_id: { 
+        type: Schema.Types.ObjectId, 
+        ref: 'UserCheckpoint', 
+        required: true,
+        autopopulate: true 
+    },
     owner: {
         type: {
             type: String,
@@ -19,7 +25,7 @@ const userInteractionSchema = new Schema<IUserInteractionDocument, IUserInteract
         type: Schema.Types.Mixed,
         default: null,
         validate: {
-            validator: function(v) {
+            validator: function(v: any) {
                 return v === null
                     || (typeof v === 'object' 
                         && (v.selected_option === undefined || typeof v.selected_option === 'number')
@@ -27,8 +33,18 @@ const userInteractionSchema = new Schema<IUserInteractionDocument, IUserInteract
             }
         },
     },
-    created_by: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    updated_by: { type: Schema.Types.ObjectId, ref: 'User', required: true }
+    created_by: { 
+        type: Schema.Types.ObjectId, 
+        ref: 'User', 
+        required: true,
+        autopopulate: true 
+    },
+    updated_by: { 
+        type: Schema.Types.ObjectId, 
+        ref: 'User', 
+        required: true,
+        autopopulate: true 
+    }
 }, { timestamps: true });
 
 userInteractionSchema.methods.apiRepresentation = function(this: IUserInteractionDocument) {
@@ -44,32 +60,52 @@ userInteractionSchema.methods.apiRepresentation = function(this: IUserInteractio
     };
 };
 
-function ensureObjectId(this: IUserInteractionDocument, next: CallbackWithoutResultAndOptionalError) {
-    if (this.user_checkpoint_id) this.user_checkpoint_id = getObjectId(this.user_checkpoint_id);
-    if (this.owner) this.owner.id = getObjectId(this.owner.id);
-    if (this.created_by) this.created_by = getObjectId(this.created_by);
-    if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
+function ensureObjectId(
+    this: IUserInteractionDocument, 
+    next: mongoose.CallbackWithoutResultAndOptionalError
+) {
+    const context = { model: 'UserInteraction', field: '' };
+    if (this.user_checkpoint_id) {
+        this.user_checkpoint_id = getObjectId(this.user_checkpoint_id, { ...context, field: 'user_checkpoint_id' });
+    }
+    if (this.owner?.id) {
+        this.owner.id = getObjectId(this.owner.id, { ...context, field: 'owner.id' });
+    }
+    if (this.created_by) {
+        this.created_by = getObjectId(this.created_by, { ...context, field: 'created_by' });
+    }
+    if (this.updated_by) {
+        this.updated_by = getObjectId(this.updated_by, { ...context, field: 'updated_by' });
+    }
     next();
 }
 
-function ensureObjectIdForUpdate(this: Query<any, any>, next: CallbackWithoutResultAndOptionalError) {
+function ensureObjectIdForUpdate(
+    this: mongoose.Query<any, any>, 
+    next: mongoose.CallbackWithoutResultAndOptionalError
+) {
     const update = this.getUpdate() as any;
-    if (update.user_checkpoint_id) update.user_checkpoint_id = getObjectId(update.user_checkpoint_id);
-    if (update?.owner?.id) update.owner.id = getObjectId(update.owner.id);
-    if (update.created_by) update.created_by = getObjectId(update.created_by);
-    if (update.updated_by) update.updated_by = getObjectId(update.updated_by);
-    next();
-}
-
-function autoPopulate(this: Query<any, any>, next: CallbackWithoutResultAndOptionalError) {
-    this.populate('created_by updated_by user_checkpoint_id');
+    if (!update) return next();
+    const context = { model: 'UserInteraction', field: '' };
+    
+    if (update.user_checkpoint_id) {
+        update.user_checkpoint_id = getObjectId(update.user_checkpoint_id, { ...context, field: 'user_checkpoint_id' });
+    }
+    if (update?.owner?.id) {
+        update.owner.id = getObjectId(update.owner.id, { ...context, field: 'owner.id' });
+    }
+    if (update.created_by) {
+        update.created_by = getObjectId(update.created_by, { ...context, field: 'created_by' });
+    }
+    if (update.updated_by) {
+        update.updated_by = getObjectId(update.updated_by, { ...context, field: 'updated_by' });
+    }
     next();
 }
 
 userInteractionSchema.pre('save', ensureObjectId);
 userInteractionSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
-userInteractionSchema.pre('find', autoPopulate);
-userInteractionSchema.pre('findOne', autoPopulate);
+userInteractionSchema.plugin(mongooseAutopopulate);
 
 const UserInteraction = mongoose.model<IUserInteractionDocument, IUserInteractionModel>('UserInteraction', userInteractionSchema);
 

@@ -1,60 +1,58 @@
 import { Types } from 'mongoose';
 import Logger from './logger';
 
-export function getObjectId(id: any): Types.ObjectId {
-  console.log('getObjectId received:', {
-    value: id === null ? 'null' : 
-          id === undefined ? 'undefined' : 
-          typeof id === 'object' ? JSON.stringify(id) : 
-          String(id),
-    type: typeof id,
-    isObjectId: id instanceof Types.ObjectId,
-    hasId: id?.id !== undefined,
-    has_id: id?._id !== undefined
-  });
+interface IdContext {
+  model: string;
+  field: string;
+}
 
+export function getObjectId(id: any, context?: IdContext): Types.ObjectId {
   try {
     if (id instanceof Types.ObjectId) {
-      console.log('Returning existing ObjectId');
       return id;
     } else if (typeof id === 'string') {
-      console.log('Converting string to ObjectId');
       return new Types.ObjectId(id);
     } else if (id && id._id) {
-      console.log('Found _id property, recursing');
-      return getObjectId(id._id);
+      return getObjectId(id._id, context);
     } else if (id && id.id) {
-      console.log('Found id property, recursing');
-      return getObjectId(id.id);
-    } else {
-      const idType = typeof id;
-      const idValue = id === null ? 'null' :
-        id === undefined ? 'undefined' :
-        typeof id === 'object' ? JSON.stringify(id) :
-        String(id);
-
-      console.log('No valid ID found to convert:', { idType, idValue });
-      throw new Error(`Invalid ObjectId: received ${idType} with value ${idValue}`);
+      return getObjectId(id.id, context);
     }
+
+    throw new Error(`Invalid ObjectId: received ${typeof id}`);
   } catch (error) {
-    const stack = error instanceof Error ? error.stack : new Error().stack;
-    const errorDetails = {
-      receivedValue: id === null ? 'null' :
-        id === undefined ? 'undefined' :
-        typeof id === 'object' ? JSON.stringify(id) :
-        String(id),
-      receivedType: typeof id,
-      errorMessage: error instanceof Error ? error.message : String(error),
-      stack: stack
-    };
-
-    Logger.error('Error getting ObjectId:', {
-      error: errorDetails,
-      stack: stack
+    const errorMsg = `ObjectId conversion failed${context ? ` for ${context.model}.${context.field}` : ''}`;
+    Logger.error(errorMsg, { 
+      value: id === null ? 'null' : 
+             id === undefined ? 'undefined' : 
+             typeof id === 'object' ? JSON.stringify(id) : String(id),
+      error: error instanceof Error ? error.message : String(error)
     });
-
-    return id;
+    throw error;
   }
+}
+
+export function getObjectIdForList(list: any[], context?: IdContext): Types.ObjectId[] {
+  return list.map(item => getObjectId(item, context));
+}
+
+export function getObjectIdForMap<K extends string | number | symbol>(
+  map: Map<K, any> | Record<K, any>, 
+  context?: IdContext
+): Map<K, Types.ObjectId> {
+  const result = new Map<K, Types.ObjectId>();
+  const entries = map instanceof Map ? map.entries() : Object.entries(map) as [K, any][];
+  
+  for (const [key, value] of entries) {
+    if (value) {
+      try {
+        result.set(key, getObjectId(value, context));
+      } catch (error) {
+        Logger.error(`Failed to convert map value for key ${String(key)}`, { context, error });
+      }
+    }
+  }
+  
+  return result;
 }
 
 export function ensureObjectIdForProperties(

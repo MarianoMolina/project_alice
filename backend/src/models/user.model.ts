@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { IUserDocument, IUserModel } from '../interfaces/user.interface';
-import { getObjectId } from '../utils/utils';
+import { getObjectId, getObjectIdForList, getObjectIdForMap } from '../utils/utils';
 import Logger from '../utils/logger';
 
 const userDefaultChatConfigSchema = new Schema({
@@ -34,59 +34,79 @@ function ensureObjectIdForSave(
   this: IUserDocument,
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
-  if (this.default_chat_config) {
-    if (this.default_chat_config.alice_agent) {
-      this.default_chat_config.alice_agent = getObjectId(this.default_chat_config.alice_agent);
-    }
-    if (this.default_chat_config.data_cluster) {
-      this.default_chat_config.data_cluster = getObjectId(this.default_chat_config.data_cluster);
-    }
-    if (this.default_chat_config.agent_tools && this.default_chat_config.agent_tools.length > 0) {
-      this.default_chat_config.agent_tools = this.default_chat_config.agent_tools.map(tool => getObjectId(tool));
-    }
-    if (this.default_chat_config.retrieval_tools && this.default_chat_config.retrieval_tools.length > 0) {
-      this.default_chat_config.retrieval_tools = this.default_chat_config.retrieval_tools.map(tool => getObjectId(tool));
-    }
-    if (this.default_chat_config.default_user_checkpoints instanceof Map) {
-      for (const [key, value] of this.default_chat_config.default_user_checkpoints.entries()) {
-        if (value) {
-          this.default_chat_config.default_user_checkpoints.set(key, getObjectId(value));
-        }
+  try {
+    if (this.default_chat_config) {
+      const context = { model: 'User', field: 'default_chat_config' };
+      if (this.default_chat_config.alice_agent) {
+        this.default_chat_config.alice_agent = getObjectId(
+          this.default_chat_config.alice_agent, 
+          { ...context, field: 'default_chat_config.alice_agent' }
+        );
+      }
+      if (this.default_chat_config.data_cluster) {
+        this.default_chat_config.data_cluster = getObjectId(
+          this.default_chat_config.data_cluster, 
+          { ...context, field: 'default_chat_config.data_cluster' }
+        );
+      }
+      if (this.default_chat_config.agent_tools?.length > 0) {
+        this.default_chat_config.agent_tools = getObjectIdForList(this.default_chat_config.agent_tools, {...context, field: 'default_chat_config.agent_tools'});
+      }
+      if (this.default_chat_config.retrieval_tools?.length > 0) {
+        this.default_chat_config.retrieval_tools = getObjectIdForList(this.default_chat_config.retrieval_tools, {...context, field: 'default_chat_config.retrieval_tools'});
+      }
+      if (this.default_chat_config.default_user_checkpoints instanceof Map) {
+        this.default_chat_config.default_user_checkpoints = getObjectIdForMap(this.default_chat_config.default_user_checkpoints, {...context, field: 'default_chat_config.default_user_checkpoints'});
       }
     }
+    next();
+  } catch (error) {
+    Logger.error('Error in User ensureObjectIdForSave:', {
+      error: error instanceof Error ? error.message : String(error),
+      userId: this._id
+    });
+    next(error instanceof Error ? error : new Error(String(error)));
   }
-  next();
 }
 
 function ensureObjectIdForUpdate(
   this: mongoose.Query<any, any>,
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
-  const update = this.getUpdate() as any;
-  if (update.default_chat_config) {
+  try {
+    const update = this.getUpdate() as any;
+    if (!update?.default_chat_config) return next();
+    const context = { model: 'User', field: 'default_chat_config' };
     if (update.default_chat_config.alice_agent) {
-      update.default_chat_config.alice_agent = getObjectId(update.default_chat_config.alice_agent);
+      update.default_chat_config.alice_agent = getObjectId(
+        update.default_chat_config.alice_agent,
+        { ...context, field: 'default_chat_config.alice_agent' }
+      );
     }
     if (update.default_chat_config.data_cluster) {
-      update.default_chat_config.data_cluster = getObjectId(update.default_chat_config.data_cluster);
+      update.default_chat_config.data_cluster = getObjectId(
+        update.default_chat_config.data_cluster,
+        { ...context, field: 'default_chat_config.data_cluster' }
+      );
     }
-    if (update.default_chat_config.agent_tools && update.default_chat_config.agent_tools.length > 0) {
-      update.default_chat_config.agent_tools = update.default_chat_config.agent_tools.map((tool: any) => getObjectId(tool));
+    if (update.default_chat_config.agent_tools?.length > 0) {
+      update.default_chat_config.agent_tools = getObjectIdForList(update.default_chat_config.agent_tools, { ...context, field: 'default_chat_config.agent_tools' });
     }
-    if (update.default_chat_config.retrieval_tools && update.default_chat_config.retrieval_tools.length > 0) {
-      update.default_chat_config.retrieval_tools = update.default_chat_config.retrieval_tools.map((tool: any) => getObjectId(tool));
+    if (update.default_chat_config.retrieval_tools?.length > 0) {
+      update.default_chat_config.retrieval_tools = getObjectIdForList(update.default_chat_config.retrieval_tools, { ...context, field: 'default_chat_config.retrieval_tools' });
     }
-    if (update.default_chat_config.default_user_checkpoints && typeof update.default_chat_config.default_user_checkpoints === 'object') {
-      const newCheckpoints = new Map();
-      for (const [key, value] of Object.entries(update.default_chat_config.default_user_checkpoints)) {
-        if (value) {
-          newCheckpoints.set(key, getObjectId(value));
-        }
-      }
-      update.default_chat_config.default_user_checkpoints = newCheckpoints;
+    if (update.default_chat_config.default_user_checkpoints && 
+        typeof update.default_chat_config.default_user_checkpoints === 'object') {
+      update.default_chat_config.default_user_checkpoints = getObjectIdForMap(update.default_chat_config.default_user_checkpoints, { ...context, field: 'default_chat_config.default_user_checkpoints' });
     }
+    next();
+  } catch (error) {
+    Logger.error('Error in User ensureObjectIdForUpdate:', {
+      error: error instanceof Error ? error.message : String(error),
+      update: this.getUpdate()
+    });
+    next(error instanceof Error ? error : new Error(String(error)));
   }
-  next();
 }
 
 userSchema.methods.apiRepresentation = function(this: IUserDocument) {

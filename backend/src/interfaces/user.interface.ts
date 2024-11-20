@@ -11,7 +11,7 @@ export interface IUserDefaultChatConfig {
     agent_tools: Types.ObjectId[] | ITaskDocument[];
     retrieval_tools: Types.ObjectId[] | ITaskDocument[];
     data_cluster?: Types.ObjectId | IDataClusterDocument;
-    default_user_checkpoints: { [key: string]: Types.ObjectId | IUserCheckpointDocument };
+    default_user_checkpoints: Map<string, Types.ObjectId | IUserCheckpointDocument>;
 }
 
 // Update the IUser interface
