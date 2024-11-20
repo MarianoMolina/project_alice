@@ -1,11 +1,11 @@
-{{ plan_workflow }}
+{{ Plan_Workflow }}
 
-{% if generate_code %}
+{% if Generate_Code %}
 This is your last attempt at drafting this code:
-{{ generate_code }}
+{{ Generate_Code }}
 {% endif %}
 
-{% if generate_unit_tests %}
+{% if Generate_Unit_Tests %}
 This is the unit test code:
-{{ generate_unit_tests }}
+{{ Generate_Unit_Tests }}
 {% endif %}

@@ -18,7 +18,6 @@ interface DataClusterHeaderProps {
     setIsFlatView: (value: boolean) => void;
     isEditable: boolean;
     isDirty: boolean;
-    showCreate: boolean;
     showEdit: boolean;
     showSelect: boolean;
     onAction: (key: string) => void;
@@ -33,7 +32,6 @@ const DataClusterHeader = memo(({
     setIsFlatView,
     isEditable,
     isDirty,
-    showCreate,
     showEdit,
     showSelect,
     onAction,
@@ -97,7 +95,6 @@ const DataClusterHeader = memo(({
                                 dataCluster, 
                                 onDataClusterChange, 
                                 isEditable, 
-                                showCreate, 
                                 showEdit, 
                                 showSelect 
                             },
@@ -111,7 +108,6 @@ const DataClusterHeader = memo(({
                                 dataCluster, 
                                 onDataClusterChange, 
                                 isEditable, 
-                                showCreate, 
                                 showEdit, 
                                 showSelect 
                             }) :

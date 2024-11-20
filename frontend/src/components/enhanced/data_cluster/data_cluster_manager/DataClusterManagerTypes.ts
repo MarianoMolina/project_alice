@@ -106,15 +106,15 @@ interface ActionButtonConfig {
 
 // Define the action button configurations
 export const ACTION_BUTTON_CONFIG: ActionButtonConfig[] = [
-    {
-        key: 'create',
-        label: 'Create New',
-        icon: AddIcon,
-        showCondition: (props) => Boolean(props.showCreate && props.isEditable),
-        disabled: false,
-        variant: 'outlined',
-        color: 'secondary',
-    },
+    // {
+    //     key: 'create',
+    //     label: 'Create New',
+    //     icon: AddIcon,
+    //     showCondition: (props) => Boolean(props.showCreate && props.isEditable),
+    //     disabled: false,
+    //     variant: 'outlined',
+    //     color: 'secondary',
+    // },
     {
         key: 'edit',
         label: 'Edit',

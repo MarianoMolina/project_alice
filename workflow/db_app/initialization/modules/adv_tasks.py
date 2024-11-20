@@ -72,7 +72,7 @@ adv_tasks_module = AdvTasksModule(
         "agents": [
             {
                 "key": "oai_agent",
-                "name": "oai_agent",
+                "name": "OAI Agent",
                 "system_message": "default_system_message",
                 "models": {
                     "embeddings": "oai_embedding_large",
@@ -85,7 +85,7 @@ adv_tasks_module = AdvTasksModule(
             },
             {
                 "key": "pixart_gen_agent",
-                "name": "pixart_gen_agent",
+                "name": "Pixart Agent",
                 "system_message": "default_system_message",
                 "models": {
                     "img_gen": "pixart_sigma_model",
@@ -96,7 +96,7 @@ adv_tasks_module = AdvTasksModule(
             },
             {
                 "key": "bark_tts_agent",
-                "name": "bark_tts_agent",
+                "name": "Bark TTS Agent",
                 "system_message": "default_system_message",
                 "models": {
                     "tts": "bark_large",
@@ -107,7 +107,7 @@ adv_tasks_module = AdvTasksModule(
             },
             {
                 "key": "groq_tts_agent",
-                "name": "groq_tts_agent",
+                "name": "Groq TTS Agent",
                 "system_message": "default_system_message",
                 "models": {
                     "tts": "groq_llama_3_2_11b_vision",
@@ -118,7 +118,7 @@ adv_tasks_module = AdvTasksModule(
             },
             {
                 "key": "image_gen_gemini_agent",
-                "name": "image_gen_gemini_agent",
+                "name": "Gemini Img Gen Agent",
                 "system_message": "default_system_message",
                 "models": {
                     "img_gen": "gemini_img_gen_imagen_3",
@@ -132,7 +132,7 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "embedding_task",
                 "task_type": "EmbeddingTask",
-                "task_name": "embedding_task",
+                "task_name": "Embedding_Task",
                 "agent": "oai_agent",
                 "task_description": "Generates embeddings for the input text",
                 "input_variables": {
@@ -147,7 +147,7 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "retrieval_task",
                 "task_type": "RetrievalTask",
-                "task_name": "retrieval_task",
+                "task_name": "Retrieval_Task",
                 "agent": "oai_agent",
                 "task_description": "Retrieves similar embeddings for the input text",
                 "input_variables": {
@@ -164,7 +164,7 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "image_gen_task",
                 "task_type": "GenerateImageTask",
-                "task_name": "image_gen_task_dall_e",
+                "task_name": "Image_Gen_Dall_E",
                 "agent": "oai_agent",
                 "task_description": "Generates an image from the input text",
                 "input_variables": {
@@ -182,7 +182,7 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "image_gen_task_pixart",
                 "task_type": "GenerateImageTask",
-                "task_name": "image_gen_task_pixart",
+                "task_name": "Image_Gen_Pixart",
                 "agent": "pixart_gen_agent",
                 "task_description": "Generates an image from the input text",
                 "input_variables": {
@@ -200,7 +200,7 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "image_gen_task_gemini",
                 "task_type": "GenerateImageTask",
-                "task_name": "image_gen_task_gemini",
+                "task_name": "Image_Gen_Gemini",
                 "agent": "image_gen_gemini_agent",
                 "task_description": "Generates an image from the input text",
                 "input_variables": {
@@ -218,7 +218,7 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "tts_task",
                 "task_type": "TextToSpeechTask",
-                "task_name": "tts_task",
+                "task_name": "OAI_TTS_Task",
                 "agent": "oai_agent",
                 "task_description": "Converts text to speech using the OpenAI TTS API",
                 "input_variables": {
@@ -235,7 +235,7 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "groq_tts_task",
                 "task_type": "TextToSpeechTask",
-                "task_name": "groq_tts_task",
+                "task_name": "Groq_TTS_Task",
                 "agent": "groq_tts_agent",
                 "task_description": "Converts text to speech using the Groq TTS API",
                 "input_variables": {
@@ -252,7 +252,7 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "bark_tts_task",
                 "task_type": "TextToSpeechTask",
-                "task_name": "bark_tts_task",
+                "task_name": "Bark_TTS_Task",
                 "agent": "bark_tts_agent",
                 "task_description": "Converts text to speech using the Bark TTS API",
                 "input_variables": {

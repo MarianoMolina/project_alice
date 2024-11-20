@@ -1,6 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import { IUserDocument, IUserModel } from '../interfaces/user.interface';
 import { getObjectId } from '../utils/utils';
+import Logger from '../utils/logger';
 
 const userDefaultChatConfigSchema = new Schema({
   alice_agent: { type: Schema.Types.ObjectId, ref: 'Agent', required: true },
@@ -88,17 +89,6 @@ function ensureObjectIdForUpdate(
   next();
 }
 
-function autoPopulate(this: mongoose.Query<any, any>) {
-  this.populate('default_chat_config.alice_agent')
-    .populate('default_chat_config.agent_tools')
-    .populate('default_chat_config.retrieval_tools')
-    .populate('default_chat_config.data_cluster')
-    .populate({
-      path: 'default_chat_config.default_user_checkpoints.$*',
-      model: 'UserCheckpoint'
-    });
-}
-
 userSchema.methods.apiRepresentation = function(this: IUserDocument) {
   const defaultChatConfig = this.default_chat_config ? {
     alice_agent: this.default_chat_config.alice_agent ? 
@@ -123,8 +113,6 @@ userSchema.methods.apiRepresentation = function(this: IUserDocument) {
 
 userSchema.pre('save', ensureObjectIdForSave);
 userSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
-userSchema.pre('find', autoPopulate);
-userSchema.pre('findOne', autoPopulate);
 
 const User = mongoose.model<IUserDocument, IUserModel>('User', userSchema);
 

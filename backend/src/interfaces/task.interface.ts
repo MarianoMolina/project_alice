@@ -1,7 +1,7 @@
 import { Document, Types, Model } from 'mongoose';
 import { IFunctionParameters } from '../utils/functionSchema';
 import { IUserCheckpoint } from './userCheckpoint.interface';
-import { References } from './references.interface';
+import { IDataClusterDocument, References } from './references.interface';
 import { IUserDocument } from './user.interface';
 
 export enum TaskType {
@@ -27,7 +27,7 @@ export interface ITask {
   tasks: Map<string, Types.ObjectId> | null;
   templates: Map<string, Types.ObjectId> | null;
   user_checkpoints: Map<string, IUserCheckpoint | Types.ObjectId> | null;
-  data_cluster?: References;
+  data_cluster?: Types.ObjectId | IDataClusterDocument;
   required_apis: Array<string> | null;
   max_attempts: number;
   recursive: boolean;

@@ -12,7 +12,7 @@ const EntityReferenceListView: React.FC<EntityReferenceComponentProps> = ({
     const getPrimaryText = (entityReference: EntityReference) => entityReference.name ?? '';
     const getSecondaryText = (entityReference: EntityReference) => (
         <Typography component="span" variant="body2" color="textSecondary">
-            {entityReference.url}
+            Categories: {entityReference.categories ? entityReference.categories.join(', ') : ''}
         </Typography>
     );
 

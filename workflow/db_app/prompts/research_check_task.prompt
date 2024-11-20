@@ -1,7 +1,7 @@
 This is the research brief:
-{{ research_brief_task }}
+{{ Research_Brief_Task }}
 Here is the data retrieved:
-{{ data_retrieval_task }}
+{{ Data_Retrieval_Task }}
 
 Evaluate if the retrieved data sufficiently addresses the research brief. Keep in mind not all data has to be relevant, since later it will be summarized. 
 Use "APPROVED" if sufficient, or "REJECTED" if inadequate, followed by your explanation.

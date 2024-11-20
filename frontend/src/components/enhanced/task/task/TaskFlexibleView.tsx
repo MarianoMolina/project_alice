@@ -331,7 +331,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                     onChange={handleTaskEndCodeRoutingChange}
                     isViewMode={taskType !== TaskType.Workflow ? true : !isEditMode}
                 />
-                <TaskFlowchart task={memoizedFlowchartTask} height={800} />
+                <TaskFlowchart task={memoizedFlowchartTask} height={800} miniMap/>
             </Box>
             <Typography variant="h6" className={classes.titleText}>Max attempts</Typography>
             <TextField

@@ -53,13 +53,13 @@ export interface EntityConnection {
 }
 
 export interface EntityReference extends Embeddable {
+    categories: ReferenceCategoryType[];
     source_id?: string;
     name?: string;
     description?: string;
     content?: string;
     url?: string;
     images: ImageReference[];
-    categories: ReferenceCategoryType[];
     source?: ApiType;
     connections: EntityConnection[];
     metadata?: Record<string, any>;

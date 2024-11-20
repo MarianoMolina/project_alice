@@ -77,7 +77,7 @@ base_tasks_module = BaseTasksModule(
         "agents": [
             {
                 "key": "research_agent",
-                "name": "research_agent",
+                "name": "Research Agent",
                 "system_message": "research_agent_prompt",
                 "models": {
                     "chat": "gpt-4o-mini",
@@ -91,7 +91,7 @@ base_tasks_module = BaseTasksModule(
             {
                 "key": "wolfram_alpha_query_task",
                 "task_type": "APITask",
-                "task_name": "wolfram_alpha_query",
+                "task_name": "Wolfram_Alpha_Query",
                 "task_description": "Queries Wolfram Alpha for information",
                 "input_variables": {
                     "type": "object",
@@ -107,7 +107,7 @@ base_tasks_module = BaseTasksModule(
             {
                 "key": "knowledge_graph_search_task",
                 "task_type": "APITask",
-                "task_name": "knowledge_graph_search",
+                "task_name": "Knowledge_Graph_Search",
                 "task_description": "Searches the Google Knowledge Graph for information",
                 "input_variables": {
                     "type": "object",
@@ -123,7 +123,7 @@ base_tasks_module = BaseTasksModule(
             {
                 "key": "reddit_search",
                 "task_type": "APITask",
-                "task_name": "reddit_search",
+                "task_name": "Reddit_Search",
                 "task_description": "Searches Reddit for information",
                 "input_variables": {
                     "type": "object",
@@ -141,7 +141,7 @@ base_tasks_module = BaseTasksModule(
             {
                 "key": "exa_search",
                 "task_type": "APITask",
-                "task_name": "exa_search",
+                "task_name": "Exa_Search",
                 "task_description": "Searches Exa for information",
                 "input_variables": {
                     "type": "object",
@@ -156,7 +156,7 @@ base_tasks_module = BaseTasksModule(
             {
                 "key": "wikipedia_search",
                 "task_type": "APITask",
-                "task_name": "wikipedia_search",
+                "task_name": "Wikipedia_Search",
                 "task_description": "Searches Wikipedia for information",
                 "input_variables": {
                     "type": "object",
@@ -171,7 +171,7 @@ base_tasks_module = BaseTasksModule(
             {
                 "key": "google_search",
                 "task_type": "APITask",
-                "task_name": "google_search",
+                "task_name": "Google_Search",
                 "task_description": "Searches Google for information",
                 "input_variables": {
                     "type": "object",
@@ -186,7 +186,7 @@ base_tasks_module = BaseTasksModule(
             {
                 "key": "arxiv_search",
                 "task_type": "APITask",
-                "task_name": "arxiv_search",
+                "task_name": "Arxiv_Search",
                 "task_description": "Searches arXiv for papers",
                 "input_variables": {
                     "type": "object",
@@ -208,12 +208,12 @@ base_tasks_module = BaseTasksModule(
                     "task_template": "basic_prompt"
                 },
                 "tasks":{
-                    "reddit_search": "reddit_search",
-                    "exa_search": "exa_search",
-                    "wikipedia_search": "wikipedia_search",
-                    "google_search": "google_search",
-                    "arxiv_search": "arxiv_search",
-                    "knowledge_graph_search": "knowledge_graph_search_task"
+                    "Reddit_Search": "reddit_search",
+                    "Exa_Search": "exa_search",
+                    "Wikipedia_Search": "wikipedia_search",
+                    "Google_Search": "google_search",
+                    "Arxiv_Search": "arxiv_search",
+                    "Knowledge_Graph_Search": "knowledge_graph_search_task"
                 },
                 "input_variables": {
                     "type": "object",

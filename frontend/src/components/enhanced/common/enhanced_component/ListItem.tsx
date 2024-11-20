@@ -11,7 +11,7 @@ import {
 import { Visibility, ChevronRight } from '@mui/icons-material';
 import { makeStyles } from '@mui/styles';
 import { CollectionElementString } from '../../../../types/CollectionTypes';
-import { hexToRgba } from '../../../../utils/StyleUtils';
+import { formatStringWithSpaces, hexToRgba } from '../../../../utils/StyleUtils';
 
 const useStyles = makeStyles((theme: Theme) => ({
   listItem: {
@@ -96,7 +96,7 @@ function EnhancedListItemComponent<T>({
   const handleInteraction = useCallback(() => onInteraction?.(item), [onInteraction, item]);
 
   const { truncated: truncatedPrimaryText, isTruncated: isPrimaryTruncated } =
-    truncateText(primaryText, maxCharacters);
+    truncateText(formatStringWithSpaces(primaryText), maxCharacters);
 
   const renderSecondaryText = () => {
     if (typeof secondaryText === 'string') {

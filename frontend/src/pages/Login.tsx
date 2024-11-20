@@ -15,6 +15,7 @@ const Login: React.FC = () => {
     setError(null);
 
     try {
+      Logger.debug('Logging in with email:', email);
       await loginAndNavigate(email, password);
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {

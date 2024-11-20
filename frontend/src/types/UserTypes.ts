@@ -1,16 +1,18 @@
-import { AliceAgent } from "./AgentTypes";
-import { RequiredCheckpoints } from "./ChatTypes";
+import { CheckpointType, RequiredCheckpoints } from "./ChatTypes";
 import { BasicDBObj, convertToBasicDBObj } from "./CollectionTypes";
-import { DataCluster } from "./DataClusterTypes";
-import { AliceTask } from "./TaskTypes";
 
+export type UserCheckpoints = {
+    [CheckpointType.TOOL_CALL]: string;
+    [CheckpointType.CODE_EXECUTION]: string;
+};
 export interface UserDefaultChatConfig {
-    alice_agent: AliceAgent;
-    agent_tools: AliceTask[];
-    retrieval_tools: AliceTask[];
-    data_cluster?: DataCluster;
-    default_user_checkpoints: RequiredCheckpoints;
+    alice_agent: string;
+    agent_tools: string[];
+    retrieval_tools: string[];
+    data_cluster?: string;
+    default_user_checkpoints: UserCheckpoints;
 }
+
 export interface User extends BasicDBObj {
     name: string;
     email: string;

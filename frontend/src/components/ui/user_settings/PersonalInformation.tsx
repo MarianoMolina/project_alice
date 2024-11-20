@@ -1,5 +1,5 @@
 // components/ui/user_settings/PersonalInformation.tsx
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Box, TextField, Typography, Button, Card, CardContent, Alert } from '@mui/material';
 import { Person } from '@mui/icons-material';
 import { useApi } from '../../../contexts/ApiContext';
@@ -34,6 +34,55 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [populatedItems, setPopulatedItems] = useState<{
+        agent?: AliceAgent,
+        agentTools: AliceTask[],
+        retrievalTools: AliceTask[],
+        toolCallCheckpoint?: UserCheckpoint,
+        codeExecCheckpoint?: UserCheckpoint,
+        dataCluster?: DataCluster
+    }>({
+        agentTools: [],
+        retrievalTools: []
+    });
+
+    useEffect(() => {
+        const populateItems = async () => {
+            const [
+                agent,
+                agentTools,
+                retrievalTools,
+                toolCallCheckpoint,
+                codeExecCheckpoint,
+                dataCluster
+            ] = await Promise.all([
+                userObject.default_chat_config?.alice_agent ?
+                    fetchItem('agents', userObject.default_chat_config.alice_agent) : undefined,
+                Promise.all((userObject.default_chat_config?.agent_tools || [])
+                    .map(id => fetchItem('tasks', id))),
+                Promise.all((userObject.default_chat_config?.retrieval_tools || [])
+                    .map(id => fetchItem('tasks', id))),
+                userObject.default_chat_config?.default_user_checkpoints?.[CheckpointType.TOOL_CALL] ?
+                    fetchItem('usercheckpoints', userObject.default_chat_config.default_user_checkpoints[CheckpointType.TOOL_CALL]) : undefined,
+                userObject.default_chat_config?.default_user_checkpoints?.[CheckpointType.CODE_EXECUTION] ?
+                    fetchItem('usercheckpoints', userObject.default_chat_config.default_user_checkpoints[CheckpointType.CODE_EXECUTION]) : undefined,
+                userObject.default_chat_config?.data_cluster ?
+                    (typeof userObject.default_chat_config.data_cluster === 'string' ?
+                        fetchItem('dataclusters', userObject.default_chat_config.data_cluster) : undefined)
+                    : undefined]);
+
+            setPopulatedItems({
+                agent: agent as AliceAgent,
+                agentTools: agentTools as AliceTask[],
+                retrievalTools: retrievalTools as AliceTask[],
+                toolCallCheckpoint: toolCallCheckpoint as UserCheckpoint,
+                codeExecCheckpoint: codeExecCheckpoint as UserCheckpoint,
+                dataCluster: dataCluster as DataCluster
+            });
+        };
+
+        populateItems();
+    }, [userObject.default_chat_config, fetchItem]);
 
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -49,7 +98,7 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
                     ...prevUser,
                     default_chat_config: {
                         ...prevUser.default_chat_config,
-                        alice_agent: agent,
+                        alice_agent: agent._id,
                     } as UserDefaultChatConfig,
                 };
             });
@@ -57,28 +106,26 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
     }, [fetchItem, setUserObject]);
 
     const handleAgentToolsChange = useCallback(async (selectedIds: string[]) => {
-        const tools = await Promise.all(selectedIds.map(id => fetchItem('tasks', id) as Promise<AliceTask>));
         setUserObject(prevUser => {
             if (!prevUser) return null;
             return {
                 ...prevUser,
                 default_chat_config: {
                     ...prevUser.default_chat_config,
-                    agent_tools: tools,
+                    agent_tools: selectedIds,
                 } as UserDefaultChatConfig,
             };
         });
     }, [fetchItem, setUserObject]);
 
     const handleRetrievalToolsChange = useCallback(async (selectedIds: string[]) => {
-        const tools = await Promise.all(selectedIds.map(id => fetchItem('tasks', id) as Promise<AliceTask>));
         setUserObject(prevUser => {
             if (!prevUser) return null;
             return {
                 ...prevUser,
                 default_chat_config: {
                     ...prevUser.default_chat_config,
-                    retrieval_tools: tools,
+                    retrieval_tools: selectedIds,
                 } as UserDefaultChatConfig,
             };
         });
@@ -96,7 +143,7 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
                         ...prevUser.default_chat_config,
                         default_user_checkpoints: {
                             ...currentCheckpoints,
-                            [CheckpointType.TOOL_CALL]: checkpoint,
+                            [CheckpointType.TOOL_CALL]: checkpoint._id,
                         },
                     } as UserDefaultChatConfig,
                 };
@@ -116,7 +163,7 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
                         ...prevUser.default_chat_config,
                         default_user_checkpoints: {
                             ...currentCheckpoints,
-                            [CheckpointType.CODE_EXECUTION]: checkpoint,
+                            [CheckpointType.CODE_EXECUTION]: checkpoint._id,
                         },
                     } as UserDefaultChatConfig,
                 };
@@ -214,7 +261,7 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
                 <EnhancedSelect<AliceAgent>
                     componentType="agents"
                     EnhancedView={AgentShortListView}
-                    selectedItems={userObject.default_chat_config?.alice_agent ? [userObject.default_chat_config.alice_agent] : []}
+                    selectedItems={populatedItems?.agent ? [populatedItems.agent] : []}
                     onSelect={handleAgentChange}
                     label="Select Default Agent"
                     activeAccordion={activeAccordion}
@@ -228,7 +275,7 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
                 <EnhancedSelect<AliceTask>
                     componentType="tasks"
                     EnhancedView={TaskShortListView}
-                    selectedItems={userObject.default_chat_config?.agent_tools || []}
+                    selectedItems={populatedItems.agentTools}
                     onSelect={handleAgentToolsChange}
                     multiple
                     label="Select Default Agent Tools"
@@ -243,7 +290,7 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
                 <EnhancedSelect<AliceTask>
                     componentType="tasks"
                     EnhancedView={TaskShortListView}
-                    selectedItems={userObject.default_chat_config?.retrieval_tools || []}
+                    selectedItems={populatedItems.retrievalTools}
                     onSelect={handleRetrievalToolsChange}
                     multiple
                     label="Select Default Retrieval Tools"
@@ -260,8 +307,8 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
                     <EnhancedSelect<UserCheckpoint>
                         componentType="usercheckpoints"
                         EnhancedView={UserCheckpointShortListView}
-                        selectedItems={userObject.default_chat_config?.default_user_checkpoints?.[CheckpointType.TOOL_CALL] ?
-                            [userObject.default_chat_config.default_user_checkpoints[CheckpointType.TOOL_CALL]] : []}
+                        selectedItems={populatedItems?.toolCallCheckpoint ?
+                            [populatedItems.toolCallCheckpoint] : []}
                         onSelect={handleToolCallCheckpointChange}
                         label="Select Tool Call Checkpoint"
                         activeAccordion={activeAccordion}
@@ -276,8 +323,8 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
                     <EnhancedSelect<UserCheckpoint>
                         componentType="usercheckpoints"
                         EnhancedView={UserCheckpointShortListView}
-                        selectedItems={userObject.default_chat_config?.default_user_checkpoints?.[CheckpointType.CODE_EXECUTION] ?
-                            [userObject.default_chat_config.default_user_checkpoints[CheckpointType.CODE_EXECUTION]] : []}
+                        selectedItems={populatedItems.codeExecCheckpoint ?
+                            [populatedItems.codeExecCheckpoint] : []}
                         onSelect={handleCodeExecCheckpointChange}
                         label="Select Code Execution Checkpoint"
                         activeAccordion={activeAccordion}
@@ -289,7 +336,7 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
                 </Box>
                 <Typography variant="subtitle1">Data Cluster</Typography>
                 <DataClusterManager
-                    dataCluster={userObject.default_chat_config?.data_cluster}
+                    dataCluster={populatedItems.dataCluster}
                     isEditable={true}
                     onDataClusterChange={handleDataClusterChange}
                     flatten={false}

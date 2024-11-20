@@ -9,7 +9,7 @@ const EntityReferenceShortListView: React.FC<EntityReferenceComponentProps> = ({
     onView,
 }) => {
     const getPrimaryText = (entityReference: EntityReference) => entityReference.name ?? '';
-    const getSecondaryText = (entityReference: EntityReference) => entityReference.url ?? '';
+    const getSecondaryText = (entityReference: EntityReference) => entityReference.categories ? entityReference.categories.join(', ') : '';
 
     return (
         <EnhancedShortListView<EntityReference>

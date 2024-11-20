@@ -20,7 +20,7 @@ const ToolCallCardView: React.FC<ToolCallComponentProps> = ({ item }) => {
         {
             icon: <TypeSpecimen />,
             primary_text: "Args",
-            secondary_text: <CodeBlock language='json' code={item.function?.arguments}/>
+            secondary_text: <CodeBlock language='json' code={JSON.stringify(item.function?.arguments, null, 2)} />
         },
         {
             icon: <Category />,

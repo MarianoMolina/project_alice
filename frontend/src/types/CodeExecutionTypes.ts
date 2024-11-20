@@ -36,3 +36,26 @@ export const getDefaultCodeExecutionForm = (): Partial<CodeExecution> => ({
         exit_code: 0
     }
 });
+
+export const LANGUAGES = [
+    'python',
+    'javascript',
+    'typescript',
+    'java',
+    'c',
+    'cpp',
+    'csharp',
+    'ruby',
+    'php',
+    'swift',
+    'go',
+    'rust',
+    'shell',
+    'sql',
+    'html',
+    'css',
+    'markdown',
+    'json',
+    'yaml',
+    'text'
+];

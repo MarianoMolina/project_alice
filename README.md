@@ -7,10 +7,11 @@ Alice is an agentic workflow framework that integrates task execution and intell
 
 > What's new? v0.3 brings:
 > - RAG: Support for RAG with the new Retrieval Task, and new structures Data Clusters and Embedding Chunk. Support for local embeddings without needing LM Studio.  
-> - HITL: Human-in-the-loop mechanics to tasks
+> - HITL: Human-in-the-loop mechanics to tasks -> Add a User Checkpoint to a task or a chat, and force a user interaction 'pause' whenever the chosen node is reached
 > - COT: A basic Chain-of-thought implementation: [analysis] tags are parsed on the frontend, and added to the agent's system prompts allowing them think through requests more effectively
 > - DOCUMENTS: Alice Documents, represented by the [aliceDocument] tag, are parsed on the frontend and added to the agent's system prompts allowing them to structure their responses better
 > - NODE FLOW: Fully implemented node execution logic to tasks, making workflows simply a case where the nodes are other tasks. This allows for greater clarity on what each task is doing and why
+> - FLOW VIEWER: Updated the task UI to show more details on the task's inner node logic
 > - APIS: New APIs for Wolfram Alpha, Google's Knowledge Graph, PixArt Image Generation (local), Bark TTS (local)
 > - DATA CLUSTERS: Now chats and tasks can hold updatable data clusters that hold embeddable references like messages, files, task responses, etc. You can add any reference in your environment to a data cluster to give your agents/tasks access to it.
 

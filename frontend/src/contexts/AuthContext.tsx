@@ -70,6 +70,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       if (!user?._id) throw new Error('No user ID found');
       const updatedUser = await updateItem('users', user._id, userData);
+      Logger.debug('Updated user:', updatedUser);
       saveUserData(updatedUser);
     } catch (error) {
       Logger.error('Error updating user:', error);

@@ -12,7 +12,6 @@ const DataClusterManager: React.FC<DataClusterManagerProps> = ({
     dataCluster,
     onDataClusterChange,
     isEditable = false,
-    showCreate = true,
     showEdit = true,
     showSelect = true,
     flatten = true
@@ -32,13 +31,13 @@ const DataClusterManager: React.FC<DataClusterManagerProps> = ({
                 }
                 break;
             case 'save':
-                if (editedCluster && isEditable && onDataClusterChange) {
-                    onDataClusterChange(editedCluster);
-                    setIsDirty(false);
-                    setInEditMode(false);
-                    setIsFlatView(previousViewState);
-                }
+                handleSave()
                 break;
+            // case 'create':
+            //     setEditedCluster(undefined);
+            //     setInEditMode(true);
+            //     setIsDirty(false);
+            //     break;
             case 'cancel':
                 setEditedCluster(dataCluster);
                 setIsDirty(false);
@@ -47,6 +46,14 @@ const DataClusterManager: React.FC<DataClusterManagerProps> = ({
                 break;
         }
     }, [dataCluster, editedCluster, onDataClusterChange, isEditable, isFlatView, previousViewState]);
+
+    const handleSave = useCallback(() => {
+        if (!editedCluster || !isEditable || !onDataClusterChange) return;
+        onDataClusterChange(editedCluster);
+        setIsDirty(false);
+        setInEditMode(false);
+        setIsFlatView(previousViewState);
+    }, [editedCluster, onDataClusterChange, previousViewState]);
 
     const handleClusterChange = useCallback((newCluster: DataCluster) => {
         setEditedCluster(newCluster);
@@ -107,7 +114,6 @@ const DataClusterManager: React.FC<DataClusterManagerProps> = ({
                 setIsFlatView={setIsFlatView}
                 isEditable={isEditable}
                 isDirty={isDirty}
-                showCreate={showCreate}
                 showEdit={showEdit}
                 showSelect={showSelect}
                 onAction={handleAction}

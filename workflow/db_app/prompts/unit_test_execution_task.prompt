@@ -1,5 +1,5 @@
 This is the code:
-{{ generate_code }}
+{{ Generate_Code }}
 
 This is the unit test code:
-{{ generate_unit_tests }}
+{{ Generate_Unit_Tests }}

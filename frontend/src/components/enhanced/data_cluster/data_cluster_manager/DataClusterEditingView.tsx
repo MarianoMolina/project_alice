@@ -8,6 +8,7 @@ import ReferenceChip from '../../common/references/ReferenceChip';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import { REFERENCE_CONFIG } from './DataClusterManagerTypes';
 import { useApi } from '../../../../contexts/ApiContext';
+import Logger from '../../../../utils/Logger';
 
 interface DataClusterEditingViewProps {
     editedCluster: DataCluster;
@@ -31,24 +32,6 @@ const DataClusterEditingView: React.FC<DataClusterEditingViewProps> = ({
                 typeof item === 'string' ? item : item._id!
             ) || []
         }));
-    };
-
-    const handleSelectionConfirm = async (type: keyof References) => {
-        if (!selectedIds[type] || !type) return;
-
-        const config = REFERENCE_CONFIG.find(c => c.key === type);
-        if (!config?.collectionName) return;
-
-        const newRefs = await Promise.all(
-            selectedIds[type]!.map(id => fetchItem(config.collectionName!, id))
-        );
-
-        onClusterChange({
-            ...editedCluster,
-            [type]: newRefs
-        });
-
-        setActiveDialog(null);
     };
 
     const handleDelete = (type: keyof References, index: number) => {
@@ -76,6 +59,26 @@ const DataClusterEditingView: React.FC<DataClusterEditingViewProps> = ({
     const handleAccordionToggle = useCallback((accordion: string | null) => {
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
     }, []);
+
+
+    const handleReferenceSelection = async (type: keyof References, ids: string[]) => {
+        if (!selectedIds[type] || !type) return;
+
+        const config = REFERENCE_CONFIG.find(c => c.key === type);
+        if (!config?.collectionName) return;
+        
+        setSelectedIds(prev => ({ ...prev, [type]: ids }));
+
+        const newRefs = await Promise.all(
+            ids!.map(id => fetchItem(config.collectionName!, id))
+        );
+
+        onClusterChange({
+            ...editedCluster,
+            [type]: newRefs
+        });
+    };
+
     const renderSelectionDialog = () => {
         if (!activeDialog) return null;
 
@@ -98,8 +101,7 @@ const DataClusterEditingView: React.FC<DataClusterEditingViewProps> = ({
                         EnhancedView={EnhancedViewComponent}
                         selectedItems={selectedItems as any[]}
                         onSelect={(ids) => {
-                            setSelectedIds(prev => ({ ...prev, [activeDialog]: ids }));
-                            handleSelectionConfirm(activeDialog);
+                            handleReferenceSelection(config.key, ids);
                         }}
                         isInteractable={true}
                         multiple={true}

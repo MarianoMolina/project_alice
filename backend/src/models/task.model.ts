@@ -26,7 +26,7 @@ const taskSchema = new Schema<ITaskDocument, ITaskModel>({
     required_apis: { type: [String], default: null },
     agent: { type: Schema.Types.ObjectId, ref: 'Agent', default: null },
     user_checkpoints: { type: Map, of: Schema.Types.ObjectId, ref: 'UserCheckpoint', default: null },
-    data_cluster: { type: referencesSchema, default: () => ({}) },
+    data_cluster: { type: Schema.Types.ObjectId, ref: 'DataCluster', required: false, description: "Data cluster for the chat" },
     created_by: { type: Schema.Types.ObjectId, ref: 'User' },
     updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
@@ -48,6 +48,7 @@ taskSchema.methods.apiRepresentation = function (this: ITaskDocument) {
         node_end_code_routing: this.node_end_code_routing ? Object.fromEntries(
             Array.from(this.node_end_code_routing.entries()).map(([key, value]) => [key, Object.fromEntries(value)])
         ) : null,
+        data_cluster: this.data_cluster || null,
         max_attempts: this.max_attempts || 1,
         agent: this.agent ? (this.agent._id || this.agent) : null,
         created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
@@ -93,6 +94,7 @@ function ensureObjectIdForSave(this: ITaskDocument, next: mongoose.CallbackWitho
         }
         if (this.created_by) this.created_by = getObjectId(this.created_by);
         if (this.updated_by) this.updated_by = getObjectId(this.updated_by);
+        if (this.data_cluster) this.data_cluster = getObjectId(this.data_cluster);
         next();
     } catch (error) {
         next(error instanceof Error ? error : new Error(String(error)));
@@ -126,6 +128,10 @@ function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.
             );
         }
 
+        if (update.data_cluster && typeof update.data_cluster === 'object') {
+            update.data_cluster = getObjectId(update.data_cluster);
+        }
+
         // Handle single fields with proper null checks
         if (update.agent) update.agent = getObjectId(update.agent);
         if (update.created_by) update.created_by = getObjectId(update.created_by);
@@ -145,6 +151,7 @@ function autoPopulate(this: mongoose.Query<any, any>, next: mongoose.CallbackWit
     this.populate('created_by')
         .populate('updated_by')
         .populate('agent')
+        .populate('data_cluster')
 
     this.populate({
         path: 'templates',

@@ -125,7 +125,7 @@ function autoPopulate(this: mongoose.Query<any, any>) {
       path: 'default_user_checkpoints.$*',
       model: 'UserCheckpoint'
     })
-    .populate('messages'); // Only need to populate messages at the top level
+    .populate('messages');
 }
 
 aliceChatSchema.pre('save', ensureObjectIdForSave);

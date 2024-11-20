@@ -13,6 +13,7 @@ import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import TaskFlowchart from '../../common/task_flowchart/FlowChart';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 import { hasAnyReferences } from '../../../../types/ReferenceTypes';
+import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
 
 interface ChipItem {
     _id?: string;
@@ -131,7 +132,7 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
         },
         {
             icon: <ExitToApp />,
-            primary_text: "Exit Code Routing",
+            primary_text: "Task flow",
             secondary_text: (item.node_end_code_routing && Object.keys(item.node_end_code_routing).length > 0) ? 
                 <TaskFlowchart task={item} height={500} minWidth={500}/>
                 : "No exit code routing defined"
@@ -141,7 +142,7 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
     return (
         <CommonCardView
             elementType='Task'
-            title={item.task_name}
+            title={formatStringWithSpaces(item.task_name)}
             subtitle={item.task_description}
             id={item._id}
             listItems={listItems}

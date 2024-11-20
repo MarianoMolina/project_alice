@@ -77,14 +77,14 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
             {
                 "key": "web_summarize_task_prompt",
                 "name": "Web summarization prompt",
-                "content": "{{ web_scrape }}",
+                "content": "{{ Scrape_URL }}",
                 "is_templated": True,
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "web_scrape": "web_scrape_param"
+                        "Scrape_URL": "web_scrape_param"
                     },
-                    "required": ["web_scrape"]
+                    "required": ["Scrape_URL"]
                 }
             },
             {
@@ -130,7 +130,7 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
             {
                 "key": "web_scrape_task",
                 "task_type": "WebScrapeBeautifulSoupTask",
-                "task_name": "web_scrape",
+                "task_name": "Scrape_URL",
                 "task_description": "Scrapes a webpage using BeautifulSoup and an LLM agent",
                 "agent": "web_scrape_selector_agent",
                 "required_apis": ["llm_api"],
@@ -160,15 +160,15 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
             {
                 "key": "web_summarize_task",
                 "task_type": "PromptAgentTask",
-                "task_name": "web_summarize",
+                "task_name": "Summarize_URL",
                 "task_description": "Summarizes the web scrape results",
                 "agent": "web_summarizer_agent",
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "web_scrape": "web_scrape_param",
+                        "Scrape_URL": "web_scrape_param",
                     },
-                    "required": ["web_scrape"]
+                    "required": ["Scrape_URL"]
                 },
                 "required_apis": ["llm_api"],
                 "templates": {
@@ -184,21 +184,21 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
             {
                 "key": "web_scrape_workflow",
                 "task_type": "Workflow",
-                "task_name": "web_scrape_workflow",
+                "task_name": "Web_Scrape_Workflow",
                 "task_description": "Executes the web scrape and summarize tasks",
                 "tasks": {
-                    "web_scrape": "web_scrape_task",
-                    "web_summarize": "web_summarize_task",
+                    "Scrape_URL": "web_scrape_task",
+                    "Summarize_URL": "web_summarize_task",
                 },
-                "start_node": "web_scrape",
+                "start_node": "Scrape_URL",
                 "node_end_code_routing": {
-                    "web_scrape": {
-                        0: ("web_summarize", False),
-                        1: ("web_scrape", True),
+                    "Scrape_URL": {
+                        0: ("Summarize_URL", False),
+                        1: ("Scrape_URL", True),
                     },
-                    "web_summarize": {
+                    "Summarize_URL": {
                         0: (None, False),
-                        1: ("web_summarize", True),
+                        1: ("Summarize_URL", True),
                     },
                 },
                 "max_attempts": 2,

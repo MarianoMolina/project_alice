@@ -21,6 +21,7 @@ import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClus
 import { UserCheckpoint } from '../../../../types/UserCheckpointTypes';
 import UserCheckpointShortListView from '../../user_checkpoint/user_checkpoint/UserCheckpointShortListView';
 import { useAuth } from '../../../../contexts/AuthContext';
+import { DataCluster } from '../../../../types/DataClusterTypes';
 
 const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     item,
@@ -42,22 +43,39 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
 
     Logger.debug('ChatFlexibleView', { item, handleDelete });
     useEffect(() => {
-        if (mode === 'create' && user?.default_chat_config && !item) {
-            const defaultConfig = user.default_chat_config;
+        const populateConfig = async () => {
+          if (mode === 'create' && user?.default_chat_config && !item) {
+            const config = user.default_chat_config;
+            const [agent, agentTools, retrievalTools, toolCallCheckpoint, codeExecCheckpoint, dataCluster] = await Promise.all([
+              config.alice_agent ? fetchItem('agents', config.alice_agent) : undefined,
+              Promise.all((config.agent_tools || []).map(id => fetchItem('tasks', id))),
+              Promise.all((config.retrieval_tools || []).map(id => fetchItem('tasks', id))),
+              config.default_user_checkpoints[CheckpointType.TOOL_CALL] ? 
+                fetchItem('usercheckpoints', config.default_user_checkpoints[CheckpointType.TOOL_CALL]) : undefined,
+              config.default_user_checkpoints[CheckpointType.CODE_EXECUTION] ?
+                fetchItem('usercheckpoints', config.default_user_checkpoints[CheckpointType.CODE_EXECUTION]) : undefined,
+              config.data_cluster ? fetchItem('dataclusters', config.data_cluster) : undefined
+            ]);
+      
             setForm(prevForm => ({
-                ...prevForm,
-                alice_agent: defaultConfig.alice_agent || undefined,
-                agent_tools: defaultConfig.agent_tools || [],
-                retrieval_tools: defaultConfig.retrieval_tools || [],
-                default_user_checkpoints: defaultConfig.default_user_checkpoints || {},
-                data_cluster: defaultConfig.data_cluster || undefined,
+              ...prevForm,
+              alice_agent: agent as AliceAgent,
+              agent_tools: agentTools as AliceTask[],
+              retrieval_tools: retrievalTools as AliceTask[],
+              default_user_checkpoints: {
+                [CheckpointType.TOOL_CALL]: toolCallCheckpoint as UserCheckpoint,
+                [CheckpointType.CODE_EXECUTION]: codeExecCheckpoint as UserCheckpoint
+              },
+              data_cluster: dataCluster as DataCluster,
             }));
-        } else if (item) {
+          } else if (item) {
             setForm(item);
-        } else if (!item || Object.keys(item).length === 0) {
+          } else if (!item || Object.keys(item).length === 0) {
             onChange(getDefaultChatForm());
-        }
-    }, [item, onChange, user, mode]);
+          }
+        };
+        populateConfig();
+      }, [item, onChange, user, mode, fetchItem]);
 
     useEffect(() => {
         if (isSaving) {
@@ -82,7 +100,12 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
 
     const handleFunctionsChange = useCallback(async (selectedIds: string[]) => {
         const functions = await Promise.all(selectedIds.map(id => fetchItem('tasks', id) as Promise<AliceTask>));
-        setForm(prevForm => ({ ...prevForm, functions }));
+        setForm(prevForm => ({ ...prevForm, agent_tools: functions }));
+    }, [fetchItem]);
+
+    const handleRetrievalFunctionsChange = useCallback(async (selectedIds: string[]) => {
+        const functions = await Promise.all(selectedIds.map(id => fetchItem('tasks', id) as Promise<AliceTask>));
+        setForm(prevForm => ({ ...prevForm, retrieval_tools: functions }));
     }, [fetchItem]);
 
     const handleAccordionToggle = useCallback((accordion: string | null) => {
@@ -214,8 +237,8 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
         <EnhancedSelect<AliceTask>
             componentType="tasks"
             EnhancedView={TaskShortListView}
-            selectedItems={form.agent_tools || []}
-            onSelect={handleFunctionsChange}
+            selectedItems={form.retrieval_tools || []}
+            onSelect={handleRetrievalFunctionsChange}
             isInteractable={isEditMode}
             multiple
             label="Select Retrieval Tools"
@@ -225,7 +248,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             showCreateButton={true}
         />
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    ), [form.agent_tools, handleFunctionsChange, isEditMode, activeAccordion, handleAccordionToggle]);
+    ), [form.agent_tools, handleRetrievalFunctionsChange, isEditMode, activeAccordion, handleAccordionToggle]);
 
     const memoizedToolCallCheckpointSelect = useMemo(() => (
         <EnhancedSelect<UserCheckpoint>

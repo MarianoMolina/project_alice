@@ -45,6 +45,13 @@ const DataClusterFlexibleView: React.FC<DataClusterComponentProps> = ({
         }
     }, [item, handleDelete]);
 
+    const handleDataClusterUpdate = useCallback((dataCluster: DataCluster | undefined) => {
+        if (!dataCluster) {
+            return
+        }
+        setForm(dataCluster);
+    }, []);
+
     if (!form) {
         return <Typography>No DataCluster data available.</Typography>;
     }
@@ -67,7 +74,7 @@ const DataClusterFlexibleView: React.FC<DataClusterComponentProps> = ({
             <DataClusterManager
                 dataCluster={form}
                 isEditable={isEditMode}
-                onDataClusterChange={(dataCluster)=>setForm(prevForm => ({ ...prevForm, ...dataCluster }))}
+                onDataClusterChange={handleDataClusterUpdate}
                 showCreate={mode !== 'create'}
                 showSelect={false}
             />

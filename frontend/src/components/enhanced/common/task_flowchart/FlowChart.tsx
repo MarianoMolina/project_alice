@@ -7,6 +7,7 @@ import ReactFlow, {
   OnNodesChange,
   NodeDragHandler,
   ReactFlowInstance,
+  MiniMap,
 } from 'reactflow';
 import { Alert, Box, Typography } from '@mui/material';
 import TaskNode from './nodes/TaskNode';
@@ -25,6 +26,7 @@ interface FlowchartProps {
   width?: string | number;
   minWidth?: string | number;
   minHeight?: string | number;
+  miniMap?: boolean;
 }
 
 const edgeTypes: EdgeTypes = {
@@ -39,12 +41,13 @@ const nodeTypes: NodeTypes = {
   endNode: EndNode,
 };
 
-const Flowchart: React.FC<FlowchartProps> = ({ 
-  task, 
+const Flowchart: React.FC<FlowchartProps> = ({
+  task,
   height = '1000px',
   width = '100%',
   minWidth = '500px',
-  minHeight = '500px'
+  minHeight = '500px',
+  miniMap = false
 }) => {
 
   const {
@@ -165,6 +168,9 @@ const Flowchart: React.FC<FlowchartProps> = ({
         panOnDrag={true}
         zoomOnDoubleClick={true}
       >
+        {miniMap &&
+          <MiniMap />
+        }
         <Controls />
         <Background color="#aaa" gap={16} />
       </ReactFlow>

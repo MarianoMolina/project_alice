@@ -91,9 +91,45 @@ const useStyles = makeStyles((theme: Theme) => ({
     flexDirection: 'column',
     overflow: 'hidden',
   },
+  sectionContainer: {
+    marginTop: '20px',
+    marginBottom: '20px',
+  },
+  chipContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '8px',
+    marginTop: '8px',
+  },
+  chip: {
+    margin: '4px',
+  },
+  categorySelect: {
+    minWidth: '200px !important',
+  },
+  menuIcon: {
+    marginRight: '8px',
+  },
+  imageContainer: {
+    display: 'flex',
+    gap: '16px',
+    alignItems: 'center',
+    marginBottom: '16px',
+  },
+  imageField: {
+    flex: 1,
+  },
+  sourceContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+  },
+  sourceChip: {
+    marginLeft: '8px',
+  },
   titleText: {
-    marginTop: `${theme.spacing(2)} !important`,
-  }
+    marginTop: '16px',
+  },
 }));
 
 export default useStyles;
