@@ -6,6 +6,7 @@ import { storeFileReference, updateFile, retrieveFileById, deleteFile } from '..
 import { IFileReference, IFileReferenceDocument } from '../interfaces/file.interface';
 import { getObjectId } from '../utils/utils';
 import { createRoutes } from '../utils/routeGenerator';
+import Logger from '../utils/logger';
 
 // Create a router using routeGenerator for common CRUD routes
 const generatedRouter = createRoutes<IFileReferenceDocument, 'FileReference'>(FileReference, 'FileReference', {
@@ -35,7 +36,7 @@ customRouter.get('/serve/:id', async (req: AuthRequest, res: Response) => {
     res.set('Content-Disposition', `attachment; filename="${fileReference.filename}"`);
     res.send(file);
   } catch (error) {
-    console.error('Error serving file:', error);
+    Logger.error('Error serving file:', error);
     res.status(404).json({ message: 'File not found' });
   }
 });

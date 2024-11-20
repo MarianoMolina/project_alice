@@ -1,8 +1,9 @@
 import React from 'react';
 import { APIConfig, APIConfigComponentProps } from '../../../../types/ApiConfigTypes';
-import { Box, Typography } from '@mui/material';
+import { Box, IconButton, Tooltip, Typography } from '@mui/material';
 import EnhancedListView from '../../common/enhanced_component/ListView';
-import { CheckCircle, Error, Warning } from '@mui/icons-material';
+import { Api, CheckCircle, Error, Warning } from '@mui/icons-material';
+import { apiNameIcons } from '../../../../utils/ApiUtils';
 
 const APIConfigListView: React.FC<APIConfigComponentProps> = ({
     items,
@@ -12,10 +13,12 @@ const APIConfigListView: React.FC<APIConfigComponentProps> = ({
 }) => {
     const getPrimaryText = (apiConfig: APIConfig) => apiConfig.name;
     const getSecondaryText = (apiConfig: APIConfig) => (
-        <Box>
-            <Typography component="span" variant="body2" color="textSecondary">
-                API Name: {apiConfig.api_name}
-            </Typography>
+        <Box display="flex" alignItems="center">
+            <Tooltip title={`API name: ${apiConfig.api_name}`}>
+                <IconButton size="small">
+                    {apiNameIcons[apiConfig.api_name] || <Api />}
+                </IconButton>
+            </Tooltip>
             {getHealthIcon(apiConfig.health_status)}
             <Typography component="span" variant="body2" color="textSecondary" sx={{ ml: 1 }}>
                 {apiConfig.health_status}

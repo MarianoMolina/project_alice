@@ -31,7 +31,7 @@ router.get('/', async (_req: Request, res: Response) => {
     const collections = await mongoose.connection.db?.listCollections().toArray();
     res.json(collections);
   } catch (error) {
-    console.error('Error fetching collections:', error);
+    Logger.error('Error fetching collections:', error);
     res.status(500).json({ error: (error as Error).message });
   }
 });
@@ -63,7 +63,7 @@ router.get('/:collectionName/schema', async (req: Request, res: Response) => {
     const jsonSchema = jsonSchemaMethod.call(model.schema);
     res.status(200).json(jsonSchema);
   } catch (error) {
-    console.error('Error fetching schema:', error);
+    Logger.error('Error fetching schema:', error);
     res.status(500).json({ error: (error as Error).message });
   }
 });

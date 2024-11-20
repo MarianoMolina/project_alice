@@ -25,7 +25,7 @@ const KnowledgebaseContent: React.FC = () => {
         setContent(text);
         
       } catch (error) {
-        console.error('Failed to load markdown content:', error);
+        Logger.error('Failed to load markdown content:', error);
         setContent(`# 404\nContent not found: ${location.pathname}`);
       }
     };

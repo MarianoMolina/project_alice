@@ -8,8 +8,8 @@ const ModelShortListView: React.FC<ModelComponentProps> = ({
     onInteraction,
     onView,
 }) => {
-    const getPrimaryText = (model: AliceModel) => model.model_name;
-    const getSecondaryText = (model: AliceModel) => model.model_type || 'N/A';
+    const getPrimaryText = (model: AliceModel) => model.short_name;
+    const getSecondaryText = (model: AliceModel) => `${model.api_name} - ${model.model_type}` || 'N/A';
 
     return (
         <EnhancedShortListView<AliceModel>

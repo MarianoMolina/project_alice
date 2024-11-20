@@ -9,6 +9,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useNotification } from '../../../../contexts/NotificationContext';
 import useStyles from '../MarkdownStyles';
 import clsx from 'clsx';
+import Logger from '../../../../utils/Logger';
 
 // Define the enums
 export enum CustomBlockType {
@@ -77,7 +78,7 @@ const AliceMarkdown: FC<AliceMarkdownProps> = ({
         navigator.clipboard.writeText(cleanContent).then(() => {
             addNotification('Content copied to clipboard', 'success');
         }).catch((error) => {
-            console.error('Failed to copy content:', error);
+            Logger.error('Failed to copy content:', error);
             addNotification('Failed to copy content', 'error');
         });
     };

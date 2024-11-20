@@ -21,7 +21,7 @@ export function createRoutes<T extends Document, K extends ModelName>(
   const router = Router();
 
   const handleErrors = (res: Response, error: any) => {
-    console.error(`Error in ${modelName} route:`, error);
+    Logger.error(`Error in ${modelName} route:`, error);
     res.status(500).json({ error: `An error occurred while processing ${modelName.toLowerCase()}` });
   };
 

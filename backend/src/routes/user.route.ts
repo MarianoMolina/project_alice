@@ -12,7 +12,7 @@ import { purgeAndReinitialize } from '../utils/purge.utils';
 const router: Router = express.Router();
 
 const handleErrors = (res: Response, error: any) => {
-  console.error('Error in user route:', error);
+  Logger.error('Error in user route:', error);
   res.status(500).json({ error: 'An error occurred while processing the request' });
 };
 

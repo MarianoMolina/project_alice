@@ -14,13 +14,13 @@ export function testConnection(host: string, port: number): Promise<void> {
         });
 
         socket.on('timeout', () => {
-            console.error(`Connection to ${host}:${port} timed out`);
+            Logger.error(`Connection to ${host}:${port} timed out`);
             socket.destroy();
             reject(new Error('Connection timed out'));
         });
 
         socket.on('error', (error) => {
-            console.error(`Failed to connect to ${host}:${port}:`, error.message);
+            Logger.error(`Failed to connect to ${host}:${port}:`, error.message);
             reject(error);
         });
 
@@ -33,7 +33,7 @@ export async function runNetworkTests(): Promise<void> {
         await testConnection('host.docker.internal', 1234);
         Logger.debug('LM Studio server is reachable');
     } catch (error) {
-        console.error('LM Studio server is not reachable:', error);
+        Logger.error('LM Studio server is not reachable:', error);
     }
 }
 
@@ -55,7 +55,7 @@ export function testWebSocket(url: string): Promise<void> {
         });
 
         ws.on('error', (error: Error) => {
-            console.error('WebSocket error:', error);
+            Logger.error('WebSocket error:', error);
             reject(error);
         });
 

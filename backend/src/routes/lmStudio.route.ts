@@ -21,7 +21,7 @@ router.post('/proxy/chat/completions', async (req, res) => {
 
         response.data.pipe(res);
     } catch (error) {
-        console.error('Error forwarding request:', error);
+        Logger.error('Error forwarding request:', error);
         res.status(500).json({ error: 'Failed to forward request' });
     }
 });
@@ -54,7 +54,7 @@ router.post('/chat/completions', async (req, res) => {
             res.json(completionResult);
         }
     } catch (error) {
-        console.error('Error generating chat completion:', error);
+        Logger.error('Error generating chat completion:', error);
         res.status(500).json({ error: 'Failed to generate chat completion' });
     }
 });
@@ -65,7 +65,7 @@ router.get('/models/:modelId', async (req, res) => {
         const modelInfo = await lmStudioManager.getModelInfo(modelId);
         res.json(modelInfo);
     } catch (error) {
-        console.error('Error checking model:', error);
+        Logger.error('Error checking model:', error);
         res.status(500).json({ error: 'Failed to check model' });
     }
 });
@@ -75,7 +75,7 @@ router.get('/models', async (req, res) => {
         const availableModels = await lmStudioManager.listAvailableModels();
         res.json(availableModels);
     } catch (error) {
-        console.error('Error listing models:', error);
+        Logger.error('Error listing models:', error);
         res.status(500).json({ error: 'Failed to list models' });
     }
 });
@@ -86,7 +86,7 @@ router.post('/models/:modelId/load', async (req, res) => {
         await lmStudioManager.getOrLoadModel(modelId);
         res.json({ message: `Model ${modelId} loaded successfully` });
     } catch (error) {
-        console.error('Error loading model:', error);
+        Logger.error('Error loading model:', error);
         res.status(500).json({ error: 'Failed to load model' });
     }
 });
@@ -97,7 +97,7 @@ router.post('/models/:modelId/unload', async (req, res) => {
         await lmStudioManager.unloadModel(modelId);
         res.json({ message: `Model ${modelId} unloaded successfully` });
     } catch (error) {
-        console.error('Error unloading model:', error);
+        Logger.error('Error unloading model:', error);
         res.status(500).json({ error: 'Failed to unload model' });
     }
 });
@@ -129,7 +129,7 @@ router.post('/v1/completions', async (req, res) => {
             res.json(completionResult);
         }
     } catch (error) {
-        console.error('Error generating completion:', error);
+        Logger.error('Error generating completion:', error);
         res.status(500).json({ error: 'Failed to generate completion' });
     }
 });

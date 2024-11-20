@@ -5,6 +5,7 @@ import { bytesToMB } from '../../../../utils/FileUtils';
 import { getStringLength, LengthUnit, OutputFormat } from '../../../../utils/CharacterLengthUtil';
 import { getFileStringContent } from '../../../../utils/FileUtils';
 import { retrieveFile } from '../../../../services/api';
+import Logger from '../../../../utils/Logger';
 
 const FileShortListView: React.FC<FileComponentProps> = ({
     items,
@@ -26,7 +27,7 @@ const FileShortListView: React.FC<FileComponentProps> = ({
                         const content = await getFileStringContent(file, blob);
                         contentMap[file._id] = content;
                     } catch (error) {
-                        console.error(`Error loading content for file ${file._id}:`, error);
+                        Logger.error(`Error loading content for file ${file._id}:`, error);
                     }
                 }
             }

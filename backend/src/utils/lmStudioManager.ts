@@ -34,7 +34,7 @@ class Queue {
                 try {
                     await operation();
                 } catch (error) {
-                    console.error('Error processing queue operation:', error);
+                    Logger.error('Error processing queue operation:', error);
                 }
             }
         }
@@ -61,10 +61,10 @@ export class LMStudioManager {
             baseUrl: "ws://host.docker.internal:1234",
             verboseErrorMessages: true,
             logger: {
-                info: (...args) => console.log('LMStudioClient Info:', ...args),
-                error: (...args) => console.error('LMStudioClient Error:', ...args),
-                warn: (...args) => console.warn('LMStudioClient Warning:', ...args),
-                debug: (...args) => console.debug('LMStudioClient Debug:', ...args),
+                info: (...args) => Logger.info('LMStudioClient Info:', ...args),
+                error: (...args) => Logger.error('LMStudioClient Error:', ...args),
+                warn: (...args) => Logger.warn('LMStudioClient Warning:', ...args),
+                debug: (...args) => Logger.debug('LMStudioClient Debug:', ...args),
             },
         });
         this.initializeClient();
@@ -76,10 +76,10 @@ export class LMStudioManager {
             baseUrl: "ws://host.docker.internal:1234",
             verboseErrorMessages: true,
             logger: {
-                info: (...args) => console.log('LMStudioClient Info:', ...args),
-                error: (...args) => console.error('LMStudioClient Error:', ...args),
-                warn: (...args) => console.warn('LMStudioClient Warning:', ...args),
-                debug: (...args) => console.debug('LMStudioClient Debug:', ...args),
+                info: (...args) => Logger.info('LMStudioClient Info:', ...args),
+                error: (...args) => Logger.error('LMStudioClient Error:', ...args),
+                warn: (...args) => Logger.warn('LMStudioClient Warning:', ...args),
+                debug: (...args) => Logger.debug('LMStudioClient Debug:', ...args),
             },
         });
         Logger.info('LMStudioClient initialized');
@@ -93,15 +93,15 @@ export class LMStudioManager {
             await runNetworkTests();
             Logger.info('Network tests completed');
         } catch (error) {
-            console.error('Network tests failed:', error);
+            Logger.error('Network tests failed:', error);
         }
 
-        // console.log('Running WebSocket test...');
+        // Logger.log('Running WebSocket test...');
         // try {
         //     await testWebSocket("ws://host.docker.internal:1234");
-        //     console.log('WebSocket test completed successfully');
+        //     Logger.log('WebSocket test completed successfully');
         // } catch (error) {
-        //     console.error('WebSocket test failed:', error);
+        //     Logger.error('WebSocket test failed:', error);
         // }
 
         Logger.debug('Testing listDownloadedModels...');
@@ -109,7 +109,7 @@ export class LMStudioManager {
             const models = await this.client.system.listDownloadedModels();
             Logger.debug('Downloaded models:', models);
         } catch (error) {
-            console.error('Error listing downloaded models:', error);
+            Logger.error('Error listing downloaded models:', error);
         }
     }
 
@@ -171,7 +171,7 @@ export class LMStudioManager {
             Logger.info(`Successfully loaded model ${modelId}`);
             return model;
         } catch (error) {
-            console.error(`Error loading model ${modelId}:`, error);
+            Logger.error(`Error loading model ${modelId}:`, error);
             throw new Error(`Failed to load model ${modelId}`);
         }
     }
@@ -188,7 +188,7 @@ export class LMStudioManager {
                         delete this.loadedModels[modelId];
                         Logger.info(`Successfully unloaded inactive model: ${modelId}`);
                     } catch (error) {
-                        console.error(`Failed to unload inactive model ${modelId}:`, error);
+                        Logger.error(`Failed to unload inactive model ${modelId}:`, error);
                     }
                 }
             }
@@ -207,7 +207,7 @@ export class LMStudioManager {
                 }
                 this.loadedModels = {};
             } catch (error) {
-                console.error("Error unloading models:", error);
+                Logger.error("Error unloading models:", error);
             }
         });
     }
@@ -248,11 +248,11 @@ export class LMStudioManager {
                         }
                     });
                 } else {
-                    console.warn('Invalid tool call structure:', toolCallJson);
+                    Logger.warn('Invalid tool call structure:', toolCallJson);
                 }
             } catch (error) {
-                console.error('Error parsing tool call:', error);
-                console.error('Problematic JSON string:', rawToolCall);
+                Logger.error('Error parsing tool call:', error);
+                Logger.error('Problematic JSON string:', rawToolCall);
 
                 // Attempt to recover from common JSON errors
                 try {
@@ -277,10 +277,10 @@ export class LMStudioManager {
                             }
                         });
                     } else {
-                        console.warn('Invalid tool call structure after recovery attempt:', toolCallJson);
+                        Logger.warn('Invalid tool call structure after recovery attempt:', toolCallJson);
                     }
                 } catch (recoveryError) {
-                    console.error('Failed to recover from JSON error:', recoveryError);
+                    Logger.error('Failed to recover from JSON error:', recoveryError);
                 }
             }
         }
@@ -320,7 +320,7 @@ export class LMStudioManager {
                             controller.enqueue(`data: ${JSON.stringify(chunkResponse)}\n\n`);
                         }
                     } catch (error) {
-                        console.error('Error in streaming response:', error);
+                        Logger.error('Error in streaming response:', error);
                         controller.error(error);
                     } finally {
                         controller.close();
@@ -394,7 +394,7 @@ export class LMStudioManager {
                             controller.enqueue(`data: ${JSON.stringify(chunkResponse)}\n\n`);
                         }
                     } catch (error) {
-                        console.error('Error in streaming response:', error);
+                        Logger.error('Error in streaming response:', error);
                         controller.error(error);
                     } finally {
                         controller.close();

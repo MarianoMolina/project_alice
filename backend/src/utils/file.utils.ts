@@ -50,7 +50,7 @@ async function ensureUserDirectory(userId: string): Promise<string> {
         await fs.mkdir(userDir, { recursive: true });
         Logger.info(`User directory created: ${userDir}`);
     } catch (error) {
-        console.error(`Error creating user directory: ${userDir}`, error);
+        Logger.error(`Error creating user directory: ${userDir}`, error);
         throw error;
     }
     return userDir;
@@ -114,7 +114,7 @@ export async function retrieveFileById(fileId: string, version?: number): Promis
             return { file, fileReference };
         }
     } catch (error) {
-        console.error('Error retrieving file:', error);
+        Logger.error('Error retrieving file:', error);
         throw error;
     }
 }
@@ -137,14 +137,14 @@ export async function deleteFile(fileId: string, userId: string): Promise<null> 
             const files = await fs.readdir(fileDir);
             await Promise.all(files.map(file => fs.unlink(path.join(fileDir, file))));
         } catch (error) {
-            console.error('Error deleting file versions:', error);
+            Logger.error('Error deleting file versions:', error);
         }
 
         // Delete the file directory
         try {
             await fs.rmdir(fileDir);
         } catch (error) {
-            console.error('Error deleting file directory:', error);
+            Logger.error('Error deleting file directory:', error);
         }
 
         // Delete the file reference from the database
@@ -153,7 +153,7 @@ export async function deleteFile(fileId: string, userId: string): Promise<null> 
         Logger.info(`File deleted successfully: ${fileReference.storage_path}`);
         return null;
     } catch (error) {
-        console.error('Error deleting file:', error);
+        Logger.error('Error deleting file:', error);
         throw error;
     }
 }

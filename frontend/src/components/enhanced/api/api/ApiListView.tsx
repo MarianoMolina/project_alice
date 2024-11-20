@@ -1,8 +1,9 @@
 import React from 'react';
-import { Typography, Box } from '@mui/material';
+import { Typography, Box, Tooltip, IconButton } from '@mui/material';
 import { API, ApiComponentProps } from '../../../../types/ApiTypes';
 import EnhancedListView from '../../common/enhanced_component/ListView';
-import { CheckCircle, Cancel } from '@mui/icons-material';
+import { CheckCircle, Cancel, Api } from '@mui/icons-material';
+import { apiNameIcons, apiTypeIcons } from '../../../../utils/ApiUtils';
 
 const ApiListView: React.FC<ApiComponentProps> = ({
     items,
@@ -10,10 +11,20 @@ const ApiListView: React.FC<ApiComponentProps> = ({
     onInteraction,
     onView,
 }) => {
-    const getPrimaryText = (api: API) => `${api.name} (${api.api_type})`;
+    const getPrimaryText = (api: API) => api.name || 'N/A';
 
     const getSecondaryText = (api: API) => (
         <Box display="flex" alignItems="center">
+            <Tooltip title={`API name: ${api.api_name}`}>
+                <IconButton size="small">
+                    {apiNameIcons[api.api_name] || <Api />}
+                </IconButton>
+            </Tooltip>
+            <Tooltip title={`API type: ${api.api_type}`}>
+                <IconButton size="small">
+                    {apiTypeIcons[api.api_type] || <Api />}
+                </IconButton>
+            </Tooltip>
             {api.is_active ? (
                 <CheckCircle fontSize="small" color="success" />
             ) : (

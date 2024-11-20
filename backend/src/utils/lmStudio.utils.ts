@@ -62,7 +62,7 @@ export async function callLMStudioMethod<T>(methodName: string, method: () => Pr
         const result = await withTimeout(method(), 120000); // 120 second timeout
         return result;
     } catch (error) {
-        console.error(`${methodName} failed:`, error);
+        Logger.error(`${methodName} failed:`, error);
         throw error;
     }
 }
