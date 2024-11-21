@@ -205,12 +205,19 @@ async function processNodeReferences(
   // Then process the references normally
   return Promise.all(nodeResponses.map(async (nodeResponse) => {
     Logger.debug(`Processing references for node: ${nodeResponse.node_name}`);
-    return {
-      ...nodeResponse,
+    
+    // Ensure we only include valid NodeResponse fields
+    const cleanNodeResponse: NodeResponse = {
+      parent_task_id: nodeResponse.parent_task_id,
+      node_name: nodeResponse.node_name,
+      execution_order: nodeResponse.execution_order,
+      exit_code: nodeResponse.exit_code,
       references: nodeResponse.references ? 
         await processReferences(nodeResponse.references, userId) : 
-        nodeResponse.references
+        undefined
     };
+
+    return cleanNodeResponse;
   }));
 }
 
@@ -250,7 +257,7 @@ export async function createTaskResult(
         taskResult._id.toString()
       );
 
-      Logger.debug('Updating task result with processed node references');
+      Logger.debug(`Updating task result with processed node references ${JSON.stringify(processedNodeReferences, null, 2)}`);
       // Update task result with processed references
       return await TaskResult.findByIdAndUpdate(
         taskResult._id,

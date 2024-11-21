@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { functionParametersSchema } from '../utils/functionSchema';
+import { functionParametersSchema } from './functionSchema';
 import { ensureObjectIdForProperties, getObjectId, getObjectIdForMap } from '../utils/utils';
 import { ITaskDocument, ITaskModel, TaskType } from '../interfaces/task.interface';
 import mongooseAutopopulate from 'mongoose-autopopulate';

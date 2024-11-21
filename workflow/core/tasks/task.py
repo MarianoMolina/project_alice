@@ -231,7 +231,12 @@ class AliceTask(BaseDataStructure):
         return data
 
     # Execution methods
-    async def run(self, execution_history: Optional[List[NodeResponse]] = None, node_responses: Optional[List[NodeResponse]] = None, **kwargs) -> TaskResponse:
+    async def run(self, 
+        execution_history: Optional[List[NodeResponse]] = None, 
+        node_responses: Optional[List[NodeResponse]] = None, 
+        data_cluster: Optional[References] = None, 
+        **kwargs
+        ) -> TaskResponse:
         """
         Execute the task with node-based flow and attempt tracking.
         
@@ -451,14 +456,14 @@ class AliceTask(BaseDataStructure):
             1 for node in execution_history 
             if node.parent_task_id == self.id 
             and node.node_name == node_name
-            and self.is_exit_code_retry(node.exit_code, node.node_name)
+            and self.is_exit_code_retry(node.node_name, node.exit_code)
         )
     
     def is_exit_code_retry(self, node_name: str, exit_code: int) -> bool:
         """Determine if an exit code constitutes a retry for a specific node."""
         if node_name not in self.node_end_code_routing:
-            LOGGER.warning(f"No routing rules found for node {node_name}")
-            return False
+            LOGGER.warning(f"No routing rules found for node {node_name} in {self.task_name} with end_code_routing: {self.node_end_code_routing}")
+            return True
             
         return self.node_end_code_routing[node_name].get(exit_code, (None, False))[1]
 

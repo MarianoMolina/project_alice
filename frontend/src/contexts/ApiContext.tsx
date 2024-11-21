@@ -14,7 +14,8 @@ import {
     updateMessageInChat as apiUpdateMessageInChat,
     deleteItem as apiDeleteItem,
     resumeTask as apiResumeTask,
-    resumeChat as apiResumeChat
+    resumeChat as apiResumeChat,
+    fetchItem
 } from '../services/api';
 import { useNotification } from './NotificationContext';
 import { useCardDialog } from './CardDialogContext';
@@ -27,6 +28,8 @@ import { useDialog } from './DialogCustomContext';
 import Logger from '../utils/Logger';
 import { globalEventEmitter } from '../utils/EventEmitter';
 import { UserInteraction } from '../types/UserInteractionTypes';
+import { useAuth } from './AuthContext';
+import { User } from '../types/UserTypes';
 
 interface ApiContextType {
     fetchItem: typeof apiFetchItem;
@@ -64,6 +67,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const { addNotification } = useNotification();
     const { selectCardItem } = useCardDialog();
     const { openDialog } = useDialog();
+    const { refreshUserData } = useAuth();
 
     const emitEvent = (eventType: string, collectionName: CollectionName, item: any) => {
         globalEventEmitter.emit(`${eventType}:${collectionName}`, item);
@@ -367,10 +371,12 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             throw error;
         }
     }, [addNotification]);
+
     const purgeAndReinitializeDatabase = useCallback(async (): Promise<void> => {
         try {
             await apiPurgeAndReinitializeDatabase();
-            addNotification('Database purged and reinitialized successfully', 'success');
+            await refreshUserData();
+            addNotification('Database purged and reinitialized successfully. User updated', 'success');
             globalEventEmitter.emit('databasePurged');
         } catch (error) {
             addNotification('Error purging and reinitializing database', 'error');

@@ -4,12 +4,16 @@ import { DialogWrapper } from "./DialogWrapper";
 import { getNodeContent } from "./CustomBlockUtils";
 import { Psychology } from "@mui/icons-material";
 import AliceMarkdown from "./AliceMarkdown";
+import Logger from "../../../../utils/Logger";
 
 export const AnalysisBlockComponent: React.FC<{ node: any }> = ({ node }) => {
   const [open, setOpen] = React.useState(false);
+  Logger.debug('[Markdown] Rendering Analysis block:', node);
   const content = getNodeContent(node);
   const attributes = node.data?.attributes || {};
-  const title = attributes.title || 'Alice Document';
+  const title = attributes.title || 'Analysis';
+
+  Logger.debug('[Markdown] Analysis block content:', content);
 
   return (
     <>

@@ -487,14 +487,14 @@ class BackendAPI(BaseModel):
             return None
         
     def debug_file_reference_serialization(self, file_reference: FileReference):
-        print(f"FileReference object: {file_reference}")
-        print(f"FileReference __dict__: {file_reference.__dict__}")
+        LOGGER(f"FileReference object: {file_reference}")
+        LOGGER(f"FileReference __dict__: {file_reference.__dict__}")
         
         try:
             dumped_data = file_reference.model_dump(by_alias=True)
-            print(f"model_dump() result: {json.dumps(dumped_data, indent=2)}")
+            LOGGER(f"model_dump() result: {json.dumps(dumped_data, indent=2)}")
         except Exception as e:
-            print(f"model_dump() error: {str(e)}")
+            LOGGER(f"model_dump() error: {str(e)}")
 
 def token_validation_middleware(api: BackendAPI):
     def middleware(request) -> dict[str, Any]:

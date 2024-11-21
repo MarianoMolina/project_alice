@@ -48,6 +48,7 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
 
     useEffect(() => {
         const populateItems = async () => {
+            Logger.debug(`Populating items for user ${JSON.stringify(userObject, null, 2)}`);
             const [
                 agent,
                 agentTools,
@@ -80,7 +81,7 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
                 dataCluster: dataCluster as DataCluster
             });
         };
-
+        Logger.debug(`Populating items for user ${JSON.stringify(userObject, null, 2)}`);
         populateItems();
     }, [userObject.default_chat_config, fetchItem]);
 

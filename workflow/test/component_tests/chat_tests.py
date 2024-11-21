@@ -85,7 +85,7 @@ class ChatTests(TestModule):
             return f"Error: {str(e)}"
             
     async def simulate_api_response(api_manager: APIManager, api_type: ApiType, model: Optional[AliceModel] = None, **kwargs):
-        print(f"simulate_api_response called with: api_type={api_type}, model={model}, kwargs={kwargs}")
+        LOGGER(f"simulate_api_response called with: api_type={api_type}, model={model}, kwargs={kwargs}")
         return MessageDict(
             role="assistant",
             content="I'm calling a function to help with your request.",

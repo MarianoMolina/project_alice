@@ -116,10 +116,9 @@ def apply_parsing_strategy(html: str, selectors: List[str]) -> Optional[str]:
         LOGGER.warning("No content extracted using the agent-generated selectors.")
         return None
 
-def fallback_parsing_strategy(html: str) -> Optional[str]:
+def fallback_parsing_strategy(html: str, selectors: List[str] = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']) -> Optional[str]:
     LOGGER.info("Applying fallback parsing strategy by extracting all <p> tags.")
     soup = BeautifulSoup(html, 'html.parser')
-    selectors = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']
     content_elements = []
     for selector in selectors:
         paragraphs = soup.select(selector)

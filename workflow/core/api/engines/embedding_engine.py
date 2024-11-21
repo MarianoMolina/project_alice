@@ -14,7 +14,7 @@ from workflow.core.data_structures import (
     ParameterDefinition,
 )
 from workflow.core.api.engines.api_engine import APIEngine
-from workflow.util import LOGGER, est_token_count, Language, RecursiveTextSplitter, cosine_similarity, get_language_matching
+from workflow.util import LOGGER, est_token_count, Language, RecursiveTextSplitter, cosine_similarity, get_language_matching, get_traceback
 
 class EmbeddingEngine(APIEngine):
     input_variables: FunctionParameters = Field(
@@ -138,8 +138,20 @@ class EmbeddingEngine(APIEngine):
         # Step 3: Generate embeddings for combined sentences using generate_embedding
         embedding_chunks = await self.get_embeddings_for_sentences(combined_sentences, api_data)
 
+        LOGGER.debug(f"Embeddings generated: {[type(chunk) for chunk in embedding_chunks]}")
+
+        vector_list = [chunk.vector for chunk in embedding_chunks]
+
+        LOGGER.debug(f"vector_list generated: {vector_list}")
+
+        if not vector_list:
+            raise ValueError(f"No embeddings generated for the input text. Traceback - {get_traceback()}")
+        
+        if len(vector_list) != len(combined_sentences):
+            raise ValueError(f"Length of vector list and combined sentences do not match. len(vector_list): {len(vector_list)} \nlen(combined_sentences): {len(combined_sentences)} \nTraceback - {get_traceback()}")
+
         # Step 4: Find breakpoints using cosine similarity
-        breakpoints = self.find_breakpoints([chunk.vector for chunk in embedding_chunks], combined_sentences)
+        breakpoints = self.find_breakpoints(vector_list, combined_sentences)
 
         # Step 5: Return final chunks based on breakpoints
         chunks = self.return_final_chunks(breakpoints, sentences)
@@ -171,7 +183,10 @@ class EmbeddingEngine(APIEngine):
         Generates embeddings for the combined sentences using generate_embedding.
         """
         # Generate embeddings for the combined sentences
-        embedding_chunks = await self.generate_embedding(combined_sentences, api_data)
+        embedding_chunks: List[EmbeddingChunk] = []
+        for sentence in combined_sentences:
+            gen_embeddings = await self.generate_embedding([sentence], api_data)
+            embedding_chunks.append(gen_embeddings[0])
         return embedding_chunks
 
     def find_breakpoints(

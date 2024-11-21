@@ -22,3 +22,15 @@ export const formatStringWithSpaces = (str: string): string => {
         // Capitalize first letter of each word (optional)
         .replace(/\b\w/g, c => c.toUpperCase());
 };
+
+export const formatCamelCaseString = (str: string): string => {
+    // Handle empty or null strings
+    if (!str) return '';
+    
+    // Replace underscores with spaces and ensure proper spacing
+    return str
+        // Replace underscores with spaces
+        .replace(/_/g, ' ')
+        // Capitalize first letter of each word (optional)
+        .replace(/\b\w/g, c => c.toUpperCase());
+}

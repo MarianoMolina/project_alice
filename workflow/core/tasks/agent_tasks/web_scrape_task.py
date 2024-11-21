@@ -109,7 +109,7 @@ class WebScrapeBeautifulSoupTask(AliceTask):
             if selectors:
                 content = apply_parsing_strategy(cleaned_html, selectors)
                 if content:
-                    final_reference = entity_reference.model_copy(update={"description": clean_text(content), "metadata": {"selectors": selectors, "creation_metadata": creation_metadata}})
+                    final_reference = entity_reference.model_copy(update={"content": clean_text(content), "metadata": {"selectors": selectors, "creation_metadata": creation_metadata, "original_content": cleaned_html}})
                     return NodeResponse(
                         parent_task_id=self.id,
                         node_name="generate_selectors_and_parse",
@@ -119,8 +119,10 @@ class WebScrapeBeautifulSoupTask(AliceTask):
                     )
             
             # Fallback to default method
-            content = fallback_parsing_strategy(cleaned_html)
-            final_reference = entity_reference.model_copy(update={"description": clean_text(content)})
+            LOGGER.debug('Falling back to default parsing strategy.')
+            selectors = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+            content = fallback_parsing_strategy(cleaned_html, selectors)
+            final_reference = entity_reference.model_copy(update={"content": clean_text(content), "metadata": {"selectors": selectors, "original_content": cleaned_html, "creation_metadata": {"origin": "fallback_parsing"}}})
 
             return NodeResponse(
                 parent_task_id=self.id,
@@ -196,3 +198,5 @@ Example response format:
         unique_selectors = list(dict.fromkeys(selectors))
         LOGGER.info(f"Unique selectors collected: {unique_selectors}")
         return unique_selectors if unique_selectors else None, creation_metadata if creation_metadata else None
+    
+## TODO: Add an optional summarization step that uses the LLM model to summarize the content and create the entity description.

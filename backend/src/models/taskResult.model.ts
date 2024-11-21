@@ -6,7 +6,7 @@ import { getObjectId } from '../utils/utils';
 
 // Create a schema for ExecutionHistoryItem
 const executionHistoryItemSchema = new Schema<ExecutionHistoryItem>({
-  parent_task_id: { type: String },
+  parent_task_id: { type: Schema.Types.ObjectId, ref: 'Task' },
   node_name: { type: String, required: true },
   execution_order: { type: Number, required: true },
   exit_code: { type: Number }
@@ -14,12 +14,35 @@ const executionHistoryItemSchema = new Schema<ExecutionHistoryItem>({
 
 // Create a schema for NodeResponse that extends ExecutionHistoryItem
 const nodeResponseSchema = new Schema<NodeResponse>({
-  parent_task_id: { type: String },
+  parent_task_id: { type: Schema.Types.ObjectId, ref: 'Task' },
   node_name: { type: String, required: true },
   execution_order: { type: Number, required: true },
   exit_code: { type: Number },
   references: { type: referencesSchema, default: () => ({}) }
 });
+
+function ensureObjectIdForSaveNode(
+  this: NodeResponse,
+  next: mongoose.CallbackWithoutResultAndOptionalError
+) {
+  if (this.parent_task_id) this.parent_task_id = getObjectId(this.parent_task_id, { model: 'TaskResult', field: 'parent_task_id' });
+  next();
+}
+
+function ensureObjectIdForUpdateNode(
+  this: mongoose.Query<any, any>,
+  next: mongoose.CallbackWithoutResultAndOptionalError
+) {
+  const update = this.getUpdate() as any;
+  if (!update) return next();
+  if (update.parent_task_id) update.parent_task_id = getObjectId(update.parent_task_id, { model: 'TaskResult', field: 'parent_task_id' });
+  next();
+}
+
+executionHistoryItemSchema.pre('save', ensureObjectIdForSaveNode);
+executionHistoryItemSchema.pre('findOneAndUpdate', ensureObjectIdForUpdateNode);
+nodeResponseSchema.pre('save', ensureObjectIdForSaveNode);
+nodeResponseSchema.pre('findOneAndUpdate', ensureObjectIdForUpdateNode);
 
 const taskResultSchema = new Schema<ITaskResultDocument, ITaskResultModel>({
   task_name: { type: String, required: true },

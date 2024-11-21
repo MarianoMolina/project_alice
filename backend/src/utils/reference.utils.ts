@@ -186,3 +186,72 @@ export function compareReferences(ref1: References | undefined, ref2: References
 
   return true;
 }
+
+/**
+ * Cleans a references object by removing any properties that aren't defined in the References interface
+ * and ensuring array properties are actually arrays
+ */
+export function cleanReferences(references: any): References {
+  if (!references || typeof references !== 'object') {
+    return {};
+  }
+
+  const validKeys = [
+    'messages',
+    'files',
+    'task_responses',
+    'entity_references',
+    'user_interactions',
+    'embeddings',
+    'tool_calls',
+    'code_executions'
+  ];
+
+  const cleanedReferences: References = {};
+
+  // Only copy over valid keys that are actually arrays
+  for (const key of validKeys) {
+    if (key in references && references[key] !== null) {
+      // If it's not an array but should be, wrap it in an array
+      if (!Array.isArray(references[key])) {
+        Logger.warn(`References property ${key} was not an array, converting to array`);
+        cleanedReferences[key as keyof References] = references[key] ? [references[key]] : [];
+      } else {
+        cleanedReferences[key as keyof References] = references[key];
+      }
+    }
+  }
+
+  // Log if we found any unexpected keys
+  const unexpectedKeys = Object.keys(references).filter(key => !validKeys.includes(key));
+  if (unexpectedKeys.length > 0) {
+    Logger.warn(`Found unexpected keys in references object: ${unexpectedKeys.join(', ')}`);
+  }
+
+  return cleanedReferences;
+}
+
+/**
+ * Type guard to check if an object matches the References interface
+ */
+export function isValidReferences(obj: any): obj is References {
+  if (!obj || typeof obj !== 'object') return false;
+
+  const validKeys = [
+    'messages',
+    'files',
+    'task_responses',
+    'entity_references',
+    'user_interactions',
+    'embeddings',
+    'tool_calls',
+    'code_executions'
+  ];
+
+  // Check if all present keys are valid and are arrays
+  const keys = Object.keys(obj);
+  return keys.every(key => 
+    validKeys.includes(key) && 
+    (obj[key] === undefined || Array.isArray(obj[key]))
+  );
+}

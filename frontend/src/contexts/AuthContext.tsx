@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { loginUser, registerUser, LoginResponse, initializeUserDatabase } from '../services/authService';
 import { User } from '../types/UserTypes';
 import Logger from '../utils/Logger';
-import { updateItem } from '../services/api';
+import { fetchItem, updateItem } from '../services/api';
 
 interface AuthContextProps {
   isAuthenticated: boolean;
   user: User | null;
+  refreshUserData: () => Promise<void>;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   loginAndNavigate: (email: string, password: string) => Promise<void>;
@@ -50,7 +51,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return localStorage.getItem('token');
   }, []);
 
-
   const saveUserData = useCallback((userData: LoginResponse | User) => {
     try {
       const userToSave = 'user' in userData ? userData.user : userData;
@@ -65,6 +65,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       Logger.error('Error saving user data:', error);
     }
   }, [getToken]);
+
+  const refreshUserData = useCallback(async () => {
+    try {
+      if (!user?._id) throw new Error('No user ID found');
+      const refreshedUser = await fetchItem('users', user._id) as User;
+      saveUserData(refreshedUser);
+    } catch (error) {
+      Logger.error('Error refreshing user data:', error);
+      throw error;
+    }
+  }, [user?._id, saveUserData]);
 
   const updateUser = useCallback(async (userData: Partial<User>) => {
     try {
@@ -118,7 +129,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, loading, login, loginAndNavigate, register, logout, getToken, updateUser  }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, loading, login, loginAndNavigate, register, logout, getToken, updateUser, refreshUserData  }}>
       {children}
     </AuthContext.Provider>
   );

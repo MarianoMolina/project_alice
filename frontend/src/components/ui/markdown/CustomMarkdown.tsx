@@ -27,34 +27,37 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
     a: ({ href, ...props }) => (
       <MuiLink href={href} target="_blank" rel="noopener noreferrer" {...props} />
     ),
-    ol: ({ node, ordered, ...props }) => (
+    ol: ({ node, ...props }) => (
       <Typography
         component="ol"
         className={classes.markdownText}
-        style={{ 
-          listStyleType: typeof ordered === 'boolean' && ordered ? 'decimal' : 'disc',
-          paddingLeft: '1rem' 
+        style={{
+          listStyleType: 'decimal',
+          paddingLeft: '2rem',
+          marginBottom: '1rem'
         }}
-        {...(ordered ? {} : props)} // Remove ordered from props if it exists
+        {...props}
       />
     ),
-    ul: ({ node, ordered, ...props }) => (
+    
+    ul: ({ node, ...props }) => (
       <Typography
         component="ul"
         className={classes.markdownText}
-        style={{ 
-          listStyleType: typeof ordered === 'boolean' && ordered ? 'decimal' : 'disc',
-          paddingLeft: '1rem' 
+        style={{
+          listStyleType: 'disc',
+          paddingLeft: '2rem',
+          marginBottom: '1rem'
         }}
-        {...(ordered ? {} : props)} // Remove ordered from props if it exists
+        {...props}
       />
     ),
-    li: ({ node, ordered, ...props }) => ( // Add ordered to destructuring
-      <Typography 
-        component="li" 
-        className={classes.markdownText} 
-        style={{ paddingLeft: '1rem' }} 
-        {...(ordered ? {} : props)} // Remove ordered from props if it exists
+    
+    li: ({ node, ...props }) => (
+      <Typography
+        component="li"
+        className={classes.markdownText}
+        {...props}
       />
     ),
     hr: ({ node, ...props }) => <Divider className={classes.hr} {...props} />,

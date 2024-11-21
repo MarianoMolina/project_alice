@@ -128,6 +128,7 @@ const AliceMarkdown: FC<AliceMarkdownProps> = ({
         
         return null;
     };
+    Logger.debug('[Markdown:AliceMarkdown] Blocks to render:', blocks);
 
     return (
         <Box className={clsx("relative", getRoleClassName())}>

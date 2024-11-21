@@ -1,4 +1,4 @@
-import { CheckpointType, RequiredCheckpoints } from "./ChatTypes";
+import { CheckpointType } from "./ChatTypes";
 import { BasicDBObj, convertToBasicDBObj } from "./CollectionTypes";
 
 export type UserCheckpoints = {
@@ -22,11 +22,11 @@ export interface User extends BasicDBObj {
 
 export const converToUserDefaultChatConfig = (data: any): UserDefaultChatConfig => {
     return {
-        alice_agent: data?.alice_agent || {},
+        alice_agent: data?.alice_agent || undefined,
         agent_tools: data?.agent_tools || [],
         retrieval_tools: data?.retrieval_tools || [],
-        data_cluster: data?.data_cluster || {},
-        default_user_checkpoints: data?.default_user_checkpoints || {},
+        data_cluster: data?.data_cluster || undefined,
+        default_user_checkpoints: data?.default_user_checkpoints || undefined,
     };
 }
 

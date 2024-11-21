@@ -1,12 +1,11 @@
 import React from 'react';
 import { Box, Typography, Tooltip, IconButton } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
+import { CopyAll, Edit, Visibility } from '@mui/icons-material';
+import CopyToClipboard from 'react-copy-to-clipboard';
 import useStyles from '../MessageStyles';
 import { MessageComponentProps, MessageGenerators, RoleType } from '../../../../types/MessageTypes';
 import { BackgroundBeams } from '../../../ui/aceternity/BackgroundBeams';
-import { CopyAll, Visibility } from '@mui/icons-material';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
-import CopyToClipboard from 'react-copy-to-clipboard';
 import { useNotification } from '../../../../contexts/NotificationContext';
 import AliceMarkdown, { CustomBlockType } from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
@@ -81,7 +80,7 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => 
                                 onClick={() => selectFlexibleItem && selectFlexibleItem('Message', 'edit', message._id, message)}
                                 className={classes.editButton}
                             >
-                                <EditIcon fontSize="small" />
+                                <Edit fontSize="small" />
                             </IconButton>
                         </Tooltip>
 

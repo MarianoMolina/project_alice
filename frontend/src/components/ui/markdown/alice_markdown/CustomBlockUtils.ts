@@ -1,30 +1,23 @@
 import { Html, List, ListItem, Paragraph, RootContent, Text } from "mdast";
+import Logger from "../../../../utils/Logger";
 
 export const getNodeContent = (node: RootContent): string => {
+    Logger.debug('[Markdown] Getting content for node:', node);
+    // For HTML-like custom blocks, just return the raw content
     if (node.type === 'html') {
         return (node as Html).value;
     }
-    if (node.type === 'text') {
-        return (node as Text).value;
-    }
-    if (node.type === 'paragraph') {
-        const para = node as Paragraph;
-        return para.children.map(getNodeContent).join('');
-    }
-    if (node.type === 'list') {
-        const list = node as List;
-        return list.children
-            .map((item) => {
-                const listItem = item as ListItem;
-                return listItem.children.map(getNodeContent).join('');
-            })
-            .join('\n');
-    }
-    if ('children' in node) {
-        return (node.children as Array<RootContent>).map(getNodeContent).join('');
-    }
+    // For text nodes, return the value directly
     if ('value' in node) {
         return node.value as string;
+    }
+    // For nodes with children, recursively get their content
+    if ('children' in node) {
+        const children = (node.children as Array<RootContent>)
+            .map(getNodeContent)
+            .join('');
+        Logger.debug('[Markdown] Children content:', children);
+        return children;
     }
     return '';
 };

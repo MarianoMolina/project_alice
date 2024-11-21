@@ -112,7 +112,7 @@ def generate_file_content_reference(file: Union[BinaryIO, io.BytesIO], filename:
     if file_extension.lower() in extension_mime_map:
         expected_mime = extension_mime_map[file_extension.lower()]
         if not file_mime.startswith(expected_mime):
-            print(f"Warning: File extension '{file_extension}' does not match the detected MIME type '{file_mime}'")
+            LOGGER(f"Warning: File extension '{file_extension}' does not match the detected MIME type '{file_mime}'")
 
     # Read and encode file content
     file_content = file.read()

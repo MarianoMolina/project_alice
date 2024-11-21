@@ -3,6 +3,7 @@ import { Select, MenuItem, SelectChangeEvent } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Theme } from '@mui/material/styles';
 import TabHeader from './SidetabHeader';
+import { formatCamelCaseString } from '../../../utils/StyleUtils';
 
 const useStyles = makeStyles((theme: Theme) => ({
     select: {
@@ -38,7 +39,7 @@ const FilterSelect: React.FC<FilterSelectProps> = ({ title, currentSelection, op
                 </MenuItem>
                 {options.map((option) => (
                     <MenuItem key={option} value={option}>
-                        {option.split(/(?=[A-Z])/).join(' ').toUpperCase()}
+                        {formatCamelCaseString(option)}
                     </MenuItem>
                 ))}
             </Select>

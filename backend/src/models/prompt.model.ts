@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { functionParametersSchema } from '../utils/functionSchema';
+import { functionParametersSchema } from './functionSchema';
 import { ensureObjectIdForProperties, getObjectId } from '../utils/utils';
 import { IPromptDocument, IPromptModel } from '../interfaces/prompt.interface';
 import mongooseAutopopulate from 'mongoose-autopopulate';

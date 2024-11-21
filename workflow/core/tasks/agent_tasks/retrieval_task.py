@@ -14,7 +14,8 @@ from workflow.core.data_structures import (
     FileContentReference,
     FileReference,
     Embeddable, 
-    EmbeddingChunk
+    EmbeddingChunk,
+    DataCluster
 )
 from workflow.core.api import APIManager
 from workflow.util import LOGGER, cosine_similarity, Language, get_traceback
@@ -71,9 +72,8 @@ class RetrievalTask(AliceTask):
         **kwargs
     ) -> NodeResponse:
         api_manager: APIManager = kwargs.get("api_manager")
-        data_cluster: References = kwargs.get('data_cluster')
 
-        if data_cluster is None:
+        if self.data_cluster is None:
             LOGGER.error("DataCluster cannot be None.")
             return NodeResponse(
                 parent_task_id=self.id,
@@ -88,7 +88,8 @@ class RetrievalTask(AliceTask):
             )
 
         try:
-            updated_data_cluster = await self.ensure_embeddings_for_data_cluster(data_cluster, api_manager)
+            updated_data_cluster = await self.ensure_embeddings_for_data_cluster(self.data_cluster, api_manager)
+            self.data_cluster = updated_data_cluster
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name="ensure_embeddings_in_data_cluster",
@@ -97,7 +98,7 @@ class RetrievalTask(AliceTask):
                 execution_order=len(execution_history)
             )
         except Exception as e:
-            LOGGER.error(f"Error in ensuring embeddings: {e}")
+            LOGGER.error(f"Error in ensuring embeddings: {e} - Trackeback: {get_traceback()}")
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name="ensure_embeddings_in_data_cluster",
@@ -112,16 +113,18 @@ class RetrievalTask(AliceTask):
 
     async def ensure_embeddings_for_data_cluster(
         self,
-        data_cluster: References,
+        data_cluster: DataCluster,
         api_manager: APIManager
-    ) -> References:
+    ) -> DataCluster:
         """
         For each non-string and non-embedding object in data_cluster,
         ensure embeddings are available. Update the objects with embeddings if they are missing.
         """
-        updated_data_cluster = References()
+        updated_data_cluster = DataCluster()
         fields_to_process = [field for field in data_cluster.model_fields_set
                              if field not in ['embeddings']]
+        
+        LOGGER.debug(f"Fields to process: {fields_to_process}")
 
         for field_name in fields_to_process:
             items = getattr(data_cluster, field_name)
@@ -146,11 +149,11 @@ class RetrievalTask(AliceTask):
                 # Need to generate embeddings
                 content = self.get_item_content(item)
                 language = self.get_item_language(item)
-                embeddings_reference: References = await self.agent.generate_embeddings(
+                embeddings_reference: List[EmbeddingChunk] = await self.agent.generate_embeddings(
                     api_manager=api_manager, input=content, language=language
                 )
-                if embeddings_reference and embeddings_reference.embeddings:
-                    item.embedding = embeddings_reference.embeddings
+                if embeddings_reference:
+                    item.embedding = embeddings_reference
                 else:
                     raise ValueError(f"Failed to generate embeddings for item: {item}")
             updated_items.append(item)
@@ -199,8 +202,8 @@ class RetrievalTask(AliceTask):
             'go': Language.GO,
             'java': Language.JAVA,
             'kt': Language.KOTLIN,
-            'js': Language.JS,
-            'ts': Language.TS,
+            'js': Language.JAVASCRIPT,
+            'ts': Language.TYPESCRIPT,
             'php': Language.PHP,
             'proto': Language.PROTO,
             'py': Language.PYTHON,
@@ -222,7 +225,6 @@ class RetrievalTask(AliceTask):
             'ex': Language.ELIXIR,
             'exs': Language.ELIXIR,
             'ps1': Language.POWERSHELL,
-            # Add other extensions as needed
         }
         return extension_to_language.get(extension, Language.TEXT)
 
@@ -236,9 +238,8 @@ class RetrievalTask(AliceTask):
         prompt: str = kwargs.get('prompt', "")
         max_results: int = kwargs.get('max_results', 10)
         similarity_threshold: float = kwargs.get('similarity_threshold', 0.6)
-        data_cluster: References = kwargs.get('data_cluster')
 
-        if data_cluster is None:
+        if self.data_cluster is None:
             LOGGER.error("DataCluster cannot be None.")
             return NodeResponse(
                 parent_task_id=self.id,
@@ -253,6 +254,7 @@ class RetrievalTask(AliceTask):
             )
 
         try:
+            LOGGER.debug(f"Retrieving embeddings for prompt: {prompt}")
             # Step 1: Create embedding for the prompt
             embedding_chunks: List[EmbeddingChunk] = await self.agent.generate_embeddings(
                 api_manager=api_manager, input=prompt, language=Language.TEXT
@@ -264,11 +266,12 @@ class RetrievalTask(AliceTask):
 
             # Step 2: Retrieve top embeddings from data_cluster
             top_embeddings = self.retrieve_top_embeddings(
-                prompt_embedding_vector, data_cluster, similarity_threshold, max_results
+                prompt_embedding_vector, self.data_cluster, similarity_threshold, max_results
             )
 
             # Step 3: Prepare the References object to return
             result_references = self.prepare_result_references(top_embeddings)
+            LOGGER.debug(f"Retrieved embeddings: {result_references}")
 
             return NodeResponse(
                 parent_task_id=self.id,
@@ -294,7 +297,7 @@ class RetrievalTask(AliceTask):
     def retrieve_top_embeddings(
         self,
         prompt_embedding: List[float],
-        data_cluster: References,
+        data_cluster: DataCluster,
         similarity_threshold: float,
         max_results: int
     ) -> List[Dict[str, Any]]:
@@ -304,7 +307,7 @@ class RetrievalTask(AliceTask):
         """
         embedding_matches: List[Dict[str, Any]] = []
 
-        fields_to_process = [field for field in data_cluster.__fields_set__
+        fields_to_process = [field for field in data_cluster.model_fields_set
                              if field not in ['embeddings']]
 
         for field_name in fields_to_process:
@@ -356,7 +359,7 @@ class RetrievalTask(AliceTask):
             embedding_chunks = group['embedding_chunks']
             embedding_chunks.sort(key=lambda c: c.index)
             # Update the reference's embedding with only the selected chunks
-            group['reference'].embeddings = embedding_chunks
+            group['reference'].embedding = embedding_chunks
 
             # Add the reference to the result_references
             field_name = group['reference_type']

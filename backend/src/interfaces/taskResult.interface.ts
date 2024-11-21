@@ -4,14 +4,14 @@ import { References } from './references.interface';
 import { Embeddable } from './embeddingChunk.interface';
 
 export interface ExecutionHistoryItem {
-    parent_task_id?: string;
+    parent_task_id?: Types.ObjectId;
     node_name: string;
     execution_order: number;
     exit_code?: number;
 }
 
 export interface NodeResponse extends ExecutionHistoryItem {
-    references: References;
+    references?: References;
 }
 
 export interface ITaskResult extends Embeddable {

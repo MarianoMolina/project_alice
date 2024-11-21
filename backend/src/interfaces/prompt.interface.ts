@@ -1,5 +1,5 @@
 import { Document, Types, Model } from 'mongoose';
-import { IFunctionParameters } from '../utils/functionSchema';
+import { IFunctionParameters } from '../models/functionSchema';
 import { IUserDocument } from './user.interface';
 
 export interface IPrompt {

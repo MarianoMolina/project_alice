@@ -3,6 +3,7 @@ import { Box, IconButton, Tooltip, Divider, Typography } from '@mui/material';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import { SvgIconComponent } from '@mui/icons-material';
 import useStyles from './VerticalMenuSidebarStyles';
+import { formatCamelCaseString } from '../../../utils/StyleUtils';
 
 interface ActionConfig {
   name: string;
@@ -109,7 +110,7 @@ function VerticalMenuSidebar<T extends string>({
           <>
             <Box className={classes.actionsSection}>
               {actions.map((action) => (
-                <Tooltip key={action.name} title={action.name} placement="right">
+                <Tooltip key={action.name} title={formatCamelCaseString(action.name)} placement="right">
                   <span>
                     <IconButton
                       onClick={action.action}
