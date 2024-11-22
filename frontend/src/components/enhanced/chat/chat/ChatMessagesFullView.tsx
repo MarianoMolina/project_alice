@@ -1,17 +1,17 @@
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { Box, Button, Tooltip } from '@mui/material';
-import useStyles from '../../chat/ChatStyles';
+import useStyles from '../ChatStyles';
 import { useChat } from '../../../../contexts/ChatContext';
 import PlaceholderSkeleton from '../../../ui/placeholder_skeleton/PlaceholderSkeleton';
 import MessageFullView from '../../message/message/MessageFullView';
 import { MessageType } from '../../../../types/MessageTypes';
 
-interface ChatFullViewProps {
+interface ChatMessagesFullViewProps {
   messages: MessageType[];
   showRegenerate?: boolean;
 }
 
-const ChatFullView: React.FC<ChatFullViewProps> = React.memo(({
+const ChatMessagesFullView: React.FC<ChatMessagesFullViewProps> = React.memo(({
   messages,
   showRegenerate,
 }) => {
@@ -95,6 +95,6 @@ const ChatFullView: React.FC<ChatFullViewProps> = React.memo(({
   );
 });
 
-ChatFullView.displayName = 'ChatFullView';
+ChatMessagesFullView.displayName = 'ChatMessagesFullView';
 
-export default ChatFullView;
+export default ChatMessagesFullView;

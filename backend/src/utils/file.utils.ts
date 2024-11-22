@@ -325,6 +325,7 @@ export function fileReferencesEqual(
         'type',
         'file_size',
         'storage_path',
+        'embedding'
     ];
 
     for (const key of keys) {

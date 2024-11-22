@@ -1,4 +1,4 @@
-import { Html, List, ListItem, Paragraph, RootContent, Text } from "mdast";
+import { Html, RootContent } from "mdast";
 import Logger from "../../../../utils/Logger";
 
 export const getNodeContent = (node: RootContent): string => {

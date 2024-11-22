@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { IUserInteractionDocument, IUserInteractionModel, InteractionOwnerType } from "../interfaces/userInteraction.interface";
-import { getObjectId } from "../utils/utils";
+import { getObjectId, getObjectIdForList } from "../utils/utils";
 import mongooseAutopopulate from 'mongoose-autopopulate';
 
 const userInteractionSchema = new Schema<IUserInteractionDocument, IUserInteractionModel>({
@@ -33,6 +33,7 @@ const userInteractionSchema = new Schema<IUserInteractionDocument, IUserInteract
             }
         },
     },
+    embedding: [{ type: Schema.Types.ObjectId, ref: 'EmbeddingChunk', autopopulate: true }],
     created_by: { 
         type: Schema.Types.ObjectId, 
         ref: 'User', 
@@ -53,6 +54,7 @@ userInteractionSchema.methods.apiRepresentation = function(this: IUserInteractio
         user_checkpoint_id: this.user_checkpoint_id || null,
         owner: this.owner || null,
         user_response: this.user_response || {},
+        embedding: this.embedding || [],
         createdAt: this.createdAt || null,
         updatedAt: this.updatedAt || null,
         created_by: this.created_by || null,
@@ -71,6 +73,7 @@ function ensureObjectId(
     if (this.owner?.id) {
         this.owner.id = getObjectId(this.owner.id, { ...context, field: 'owner.id' });
     }
+    if (this.embedding) this.embedding = getObjectIdForList(this.embedding, { ...context, field: 'embedding' });
     if (this.created_by) {
         this.created_by = getObjectId(this.created_by, { ...context, field: 'created_by' });
     }
@@ -94,6 +97,7 @@ function ensureObjectIdForUpdate(
     if (update?.owner?.id) {
         update.owner.id = getObjectId(update.owner.id, { ...context, field: 'owner.id' });
     }
+    if (update.embedding) update.embedding = getObjectIdForList(update.embedding, { ...context, field: 'embedding' });
     if (update.created_by) {
         update.created_by = getObjectId(update.created_by, { ...context, field: 'created_by' });
     }

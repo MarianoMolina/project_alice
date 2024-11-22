@@ -4,6 +4,7 @@ import { Category, TypeSpecimen, Description } from '@mui/icons-material';
 import { ToolCallComponentProps } from '../../../../types/ToolCallTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
+import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 
 const ToolCallCardView: React.FC<ToolCallComponentProps> = ({ item }) => {
 
@@ -15,7 +16,7 @@ const ToolCallCardView: React.FC<ToolCallComponentProps> = ({ item }) => {
         {
             icon: <Description />,
             primary_text: "Tool called",
-            secondary_text: item.function?.name
+            secondary_text: formatCamelCaseString(item.function?.name)
         },
         {
             icon: <TypeSpecimen />,

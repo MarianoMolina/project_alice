@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 import { ICodeExecutionDocument } from '../interfaces/codeExecution.interface';
 import CodeExecution from '../models/codeExecution.model';
 import Logger from './logger';
+import { processEmbeddings } from './embeddingChunk.utils';
 
 // CodeExecution Utils
 export async function createCodeExecution(
@@ -15,6 +16,10 @@ export async function createCodeExecution(
             delete codeExecutionData._id;
         }
 
+        
+        if (codeExecutionData.embedding) {
+            codeExecutionData.embedding = await processEmbeddings(codeExecutionData, userId);
+        }
         // Set created_by and timestamps
         codeExecutionData.created_by = userId ? new Types.ObjectId(userId) : undefined;
         codeExecutionData.updated_by = userId ? new Types.ObjectId(userId) : undefined;
@@ -47,6 +52,10 @@ export async function updateCodeExecution(
         const isEqual = codeExecutionsEqual(existingCodeExecution, codeExecutionData);
         if (isEqual) {
             return existingCodeExecution;
+        }
+        
+        if (codeExecutionData.embedding) {
+            codeExecutionData.embedding = await processEmbeddings(codeExecutionData, userId);
         }
 
         // Set updated_by and updatedAt

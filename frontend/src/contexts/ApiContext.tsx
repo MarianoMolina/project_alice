@@ -15,7 +15,6 @@ import {
     deleteItem as apiDeleteItem,
     resumeTask as apiResumeTask,
     resumeChat as apiResumeChat,
-    fetchItem
 } from '../services/api';
 import { useNotification } from './NotificationContext';
 import { useCardDialog } from './CardDialogContext';
@@ -29,7 +28,6 @@ import Logger from '../utils/Logger';
 import { globalEventEmitter } from '../utils/EventEmitter';
 import { UserInteraction } from '../types/UserInteractionTypes';
 import { useAuth } from './AuthContext';
-import { User } from '../types/UserTypes';
 
 interface ApiContextType {
     fetchItem: typeof apiFetchItem;

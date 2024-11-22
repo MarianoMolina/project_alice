@@ -50,6 +50,7 @@ export interface MessageProps {
 }
 
 export interface ChatComponentProps extends EnhancedComponentProps<AliceChat> {
+    showRegenerate?: boolean;
 }
 
 export const getDefaultChatForm = (): Partial<AliceChat> => ({

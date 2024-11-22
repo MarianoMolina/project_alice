@@ -1,8 +1,10 @@
 import React from 'react';
-import { Box, Typography, Chip } from '@mui/material';
+import { Box, Typography, Chip, Accordion, AccordionSummary, AccordionDetails, Tooltip } from '@mui/material';
 import { References } from '../../../../types/ReferenceTypes';
 import ReferencesViewer from './ReferencesViewer';
 import { useStyles } from './ReferencesStyles';
+import { ExpandMore } from '@mui/icons-material';
+import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 
 interface NodeReferencesViewerProps {
     references: References;
@@ -36,17 +38,19 @@ export const NodeReferencesViewer: React.FC<NodeReferencesViewerProps> = ({
 
     return (
         <Box className={classes.nodeContainer}>
-            <Box className={classes.nodeContent}>
-                <Box className={classes.nodeHeader}>
-                    <Typography
-                        variant={level === 0 ? "h6" : "subtitle1"}
-                        sx={{
-                            flexGrow: 1,
-                            fontWeight: level === 0 ? 600 : 500,
-                        }}
-                    >
-                        {nodeName}
-                    </Typography>
+            <Accordion className={classes.nodeContent}>
+                <AccordionSummary expandIcon={<ExpandMore />} className={classes.nodeHeader}>
+                    <Tooltip title={nodeName} arrow>
+                        <Typography
+                            variant={level === 0 ? "h6" : "subtitle1"}
+                            sx={{
+                                flexGrow: 1,
+                                fontWeight: level === 0 ? 600 : 500,
+                            }}
+                        >
+                            {`Node: ${formatCamelCaseString(nodeName)}`}
+                        </Typography>
+                    </Tooltip>
                     {executionOrder !== undefined && (
                         <Chip
                             size="small"
@@ -61,12 +65,11 @@ export const NodeReferencesViewer: React.FC<NodeReferencesViewerProps> = ({
                             className={classes.exitCodeChip}
                         />
                     )}
-                </Box>
-
-                <Box sx={{ ml: 2 }}>
+                </AccordionSummary>
+                <AccordionDetails sx={{ ml: 2 }}>
                     <ReferencesViewer references={references} />
-                </Box>
-            </Box>
+                </AccordionDetails>
+            </Accordion>
         </Box>
     );
 };

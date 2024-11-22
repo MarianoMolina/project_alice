@@ -61,7 +61,7 @@ function VerticalMenuSidebar<T extends string>({
     if (Object.keys(groupedTabs).length === 1 && groupedTabs.ungrouped) {
       // If there's only one group and it's ungrouped, render tabs as before
       return groupedTabs.ungrouped.map((tab) => (
-        <Tooltip key={tab.name} title={tab.name} placement="right">
+        <Tooltip key={tab.name} title={formatCamelCaseString(tab.name)} placement="right">
           <span>
             <IconButton
               onClick={() => handleTabChange(tab.name)}
@@ -83,7 +83,7 @@ function VerticalMenuSidebar<T extends string>({
             </Typography>
           )}
           {groupTabs.map((tab) => (
-            <Tooltip key={tab.name} title={tab.name} placement="right">
+            <Tooltip key={tab.name} title={formatCamelCaseString(tab.name)} placement="right">
               <span>
                 <IconButton
                   onClick={() => handleTabChange(tab.name)}

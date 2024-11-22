@@ -2,13 +2,14 @@ import React from 'react';
 import {
     Typography,
 } from '@mui/material';
-import { Person, AccessTime, AttachFile, TextSnippet, Engineering, PersonPin } from '@mui/icons-material';
+import { Person, AccessTime, AttachFile, TextSnippet, Engineering, PersonPin, DataObject } from '@mui/icons-material';
 import { MessageComponentProps } from '../../../../types/MessageTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { hasAnyReferences } from '../../../../types/ReferenceTypes';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import AliceMarkdown, { CustomBlockType } from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
+import EmbeddingChunkViewer from '../../embedding_chunk/EmbeddingChunkViewer';
 
 const MessageCardView: React.FC<MessageComponentProps> = ({
     item,
@@ -16,7 +17,13 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
     if (!item) {
         return <Typography>No message data available.</Typography>;
     }
-
+    const embeddingChunkViewer = item.embedding?.length > 0 ?
+     item.embedding.map((chunk, index) => (
+        <EmbeddingChunkViewer
+            key={chunk._id || `embedding-${index}`}
+            chunk={chunk}
+        />
+    )) : <Typography>No embeddings available</Typography>;
     const listItems = [
         {
             icon: <TextSnippet />,
@@ -50,6 +57,11 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
             secondary_text: item.references && hasAnyReferences(item.references) ? <DataClusterManager dataCluster={item.references} /> : <Typography>"N/A"</Typography>,
         },
         {
+            icon: <DataObject />,
+            primary_text: "Embedding",
+            secondary_text: embeddingChunkViewer
+        },
+        {
             icon: <Person />,
             primary_text: "Metadata",
             secondary_text: item.creation_metadata ? <CodeBlock language="json" code={JSON.stringify(item.creation_metadata, null, 2)} /> : "N/A",
@@ -58,7 +70,7 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
             icon: <AccessTime />,
             primary_text: "Created At",
             secondary_text: new Date(item.createdAt || '').toLocaleString()
-        },
+        }
     ];
 
     return (

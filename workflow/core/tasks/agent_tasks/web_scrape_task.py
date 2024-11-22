@@ -98,18 +98,20 @@ class WebScrapeBeautifulSoupTask(AliceTask):
 
         entity_reference = fetch_url_reference.entity_references[-1]
         html_content = entity_reference.content
-        title = entity_reference.name
-        url = entity_reference.url
-
+        LOGGER.debug(f"HTML content length: {len(html_content)} characters.")
         cleaned_html = preprocess_html(html_content)
+        LOGGER.debug(f"Cleaned HTML length: {len(cleaned_html)} characters.")
         html_samples = sample_html(cleaned_html)
         
         try:
             selectors, creation_metadata = await self._generate_parsing_instructions(html_samples, api_manager)
             if selectors:
                 content = apply_parsing_strategy(cleaned_html, selectors)
+                LOGGER.debug(f"Content extracted using selectors: {len(content)} characters.")
                 if content:
-                    final_reference = entity_reference.model_copy(update={"content": clean_text(content), "metadata": {"selectors": selectors, "creation_metadata": creation_metadata, "original_content": cleaned_html}})
+                    final_content = clean_text(content)
+                    LOGGER.debug(f"Final content length: {len(final_content)} characters.")
+                    final_reference = entity_reference.model_copy(update={"content": final_content, "metadata": {"selectors": selectors, "creation_metadata": creation_metadata, "original_content": cleaned_html}})
                     return NodeResponse(
                         parent_task_id=self.id,
                         node_name="generate_selectors_and_parse",
@@ -122,7 +124,10 @@ class WebScrapeBeautifulSoupTask(AliceTask):
             LOGGER.debug('Falling back to default parsing strategy.')
             selectors = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']
             content = fallback_parsing_strategy(cleaned_html, selectors)
-            final_reference = entity_reference.model_copy(update={"content": clean_text(content), "metadata": {"selectors": selectors, "original_content": cleaned_html, "creation_metadata": {"origin": "fallback_parsing"}}})
+            LOGGER.debug(f"Content extracted using fallback selectors: {len(content)} characters.")
+            final_content = clean_text(content)
+            LOGGER.debug(f"Final content length: {len(final_content)} characters.")
+            final_reference = entity_reference.model_copy(update={"content": final_content, "metadata": {"selectors": selectors, "original_content": cleaned_html, "creation_metadata": {"origin": "fallback_parsing"}}})
 
             return NodeResponse(
                 parent_task_id=self.id,

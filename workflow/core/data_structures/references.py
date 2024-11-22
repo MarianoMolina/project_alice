@@ -10,6 +10,42 @@ from workflow.core.data_structures.tool_calls import ToolCall
 from workflow.core.data_structures.code import CodeExecution
 from workflow.core.data_structures.entity_reference import EntityReference
 
+references_model_map = {
+    'messages': MessageDict,
+    'task_responses': TaskResponse,
+    'entity_references': EntityReference,
+    'user_interactions': UserInteraction,
+    'embeddings': EmbeddingChunk,
+    'code_executions': CodeExecution,
+    'tool_calls': ToolCall,
+    'files': FileReference | FileContentReference,
+}
+
+def get_file_object(file_dict: Union[Dict[str, Any], FileContentReference, FileReference]) -> Union[FileReference, FileContentReference]:
+    """Get the appropriate file reference object based on the input dictionary."""
+    if isinstance(file_dict, (FileReference, FileContentReference)):
+        return file_dict
+    elif isinstance(file_dict, dict):
+        # If it has content, it's a FileContentReference, otherwise FileReference
+        model_class = FileContentReference if 'content' in file_dict else FileReference
+        return model_class(**file_dict)
+    else:
+        raise ValueError(f"Invalid file reference format: {file_dict}")
+    
+def get_reference_object(dict: Union[Dict[str, Any], Any], field_name: str) -> BaseModel | Any:
+    """Get the appropriate reference object based on the field name. If not a reference object, returns the value"""
+    if field_name == 'files':
+        return get_file_object(dict)
+    model_class = references_model_map.get(field_name)
+    if not model_class:
+        return dict
+    if isinstance(dict, model_class):
+        return dict
+    elif isinstance(dict, dict):
+        return model_class(**dict)
+    else:
+        raise ValueError(f"Invalid {model_class.__name__} format: {dict} - type: {type(dict)}")
+    
 class References(BaseModel):
     messages: Optional[List[MessageDict]] = Field(default=None, description="List of message references")
     files: Optional[List[Union[FileReference, FileContentReference]]] = Field(default=None, description="List of file references")
@@ -26,48 +62,15 @@ class References(BaseModel):
         if value is None:
             return None
 
-        # Get the appropriate model class based on the field name
-        model_map = {
-            'messages': MessageDict,
-            'task_responses': TaskResponse,
-            'entity_references': EntityReference,
-            'user_interactions': UserInteraction,
-            'embeddings': EmbeddingChunk,
-            'code_executions': CodeExecution,
-            'tool_calls': ToolCall,
-        }
-        
-        if info.field_name == 'files':
-            validated_items = []
-            for item in value:
-                if isinstance(item, (FileReference, FileContentReference)):
-                    validated_items.append(item)
-                elif isinstance(item, dict):
-                    # If it has content, it's a FileContentReference, otherwise FileReference
-                    model_class = FileContentReference if 'content' in item else FileReference
-                    validated_items.append(model_class(**item))
-                else:
-                    raise ValueError(f"Invalid file reference format: {item}")
-            return validated_items
-            
-        model_class = model_map.get(info.field_name)
-        if not model_class:
-            return value
-
         validated_items = []
         for item in value:
-            if isinstance(item, dict):
-                validated_items.append(model_class(**item))
-            elif isinstance(item, model_class):
-                validated_items.append(item)
-            else:
-                raise ValueError(f"Invalid {info.field_name} format: {item}")
+            validated_items.append(get_reference_object(item, info.field_name))
 
         return validated_items
-    
+
     def model_dump(self, *args, **kwargs) -> Dict[str, Any]:
         data = super().model_dump(*args, **kwargs)
-        for key in ['messages', 'files', 'task_responses', 'entity_references', 'user_interactions', 'embeddings', 'code_executions', 'tool_calls']:
+        for key in references_model_map.keys():
             if getattr(self, key) is not None:
                 data[key] = [
                     item.model_dump(*args, **kwargs) if isinstance(item, BaseModel)
@@ -80,36 +83,28 @@ class References(BaseModel):
     def add_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, EntityReference, UserInteraction, EmbeddingChunk, CodeExecution, ToolCall]):
         """Add a reference to the appropriate list based on its type."""
         if isinstance(reference, MessageDict):
-            if self.messages is None:
-                self.messages = []
+            if self.messages is None: self.messages = []
             self.messages.append(reference)
         elif isinstance(reference, (FileReference, FileContentReference)):
-            if self.files is None:
-                self.files = []
+            if self.files is None: self.files = []
             self.files.append(reference)
         elif isinstance(reference, TaskResponse):
-            if self.task_responses is None:
-                self.task_responses = []
+            if self.task_responses is None: self.task_responses = []
             self.task_responses.append(reference)
         elif isinstance(reference, EntityReference):
-            if self.entity_references is None:
-                self.entity_references = []
+            if self.entity_references is None: self.entity_references = []
             self.entity_references.append(reference)
         elif isinstance(reference, UserInteraction):
-            if self.user_interactions is None:
-                self.user_interactions = []
+            if self.user_interactions is None: self.user_interactions = []
             self.user_interactions.append(reference)
         elif isinstance(reference, EmbeddingChunk):
-            if self.embeddings is None:
-                self.embeddings = []
+            if self.embeddings is None: self.embeddings = []
             self.embeddings.append(reference)
         elif isinstance(reference, CodeExecution):
-            if self.code_executions is None:
-                self.code_executions = []
+            if self.code_executions is None: self.code_executions = []
             self.code_executions.append(reference)
         elif isinstance(reference, ToolCall):
-            if self.tool_calls is None:
-                self.tool_calls = []
+            if self.tool_calls is None: self.tool_calls = []
             self.tool_calls.append(reference)
         else:
             raise ValueError(f"Unsupported reference type: {type(reference)}")
@@ -131,7 +126,7 @@ class References(BaseModel):
 
     def remove_reference(self, reference: Union[MessageDict, FileReference, FileContentReference, TaskResponse, EntityReference, UserInteraction, EmbeddingChunk, CodeExecution, ToolCall]) -> bool:
         """Remove a specific reference."""
-        for attr in ['messages', 'files', 'task_responses', 'entity_references', 'user_interactions', 'embeddings', 'code_executions', 'tool_calls']:
+        for attr in references_model_map.keys():
             ref_list = getattr(self, attr)
             if ref_list is not None and reference in ref_list:
                 ref_list.remove(reference)
@@ -188,9 +183,7 @@ class References(BaseModel):
             return False
             
         # Compare each field
-        fields_to_compare = [
-            'messages', 'files', 'task_responses', 'entity_references', 'user_interactions', 'embeddings', 'code_executions', 'tool_calls'
-        ]
+        fields_to_compare = references_model_map.keys()
         
         for field in fields_to_compare:
             self_items = getattr(self, field) or []

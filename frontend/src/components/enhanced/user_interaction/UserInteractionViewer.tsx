@@ -3,7 +3,6 @@ import { Box, Typography, Paper, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import { UserInteraction } from '../../../types/UserInteractionTypes';
-import { CopyButton } from '../../ui/markdown/CopyButton';
 import CustomMarkdown from '../../ui/markdown/CustomMarkdown';
 import { useDialog } from '../../../contexts/DialogCustomContext';
 import { useCardDialog } from '../../../contexts/CardDialogContext';
@@ -100,7 +99,6 @@ const UserInteractionViewer: React.FC<UserInteractionViewerProps> = ({ interacti
               View Task Response
             </ViewButton>
           )}
-          <CopyButton code={JSON.stringify(interaction, null, 2)} />
         </Box>
       </Box>
 

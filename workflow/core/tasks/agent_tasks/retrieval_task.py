@@ -1,5 +1,5 @@
 import os
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any, Union, TypedDict, Tuple
 from pydantic import Field, BaseModel
 from workflow.core.tasks.task import AliceTask
 from workflow.core.agent.agent import AliceAgent
@@ -11,6 +11,7 @@ from workflow.core.data_structures import (
     References,
     NodeResponse,
     TasksEndCodeRouting,
+    references_model_map,
     FileContentReference,
     FileReference,
     Embeddable, 
@@ -19,6 +20,12 @@ from workflow.core.data_structures import (
 )
 from workflow.core.api import APIManager
 from workflow.util import LOGGER, cosine_similarity, Language, get_traceback
+
+class ChunkedEmbedding(TypedDict):
+    similarity: float
+    reference_type: str
+    reference: BaseModel
+    embedding_chunk: EmbeddingChunk
 
 class RetrievalTask(AliceTask):
     agent: AliceAgent = Field(..., description="The agent to use for the task")
@@ -40,6 +47,11 @@ class RetrievalTask(AliceTask):
                     description="The similarity threshold to consider.",
                     default=0.6
                 ),
+                "update_all": ParameterDefinition(
+                    type="boolean",
+                    description="Whether to update all items in the data cluster.",
+                    default=False
+                )
             },
             required=["prompt"]
         )
@@ -88,7 +100,8 @@ class RetrievalTask(AliceTask):
             )
 
         try:
-            updated_data_cluster = await self.ensure_embeddings_for_data_cluster(self.data_cluster, api_manager)
+            update_all: bool = kwargs.get("update_all", False)
+            updated_data_cluster = await self.ensure_embeddings_for_data_cluster(self.data_cluster, api_manager, update_all)
             self.data_cluster = updated_data_cluster
             return NodeResponse(
                 parent_task_id=self.id,
@@ -114,14 +127,15 @@ class RetrievalTask(AliceTask):
     async def ensure_embeddings_for_data_cluster(
         self,
         data_cluster: DataCluster,
-        api_manager: APIManager
+        api_manager: APIManager,
+        update_all: bool = False
     ) -> DataCluster:
         """
         For each non-string and non-embedding object in data_cluster,
         ensure embeddings are available. Update the objects with embeddings if they are missing.
         """
         updated_data_cluster = DataCluster()
-        fields_to_process = [field for field in data_cluster.model_fields_set
+        fields_to_process = [field for field in references_model_map.keys()
                              if field not in ['embeddings']]
         
         LOGGER.debug(f"Fields to process: {fields_to_process}")
@@ -129,14 +143,15 @@ class RetrievalTask(AliceTask):
         for field_name in fields_to_process:
             items = getattr(data_cluster, field_name)
             if items:
-                updated_items = await self.ensure_embeddings_for_items(items, api_manager)
+                updated_items = await self.ensure_embeddings_for_items(items, api_manager, update_all)
                 setattr(updated_data_cluster, field_name, updated_items)
         return updated_data_cluster
 
     async def ensure_embeddings_for_items(
         self,
         items: List[BaseModel],
-        api_manager: APIManager
+        api_manager: APIManager,
+        update_all: bool = False
     ) -> List[BaseModel]:
         """
         For a list of items, ensure each has embeddings.
@@ -145,7 +160,7 @@ class RetrievalTask(AliceTask):
         for item in items:
             if not isinstance(item, Embeddable):
                 continue  # Skip if the item doesn't have an embedding field
-            if not item.embedding:
+            if not item.embedding or update_all:
                 # Need to generate embeddings
                 content = self.get_item_content(item)
                 language = self.get_item_language(item)
@@ -270,46 +285,35 @@ class RetrievalTask(AliceTask):
             )
 
             # Step 3: Prepare the References object to return
-            result_references = self.prepare_result_references(top_embeddings)
-            LOGGER.debug(f"Retrieved embeddings: {result_references}")
+            embedding_chunks = self.prepare_result_references(top_embeddings)
+            LOGGER.debug(f"Retrieved embeddings: {embedding_chunks}")
 
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name="retrieve_relevant_embeddings",
                 exit_code=0,
-                references=result_references,
+                references=References(embeddings=embedding_chunks),
                 execution_order=len(execution_history)
             )
 
         except Exception as e:
-            LOGGER.error(f"Error in retrieval task: {e}")
+            LOGGER.error(f"Error in retrieval task: {e} - Trackeback: {get_traceback()}")
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name="retrieve_relevant_embeddings",
                 exit_code=1,
                 references=References(messages=[MessageDict(
                     role="system",
-                    content=f"Retrieval failed: {str(e)}",
+                    content=f"Retrieval failed: {str(e)} - Trackeback: {get_traceback()}",
                     generated_by="system"
                 )]),
                 execution_order=len(execution_history)
             )
-    def retrieve_top_embeddings(
-        self,
-        prompt_embedding: List[float],
-        data_cluster: DataCluster,
-        similarity_threshold: float,
-        max_results: int
-    ) -> List[Dict[str, Any]]:
-        """
-        Compute cosine similarity between the prompt_embedding and each embedding in data_cluster.
-        Return top embeddings that exceed the similarity threshold, up to max_results.
-        """
-        embedding_matches: List[Dict[str, Any]] = []
 
-        fields_to_process = [field for field in data_cluster.model_fields_set
+    def get_similarity_chunks_from_data_cluster(self, data_cluster: DataCluster, prompt_embedding: List[float]) -> List[ChunkedEmbedding]:
+        embedding_chunks: List[Dict[str, Any]] = []
+        fields_to_process = [field for field in references_model_map.keys()
                              if field not in ['embeddings']]
-
         for field_name in fields_to_process:
             items = getattr(data_cluster, field_name)
             if items:
@@ -317,33 +321,73 @@ class RetrievalTask(AliceTask):
                     if hasattr(item, 'embedding') and item.embedding:
                         for embedding_chunk in item.embedding:
                             similarity = cosine_similarity(prompt_embedding, embedding_chunk.vector)
-                            if similarity >= similarity_threshold:
-                                embedding_matches.append({
-                                    'similarity': similarity,
-                                    'reference_type': field_name,
-                                    'reference': item,
-                                    'embedding_chunk': embedding_chunk
-                                })
+                            embedding_chunks.append({
+                                'similarity': similarity,
+                                'reference_type': field_name,
+                                'reference': item,
+                                'embedding_chunk': embedding_chunk
+                            })
+                    else:
+                        LOGGER.debug(f"Item {item} has no embedding.")
+        return embedding_chunks
+    
+    def filter_chunks_by_similarity_threshold(self, embedding_chunks: List[ChunkedEmbedding], similarity_threshold: float) -> List[ChunkedEmbedding]:
+        return [chunk for chunk in embedding_chunks if chunk['similarity'] >= similarity_threshold]
+    
+    def get_final_embedding_chunks(self, embedding_chunks: List[ChunkedEmbedding], max_results: int, similarity_threshold: float) -> List[ChunkedEmbedding]:
+        if len(embedding_chunks) <= max_results:
+            return embedding_chunks
+        else:
+            filtered_chunks = self.filter_chunks_by_similarity_threshold(embedding_chunks, similarity_threshold)
+            if len(filtered_chunks) <= max_results:
+                LOGGER.debug(f"Found only {len(filtered_chunks)} matches for a max_result of {max_results}. Reducing threshold from {similarity_threshold}.")
+                return self.get_final_embedding_chunks(embedding_chunks, max_results, similarity_threshold * 0.75)
+            # Sort by similarity
+            filtered_chunks.sort(key=lambda x: x['similarity'], reverse=True)
+            # Return top N results
+            return filtered_chunks[:max_results]
+    
+    def retrieve_top_embeddings(
+        self,
+        prompt_embedding: List[float],
+        data_cluster: DataCluster,
+        similarity_threshold: float,
+        max_results: int
+    ) -> List[ChunkedEmbedding]:
+        """
+        Compute cosine similarity between the prompt_embedding and each embedding in data_cluster.
+        Return top embeddings that exceed the similarity threshold, up to max_results.
+        """
+        embedding_similarity_chunk: List[ChunkedEmbedding] = self.get_similarity_chunks_from_data_cluster(data_cluster, prompt_embedding)
 
-        # Sort matches by similarity descending
-        embedding_matches.sort(key=lambda x: x['similarity'], reverse=True)
+        LOGGER.debug(f"Embedding similarity chunk: {embedding_similarity_chunk}")
 
-        # Select top N results
-        top_embeddings = embedding_matches[:max_results]
+        actual_max_results = min(max_results, len(embedding_similarity_chunk))
 
-        return top_embeddings
+        if not embedding_similarity_chunk:
+            LOGGER.debug(f"No embeddings found in data cluster. max_results: {max_results} - actual_max_results: {actual_max_results}")
+            return []
+        
+        if len(embedding_similarity_chunk) <= max_results:
+            return embedding_similarity_chunk
+        
+        final_chunks: List[ChunkedEmbedding] = self.get_final_embedding_chunks(embedding_similarity_chunk, max_results, similarity_threshold)
+
+        LOGGER.debug(f"Final chunks: {final_chunks}")
+
+        return final_chunks
 
     def prepare_result_references(
         self,
-        top_embeddings: List[Dict[str, Any]]
-    ) -> References:
+        top_embeddings: List[ChunkedEmbedding]
+    ) -> List[EmbeddingChunk]:
         """
         Prepare a References object containing the embeddings that meet the threshold,
         ordered by context and similarity.
         """
-        result_references = References()
         reference_groups: Dict[int, Dict[str, Any]] = {}
 
+        LOGGER.debug(f"Top embeddings: {top_embeddings}")
         for item in top_embeddings:
             ref_id = id(item['reference'])
             if ref_id not in reference_groups:
@@ -354,19 +398,13 @@ class RetrievalTask(AliceTask):
                 }
             reference_groups[ref_id]['embedding_chunks'].append(item['embedding_chunk'])
 
+        LOGGER.debug(f"Reference groups: {reference_groups}")
+        final_embedding_chunks: List[EmbeddingChunk] = []
         # Sort the embeddings within each reference by their index
         for group in reference_groups.values():
             embedding_chunks = group['embedding_chunks']
             embedding_chunks.sort(key=lambda c: c.index)
             # Update the reference's embedding with only the selected chunks
-            group['reference'].embedding = embedding_chunks
+            final_embedding_chunks.extend(embedding_chunks)
 
-            # Add the reference to the result_references
-            field_name = group['reference_type']
-            existing_items = getattr(result_references, field_name, None)
-            if existing_items is None:
-                setattr(result_references, field_name, [group['reference']])
-            else:
-                existing_items.append(group['reference'])
-
-        return result_references
+        return final_embedding_chunks

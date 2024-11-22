@@ -27,6 +27,12 @@ adv_tasks_module = AdvTasksModule(
                 "description": "The threshold for the similarity of the embeddings."
             },
             {
+                "key": "update_all_parameter",
+                "type": "boolean",
+                "description": "Whether to update all the embeddings or only the missing ones.",
+                "default": False
+            },
+            {
                 "key": "prompt_img_gen",
                 "type": "string",
                 "description": "The prompt to generate an image from."
@@ -44,7 +50,7 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "quality_parameter",
                 "type": "string",
-                "description": "The quality of the image generation.",
+                "description": "The quality of the image generation. Options: 'standard', 'hd'.",
             },
             {
                 "key": "text_parameter",
@@ -149,17 +155,39 @@ adv_tasks_module = AdvTasksModule(
                 "task_type": "RetrievalTask",
                 "task_name": "Retrieval_Task",
                 "agent": "oai_agent",
-                "task_description": "Retrieves similar embeddings for the input text",
+                "task_description": "Retrieves similar embeddings for the input text from its data cluster, ensuring all the references have embeddings available.",
                 "input_variables": {
                     "type": "object",
                     "properties": {
                         "prompt": "prompt_retrieval_parameter",
                         "max_results": "max_results_parameter",
                         "sumilarity_threshold": "sumilarity_threshold_parameter",
+                        "update_all": "update_all_parameter",
                     },
                     "required": ["prompt"]
                 },
                 "required_apis": ["embeddings"]
+            },
+            {
+                "key": "update_data_cluster_task",
+                "task_type": "RetrievalTask",
+                "task_name": "Update_Data_Cluster",
+                "agent": "oai_agent",
+                "task_description": "Ensures all the references in its data cluster have embeddings available. If Update All is set to True, it updates all the embeddings, otherwise only the missing ones.",
+                "input_variables": {
+                    "type": "object",
+                    "properties": {
+                        "update_all": "update_all_parameter",
+                    },
+                    "required": []
+                },
+                "required_apis": ["embeddings"],
+                "node_end_code_routing": {
+                    'ensure_embeddings_in_data_cluster': {
+                        0: (None, False),
+                        1: ('ensure_embeddings_in_data_cluster', True),
+                    },
+                },
             },
             {
                 "key": "image_gen_task",

@@ -37,6 +37,7 @@ export const useStyles = makeStyles((theme: Theme) => ({
         backgroundColor: theme.palette.background.paper,
         borderRadius: theme.shape.borderRadius,
         boxShadow: theme.shadows[1],
+        width: '100%',
     },
     exitCodeChip: {
         marginLeft: theme.spacing(1),

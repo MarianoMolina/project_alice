@@ -84,6 +84,7 @@ export function userInteractionsEqual(
         'user_response',
         'created_by',
         'updated_by',
+        'embedding'
     ];
     for (const key of keys) {
         if (JSON.stringify(tr1[key]) !== JSON.stringify(tr2[key])) {

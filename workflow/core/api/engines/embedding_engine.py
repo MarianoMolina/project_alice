@@ -6,9 +6,7 @@ from openai.types import CreateEmbeddingResponse
 from workflow.core.data_structures import (
     ModelConfig,
     ApiType,
-    MessageDict,
     EmbeddingChunk,
-    ContentType,
     References,
     FunctionParameters,
     ParameterDefinition,
@@ -80,47 +78,37 @@ class EmbeddingEngine(APIEngine):
         model = api_data.model
 
         LOGGER.debug(f"Generating embeddings for {len(inputs)} inputs using model: {model}")
-        LOGGER.debug(f"Inputs: {inputs}")
-
         # Check if total tokens exceed context size
-        total_tokens = sum(est_token_count(input) for input in inputs)
-        if total_tokens > api_data.ctx_size:
-            return References(
-                messages=[
-                    MessageDict(
-                        role="system",
-                        content=f"Input text (tokens est.: {total_tokens}) exceeds the maximum token limit: {api_data.ctx_size}",
-                        type=ContentType.TEXT,
+        chunks: List[EmbeddingChunk] = []
+
+        for input in inputs:
+            try:
+                if not input:
+                    continue
+                if est_token_count(input) > api_data.ctx_size:
+                    raise ValueError(f"Input text (tokens est.: {est_token_count(input)}) exceeds the maximum token limit: {api_data.ctx_size}")
+                response = await client.embeddings.create(input=inputs, model=model)
+
+                # Extract embeddings from the response
+                embeddings = [data.embedding for data in response.data]
+
+                # Create EmbeddingChunks objects for each input
+                for idx, (input_text, embedding) in enumerate(zip(inputs, embeddings)):
+                    creation_metadata = {
+                        "model": model,
+                        "usage": self.get_usage(response),
+                    }
+                    embedding_chunk = EmbeddingChunk(
+                        vector=embedding,
+                        text_content=input_text,
+                        index=idx,
+                        creation_metadata=creation_metadata,
                     )
-                ]
-            )
 
-        try:
-            response = await client.embeddings.create(input=inputs, model=model)
-
-            # Extract embeddings from the response
-            embeddings = [data.embedding for data in response.data]
-
-            # Create EmbeddingChunks objects for each input
-            chunks: List[EmbeddingChunk] = []
-            for idx, (input_text, embedding) in enumerate(zip(inputs, embeddings)):
-                creation_metadata = {
-                    "model": model,
-                    "usage": self.get_usage(response),
-                }
-                embedding_chunk = EmbeddingChunk(
-                    vector=embedding,
-                    text_content=input_text,
-                    index=idx,
-                    creation_metadata=creation_metadata,
-                )
-
-                chunks.append(embedding_chunk)
-
-            return chunks
-        except Exception as e:
-            LOGGER.error(f"Error in OpenAI embeddings API call: {str(e)}")
-            raise Exception(f"Error in OpenAI embeddings API call: {str(e)}")
+                    chunks.append(embedding_chunk)
+            except Exception as e:
+                LOGGER.error(f"Error in OpenAI embeddings API call: {str(e)} - Traceback: {get_traceback()}")
+        return chunks
 
     async def semantic_text_chunking(self, input_text: str, api_data: ModelConfig) -> List[str]:
         """

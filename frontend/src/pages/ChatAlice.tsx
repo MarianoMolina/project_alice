@@ -9,7 +9,7 @@ import { useChat } from '../contexts/ChatContext';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
 import EnhancedTask from '../components/enhanced/task/task/EnhancedTask';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
-import ChatInput, { ChatInputRef } from '../components/enhanced/common/chat_components/ChatInput';
+import ChatInput, { ChatInputRef } from '../components/enhanced/chat/ChatInput';
 import useStyles from '../styles/ChatAliceStyles';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
 import { useCardDialog } from '../contexts/CardDialogContext';
@@ -17,7 +17,7 @@ import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
 import { FileReference } from '../types/FileTypes';
 import EnhancedMessage from '../components/enhanced/message/message/EnhancedMessage';
 import Logger from '../utils/Logger';
-import ChatFullView from '../components/enhanced/common/chat_components/ChatFullView';
+import ChatMessagesFullView from '../components/enhanced/chat/chat/ChatMessagesFullViewNew';
 import ChatShortListView from '../components/enhanced/chat/chat/ChatShortListView';
 import ChatCardView from '../components/enhanced/chat/chat/ChatCardView';
 import { LlmProvider } from '../types/ApiTypes';
@@ -27,7 +27,6 @@ import EnhancedEntityReference from '../components/enhanced/entity_reference/ent
 const ChatAlice: React.FC = () => {
   const classes = useStyles();
   const {
-    messages,
     pastChats,
     currentChatId,
     handleSelectChat,
@@ -229,7 +228,14 @@ const ChatAlice: React.FC = () => {
       <Box className={classes.chatAliceMain}>
         <Box className={classes.chatAliceMessages}>
           {currentChat ? (
-            <ChatFullView messages={messages} showRegenerate={true} />
+            <ChatMessagesFullView 
+            item={currentChat} 
+            showRegenerate={true} 
+            items={null} 
+            onChange={()=>{}} 
+            mode='view' 
+            handleSave={async () => {}} 
+            />
           ) : (
             <PlaceholderSkeleton
               mode="chat"

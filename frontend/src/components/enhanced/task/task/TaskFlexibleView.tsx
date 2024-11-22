@@ -31,6 +31,7 @@ import TaskFlowchart from '../../common/task_flowchart/FlowChart';
 import useStyles from '../TaskStyles';
 import ExitCodeManager from '../../common/exit_code_manager/ExitCodeManager';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
+import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 
 const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     item,
@@ -251,7 +252,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                 >
                     {Object.values(TaskType).map((type) => (
                         <MenuItem key={type} value={type}>
-                            {type.split(/(?=[A-Z])/).join(' ')}
+                            {formatCamelCaseString(type)}
                         </MenuItem>
                     ))}
                 </Select>
@@ -297,7 +298,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                     renderValue={(selected) => (
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                             {(selected as ApiType[]).map((value) => (
-                                <Chip key={value} label={value} />
+                                <Chip key={value} label={formatCamelCaseString(value)} />
                             ))}
                         </Box>
                     )}
@@ -305,7 +306,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                 >
                     {Object.values(ApiType).map((apiType) => (
                         <MenuItem key={apiType} value={apiType}>
-                            {apiType}
+                            {formatCamelCaseString(apiType)}
                         </MenuItem>
                     ))}
                 </Select>

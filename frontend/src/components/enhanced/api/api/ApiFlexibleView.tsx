@@ -19,6 +19,7 @@ import { useApi } from '../../../../contexts/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import Logger from '../../../../utils/Logger';
 import useStyles from '../ApiStyles';
+import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 
 const ApiFlexibleView: React.FC<ApiComponentProps> = ({
     item,
@@ -150,7 +151,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                             onChange={(e) => handleApiNameChange(e.target.value as ApiName)}
                         >
                             {Object.values(ApiName).map((name) => (
-                                <MenuItem key={name} value={name}>{name}</MenuItem>
+                                <MenuItem key={name} value={name}>{formatCamelCaseString(name)}</MenuItem>
                             ))}
                         </Select>
                     </FormControl>
@@ -168,7 +169,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                             disabled={!isEditMode}
                         >
                             {availableApiTypes.map((type) => (
-                                <MenuItem key={type} value={type}>{type}</MenuItem>
+                                <MenuItem key={type} value={type}>{formatCamelCaseString(type)}</MenuItem>
                             ))}
                         </Select>
                     </FormControl>

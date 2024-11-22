@@ -8,7 +8,6 @@ import ReferenceChip from '../../common/references/ReferenceChip';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import { REFERENCE_CONFIG } from './DataClusterManagerTypes';
 import { useApi } from '../../../../contexts/ApiContext';
-import Logger from '../../../../utils/Logger';
 
 interface DataClusterEditingViewProps {
     editedCluster: DataCluster;

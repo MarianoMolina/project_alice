@@ -10,6 +10,7 @@ import { useTask } from '../../../../contexts/TaskContext';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import useStyles from '../TaskStyles';
 import TaskResponseList from '../../task_response/task_response/TaskResponseListView';
+import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 
 const TaskExecuteView: React.FC<TaskComponentProps> = ({
     item,
@@ -60,7 +61,7 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
         <Card className={classes.taskCard}>
             <CardContent>
                 <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                    <Typography variant="h6">{item.task_name}</Typography>
+                    <Typography variant="h6">{formatCamelCaseString(item.task_name)}</Typography>
                     <Box>
                         <Tooltip title="View task details">
                             <IconButton

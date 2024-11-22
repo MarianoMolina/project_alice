@@ -10,6 +10,7 @@ import { useNotification } from '../../../../contexts/NotificationContext';
 import AliceMarkdown, { CustomBlockType } from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 import { hasAnyReferences } from '../../../../types/ReferenceTypes';
+import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 
 const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => {
     const classes = useStyles();
@@ -92,9 +93,9 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => 
                 }
                 <Box className={classes.metadataContainer}>
                     {message.step && (
-                        <Tooltip title="Task or source that produced this message" arrow>
+                        <Tooltip title={`Task or source that produced this message: ${message.step}`} arrow>
                             <Typography variant="caption" className={classes.metadata}>
-                                Step: {message.step}
+                                Step: {formatCamelCaseString(message.step)}
                             </Typography>
                         </Tooltip>
                     )}

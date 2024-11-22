@@ -100,10 +100,14 @@ export async function updateMessage(
     if (processedMessageData.embedding) {
       processedMessageData.embedding = await processEmbeddings(processedMessageData, userId);
     }
+    Logger.debug('Message object created, data:', JSON.stringify(processedMessageData, null, 2));
 
     const isEqual = messagesEqual(existingMessage, processedMessageData);
 
+    Logger.debug('Messages equal:', isEqual);
+
     if (isEqual) {
+      Logger.debug('No changes detected, returning existing message');
       return existingMessage;
     }
 
@@ -134,7 +138,9 @@ export function messagesEqual(
     'step',
     'assistant_name',
     'type',
-    'creation_metadata'
+    'creation_metadata',
+    'embedding',
+    'references',
   ];
 
   for (const key of keys) {

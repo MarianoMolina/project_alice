@@ -94,6 +94,7 @@ export function entityReferencesEqual(
     'metadata',
     'created_by',
     'updated_by',
+    'embedding'
   ];
   
   for (const key of keys) {

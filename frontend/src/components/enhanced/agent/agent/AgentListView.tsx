@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, IconButton, Tooltip, Typography } from '@mui/material';
+import { Box, IconButton, Tooltip } from '@mui/material';
 import { AliceAgent, AgentComponentProps } from '../../../../types/AgentTypes';
 import EnhancedListView from '../../common/enhanced_component/ListView';
 import { apiNameIcons } from '../../../../utils/ApiUtils';

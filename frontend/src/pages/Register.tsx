@@ -40,7 +40,7 @@ const Register = () => {
 
   const handleApiSelect = (api: APIConfig) => {
     if (!api._id) return;
-    selectFlexibleItem('API', 'edit', api._id);
+    selectFlexibleItem('APIConfig', 'edit', api._id);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

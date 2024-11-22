@@ -39,6 +39,20 @@ advanced_chat_module = AdvancedChatModule(
                 "has_code_exec": 0,
                 "max_consecutive_auto_reply": 1,
             },
+            {
+                "key": "oai_alice_adv",
+                "name": "Alice w/ approve-tools (OAI)",
+                "system_message": "default_system_message",
+                "models": {
+                    "chat": "gpt-4o-mini",
+                    "img_gen": "Dall-E-3",
+                    "embeddings": "oai_embedding_large",
+                    "tts": "tts-1",
+                },
+                "has_tools": 2,
+                "has_code_exec": 0,
+                "max_consecutive_auto_reply": 1,
+            }
         ],
         "chats": [
             {
@@ -62,6 +76,17 @@ advanced_chat_module = AdvancedChatModule(
                     "code_execution": "default_code_exec_checkpoint"
                 }
             },
+            {
+                "key": "advanced_chat_oai",
+                "name": "Advanced Chat (OAI)",
+                "alice_agent": "oai_alice_adv",
+                "agent_tools": ["coding_workflow", "image_gen_task", "search_hub"],
+                "retrieval_tools": ["retrieval_task"],
+                "default_user_checkpoints": {
+                    "tool_call": "default_tool_call_checkpoint",
+                    "code_execution": "default_code_exec_checkpoint"
+                }
+            }
         ]
     }
 )

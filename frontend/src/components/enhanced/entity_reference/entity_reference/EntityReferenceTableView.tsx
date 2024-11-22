@@ -1,7 +1,6 @@
 import React from 'react';
 import { EntityReference, EntityReferenceComponentProps } from '../../../../types/EntityReferenceTypes';
 import EnhancedTableView from '../../common/enhanced_component/TableView';
-import { head } from 'lodash';
 
 const EntityReferenceTableView: React.FC<EntityReferenceComponentProps> = ({
   items,

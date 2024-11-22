@@ -45,3 +45,32 @@ export const getDefaultAgentForm = (): Partial<AliceAgent> => ({
   has_code_exec: 0,
   models: {},
 });
+
+export const mapCodePermission = (permission: CodePermission): string => {
+  switch (permission) {
+    case CodePermission.DISABLED:
+      return 'Disabled';
+    case CodePermission.NORMAL:
+      return 'Normal';
+    case CodePermission.WITH_PERMISSION:
+      return 'With Permission';
+    case CodePermission.TAGGED_ONLY:
+      return 'Tagged Only';
+    default:
+      return 'Unknown';
+  }
+}
+export const mapToolPermission = (permission: ToolPermission): string => {
+  switch (permission) {
+    case ToolPermission.DISABLED:
+      return 'Disabled';
+    case ToolPermission.NORMAL:
+      return 'Normal';
+    case ToolPermission.WITH_PERMISSION:
+      return 'With Permission';
+    case ToolPermission.DRY_RUN:
+      return 'Dry Run';
+    default:
+      return 'Unknown';
+  }
+}

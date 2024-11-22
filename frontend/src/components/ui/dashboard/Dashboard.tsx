@@ -27,7 +27,7 @@ const Dashboard: React.FC = () => {
       title: "Develop Agents and Skills",
       description: "Build new prompts, agents and tasks to deploy.",
       icon: <Code />,
-      path: "/database"
+      path: "/structures"
     },
   ];
 

@@ -5,7 +5,7 @@ from .node_response import NodeResponse, ExecutionHistoryItem
 from .user_checkpoint import UserCheckpoint
 from .user_interaction import UserInteraction, UserResponse, InteractionOwnerType, InteractionOwner
 from .user import User, UserRoles
-from .references import References, DataCluster
+from .references import References, DataCluster, get_reference_object, references_model_map
 from .model_config import ModelConfig
 from .model import AliceModel
 from .prompt import Prompt
@@ -52,4 +52,4 @@ __all__ = ['FileReference', 'ContentType', 'FileType', 'FileContentReference', '
            'ApiName', 'ApiType', 'ModelType', 'ParameterDefinition', 'FunctionConfig', 'FunctionParameters', 'ToolCall', 'ToolCallConfig', 'UserCheckpoint', 'UserResponse',
            'ToolFunction', 'ensure_tool_function', 'EntityType', 'ModelApis', 'FileOutput', 'References', 'complete_inner_execution_history', 'Embeddable',
            'AliceModel', 'Prompt', 'BaseDataStructure', 'DataCluster', 'InteractionOwnerType', 'InteractionOwner', 'MessageGenerators', 'RoleTypes', 'CodeBlock',
-           'CodeOutput', 'CodeExecution', 'API_CONFIG_TYPES', 'API_CAPABILITIES', 'EntityReference', 'ReferenceCategory', 'ImageReference']
+           'CodeOutput', 'CodeExecution', 'API_CONFIG_TYPES', 'API_CAPABILITIES', 'EntityReference', 'ReferenceCategory', 'ImageReference', 'get_reference_object', 'references_model_map']

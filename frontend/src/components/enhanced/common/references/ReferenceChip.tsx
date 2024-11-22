@@ -8,14 +8,14 @@ import { EntityReference } from '../../../../types/EntityReferenceTypes';
 import { UserInteraction } from '../../../../types/UserInteractionTypes';
 import { EmbeddingChunk } from '../../../../types/EmbeddingChunkTypes';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
-import { CollectionElementString, CollectionTypeString } from '../../../../types/CollectionTypes';
+import { CollectionElementString } from '../../../../types/CollectionTypes';
 import { ReferenceType } from '../../../../types/ReferenceTypes';
 import { ToolCall } from '../../../../types/ToolCallTypes';
 import { CodeExecution } from '../../../../types/CodeExecutionTypes';
 
 interface ReferenceChipProps {
   reference: ReferenceType;
-  type: CollectionTypeString[keyof CollectionTypeString];
+  type: CollectionElementString; //CollectionTypeString[keyof CollectionTypeString]
   view?: boolean;
   className?: string;
   delete?: boolean;

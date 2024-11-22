@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { IEntityReferenceDocument, IEntityReferenceModel, ReferenceCategoryType } from "../interfaces/entityReference.interface";
-import { getObjectId } from "../utils/utils";
+import { getObjectId, getObjectIdForList } from "../utils/utils";
 import { ApiType } from "../interfaces/api.interface";
 import mongooseAutopopulate from 'mongoose-autopopulate';
 
@@ -31,6 +31,7 @@ const entityReferenceSchema = new Schema<IEntityReferenceDocument, IEntityRefere
     enum: Object.values(ReferenceCategoryType),
     required: true
   }],
+  embedding: [{ type: Schema.Types.ObjectId, ref: 'EmbeddingChunk', autopopulate: true }],
   source: { type: String, enum: Object.values(ApiType) },
   connections: [entityConnectionSchema],
   metadata: { type: Map, of: Schema.Types.Mixed },
@@ -51,6 +52,7 @@ entityReferenceSchema.methods.apiRepresentation = function(this: IEntityReferenc
     source: this.source || null,
     connections: this.connections || [],
     metadata: this.metadata || {},
+    embedding: this.embedding || [],
     createdAt: this.createdAt || null,
     updatedAt: this.updatedAt || null,
     created_by: this.created_by || null,
@@ -60,6 +62,7 @@ entityReferenceSchema.methods.apiRepresentation = function(this: IEntityReferenc
 
 function ensureObjectId(this: IEntityReferenceDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {
   const context = { model: 'EntityReference', field: '' };
+  if (this.embedding) this.embedding = getObjectIdForList(this.embedding, { ...context, field: 'embedding' });
   if (this.created_by) this.created_by = getObjectId(this.created_by, { ...context, field: 'created_by' });
   if (this.updated_by) this.updated_by = getObjectId(this.updated_by, { ...context, field: 'updated_by' });
   if (this.connections) {
@@ -76,6 +79,7 @@ function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.
   const update = this.getUpdate() as any;
   if (!update) return next();
   const context = { model: 'EntityReference', field: '' };
+  if (update.embedding) update.embedding = getObjectIdForList(update.embedding, { ...context, field: 'embedding' });
   if (update.created_by) update.created_by = getObjectId(update.created_by, { ...context, field: 'created_by' });
   if (update.updated_by) update.updated_by = getObjectId(update.updated_by, { ...context, field: 'updated_by' });
   if (update.connections) {

@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 import { IToolCallDocument } from '../interfaces/toolCall.interface';
 import ToolCall from '../models/toolCall.model';
 import Logger from './logger';
+import { processEmbeddings } from './embeddingChunk.utils';
 
 export async function createToolCall(
     toolCallData: Partial<IToolCallDocument>,
@@ -12,6 +13,10 @@ export async function createToolCall(
         if ('_id' in toolCallData) {
             Logger.warn(`Removing _id from toolCallData: ${toolCallData._id}`);
             delete toolCallData._id;
+        }
+        
+        if (toolCallData.embedding) {
+            toolCallData.embedding = await processEmbeddings(toolCallData, userId);
         }
 
         // Set created_by and timestamps
@@ -47,6 +52,10 @@ export async function updateToolCall(
         if (isEqual) {
             return existingToolCall;
         }
+        
+        if (toolCallData.embedding) {
+            toolCallData.embedding = await processEmbeddings(toolCallData, userId);
+        }
 
         // Set updated_by and updatedAt
         toolCallData.updated_by = userId ? new Types.ObjectId(userId) : undefined;
@@ -73,7 +82,8 @@ function toolCallsEqual(
         'type',
         'function',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'embedding'
     ];
     for (const key of keys) {
         if (JSON.stringify(tc1[key]) !== JSON.stringify(tc2[key])) {

@@ -23,6 +23,7 @@ import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import { referenceCategoryToIcon } from '../../../../utils/EntityReferenceUtils';
 import { apiTypeIcons } from '../../../../utils/ApiUtils';
+import EmbeddingChunkViewer from '../../embedding_chunk/EmbeddingChunkViewer';
 
 const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
     item
@@ -81,6 +82,14 @@ const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
         </Box>
     );
 
+    const embeddingChunkViewer = item.embedding?.length > 0 ?
+     item.embedding.map((chunk, index) => (
+        <EmbeddingChunkViewer
+            key={chunk._id || `embedding-${index}`}
+            chunk={chunk}
+        />
+    )) : <Typography>No embeddings available</Typography>;
+
     const listItems = [
         {
             icon: <Source />,
@@ -133,14 +142,19 @@ const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
             secondary_text: renderConnections()
         },
         {
-            icon: <QueryBuilder />,
-            primary_text: "Created at",
-            secondary_text: new Date(item.createdAt || '').toLocaleString()
+            icon: <DataObject />,
+            primary_text: "Embedding",
+            secondary_text: embeddingChunkViewer
         },
         {
             icon: <DataObject />,
             primary_text: "Metadata",
             secondary_text: <CodeBlock language="json" code={JSON.stringify(item.metadata, null, 2)} />
+        },
+        {
+            icon: <QueryBuilder />,
+            primary_text: "Created at",
+            secondary_text: new Date(item.createdAt || '').toLocaleString()
         }
     ].filter(item => item.secondary_text); // Only show items with content
 

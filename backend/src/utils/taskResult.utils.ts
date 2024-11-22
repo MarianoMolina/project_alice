@@ -358,7 +358,8 @@ export function taskResultsEqual(
     'result_diagnostic',
     'usage_metrics',
     'execution_history',
-    'node_references'
+    'node_references',
+    'embedding'
   ];
 
   for (const key of keys) {

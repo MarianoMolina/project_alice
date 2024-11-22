@@ -13,6 +13,7 @@ import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import MessageShortListView from '../../message/message/MessageShortListView';
 import { hasAnyReferences } from '../../../../types/ReferenceTypes';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
+import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
 
 const ChatCardView: React.FC<ChatComponentProps> = ({
   item,
@@ -41,7 +42,7 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
           {item.agent_tools && item.agent_tools.length > 0 ? (
             item.agent_tools.map((func, index) => (
               <ListItemButton key={index} onClick={() => func._id && selectCardItem && selectCardItem('Task', func._id, func)}>
-                <ListItemText primary={func.task_name} />
+                <ListItemText primary={formatStringWithSpaces(func.task_name)} />
               </ListItemButton>
             ))
           ) : (
@@ -58,7 +59,7 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
           {item.retrieval_tools && item.retrieval_tools.length > 0 ? (
             item.retrieval_tools.map((func, index) => (
               <ListItemButton key={index} onClick={() => func._id && selectCardItem && selectCardItem('Task', func._id, func)}>
-                <ListItemText primary={func.task_name} />
+                <ListItemText primary={formatStringWithSpaces(func.task_name)} />
               </ListItemButton>
             ))
           ) : (

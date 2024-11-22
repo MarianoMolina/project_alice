@@ -16,6 +16,7 @@ import { AliceModel, getDefaultModelForm, ModelComponentProps, ModelType } from 
 import { ApiName } from '../../../../types/ApiTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import useStyles from '../ModelStyles';
+import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 
 const ModelFlexibleView: React.FC<ModelComponentProps> = ({
     item,
@@ -79,14 +80,14 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                     onChange={(e) => onChange({ model_type: e.target.value as ModelType })}
                     renderValue={(selected) => (
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                            <Chip key={selected} label={selected} />
+                            <Chip key={selected} label={formatCamelCaseString(selected)} />
                         </Box>
                     )}
                     disabled={!isEditMode}
                 >
                     {Object.values(ModelType).map((modelType) => (
                         <MenuItem key={modelType} value={modelType}>
-                            {modelType}
+                            {formatCamelCaseString(modelType)}
                         </MenuItem>
                     ))}
                 </Select>
@@ -99,14 +100,14 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                     onChange={(e) => onChange({ api_name: e.target.value as ApiName })}
                     renderValue={(selected) => (
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                            <Chip key={selected} label={selected} />
+                            <Chip key={selected} label={formatCamelCaseString(selected)} />
                         </Box>
                     )}
                     disabled={!isEditMode}
                 >
                     {Object.values(ApiName).map((apiName) => (
                         <MenuItem key={apiName} value={apiName}>
-                            {apiName}
+                            {formatCamelCaseString(apiName)}
                         </MenuItem>
                     ))}
                 </Select>

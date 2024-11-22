@@ -14,6 +14,7 @@ import { ApiName } from '../../../../types/ApiTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import useStyles from '../APIConfigStyles';
 import { API_BASE_URLS } from '../../../../utils/ApiUtils';
+import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 
 const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
     item,
@@ -308,7 +309,7 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
                     disabled={!isCreateMode}
                 >
                     {Object.values(ApiName).map((name) => (
-                        <MenuItem key={name} value={name}>{name}</MenuItem>
+                        <MenuItem key={name} value={name}>{formatCamelCaseString(name)}</MenuItem>
                     ))}
                 </Select>
             </FormControl>

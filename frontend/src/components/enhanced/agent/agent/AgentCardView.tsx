@@ -8,7 +8,7 @@ import {
     ListItemText,
 } from '@mui/material';
 import { Category, LibraryBooks, Code, Build, ChatBubbleOutline } from '@mui/icons-material';
-import { AgentComponentProps } from '../../../../types/AgentTypes';
+import { AgentComponentProps, mapCodePermission, mapToolPermission } from '../../../../types/AgentTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { ModelType } from '../../../../types/ModelTypes';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
@@ -38,13 +38,13 @@ const AgentCardView: React.FC<AgentComponentProps> = ({
     const listItems = [
         {
             icon: <Code />,
-            primary_text: "Can execute code",
-            secondary_text: item.has_code_exec ? 'Yes' : 'No' // Correct this to show the enum value
+            primary_text: "Code Execution",
+            secondary_text: `${item.has_code_exec}: ${mapCodePermission(item.has_code_exec)}`
         },
         {
             icon: <Build />,
-            primary_text: "Can use tools",
-            secondary_text: item.has_tools ? 'Yes' : 'No' // Correct this to show the enum value
+            primary_text: "Tool Use",
+            secondary_text: `${item.has_tools}: ${mapToolPermission(item.has_tools)}`
         },
         {
             icon: <ChatBubbleOutline />,

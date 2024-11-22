@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 import { ExecutionHistoryItem, ITaskResultDocument, ITaskResultModel, NodeResponse } from '../interfaces/taskResult.interface';
 import { referencesSchema } from './reference.model';
 import mongooseAutopopulate from 'mongoose-autopopulate';
-import { getObjectId } from '../utils/utils';
+import { getObjectId, getObjectIdForList } from '../utils/utils';
 
 // Create a schema for ExecutionHistoryItem
 const executionHistoryItemSchema = new Schema<ExecutionHistoryItem>({
@@ -56,6 +56,7 @@ const taskResultSchema = new Schema<ITaskResultDocument, ITaskResultModel>({
   usage_metrics: { type: Map, of: String, default: null },
   execution_history: { type: [executionHistoryItemSchema], default: [] },
   node_references: { type: [nodeResponseSchema], default: [] },
+  embedding: [{ type: Schema.Types.ObjectId, ref: 'EmbeddingChunk', autopopulate: true }],
   created_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true },
   updated_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true }
 }, { timestamps: true });
@@ -74,6 +75,7 @@ taskResultSchema.methods.apiRepresentation = function(this: ITaskResultDocument)
     usage_metrics: this.usage_metrics || null,
     execution_history: this.execution_history || [],
     node_references: this.node_references || [],
+    embedding: this.embedding || [],
     created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
     updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,
     createdAt: this.createdAt || null,
@@ -86,6 +88,7 @@ function ensureObjectIdForSave(
   next: mongoose.CallbackWithoutResultAndOptionalError
 ) {
   const context = { model: 'TaskResult', field: '' };
+  if (this.embedding) this.embedding = getObjectIdForList(this.embedding, { ...context, field: 'embedding' });
   if (this.created_by) this.created_by = getObjectId(this.created_by, { ...context, field: 'created_by' });
   if (this.updated_by) this.updated_by = getObjectId(this.updated_by, { ...context, field: 'updated_by' });
   if (this.task_id) this.task_id = getObjectId(this.task_id, { ...context, field: 'task_id' });
@@ -99,6 +102,7 @@ function ensureObjectIdForUpdate(
   const update = this.getUpdate() as any;
   if (!update) return next();
   const context = { model: 'TaskResult', field: '' };
+  if (update.embedding) update.embedding = getObjectIdForList(update.embedding, { ...context, field: 'embedding' });
   if (update.created_by) update.created_by = getObjectId(update.created_by, { ...context, field: 'created_by' });
   if (update.updated_by) update.updated_by = getObjectId(update.updated_by, { ...context, field: 'updated_by' });
   if (update.task_id) update.task_id = getObjectId(update.task_id, { ...context, field: 'task_id' });

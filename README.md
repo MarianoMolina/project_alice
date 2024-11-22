@@ -166,6 +166,7 @@ In the case of Workflows, these nodes are "inner tasks" instead of specific meth
 
 ### Available APIs
 ![APIS](./img/APIs.PNG "Available API endpoints")
+
 ```typescript
 export enum ApiType {
     LLM_MODEL = 'llm_api',

@@ -1,15 +1,15 @@
 import { ChangeEvent, KeyboardEvent, useState, forwardRef, useImperativeHandle, useCallback } from 'react';
 import { Box, Button, TextField, Chip, Tooltip } from '@mui/material';
-import { ContentType, getDefaultMessageForm, MessageType } from '../../../../types/MessageTypes';
-import { FileReference, FileType } from '../../../../types/FileTypes';
-import { createFileContentReference, selectFile } from '../../../../utils/FileUtils';
-import { useApi } from '../../../../contexts/ApiContext';
-import { useNotification } from '../../../../contexts/NotificationContext';
-import { TaskResponse } from '../../../../types/TaskResponseTypes';
-import { References } from '../../../../types/ReferenceTypes';
+import { ContentType, getDefaultMessageForm, MessageType } from '../../../types/MessageTypes';
+import { FileReference, FileType } from '../../../types/FileTypes';
+import { createFileContentReference, selectFile } from '../../../utils/FileUtils';
+import { useApi } from '../../../contexts/ApiContext';
+import { useNotification } from '../../../contexts/NotificationContext';
+import { TaskResponse } from '../../../types/TaskResponseTypes';
+import { References } from '../../../types/ReferenceTypes';
 import { AttachFile } from '@mui/icons-material';
-import Logger from '../../../../utils/Logger';
-import { EntityReference } from '../../../../types/EntityReferenceTypes';
+import Logger from '../../../utils/Logger';
+import { EntityReference } from '../../../types/EntityReferenceTypes';
 
 interface ChatInputProps {
   sendMessage: (chatId: string, message: MessageType) => Promise<void>;
