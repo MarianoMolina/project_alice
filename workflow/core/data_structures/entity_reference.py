@@ -96,11 +96,6 @@ class EntityReference(Embeddable):
         if self.categories:
             categories_str = ", ".join(str(cat) for cat in self.categories)
             parts.append(f"Categories: [{categories_str}]")
-            
-        # Add truncated description if available
-        if self.description:
-            desc = self.description[:100] + "..." if len(self.description) > 100 else self.description
-            parts.append(f"Description: {desc}")
 
         if self.url:
             parts.append(f"URL: {self.url}")
@@ -116,6 +111,12 @@ class EntityReference(Embeddable):
         # Add number of images if any exist
         if self.images:
             parts.append(f"Images: {len(self.images)}")
+            
+        if self.description:
+            parts.append(f"Description: {self.description}")
+
+        if self.content:
+            parts.append(f"Content: {self.content}")
             
         # Join all parts with separators
         return "\n".join(parts)

@@ -21,7 +21,7 @@ def setup_logging(log_level=logging.WARNING) -> logging.Logger:
     file_handler = RotatingFileHandler(
         os.path.join(workflow_log_dir, 'app.log'),
         maxBytes=10*1024*1024,
-        backupCount=5
+        backupCount=10
     )
     file_handler.setLevel(log_level)
 

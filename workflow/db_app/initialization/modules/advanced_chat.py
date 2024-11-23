@@ -41,7 +41,7 @@ advanced_chat_module = AdvancedChatModule(
             },
             {
                 "key": "oai_alice_adv",
-                "name": "Alice w/ approve-tools (OAI)",
+                "name": "Alice w/ tool w/ user permission (OAI)",
                 "system_message": "default_system_message",
                 "models": {
                     "chat": "gpt-4o-mini",

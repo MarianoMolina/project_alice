@@ -1,6 +1,6 @@
 import json, re, numpy as np
 from typing import List, Any, Type, Tuple, Dict
-from workflow.util.logging_config import LOGGER
+from workflow.util.logger import LOGGER
 
 def check_cuda_availability() -> bool:
     try:

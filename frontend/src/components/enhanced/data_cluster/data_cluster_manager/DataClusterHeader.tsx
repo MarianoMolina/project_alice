@@ -11,16 +11,16 @@ import { Dialog } from '@mui/material';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import DataClusterShortListView from '../data_cluster/DataClusterShortListView';
 import { useState } from 'react';
+import { useApi } from '../../../../contexts/ApiContext';
 
 interface DataClusterHeaderProps {
     editedCluster: DataCluster | undefined;
     isFlatView: boolean;
     setIsFlatView: (value: boolean) => void;
     isEditable: boolean;
-    isDirty: boolean;
     showEdit: boolean;
     showSelect: boolean;
-    onAction: (key: string) => void;
+    onEdit?: () => void;
     dataCluster: DataCluster | undefined;
     onDataClusterChange?: (dataCluster: DataCluster | undefined) => void;
     inEditMode: boolean;
@@ -31,20 +31,21 @@ const DataClusterHeader = memo(({
     isFlatView,
     setIsFlatView,
     isEditable,
-    isDirty,
     showEdit,
     showSelect,
-    onAction,
+    onEdit,
     dataCluster,
     onDataClusterChange,
     inEditMode
 }: DataClusterHeaderProps) => {
     const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
+    const { fetchItem } = useApi();
 
-    const handleSelect = (selectedIds: string[]) => {
+    const handleSelect = async (selectedIds: string[]) => {
         if (selectedIds.length > 0 && isEditable && onDataClusterChange) {
+            const dataC = await fetchItem('dataclusters', selectedIds[0]) as DataCluster;
             setIsSelectDialogOpen(false);
-            onDataClusterChange({ _id: selectedIds[0] } as DataCluster);
+            onDataClusterChange(dataC);
         }
     };
 
@@ -52,7 +53,7 @@ const DataClusterHeader = memo(({
         if (key === 'select') {
             setIsSelectDialogOpen(true);
         } else {
-            onAction(key);
+            onEdit && onEdit();
         }
     };
 
@@ -88,7 +89,7 @@ const DataClusterHeader = memo(({
                         showCondition, 
                         disabled, 
                         variant, 
-                        color 
+                        color
                     }) => {
                         const isVisible = showCondition(
                             { 
@@ -96,9 +97,9 @@ const DataClusterHeader = memo(({
                                 onDataClusterChange, 
                                 isEditable, 
                                 showEdit, 
-                                showSelect 
+                                showSelect,
+                                inEditMode
                             },
-                            isDirty,
                             isEditable,
                             inEditMode
                         );
@@ -109,7 +110,8 @@ const DataClusterHeader = memo(({
                                 onDataClusterChange, 
                                 isEditable, 
                                 showEdit, 
-                                showSelect 
+                                showSelect,
+                                inEditMode
                             }) :
                             disabled;
 

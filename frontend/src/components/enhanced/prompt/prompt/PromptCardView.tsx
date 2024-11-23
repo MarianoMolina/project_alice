@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Typography,
     Chip,
     Accordion,
     AccordionSummary,
     AccordionDetails,
+    Dialog,
+    DialogTitle,
+    DialogContent,
 } from '@mui/material';
 import { Code, ExpandMore, Assignment, QueryBuilder, Settings } from '@mui/icons-material';
 import { PromptComponentProps } from '../../../../types/PromptTypes';
@@ -12,11 +15,13 @@ import useStyles from '../PromptStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
+import PromptParsedView from '../PromptParsedView';
 
 const PromptCardView: React.FC<PromptComponentProps> = ({
     item,
 }) => {
     const classes = useStyles();
+    const [isPromptDialogOpen, setIsPromptDialogOpen] = useState(false);
 
     const { selectCardItem } = useCardDialog();
     if (!item) {
@@ -26,19 +31,24 @@ const PromptCardView: React.FC<PromptComponentProps> = ({
     const listItems = [
         {
             icon: <Code />,
-            primary_text: "Templated",
-            secondary_text: item.is_templated ? 'Yes' : 'No'
+            primary_text: "Content",
+            secondary_text: (
+                <AliceMarkdown showCopyButton>
+                    {item.content}
+                </AliceMarkdown>
+            )
         },
         {
-            icon: <QueryBuilder />,
-            primary_text: "Created at",
-            secondary_text: new Date(item.createdAt || '').toLocaleString()
+            icon: <Code />,
+            primary_text: "Templated",
+            secondary_text: item.is_templated ? (
+                <Chip
+                    label="Yes"
+                    color="primary"
+                    onClick={() => setIsPromptDialogOpen(true)}
+                />
+            ) : 'No'
         },
-        ...(item.version !== undefined ? [{
-            icon: <Assignment />,
-            primary_text: "Version",
-            secondary_text: item.version.toString()
-        }] : []),
         ...(item.parameters ? [{
             icon: <Settings />,
             primary_text: "Parameters",
@@ -48,7 +58,7 @@ const PromptCardView: React.FC<PromptComponentProps> = ({
                         <Chip
                             key={key}
                             label={`${key}: ${param.type}`}
-                            onClick={() => selectCardItem && selectCardItem('Prompt', param._id!, param)}
+                            onClick={() => selectCardItem && selectCardItem('Parameter', param._id!, param)}
                             className={classes.chip}
                             color={item.parameters?.required.includes(key) ? "primary" : "default"}
                         />
@@ -70,7 +80,17 @@ const PromptCardView: React.FC<PromptComponentProps> = ({
                     ))}
                 </>
             )
-        }] : [])
+        }] : []),
+        ...(item.version !== undefined ? [{
+            icon: <Assignment />,
+            primary_text: "Version",
+            secondary_text: item.version.toString()
+        }] : []),
+        {
+            icon: <QueryBuilder />,
+            primary_text: "Created at",
+            secondary_text: new Date(item.createdAt || '').toLocaleString()
+        },
     ];
 
     return (
@@ -82,20 +102,24 @@ const PromptCardView: React.FC<PromptComponentProps> = ({
             item={item}
             itemType='prompts'
         >
-            <Accordion>
-                <AccordionSummary
-                    expandIcon={<ExpandMore />}
-                    aria-controls="prompt-content"
-                    id="prompt-content-header"
-                >
-                    <Typography>Prompt Content</Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                    <AliceMarkdown showCopyButton>
-                        {item.content}
-                    </AliceMarkdown>
-                </AccordionDetails>
-            </Accordion>
+            <Dialog
+                open={isPromptDialogOpen}
+                onClose={() => setIsPromptDialogOpen(false)}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogTitle>
+                    Prompt Preview
+                </DialogTitle>
+                <DialogContent>
+                    {item.is_templated && (
+                        <PromptParsedView
+                            prompt={item}
+                            initialInputs={item.parameters}
+                        />
+                    )}
+                </DialogContent>
+            </Dialog>
         </CommonCardView>
     );
 };

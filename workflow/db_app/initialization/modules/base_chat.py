@@ -12,9 +12,9 @@ base_chat_module = BaseChatModule(
     data = {
         "parameters": [
             {
-                "key": "user_name_parameter",
-                "type": "string",
-                "description": "The name of the user."
+                "key": "user_data_parameter",
+                "type": "object",
+                "description": "The user object."
             }
         ],
         "user_checkpoints": [
@@ -42,7 +42,7 @@ base_chat_module = BaseChatModule(
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "user_name": "user_name_parameter"
+                        "user_data": "user_data_paramter"
                     },
                     "required": []
                 }

@@ -2,12 +2,11 @@ import React from 'react';
 import { BaseTaskData } from '../../utils/FlowChartUtils';
 import { Chip, Stack } from '@mui/material';
 import { ApiType } from '../../../../../../types/ApiTypes';
-import { FunctionParameters } from '../../../../../../types/ParameterTypes';
+import { FunctionParameters, ParameterTypes } from '../../../../../../types/ParameterTypes';
 import { TaskType } from '../../../../../../types/TaskTypes';
 import theme from '../../../../../../Theme';
 import { CollectionElement, CollectionElementString } from '../../../../../../types/CollectionTypes';
 import { OutputType } from '../../../../../../types/ReferenceTypes';
-
 // Node type mappings
 export interface NodeConfig {
   getInputs?: (data: BaseTaskData) => FunctionParameters | null;
@@ -89,7 +88,7 @@ export const NODE_CONFIGS: { [key in TaskType]?: { [nodeName: string]: NodeConfi
     fetch_url: {
       getInputs: () => ({
         type: 'object',
-        properties: { url: { type: 'string', description: 'URL to fetch' } },
+        properties: { url: { type: ParameterTypes.STRING, description: 'URL to fetch' } },
         required: ['url']
       }),
       getOutputType: () => OutputType.MESSAGE,
@@ -99,8 +98,8 @@ export const NODE_CONFIGS: { [key in TaskType]?: { [nodeName: string]: NodeConfi
       getInputs: () => ({
         type: 'object',
         properties: {
-          fetch_url: { type: 'string', description: 'URL response' },
-          fetch_url_html_content: { type: 'string', description: 'HTML content' }
+          fetch_url: { type: ParameterTypes.STRING, description: 'URL response' },
+          fetch_url_html_content: { type: ParameterTypes.STRING, description: 'HTML content' }
         },
         required: ['fetch_url']
       }),
@@ -114,7 +113,7 @@ export const NODE_CONFIGS: { [key in TaskType]?: { [nodeName: string]: NodeConfi
       getInputs: () => ({
         type: 'object',
         properties: {
-          data_cluster: { type: 'object', description: 'Data cluster' }
+          data_cluster: { type: ParameterTypes.OBJECT, description: 'Data cluster' }
         },
         required: ['data_cluster']
       }),
@@ -129,7 +128,7 @@ export const NODE_CONFIGS: { [key in TaskType]?: { [nodeName: string]: NodeConfi
         return {
           type: 'object',
           properties: {
-            data_cluster: { type: 'object', description: 'Data cluster' },
+            data_cluster: { type: ParameterTypes.OBJECT, description: 'Data cluster' },
             ...baseInputs
           },
           required: ['data_cluster', ...baseRequired]

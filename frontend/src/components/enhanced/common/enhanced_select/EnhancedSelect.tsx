@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Box, IconButton, Accordion, AccordionSummary, AccordionDetails, Typography, Chip, Divider } from '@mui/material';
+import { Box, IconButton, Accordion, AccordionSummary, AccordionDetails, Typography, Chip } from '@mui/material';
 import { Edit, Close, ExpandMore, Add } from '@mui/icons-material';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import useStyles from './EnhancedSelectStyles';
@@ -144,7 +144,6 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
           {memoizedEnhancedComponent}
         </AccordionDetails>
       </Accordion>
-      <Divider className={classes.divider} />
     </Box>
   );
 }

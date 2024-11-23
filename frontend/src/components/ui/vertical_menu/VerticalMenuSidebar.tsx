@@ -123,7 +123,6 @@ function VerticalMenuSidebar<T extends string>({
                 </Tooltip>
               ))}
             </Box>
-            <Divider className={classes.divider} />
           </>
         )}
         <Box className={classes.tabsSection}>

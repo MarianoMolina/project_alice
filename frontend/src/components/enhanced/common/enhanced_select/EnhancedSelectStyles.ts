@@ -48,10 +48,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   createButton: {
     marginLeft: theme.spacing(1),
   },
-  divider: {
-    marginTop: theme.spacing(2),
-    marginBottom: theme.spacing(1),
-  },
 }));
 
 export default useStyles;

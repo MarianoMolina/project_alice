@@ -5,6 +5,7 @@ import {
     Edit as EditIcon,
     Search as SearchIcon,
     Save as SaveIcon,
+    Close,
 } from '@mui/icons-material';
 import { DataCluster } from '../../../../types/DataClusterTypes';
 import { References } from '../../../../types/ReferenceTypes';
@@ -94,32 +95,36 @@ export const REFERENCE_CONFIG: ReferenceTypeConfig[] = [
     }
 ];
 
+interface DataClusterActionProps extends DataClusterManagerProps {
+    inEditMode: boolean;
+}
+
 interface ActionButtonConfig {
     key: string;
     label: string;
     icon: typeof AddIcon;
-    showCondition: (props: DataClusterManagerProps, isDirty: boolean, isEditable: boolean, inEditMode: boolean) => boolean;
-    disabled: boolean | ((props: DataClusterManagerProps) => boolean);
+    showCondition: (props: DataClusterActionProps, isEditable: boolean, inEditMode: boolean) => boolean;
+    disabled: boolean | ((props: DataClusterActionProps) => boolean);
     variant: 'outlined' | 'contained';
     color?: 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
 }
 
 // Define the action button configurations
 export const ACTION_BUTTON_CONFIG: ActionButtonConfig[] = [
-    // {
-    //     key: 'create',
-    //     label: 'Create New',
-    //     icon: AddIcon,
-    //     showCondition: (props) => Boolean(props.showCreate && props.isEditable),
-    //     disabled: false,
-    //     variant: 'outlined',
-    //     color: 'secondary',
-    // },
+    {
+        key: 'endEdit',
+        label: 'Stop Editing',
+        icon: Close,
+        showCondition: (props) => Boolean(props.showEdit && props.isEditable && props.inEditMode),
+        disabled: false,
+        variant: 'outlined',
+        color: 'secondary',
+    },
     {
         key: 'edit',
         label: 'Edit',
         icon: EditIcon,
-        showCondition: (props) => Boolean(props.showEdit && props.isEditable),
+        showCondition: (props) => Boolean(props.showEdit && props.isEditable && !props.inEditMode),
         disabled: (props) => !props.dataCluster,
         variant: 'outlined',
         color: 'info',
@@ -133,13 +138,13 @@ export const ACTION_BUTTON_CONFIG: ActionButtonConfig[] = [
         variant: 'outlined',
         color: 'info',
     },
-    {
-        key: 'save',
-        label: 'Save Changes',
-        icon: SaveIcon,
-        showCondition: (_, isDirty, isEditable) => Boolean(isDirty && isEditable),
-        disabled: false,
-        variant: 'contained',
-        color: 'info',
-    }
+    // {
+    //     key: 'save',
+    //     label: 'Save Changes',
+    //     icon: SaveIcon,
+    //     showCondition: (_, isDirty, isEditable) => Boolean(isDirty && isEditable),
+    //     disabled: false,
+    //     variant: 'contained',
+    //     color: 'info',
+    // }
 ];

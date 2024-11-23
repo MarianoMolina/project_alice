@@ -3,7 +3,7 @@ from enum import Enum
 from typing import get_type_hints, get_origin, get_args, Dict, Any, Union, Optional, List
 from pydantic import BaseModel, Field, ConfigDict, ValidationError
 from workflow.db_app.app import BackendAPI
-from workflow.util.logging_config import LOGGER
+from workflow.util.logger import LOGGER
 from workflow.core import AliceAgent, AliceChat, AliceTask, API, APIConfig
 from workflow.core.data_structures import (
     EntityType, ParameterDefinition, FunctionParameters, TaskResponse, User, UserCheckpoint, Prompt, AliceModel, UserInteraction
@@ -194,7 +194,7 @@ class DBInitManager(BaseModel):
             if task_type == task_class.__name__:
                 try:                
                     task = task_class(**task_dict)
-                    LOGGER.debug(f"Just created task: {task.model_dump()}")
+                    # LOGGER.debug(f"Just created task: {task.model_dump()}")
                     return task
                 except Exception as e:
                     LOGGER.error(f"Error creating task of type {task_type}: {str(e)} \n Task data: {task_dict}")

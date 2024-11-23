@@ -2,7 +2,7 @@ import re
 from typing import List, Optional
 from enum import Enum
 from workflow.util.utils import est_token_count
-from workflow.util.logging_config import LOGGER
+from workflow.util.logger import LOGGER
 
 class Language(str, Enum):
     """Enum of the programming languages."""

@@ -1,5 +1,3 @@
-import Logger from "./Logger";
-
 export const hexToRgba = (hex: string, opacity: number): string => {
     let r = 0, g = 0, b = 0;
     if (hex.length === 4) {
@@ -28,10 +26,7 @@ export const formatStringWithSpaces = (str: string): string => {
 export const formatCamelCaseString = (str: string): string => {
     // Handle empty or null strings
     if (!str) return '';
-    
-    Logger.debug(`Formatting string: ${str}`);
-    
-    const newStr = str
+    return str
         // Replace underscores with spaces
         .replace(/_/g, ' ')
         // Handle acronyms: insert space before last capital in a sequence if followed by lowercase
@@ -44,7 +39,4 @@ export const formatCamelCaseString = (str: string): string => {
         .replace(/([a-zA-Z])([0-9])/g, '$1 $2')
         // Capitalize first letter of each word
         .replace(/\b\w/g, c => c.toUpperCase());
-    
-    Logger.debug(`Formatted string: ${newStr}`);
-    return newStr;
 };

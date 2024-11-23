@@ -7,6 +7,7 @@ import FlatReferenceView from './DataClusterFlatView';
 import CategorizedReferenceView from './DataClusterCategorizedView';
 import DataClusterEditingView from './DataClusterEditingView';
 import { DataClusterManagerProps } from './DataClusterManagerTypes';
+import Logger from '../../../../utils/Logger';
 
 const DataClusterManager: React.FC<DataClusterManagerProps> = ({
     dataCluster,
@@ -17,47 +18,24 @@ const DataClusterManager: React.FC<DataClusterManagerProps> = ({
     flatten = true
 }) => {
     const [inEditMode, setInEditMode] = useState(false);
-    const [isDirty, setIsDirty] = useState(false);
     const [editedCluster, setEditedCluster] = useState<DataCluster | undefined>(dataCluster);
     const [isFlatView, setIsFlatView] = useState(flatten);
-    const [previousViewState, setPreviousViewState] = useState(flatten);
 
-    const handleAction = useCallback((actionKey: string) => {
-        switch (actionKey) {
-            case 'edit':
-                if (dataCluster) {
-                    setPreviousViewState(isFlatView);
-                    setInEditMode(true);
-                }
-                break;
-            case 'save':
-                handleSave()
-                break;
-            // case 'create':
-            //     setEditedCluster(undefined);
-            //     setInEditMode(true);
-            //     setIsDirty(false);
-            //     break;
-            case 'cancel':
-                setEditedCluster(dataCluster);
-                setIsDirty(false);
-                setInEditMode(false);
-                setIsFlatView(previousViewState);
-                break;
+    Logger.debug('[DataClusterManager]', 'dataCluster', dataCluster);
+
+    const toggleEdit = useCallback(() => {
+        if (dataCluster) {
+            setInEditMode && setInEditMode(prev => !prev);
         }
-    }, [dataCluster, editedCluster, onDataClusterChange, isEditable, isFlatView, previousViewState]);
-
-    const handleSave = useCallback(() => {
-        if (!editedCluster || !isEditable || !onDataClusterChange) return;
-        onDataClusterChange(editedCluster);
-        setIsDirty(false);
-        setInEditMode(false);
-        setIsFlatView(previousViewState);
-    }, [editedCluster, onDataClusterChange, previousViewState]);
+    }, [dataCluster, editedCluster, onDataClusterChange, isEditable, isFlatView]);
 
     const handleClusterChange = useCallback((newCluster: DataCluster) => {
         setEditedCluster(newCluster);
-        setIsDirty(true);
+        onDataClusterChange && onDataClusterChange(newCluster);
+    }, [onDataClusterChange]);
+
+    const localOnDataClusterChange = useCallback((newCluster: DataCluster | undefined) => {
+        handleClusterChange(newCluster || {});
     }, []);
 
     const handleDelete = useCallback((type: keyof References, index: number) => {
@@ -74,8 +52,8 @@ const DataClusterManager: React.FC<DataClusterManagerProps> = ({
                 [type]: newArray
             };
         });
-        setIsDirty(true);
-    }, [editedCluster, isEditable]);
+        onDataClusterChange && onDataClusterChange(editedCluster);
+    }, [editedCluster, isEditable, onDataClusterChange]);
 
     const renderContent = () => {
         if (inEditMode && editedCluster) {
@@ -113,12 +91,11 @@ const DataClusterManager: React.FC<DataClusterManagerProps> = ({
                 isFlatView={isFlatView}
                 setIsFlatView={setIsFlatView}
                 isEditable={isEditable}
-                isDirty={isDirty}
                 showEdit={showEdit}
                 showSelect={showSelect}
-                onAction={handleAction}
+                onEdit={toggleEdit}
                 dataCluster={dataCluster}
-                onDataClusterChange={onDataClusterChange}
+                onDataClusterChange={localOnDataClusterChange}
                 inEditMode={inEditMode}
             />
             {renderContent()}

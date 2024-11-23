@@ -1,5 +1,5 @@
 import traceback, json
-from workflow.util.logging_config import LOGGER
+from workflow.util.logger import LOGGER
 from unittest.mock import patch, AsyncMock
 from typing import Dict, Any, List, Optional
 from workflow.test.component_tests.test_environment import TestModule

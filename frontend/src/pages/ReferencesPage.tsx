@@ -1,11 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Box } from '@mui/material';
 import {
-    Add, Message, Description,
-    AttachFile, Diversity2, Assignment, Feedback,
-    Code,
-    PersonOutline,
-    Build
+    Add, Diversity2
 } from '@mui/icons-material';
 import {
     TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH,
@@ -27,6 +23,7 @@ import { useCardDialog } from '../contexts/CardDialogContext';
 import Logger from '../utils/Logger';
 import ToggleBox from '../components/ui/sidetab_header/ToggleBox';
 import EnhancedEntityReference from '../components/enhanced/entity_reference/entity_reference/EnhancedEntityReference';
+import { collectionElementIcons } from '../utils/CollectionUtils';
 
 const ReferencesPage: React.FC = () => {
     const classes = useStyles();
@@ -40,20 +37,20 @@ const ReferencesPage: React.FC = () => {
 
     const tabs = [
         // Msg Group
-        { name: 'Message' as CollectionElementString, icon: Message, group: 'Msg' },
-        { name: 'ToolCall' as CollectionElementString, icon: Build, group: 'Msg' },
-        { name: 'CodeExecution' as CollectionElementString, icon: Code, group: 'Msg' },
+        { name: 'Message' as CollectionElementString, icon: collectionElementIcons.Message, group: 'Msg' },
+        { name: 'ToolCall' as CollectionElementString, icon: collectionElementIcons.ToolCall, group: 'Msg' },
+        { name: 'CodeExecution' as CollectionElementString, icon: collectionElementIcons.CodeExecution, group: 'Msg' },
 
         // Task Group
-        { name: 'TaskResponse' as CollectionElementString, icon: Assignment, group: 'Task' },
+        { name: 'TaskResponse' as CollectionElementString, icon: collectionElementIcons.TaskResponse, group: 'Task' },
 
         // File Group
-        { name: 'File' as CollectionElementString, icon: AttachFile, group: 'File' },
+        { name: 'File' as CollectionElementString, icon: collectionElementIcons.File, group: 'File' },
 
         // Misc Group
-        { name: 'EmbeddingChunk' as CollectionElementString, icon: Description, group: 'Misc' },
-        { name: 'UserInteraction' as CollectionElementString, icon: Feedback, group: 'Misc' },
-        { name: 'EntityReference' as CollectionElementString, icon: PersonOutline, group: 'Misc' },
+        { name: 'EmbeddingChunk' as CollectionElementString, icon: collectionElementIcons.EmbeddingChunk, group: 'Misc' },
+        { name: 'UserInteraction' as CollectionElementString, icon: collectionElementIcons.UserInteraction, group: 'Misc' },
+        { name: 'EntityReference' as CollectionElementString, icon: collectionElementIcons.EntityReference, group: 'Misc' },
 
         // Refs Group
         { name: 'DataCluster' as CollectionElementString, icon: Diversity2, group: 'Refs' },

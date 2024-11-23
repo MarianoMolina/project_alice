@@ -1,9 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Box } from '@mui/material';
 import { 
-  Add, Category, Settings, Description, 
-  Functions, Api, QuestionAnswer, LiveHelp, 
-  SvgIconComponent
+  Add
 } from '@mui/icons-material';
 import { 
   TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH,
@@ -25,7 +23,7 @@ import { useCardDialog } from '../contexts/CardDialogContext';
 import Logger from '../utils/Logger';
 import ToggleBox from '../components/ui/sidetab_header/ToggleBox';
 import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
-import { AIAssistantIcon } from '../utils/CustomIcons';
+import { collectionElementIcons } from '../utils/CollectionUtils';
 
 const StructuresPage: React.FC = () => {
     const classes = useStyles();
@@ -39,19 +37,19 @@ const StructuresPage: React.FC = () => {
 
     const tabs = [
         // Core Group
-        { name: 'Agent' as CollectionElementString, icon: AIAssistantIcon as SvgIconComponent, group: 'Core' },
-        { name: 'Task' as CollectionElementString, icon: Functions, group: 'Core' },
-        { name: 'Chat' as CollectionElementString, icon: QuestionAnswer, group: 'Core' },
+        { name: 'Agent' as CollectionElementString, icon: collectionElementIcons.Agent, group: 'Core' },
+        { name: 'Task' as CollectionElementString, icon: collectionElementIcons.Task, group: 'Core' },
+        { name: 'Chat' as CollectionElementString, icon: collectionElementIcons.Chat, group: 'Core' },
         
         // API Group
-        { name: 'API' as CollectionElementString, icon: Api, group: 'API' },
-        { name: 'APIConfig' as CollectionElementString, icon: Settings, group: 'API' },
-        { name: 'Model' as CollectionElementString, icon: Category, group: 'API' },
+        { name: 'API' as CollectionElementString, icon: collectionElementIcons.API, group: 'API' },
+        { name: 'APIConfig' as CollectionElementString, icon: collectionElementIcons.APIConfig, group: 'API' },
+        { name: 'Model' as CollectionElementString, icon: collectionElementIcons.Model, group: 'API' },
         
         // Misc Group
-        { name: 'Prompt' as CollectionElementString, icon: Description, group: 'Misc' },
-        { name: 'Parameter' as CollectionElementString, icon: Settings, group: 'Misc' },
-        { name: 'UserCheckpoint' as CollectionElementString, icon: LiveHelp, group: 'Misc' },
+        { name: 'Prompt' as CollectionElementString, icon: collectionElementIcons.Prompt, group: 'Misc' },
+        { name: 'Parameter' as CollectionElementString, icon: collectionElementIcons.Parameter, group: 'Misc' },
+        { name: 'UserCheckpoint' as CollectionElementString, icon: collectionElementIcons.UserCheckpoint, group: 'Misc' },
         
     ];
 

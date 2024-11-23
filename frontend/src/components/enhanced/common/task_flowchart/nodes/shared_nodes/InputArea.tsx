@@ -1,5 +1,6 @@
 import React from 'react';
 import { Tooltip } from '@mui/material';
+import { formatCamelCaseString } from '../../../../../../utils/StyleUtils';
 
 interface InputAreaProps {
   properties: { [key: string]: any };
@@ -18,7 +19,7 @@ export const InputArea: React.FC<InputAreaProps> = ({ properties, required }) =>
             : 'bg-gray-100 text-gray-600'
             }`}
         >
-          {key}
+          {formatCamelCaseString(key)}
         </div>
       </Tooltip>
     ))}

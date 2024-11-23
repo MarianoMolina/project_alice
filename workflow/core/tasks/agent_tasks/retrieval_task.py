@@ -1,5 +1,5 @@
 import os
-from typing import List, Dict, Any, Union, TypedDict, Tuple
+from typing import List, Dict, Any, Union, TypedDict
 from pydantic import Field, BaseModel
 from workflow.core.tasks.task import AliceTask
 from workflow.core.agent.agent import AliceAgent
@@ -320,6 +320,12 @@ class RetrievalTask(AliceTask):
                 for item in items:
                     if hasattr(item, 'embedding') and item.embedding:
                         for embedding_chunk in item.embedding:
+                            if not isinstance(embedding_chunk, EmbeddingChunk):
+                                try:
+                                    embedding_chunk = EmbeddingChunk(**embedding_chunk)
+                                except Exception as e:
+                                    LOGGER.error(f"Failed to parse embedding chunk: {e}")
+                                    continue
                             similarity = cosine_similarity(prompt_embedding, embedding_chunk.vector)
                             embedding_chunks.append({
                                 'similarity': similarity,
@@ -339,7 +345,7 @@ class RetrievalTask(AliceTask):
             return embedding_chunks
         else:
             filtered_chunks = self.filter_chunks_by_similarity_threshold(embedding_chunks, similarity_threshold)
-            if len(filtered_chunks) <= max_results:
+            if len(filtered_chunks) < max_results:
                 LOGGER.debug(f"Found only {len(filtered_chunks)} matches for a max_result of {max_results}. Reducing threshold from {similarity_threshold}.")
                 return self.get_final_embedding_chunks(embedding_chunks, max_results, similarity_threshold * 0.75)
             # Sort by similarity
@@ -358,6 +364,7 @@ class RetrievalTask(AliceTask):
         Compute cosine similarity between the prompt_embedding and each embedding in data_cluster.
         Return top embeddings that exceed the similarity threshold, up to max_results.
         """
+        # Step 1: Compute similarity between prompt and each embedding in data_cluster
         embedding_similarity_chunk: List[ChunkedEmbedding] = self.get_similarity_chunks_from_data_cluster(data_cluster, prompt_embedding)
 
         LOGGER.debug(f"Embedding similarity chunk: {[{emb['embedding_chunk'].text_content, emb['similarity']} for emb in embedding_similarity_chunk]}")

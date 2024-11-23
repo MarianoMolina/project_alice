@@ -10,23 +10,40 @@ enum LogLevel {
   DEBUG = 3
 }
 
+interface LogFileConfig {
+  maxBytes: number;
+  backupCount: number;
+}
+
 class LoggerClass {
   private static instance: LoggerClass;
   private logDir: string;
   private logFile: string;
   private level: LogLevel;
+  private maxBytes: number;
+  private backupCount: number;
+  private currentSize: number;
 
-  private constructor(component: 'frontend' | 'backend') {
+  private constructor(component: 'frontend' | 'backend', config?: LogFileConfig) {
     this.logDir = path.join('/app/logs', component);
     this.logFile = path.join(this.logDir, 'app.log');
     this.level = this.getLogLevelFromEnv();
-    this.info('LOG_LEVEL:', this.level);
+    // Default to 10MB max file size and 5 backup files if not specified
+    this.maxBytes = config?.maxBytes ?? 10 * 1024 * 1024;
+    this.backupCount = config?.backupCount ?? 5;
+    this.currentSize = 0;
+    
     this.initializeLogDirectory();
+    this.initializeCurrentSize();
+    this.info('LOG_LEVEL:', this.level);
   }
 
-  public static getInstance(component: 'frontend' | 'backend'): LoggerClass {
+  public static getInstance(
+    component: 'frontend' | 'backend',
+    config?: LogFileConfig
+  ): LoggerClass {
     if (!LoggerClass.instance) {
-      LoggerClass.instance = new LoggerClass(component);
+      LoggerClass.instance = new LoggerClass(component, config);
     }
     return LoggerClass.instance;
   }
@@ -35,6 +52,40 @@ class LoggerClass {
     if (!fs.existsSync(this.logDir)) {
       fs.mkdirSync(this.logDir, { recursive: true });
     }
+  }
+
+  private initializeCurrentSize() {
+    if (fs.existsSync(this.logFile)) {
+      const stats = fs.statSync(this.logFile);
+      this.currentSize = stats.size;
+    } else {
+      this.currentSize = 0;
+    }
+  }
+
+  private rotateFiles() {
+    // Delete the last backup if it exists
+    const lastBackup = `${this.logFile}.${this.backupCount}`;
+    if (fs.existsSync(lastBackup)) {
+      fs.unlinkSync(lastBackup);
+    }
+
+    // Rotate existing backup files
+    for (let i = this.backupCount - 1; i >= 1; i--) {
+      const currentFile = `${this.logFile}.${i}`;
+      const nextFile = `${this.logFile}.${i + 1}`;
+      if (fs.existsSync(currentFile)) {
+        fs.renameSync(currentFile, nextFile);
+      }
+    }
+
+    // Rotate the current log file
+    if (fs.existsSync(this.logFile)) {
+      fs.renameSync(this.logFile, `${this.logFile}.1`);
+    }
+
+    // Reset current size
+    this.currentSize = 0;
   }
 
   private getLogLevelFromEnv(): LogLevel {
@@ -55,19 +106,15 @@ class LoggerClass {
 
   private formatArgs(args: any[]): string {
     return args.map(arg => {
-      // Handle null/undefined
       if (arg === null) return 'null';
       if (arg === undefined) return 'undefined';
 
-      // Handle Error objects
       if (arg instanceof Error) {
         return `${arg.message}${arg.stack ? `\nStack Trace:\n${arg.stack}` : ''}`;
       }
 
-      // Handle objects
       if (typeof arg === 'object') {
         try {
-          // Handle the specific case where we have error details and stack
           if ('error' in arg && 'stack' in arg) {
             const { error, stack, ...rest } = arg;
             return JSON.stringify({
@@ -77,7 +124,6 @@ class LoggerClass {
             }, null, 2);
           }
 
-          // Handle objects that have a stack property
           if ('stack' in arg) {
             const { stack, ...rest } = arg;
             return JSON.stringify({
@@ -86,14 +132,12 @@ class LoggerClass {
             }, null, 2);
           }
 
-          // Default object handling
           return JSON.stringify(arg, null, 2);
         } catch (e) {
           return '[Circular or Non-Serializable Object]';
         }
       }
 
-      // Handle primitives
       return String(arg);
     }).join(' ');
   }
@@ -102,29 +146,30 @@ class LoggerClass {
     if (level <= this.level) {
       const timestamp = new Date().toISOString();
       const formattedArgs = this.formatArgs(args);
-      const logMessage = `[${timestamp}] ${LogLevel[level]}: ${message} ${formattedArgs}`;
+      const logMessage = `[${timestamp}] ${LogLevel[level]}: ${message} ${formattedArgs}\n`;
 
       // Console output with color coding
       const consoleMessage = this.getColoredLogLevel(level) + logMessage + '\x1b[0m';
-      console.log(consoleMessage);
+      console.log(consoleMessage.trim()); // Remove trailing newline for console
+
+      // Check if we need to rotate files
+      if (this.currentSize + Buffer.byteLength(logMessage) > this.maxBytes) {
+        this.rotateFiles();
+      }
 
       // File output
-      fs.appendFileSync(this.logFile, logMessage + '\n');
+      fs.appendFileSync(this.logFile, logMessage);
+      this.currentSize += Buffer.byteLength(logMessage);
     }
   }
 
   private getColoredLogLevel(level: LogLevel): string {
     switch (level) {
-      case LogLevel.ERROR:
-        return '\x1b[31m'; // Red
-      case LogLevel.WARN:
-        return '\x1b[33m'; // Yellow
-      case LogLevel.INFO:
-        return '\x1b[36m'; // Cyan
-      case LogLevel.DEBUG:
-        return '\x1b[35m'; // Magenta
-      default:
-        return '\x1b[0m'; // Reset
+      case LogLevel.ERROR: return '\x1b[31m';
+      case LogLevel.WARN: return '\x1b[33m';
+      case LogLevel.INFO: return '\x1b[36m';
+      case LogLevel.DEBUG: return '\x1b[35m';
+      default: return '\x1b[0m';
     }
   }
 
@@ -145,8 +190,7 @@ class LoggerClass {
   }
 }
 
-const Logger = LoggerClass.getInstance('backend');
-
+// Export the rest of the types and functions as before...
 export interface ErrorDetails {
   receivedValue: string;
   receivedType: string;
@@ -154,16 +198,15 @@ export interface ErrorDetails {
   stack?: string;
   context?: Record<string, unknown>;
 }
+
 export function logError(
   error: unknown,
   message: string,
   value?: unknown,
   additionalContext?: Record<string, unknown>
 ): void {
-  // Capture stack trace
   const stack = error instanceof Error ? error.stack : new Error().stack;
 
-  // Format the received value
   const formatValue = (val: unknown): string => {
     if (val === null) return 'null';
     if (val === undefined) return 'undefined';
@@ -177,7 +220,6 @@ export function logError(
     return String(val);
   };
 
-  // Create detailed error message
   const errorDetails: ErrorDetails = {
     receivedValue: value !== undefined ? formatValue(value) : 'No value provided',
     receivedType: value !== undefined ? typeof value : 'undefined',
@@ -186,11 +228,17 @@ export function logError(
     ...(additionalContext && { context: additionalContext })
   };
 
-  // Log the error with all details
+  const Logger = LoggerClass.getInstance('backend');
   Logger.error(message, {
     error: errorDetails,
     stack
   });
 }
+
+// Create logger instance with custom config
+const Logger = LoggerClass.getInstance('backend', {
+  maxBytes: 10 * 1024 * 1024, // 10MB
+  backupCount: 10
+});
 
 export default Logger;

@@ -42,7 +42,7 @@ def create_task_from_json(task_dict: dict) -> AliceTask:
         if task_type == task_class.__name__:
             try:                
                 task = task_class(**task_dict)
-                LOGGER.debug(f"Just created task: {task.model_dump()}")
+                # LOGGER.debug(f"Just created task: {task.model_dump()}")
                 return task
             except Exception as e:
                 LOGGER.error(f"Error creating task of type {task_type}: {str(e)} \n Task data: {task_dict}")

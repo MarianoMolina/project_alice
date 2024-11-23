@@ -32,6 +32,7 @@ import useStyles from '../TaskStyles';
 import ExitCodeManager from '../../common/exit_code_manager/ExitCodeManager';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
+import { DataCluster } from '../../../../types/DataClusterTypes';
 
 const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     item,
@@ -86,6 +87,11 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     const handleCheckboxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, checked } = e.target;
         setForm(prevForm => ({ ...prevForm, [name]: checked }));
+    }, []);
+
+    const handleDataClusterChange = useCallback((newCluster: DataCluster | undefined) => {
+        Logger.debug('[handleDataClusterChange]', newCluster);
+        setForm(prevForm => ({ ...prevForm, data_cluster: newCluster }));
     }, []);
 
     const handleRequiredApisChange = useCallback((event: SelectChangeEvent<ApiType[]>) => {
@@ -365,7 +371,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             <DataClusterManager
                 dataCluster={form.data_cluster}
                 isEditable={true}
-                onDataClusterChange={(dataCluster) => setForm(prevForm => ({ ...prevForm, data_cluster: dataCluster }))}
+                onDataClusterChange={handleDataClusterChange}
                 flatten={false}
             />
 

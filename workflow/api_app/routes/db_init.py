@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, HTTPException, Depends
 from workflow.api_app.util.dependencies import get_db_app
 from workflow.db_app.initialization import DB_STRUCTURE
-from workflow.util.logging_config import LOGGER
+from workflow.util.logger import LOGGER
 
 router = APIRouter()
 

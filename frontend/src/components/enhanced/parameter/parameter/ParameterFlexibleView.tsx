@@ -6,8 +6,9 @@ import {
     Select,
     MenuItem,
     Typography,
+    Menu,
 } from '@mui/material';
-import { ParameterComponentProps, ParameterDefinition, getDefaultParameterForm } from '../../../../types/ParameterTypes';
+import { ParameterComponentProps, ParameterDefinition, ParameterTypes, getDefaultParameterForm } from '../../../../types/ParameterTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import Logger from '../../../../utils/Logger';
 import useStyles from '../ParameterStyles';
@@ -56,11 +57,13 @@ const ParameterFlexibleView: React.FC<ParameterComponentProps> = ({
                 <InputLabel>Type</InputLabel>
                 <Select
                     value={item?.type || 'string'}
-                    onChange={(e) => onChange({ type: e.target.value as 'string' | 'integer' })}
+                    onChange={(e) => onChange({ type: e.target.value as ParameterTypes })}
                     disabled={!isEditMode}
                 >
-                    <MenuItem value="string">String</MenuItem>
-                    <MenuItem value="integer">Integer</MenuItem>
+                    <MenuItem value={ParameterTypes.STRING}>String</MenuItem>
+                    <MenuItem value={ParameterTypes.INTEGER}>Integer</MenuItem>
+                    <MenuItem value={ParameterTypes.BOOLEAN}>Boolean</MenuItem>
+                    <MenuItem value={ParameterTypes.OBJECT}>Object</MenuItem>
                 </Select>
             </FormControl>
             <Typography variant="h6" className={classes.titleText}>Description</Typography>

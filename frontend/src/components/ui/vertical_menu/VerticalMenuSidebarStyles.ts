@@ -56,10 +56,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     textTransform: 'uppercase',
     marginBottom: theme.spacing(0.5),
   },
-  divider: {
-    margin: theme.spacing(1, 0),
-    width: '100%',
-  },
   expandButton: {
     marginTop: 'auto',
     marginBottom: theme.spacing(2),

@@ -5,7 +5,15 @@ export interface FunctionParameters {
     properties: { [key: string]: ParameterDefinition };
     required: string[];
 }
-export type ParameterTypes = "string" | "integer" | "boolean" | "object" | "array";
+
+export enum ParameterTypes {
+    STRING = 'string',
+    INTEGER = 'integer',
+    NUMBER = 'number',
+    BOOLEAN = 'boolean',
+    OBJECT = 'object',
+    ARRAY = 'array',
+}
 export interface ParameterDefinition extends BaseDatabaseObject {
     type: ParameterTypes;
     description: string;
@@ -23,7 +31,7 @@ export const convertToParameterDefinition = (data: any): ParameterDefinition => 
 export interface ParameterComponentProps extends EnhancedComponentProps<ParameterDefinition> {
 }
 export const getDefaultParameterForm = (): Partial<ParameterDefinition> => ({
-    type: 'string',
+    type: ParameterTypes.STRING,
     description: '',
     default: null
 });

@@ -1,4 +1,4 @@
-from .logging_config import LOGGER, LOG_LEVEL
+from .logger import LOGGER, LOG_LEVEL
 from .const import BACKEND_PORT, FRONTEND_PORT, WORKFLOW_PORT, HOST
 from .run_code import run_code
 from .text_splitter import RecursiveTextSplitter, Language, get_language_matching

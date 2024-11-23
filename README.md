@@ -1,19 +1,20 @@
 # Alice: Advanced Language Intelligence and Cognitive Engine
-*Version 0.3*
+*Version 0.3 (alpha)*
 
 ![Alice LOGO](./frontend/public/logo_alice.ico)
 
 Alice is an agentic workflow framework that integrates task execution and intelligent chat capabilities. It provides a flexible environment for creating, managing, and deploying AI agents for various purposes, leveraging a microservices architecture with MongoDB for data persistence.
 
 > What's new? v0.3 brings:
-> - RAG: Support for RAG with the new Retrieval Task, and new structures Data Clusters and Embedding Chunk. Support for local embeddings without needing io.  
+> - RAG: Support for RAG with the new Retrieval Task, which takes a prompt and a Data Cluster, and returns chunks with highest similarity. 
 > - HITL: Human-in-the-loop mechanics to tasks -> Add a User Checkpoint to a task or a chat, and force a user interaction 'pause' whenever the chosen node is reached
 > - COT: A basic Chain-of-thought implementation: [analysis] tags are parsed on the frontend, and added to the agent's system prompts allowing them think through requests more effectively
 > - DOCUMENTS: Alice Documents, represented by the [aliceDocument] tag, are parsed on the frontend and added to the agent's system prompts allowing them to structure their responses better
 > - NODE FLOW: Fully implemented node execution logic to tasks, making workflows simply a case where the nodes are other tasks. This allows for greater clarity on what each task is doing and why
 > - FLOW VIEWER: Updated the task UI to show more details on the task's inner node logic
-> - APIS: New APIs for Wolfram Alpha, Google's Knowledge Graph, PixArt Image Generation (local), Bark TTS (local)
+> - APIS: New APIs for Wolfram Alpha, Google's Knowledge Graph, PixArt Image Generation (local), Bark TTS (local). Support for local embeddings. 
 > - DATA CLUSTERS: Now chats and tasks can hold updatable data clusters that hold embeddable references like messages, files, task responses, etc. You can add any reference in your environment to a data cluster to give your agents/tasks access to it.
+> - **NOTE**: If you update to this version, you'll need to reinitialize your database (User settings -> Danger Zone). This update required a lot of changes to the framework, and making it backwards compatible is inefficient at this stage. Keep in mind Project ALice is still in Alpha, and changes should be expected. 
 
 > What's next? Planned developments for v0.4 (find detailed info below):
 > - Agent using computer
@@ -140,9 +141,9 @@ View their outputs, run them again, change their settings, etc.
 ![User APIs](./img/user.PNG "View your user details and API configs - also you can re-set your database")
 
 ### How tasks work
-All tasks execute a set of "nodes" (for most tasks) called "inner nodes", and can be one or more. The execution logic for these nodes is defined by the node_end_code_routing object and the start_node string (unless a custom execution method is provided). The task will, logically, execute the start_node node, and then use the routing and the result retrieved, to decide what node to execute next. 
+All tasks execute a set of "inner nodes", which can be one or more. The execution logic for these nodes is defined by the node_end_code_routing object and the start_node string. The task will execute the start_node node, and then use the routing and the result retrieved, to decide what node to execute next. 
 
-These nodes are, in normal tasks, inner methods that the task calls when executing, and they return a References object. These methods are passed all the executed nodes up to now, with their respective References objects, allowing each task and each node to decide how to execute and what to return. 
+These nodes are, in normal tasks, inner methods that the task calls when executing, and they return a NodeResponse object. These methods are passed all the executed nodes up to now, with their respective NodeResponse objects, allowing each task and each node to decide how to execute and what to return. 
 
 In the case of Workflows, these nodes are "inner tasks" instead of specific methods defined in the class. These are provided in the "tasks" object of the parent Workflow, and they are executed as a normal inner node would. 
 
@@ -205,6 +206,7 @@ export enum ApiName {
     LM_STUDIO = 'lm_studio',
     CUSTOM = 'Custom',
 }
+// This map shows which ApiType each ApiName has available
 export const API_CAPABILITIES: Record<ApiName, Set<ApiType>> = {
   [ApiName.OPENAI]: new Set([
     ApiType.LLM_MODEL,
@@ -392,6 +394,9 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
 
 11. **Local deployment**: Offer more options for local deployment, especially for smaller models like TTS (even RVC), image generation, etc. (local llm, embeddings and vision can already be used with io) 
    - Offer something closer to Automatic111 for img gen. An option I've thought about is having a ComfyUI container with a set of workflows pre-set that work off the box. 
+
+12. **Test Module**: A section in the UI were you can define a test setup for a task (inputs, models, prompts), to help find ideal task setups. 
+
 
 ## License
 
