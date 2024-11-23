@@ -55,6 +55,9 @@ class ImageGenerationEngine(APIEngine):
             base_url=api_data.base_url
         )
         model = api_data.model
+        if quality not in ["standard", "hd"]:
+            quality = "standard"
+            LOGGER.warning(f"Invalid quality parameter. Using default value: {quality}")
         if not model:
             LOGGER.error("No model specified.")
             LOGGER.error(get_traceback())

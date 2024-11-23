@@ -1,21 +1,18 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from typing import Dict, Any
 from workflow.api_app.util.dependencies import get_db_app
 from workflow.db_app.app import BackendAPI
-from workflow.core.data_structures import UserInteraction, MessageDict
+from workflow.core.data_structures import UserInteraction, InteractionOwnerType
 from workflow.util import LOGGER
 
 router = APIRouter()
 
 class ChatResumeRequest(BaseModel):
     """Request model for resuming a chat interaction."""
-    chat_id: str
-    interaction: UserInteraction
+    interaction_id: str
 
-@router.post("/chat_resume/{chat_id}")
+@router.post("/chat_resume")
 async def chat_resume(
-    chat_id: str,
     request: ChatResumeRequest,
     db_app: BackendAPI = Depends(get_db_app)
 ) -> bool:
@@ -39,14 +36,27 @@ async def chat_resume(
     Raises:
         HTTPException: If chat not found or other errors occur during processing
     """
-    LOGGER.info(f'Resuming chat for id {chat_id} with interaction {request.interaction}')
-    
-    # Validate chat_id matches the interaction owner
-    if request.interaction.owner.id != chat_id:
+    LOGGER.info(f'Resuming chat with interaction {request.interaction_id}')
+
+    interaction_id = request.interaction_id
+    if not interaction_id:
         raise HTTPException(
             status_code=400,
-            detail="Interaction owner ID does not match the specified chat ID"
+            detail="Interaction ID is required to resume a chat"
         )
+    interaction_data = await db_app.get_entity_from_db('user_interactions', interaction_id)
+    user_interaction: UserInteraction = None
+    try:
+        user_interaction = UserInteraction(**interaction_data)
+        if user_interaction.owner.type != InteractionOwnerType.CHAT:
+            raise ValueError("Interaction owner is not a chat")
+    except Exception as e:
+        import traceback
+        error_msg = f"Error processing chat resume - user interaction: {str(e)}\n{traceback.format_exc()}"
+        LOGGER.error(error_msg)
+        raise HTTPException(status_code=500, detail=error_msg)
+        
+    chat_id = user_interaction.owner.id
     
     # Get chat data
     chat_data = await db_app.get_chats(chat_id)
@@ -60,39 +70,22 @@ async def chat_resume(
     
     try:
         # Generate new messages from the interaction
-        new_messages = await chat_data[chat_id].continue_user_interaction(
+        new_message = await chat_data[chat_id].continue_user_interaction(
             api_manager,
-            request.interaction
+            user_interaction
         )
+        msg_id = new_message.id
         
-        if not new_messages:
+        if not new_message:
             LOGGER.warning("No new messages generated from interaction")
             return False
             
-        LOGGER.debug(f'Generated new messages: {new_messages}')
-        
-        # Find the index of the message containing the interaction
-        messages = chat_data[chat_id].messages
-        insert_index = None
-        
-        for i, message in enumerate(messages):
-            if (message.references and 
-                message.references.user_interactions and 
-                any(ui.owner.id == request.interaction.owner.id for ui in message.references.user_interactions)):
-                insert_index = i + 1
-                break
-                
-        if insert_index is None:
-            LOGGER.error("Could not find original interaction message")
-            return False
-            
-        # Insert new messages after the interaction message
-        messages[insert_index:insert_index] = new_messages
+        LOGGER.debug(f'Updated message: {new_message}')
         
         # Update the chat in the database
-        updated_chat = await db_app.update_chat(chat_id, chat_data[chat_id])
-        if not updated_chat:
-            LOGGER.error(f"Failed to update chat {chat_id} in database")
+        updated_msg = await db_app.update_entity_in_db('messages', msg_id, new_message.model_dump(by_alias=True))
+        if not updated_msg:
+            LOGGER.error(f"Failed to update msg {msg_id} in database - {new_message}")
             return False
             
         LOGGER.info(f'Successfully resumed and updated chat {chat_id}')

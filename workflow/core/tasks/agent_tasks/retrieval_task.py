@@ -360,7 +360,7 @@ class RetrievalTask(AliceTask):
         """
         embedding_similarity_chunk: List[ChunkedEmbedding] = self.get_similarity_chunks_from_data_cluster(data_cluster, prompt_embedding)
 
-        LOGGER.debug(f"Embedding similarity chunk: {embedding_similarity_chunk}")
+        LOGGER.debug(f"Embedding similarity chunk: {[{emb['embedding_chunk'].text_content, emb['similarity']} for emb in embedding_similarity_chunk]}")
 
         actual_max_results = min(max_results, len(embedding_similarity_chunk))
 
@@ -373,7 +373,7 @@ class RetrievalTask(AliceTask):
         
         final_chunks: List[ChunkedEmbedding] = self.get_final_embedding_chunks(embedding_similarity_chunk, max_results, similarity_threshold)
 
-        LOGGER.debug(f"Final chunks: {final_chunks}")
+        LOGGER.debug(f"Final chunks: {[{emb['embedding_chunk'].text_content, emb['similarity']} for emb in final_chunks]}")
 
         return final_chunks
 
@@ -387,7 +387,7 @@ class RetrievalTask(AliceTask):
         """
         reference_groups: Dict[int, Dict[str, Any]] = {}
 
-        LOGGER.debug(f"Top embeddings: {top_embeddings}")
+        LOGGER.debug(f"Top embeddings: {[{emb['embedding_chunk'].text_content, emb['similarity']} for emb in top_embeddings]}")
         for item in top_embeddings:
             ref_id = id(item['reference'])
             if ref_id not in reference_groups:

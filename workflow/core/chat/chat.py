@@ -1,12 +1,13 @@
 from enum import Enum
 from pydantic import Field, model_validator, BaseModel
-from typing import List, Optional, Dict, Any, Callable
+from typing import List, Optional, Dict, Any, Callable, Union
 from workflow.util import LOGGER, get_traceback
 from workflow.core.data_structures import (
     MessageDict, ContentType, References, ToolFunction,
     UserInteraction, UserCheckpoint, Prompt, User, 
     BaseDataStructure, DataCluster, InteractionOwner,
-    InteractionOwnerType, MessageGenerators, RoleTypes
+    InteractionOwnerType, MessageGenerators, RoleTypes,
+    TaskResponse, CodeExecution
 )
 from workflow.core.agent import AliceAgent
 from workflow.core.api import APIManager
@@ -221,7 +222,7 @@ class AliceChat(BaseDataStructure):
             LOGGER.error(error_msg)
             return [self._create_error_message(error_msg)]
 
-    async def continue_user_interaction(self, api_manager: APIManager, interaction: UserInteraction) -> List[MessageDict]:
+    async def continue_user_interaction(self, api_manager: APIManager, interaction: UserInteraction) -> Optional[MessageDict]:
         """
         Process a specific user interaction, potentially from earlier in the conversation.
         
@@ -263,23 +264,32 @@ class AliceChat(BaseDataStructure):
 
             # Execute appropriate action
             if next_step == CheckpointType.TOOL_CALL and target_message.references.tool_calls:
-                return await self._handle_tool_calls(
+                task_responses = await self._handle_tool_calls(
                     api_manager,
-                    target_message.references.tool_calls,
-                    skip_permission=True
+                    target_message.references.tool_calls
                 )
+                if not target_message.references.task_responses:
+                    target_message.references.task_responses = []
+                target_message.references.task_responses.extend(task_responses)
+                return target_message
             elif next_step == CheckpointType.CODE_EXECUTION:
-                return await self._handle_code_execution(
-                    [target_message],
-                    skip_permission=True
-                )
+                code_blocks = self.alice_agent.collect_code_blocs([target_message])
+                if code_blocks:
+                    code_executions: List[CodeExecution] = await self._handle_code_execution(
+                        [target_message]
+                    )
+                    if code_executions:
+                        if not target_message.references.code_executions:
+                            target_message.references.code_executions = []
+                        target_message.references.code_executions.extend(code_executions)
+                return target_message
 
         except Exception as e:
             error_msg = f"Error processing interaction: {str(e)}\n{get_traceback()}"
             LOGGER.error(error_msg)
-            return [self._create_error_message(error_msg)]
+            return self._create_error_message(error_msg)
 
-        return []
+        return None
 
     async def _execute_chat_turns(self, api_manager: APIManager, user_data: Optional[User] = None) -> List[MessageDict]:
         """Execute a sequence of chat turns until completion or max turns reached."""
@@ -288,19 +298,19 @@ class AliceChat(BaseDataStructure):
         
         while turn_count < self.alice_agent.max_consecutive_auto_reply:
             try:
-                turn_messages = await self._execute_single_turn(api_manager, all_generated_messages, user_data)
+                turn_message = await self._execute_single_turn(api_manager, all_generated_messages, user_data)
                 
-                if not turn_messages:
+                if not turn_message:
                     break
                     
-                all_generated_messages.extend(turn_messages)
+                all_generated_messages.append(turn_message)
                 
                 # Check for pending interaction
-                if any(self._get_pending_interaction(msg) for msg in turn_messages):
+                if self._get_pending_interaction(turn_message):
                     break
                     
                 # Check if we should continue
-                if not self._should_continue_turns(turn_messages):
+                if not self._should_continue_turns(turn_message):
                     break
                     
                 turn_count += 1
@@ -313,9 +323,9 @@ class AliceChat(BaseDataStructure):
 
         return all_generated_messages
 
-    async def _execute_single_turn(self, api_manager: APIManager, previous_messages: List[MessageDict], user_data: Optional[User] = None) -> List[MessageDict]:
+    async def _execute_single_turn(self, api_manager: APIManager, previous_messages: List[MessageDict], user_data: Optional[User] = None) -> MessageDict:
         """Execute a single turn of the conversation (LLM -> tools -> code)."""
-        turn_messages = []
+        turn_message: MessageDict = None
         
         try:
             # Generate LLM response
@@ -325,73 +335,89 @@ class AliceChat(BaseDataStructure):
                 self._get_available_tool_functions(api_manager),
                 user_data=user_data
             )
-            turn_messages.append(llm_message)
+            turn_message = llm_message
 
             # Handle tool calls
-            if llm_message.references.tool_calls:
-                tool_messages = await self._handle_tool_calls(
+            can_tool_call = self._can_tool_call(llm_message)
+            if can_tool_call and not isinstance(can_tool_call, UserInteraction):
+                tool_responses: List[TaskResponse] = await self._handle_tool_calls(
                     api_manager,
                     llm_message.references.tool_calls,
                     llm_message
                 )
-                if tool_messages:
-                    turn_messages.extend(tool_messages)
+                if tool_responses:
+                    turn_message.references.task_responses.extend(tool_responses)
+            elif can_tool_call and isinstance(can_tool_call, UserInteraction):
+                if not turn_message.references.user_interactions:
+                    turn_message.references.user_interactions = []
+                turn_message.references.user_interactions.append(can_tool_call)
 
             # Handle code execution
-            code_messages = await self._handle_code_execution([llm_message], False)
-            if code_messages:
-                turn_messages.extend(code_messages)
-
-            return turn_messages
+            can_execute_code = self._can_execute_code(llm_message)
+            if can_execute_code and not isinstance(can_execute_code, UserInteraction):
+                code_executions: List[CodeExecution]  = await self._handle_code_execution([llm_message], False)
+                if code_executions:
+                    turn_message.references.code_executions.extend(code_executions)
+            elif can_execute_code and isinstance(can_execute_code, UserInteraction):
+                if not turn_message.references.user_interactions:
+                    turn_message.references.user_interactions = []
+                turn_message.references.user_interactions.append(can_execute_code)
+            return turn_message
 
         except Exception as e:
             error_msg = f"Error in turn execution: {str(e)}\n{get_traceback()}"
             LOGGER.error(error_msg)
-            return [self._create_error_message(error_msg)]
+            return self._create_error_message(error_msg)
+        
+    def _can_tool_call(self, message: MessageDict) -> Union[bool, UserInteraction]:
+        """Check if tool calls are allowed and return a pending interaction if needed."""
+        if not message.references or not message.references.tool_calls or self.alice_agent.has_tools == 0  or self.alice_agent.has_tools == 3: # Disabled or dry run
+            return False
+        if self.alice_agent.has_tools == 2:  # WITH_PERMISSION
+            # Create new interaction
+            checkpoint = self.default_user_checkpoints.get(CheckpointType.TOOL_CALL)
+            if not checkpoint:
+                LOGGER.error("No default checkpoint defined for tool calls")
+                return False
+            return self._create_checkpoint_interaction(checkpoint)
+        return True
+    
+    def _can_execute_code(self, message: MessageDict) -> Union[bool, UserInteraction]:
+        """Check if code execution is allowed and return a pending interaction if needed."""
+        
+        code_blocks = self.alice_agent.collect_code_blocs([message])
+        if not code_blocks or not message.references or not message.references.code_executions or self.alice_agent.has_code_exec == 0: # Disabled
+            return False
+        if self.alice_agent.has_code_exec == 2:  # WITH_PERMISSION
+            # Create new interaction
+            checkpoint = self.default_user_checkpoints.get(CheckpointType.CODE_EXECUTION)
+            if not checkpoint:
+                LOGGER.error("No default checkpoint defined for code execution")
+                return False
+            return self._create_checkpoint_interaction(checkpoint)
+        return True
 
-    async def _handle_tool_calls(self, api_manager: APIManager, tool_calls: List[Dict], skip_permission: bool = False) -> List[MessageDict]:
+    async def _handle_tool_calls(self, api_manager: APIManager, tool_calls: List[Dict]) -> List[TaskResponse]:
         """Handle tool calls with permission checking."""
-        if self.alice_agent.has_tools == 0:  # DISABLED
-            return []
-            
-        if not skip_permission and self.alice_agent.has_tools == 2:  # WITH_PERMISSION
-            # Create new checkpoint
-            checkpoint = self.default_user_checkpoints[CheckpointType.TOOL_CALL]
-            return [self._create_checkpoint_message(checkpoint)]
-
         # Execute tool calls
-        return await self.alice_agent.process_tool_calls(
+        messages: List[MessageDict] = await self.alice_agent.process_tool_calls(
             tool_calls,
             self._get_available_tool_map(api_manager),
             self._get_available_tool_functions(api_manager),
         )
+        if not messages:
+            return []
+        
+        return [msg.references.task_responses[0] for msg in messages if msg.references.task_responses]
 
-    async def _handle_code_execution(self, messages: List[MessageDict], skip_permission: bool = False) -> List[MessageDict]:
+
+    async def _handle_code_execution(self, messages: List[MessageDict]) -> List[CodeExecution]:
         """Handle code execution with permission checking."""
-        if self.alice_agent.has_code_exec == 0:  # DISABLED
-            return []
-
-        # Check for code blocks
-        code_blocks = self.alice_agent.collect_code_blocs(messages)
-        if not code_blocks:
-            return []
-
-        if not skip_permission and self.alice_agent.has_code_exec == 2:  # WITH_PERMISSION
-            # Create new checkpoint
-            checkpoint = self.default_user_checkpoints[CheckpointType.CODE_EXECUTION]
-            return [self._create_checkpoint_message(checkpoint)]
-
         # Execute code
         code_executions, exit_code = await self.alice_agent.process_code_execution(messages)
-        return [MessageDict(
-            role=RoleTypes.ASSISTANT,
-            content=f"Code execution completed. Exit code: {exit_code}",
-            generated_by=MessageGenerators.SYSTEM,
-            type=ContentType.TEXT,
-            references=References(code_executions=code_executions)
-        )]
+        return code_executions
 
-    def _create_checkpoint_message(self, checkpoint: UserCheckpoint) -> MessageDict:
+    def _create_checkpoint_interaction(self, checkpoint: UserCheckpoint) -> UserInteraction:
         """Create a message containing a user checkpoint."""
         interaction = UserInteraction(
             user_checkpoint_id=checkpoint,
@@ -401,13 +427,7 @@ class AliceChat(BaseDataStructure):
             )
         )
         
-        return MessageDict(
-            role=RoleTypes.ASSISTANT,
-            content=checkpoint.user_prompt,
-            generated_by="system",
-            type=ContentType.TEXT,
-            references=References(user_interactions=[interaction])
-        )
+        return interaction
 
     def _get_pending_interaction(self, message: MessageDict) -> Optional[UserInteraction]:
         """Get a pending user interaction from a message if it exists."""
@@ -429,10 +449,10 @@ class AliceChat(BaseDataStructure):
                 return message
         return None
 
-    def _should_continue_turns(self, turn_messages: List[MessageDict]) -> bool:
+    def _should_continue_turns(self, turn_message: MessageDict) -> bool:
         """Determine if we should continue with another turn."""
         # Continue if we had tool calls or code execution
-        return any(msg.generated_by == MessageGenerators.TOOL for msg in turn_messages)
+        return turn_message.references.tool_calls or turn_message.references.code_executions
 
     def _create_error_message(self, error_msg: str) -> MessageDict:
         """Create a standardized error message."""
