@@ -27,7 +27,7 @@ const DataClusterManager: React.FC<DataClusterManagerProps> = ({
         if (dataCluster) {
             setInEditMode && setInEditMode(prev => !prev);
         }
-    }, [dataCluster, editedCluster, onDataClusterChange, isEditable, isFlatView]);
+    }, [dataCluster]);
 
     const handleClusterChange = useCallback((newCluster: DataCluster) => {
         setEditedCluster(newCluster);
@@ -36,7 +36,7 @@ const DataClusterManager: React.FC<DataClusterManagerProps> = ({
 
     const localOnDataClusterChange = useCallback((newCluster: DataCluster | undefined) => {
         handleClusterChange(newCluster || {});
-    }, []);
+    }, [handleClusterChange]);
 
     const handleDelete = useCallback((type: keyof References, index: number) => {
         if (!editedCluster || !isEditable) return;

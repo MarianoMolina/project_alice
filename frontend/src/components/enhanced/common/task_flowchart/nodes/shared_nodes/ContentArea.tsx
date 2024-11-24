@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { BaseTaskData } from '../../utils/FlowChartUtils';
-import { Accordion, AccordionDetails, AccordionSummary, Box, Dialog, DialogContent, DialogTitle, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import { DataObject, ExpandMore } from '@mui/icons-material';
 import { ApiType } from '../../../../../../types/ApiTypes';
 import theme from '../../../../../../Theme';
@@ -8,7 +8,6 @@ import { useCardDialog } from '../../../../../../contexts/CardDialogContext';
 import { NodeConfig } from './TaskTypeNodeDefinitions';
 import { RequiredApis } from './RequiredApisArea';
 import { formatCamelCaseString } from '../../../../../../utils/StyleUtils';
-import PromptParsedView from '../../../../prompt/PromptParsedView';
 
 // Component for the content area
 interface NodeContentAreaProps {
@@ -18,8 +17,7 @@ interface NodeContentAreaProps {
 }
 
 export const NodeContentArea: React.FC<NodeContentAreaProps> = ({ data, nodeConfig, requiredApis }) => {
-    const [isPromptDialogOpen, setIsPromptDialogOpen] = useState(false);
-    const { selectCardItem } = useCardDialog();
+    const { selectCardItem, selectPromptParsedDialog } = useCardDialog();
     const taskTemplate = useMemo(() =>
         data?.templates?.task_template || undefined
         , [data?.templates]);
@@ -31,11 +29,7 @@ export const NodeContentArea: React.FC<NodeContentAreaProps> = ({ data, nodeConf
 
     const handleViewPrompt = (event: React.MouseEvent) => {
         event.stopPropagation();
-        setIsPromptDialogOpen(true);
-    };
-
-    const handleClosePromptDialog = () => {
-        setIsPromptDialogOpen(false);
+        taskTemplate && selectPromptParsedDialog(taskTemplate, systemTemplate);
     };
     return (
         <Stack spacing={1}>
@@ -90,25 +84,6 @@ export const NodeContentArea: React.FC<NodeContentAreaProps> = ({ data, nodeConf
                     </Stack>
                 </AccordionDetails>
             </Accordion>
-
-            <Dialog
-                open={isPromptDialogOpen}
-                onClose={handleClosePromptDialog}
-                maxWidth="md"
-                fullWidth
-            >
-                <DialogTitle>
-                    Task Template Preview
-                </DialogTitle>
-                <DialogContent>
-                    {taskTemplate && (
-                        <PromptParsedView
-                            prompt={taskTemplate}
-                            systemPrompt={systemTemplate}
-                        />
-                    )}
-                </DialogContent>
-            </Dialog>
         </Stack>
     );
 };

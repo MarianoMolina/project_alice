@@ -4,7 +4,6 @@ import {
     Add as AddIcon,
     Edit as EditIcon,
     Search as SearchIcon,
-    Save as SaveIcon,
     Close,
 } from '@mui/icons-material';
 import { DataCluster } from '../../../../types/DataClusterTypes';

@@ -5,6 +5,7 @@ interface DialogButton {
   action: () => void;
   variant?: 'text' | 'outlined' | 'contained';
   color?: 'inherit' | 'primary' | 'secondary' | 'success' | 'error' | 'info' | 'warning';
+  disabled?: boolean;
 }
 
 interface DialogOptions {

@@ -2,12 +2,9 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { CircularProgress, Box } from '@mui/material';
-import { ApiProvider } from '../contexts/ApiContext';
 import { TaskProvider } from '../contexts/TaskContext';
 import { ChatProvider } from '../contexts/ChatContext';
-import { DialogProvider } from '../contexts/CardDialogContext';
-import EnhancedCardDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
-import EnhancedFlexibleDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedFlexibleDialog';
+import { CardDialogProvider } from '../contexts/CardDialogContext';
 
 interface ProtectedRouteProps {
   element: React.ReactNode;
@@ -26,17 +23,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
   }
 
   return isAuthenticated ? (
-    <DialogProvider>
-      <ApiProvider>
-        <TaskProvider>
-          <ChatProvider>
-            <EnhancedCardDialog />
-            <EnhancedFlexibleDialog />
-            {element}
-          </ChatProvider>
-        </TaskProvider>
-      </ApiProvider>
-    </DialogProvider>
+    <CardDialogProvider>
+      <TaskProvider>
+        <ChatProvider>
+          {element}
+        </ChatProvider>
+      </TaskProvider>
+    </CardDialogProvider>
   ) : (
     <Navigate to="/login" replace state={{ from: location }} />
   );

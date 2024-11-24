@@ -1,13 +1,13 @@
-import React, { useCallback, useState } from 'react';
-import { Box, Typography, IconButton, Dialog } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Typography, IconButton } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { DataCluster } from '../../../../types/DataClusterTypes';
 import { References } from '../../../../types/ReferenceTypes';
 import { CollectionType } from '../../../../types/CollectionTypes';
 import ReferenceChip from '../../common/references/ReferenceChip';
-import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import { REFERENCE_CONFIG } from './DataClusterManagerTypes';
 import { useApi } from '../../../../contexts/ApiContext';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
 
 interface DataClusterEditingViewProps {
     editedCluster: DataCluster;
@@ -19,18 +19,33 @@ const DataClusterEditingView: React.FC<DataClusterEditingViewProps> = ({
     onClusterChange
 }) => {
     const { fetchItem } = useApi();
-    const [activeDialog, setActiveDialog] = useState<keyof References | null>(null);
+    const { selectDialog } = useCardDialog();
     const [selectedIds, setSelectedIds] = useState<{ [K in keyof References]?: string[] }>({});
-    const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
 
     const handleAddClick = (referenceType: keyof References) => {
-        setActiveDialog(referenceType);
+        const config = REFERENCE_CONFIG.find(c => c.key === referenceType);
+        if (!config?.collectionName || !config.EnhancedView) return;
+
+        const existingRefs = editedCluster[referenceType] || [];
         setSelectedIds(prev => ({
             ...prev,
-            [referenceType]: editedCluster[referenceType]?.map(item => 
+            [referenceType]: existingRefs.map(item => 
                 typeof item === 'string' ? item : item._id!
-            ) || []
+            )
         }));
+
+        selectDialog<CollectionType[typeof config.collectionName]>(
+            config.collectionName,
+            config.EnhancedView,
+            `Select ${config.title}`,
+            async (item) => {
+                const currentIds = selectedIds[referenceType] || [];
+                const newIds = [...currentIds, item._id!];
+                await handleReferenceSelection(config.key, newIds);
+            },
+            existingRefs as any[],
+            true // multiple selection
+        );
     };
 
     const handleDelete = (type: keyof References, index: number) => {
@@ -55,13 +70,9 @@ const DataClusterEditingView: React.FC<DataClusterEditingViewProps> = ({
             />
         ));
     };
-    const handleAccordionToggle = useCallback((accordion: string | null) => {
-        setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
-    }, []);
-
 
     const handleReferenceSelection = async (type: keyof References, ids: string[]) => {
-        if (!selectedIds[type] || !type) return;
+        if (!ids.length || !type) return;
 
         const config = REFERENCE_CONFIG.find(c => c.key === type);
         if (!config?.collectionName) return;
@@ -69,49 +80,13 @@ const DataClusterEditingView: React.FC<DataClusterEditingViewProps> = ({
         setSelectedIds(prev => ({ ...prev, [type]: ids }));
 
         const newRefs = await Promise.all(
-            ids!.map(id => fetchItem(config.collectionName!, id))
+            ids.map(id => fetchItem(config.collectionName!, id))
         );
 
         onClusterChange({
             ...editedCluster,
             [type]: newRefs
         });
-    };
-
-    const renderSelectionDialog = () => {
-        if (!activeDialog) return null;
-
-        const config = REFERENCE_CONFIG.find(c => c.key === activeDialog);
-        if (!config?.EnhancedView || !config.collectionName) return null;
-
-        const selectedItems = editedCluster[activeDialog] || [];
-        const EnhancedViewComponent = config.EnhancedView;
-
-        return (
-            <Dialog
-                open={true}
-                onClose={() => setActiveDialog(null)}
-                maxWidth="md"
-                fullWidth
-            >
-                <Box className="p-4">
-                    <EnhancedSelect<CollectionType[typeof config.collectionName]>
-                        componentType={config.collectionName}
-                        EnhancedView={EnhancedViewComponent}
-                        selectedItems={selectedItems as any[]}
-                        onSelect={(ids) => {
-                            handleReferenceSelection(config.key, ids);
-                        }}
-                        isInteractable={true}
-                        multiple={true}
-                        label={`Select ${config.title}`}
-                        activeAccordion={activeAccordion}
-                        onAccordionToggle={handleAccordionToggle}
-                        accordionEntityName={config.key}
-                    />
-                </Box>
-            </Dialog>
-        );
     };
 
     const renderSection = (config: typeof REFERENCE_CONFIG[number]) => {
@@ -143,7 +118,6 @@ const DataClusterEditingView: React.FC<DataClusterEditingViewProps> = ({
     return (
         <Box className="space-y-4">
             {REFERENCE_CONFIG.map(renderSection)}
-            {renderSelectionDialog()}
         </Box>
     );
 };

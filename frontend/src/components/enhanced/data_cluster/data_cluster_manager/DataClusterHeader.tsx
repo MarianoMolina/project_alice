@@ -7,11 +7,8 @@ import {
 import { DataCluster } from '../../../../types/DataClusterTypes';
 import { hasAnyReferences } from '../../../../types/ReferenceTypes';
 import { ACTION_BUTTON_CONFIG } from './DataClusterManagerTypes';
-import { Dialog } from '@mui/material';
-import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import DataClusterShortListView from '../data_cluster/DataClusterShortListView';
-import { useState } from 'react';
-import { useApi } from '../../../../contexts/ApiContext';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
 
 interface DataClusterHeaderProps {
     editedCluster: DataCluster | undefined;
@@ -38,20 +35,23 @@ const DataClusterHeader = memo(({
     onDataClusterChange,
     inEditMode
 }: DataClusterHeaderProps) => {
-    const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
-    const { fetchItem } = useApi();
+    const { selectDialog } = useCardDialog();
 
-    const handleSelect = async (selectedIds: string[]) => {
-        if (selectedIds.length > 0 && isEditable && onDataClusterChange) {
-            const dataC = await fetchItem('dataclusters', selectedIds[0]) as DataCluster;
-            setIsSelectDialogOpen(false);
-            onDataClusterChange(dataC);
+    const handleSelect = async (selectedCluster: DataCluster) => {
+        if (isEditable && onDataClusterChange) {
+            onDataClusterChange(selectedCluster);
         }
     };
 
     const handleAction = (key: string) => {
         if (key === 'select') {
-            setIsSelectDialogOpen(true);
+            selectDialog<DataCluster>(
+                'dataclusters',
+                DataClusterShortListView,
+                'Select Data Cluster',
+                handleSelect,
+                dataCluster ? [dataCluster] : []
+            );
         } else {
             onEdit && onEdit();
         }
@@ -141,28 +141,6 @@ const DataClusterHeader = memo(({
         <>
             {renderViewToggle()}
             {renderActionButtons()}
-            
-            <Dialog
-                open={isSelectDialogOpen}
-                onClose={() => setIsSelectDialogOpen(false)}
-                maxWidth="md"
-                fullWidth
-            >
-                <Box className="p-4">
-                    <EnhancedSelect<DataCluster>
-                        componentType="dataclusters"
-                        EnhancedView={DataClusterShortListView}
-                        selectedItems={dataCluster ? [dataCluster] : []}
-                        onSelect={handleSelect}
-                        isInteractable={true}
-                        multiple={false}
-                        label="Select Data Cluster"
-                        activeAccordion={null}
-                        onAccordionToggle={() => {}}
-                        accordionEntityName="data-cluster"
-                    />
-                </Box>
-            </Dialog>
         </>
     );
 });

@@ -1,16 +1,15 @@
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useMemo } from 'react';
 import { NodeProps } from 'reactflow';
 import { ApiType } from '../../../../../types/ApiTypes';
 import { apiTypeIcons } from '../../../../../utils/ApiUtils';
 import NodeTemplate from './NodeTemplate';
-import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, Dialog, DialogContent, DialogTitle, Divider, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, Divider, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { getNodeAreas } from './shared_nodes/ShareNodes';
 import { TaskNodeData } from '../utils/FlowChartUtils';
 import theme from '../../../../../Theme';
 import { useCardDialog } from '../../../../../contexts/CardDialogContext';
 import { DataObject, ExpandMore } from '@mui/icons-material';
-import PromptParsedView from '../../../prompt/PromptParsedView';
 import { formatCamelCaseString } from '../../../../../utils/StyleUtils';
 
 const TaskNode: React.FC<NodeProps<TaskNodeData>> = ({
@@ -18,10 +17,9 @@ const TaskNode: React.FC<NodeProps<TaskNodeData>> = ({
   data,
   isConnectable
 }) => {
-  const [isPromptDialogOpen, setIsPromptDialogOpen] = useState(false);
   const { inputArea, outputArea, exitCodeArea } = getNodeAreas(data);
   const innerNodes = Object.keys(data.node_end_code_routing || {});
-  const { selectCardItem } = useCardDialog();
+  const { selectCardItem, selectPromptParsedDialog } = useCardDialog();
   const handleViewTask = (event: React.MouseEvent) => {
     event.stopPropagation();
     selectCardItem('Task', data._id, data);
@@ -37,11 +35,7 @@ const TaskNode: React.FC<NodeProps<TaskNodeData>> = ({
 
   const handleViewPrompt = (event: React.MouseEvent) => {
     event.stopPropagation();
-    setIsPromptDialogOpen(true);
-  };
-
-  const handleClosePromptDialog = () => {
-    setIsPromptDialogOpen(false);
+    taskTemplate && selectPromptParsedDialog(taskTemplate, systemTemplate);
   };
 
   const centerArea = (
@@ -201,25 +195,6 @@ const TaskNode: React.FC<NodeProps<TaskNodeData>> = ({
           )}
         </AccordionDetails>
       </Accordion>
-
-      <Dialog
-        open={isPromptDialogOpen}
-        onClose={handleClosePromptDialog}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>
-          Task Template Preview
-        </DialogTitle>
-        <DialogContent>
-          {taskTemplate && (
-            <PromptParsedView
-              prompt={taskTemplate}
-              systemPrompt={systemTemplate}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
     </Stack>
   );
 

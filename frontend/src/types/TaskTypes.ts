@@ -148,3 +148,105 @@ export const getDefaultTaskForm = (taskType: TaskType): AliceTask => {
       return baseForm;
   }
 };
+
+export const taskDescriptions: Record<TaskType, string> = {
+  [TaskType.APITask]: `A specialized task type designed to interact with external APIs in a standardized way. It handles a single API interaction with built-in validation, error handling, and retry logic. Each APITask:
+- Works with exactly one API type
+- Automatically validates API configurations and requirements
+- Handles API authentication and connection management
+- Provides consistent error handling and retry behavior
+- Can be configured with custom input parameters
+- Reports detailed execution status and results
+
+Best used for: Direct API interactions like sending any single-purpose API operation.`,
+  [TaskType.Workflow]: `A container task type that orchestrates multiple subtasks in a defined sequence. It manages task dependencies, data flow, and execution order while providing centralized control and monitoring. Each Workflow:
+- Coordinates multiple tasks in a specific order
+- Automatically handles data passing between tasks
+- Manages task dependencies and execution flow
+- Provides unified error handling across all subtasks
+- Supports checkpoints for user interactions
+- Collects and aggregates results from all subtasks
+
+Best used for: Complex operations requiring multiple steps, processes involving different APIs or services, or any sequence of tasks that need to be executed in a coordinated manner.`,
+  [TaskType.PromptAgentTask]: `A versatile task type that processes prompts using AI agents, with built-in support for tool usage and code execution. Each PromptAgentTask:
+- Processes natural language prompts through AI agents
+- Can execute function calls (tools) based on AI responses
+- Optionally handles code generation and execution
+- Maintains conversation history for context
+- Supports custom prompt templates
+- Automatically manages the flow between AI responses, tool usage, and code execution
+
+Best used for: Complex interactions requiring AI assistance, tasks that combine natural language processing with specific actions, or operations needing flexible tool integration.
+`,
+  [TaskType.CheckTask]: `A specialized evaluation task that analyzes AI responses against specific criteria or keywords. Each CheckTask:
+- Validates AI outputs against predefined success criteria
+- Uses configurable response mapping for pass/fail conditions
+- Provides binary (approved/failed) decisions
+- Supports retry logic for failed checks
+- Can be used as a validation step in workflows
+
+Best used for: Quality control, content validation, safety checks, or any scenario requiring specific criteria verification before proceeding.
+`,
+  [TaskType.CodeGenerationLLMTask]: `A dedicated task type for AI - powered code generation and execution. Each CodeGenerationLLMTask:
+- Generates code based on natural language descriptions
+- Automatically executes and validates generated code
+- Provides intelligent retry logic for failed attempts
+- Handles code improvement based on execution results
+- Maintains context between generation attempts
+- Supports multiple programming languages
+
+Best used for: Automated code generation, code prototyping, script creation, coding assistance, or any task requiring code generation and execution from natural language descriptions.`,
+  [TaskType.GenerateImageTask]: `A task type that creates images from text descriptions using AI. Each GenerateImageTask:
+- Creates images based on text prompts
+- Supports multiple image generation in one request
+- Offers customizable image sizes
+- Provides quality control options
+- Handles complex descriptive prompts
+- Includes automatic retry for failed generations
+
+Best used for: Creating custom illustrations, generating visual content for presentations, prototyping design ideas, or any scenario requiring AI-generated images from textual descriptions.`,
+  [TaskType.EmbeddingTask]: `A task type that converts text into numerical vector representations (embeddings). Each EmbeddingTask:
+- Transforms text into high-dimensional vectors
+- Preserves semantic meaning of text
+- Handles single or multiple text inputs
+- Generates consistent embeddings for similar content
+- Supports different text formats
+- Includes error handling for malformed inputs
+
+Best used for: Semantic search implementations, text similarity analysis, content recommendation systems, or any application requiring text-to-vector conversion for machine learning purposes.
+`,
+  [TaskType.WebScrapeBeautifulSoupTask]: `A task type designed for intelligent web content extraction and processing. Each WebScrapeBeautifulSoupTask:
+- Fetches and processes web page content
+- Intelligently identifies relevant content sections
+- Automatically generates optimal CSS selectors for content extraction
+- Removes unwanted elements (ads, navigation, etc.)
+- Handles various webpage structures
+- Falls back to reliable parsing strategies when needed
+- Preserves content structure and hierarchy
+- Includes metadata about extraction process
+
+Best used for: Content aggregation, data collection from websites, web research automation, content monitoring systems, or any scenario requiring structured extraction of web content while filtering out non-essential elements.`,
+  [TaskType.RetrievalTask]: `A specialized task type that handles semantic search and content retrieval using embeddings. Each RetrievalTask:
+- Converts content into searchable vector embeddings
+- Performs semantic similarity searches across multiple content types
+- Automatically manages embedding generation and updates
+- Supports multiple file formats and content types
+- Provides configurable similarity thresholds
+- Returns ranked results based on relevance
+- Handles incremental updates to content collections
+
+Best used for: Building semantic search systems, implementing content recommendation engines, finding similar documents, creating knowledge bases with semantic search capabilities, or any scenario requiring content retrieval based on meaning rather than exact matching.
+`,
+  [TaskType.TextToSpeechTask]: `A specialized task type that converts text into natural-sounding speech. Each TextToSpeechTask:
+- Transforms written text into spoken audio
+- Supports multiple voice options
+- Allows speed adjustment of speech
+- Handles long-form text conversion
+- Produces audio files as output
+- Includes automatic retry logic for failed conversions
+
+Best used for: Creating voiceovers, generating spoken content for accessibility, audio content creation, or any scenario requiring text-to-speech conversion.
+`,
+  [TaskType.CodeExecutionLLMTask]: ``,
+
+};

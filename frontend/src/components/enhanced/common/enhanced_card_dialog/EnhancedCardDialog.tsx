@@ -57,7 +57,7 @@ import CodeExecutionCardView from '../../code_execution/code_execution/CodeExecu
 import APIConfigCardView from '../../api_config/api_config/APIConfigCardView';
 
 const EnhancedCardDialog: React.FC = () => {
-  const { selectedCardItem, selectedCardItemType, handleClose, selectCardItem } = useCardDialog();
+  const { selectedCardItem, selectedCardItemType, closeCardDialog, selectCardItem, isCardDialogOpen } = useCardDialog();
 
   const renderDialogContent = () => {
     if (!selectedCardItem || !selectedCardItemType) return null;
@@ -258,7 +258,7 @@ const EnhancedCardDialog: React.FC = () => {
   };
 
   return (
-    <Dialog open={!!selectedCardItem} onClose={handleClose} maxWidth='xl'>
+    <Dialog open={isCardDialogOpen} onClose={closeCardDialog} maxWidth='xl'>
       {renderDialogContent()}
     </Dialog>
   );

@@ -4,10 +4,6 @@ import {
     Typography,
     Box,
     Button,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
 } from '@mui/material';
 import { FileComponentProps, FileContentReference, FileReference, FileType, getDefaultFileForm } from '../../../../types/FileTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
@@ -18,6 +14,7 @@ import { useApi } from '../../../../contexts/ApiContext';
 import { MessageType } from '../../../../types/MessageTypes';
 import { useNotification } from '../../../../contexts/NotificationContext';
 import Logger from '../../../../utils/Logger';
+import { useDialog } from '../../../../contexts/DialogCustomContext';
 
 const FileFlexibleView: React.FC<FileComponentProps> = ({
     item,
@@ -27,16 +24,15 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
     handleDelete,
 }) => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const { uploadFileContentReference } = useApi();
     const { addNotification } = useNotification();
+    const { openDialog } = useDialog();
 
     useEffect(() => {
         if (!item || Object.keys(item).length === 0) {
             onChange(getDefaultFileForm());
         }
     }, [item, onChange]);
-
 
     const handleLocalDelete = useCallback(() => {
         if (item && Object.keys(item).length > 0 && handleDelete) {
@@ -47,11 +43,32 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
     if (!item && mode !== 'create') {
         return <Typography>No file data available.</Typography>;
     }
-    
+
     const isEditMode = mode === 'edit' || mode === 'create';
     const title = mode === 'create' ? 'Upload New File' : mode === 'edit' ? 'Edit File' : 'File Details';
     const saveButtonText = item?._id ? 'Update File' : 'Upload File';
     const hasTranscriptSlot = item && item._id && item.type !== 'file';
+
+    const handleOpenDialog = () => {
+        openDialog({
+            title: 'Confirm File Upload',
+            content: `Are you sure you want to upload ${selectedFile?.name}?`,
+            buttons: [
+                {
+                    text: 'Cancel',
+                    action: () => addNotification('File upload cancelled', 'info'),
+                    color: 'error',
+                    variant: 'contained',
+                },
+                {
+                    text: 'Upload',
+                    action: handleUploadConfirm,
+                    color: 'primary',
+                    variant: 'contained',
+                }
+            ],
+        });
+    }
 
     const handleFileUpdate = (updatedFile: FileContentReference) => {
         onChange(updatedFile);
@@ -63,7 +80,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
             const file = await selectFile(allowedTypes);
             if (file) {
                 setSelectedFile(file);
-                setIsDialogOpen(true);
+                handleOpenDialog();
             } else {
                 Logger.info('No file selected or file type not allowed');
                 addNotification('No file selected or file type not allowed', 'info');
@@ -85,7 +102,6 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
                 return;
             }
             onChange(file);
-            setIsDialogOpen(false);
         }
     };
 
@@ -100,20 +116,6 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
                     <Button variant="contained" onClick={handleFileSelect}>
                         Select File to Upload
                     </Button>
-                    <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
-                        <DialogTitle>Confirm File Upload</DialogTitle>
-                        <DialogContent>
-                            <Typography>
-                                Are you sure you want to upload {selectedFile?.name}?
-                            </Typography>
-                        </DialogContent>
-                        <DialogActions>
-                            <Button onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                            <Button onClick={handleUploadConfirm} color="primary">
-                                Upload
-                            </Button>
-                        </DialogActions>
-                    </Dialog>
                 </Box>
             );
         }

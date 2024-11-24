@@ -2,7 +2,6 @@ import React, { useMemo, useState } from 'react';
 import {
     Card, CardContent, IconButton, CircularProgress,
     Typography, Alert, Box, Button, Dialog, DialogContent, Tooltip,
-    DialogTitle
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import HistoryIcon from '@mui/icons-material/History';
@@ -13,7 +12,6 @@ import useStyles from '../TaskStyles';
 import TaskResponseList from '../../task_response/task_response/TaskResponseListView';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 import { DataObject } from '@mui/icons-material';
-import PromptParsedView from '../../prompt/PromptParsedView';
 import { useAuth } from '../../../../contexts/AuthContext';
 import ParameterInputFields from '../../parameter/ParameterInputFields';
 
@@ -30,9 +28,8 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
         setInputValues,
         getTaskResultsById,
     } = useTask();
-    const { selectCardItem } = useCardDialog();
+    const { selectCardItem, selectPromptParsedDialog } = useCardDialog();
     const [isResultsDialogOpen, setIsResultsDialogOpen] = useState(false);
-    const [isPromptDialogOpen, setIsPromptDialogOpen] = useState(false);
     const { user } = useAuth();
 
     const taskResults = useMemo(() =>
@@ -75,11 +72,7 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
     };
 
     const handleViewPrompt = () => {
-        setIsPromptDialogOpen(true);
-    };
-
-    const handleClosePromptDialog = () => {
-        setIsPromptDialogOpen(false);
+        taskTemplate && selectPromptParsedDialog(taskTemplate, systemTemplate, inputValues, { user_data: user });
     };
 
     return (
@@ -168,28 +161,6 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
                         mode={'view'}
                         handleSave={async () => { }}
                     />
-                </DialogContent>
-            </Dialog>
-
-            {/* Prompt Template Dialog */}
-            <Dialog
-                open={isPromptDialogOpen}
-                onClose={handleClosePromptDialog}
-                maxWidth="md"
-                fullWidth
-            >
-                <DialogTitle>
-                    Task Template Preview
-                </DialogTitle>
-                <DialogContent>
-                    {taskTemplate && (
-                        <PromptParsedView
-                            prompt={taskTemplate}
-                            initialInputs={inputValues}
-                            systemPrompt={systemTemplate}
-                            initialSystemInputs={{ user_data: user }}
-                        />
-                    )}
                 </DialogContent>
             </Dialog>
         </Card>

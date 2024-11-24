@@ -381,7 +381,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             Logger.error('Error purging and reinitializing database:', error);
             throw error;
         }
-    }, [addNotification]);
+    }, [addNotification, refreshUserData]);
 
     const value: ApiContextType = {
         fetchItem: apiFetchItem,

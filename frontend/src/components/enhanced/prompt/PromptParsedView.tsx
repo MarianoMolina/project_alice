@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, Button, Typography, Box, AccordionSummary, Accordion, AccordionDetails, Divider } from '@mui/material';
+import { Card, CardContent, Typography, Box, AccordionSummary, Accordion, AccordionDetails, Divider } from '@mui/material';
 import nunjucks from 'nunjucks';
 import { Prompt } from '../../../types/PromptTypes';
 import AliceMarkdown, { RoleType } from '../../ui/markdown/alice_markdown/AliceMarkdown';
@@ -84,7 +84,7 @@ const PromptParsedView = ({
     if (prompt.content) {
       updateRenderedContent();
     }
-  }, [prompt.content, systemPrompt?.content]);
+  }, [prompt.content, systemPrompt?.content, inputs, systemInputs]);
 
   const handleInputChange = (key: string, value: string | boolean | number, isSystem: boolean = false) => {
     if (isSystem) {
@@ -141,15 +141,6 @@ const PromptParsedView = ({
               title="Prompt Variables"
             />
           )}
-
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={updateRenderedContent}
-            className="mt-4"
-          >
-            Update Render
-          </Button>
 
           {error && (
             <Typography color="error" className="mt-4">

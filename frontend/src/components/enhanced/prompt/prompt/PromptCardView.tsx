@@ -1,29 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
     Typography,
     Chip,
-    Accordion,
-    AccordionSummary,
-    AccordionDetails,
-    Dialog,
-    DialogTitle,
-    DialogContent,
 } from '@mui/material';
-import { Code, ExpandMore, Assignment, QueryBuilder, Settings } from '@mui/icons-material';
+import { Code, Assignment, QueryBuilder, Settings } from '@mui/icons-material';
 import { PromptComponentProps } from '../../../../types/PromptTypes';
 import useStyles from '../PromptStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
-import PromptParsedView from '../PromptParsedView';
 
 const PromptCardView: React.FC<PromptComponentProps> = ({
     item,
 }) => {
     const classes = useStyles();
-    const [isPromptDialogOpen, setIsPromptDialogOpen] = useState(false);
-
-    const { selectCardItem } = useCardDialog();
+    const { selectCardItem, selectPromptParsedDialog } = useCardDialog();
     if (!item) {
         return <Typography>No prompt data available.</Typography>;
     }
@@ -45,7 +36,7 @@ const PromptCardView: React.FC<PromptComponentProps> = ({
                 <Chip
                     label="Yes"
                     color="primary"
-                    onClick={() => setIsPromptDialogOpen(true)}
+                    onClick={() => selectPromptParsedDialog(item)}
                 />
             ) : 'No'
         },
@@ -102,24 +93,6 @@ const PromptCardView: React.FC<PromptComponentProps> = ({
             item={item}
             itemType='prompts'
         >
-            <Dialog
-                open={isPromptDialogOpen}
-                onClose={() => setIsPromptDialogOpen(false)}
-                maxWidth="md"
-                fullWidth
-            >
-                <DialogTitle>
-                    Prompt Preview
-                </DialogTitle>
-                <DialogContent>
-                    {item.is_templated && (
-                        <PromptParsedView
-                            prompt={item}
-                            initialInputs={item.parameters}
-                        />
-                    )}
-                </DialogContent>
-            </Dialog>
         </CommonCardView>
     );
 };

@@ -1,4 +1,3 @@
-// components/ui/user_settings/PersonalInformation.tsx
 import React, { useCallback, useEffect, useState } from 'react';
 import { Box, TextField, Typography, Button, Card, CardContent, Alert } from '@mui/material';
 import { Person } from '@mui/icons-material';
@@ -117,7 +116,7 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
                 } as UserDefaultChatConfig,
             };
         });
-    }, [fetchItem, setUserObject]);
+    }, [setUserObject]);
 
     const handleRetrievalToolsChange = useCallback(async (selectedIds: string[]) => {
         setUserObject(prevUser => {
@@ -130,7 +129,7 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
                 } as UserDefaultChatConfig,
             };
         });
-    }, [fetchItem, setUserObject]);
+    }, [setUserObject]);
 
     const handleToolCallCheckpointChange = useCallback(async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {

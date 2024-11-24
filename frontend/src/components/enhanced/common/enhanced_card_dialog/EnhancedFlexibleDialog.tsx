@@ -28,13 +28,12 @@ const EnhancedFlexibleDialog: React.FC = () => {
     selectedFlexibleItemType, 
     selectCardItem,
     flexibleDialogMode, 
-    handleClose, 
-    isDialogOpen,
-    activeDialog
+    closeFlexibleDialog, 
+    isFlexibleDialogOpen,
   } = useCardDialog();
 
   const renderDialogContent = () => {
-    if (!selectedFlexibleItemType || !flexibleDialogMode || activeDialog !== 'flexible') return null;
+    if (!selectedFlexibleItemType || !flexibleDialogMode || !isFlexibleDialogOpen) return null;
     Logger.debug('renderDialogContent', selectedFlexibleItemType, flexibleDialogMode);
 
     const handleProps = {
@@ -60,10 +59,10 @@ const EnhancedFlexibleDialog: React.FC = () => {
       mode: flexibleDialogMode as ComponentMode,
       fetchAll: false,
       onSave: async () => {
-        handleClose();
+        closeFlexibleDialog();
         return Promise.resolve();
       },
-      onDelete: async () => handleClose(),
+      onDelete: async () => closeFlexibleDialog(),
       ...handleProps,
     };
 
@@ -148,7 +147,7 @@ const EnhancedFlexibleDialog: React.FC = () => {
   };
 
   return (
-    <Dialog open={isDialogOpen && activeDialog === 'flexible'} onClose={handleClose} maxWidth='xl'>
+    <Dialog open={isFlexibleDialogOpen} onClose={closeFlexibleDialog} maxWidth='xl'>
       {renderDialogContent()}
     </Dialog>
   );

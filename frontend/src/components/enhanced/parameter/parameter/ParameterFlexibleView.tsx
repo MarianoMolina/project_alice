@@ -6,7 +6,6 @@ import {
     Select,
     MenuItem,
     Typography,
-    Menu,
 } from '@mui/material';
 import { ParameterComponentProps, ParameterDefinition, ParameterTypes, getDefaultParameterForm } from '../../../../types/ParameterTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';

@@ -33,6 +33,7 @@ import ExitCodeManager from '../../common/exit_code_manager/ExitCodeManager';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 import { DataCluster } from '../../../../types/DataClusterTypes';
+import { taskDescriptions } from '../../../../types/TaskTypes';
 
 const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     item,
@@ -251,17 +252,20 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             <Typography variant="h6" className={classes.titleText}>Type</Typography>
             <FormControl fullWidth margin="normal">
                 <InputLabel>Task Type</InputLabel>
-                <Select<TaskType>
-                    value={taskType}
-                    onChange={handleTaskTypeChange}
-                    disabled={!isEditMode}
-                >
-                    {Object.values(TaskType).map((type) => (
-                        <MenuItem key={type} value={type}>
-                            {formatCamelCaseString(type)}
-                        </MenuItem>
-                    ))}
-                </Select>
+
+                <Tooltip title={taskDescriptions[taskType]} arrow>
+                    <Select<TaskType>
+                        value={taskType}
+                        onChange={handleTaskTypeChange}
+                        disabled={!isEditMode}
+                    >
+                        {Object.values(TaskType).map((type) => (
+                            <MenuItem key={type} value={type}>
+                                {formatCamelCaseString(type)}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </Tooltip>
             </FormControl>
             <Typography variant="h6" className={classes.titleText}>Name</Typography>
             <TextField
@@ -329,7 +333,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                 exitCodes={form.exit_codes || {}}
                 onChange={handleExitCodesChange}
                 isEditMode={isEditMode}
-            />            
+            />
             <Typography variant="h6" className={classes.titleText}>Node End Code Routing</Typography>
             <Box className={classes.endCodeRoutingContainer}>
                 <TaskEndCodeRoutingBuilder
@@ -338,7 +342,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                     onChange={handleTaskEndCodeRoutingChange}
                     isViewMode={taskType !== TaskType.Workflow ? true : !isEditMode}
                 />
-                <TaskFlowchart task={memoizedFlowchartTask} height={800} miniMap/>
+                <TaskFlowchart task={memoizedFlowchartTask} height={800} miniMap />
             </Box>
             <Typography variant="h6" className={classes.titleText}>Max attempts</Typography>
             <TextField
@@ -366,7 +370,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                     label="Recursive"
                 />
             </Tooltip>
-            
+
             <Typography variant="h6" className={classes.titleText}>Data Cluster</Typography>
             <DataClusterManager
                 dataCluster={form.data_cluster}
