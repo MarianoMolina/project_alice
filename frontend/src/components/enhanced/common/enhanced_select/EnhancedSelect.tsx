@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Box, IconButton, Accordion, AccordionSummary, AccordionDetails, Typography, Chip } from '@mui/material';
-import { Edit, Close, ExpandMore, Add } from '@mui/icons-material';
+import { Box, IconButton, Accordion, AccordionSummary, AccordionDetails, Typography, Chip, Tooltip } from '@mui/material';
+import { Edit, Close, ExpandMore, Add, Info } from '@mui/icons-material';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import useStyles from './EnhancedSelectStyles';
 import { CollectionName, CollectionType, CollectionElementString, collectionNameToElementString, collectionNameToEnhancedComponent } from '../../../../types/CollectionTypes';
@@ -19,7 +19,8 @@ interface EnhancedSelectProps<T extends CollectionType[CollectionName]> {
   onView?: (id: string) => void;
   accordionEntityName: string;
   showCreateButton?: boolean;
-  filters?: Record<string, any>; // Add filters prop
+  description?: string;
+  filters?: Record<string, any>;
 }
 
 function EnhancedSelect<T extends CollectionType[CollectionName]>({
@@ -34,7 +35,8 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
   onAccordionToggle,
   accordionEntityName,
   showCreateButton = false,
-  filters // Add filters to destructuring
+  description,
+  filters
 }: EnhancedSelectProps<T>) {
   const classes = useStyles();
   const { selectFlexibleItem, selectCardItem } = useCardDialog();
@@ -79,7 +81,7 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
       ? [...selectedItems.map(i => i._id!), item._id!]
       : [item._id!];
     onSelect(newSelectedIds);
-    
+
     if (!multiple) {
       setLocalExpanded(false);
     }
@@ -112,33 +114,45 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
 
   return (
     <Box className={classes.selectContainer}>
-      <Typography className={classes.label} variant="caption">{label}{multiple ? ' (multiple)' : null}</Typography>
       <Box className={classes.chipContainer}>
         {selectedItems?.map(renderSelectedItem)}
         <Box className={classes.buttonContainer}>
-          <IconButton
-            onClick={handleToggle}
-            disabled={!isInteractable}
-            size="small"
-            className={classes.editButton}
-          >
-            {isExpanded ? <Close /> : <Edit />}
-          </IconButton>
-          {showCreateButton && (
+          {description && (
+            <Tooltip title={description}>
+              <IconButton
+                size="small"
+              >
+                <Info />
+              </IconButton>
+            </Tooltip>
+          )}
+          <Tooltip title={isInteractable ? 'Edit' : ''}>
             <IconButton
-              onClick={handleCreate}
+              onClick={handleToggle}
               disabled={!isInteractable}
               size="small"
-              className={classes.createButton}
+              className={classes.editButton}
             >
-              <Add />
+              {isExpanded ? <Close /> : <Edit />}
             </IconButton>
+          </Tooltip>
+          {showCreateButton && (
+            <Tooltip title={isInteractable ? 'Create' : ''}>
+              <IconButton
+                onClick={handleCreate}
+                disabled={!isInteractable}
+                size="small"
+                className={classes.createButton}
+              >
+                <Add />
+              </IconButton>
+            </Tooltip>
           )}
         </Box>
       </Box>
       <Accordion expanded={isExpanded} onChange={handleToggle}>
         <AccordionSummary expandIcon={<ExpandMore />}>
-          <Typography>{label}</Typography>
+          <Typography>{label}{multiple ? ' (multiple)' : null}</Typography>
         </AccordionSummary>
         <AccordionDetails>
           {memoizedEnhancedComponent}

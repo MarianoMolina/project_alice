@@ -1,9 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import {
     Typography,
-    TextField,
-    Switch,
-    FormControlLabel,
     Box
 } from '@mui/material';
 import FunctionDefinitionBuilder from '../../common/function_select/FunctionDefinitionBuilder';
@@ -11,7 +8,9 @@ import { PromptComponentProps, Prompt, getDefaultPromptForm } from '../../../../
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import { FunctionParameters } from '../../../../types/ParameterTypes';
 import Logger from '../../../../utils/Logger';
-import useStyles from '../PromptStyles';
+import { TextInput } from '../../common/inputs/TextInput';
+import { BooleanInput } from '../../common/inputs/BooleanInput';
+import { NumericInput } from '../../common/inputs/NumericInput';
 
 const PromptFlexibleView: React.FC<PromptComponentProps> = ({
     item,
@@ -22,8 +21,6 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
 }) => {
     const [form, setForm] = useState<Partial<Prompt>>(item || getDefaultPromptForm());
     const [isSaving, setIsSaving] = useState(false);
-    const classes = useStyles();
-    
     Logger.debug('PromptFlexibleView', 'form', form);
 
     useEffect(() => {
@@ -40,17 +37,7 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
             onChange(getDefaultPromptForm());
         }
     }, [item, onChange]);
-
-    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setForm(prevForm => ({ ...prevForm, [name]: value }));
-    }, []);
-
-    const handleSwitchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, checked } = e.target;
-        setForm(prevForm => ({ ...prevForm, [name]: checked }));
-    }, []);
-
+    
     const handleFunctionDefinitionChange = useCallback((newDefinition: FunctionParameters) => {
         setForm(prevForm => ({ ...prevForm, parameters: newDefinition }));
     }, []);
@@ -85,50 +72,51 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
             item={item as Prompt}
             itemType="prompts"
         >
-            <Typography variant="h6" className={classes.titleText}>Name</Typography>
-            <TextField
-                fullWidth
+            <TextInput
                 name="name"
                 label="Name"
                 value={form.name || ''}
-                onChange={handleInputChange}
-                margin="normal"
+                onChange={(value) => onChange({ name: value })}
                 disabled={!isEditMode}
+                description='Enter the name of the prompt'
             />
-            <Typography variant="h6" className={classes.titleText}>Content</Typography>
-            <TextField
-                fullWidth
+            <TextInput
                 name="content"
                 label="Content"
                 value={form.content || ''}
-                onChange={handleInputChange}
-                margin="normal"
+                onChange={(value) => onChange({ content: value })}
+                disabled={!isEditMode}
                 multiline
                 rows={4}
-                disabled={!isEditMode}
+                description='Enter the content of the prompt. You can use input variables if the prompt is templated, using Jinja2 syntax'
             />
-            <Typography variant="h6" className={classes.titleText}>Is templated?</Typography>
-            <FormControlLabel
-                control={
-                    <Switch
-                        name="is_templated"
-                        checked={form.is_templated || false}
-                        onChange={handleSwitchChange}
-                        disabled={!isEditMode}
-                    />
-                }
+            <BooleanInput
+                name="is_templated"
                 label="Is Templated"
+                value={form.is_templated || false}
+                onChange={(value) => onChange({ is_templated: value })}
+                disabled={!isEditMode}
+                description='Check if the prompt is templated. If templated, it can use input variables'
+                
             />
             {form.is_templated && (
                 <Box>
-                    <Typography variant="h6" className={classes.titleText}>Parameters</Typography>
                     <FunctionDefinitionBuilder
+                        title='Template Parameters'
                         initialParameters={form.parameters}
                         onChange={handleFunctionDefinitionChange}
                         isViewOnly={!isEditMode}
                     />
                 </Box>
             )}
+            <NumericInput
+                name="version"
+                label="Version"
+                value={form.version || 0}
+                onChange={(value) => onChange({ version: value })}
+                disabled={!isEditMode}
+                description='Prompt version number'
+            />
         </GenericFlexibleView>
     );
 };

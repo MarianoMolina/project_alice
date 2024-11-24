@@ -1,10 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import {
-    TextField,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
     Typography,
     Box,
     Alert,
@@ -15,6 +10,8 @@ import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import useStyles from '../APIConfigStyles';
 import { API_BASE_URLS } from '../../../../utils/ApiUtils';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
+import { TextInput } from '../../common/inputs/TextInput';
+import { SelectInput } from '../../common/inputs/SelectInput';
 
 const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
     item,
@@ -57,7 +54,7 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
         setForm(prevForm => ({ ...prevForm, health_status: status }));
     }, []);
 
-    const handleDataChange = useCallback((field: string, value: string) => {
+    const handleDataChange = useCallback((field: string, value: string | undefined) => {
         setForm(prevForm => ({
             ...prevForm,
             data: {
@@ -70,7 +67,7 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
     const handleApiNameChange = useCallback((newApiName: ApiName) => {
         // Pre-fill base_url if available
         const baseUrl = API_BASE_URLS[newApiName] || '';
-        
+
         setForm(prevForm => ({
             ...prevForm,
             api_name: newApiName,
@@ -163,7 +160,7 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
         if (!form.api_name) return null;
 
         const data = form.data || {};
-        
+
         switch (form.api_name) {
             case ApiName.OPENAI:
             case ApiName.ANTHROPIC:
@@ -176,92 +173,87 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
             case ApiName.CUSTOM:
                 return (
                     <>
-                        <TextField
-                            fullWidth
-                            type="password"
-                            label="API Key"
+                        <TextInput
+                            name='api_key'
+                            label='API Key'
                             value={data.api_key || ''}
-                            onChange={(e) => handleDataChange('api_key', e.target.value)}
-                            margin="normal"
+                            onChange={(value) => handleDataChange('api_key', value)}
                             disabled={!isEditMode}
-                        />
-                        <TextField
                             fullWidth
-                            label="Base URL"
+                        />
+                        <TextInput
+                            name='base_url'
+                            label='Base URL'
                             value={data.base_url || ''}
-                            onChange={(e) => handleDataChange('base_url', e.target.value)}
-                            margin="normal"
+                            onChange={(value) => handleDataChange('base_url', value)}
                             disabled={!isEditMode}
+                            fullWidth
                         />
                     </>
                 );
             case ApiName.GOOGLE_SEARCH:
                 return (
                     <>
-                        <TextField
-                            fullWidth
-                            type="password"
-                            label="API Key"
+                        <TextInput
+                            name='api_key'
+                            label='API Key'
                             value={data.api_key || ''}
-                            onChange={(e) => handleDataChange('api_key', e.target.value)}
-                            margin="normal"
+                            onChange={(value) => handleDataChange('api_key', value)}
                             disabled={!isEditMode}
-                        />
-                        <TextField
                             fullWidth
-                            label="CSE ID"
+                        />
+                        <TextInput
+                            name='cse_id'
+                            label='CSE ID'
                             value={data.cse_id || ''}
-                            onChange={(e) => handleDataChange('cse_id', e.target.value)}
-                            margin="normal"
+                            onChange={(value) => handleDataChange('cse_id', value)}
                             disabled={!isEditMode}
+                            fullWidth
                         />
                     </>
                 );
             case ApiName.REDDIT:
                 return (
-                    <>
-                        <TextField
-                            fullWidth
-                            label="Client ID"
+                    <>  
+                        <TextInput
+                            name='client_id'
+                            label='Client ID'
                             value={data.client_id || ''}
-                            onChange={(e) => handleDataChange('client_id', e.target.value)}
-                            margin="normal"
+                            onChange={(value) => handleDataChange('client_id', value)}
                             disabled={!isEditMode}
-                        />
-                        <TextField
                             fullWidth
-                            type="password"
-                            label="Client Secret"
+                        />
+                        <TextInput
+                            name='client_secret'
+                            label='Client Secret'
                             value={data.client_secret || ''}
-                            onChange={(e) => handleDataChange('client_secret', e.target.value)}
-                            margin="normal"
+                            onChange={(value) => handleDataChange('client_secret', value)}
                             disabled={!isEditMode}
+                            fullWidth
                         />
                     </>
                 );
             case ApiName.WOLFRAM_ALPHA:
                 return (
-                    <TextField
-                        fullWidth
-                        type="password"
-                        label="App ID"
+                    <TextInput
+                        name='app_id'
+                        label='App ID'
                         value={data.app_id || ''}
-                        onChange={(e) => handleDataChange('app_id', e.target.value)}
-                        margin="normal"
+                        onChange={(value) => handleDataChange('app_id', value)}
                         disabled={!isEditMode}
+                        fullWidth
                     />
                 );
             case ApiName.EXA:
             case ApiName.GOOGLE_KNOWLEDGE_GRAPH:
                 return (
-                    <TextField
-                        fullWidth
-                        type="password"
-                        label="API Key"
+                    <TextInput
+                        name='api_key'
+                        label='API Key'
                         value={data.api_key || ''}
-                        onChange={(e) => handleDataChange('api_key', e.target.value)}
-                        margin="normal"
+                        onChange={(value) => handleDataChange('api_key', value)}
                         disabled={!isEditMode}
+                        fullWidth
                     />
                 );
             default:
@@ -288,31 +280,37 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
                     {validationError}
                 </Alert>
             )}
-            
-            <Typography variant="h6" className={classes.titleText}>Name</Typography>
-            <TextField
-                fullWidth
-                name="name"
-                label="Config Name"
+            <TextInput
+                name='name'
+                label='Config Name'
                 value={form.name || ''}
-                onChange={handleInputChange}
-                margin="normal"
+                onChange={(value) => handleInputChange({ target: { name: 'name', value } } as any)}
                 disabled={!isEditMode}
+                description='Enter a name for the API configuration'
+                fullWidth
             />
-
-            <Typography variant="h6" className={classes.titleText}>API Type</Typography>
-            <FormControl fullWidth margin="normal">
-                <InputLabel>API Name</InputLabel>
-                <Select
-                    value={form.api_name || ''}
-                    onChange={(e) => handleApiNameChange(e.target.value as ApiName)}
-                    disabled={!isCreateMode}
-                >
-                    {Object.values(ApiName).map((name) => (
-                        <MenuItem key={name} value={name}>{formatCamelCaseString(name)}</MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
+            <SelectInput
+                name='api_name'
+                label='API Name'
+                value={form.api_name || ''}
+                onChange={(apiName) => handleApiNameChange(apiName as ApiName)}
+                options={Object.values(ApiName).map((name) => ({ value: name, label: formatCamelCaseString(name) }))}
+                description='Select the name of the API you want to create'
+                disabled={!isCreateMode}
+                fullWidth
+                required
+            />
+            <SelectInput
+                name='health_status'
+                label='Health Status'
+                value={form.health_status || HealthStatus.HEALTHY}
+                onChange={(status) => handleHealthStatusChange(status as HealthStatus)}
+                options={Object.values(HealthStatus).map((status) => ({ value: status, label: formatCamelCaseString(status) }))}
+                description='Select the health status of the API'
+                disabled={!isEditMode}
+                fullWidth
+                required
+            />
 
             {form.api_name && (
                 <>
@@ -322,20 +320,6 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
                     </Box>
                 </>
             )}
-
-            <Typography variant="h6" className={classes.titleText}>Health Status</Typography>
-            <FormControl fullWidth margin="normal">
-                <InputLabel>Health Status</InputLabel>
-                <Select
-                    value={form.health_status || HealthStatus.HEALTHY}
-                    onChange={(e) => handleHealthStatusChange(e.target.value as HealthStatus)}
-                    disabled={!isEditMode}
-                >
-                    <MenuItem value={HealthStatus.HEALTHY}>Healthy</MenuItem>
-                    <MenuItem value={HealthStatus.UNHEALTHY}>Unhealthy</MenuItem>
-                    <MenuItem value={HealthStatus.UNKNOWN}>Unknown</MenuItem>
-                </Select>
-            </FormControl>
 
         </GenericFlexibleView>
     );

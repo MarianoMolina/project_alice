@@ -4,11 +4,7 @@ import {
     TextField,
     Box,
     Chip,
-    Select,
-    MenuItem,
     IconButton,
-    InputLabel,
-    FormControl,
 } from '@mui/material';
 import { Close, Add } from '@mui/icons-material';
 import { getDefaultEntityReferenceForm, EntityReference, EntityReferenceComponentProps, ReferenceCategoryType, ImageReference } from '../../../../types/EntityReferenceTypes';
@@ -17,6 +13,10 @@ import useStyles from '../EntityReferenceStyles';
 import { referenceCategoryToIcon } from '../../../../utils/EntityReferenceUtils';
 import { apiTypeIcons } from '../../../../utils/ApiUtils';
 import Logger from '../../../../utils/Logger';
+import { TextInput } from '../../common/inputs/TextInput';
+import { formatCamelCaseString } from '../../../../utils/StyleUtils';
+import { ApiType } from '../../../../types/ApiTypes';
+import { IconSelectInput } from '../../common/inputs/IconSelectInput';
 
 const EntityReferenceFlexibleView: React.FC<EntityReferenceComponentProps> = ({
     item,
@@ -29,7 +29,7 @@ const EntityReferenceFlexibleView: React.FC<EntityReferenceComponentProps> = ({
     const [isSaving, setIsSaving] = useState(false);
     const classes = useStyles();
     const isEditMode = mode === 'edit' || mode === 'create';
-    
+
     useEffect(() => {
         if (!item || Object.keys(item).length === 0) {
             setForm(getDefaultEntityReferenceForm());
@@ -56,18 +56,6 @@ const EntityReferenceFlexibleView: React.FC<EntityReferenceComponentProps> = ({
     const updateForm = useCallback((updates: Partial<EntityReference>) => {
         setForm(prev => ({ ...prev, ...updates }));
     }, []);
-
-    const handleAddCategory = (category: ReferenceCategoryType) => {
-        if (!form.categories?.includes(category)) {
-            updateForm({ categories: [...(form.categories || []), category] });
-        }
-    };
-
-    const handleRemoveCategory = (categoryToRemove: ReferenceCategoryType) => {
-        updateForm({
-            categories: form.categories?.filter(cat => cat !== categoryToRemove) || []
-        });
-    };
 
     const handleAddImage = () => {
         updateForm({
@@ -97,6 +85,17 @@ const EntityReferenceFlexibleView: React.FC<EntityReferenceComponentProps> = ({
         onChange(form);
         setIsSaving(true);
     }, [form, onChange]);
+    const sourceOptions = Object.values(ApiType).map((type) => ({
+        value: type,
+        label: formatCamelCaseString(type),
+        icon: apiTypeIcons[type],
+    }));
+
+    const categoryOptions = Object.values(ReferenceCategoryType).map((category) => ({
+        value: category,
+        label: formatCamelCaseString(category),
+        icon: referenceCategoryToIcon[category],  
+    }));
 
     const title = mode === 'create' ? 'Create New Entity Reference' : mode === 'edit' ? 'Edit Entity Reference' : 'Entity Reference Details';
     const saveButtonText = form._id ? 'Update Entity Reference' : 'Create Entity Reference';
@@ -112,103 +111,69 @@ const EntityReferenceFlexibleView: React.FC<EntityReferenceComponentProps> = ({
             item={item as EntityReference}
             itemType="entityreferences"
         >
-            <TextField
-                fullWidth
+            <TextInput
+                name='source_id'
                 label="Source ID"
                 value={form.source_id || ''}
-                onChange={(e) => updateForm({ source_id: e.target.value })}
-                margin="normal"
+                onChange={(value) => updateForm({ source_id: value })}
                 disabled={!isEditMode}
             />
-
-            {form.source && (
-                <Box className={classes.sourceContainer}>
-                    <Typography variant="h6">Source</Typography>
-                    <Chip
-                        icon={apiTypeIcons[form.source]}
-                        label={form.source}
-                        className={classes.sourceChip}
-                    />
-                </Box>
-            )}
-
-            <TextField
+            <IconSelectInput
+                name="source"
+                label="Source"
+                title="Source"
+                value={form.source || ''}
+                onChange={(value) => updateForm({ source: value as ApiType })}
+                options={sourceOptions}
+                disabled={!isEditMode}
+                chipDisplay={true}
                 fullWidth
+            />
+
+            <IconSelectInput
+                name="categories"
+                label="Categories"
+                title="Categories"
+                value={form.categories || []}
+                onChange={(value) => updateForm({ categories: value as ReferenceCategoryType[] })}
+                options={categoryOptions}
+                disabled={!isEditMode}
+                multiple
+                chipDisplay={true}
+                fullWidth
+            />
+            <TextInput
+                name='name'
                 label="Name"
                 value={form.name || ''}
-                onChange={(e) => updateForm({ name: e.target.value })}
-                margin="normal"
+                onChange={(value) => updateForm({ name: value })}
                 disabled={!isEditMode}
             />
-
-            <TextField
-                fullWidth
-                label="Description"
-                value={form.description || ''}
-                onChange={(e) => updateForm({ description: e.target.value })}
-                margin="normal"
-                multiline
-                rows={3}
-                disabled={!isEditMode}
-            />
-
-            <TextField
-                fullWidth
+            <TextInput
+                name='url'
                 label="URL"
                 value={form.url || ''}
-                onChange={(e) => updateForm({ url: e.target.value })}
-                margin="normal"
+                onChange={(value) => updateForm({ url: value })}
                 disabled={!isEditMode}
             />
-
-            <TextField
-                fullWidth
+            <TextInput
+                name='description'
+                label="Description"
+                value={form.description || ''}
+                onChange={(value) => updateForm({ description: value })}
+                disabled={!isEditMode}
+                multiline
+                rows={3}
+            />
+            <TextInput
+                name='content'
                 label="Content"
                 value={form.content || ''}
-                onChange={(e) => updateForm({ content: e.target.value })}
-                margin="normal"
+                onChange={(value) => updateForm({ content: value })}
+                disabled={!isEditMode}
                 multiline
                 rows={4}
-                disabled={!isEditMode}
             />
-
-            <Box className={classes.sectionContainer}>
-                <Typography variant="h6">Categories</Typography>
-                <Box className={classes.chipContainer}>
-                    {isEditMode && (
-                        <FormControl className={classes.categorySelect}>
-                            <InputLabel>Add Category</InputLabel>
-                            <Select
-                                value=""
-                                onChange={(e) => handleAddCategory(e.target.value as ReferenceCategoryType)}
-                            >
-                                {Object.values(ReferenceCategoryType).map((category) => {
-                                    const Icon = referenceCategoryToIcon[category];
-                                    return (
-                                        <MenuItem key={category} value={category}>
-                                            <Icon className={classes.menuIcon} />
-                                            {category}
-                                        </MenuItem>
-                                    );
-                                })}
-                            </Select>
-                        </FormControl>
-                    )}
-                    {form.categories?.map((category) => {
-                        const Icon = referenceCategoryToIcon[category];
-                        return (
-                            <Chip
-                                key={category}
-                                icon={<Icon />}
-                                label={category}
-                                onDelete={isEditMode ? () => handleRemoveCategory(category) : undefined}
-                                className={classes.chip}
-                            />
-                        );
-                    })}
-                </Box>
-            </Box>
-
             <Box className={classes.sectionContainer}>
                 <Typography variant="h6">Images</Typography>
                 {form.images?.map((image, index) => (

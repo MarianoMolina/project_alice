@@ -1,16 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
     Box,
-    TextField,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    Chip,
-    FormControlLabel,
-    Checkbox,
     Typography,
-    Tooltip,
     SelectChangeEvent
 } from '@mui/material';
 import { AliceTask, getDefaultTaskForm, TaskComponentProps, TasksEndCodeRouting, TaskType } from '../../../../types/TaskTypes';
@@ -34,6 +25,11 @@ import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClus
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 import { DataCluster } from '../../../../types/DataClusterTypes';
 import { taskDescriptions } from '../../../../types/TaskTypes';
+import { TextInput } from '../../common/inputs/TextInput';
+import { NumericInput } from '../../common/inputs/NumericInput';
+import { BooleanInput } from '../../common/inputs/BooleanInput';
+import { SelectInput } from '../../common/inputs/SelectInput';
+import { LANGUAGES } from '../../../../types/CodeExecutionTypes';
 
 const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     item,
@@ -67,6 +63,12 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     }, [item]);
 
     useEffect(() => {
+        if (item?.task_type) {
+            setTaskType(item.task_type);
+        }
+    }, [item?.task_type]);
+
+    useEffect(() => {
         if (!item || Object.keys(item).length === 0) {
             onChange(getDefaultTaskForm(taskType));
         }
@@ -80,38 +82,15 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
         setForm(prevForm => ({ ...prevForm, input_variables: newDefinition }));
     }, []);
 
-    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setForm(prevForm => ({ ...prevForm, [name]: value }));
-    }, []);
-
-    const handleCheckboxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, checked } = e.target;
-        setForm(prevForm => ({ ...prevForm, [name]: checked }));
+    const handleFieldChange = useCallback((field: keyof AliceTask, value: any) => {
+        setForm(prevForm => ({ ...prevForm, [field]: value }));
     }, []);
 
     const handleDataClusterChange = useCallback((newCluster: DataCluster | undefined) => {
         Logger.debug('[handleDataClusterChange]', newCluster);
         setForm(prevForm => ({ ...prevForm, data_cluster: newCluster }));
-    }, []);
-
-    const handleRequiredApisChange = useCallback((event: SelectChangeEvent<ApiType[]>) => {
-        const value = event.target.value as ApiType[];
-        setForm(prevForm => ({ ...prevForm, required_apis: value }));
-    }, []);
-
-    const handleTaskTypeChange = useCallback((event: SelectChangeEvent<TaskType>) => {
-        const newType = event.target.value as TaskType;
-        setTaskType(newType);
-        setForm(prevForm => ({ ...prevForm, task_type: newType }));
-        Logger.debug('handleTaskTypeChange', newType);
-    }, []);
-
-    const handleValidLanguagesChange = useCallback((event: SelectChangeEvent<string[]>) => {
-        const { target: { value } } = event;
-        setForm(prevForm => ({ ...prevForm, valid_languages: typeof value === 'string' ? value.split(',') : value }));
-    }, []);
-
+    }, []); 
+    
     const handlePromptSelect = useCallback(async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {
             const prompt = await fetchItem('prompts', selectedIds[0]) as Prompt;
@@ -167,6 +146,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             activeAccordion={activeAccordion}
             onAccordionToggle={handleAccordionToggle}
             accordionEntityName="prompts"
+            description='The prompt template that will be used to structure the task input.'
             showCreateButton={true}
         />
     ), [form?.templates?.task_template, isEditMode, activeAccordion, handleAccordionToggle, handlePromptSelect]);
@@ -180,6 +160,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             isInteractable={isEditMode}
             label="Select Output Prompt"
             activeAccordion={activeAccordion}
+            description='The prompt template that will be used to structure the task output.'
             onAccordionToggle={handleAccordionToggle}
             accordionEntityName="output_prompt"
             showCreateButton={true}
@@ -197,6 +178,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             activeAccordion={activeAccordion}
             onAccordionToggle={handleAccordionToggle}
             accordionEntityName="agent"
+            description='The agent that will execute this task. The models this agent has will be used when executing the task.'
             showCreateButton={true}
         />
     ), [form?.agent, isEditMode, activeAccordion, handleAccordionToggle, handleAgentSelect]);
@@ -210,6 +192,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             isInteractable={isEditMode}
             multiple
             label="Select Tasks"
+            description='The tasks that will be executed, if the task type is Workflow. Otherwise, these tasks are passed to agents as tools'
             activeAccordion={activeAccordion}
             onAccordionToggle={handleAccordionToggle}
             accordionEntityName="tasks"
@@ -249,87 +232,59 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             item={item as AliceTask}
             itemType='tasks'
         >
-            <Typography variant="h6" className={classes.titleText}>Type</Typography>
-            <FormControl fullWidth margin="normal">
-                <InputLabel>Task Type</InputLabel>
-
-                <Tooltip title={taskDescriptions[taskType]} arrow>
-                    <Select<TaskType>
-                        value={taskType}
-                        onChange={handleTaskTypeChange}
-                        disabled={!isEditMode}
-                    >
-                        {Object.values(TaskType).map((type) => (
-                            <MenuItem key={type} value={type}>
-                                {formatCamelCaseString(type)}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </Tooltip>
-            </FormControl>
-            <Typography variant="h6" className={classes.titleText}>Name</Typography>
-            <TextField
-                fullWidth
-                margin="normal"
+            <SelectInput
+                name="task_type"
+                label="Task Type"
+                value={taskType}
+                onChange={(value) => handleFieldChange('task_type', value)}
+                disabled={!isEditMode}
+                description={taskType && taskDescriptions[taskType]}
+                options={Object.values(TaskType).map((type) => ({ value: type, label: formatCamelCaseString(type) }))}
+            />
+            <TextInput
                 name="task_name"
                 label="Task Name"
-                value={form.task_name || ''}
-                onChange={handleInputChange}
-                required
+                value={form.task_name}
+                onChange={(value) => handleFieldChange('task_name', value)}
                 disabled={!isEditMode}
-            />
-            <Typography variant="h6" className={classes.titleText}>Description</Typography>
-            <TextField
+                required
+                description="The display name of the task."
                 fullWidth
-                margin="normal"
+            />
+            <TextInput
                 name="task_description"
                 label="Task Description"
-                value={form.task_description || ''}
-                onChange={handleInputChange}
-                multiline
-                rows={3}
-                required
+                value={form.task_description}
+                onChange={(value) => handleFieldChange('task_description', value)}
                 disabled={!isEditMode}
+                required
+                description="A description of the task. This info is provided to the agent."
+                fullWidth
+                rows={3}
+                multiline
             />
-            <Typography variant="h6" className={classes.titleText}>Agent</Typography>
             {memoizedAgentSelect}
-            <Typography variant="h6" className={classes.titleText}>Sub-tasks</Typography>
             {memoizedTaskSelect}
-            <Typography variant="h6" className={classes.titleText}>Template</Typography>
             {memoizedPromptSelect}
             {memoizedOutputPromptSelect}
-            <Typography variant="h6" className={classes.titleText}>Required APIs</Typography>
-            <FormControl fullWidth margin="normal">
-                <InputLabel>Required API Types</InputLabel>
-                <Select
-                    multiple
-                    value={form.required_apis || []}
-                    onChange={handleRequiredApisChange}
-                    renderValue={(selected) => (
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                            {(selected as ApiType[]).map((value) => (
-                                <Chip key={value} label={formatCamelCaseString(value)} />
-                            ))}
-                        </Box>
-                    )}
-                    disabled={!isEditMode}
-                >
-                    {Object.values(ApiType).map((apiType) => (
-                        <MenuItem key={apiType} value={apiType}>
-                            {formatCamelCaseString(apiType)}
-                        </MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
-
-            <Typography variant="h6" className={classes.titleText}>Input Variables</Typography>
+            <SelectInput
+                name="required_apis"
+                label="Required API Types"
+                value={form.required_apis || []}
+                onChange={(value) => handleFieldChange('required_apis', value)}
+                disabled={!isEditMode}
+                description='The API types that are required for this task to execute'
+                options={Object.values(ApiType).map((apiType) => ({ value: apiType, label: formatCamelCaseString(apiType) }))}
+                multiple
+            />
             <FunctionDefinitionBuilder
+                title="Input Variables"
                 initialParameters={form.input_variables || undefined}
                 onChange={handleInputVariablesChange}
                 isViewOnly={!isEditMode}
             />
-            <Typography variant="h6" className={classes.titleText}>Exit Codes</Typography>
             <ExitCodeManager
+                title="Exit Codes"
                 exitCodes={form.exit_codes || {}}
                 onChange={handleExitCodesChange}
                 isEditMode={isEditMode}
@@ -344,32 +299,26 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                 />
                 <TaskFlowchart task={memoizedFlowchartTask} height={800} miniMap />
             </Box>
-            <Typography variant="h6" className={classes.titleText}>Max attempts</Typography>
-            <TextField
-                fullWidth
-                margin="normal"
+            <NumericInput
                 name="max_attempts"
                 label="Max Attempts"
-                type="number"
-                value={form.max_attempts || ''}
-                onChange={handleInputChange}
-                inputProps={{ min: 1 }}
+                value={form.max_attempts}
+                onChange={(value) => handleFieldChange('max_attempts', value)}
                 disabled={!isEditMode}
+                required
+                isInteger
+                description='The maximum number of node failures this task will perform before it fails.'
+                min={0}
+                fullWidth
             />
-            <Typography variant="h6" className={classes.titleText}>Enable Recursion</Typography>
-            <Tooltip title="Normally, if a task being executed is present in the execution history of a task, it will be rejected, unless it is recursive. Workflows usually should have recursion enabled.">
-                <FormControlLabel
-                    control={
-                        <Checkbox
-                            checked={form.recursive || false}
-                            onChange={handleCheckboxChange}
-                            name="recursive"
-                            disabled={!isEditMode}
-                        />
-                    }
-                    label="Recursive"
-                />
-            </Tooltip>
+            <BooleanInput
+                name="recursive"
+                label="Recursive"
+                value={form.recursive}
+                onChange={(value) => handleFieldChange('recursive', value)}
+                disabled={!isEditMode}
+                description="Normally, if a task being executed is present in the execution history of a task, it will be rejected, unless it is recursive. Workflows usually should have recursion enabled."
+            />
 
             <Typography variant="h6" className={classes.titleText}>Data Cluster</Typography>
             <DataClusterManager
@@ -381,23 +330,16 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
 
             {/* CodeExecutionLLMTask specific fields */}
             {taskType === 'CodeExecutionLLMTask' && (
-                <>
-                    <Typography variant="h6" className={classes.titleText}>Valid Languages for Execution</Typography>
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel>Valid Languages</InputLabel>
-                        <Select
-                            multiple
-                            value={form.valid_languages || []}
-                            onChange={handleValidLanguagesChange}
-                            disabled={!isEditMode}
-                        >
-                            <MenuItem value="python">Python</MenuItem>
-                            <MenuItem value="shell">Shell</MenuItem>
-                            <MenuItem value="javascript">JavaScript</MenuItem>
-                        </Select>
-                    </FormControl>
-                    <Typography variant="h6" className={classes.titleText}>Timeout</Typography>
-                </>
+                <SelectInput
+                    name="valid_languages"
+                    label="Valid Languages"
+                    value={form.valid_languages || []}
+                    onChange={(value) => handleFieldChange('valid_languages', value)}
+                    disabled={!isEditMode}
+                    description='Valid languages for execution'
+                    options={LANGUAGES.map((lang) => ({ value: lang, label: formatCamelCaseString(lang) }))}
+                    multiple
+                />
             )}
         </GenericFlexibleView>
     );

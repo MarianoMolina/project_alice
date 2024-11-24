@@ -15,6 +15,7 @@ import CommonCardView from '../../common/enhanced_component/CardView';
 import { AccessTime, CheckCircle, Error, Warning, Output, Code, BugReport, DataObject, Analytics } from '@mui/icons-material';
 import NodeResponsesViewer from '../../common/references/NodeResponsesViewer';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
+import EmbeddingChunkViewer from '../../embedding_chunk/EmbeddingChunkViewer';
 
 const ExitCodeChip = styled(Chip)(({ theme }) => ({
     fontWeight: 'bold',
@@ -61,6 +62,14 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
         </Accordion>
     );
 
+    const embeddingChunkViewer = item.embedding?.length > 0 ?
+     item.embedding.map((chunk, index) => (
+        <EmbeddingChunkViewer
+            key={chunk._id || `embedding-${index}`}
+            chunk={chunk}
+        />
+    )) : <Typography>No embeddings available</Typography>;
+    
     const exitCodeProps = getExitCodeProps(item.result_code);
 
     const listItems = [
@@ -130,6 +139,17 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
                     title="Diagnostics"
                     content={<CommandLineLog content={item.result_diagnostic ?? ''} />}
                     disabled={!item.result_diagnostic}
+                />
+            )
+        },
+        {
+            icon: <DataObject />,
+            primary_text: "Embedding",
+            secondary_text: (
+                <AccordionSection
+                    title='Embedding'
+                    content={embeddingChunkViewer}
+                    disabled={!item.embedding?.length}
                 />
             )
         },

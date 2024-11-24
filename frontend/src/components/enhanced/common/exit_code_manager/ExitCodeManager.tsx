@@ -4,6 +4,7 @@ import {
   TextField,
   IconButton,
   Button,
+  Typography,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 
@@ -13,12 +14,14 @@ interface ExitCode {
 }
 
 interface ExitCodeManagerProps {
+  title?: string;
   exitCodes: { [key: string]: string };
   onChange: (newExitCodes: { [key: string]: string }) => void;
   isEditMode: boolean;
 }
 
 const ExitCodeManager: React.FC<ExitCodeManagerProps> = ({
+  title = 'Exit Code Manager',
   exitCodes,
   onChange,
   isEditMode,
@@ -64,7 +67,8 @@ const ExitCodeManager: React.FC<ExitCodeManagerProps> = ({
   };
 
   return (
-    <Box>
+    <Box sx={{padding: 1, marginTop: 1, marginBottom: 1}}>
+      <Typography variant="h6" gutterBottom>{title}</Typography>
       {codes.map((exitCode, index) => (
         <Box key={index} display="flex" alignItems="center" mb={1}>
           <TextField

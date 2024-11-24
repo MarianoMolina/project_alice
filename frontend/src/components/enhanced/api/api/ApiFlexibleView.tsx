@@ -1,13 +1,4 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import {
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    Switch,
-    TextField,
-    Typography,
-} from '@mui/material';
 import { ApiComponentProps, API, ApiType, ApiName, getDefaultApiForm, ModelApiType } from '../../../../types/ApiTypes';
 import { API_CAPABILITIES } from '../../../../utils/ApiUtils';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
@@ -20,6 +11,9 @@ import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import Logger from '../../../../utils/Logger';
 import useStyles from '../ApiStyles';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
+import { SelectInput } from '../../common/inputs/SelectInput';
+import { TextInput } from '../../common/inputs/TextInput';
+import { BooleanInput } from '../../common/inputs/BooleanInput';
 
 const ApiFlexibleView: React.FC<ApiComponentProps> = ({
     item,
@@ -52,6 +46,10 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
             onChange(getDefaultApiForm());
         }
     }, [item, onChange]);
+
+    const handleFieldChange = useCallback((field: keyof API, value: any) => {
+        setForm(prevForm => ({ ...prevForm, [field]: value }));
+    }, []);
 
     const updateAvailableApiTypes = useCallback((apiName: ApiName | undefined) => {
         Logger.debug('updateAvailableApiTypes', apiName);
@@ -142,97 +140,76 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
             itemType='apis'
         >
             {isCreateMode && (
-                <>
-                    <Typography variant="h6" className={classes.titleText}>API Name</Typography>
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel>API Name</InputLabel>
-                        <Select
-                            value={form.api_name || ''}
-                            onChange={(e) => handleApiNameChange(e.target.value as ApiName)}
-                        >
-                            {Object.values(ApiName).map((name) => (
-                                <MenuItem key={name} value={name}>{formatCamelCaseString(name)}</MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </>
+                <SelectInput
+                    value={form.api_name || ''}
+                    onChange={(apiName) => handleApiNameChange(apiName as ApiName)}
+                    name="api_name"
+                    label="API Name"
+                    options={Object.values(ApiName).map((name) => ({ value: name, label: formatCamelCaseString(name) }))}
+                    description='Select the name of the API you want to create'
+                />
             )}
 
             {form.api_name && (
-                <>
-                    <Typography variant="h6" className={classes.titleText}>API Type</Typography>
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel>API Type</InputLabel>
-                        <Select
-                            value={form.api_type || ''}
-                            onChange={(e) => handleApiTypeChange(e.target.value as ApiType)}
-                            disabled={!isEditMode}
-                        >
-                            {availableApiTypes.map((type) => (
-                                <MenuItem key={type} value={type}>{formatCamelCaseString(type)}</MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </>
+                <SelectInput
+                    value={form.api_type || ''}
+                    onChange={(apiType) => handleApiTypeChange(apiType as ApiType)}
+                    name="api_type"
+                    label="API Type"
+                    options={availableApiTypes.map((type) => ({ value: type, label: formatCamelCaseString(type) }))}
+                    disabled={!isEditMode}
+                    description='Select the type of API'
+                />
             )}
-
-            <Typography variant="h6" className={classes.titleText}>Display Name</Typography>
-            <TextField
-                fullWidth
+            <TextInput
                 name="name"
                 label="API Display Name"
                 value={form.name || ''}
-                onChange={handleInputChange}
-                margin="normal"
+                onChange={(value) => handleFieldChange('name', value)}
                 disabled={!isEditMode}
+                description='Enter a description for the API'
             />
 
             {form.api_name && (
-                <>
-                    <Typography variant="h6" className={classes.titleText}>Configuration</Typography>
-                    <EnhancedSelect<APIConfig>
-                        componentType="apiconfigs"
-                        EnhancedView={APIConfigShortListView}
-                        selectedItems={form.api_config ? [form.api_config] : []}
-                        onSelect={handleApiConfigChange}
-                        isInteractable={isEditMode}
-                        label="API Configuration"
-                        activeAccordion={activeAccordion}
-                        onAccordionToggle={handleAccordionToggle}
-                        accordionEntityName="api-config"
-                        showCreateButton={true}
-                        filters={{ api_name: form.api_name }}
-                    />
-                </>
+                <EnhancedSelect<APIConfig>
+                    componentType="apiconfigs"
+                    EnhancedView={APIConfigShortListView}
+                    selectedItems={form.api_config ? [form.api_config] : []}
+                    onSelect={handleApiConfigChange}
+                    isInteractable={isEditMode}
+                    label="API Configuration"
+                    activeAccordion={activeAccordion}
+                    description='Select the configuration for this API'
+                    onAccordionToggle={handleAccordionToggle}
+                    accordionEntityName="api-config"
+                    showCreateButton={true}
+                    filters={{ api_name: form.api_name }}
+                />
             )}
 
             {form.api_type && isModelApiType(form.api_type) && (
-                <>
-                    <Typography variant="h6" className={classes.titleText}>Default Model</Typography>
-                    <EnhancedSelect<AliceModel>
-                        componentType="models"
-                        EnhancedView={ModelShortListView}
-                        selectedItems={form.default_model ? [form.default_model] : []}
-                        onSelect={handleDefaultModelChange}
-                        isInteractable={isEditMode}
-                        label="Select Default Model"
-                        activeAccordion={activeAccordion}
-                        onAccordionToggle={handleAccordionToggle}
-                        accordionEntityName="default-model"
-                        showCreateButton={true}
-                    />
-                </>
-            )}
-
-            <Typography variant="h6" className={classes.titleText}>Active?</Typography>
-            <FormControl fullWidth margin="normal">
-                <InputLabel>Is Active</InputLabel>
-                <Switch
-                    checked={form.is_active || false}
-                    onChange={(e) => onChange({ ...form, is_active: e.target.checked })}
-                    disabled={!isEditMode}
+                <EnhancedSelect<AliceModel>
+                    componentType="models"
+                    EnhancedView={ModelShortListView}
+                    selectedItems={form.default_model ? [form.default_model] : []}
+                    onSelect={handleDefaultModelChange}
+                    isInteractable={isEditMode}
+                    label="Select Default Model"
+                    activeAccordion={activeAccordion}
+                    description='Select the default model for this API'
+                    onAccordionToggle={handleAccordionToggle}
+                    accordionEntityName="default-model"
+                    showCreateButton={true}
                 />
-            </FormControl>
+            )}
+            <BooleanInput
+                name="is_active"
+                label="Is Active"
+                value={form.is_active || false}
+                onChange={(value) => handleFieldChange('is_active', value)}
+                disabled={!isEditMode}
+                description='Is this API active?'
+            />
         </GenericFlexibleView>
     );
 };

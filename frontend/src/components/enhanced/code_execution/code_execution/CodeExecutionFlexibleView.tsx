@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     Typography,
     TextField,
@@ -15,6 +15,10 @@ import Logger from '../../../../utils/Logger';
 import useStyles from '../CodeExecutionStyles';
 import { CodeBlock as MarkdownCodeBlock } from '../../../ui/markdown/CodeBlock';
 import { Check, Error } from '@mui/icons-material';
+import { SelectInput } from '../../common/inputs/SelectInput';
+import { formatCamelCaseString } from '../../../../utils/StyleUtils';
+import { TextInput } from '../../common/inputs/TextInput';
+import { NumericInput } from '../../common/inputs/NumericInput';
 
 
 const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
@@ -26,13 +30,26 @@ const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
 }) => {
     const classes = useStyles();
     const isEditMode = mode === 'edit' || mode === 'create';
+    const [form, setForm] = useState<Partial<CodeExecution>>(item || getDefaultCodeExecutionForm());
+    const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        if (isSaving) {
+            handleSave();
+            setIsSaving(false);
+        }
+    }, [isSaving, handleSave]);
+
+    useEffect(() => {
+        if (item && Object.keys(item).length !== 0) {
+            setForm(item);
+        }
+    }, [item]);
 
     useEffect(() => {
         if (!item || Object.keys(item).length === 0) {
             onChange(getDefaultCodeExecutionForm());
         }
-        Logger.debug('CodeExecutionFlexibleView', 'item', item);
-        Logger.debug('CodeExecutionFlexibleView', getDefaultCodeExecutionForm());
     }, [item, onChange]);
    
     const handleLocalDelete = useCallback(() => {
@@ -40,50 +57,75 @@ const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
             handleDelete(item);
         }
     }, [item, handleDelete]);
+    
+    const handleLocalSave = useCallback(async () => {
+        onChange(form);
+        setIsSaving(true);
+    }, [form, onChange]);
 
-    const handleCodeChange = (value: string) => {
+    const handleFieldChange = useCallback((field: keyof CodeExecution, value: any) => {
+        setForm(prevForm => ({ ...prevForm, [field]: value }));
+    }, []);
+
+    const handleCodeChange = (value: string | undefined) => {
+        if (!value) {
+            return;
+        }
         const newCodeBlock: CodeBlock = {
             code: value,
             language: item?.code_block?.language || 'text' // Provide default language
         };
         
-        onChange({
-            code_block: newCodeBlock
-        });
+        handleFieldChange('code_block', newCodeBlock);
     };
 
-    const handleLanguageChange = (value: string) => {
+    const handleLanguageChange = (value: string | string[] | undefined) => {
+        if (!value) {
+            return;
+        }
+        if (Array.isArray(value)) {
+            value = value[0];
+        }
         const newCodeBlock: CodeBlock = {
             code: item?.code_block?.code || '',
             language: value
         };
 
-        onChange({
-            code_block: newCodeBlock
-        });
+        handleFieldChange('code_block', newCodeBlock);
     };
 
-    const handleOutputChange = (value: string) => {
+    const handleOutputChange = (value: string | undefined) => {
+        if (!value) {
+            return
+        }
         const newOutput: CodeOutput = {
             output: value,
             exit_code: item?.code_output?.exit_code || 0
         };
 
-        onChange({
-            code_output: newOutput
-        });
+        handleFieldChange('code_output', newOutput);
     };
 
-    const handleExitCodeChange = (value: string) => {
-        const exitCode = parseInt(value) || 0;
+    const handleExitCodeChange = (value: string | number | undefined) => {
+        if (!value) {
+            return
+        }
+        if (typeof value === 'string' && value.trim() === '') {
+            return;
+        }
+        if (typeof value === 'number' && isNaN(value)) {
+            return;
+        }
+        if (typeof value === 'string' ) {
+            value = parseInt(value);
+        }
+        const exitCode = value || 0;
         const newOutput: CodeOutput = {
             output: item?.code_output?.output || '',
             exit_code: exitCode
         };
 
-        onChange({
-            code_output: newOutput
-        });
+        handleFieldChange('code_output', newOutput);
     };
 
     const title = mode === 'create' ? 'Create New Code Execution' : mode === 'edit' ? 'Edit Code Execution' : 'Code Execution Details';
@@ -93,95 +135,55 @@ const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
         <GenericFlexibleView
             elementType='Code Execution'
             title={title}
-            onSave={handleSave}
+            onSave={handleLocalSave}
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
             item={item as CodeExecution}
             itemType='codeexecutions'
         >
-            <Box className={classes.section}>
-                <Typography variant="h6" className={classes.sectionTitle}>Code Block</Typography>
-                
-                <FormControl fullWidth margin="normal">
-                    <InputLabel id="language-select-label">Language</InputLabel>
-                    <Select
-                        labelId="language-select-label"
-                        value={item?.code_block?.language || ''}
-                        onChange={(e) => handleLanguageChange(e.target.value)}
-                        disabled={!isEditMode}
-                    >
-                        {LANGUAGES.map((lang) => (
-                            <MenuItem key={lang} value={lang}>
-                                {lang.charAt(0).toUpperCase() + lang.slice(1)}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+            <SelectInput
+                name='type'
+                label='Type'
+                value={item?.code_block.language || 'text'}
+                onChange={(value) => handleLanguageChange(value)}
+                description='Type is always code.'
+                options={LANGUAGES.map((lang) => ({
+                    value: lang,
+                    label: formatCamelCaseString(lang)
+                }))
+                }
+            />
+            <TextInput
+                name='code'
+                label='Code'
+                value={item?.code_block.code || ''}
+                onChange={(value) => handleCodeChange(value)}
+                disabled={!isEditMode}
+                description='Enter the code to be executed'
+                multiline
+                rows={5}
+            />
 
-                {isEditMode ? (
-                    <TextField
-                        fullWidth
-                        multiline
-                        rows={8}
-                        value={item?.code_block?.code || ''}
-                        onChange={(e) => handleCodeChange(e.target.value)}
-                        placeholder="Enter your code here..."
-                        margin="normal"
-                        className={classes.codeInput}
-                    />
-                ) : (
-                    <Box className={classes.codeDisplay}>
-                        <MarkdownCodeBlock
-                            language={item?.code_block?.language || 'text'}
-                            code={item?.code_block?.code || ''}
-                        />
-                    </Box>
-                )}
-            </Box>
+            <TextInput
+                name='output'
+                label='Output'
+                value={item?.code_output.output || ''}
+                onChange={(value) => handleOutputChange(value)}
+                disabled={!isEditMode}
+                description='Enter the output of the code execution'
+                multiline
+                rows={3}
+            />
 
-            <Box className={classes.section}>
-                <Typography variant="h6" className={classes.sectionTitle}>
-                    Execution Output
-                    {item?.code_output?.exit_code !== undefined && (
-                        <Chip
-                            icon={item.code_output.exit_code === 0 ? <Check /> : <Error />}
-                            label={`Exit Code: ${item.code_output.exit_code}`}
-                            color={item.code_output.exit_code === 0 ? "success" : "error"}
-                            className={classes.exitCodeChip}
-                        />
-                    )}
-                </Typography>
-
-                {isEditMode ? (
-                    <>
-                        <TextField
-                            fullWidth
-                            multiline
-                            rows={4}
-                            value={item?.code_output?.output || ''}
-                            onChange={(e) => handleOutputChange(e.target.value)}
-                            placeholder="Execution output..."
-                            margin="normal"
-                        />
-                        <TextField
-                            type="number"
-                            label="Exit Code"
-                            value={item?.code_output?.exit_code || 0}
-                            onChange={(e) => handleExitCodeChange(e.target.value)}
-                            margin="normal"
-                            className={classes.exitCodeInput}
-                        />
-                    </>
-                ) : (
-                    <Box className={classes.outputDisplay}>
-                        <MarkdownCodeBlock
-                            language="text"
-                            code={item?.code_output?.output || ''}
-                        />
-                    </Box>
-                )}
-            </Box>
+            <NumericInput
+                name='exit_code'
+                label='Exit Code'
+                value={item?.code_output.exit_code || 0}
+                onChange={(value) => handleExitCodeChange(value)}
+                disabled={!isEditMode}
+                description='Enter the exit code of the code execution'
+            />
         </GenericFlexibleView>
     );
 };

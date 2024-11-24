@@ -2,6 +2,7 @@ import React from 'react';
 import {
     Typography,
     Chip,
+    Tooltip,
 } from '@mui/material';
 import { Code, Assignment, QueryBuilder, Settings } from '@mui/icons-material';
 import { PromptComponentProps } from '../../../../types/PromptTypes';
@@ -33,11 +34,13 @@ const PromptCardView: React.FC<PromptComponentProps> = ({
             icon: <Code />,
             primary_text: "Templated",
             secondary_text: item.is_templated ? (
+                <Tooltip title="Click here to view the parsed prompt">
                 <Chip
                     label="Yes"
                     color="primary"
                     onClick={() => selectPromptParsedDialog(item)}
                 />
+                </Tooltip>
             ) : 'No'
         },
         ...(item.parameters ? [{

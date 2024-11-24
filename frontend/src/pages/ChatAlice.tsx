@@ -17,12 +17,15 @@ import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
 import { FileReference } from '../types/FileTypes';
 import EnhancedMessage from '../components/enhanced/message/message/EnhancedMessage';
 import Logger from '../utils/Logger';
-import ChatMessagesFullView from '../components/enhanced/chat/chat/ChatMessagesFullViewNew';
+import ChatMessagesFullView from '../components/enhanced/chat/chat/ChatMessagesFullView';
 import ChatShortListView from '../components/enhanced/chat/chat/ChatShortListView';
 import ChatCardView from '../components/enhanced/chat/chat/ChatCardView';
 import { LlmProvider } from '../types/ApiTypes';
 import FilterSelect from '../components/ui/sidetab_header/FilterSelect';
 import EnhancedEntityReference from '../components/enhanced/entity_reference/entity_reference/EnhancedEntityReference';
+import { collectionElementIcons } from '../utils/CollectionUtils';
+import EnhancedToolCall from '../components/enhanced/tool_calls/tool_calls/EnhancedToolCall';
+import EnhancedCodeExecution from '../components/enhanced/code_execution/code_execution/EnhancedCodeExecution';
 
 const ChatAlice: React.FC = () => {
   const classes = useStyles();
@@ -100,13 +103,15 @@ const ChatAlice: React.FC = () => {
   ];
 
   const tabs = [
-    { name: 'Select Chat', icon: Chat, group: 'Chat' },
+    { name: 'Select Chat', icon: collectionElementIcons.Chat, group: 'Chat' },
     { name: 'Current Chat', icon: Info, disabled: !currentChatId, group: 'Info' },
-    { name: 'Add Functions', icon: Functions, disabled: !currentChatId, group: 'Info' },
-    { name: 'Add File Reference', icon: AttachFile, disabled: !currentChatId, group: 'Ref' },
-    { name: 'Add Message Reference', icon: Message, disabled: !currentChatId, group: 'Ref' },
-    { name: 'Add Task Results', icon: Assignment, disabled: !currentChatId, group: 'Ref' },
-    { name: 'Add URL Reference', icon: Link, disabled: !currentChatId, group: 'Ref' },
+    { name: 'Add Tools', icon: collectionElementIcons.Task, disabled: !currentChatId, group: 'Info' },
+    { name: 'Add File Reference', icon: collectionElementIcons.File, disabled: !currentChatId, group: 'Ref' },
+    { name: 'Add Message Reference', icon: collectionElementIcons.Message, disabled: !currentChatId, group: 'Ref' },
+    { name: 'Add Task Results', icon: collectionElementIcons.TaskResponse, disabled: !currentChatId, group: 'Ref' },
+    { name: 'Add Entity Reference', icon: collectionElementIcons.EntityReference, disabled: !currentChatId, group: 'Ref' },
+    { name: 'Add Tool Call', icon: collectionElementIcons.ToolCall, disabled: !currentChatId, group: 'Ref' },
+    { name: 'Add Code Execution', icon: collectionElementIcons.CodeExecution, disabled: !currentChatId, group: 'Ref' },
   ];
 
   const renderSidebarContent = useCallback((tabName: string) => {
@@ -119,6 +124,8 @@ const ChatAlice: React.FC = () => {
       handleAPIClick: (id: string) => selectCardItem('API', id),
       handleMessageClick: (id: string) => selectCardItem('Message', id),
       handleEntityReferenceClick: (id: string) => selectCardItem('EntityReference', id),
+      handleToolCallClick: (id: string) => selectCardItem('ToolCall', id),
+      handleCodeExecutionClick: (id: string) => selectCardItem('CodeExecution', id),
     };
 
     return (
@@ -155,7 +162,7 @@ const ChatAlice: React.FC = () => {
                     handleSave={async () => { }}
                   />
                 );
-              case 'Add Functions':
+              case 'Add Tools':
                 return (
                   <EnhancedTask
                     mode={'list'}
@@ -185,7 +192,7 @@ const ChatAlice: React.FC = () => {
                     {...handleProps}
                   />
                 );
-              case 'Add URL Reference':
+              case 'Add Entity Reference':
                 return (
                   <EnhancedEntityReference
                     mode={'list'}
@@ -205,6 +212,26 @@ const ChatAlice: React.FC = () => {
                     {...handleProps}
                   />
                 );
+              case 'Add Tool Call':
+                return (
+                  <EnhancedToolCall
+                    mode={'list'}
+                    fetchAll={true}
+                    onView={(toolCall) => toolCall._id && selectCardItem('ToolCall', toolCall._id)}
+                    onInteraction={addMessageReference}
+                    {...handleProps}
+                  />
+                )
+              case 'Add Code Execution':
+                return ( 
+                  <EnhancedCodeExecution
+                    mode={'list'}
+                    fetchAll={true}
+                    onView={(codeExecution) => codeExecution._id && selectCardItem('CodeExecution', codeExecution._id)}
+                    onInteraction={addMessageReference}
+                    {...handleProps}
+                  />
+                )
               default:
                 return null;
             }

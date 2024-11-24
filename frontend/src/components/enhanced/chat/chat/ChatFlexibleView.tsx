@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
-    TextField,
     Box,
     Typography,
     Alert,
@@ -22,6 +21,7 @@ import { UserCheckpoint } from '../../../../types/UserCheckpointTypes';
 import UserCheckpointShortListView from '../../user_checkpoint/user_checkpoint/UserCheckpointShortListView';
 import { useAuth } from '../../../../contexts/AuthContext';
 import { DataCluster } from '../../../../types/DataClusterTypes';
+import { TextInput } from '../../common/inputs/TextInput';
 
 const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     item,
@@ -44,38 +44,38 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     Logger.debug('ChatFlexibleView', { item, handleDelete });
     useEffect(() => {
         const populateConfig = async () => {
-          if (mode === 'create' && user?.default_chat_config && !item) {
-            const config = user.default_chat_config;
-            const [agent, agentTools, retrievalTools, toolCallCheckpoint, codeExecCheckpoint, dataCluster] = await Promise.all([
-              config.alice_agent ? fetchItem('agents', config.alice_agent) : undefined,
-              Promise.all((config.agent_tools || []).map(id => fetchItem('tasks', id))),
-              Promise.all((config.retrieval_tools || []).map(id => fetchItem('tasks', id))),
-              config.default_user_checkpoints[CheckpointType.TOOL_CALL] ? 
-                fetchItem('usercheckpoints', config.default_user_checkpoints[CheckpointType.TOOL_CALL]) : undefined,
-              config.default_user_checkpoints[CheckpointType.CODE_EXECUTION] ?
-                fetchItem('usercheckpoints', config.default_user_checkpoints[CheckpointType.CODE_EXECUTION]) : undefined,
-              config.data_cluster ? fetchItem('dataclusters', config.data_cluster) : undefined
-            ]);
-      
-            setForm(prevForm => ({
-              ...prevForm,
-              alice_agent: agent as AliceAgent,
-              agent_tools: agentTools as AliceTask[],
-              retrieval_tools: retrievalTools as AliceTask[],
-              default_user_checkpoints: {
-                [CheckpointType.TOOL_CALL]: toolCallCheckpoint as UserCheckpoint,
-                [CheckpointType.CODE_EXECUTION]: codeExecCheckpoint as UserCheckpoint
-              },
-              data_cluster: dataCluster as DataCluster,
-            }));
-          } else if (item) {
-            setForm(item);
-          } else if (!item || Object.keys(item).length === 0) {
-            onChange(getDefaultChatForm());
-          }
+            if (mode === 'create' && user?.default_chat_config && !item) {
+                const config = user.default_chat_config;
+                const [agent, agentTools, retrievalTools, toolCallCheckpoint, codeExecCheckpoint, dataCluster] = await Promise.all([
+                    config.alice_agent ? fetchItem('agents', config.alice_agent) : undefined,
+                    Promise.all((config.agent_tools || []).map(id => fetchItem('tasks', id))),
+                    Promise.all((config.retrieval_tools || []).map(id => fetchItem('tasks', id))),
+                    config.default_user_checkpoints[CheckpointType.TOOL_CALL] ?
+                        fetchItem('usercheckpoints', config.default_user_checkpoints[CheckpointType.TOOL_CALL]) : undefined,
+                    config.default_user_checkpoints[CheckpointType.CODE_EXECUTION] ?
+                        fetchItem('usercheckpoints', config.default_user_checkpoints[CheckpointType.CODE_EXECUTION]) : undefined,
+                    config.data_cluster ? fetchItem('dataclusters', config.data_cluster) : undefined
+                ]);
+
+                setForm(prevForm => ({
+                    ...prevForm,
+                    alice_agent: agent as AliceAgent,
+                    agent_tools: agentTools as AliceTask[],
+                    retrieval_tools: retrievalTools as AliceTask[],
+                    default_user_checkpoints: {
+                        [CheckpointType.TOOL_CALL]: toolCallCheckpoint as UserCheckpoint,
+                        [CheckpointType.CODE_EXECUTION]: codeExecCheckpoint as UserCheckpoint
+                    },
+                    data_cluster: dataCluster as DataCluster,
+                }));
+            } else if (item) {
+                setForm(item);
+            } else if (!item || Object.keys(item).length === 0) {
+                onChange(getDefaultChatForm());
+            }
         };
         populateConfig();
-      }, [item, onChange, user, mode, fetchItem]);
+    }, [item, onChange, user, mode, fetchItem]);
 
     useEffect(() => {
         if (isSaving) {
@@ -84,9 +84,8 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
         }
     }, [isSaving, handleSave]);
 
-    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setForm(prevForm => ({ ...prevForm, [name]: value }));
+    const handleFieldChange = useCallback((field: keyof AliceAgent, value: any) => {
+        setForm(prevForm => ({ ...prevForm, [field]: value }));
     }, []);
 
     const handleAgentChange = useCallback(async (selectedIds: string[]) => {
@@ -144,7 +143,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                         request_feedback: false
                     }
                 };
-    
+
                 return {
                     ...prevForm,
                     default_user_checkpoints: {
@@ -155,7 +154,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             });
         }
     }, [fetchItem]);
-    
+
     const handleCodeExecCheckpointChange = useCallback(async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {
             const checkpoint = await fetchItem('usercheckpoints', selectedIds[0]) as UserCheckpoint;
@@ -170,7 +169,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                     },
                     [CheckpointType.CODE_EXECUTION]: checkpoint
                 };
-    
+
                 return {
                     ...prevForm,
                     default_user_checkpoints: {
@@ -207,7 +206,8 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             selectedItems={form.alice_agent ? [form.alice_agent] : []}
             onSelect={handleAgentChange}
             isInteractable={isEditMode}
-            label="Select Agent"
+            label="Select Chat Agent"
+            description='This agent will be used to respond to user messages in the chat. This models in this agent will be used to generate responses, transcribe files, etc'
             activeAccordion={activeAccordion}
             onAccordionToggle={handleAccordionToggle}
             accordionEntityName="agent"
@@ -225,6 +225,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             isInteractable={isEditMode}
             multiple
             label="Select Agent Tools"
+            description='These tools will be given to the agent. '
             activeAccordion={activeAccordion}
             onAccordionToggle={handleAccordionToggle}
             accordionEntityName="agent_tools"
@@ -242,6 +243,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             isInteractable={isEditMode}
             multiple
             label="Select Retrieval Tools"
+            description='These tools will be given to the agent, and provided access to the data cluster in the chat.'
             activeAccordion={activeAccordion}
             onAccordionToggle={handleAccordionToggle}
             accordionEntityName="retrieval_tools"
@@ -258,6 +260,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             onSelect={handleToolCallCheckpointChange}
             isInteractable={isEditMode}
             label="Select Tool Call Checkpoint"
+            description='This checkpoint will be used when the agent calls a tool if their permission level is 2.'
             activeAccordion={activeAccordion}
             onAccordionToggle={handleAccordionToggle}
             accordionEntityName="tool_call_checkpoint"
@@ -273,6 +276,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             onSelect={handleCodeExecCheckpointChange}
             isInteractable={isEditMode}
             label="Select Code Execution Checkpoint"
+            description='This checkpoint will be used when the agent executes code and their permission level = 2.'
             activeAccordion={activeAccordion}
             onAccordionToggle={handleAccordionToggle}
             accordionEntityName="code_exec_checkpoint"
@@ -296,25 +300,22 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                     {validationError}
                 </Alert>
             )}
-            <Typography variant="h6" className={classes.titleText}>Name</Typography>
-            <TextField
-                fullWidth
+
+            <TextInput
                 name="name"
                 label="Chat Name"
-                value={form.name || ''}
-                onChange={handleInputChange}
+                value={form.name}
+                onChange={(value) => handleFieldChange('name', value)}
                 disabled={!isEditMode}
-                margin="normal"
+                required
+                description="The display name of the chat."
+                fullWidth
             />
-            <Typography variant="h6" className={classes.titleText}>Agent</Typography>
             {memoizedAgentSelect}
-            <Typography variant="h6" className={classes.titleText}>Agent Tools</Typography>
             {memoizedTaskSelect}
-            <Typography variant="h6" className={classes.titleText}>Retrieval Tools</Typography>
             {memoizedRetrievalTaskSelect}
             {form.messages && form.messages.length > 0 && (
                 <>
-                    <Typography variant="h6" className={classes.titleText}>Messages</Typography>
                     <Box mt={2}>
                         <MessageListView
                             items={form.messages || []}
@@ -327,15 +328,8 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                     </Box>
                 </>
             )}
-            <Typography variant="h6" className={classes.titleText}>Default Checkpoints</Typography>
-            <Box mb={2}>
-                <Typography variant="subtitle1" color="textSecondary">Tool Call Checkpoint</Typography>
-                {memoizedToolCallCheckpointSelect}
-            </Box>
-            <Box mb={2}>
-                <Typography variant="subtitle1" color="textSecondary">Code Execution Checkpoint</Typography>
-                {memoizedCodeExecCheckpointSelect}
-            </Box>
+            {memoizedToolCallCheckpointSelect}
+            {memoizedCodeExecCheckpointSelect}
             <Typography variant="h6" className={classes.titleText}>Data Cluster</Typography>
             <DataClusterManager
                 dataCluster={form.data_cluster}

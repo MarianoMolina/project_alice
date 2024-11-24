@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import { ApiComponentProps, ApiName, ApiType, ModelApiType } from '../../../../types/ApiTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { Api, Category, PowerSettingsNew, Settings } from '@mui/icons-material';
+import { Api, Category, PowerSettingsNew, QueryBuilder, Settings } from '@mui/icons-material';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import { apiNameIcons, apiTypeIcons } from '../../../../utils/ApiUtils';
 import { AIIcon } from '../../../../utils/CustomIcons';
@@ -60,6 +60,7 @@ const ApiCardView: React.FC<ApiComponentProps> = ({
                         checked={item.is_active}
                         onChange={handleToggleActive}
                         color="primary"
+                        disabled
                     />
                 </ListItemSecondaryAction>
             )
@@ -72,6 +73,11 @@ const ApiCardView: React.FC<ApiComponentProps> = ({
                     <ListItemText primary={item.api_config.name} />
                 </ListItemButton>
             ) : "N/A"
+        },
+        {
+            icon: <QueryBuilder />,
+            primary_text: "Created At",
+            secondary_text: new Date(item.createdAt || '').toLocaleString()
         }
     ];
 

@@ -4,7 +4,7 @@ import {
     Box,
     Stack
 } from '@mui/material';
-import { Language, DataObject } from '@mui/icons-material';
+import { Language, DataObject, QueryBuilder } from '@mui/icons-material';
 import { DataClusterComponentProps } from '../../../../types/DataClusterTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import ReferenceChip from '../../common/references/ReferenceChip';
@@ -52,6 +52,11 @@ const DataClusterCardView: React.FC<DataClusterComponentProps> = ({
                     </Typography>
                 </Box>
             )
+        },
+        {
+            icon: <QueryBuilder />,
+            primary_text: "Created At",
+            secondary_text: new Date(item.createdAt || '').toLocaleString()
         }
     ];
 

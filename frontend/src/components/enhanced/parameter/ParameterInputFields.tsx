@@ -179,7 +179,7 @@ const JsonInput = ({
       multiline
       rows={4}
       error={error}
-      helperText={error ? 'Invalid JSON format' : `Type: object/array - ${param.description}`}
+      helperText={error ? 'Invalid JSON format' : `Type: ${param.type} - ${param.description}`}
     />
   );
 };

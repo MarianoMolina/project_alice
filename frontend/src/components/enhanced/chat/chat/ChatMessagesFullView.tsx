@@ -4,16 +4,11 @@ import useStyles from '../ChatStyles';
 import { useChat } from '../../../../contexts/ChatContext';
 import PlaceholderSkeleton from '../../../ui/placeholder_skeleton/PlaceholderSkeleton';
 import MessageFullView from '../../message/message/MessageFullView';
-import { MessageType } from '../../../../types/MessageTypes';
+import { ChatComponentProps } from '../../../../types/ChatTypes';
 
-interface ChatMessagesFullViewProps {
-  messages: MessageType[];
-  showRegenerate?: boolean;
-}
-
-const ChatMessagesFullView: React.FC<ChatMessagesFullViewProps> = React.memo(({
-  messages,
-  showRegenerate,
+const ChatMessagesFullView: React.FC<ChatComponentProps> = React.memo(({
+  item,
+  showRegenerate = true,
 }) => {
   const classes = useStyles();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -29,7 +24,7 @@ const ChatMessagesFullView: React.FC<ChatMessagesFullViewProps> = React.memo(({
 
   useEffect(() => {
     setShouldScroll(true);
-  }, [messages]);
+  }, [item?.messages]);
 
   useEffect(() => {
     scrollToBottom();
@@ -39,7 +34,7 @@ const ChatMessagesFullView: React.FC<ChatMessagesFullViewProps> = React.memo(({
     if (isGenerating) {
       return <Button disabled>Generating...</Button>;
     }
-    const lastMessage = messages[messages.length - 1];
+    const lastMessage = item?.messages[item?.messages.length - 1];
     if (lastMessage && lastMessage.role === 'user' && generateResponse) {
       return (
         <Tooltip title="Request a new response from the assistant based on the last message">
@@ -55,10 +50,10 @@ const ChatMessagesFullView: React.FC<ChatMessagesFullViewProps> = React.memo(({
       );
     }
     return null;
-  }, [isGenerating, messages, generateResponse, handleRegenerateResponse]);
+  }, [isGenerating, item?.messages, generateResponse, handleRegenerateResponse]);
 
   const memoizedMessages = useMemo(() => (
-    messages.map((message) => (
+    item?.messages.map((message) => (
       <MessageFullView
         key={message._id}
         mode={'view'}
@@ -68,12 +63,12 @@ const ChatMessagesFullView: React.FC<ChatMessagesFullViewProps> = React.memo(({
         handleSave={async () => undefined}
       />
     ))
-  ), [messages]);
+  ), [item?.messages]);
 
   return (
     <Box className={classes.fullChatView}>
       <Box className={classes.messagesContainer}>
-        {messages.length > 0 ? (
+        {item?.messages && item?.messages.length > 0 ? (
           memoizedMessages
         ) : (
           <Box className={classes.emptyMessagesContainer}>

@@ -2,7 +2,7 @@ import React from 'react';
 import {
     Typography,
 } from '@mui/material';
-import { Person, AccessTime, AttachFile, TextSnippet, Engineering, PersonPin, DataObject } from '@mui/icons-material';
+import { Person, AttachFile, TextSnippet, Engineering, PersonPin, DataObject, QueryBuilder } from '@mui/icons-material';
 import { MessageComponentProps } from '../../../../types/MessageTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { hasAnyReferences } from '../../../../types/ReferenceTypes';
@@ -67,7 +67,7 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
             secondary_text: item.creation_metadata ? <CodeBlock language="json" code={JSON.stringify(item.creation_metadata, null, 2)} /> : "N/A",
         },
         {
-            icon: <AccessTime />,
+            icon: <QueryBuilder />,
             primary_text: "Created At",
             secondary_text: new Date(item.createdAt || '').toLocaleString()
         }

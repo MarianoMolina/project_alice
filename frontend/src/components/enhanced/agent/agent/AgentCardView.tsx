@@ -7,7 +7,7 @@ import {
     ListItemIcon,
     ListItemText,
 } from '@mui/material';
-import { Category, LibraryBooks, Code, Build, ChatBubbleOutline } from '@mui/icons-material';
+import { Category, LibraryBooks, Code, Build, ChatBubbleOutline, BadgeOutlined, QueryBuilder } from '@mui/icons-material';
 import { AgentComponentProps, mapCodePermission, mapToolPermission } from '../../../../types/AgentTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { ModelType } from '../../../../types/ModelTypes';
@@ -37,19 +37,9 @@ const AgentCardView: React.FC<AgentComponentProps> = ({
 
     const listItems = [
         {
-            icon: <Code />,
-            primary_text: "Code Execution",
-            secondary_text: `${item.has_code_exec}: ${mapCodePermission(item.has_code_exec)}`
-        },
-        {
-            icon: <Build />,
-            primary_text: "Tool Use",
-            secondary_text: `${item.has_tools}: ${mapToolPermission(item.has_tools)}`
-        },
-        {
-            icon: <ChatBubbleOutline />,
-            primary_text: "Max consecutive replies",
-            secondary_text: item.max_consecutive_auto_reply?.toString() ?? 'none'
+            icon: <BadgeOutlined/>,
+            primary_text: "Name",
+            secondary_text: item.name
         },
         {
             icon: <Category />,
@@ -68,6 +58,26 @@ const AgentCardView: React.FC<AgentComponentProps> = ({
                     {item.system_message?.content || 'N/A'}
                 </ListItemButton>
             )
+        },
+        {
+            icon: <ChatBubbleOutline />,
+            primary_text: "Max consecutive replies",
+            secondary_text: item.max_consecutive_auto_reply?.toString() ?? 'none'
+        },
+        {
+            icon: <Build />,
+            primary_text: "Tool Use",
+            secondary_text: `${item.has_tools}: ${mapToolPermission(item.has_tools)}`
+        },
+        {
+            icon: <Code />,
+            primary_text: "Code Execution",
+            secondary_text: `${item.has_code_exec}: ${mapCodePermission(item.has_code_exec)}`
+        },
+        {
+            icon: <QueryBuilder />,
+            primary_text: "Created At",
+            secondary_text: new Date(item.createdAt || '').toLocaleString()
         }
     ];
 

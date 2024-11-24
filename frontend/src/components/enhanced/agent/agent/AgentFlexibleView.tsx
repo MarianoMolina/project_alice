@@ -1,25 +1,31 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
-    TextField,
-    Typography,
-    MenuItem,
-    Select,
-    FormControl,
-    InputLabel,
-    SelectChangeEvent,
-} from '@mui/material';
-import { AgentComponentProps, AliceAgent, getDefaultAgentForm } from '../../../../types/AgentTypes';
+    AgentComponentProps,
+    AliceAgent,
+    getDefaultAgentForm,
+    ToolPermission,
+    CodePermission
+} from '../../../../types/AgentTypes';
 import { Prompt } from '../../../../types/PromptTypes';
 import { AliceModel, ModelType } from '../../../../types/ModelTypes';
-import { ToolPermission, CodePermission } from '../../../../types/AgentTypes';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import PromptShortListView from '../../prompt/prompt/PromptShortListView';
 import ModelShortListView from '../../model/model/ModelShortListView';
 import { useApi } from '../../../../contexts/ApiContext';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import Logger from '../../../../utils/Logger';
-import useStyles from '../AgentStyles';
+import { TextInput } from '../../common/inputs/TextInput';
+import { SelectInput } from '../../common/inputs/SelectInput';
+import { NumericInput } from '../../common/inputs/NumericInput';
+
+// Helper to convert enum to selection options
+const enumToOptions = (enumObj: Record<string, string | number>) =>
+    Object.entries(enumObj)
+        .filter(([key]) => isNaN(Number(key))) // Filter out numeric keys
+        .map(([_, value]) => ({
+            value: value.toString(),
+            label: value.toString()
+        }));
 
 const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     item,
@@ -33,7 +39,10 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [form, setForm] = useState<Partial<AliceAgent>>(item || getDefaultAgentForm());
     const [isSaving, setIsSaving] = useState(false);
-    const classes = useStyles();
+
+    const isEditMode = mode === 'edit' || mode === 'create';
+    const title = mode === 'create' ? 'Create New Agent' : mode === 'edit' ? 'Edit Agent' : 'Agent Details';
+    const saveButtonText = form._id ? 'Update Agent' : 'Create Agent';
 
     useEffect(() => {
         if (isSaving) {
@@ -45,31 +54,13 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     useEffect(() => {
         if (item) {
             setForm(item);
-        } else if (!item || Object.keys(item).length === 0)  {
+        } else if (!item || Object.keys(item).length === 0) {
             onChange(getDefaultAgentForm());
         }
     }, [item, onChange]);
 
-    const isEditMode = mode === 'edit' || mode === 'create';
-
-    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        if (name === 'max_consecutive_auto_reply') {
-            const numValue = parseInt(value, 10);
-            if (!isNaN(numValue) && numValue >= 0) {
-                setForm(prevForm => ({ ...prevForm, [name]: numValue }));
-            }
-        } else {
-            setForm(prevForm => ({ ...prevForm, [name]: value }));
-        }
-    }, []);
-
-    const handleSelectChange = useCallback((e: SelectChangeEvent) => {
-        const { name, value } = e.target;
-        if (name) {
-            const numericValue = parseInt(value as string, 10);
-            setForm(prevForm => ({ ...prevForm, [name]: numericValue }));
-        }
+    const handleFieldChange = useCallback((field: keyof AliceAgent, value: any) => {
+        setForm(prevForm => ({ ...prevForm, [field]: value }));
     }, []);
 
     const handleModelChange = useCallback(async (selectedIds: string[]) => {
@@ -106,11 +97,11 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
         }
     }, [item, handleDelete]);
 
-    const title = mode === 'create' ? 'Create New Agent' : mode === 'edit' ? 'Edit Agent' : 'Agent Details';
-    const saveButtonText = form._id ? 'Update Agent' : 'Create Agent';
+    // Convert enums to selection options
+    const toolPermissionOptions = useMemo(() => enumToOptions(ToolPermission), []);
+    const codePermissionOptions = useMemo(() => enumToOptions(CodePermission), []);
 
-    Logger.debug('AgentFlexibleView', { form, mode });
-
+    // Memoized selects for database items
     const memoizedPromptSelect = useMemo(() => (
         <EnhancedSelect<Prompt>
             componentType="prompts"
@@ -118,8 +109,9 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             selectedItems={form.system_message ? [form.system_message] : []}
             onSelect={handlePromptChange}
             isInteractable={isEditMode}
-            label="Select System Message" 
+            label="Select System Message"
             activeAccordion={activeAccordion}
+            description='The system message that the agent will use to respond to the user.'
             onAccordionToggle={handleAccordionToggle}
             onView={(id) => selectCardItem("Prompt", id)}
             accordionEntityName="system-message"
@@ -134,6 +126,7 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             onSelect={handleModelChange}
             isInteractable={isEditMode}
             multiple
+            description='The models that the agent will use to respond to the user. Can have one model per model type.'
             label="Select Models"
             activeAccordion={activeAccordion}
             onAccordionToggle={handleAccordionToggle}
@@ -153,63 +146,52 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             item={item as AliceAgent}
             itemType='agents'
         >
-            <Typography variant="h6" className={classes.titleText}>Name</Typography>
-            <TextField
-                fullWidth
+            <TextInput
                 name="name"
                 label="Name"
-                value={form.name || ''}
-                onChange={handleInputChange}
-                margin="normal"
+                value={form.name}
+                onChange={(value) => handleFieldChange('name', value)}
                 disabled={!isEditMode}
-            />
-            <Typography variant="h6" className={classes.titleText}>System Message</Typography>
-            {memoizedPromptSelect}
-            <Typography variant="h6" className={classes.titleText}>Models</Typography>
-            {memoizedModelSelect}
-            <Typography variant="h6" className={classes.titleText}>Max Consecutive Replies</Typography>
-            <TextField
+                required
+                description="The display name of the agent."
                 fullWidth
-                name="max_consecutive_auto_reply"
-                type='number'
-                label="Max Consecutive Auto Reply"
-                value={form.max_consecutive_auto_reply || ''}
-                onChange={handleInputChange}
-                margin="normal"
-                disabled={!isEditMode}
             />
-            <Typography variant="h6" className={classes.titleText}>Tool Execution</Typography>
-            <FormControl fullWidth margin="normal">
-                <InputLabel>Tool Permission</InputLabel>
-                <Select
-                    name="has_tools"
-                    value={form.has_tools?.toString() ?? ToolPermission.DISABLED.toString()}
-                    onChange={handleSelectChange}
-                    disabled={!isEditMode}
-                    label="Tool Permission"
-                >
-                    <MenuItem value={ToolPermission.NORMAL.toString()}>Normal</MenuItem>
-                    <MenuItem value={ToolPermission.DISABLED.toString()}>Disabled</MenuItem>
-                    <MenuItem value={ToolPermission.WITH_PERMISSION.toString()}>With Permission</MenuItem>
-                    <MenuItem value={ToolPermission.DRY_RUN.toString()}>Dry Run</MenuItem>
-                </Select>
-            </FormControl>
-            <Typography variant="h6" className={classes.titleText}>Code Execution</Typography>
-            <FormControl fullWidth margin="normal">
-                <InputLabel>Code Permission</InputLabel>
-                <Select
-                    name="has_code_exec"
-                    value={form.has_code_exec?.toString() ?? CodePermission.NORMAL.toString()}
-                    onChange={handleSelectChange}
-                    disabled={!isEditMode}
-                    label="Code Permission"
-                >
-                    <MenuItem value={CodePermission.NORMAL.toString()}>Normal</MenuItem>
-                    <MenuItem value={CodePermission.DISABLED.toString()}>Disabled</MenuItem>
-                    <MenuItem value={CodePermission.WITH_PERMISSION.toString()}>With Permission</MenuItem>
-                    <MenuItem value={CodePermission.TAGGED_ONLY.toString()}>Tagged Only</MenuItem>
-                </Select>
-            </FormControl>
+            {memoizedPromptSelect}
+            {memoizedModelSelect}
+            <NumericInput
+                name="max_consecutive_auto_reply"
+                label="Max Consecutive Auto Reply"
+                value={form.max_consecutive_auto_reply}
+                onChange={(value) => handleFieldChange('max_consecutive_auto_reply', value)}
+                disabled={!isEditMode}
+                required
+                isInteger
+                description='The maximum number of consecutive auto replies the agent can send. If > 1, if the agent produces tool calls or code executions, it will continue responding until the max is reached.'
+                min={0}
+                fullWidth
+            />
+            <SelectInput
+                name="has_tools"
+                label="Tool Permission"
+                value={form.has_tools?.toString()}
+                onChange={(value) => handleFieldChange('has_tools', Number(value))}
+                options={toolPermissionOptions}
+                disabled={!isEditMode}
+                description='The permission level for tool execution. 0: Disabled, 1: Normal, 2: With Permission, 3: Dry Run'
+                fullWidth
+                required
+            />
+            <SelectInput
+                name="has_code_exec"
+                label="Code Permission"
+                value={form.has_code_exec?.toString()}
+                onChange={(value) => handleFieldChange('has_code_exec', Number(value))}
+                options={codePermissionOptions}
+                disabled={!isEditMode}
+                description='The permission level for code execution. 0: Disabled, 1: Normal, 2: With Permission, 3: Tagged Only'
+                fullWidth
+                required
+            />
         </GenericFlexibleView>
     );
 };

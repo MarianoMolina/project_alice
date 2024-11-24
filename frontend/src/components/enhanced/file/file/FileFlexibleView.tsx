@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-    TextField,
     Typography,
     Box,
     Button,
@@ -15,6 +14,7 @@ import { MessageType } from '../../../../types/MessageTypes';
 import { useNotification } from '../../../../contexts/NotificationContext';
 import Logger from '../../../../utils/Logger';
 import { useDialog } from '../../../../contexts/DialogCustomContext';
+import { TextInput } from '../../common/inputs/TextInput';
 
 const FileFlexibleView: React.FC<FileComponentProps> = ({
     item,
@@ -121,15 +121,16 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
         }
 
         return (
-            <>
-                <TextField
-                    fullWidth
-                    label="Filename"
+            <>  
+                <TextInput
+                    name='filename'
+                    label='Filename'
                     value={item?.filename || ''}
-                    onChange={(e) => onChange({ ...item, filename: e.target.value } as FileReference)}
-                    margin="normal"
+                    onChange={(e) => onChange({ ...item, filename: e } as FileReference)}
                     disabled={!isEditMode}
+                    description='Enter the filename for the file. It should contain its extension.'
                 />
+                
                 <Typography variant="body1">File Type: {item?.type}</Typography>
                 <Typography variant="body1">{bytesToMB(item?.file_size ?? 0)}</Typography>
                 <Typography variant="body1">

@@ -6,9 +6,8 @@ const useStyles = makeStyles((theme: Theme) => ({
   selectContainer: {
     backgroundColor: theme.palette.background.default,
     borderRadius: theme.shape.borderRadius,
-    padding: theme.spacing(2),
-    marginBottom: theme.spacing(1.5),
-    marginTop: theme.spacing(1.5),
+    padding: theme.spacing(1),
+    margin: theme.spacing(1),
     boxShadow: theme.shadows[1],
     position: 'relative',
   },

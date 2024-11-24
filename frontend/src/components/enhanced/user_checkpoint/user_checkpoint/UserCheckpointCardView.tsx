@@ -22,11 +22,6 @@ const UserCheckpointCardView: React.FC<UserCheckpointComponentProps> = ({
             secondary_text: item.user_prompt || 'No user prompt available'
         },
         {
-            icon: <QueryBuilder />,
-            primary_text: "Created at",
-            secondary_text: new Date(item.createdAt || '').toLocaleString()
-        },
-        {
             icon: <Description />,
             primary_text: "Options",
             secondary_text: <CodeBlock language="json" code={JSON.stringify(item.options_obj, null, 2)} />
@@ -35,6 +30,11 @@ const UserCheckpointCardView: React.FC<UserCheckpointComponentProps> = ({
             icon: <DataObject />,
             primary_text: "Next task",
             secondary_text: <CodeBlock language="json" code={JSON.stringify(item.task_next_obj, null, 2)} />
+        },
+        {
+            icon: <QueryBuilder />,
+            primary_text: "Created at",
+            secondary_text: new Date(item.createdAt || '').toLocaleString()
         },
     ];
 

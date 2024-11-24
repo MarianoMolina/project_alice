@@ -39,7 +39,7 @@ const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
                 return (
                     <Chip
                         key={category}
-                        icon={<Icon />}
+                        icon={Icon}
                         label={category}
                         size="small"
                     />

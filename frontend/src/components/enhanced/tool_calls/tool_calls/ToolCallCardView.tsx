@@ -1,10 +1,11 @@
 import React from 'react';
 import { Typography } from '@mui/material';
-import { Category, TypeSpecimen, Description } from '@mui/icons-material';
+import { Category, TypeSpecimen, Description, DataObject } from '@mui/icons-material';
 import { ToolCallComponentProps } from '../../../../types/ToolCallTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
+import EmbeddingChunkViewer from '../../embedding_chunk/EmbeddingChunkViewer';
 
 const ToolCallCardView: React.FC<ToolCallComponentProps> = ({ item }) => {
 
@@ -12,6 +13,13 @@ const ToolCallCardView: React.FC<ToolCallComponentProps> = ({ item }) => {
         return <Typography>No ToolCall data available.</Typography>;
     }
 
+    const embeddingChunkViewer = item.embedding?.length > 0 ?
+     item.embedding.map((chunk, index) => (
+        <EmbeddingChunkViewer
+            key={chunk._id || `embedding-${index}`}
+            chunk={chunk}
+        />
+    )) : <Typography>No embeddings available</Typography>;
     const listItems = [
         {
             icon: <Description />,
@@ -22,6 +30,11 @@ const ToolCallCardView: React.FC<ToolCallComponentProps> = ({ item }) => {
             icon: <TypeSpecimen />,
             primary_text: "Args",
             secondary_text: <CodeBlock language='json' code={JSON.stringify(item.function?.arguments, null, 2)} />
+        },
+        {
+            icon: <DataObject />,
+            primary_text: "Embedding",
+            secondary_text: embeddingChunkViewer
         },
         {
             icon: <Category />,

@@ -2,10 +2,11 @@ import React from 'react';
 import { Typography } from '@mui/material';
 import { FileComponentProps } from '../../../../types/FileTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { InsertDriveFile, CalendarToday, AccessTime, TextSnippet, AttachFile } from '@mui/icons-material';
+import { InsertDriveFile, CalendarToday, AccessTime, TextSnippet, AttachFile, QueryBuilder, DataObject } from '@mui/icons-material';
 import FileViewer from '../FileViewer';
 import { bytesToMB } from '../../../../utils/FileUtils';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
+import EmbeddingChunkViewer from '../../embedding_chunk/EmbeddingChunkViewer';
 
 const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
 
@@ -13,6 +14,14 @@ const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
         return <Typography>No file data available.</Typography>;
     }
 
+    const embeddingChunkViewer = item.embedding?.length > 0 ?
+     item.embedding.map((chunk, index) => (
+        <EmbeddingChunkViewer
+            key={chunk._id || `embedding-${index}`}
+            chunk={chunk}
+        />
+    )) : <Typography>No embeddings available</Typography>;
+    
     const listItems = [
         {
             icon: <InsertDriveFile />,
@@ -38,7 +47,17 @@ const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
             icon: <AttachFile />,
             primary_text: "File Preview",
             secondary_text: <FileViewer file={item} editable={false} />
-        }
+        },
+        {
+            icon: <DataObject />,
+            primary_text: "Embedding",
+            secondary_text: embeddingChunkViewer
+        },
+        {
+            icon: <QueryBuilder />,
+            primary_text: "Created at",
+            secondary_text: new Date(item.createdAt || '').toLocaleString()
+        },
     ];
 
     return (

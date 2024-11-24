@@ -10,6 +10,7 @@ import { useApi } from '../../../../contexts/ApiContext';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import Logger from '../../../../utils/Logger';
+import EmbeddingChunkViewer from '../../embedding_chunk/EmbeddingChunkViewer';
 
 const UserInteractionCardView: React.FC<UserInteractionComponentProps> = ({
     item: initialItem
@@ -63,7 +64,13 @@ const UserInteractionCardView: React.FC<UserInteractionComponentProps> = ({
             Respond
         </Button>
     );
-
+    const embeddingChunkViewer = item.embedding?.length > 0 ?
+     item.embedding.map((chunk, index) => (
+        <EmbeddingChunkViewer
+            key={chunk._id || `embedding-${index}`}
+            chunk={chunk}
+        />
+    )) : <Typography>No embeddings available</Typography>;
     const listItems = [
         {
             icon: <Language />,
@@ -79,6 +86,11 @@ const UserInteractionCardView: React.FC<UserInteractionComponentProps> = ({
             icon: <DataObject />,
             primary_text: "User Choice",
             secondary_text: UserResponseContent
+        },
+        {
+            icon: <DataObject />,
+            primary_text: "Embedding",
+            secondary_text: embeddingChunkViewer
         },
         {
             icon: <QueryBuilder />,

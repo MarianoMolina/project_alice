@@ -1,15 +1,23 @@
 import React from 'react';
 import { Typography } from '@mui/material';
-import { Category, TypeSpecimen, Description } from '@mui/icons-material';
+import { Category, TypeSpecimen, Description, QueryBuilder, DataObjectRounded } from '@mui/icons-material';
 import { CodeExecutionComponentProps } from '../../../../types/CodeExecutionTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
+import EmbeddingChunkViewer from '../../embedding_chunk/EmbeddingChunkViewer';
 
 const CodeExecutionCardView: React.FC<CodeExecutionComponentProps> = ({ item }) => {
 
     if (!item) {
         return <Typography>No CodeExecution data available.</Typography>;
     }
+    const embeddingChunkViewer = item.embedding?.length > 0 ?
+        item.embedding.map((chunk, index) => (
+            <EmbeddingChunkViewer
+                key={chunk._id || `embedding-${index}`}
+                chunk={chunk}
+            />
+        )) : <Typography>No embeddings available</Typography>;
 
     let listItems = [
         {
@@ -37,12 +45,17 @@ const CodeExecutionCardView: React.FC<CodeExecutionComponentProps> = ({ item }) 
             });
         }
     }
-
-    listItems.push({
-        icon: <Category />,
-        primary_text: "Created at",
-        secondary_text: new Date(item.createdAt || '').toDateString()
-    })
+    listItems.push(
+        {
+            icon: <DataObjectRounded />,
+            primary_text: "Embedding",
+            secondary_text: <>{embeddingChunkViewer}</>
+        },
+        {
+            icon: <QueryBuilder />,
+            primary_text: "Created at",
+            secondary_text: new Date(item.createdAt || '').toDateString()
+        })
 
     return (
         <CommonCardView

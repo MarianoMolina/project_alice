@@ -25,12 +25,14 @@ import * as FunctionUtils from './FunctionUtils';
 import Logger from '../../../../utils/Logger';
 
 interface FunctionDefinitionBuilderProps {
+    title?: string | undefined;
     initialParameters?: FunctionParameters;
     onChange?: (functionDefinition: FunctionParameters) => void;
     isViewOnly?: boolean;
 }
 
 const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
+    title = undefined,
     initialParameters,
     onChange,
     isViewOnly = false
@@ -112,10 +114,10 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
     }, [activeParameters]);
 
     return (
-        <Paper elevation={3} className={classes.container}>
+        <Paper elevation={3} className={classes.container} sx={{padding: 1, marginTop: 1, marginBottom: 1}}>
             {!isViewOnly && (
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                    <Typography variant="h6">Function Definition Builder</Typography>
+                    <Typography variant="h6">{title}</Typography>
                     <Button
                         variant="contained"
                         color="primary"

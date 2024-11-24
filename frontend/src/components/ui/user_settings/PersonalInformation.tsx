@@ -17,6 +17,7 @@ import UserCheckpointShortListView from '../../enhanced/user_checkpoint/user_che
 import DataClusterManager from '../../enhanced/data_cluster/data_cluster_manager/DataClusterManager';
 import { DataCluster } from '../../../types/DataClusterTypes';
 import { useAuth } from '../../../contexts/AuthContext';
+import { TextInput } from '../../enhanced/common/inputs/TextInput';
 
 interface PersonalInformationProps {
     userObject: User;
@@ -236,28 +237,23 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
                         {validationError}
                     </Alert>
                 )}
-
-                <TextField
-                    label="Name"
-                    name="name"
+                <TextInput
+                    name='name'
+                    label='Name'
                     value={userObject.name || ''}
-                    onChange={handleInputChange}
-                    fullWidth
-                    margin="normal"
+                    onChange={(value = '') => setUserObject(prevUser => prevUser ? { ...prevUser, name: value } : null)}
+                    disabled={false}
+                    description='Enter your name'
                 />
-
-                <TextField
-                    label="Email"
-                    name="email"
+                <TextInput
+                    name='email'
+                    label='Email'
                     value={userObject.email || ''}
-                    onChange={handleInputChange}
-                    fullWidth
-                    margin="normal"
+                    onChange={(value = '') => setUserObject(prevUser => prevUser ? { ...prevUser, email: value } : null)}
+                    disabled={false}
+                    description='Enter your email'
                 />
-
                 <Typography variant="h6" className={classes.titleText}>Default Chat Configuration</Typography>
-
-                <Typography variant="subtitle1">Agent</Typography>
                 <EnhancedSelect<AliceAgent>
                     componentType="agents"
                     EnhancedView={AgentShortListView}
@@ -265,13 +261,12 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
                     onSelect={handleAgentChange}
                     label="Select Default Agent"
                     activeAccordion={activeAccordion}
+                    description='The agent that will be used for chat sessions.'
                     onAccordionToggle={handleAccordionToggle}
                     accordionEntityName="agent"
                     showCreateButton={true}
                     isInteractable={true}
                 />
-
-                <Typography variant="subtitle1">Agent Tools</Typography>
                 <EnhancedSelect<AliceTask>
                     componentType="tasks"
                     EnhancedView={TaskShortListView}
@@ -280,13 +275,12 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
                     multiple
                     label="Select Default Agent Tools"
                     activeAccordion={activeAccordion}
+                    description='The tools that the chat agent will have access to.'
                     onAccordionToggle={handleAccordionToggle}
                     accordionEntityName="agent_tools"
                     showCreateButton={true}
                     isInteractable={true}
                 />
-
-                <Typography variant="subtitle1">Retrieval Tools</Typography>
                 <EnhancedSelect<AliceTask>
                     componentType="tasks"
                     EnhancedView={TaskShortListView}
@@ -294,47 +288,41 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
                     onSelect={handleRetrievalToolsChange}
                     multiple
                     label="Select Default Retrieval Tools"
+                    description='The tools that the chat agent will use to retrieve information from the data cluster.'
                     activeAccordion={activeAccordion}
                     onAccordionToggle={handleAccordionToggle}
                     accordionEntityName="retrieval_tools"
                     showCreateButton={true}
                     isInteractable={true}
                 />
-
-                <Typography variant="subtitle1">Default Checkpoints</Typography>
-                <Box mb={2}>
-                    <Typography variant="subtitle2" color="textSecondary">Tool Call Checkpoint</Typography>
-                    <EnhancedSelect<UserCheckpoint>
-                        componentType="usercheckpoints"
-                        EnhancedView={UserCheckpointShortListView}
-                        selectedItems={populatedItems?.toolCallCheckpoint ?
-                            [populatedItems.toolCallCheckpoint] : []}
-                        onSelect={handleToolCallCheckpointChange}
-                        label="Select Tool Call Checkpoint"
-                        activeAccordion={activeAccordion}
-                        onAccordionToggle={handleAccordionToggle}
-                        accordionEntityName="tool_call_checkpoint"
-                        showCreateButton={true}
-                        isInteractable={true}
-                    />
-                </Box>
-                <Box mb={2}>
-                    <Typography variant="subtitle2" color="textSecondary">Code Execution Checkpoint</Typography>
-                    <EnhancedSelect<UserCheckpoint>
-                        componentType="usercheckpoints"
-                        EnhancedView={UserCheckpointShortListView}
-                        selectedItems={populatedItems.codeExecCheckpoint ?
-                            [populatedItems.codeExecCheckpoint] : []}
-                        onSelect={handleCodeExecCheckpointChange}
-                        label="Select Code Execution Checkpoint"
-                        activeAccordion={activeAccordion}
-                        onAccordionToggle={handleAccordionToggle}
-                        accordionEntityName="code_exec_checkpoint"
-                        showCreateButton={true}
-                        isInteractable={true}
-                    />
-                </Box>
-                <Typography variant="subtitle1">Data Cluster</Typography>
+                <EnhancedSelect<UserCheckpoint>
+                    componentType="usercheckpoints"
+                    EnhancedView={UserCheckpointShortListView}
+                    selectedItems={populatedItems?.toolCallCheckpoint ?
+                        [populatedItems.toolCallCheckpoint] : []}
+                    onSelect={handleToolCallCheckpointChange}
+                    label="Select Default Tool Call Checkpoint"
+                    description='The checkpoint that will be used when a tool is called if the agent needs to ask for permission.'
+                    activeAccordion={activeAccordion}
+                    onAccordionToggle={handleAccordionToggle}
+                    accordionEntityName="tool_call_checkpoint"
+                    showCreateButton={true}
+                    isInteractable={true}
+                />
+                <EnhancedSelect<UserCheckpoint>
+                    componentType="usercheckpoints"
+                    EnhancedView={UserCheckpointShortListView}
+                    selectedItems={populatedItems.codeExecCheckpoint ?
+                        [populatedItems.codeExecCheckpoint] : []}
+                    onSelect={handleCodeExecCheckpointChange}
+                    label="Select Code Execution Checkpoint"
+                    activeAccordion={activeAccordion}
+                    onAccordionToggle={handleAccordionToggle}
+                    accordionEntityName="code_exec_checkpoint"
+                    showCreateButton={true}
+                    isInteractable={true}
+                />
+                <Typography variant="subtitle1">Default Chat Data Cluster</Typography>
                 <DataClusterManager
                     dataCluster={populatedItems.dataCluster}
                     isEditable={true}

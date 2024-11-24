@@ -11,6 +11,8 @@ import { ParameterComponentProps, ParameterDefinition, ParameterTypes, getDefaul
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import Logger from '../../../../utils/Logger';
 import useStyles from '../ParameterStyles';
+import { SelectInput } from '../../common/inputs/SelectInput';
+import { TextInput } from '../../common/inputs/TextInput';
 
 const ParameterFlexibleView: React.FC<ParameterComponentProps> = ({
     item,
@@ -51,37 +53,35 @@ const ParameterFlexibleView: React.FC<ParameterComponentProps> = ({
             item={item as ParameterDefinition}
             itemType='parameters'
         >
-            <Typography variant="h6" className={classes.titleText}>Type</Typography>
-            <FormControl fullWidth margin="normal">
-                <InputLabel>Type</InputLabel>
-                <Select
-                    value={item?.type || 'string'}
-                    onChange={(e) => onChange({ type: e.target.value as ParameterTypes })}
-                    disabled={!isEditMode}
-                >
-                    <MenuItem value={ParameterTypes.STRING}>String</MenuItem>
-                    <MenuItem value={ParameterTypes.INTEGER}>Integer</MenuItem>
-                    <MenuItem value={ParameterTypes.BOOLEAN}>Boolean</MenuItem>
-                    <MenuItem value={ParameterTypes.OBJECT}>Object</MenuItem>
-                </Select>
-            </FormControl>
-            <Typography variant="h6" className={classes.titleText}>Description</Typography>
-            <TextField
-                fullWidth
+            <SelectInput
+                name="type"
+                label="Parameter Type"
+                value={item?.type || 'string'}
+                onChange={(e) => onChange({ type: e as ParameterTypes })}
+                disabled={!isEditMode}
+                description='Select the data type of parameter'
+                options={[
+                    { value: ParameterTypes.STRING, label: 'String' },
+                    { value: ParameterTypes.INTEGER, label: 'Integer' },
+                    { value: ParameterTypes.BOOLEAN, label: 'Boolean' },
+                    { value: ParameterTypes.OBJECT, label: 'Object' },
+                    { value: ParameterTypes.ARRAY, label: 'Array' },
+                ]}
+            />
+            <TextInput
+                name="description"
                 label="Description"
                 value={item?.description || ''}
-                onChange={(e) => onChange({ description: e.target.value })}
-                margin="normal"
+                description='Enter a description for the parameter'
+                onChange={(value) => onChange({ description: value })}
                 disabled={!isEditMode}
             />
-            <Typography variant="h6" className={classes.titleText}>Default Value</Typography>
-            <TextField
-                fullWidth
+            <TextInput
+                name="default"
                 label="Default Value"
+                description='Enter the default value for the parameter'
                 value={item?.default || ''}
-                onChange={(e) => onChange({ default: item?.type === 'integer' ? Number(e.target.value) : e.target.value })}
-                type={item?.type === 'integer' ? 'integer' : 'text'}
-                margin="normal"
+                onChange={(value) => onChange({ default: item?.type === 'integer' ? Number(value) : value })}
                 disabled={!isEditMode}
             />
         </GenericFlexibleView>

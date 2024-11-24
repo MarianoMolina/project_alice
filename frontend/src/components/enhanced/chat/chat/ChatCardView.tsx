@@ -6,7 +6,7 @@ import {
   List,
   Box,
 } from '@mui/material';
-import { Person, Functions, Message as MessageIcon, AttachFile } from '@mui/icons-material';
+import { Person, Functions, Message as MessageIcon, AttachFile, QueryBuilder } from '@mui/icons-material';
 import { ChatComponentProps } from '../../../../types/ChatTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
@@ -89,7 +89,12 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
       icon: <AttachFile />,
       primary_text: "Data Cluster",
       secondary_text: item.data_cluster && hasAnyReferences(item.data_cluster) ? <DataClusterManager dataCluster={item.data_cluster} isEditable={false} /> : 'No data cluster'
-    }
+    },
+    {
+      icon: <QueryBuilder />,
+      primary_text: "Created At",
+      secondary_text: new Date(item.createdAt || '').toLocaleString()
+  }
   ];
 
   return (

@@ -6,6 +6,7 @@ import UserCheckpointShortListView from './UserCheckpointShortListView';
 import { UserCheckpoint } from '../../../../types/UserCheckpointTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
 import { UserCheckpointComponentProps } from '../../../../types/UserCheckpointTypes';
+import UserCheckpointFlexibleView from './UserCheckpointFlexibleView';
 
 type BaseUserCheckpointMode = BaseDbElementProps<UserCheckpoint>['mode'];
 type ExtendedUserCheckpointMode = 'list' | 'shortList' | 'card' | 'table';
@@ -45,6 +46,7 @@ const EnhancedUserCheckpoint: React.FC<EnhancedUserCheckpointProps> = (props) =>
       case 'create':
       case 'edit':
       case 'view':
+        return <UserCheckpointFlexibleView {...commonProps} />;
       case 'card':
         return <UserCheckpointCardView {...commonProps} />;
       case 'shortList':
