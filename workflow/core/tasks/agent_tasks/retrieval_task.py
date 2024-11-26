@@ -16,10 +16,13 @@ from workflow.core.data_structures import (
     FileReference,
     Embeddable, 
     EmbeddingChunk,
+    CodeExecution,
     DataCluster
 )
 from workflow.core.api import APIManager
 from workflow.util import LOGGER, cosine_similarity, Language, get_traceback
+
+MIN_SIMILARITY_THRESHOLD = 0.2
 
 class ChunkedEmbedding(TypedDict):
     similarity: float
@@ -138,7 +141,7 @@ class RetrievalTask(AliceTask):
         fields_to_process = [field for field in references_model_map.keys()
                              if field not in ['embeddings']]
         
-        LOGGER.debug(f"Fields to process: {fields_to_process}")
+        LOGGER.info(f"Fields to process: {fields_to_process}")
 
         for field_name in fields_to_process:
             items = getattr(data_cluster, field_name)
@@ -163,31 +166,29 @@ class RetrievalTask(AliceTask):
             if not item.embedding or update_all:
                 # Need to generate embeddings
                 content = self.get_item_content(item)
+                LOGGER.info(f"Generating embeddings for item with content length of {len(content)}")
                 language = self.get_item_language(item)
                 embeddings_reference: List[EmbeddingChunk] = await self.agent.generate_embeddings(
                     api_manager=api_manager, input=content, language=language
                 )
                 if embeddings_reference:
+                    LOGGER.info(f"Generated embeddings for item: {len(embeddings_reference)}")
                     item.embedding = embeddings_reference
                 else:
                     raise ValueError(f"Failed to generate embeddings for item: {item}")
             updated_items.append(item)
+        LOGGER.info(f"Updated items: {len(updated_items)}")
+        LOGGER.info(f"Embedding chunks: {[len(item.embedding) for item in updated_items if item.embedding]}")
         return updated_items
     
     def get_item_content(self, item: BaseModel) -> Union[str, List[str]]:
         """
         Extracts the content from the item for embedding generation.
         """
-        if isinstance(item, FileReference) or isinstance(item, FileContentReference):
-            if item.transcript and item.transcript.content:
-                return item.transcript.content
-            else:
-                raise ValueError(f"No transcript content available for file: {item.filename}")
-        elif hasattr(item, 'content') and isinstance(item.content, str):
-            return item.content
-        elif hasattr(item, 'text_content') and isinstance(item.text_content, str):
-            return item.text_content
-        else:
+        try:
+            return str(item)
+        except Exception as e:
+            LOGGER.error(f"Failed to extract content from item: {e}")
             raise ValueError(f"Cannot extract content from item: {item}")
 
     def get_item_language(self, item: BaseModel) -> Language:
@@ -198,6 +199,8 @@ class RetrievalTask(AliceTask):
             extension = self.get_file_extension(item.filename)
             language = self.map_extension_to_language(extension)
             return language
+        if isinstance(item, CodeExecution):
+            return item.code_block.language
         else:
             return Language.TEXT
 
@@ -269,7 +272,7 @@ class RetrievalTask(AliceTask):
             )
 
         try:
-            LOGGER.debug(f"Retrieving embeddings for prompt: {prompt}")
+            LOGGER.info(f"Retrieving embeddings for prompt: {prompt}")
             # Step 1: Create embedding for the prompt
             embedding_chunks: List[EmbeddingChunk] = await self.agent.generate_embeddings(
                 api_manager=api_manager, input=prompt, language=Language.TEXT
@@ -286,7 +289,7 @@ class RetrievalTask(AliceTask):
 
             # Step 3: Prepare the References object to return
             embedding_chunks = self.prepare_result_references(top_embeddings)
-            LOGGER.debug(f"Retrieved embeddings: {embedding_chunks}")
+            LOGGER.info(f"Retrieved embeddings: {len(embedding_chunks)}")
 
             return NodeResponse(
                 parent_task_id=self.id,
@@ -334,7 +337,7 @@ class RetrievalTask(AliceTask):
                                 'embedding_chunk': embedding_chunk
                             })
                     else:
-                        LOGGER.debug(f"Item {item} has no embedding.")
+                        LOGGER.info(f"Item {item} has no embedding.")
         return embedding_chunks
     
     def filter_chunks_by_similarity_threshold(self, embedding_chunks: List[ChunkedEmbedding], similarity_threshold: float) -> List[ChunkedEmbedding]:
@@ -345,8 +348,9 @@ class RetrievalTask(AliceTask):
             return embedding_chunks
         else:
             filtered_chunks = self.filter_chunks_by_similarity_threshold(embedding_chunks, similarity_threshold)
-            if len(filtered_chunks) < max_results:
-                LOGGER.debug(f"Found only {len(filtered_chunks)} matches for a max_result of {max_results}. Reducing threshold from {similarity_threshold}.")
+            if len(filtered_chunks) < max_results and similarity_threshold > MIN_SIMILARITY_THRESHOLD:
+                # If we don't have enough results, reduce the threshold and try again 
+                LOGGER.info(f"Found only {len(filtered_chunks)} matches for a max_result of {max_results}. Reducing threshold from {similarity_threshold}.")
                 return self.get_final_embedding_chunks(embedding_chunks, max_results, similarity_threshold * 0.75)
             # Sort by similarity
             filtered_chunks.sort(key=lambda x: x['similarity'], reverse=True)
@@ -367,12 +371,12 @@ class RetrievalTask(AliceTask):
         # Step 1: Compute similarity between prompt and each embedding in data_cluster
         embedding_similarity_chunk: List[ChunkedEmbedding] = self.get_similarity_chunks_from_data_cluster(data_cluster, prompt_embedding)
 
-        LOGGER.debug(f"Embedding similarity chunk: {[{emb['embedding_chunk'].text_content, emb['similarity']} for emb in embedding_similarity_chunk]}")
+        LOGGER.info(f"Embedding similarity chunk:  ({len(embedding_similarity_chunk)})  {[{emb['embedding_chunk'].text_content, emb['similarity']} for emb in embedding_similarity_chunk]}")
 
         actual_max_results = min(max_results, len(embedding_similarity_chunk))
 
         if not embedding_similarity_chunk:
-            LOGGER.debug(f"No embeddings found in data cluster. max_results: {max_results} - actual_max_results: {actual_max_results}")
+            LOGGER.info(f"No embeddings found in data cluster. max_results: {max_results} - actual_max_results: {actual_max_results}")
             return []
         
         if len(embedding_similarity_chunk) <= max_results:
@@ -380,7 +384,7 @@ class RetrievalTask(AliceTask):
         
         final_chunks: List[ChunkedEmbedding] = self.get_final_embedding_chunks(embedding_similarity_chunk, max_results, similarity_threshold)
 
-        LOGGER.debug(f"Final chunks: {[{emb['embedding_chunk'].text_content, emb['similarity']} for emb in final_chunks]}")
+        LOGGER.info(f"Final chunks: ({len(final_chunks)}) {[{emb['embedding_chunk'].text_content, emb['similarity']} for emb in final_chunks]}")
 
         return final_chunks
 
@@ -394,7 +398,7 @@ class RetrievalTask(AliceTask):
         """
         reference_groups: Dict[int, Dict[str, Any]] = {}
 
-        LOGGER.debug(f"Top embeddings: {[{emb['embedding_chunk'].text_content, emb['similarity']} for emb in top_embeddings]}")
+        LOGGER.info(f"Top embeddings: {[{emb['embedding_chunk'].text_content, emb['similarity']} for emb in top_embeddings]}")
         for item in top_embeddings:
             ref_id = id(item['reference'])
             if ref_id not in reference_groups:
@@ -405,7 +409,7 @@ class RetrievalTask(AliceTask):
                 }
             reference_groups[ref_id]['embedding_chunks'].append(item['embedding_chunk'])
 
-        LOGGER.debug(f"Reference groups: {reference_groups}")
+        LOGGER.info(f"Reference groups: {len(reference_groups.keys())}")
         final_embedding_chunks: List[EmbeddingChunk] = []
         # Sort the embeddings within each reference by their index
         for group in reference_groups.values():

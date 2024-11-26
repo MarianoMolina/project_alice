@@ -2,6 +2,7 @@ import { ColorLens, Download, Edit, EditNote, Google, RecordVoiceOver, Reddit, S
 import { ApiType, ApiName } from "../types/ApiTypes";
 import { AIIcon, AnthropicIcon, ArxivIcon, AzureIcon, BarkIcon, CohereIcon, GeminiIcon, GroqIcon, LlamaIcon, LMStudioIcon, 
   MistralIcon, OpenAiIcon, WikipediaIcon, WolframAlphaIcon } from "./CustomIcons";
+import { ModelType } from "../types/ModelTypes";
 
 // Base interfaces for API configurations
 interface BaseApiConfig {
@@ -191,4 +192,14 @@ export const apiTypeIcons: Record<ApiType, React.ReactElement> = {
   [ApiType.GOOGLE_KNOWLEDGE_GRAPH]: <Google />,
   [ApiType.WOLFRAM_ALPHA]: <WolframAlphaIcon />,
   [ApiType.REQUESTS]: <Download />,
+};
+
+export const modelTypeIcons: Record<ModelType, React.ReactElement> = {
+  [ModelType.CHAT]: <AIIcon />,
+  [ModelType.INSTRUCT]: <AIIcon />,
+  [ModelType.IMG_GEN]: <ColorLens />,
+  [ModelType.STT]: <EditNote />,
+  [ModelType.TTS]: <RecordVoiceOver />,
+  [ModelType.EMBEDDINGS]: <Tag />,
+  [ModelType.VISION]: <Visibility />,
 };

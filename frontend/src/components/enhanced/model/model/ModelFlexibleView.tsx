@@ -21,6 +21,8 @@ import { TextInput } from '../../common/inputs/TextInput';
 import { SelectInput } from '../../common/inputs/SelectInput';
 import { NumericInput } from '../../common/inputs/NumericInput';
 import { BooleanInput } from '../../common/inputs/BooleanInput';
+import { IconSelectInput } from '../../common/inputs/IconSelectInput';
+import { apiNameIcons, modelTypeIcons } from '../../../../utils/ApiUtils';
 
 const ModelFlexibleView: React.FC<ModelComponentProps> = ({
     item,
@@ -74,21 +76,21 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                 description='The name of the model. This should be the name the API uses to reference the model.'
                 disabled={!isEditMode}
             />
-            <SelectInput
+            <IconSelectInput
                 name='model_type'
                 label="Model Type"
                 value={item?.model_type || ''}
                 description='The type of model to create. Use Chat for LLM models.'
                 onChange={(value) => onChange({ model_type: value as ModelType })}
-                options={Object.values(ModelType).map((type) => ({ value: type, label: formatCamelCaseString(type) }))}
+                options={Object.values(ModelType).map((type) => ({ value: type, label: formatCamelCaseString(type), icon: modelTypeIcons[type] }))}
                 disabled={!isEditMode}
             />
-            <SelectInput
+            <IconSelectInput
                 name='api_name'
                 label="API Name"
                 value={item?.api_name || ''}
                 onChange={(value) => onChange({ api_name: value as ApiName })}
-                options={Object.values(ApiName).map((name) => ({ value: name, label: formatCamelCaseString(name) }))}
+                options={Object.values(ApiName).map((name) => ({ value: name, label: formatCamelCaseString(name), icon: apiNameIcons[name] }))}
                 disabled={!isEditMode}
             />
             <TextInput

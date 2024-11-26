@@ -42,7 +42,7 @@ base_chat_module = BaseChatModule(
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "user_data": "user_data_paramter"
+                        "user_data": "user_data_parameter"
                     },
                     "required": []
                 }

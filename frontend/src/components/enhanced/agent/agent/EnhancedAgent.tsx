@@ -1,5 +1,5 @@
 import React from 'react';
-import AgentFlexibleView from './AgentFlexibleViewNew';
+import AgentFlexibleView from './AgentFlexibleView';
 import AgentListView from './AgentListView';
 import AgentTableView from './AgentTableView';
 import AgentCardView from './AgentCardView';

@@ -12,7 +12,7 @@ from workflow.core.data_structures import (
     ParameterDefinition,
 )
 from workflow.core.api.engines.api_engine import APIEngine
-from workflow.util import LOGGER, est_token_count, Language, RecursiveTextSplitter, cosine_similarity, get_language_matching, get_traceback
+from workflow.util import LOGGER, est_token_count, Language, TextSplitter, cosine_similarity, get_language_matching, get_traceback
 
 class EmbeddingEngine(APIEngine):
     input_variables: FunctionParameters = Field(
@@ -55,7 +55,7 @@ class EmbeddingEngine(APIEngine):
         if language_enum == Language.TEXT:
             chunks = await self.semantic_text_chunking(input, api_data)
         else:
-            splitter = RecursiveTextSplitter(
+            splitter = TextSplitter(
                 language=language_enum,
                 chunk_size=500,
                 chunk_overlap=150,
@@ -77,7 +77,7 @@ class EmbeddingEngine(APIEngine):
         client = AsyncOpenAI(api_key=api_data.api_key, base_url=api_data.base_url)
         model = api_data.model
 
-        LOGGER.debug(f"Generating embeddings for {len(inputs)} inputs using model: {model}")
+        LOGGER.info(f"Generating embeddings for {len(inputs)} with total char length {[len(input) for input in inputs]} inputs using model: {model}")
         # Check if total tokens exceed context size
         chunks: List[EmbeddingChunk] = []
 
@@ -87,13 +87,13 @@ class EmbeddingEngine(APIEngine):
                     continue
                 if est_token_count(input) > api_data.ctx_size:
                     raise ValueError(f"Input text (tokens est.: {est_token_count(input)}) exceeds the maximum token limit: {api_data.ctx_size}")
-                response = await client.embeddings.create(input=inputs, model=model)
+                response = await client.embeddings.create(input=input, model=model)
 
                 # Extract embeddings from the response
                 embeddings = [data.embedding for data in response.data]
 
                 # Create EmbeddingChunks objects for each input
-                for idx, (input_text, embedding) in enumerate(zip(inputs, embeddings)):
+                for idx, (input_text, embedding) in enumerate(zip(input, embeddings)):
                     creation_metadata = {
                         "model": model,
                         "usage": self.get_usage(response),
@@ -116,21 +116,26 @@ class EmbeddingEngine(APIEngine):
         """
         if est_token_count(input_text) < 600:
             return [input_text]
+        
+        LOGGER.info(f"Semantic text chunking for input text with total char length {len(input_text)} with est token count {est_token_count(input_text)}")
             
         # Step 1: Setup initial sentences
         sentences = self.setup_initial_sentences(input_text)
+        LOGGER.info(f"Initial sentences: {len(sentences)} with total char length {[len(sentence) for sentence in sentences]}")
 
         # Step 2: Create overlapping combinations of sentences
         combined_sentences = self.create_combined_sentences(sentences)
 
+        LOGGER.info(f"Combined sentences: {len(combined_sentences)} with total char length {[len(combined) for combined in combined_sentences]}")
+
         # Step 3: Generate embeddings for combined sentences using generate_embedding
         embedding_chunks = await self.get_embeddings_for_sentences(combined_sentences, api_data)
 
-        LOGGER.debug(f"Embeddings generated: {[type(chunk) for chunk in embedding_chunks]}")
+        LOGGER.info(f"Embeddings generated: {[type(chunk) for chunk in embedding_chunks]}")
 
         vector_list = [chunk.vector for chunk in embedding_chunks]
 
-        LOGGER.debug(f"vector_list generated: {vector_list}")
+        LOGGER.info(f"vector_list generated: {len(vector_list)}")
 
         if not vector_list:
             raise ValueError(f"No embeddings generated for the input text. Traceback - {get_traceback()}")
@@ -141,8 +146,12 @@ class EmbeddingEngine(APIEngine):
         # Step 4: Find breakpoints using cosine similarity
         breakpoints = self.find_breakpoints(vector_list, combined_sentences)
 
+        LOGGER.info(f"Breakpoints found: {breakpoints}")
+
         # Step 5: Return final chunks based on breakpoints
         chunks = self.return_final_chunks(breakpoints, sentences)
+
+        LOGGER.info(f"Final chunks generated: {len(chunks)} with total char length {[len(chunk) for chunk in chunks]}")
 
         return chunks
 

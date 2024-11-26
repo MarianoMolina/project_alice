@@ -8,10 +8,11 @@ import { APIConfigComponentProps, APIConfig, getDefaultAPIConfigForm, HealthStat
 import { ApiName } from '../../../../types/ApiTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import useStyles from '../APIConfigStyles';
-import { API_BASE_URLS } from '../../../../utils/ApiUtils';
+import { API_BASE_URLS, apiNameIcons } from '../../../../utils/ApiUtils';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 import { TextInput } from '../../common/inputs/TextInput';
 import { SelectInput } from '../../common/inputs/SelectInput';
+import { IconSelectInput } from '../../common/inputs/IconSelectInput';
 
 const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
     item,
@@ -289,12 +290,12 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
                 description='Enter a name for the API configuration'
                 fullWidth
             />
-            <SelectInput
+            <IconSelectInput
                 name='api_name'
                 label='API Name'
                 value={form.api_name || ''}
                 onChange={(apiName) => handleApiNameChange(apiName as ApiName)}
-                options={Object.values(ApiName).map((name) => ({ value: name, label: formatCamelCaseString(name) }))}
+                options={Object.values(ApiName).map((name) => ({ value: name, label: formatCamelCaseString(name), icon: apiNameIcons[name] }))}
                 description='Select the name of the API you want to create'
                 disabled={!isCreateMode}
                 fullWidth

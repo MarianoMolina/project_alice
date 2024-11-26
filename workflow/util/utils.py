@@ -1,6 +1,7 @@
 import json, re, numpy as np
 from typing import List, Any, Type, Tuple, Dict
 from workflow.util.logger import LOGGER
+from workflow.util.const import CHAR_PER_TOKEN
 
 def check_cuda_availability() -> bool:
     try:
@@ -112,7 +113,7 @@ def chunk_text(input_text: str, target_chunk_size: int) -> List[str]:
 
 def est_token_count(text: str) -> int:
     """Estimate token count for a given string."""
-    return len(text) // 3  # Simple estimation
+    return len(text) // CHAR_PER_TOKEN  # Simple estimation
 
 def est_messages_token_count(messages: List[Dict[str, Any]], tools: List[Any] = None) -> int:
     """Estimate token count for a list of messages and optional tools."""

@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { ApiComponentProps, API, ApiType, ApiName, getDefaultApiForm, ModelApiType } from '../../../../types/ApiTypes';
-import { API_CAPABILITIES } from '../../../../utils/ApiUtils';
+import { API_CAPABILITIES, apiNameIcons, apiTypeIcons } from '../../../../utils/ApiUtils';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import ModelShortListView from '../../model/model/ModelShortListView';
 import APIConfigShortListView from '../../api_config/api_config/APIConfigShortListView';
@@ -14,6 +14,7 @@ import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 import { SelectInput } from '../../common/inputs/SelectInput';
 import { TextInput } from '../../common/inputs/TextInput';
 import { BooleanInput } from '../../common/inputs/BooleanInput';
+import { IconSelectInput } from '../../common/inputs/IconSelectInput';
 
 const ApiFlexibleView: React.FC<ApiComponentProps> = ({
     item,
@@ -125,6 +126,18 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
         }
     }, [item, handleDelete]);
 
+    const apiOptions = Object.values(ApiName).map((name) => ({
+        value: name,
+        label: formatCamelCaseString(name),
+        icon: apiNameIcons[name],
+    }));
+
+    const apiTypes = availableApiTypes.map((type) => ({
+        value: type,
+        label: formatCamelCaseString(type),
+        icon: apiTypeIcons[type],
+    }));
+
     const title = mode === 'create' ? 'Create New API' : mode === 'edit' ? 'Edit API' : 'API Details';
     const saveButtonText = form._id ? 'Update API' : 'Create API';
 
@@ -140,23 +153,23 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
             itemType='apis'
         >
             {isCreateMode && (
-                <SelectInput
+                <IconSelectInput
                     value={form.api_name || ''}
                     onChange={(apiName) => handleApiNameChange(apiName as ApiName)}
                     name="api_name"
                     label="API Name"
-                    options={Object.values(ApiName).map((name) => ({ value: name, label: formatCamelCaseString(name) }))}
+                    options={apiOptions}
                     description='Select the name of the API you want to create'
                 />
             )}
 
             {form.api_name && (
-                <SelectInput
+                <IconSelectInput
                     value={form.api_type || ''}
                     onChange={(apiType) => handleApiTypeChange(apiType as ApiType)}
                     name="api_type"
                     label="API Type"
-                    options={availableApiTypes.map((type) => ({ value: type, label: formatCamelCaseString(type) }))}
+                    options={apiTypes}
                     disabled={!isEditMode}
                     description='Select the type of API'
                 />

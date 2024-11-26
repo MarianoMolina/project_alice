@@ -448,6 +448,7 @@ print("This is just for demonstration")
     
     async def generate_embeddings(self, api_manager: APIManager, input: Union[str, List[str]], language: Optional[Language]) -> List[EmbeddingChunk]:
         embeddings_model = self.models[ModelType.EMBEDDINGS] or api_manager.get_api_by_type(ApiType.EMBEDDINGS).default_model
+        LOGGER.info(f'Generating embedding for length {len(input)}')
         if not embeddings_model:
             raise ValueError("No embeddings model available for the agent or in the API manager")
         

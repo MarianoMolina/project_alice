@@ -33,9 +33,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    padding: theme.spacing(1, 0),
+    padding: theme.spacing(1, 0, 0, 0),
     borderRadius: theme.shape.borderRadius,
-    margin: theme.spacing(0.5, 0),
+    margin: theme.spacing(0.5, 0, 0, 0),
     '&:nth-of-type(1)': {
       '--group-color-0': hexToRgba(theme.palette.primary.main, 0.4),
     },

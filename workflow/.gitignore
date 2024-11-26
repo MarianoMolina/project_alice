@@ -1,2 +1,4 @@
 /tests/test_results
 /lm_studio
+/build
+/workflow.egg-info

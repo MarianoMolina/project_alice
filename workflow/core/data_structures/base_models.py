@@ -81,3 +81,6 @@ class EmbeddingChunk(BaseDataStructure):
 
 class Embeddable(BaseDataStructure):
     embedding: Optional[List[EmbeddingChunk]] = Field(None, description="The embedding chunks for the file content")
+
+    def __str__(self) -> str:
+        return super().__str__()
