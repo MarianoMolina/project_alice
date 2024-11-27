@@ -79,6 +79,9 @@ class EmbeddingChunk(BaseDataStructure):
     index: int = Field(..., description="The index of the embedding chunk in the original text")
     creation_metadata: dict = Field(default_factory=dict, description="Metadata about the creation of the embedding")
 
+    def __str__(self) -> str:
+        return f"EmbeddingChunk: Index: {self.index}\nContent: {self.text_content}.\n"
+
 class Embeddable(BaseDataStructure):
     embedding: Optional[List[EmbeddingChunk]] = Field(None, description="The embedding chunks for the file content")
 

@@ -1,5 +1,6 @@
+import re
 from pydantic import Field
-from typing import List
+from typing import List, Tuple, Dict
 from openai import AsyncOpenAI
 from openai.types import CreateEmbeddingResponse
 from workflow.core.data_structures import (
@@ -11,10 +12,7 @@ from workflow.core.data_structures import (
     ParameterDefinition,
 )
 from workflow.core.api.engines.api_engine import APIEngine
-from workflow.util import (
-    LOGGER, est_token_count, Language, TextSplitter, 
-    SemanticTextSplitter, SplitterType, get_language_matching, get_traceback
-    )
+from workflow.util import LOGGER, est_token_count, Language, TextSplitter, SemanticTextSplitter, SplitterType, cosine_similarity, get_language_matching, get_traceback
 
 class EmbeddingEngine(APIEngine):
     input_variables: FunctionParameters = Field(

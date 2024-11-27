@@ -1,5 +1,5 @@
 import re
-from typing import List, Iterable, Optional, Protocol
+from typing import List, Iterable, Optional, Protocol, Any, Literal
 from pydantic import BaseModel, Field
 from enum import Enum
 from workflow.util.code_utils import Language
@@ -31,14 +31,14 @@ class TextSplitter(BaseModel):
         description="Type of text splitter being used"
     )
     chunk_size: int = Field(
-        default=500,
+        default=600,
         gt=0,
         description="Target size for each text chunk"
     )
     chunk_overlap: int = Field(
-        default=100,
+        default=75,
         ge=0,
-        description="Number of tokens to overlap between chunks, if the selected method includes this"
+        description="Number of tokens/chars to overlap between chunks"
     )
     language: Language = Field(
         default=Language.TEXT,
@@ -56,8 +56,8 @@ class TextSplitter(BaseModel):
         default=None,
         description="Custom separators to use for splitting. If None, defaults will be used based on language"
     )
-    keep_separator: bool = Field(
-        default=True,
+    keep_separator: bool | Literal["start", "end"] = Field(
+        default="end",
         description="Whether to keep separators in the output"
     )
     strip_whitespace: bool = Field(
@@ -73,7 +73,7 @@ class TextSplitter(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    def split_text(self, text: str, embedding_generator: EmbeddingGenerator = None) -> List[str]:
+    def split_text(self, text: str, embedding_generator: EmbeddingGenerator = None, api_data: Any = None) -> List[str]:
         separators = self.separators or get_separators_for_language(self.language)
         return self._recursive_split_text(text, separators)
 

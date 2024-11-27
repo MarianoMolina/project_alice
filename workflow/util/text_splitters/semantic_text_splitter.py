@@ -1,5 +1,5 @@
 import re
-from typing import List
+from typing import List, Any
 from pydantic import Field
 from workflow.util import LOGGER
 from workflow.util.text_splitters.utils import cosine_similarity, est_token_count
@@ -7,18 +7,13 @@ from workflow.util.text_splitters.text_splitter import TextSplitter, SplitterTyp
 
 class SemanticTextSplitter(TextSplitter):
     splitter_type: SplitterType = SplitterType.SEMANTIC
-    chunk_overlap: int = Field(
-        default=0,
-        ge=0,
-        description="Number of tokens to overlap between chunks, if the selected method includes this"
-    )
     similarity_threshold: float = Field(
         default=0.5,
         ge=0.0, le=1.0,
         description="Threshold for cosine similarity between sentence embeddings, if the method uses this"
     )
 
-    async def split_text(self, text: str, embedding_generator: EmbeddingGenerator) -> List[str]:
+    async def split_text(self, text: str, embedding_generator: EmbeddingGenerator, api_data: Any) -> List[str]:
         """Split text into semantically meaningful chunks. 
             Configs used:
             - chunk_size: Target size for each text chunk
@@ -41,7 +36,7 @@ class SemanticTextSplitter(TextSplitter):
 
         chunks = text_splitter.split_text(text)
         
-        embeddings = await embedding_generator.generate_embedding(chunks)
+        embeddings: List[List[float]] = await embedding_generator.generate_embedding(inputs=chunks, api_data=api_data)
         LOGGER.info(f"Generated embeddings count: {len(embeddings)}")
         
         breakpoints = self._find_breakpoints(embeddings, chunks)
@@ -65,7 +60,7 @@ class SemanticTextSplitter(TextSplitter):
         
         text_splitter = TextSplitter(
             chunk_size=self.chunk_overlap,
-            chunk_overlap=0,  # We don't want recursive overlap
+            chunk_overlap=0, 
             language=self.language,
             length_function=self.length_function,
         )
@@ -116,10 +111,7 @@ class SemanticTextSplitter(TextSplitter):
         """
         MIN_SIZE_RATIO = 0.8  # Minimum size before considering similarity
         MAX_SIZE_RATIO = 1.2  # Maximum size before forcing split
-        
-        # Adjust for overlap - each non-edge chunk will have overlap on both sides
-        effective_chunk_size = self.chunk_size + (2 * self.chunk_overlap)
-        
+            
         breakpoints = [0]
         current_tokens = 0
         
@@ -128,9 +120,9 @@ class SemanticTextSplitter(TextSplitter):
             tokens = est_token_count(windows[i])
             current_tokens += tokens
             
-            if (current_tokens >= effective_chunk_size * MIN_SIZE_RATIO and 
+            if (current_tokens >= self.chunk_size * MIN_SIZE_RATIO and 
                 similarity < self.similarity_threshold) or \
-            current_tokens >= effective_chunk_size * MAX_SIZE_RATIO:
+            current_tokens >= self.chunk_size * MAX_SIZE_RATIO:
                 breakpoints.append(i)
                 current_tokens = 0
                     

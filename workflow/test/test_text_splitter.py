@@ -1,12 +1,4 @@
-import sys
-from pathlib import Path
-current_dir = Path(__file__).parent.absolute()
-parent_dir = current_dir.parent
-if parent_dir not in sys.path:
-    sys.path.insert(0, str(parent_dir))
-
 import pytest
-from typing import List
 from pydantic import ValidationError
 
 from workflow.util.text_splitters.text_splitter import (
