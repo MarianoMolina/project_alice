@@ -32,6 +32,16 @@ class TaskResponse(Embeddable):
         if not self.node_references:
             return []
         return complete_inner_execution_history(self.node_references)
+    
+    @field_validator('execution_history')
+    def validate_history(cls, v):
+        if isinstance(v, list):
+            if all(isinstance(item, ExecutionHistoryItem) for item in v):
+                return v
+            else:
+                return [ExecutionHistoryItem(**item) for item in v]
+        else:
+            return []
         
     @field_validator('node_references')
     def validate_references(cls, v):

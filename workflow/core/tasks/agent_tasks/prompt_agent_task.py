@@ -127,6 +127,7 @@ class PromptAgentTask(AliceTask):
 
     def update_inputs(self, **kwargs) -> Dict[str, Any]:
         """
+        TODO: Review if this is necessary, Task already does input validation
         Validates and sanitizes the input parameters based on the defined input_variables.
         """
         sanitized_input = {}
@@ -223,7 +224,12 @@ class PromptAgentTask(AliceTask):
         except Exception as e:
             return self._create_error_response("tool_call_execution", str(e), len(execution_history))
 
-    async def execute_code_execution(self, execution_history: List[NodeResponse], node_responses: List[NodeResponse], **kwargs) -> NodeResponse:
+    async def execute_code_execution(self, execution_history: List[NodeResponse], node_responses: List[NodeResponse], include_prompt_in_execution: Optional[bool] = False, **kwargs) -> NodeResponse:
+        messages: List[MessageDict] = []
+        LOGGER.info(f"Executing code execution for task {self.task_name} with include_prompt_in_execution: {include_prompt_in_execution}")
+        if include_prompt_in_execution:
+            prompt_messages = self.create_message_list(**kwargs)
+            messages.extend(prompt_messages)
         llm_reference = self.get_node_reference(node_responses, "llm_generation")
 
         if not llm_reference or not llm_reference.messages:
@@ -239,10 +245,10 @@ class PromptAgentTask(AliceTask):
                 execution_order=len(execution_history)
             )
 
-        llm_response = llm_reference.messages[-1]
+        messages.extend(llm_reference.messages)
 
         try:
-            code_executions, exit_code  = await self.agent.process_code_execution([llm_response])
+            code_executions, exit_code  = await self.agent.process_code_execution(messages)
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name="code_execution",
@@ -303,36 +309,6 @@ class PromptAgentTask(AliceTask):
             desired_code = ToolExitCode.SUCCESS
 
         return self._get_available_exit_code(desired_code, "tool_call_execution")
-    
-    def _get_available_exit_code(self, desired_code: int, node_name: str) -> int:
-        """
-        Get the closest available exit code for a node.
-        
-        Args:
-            desired_code: The preferred exit code
-            node_name: The name of the node
-            
-        Returns:
-            The closest available exit code, defaulting to 0 if the desired code
-            isn't available and 0 is defined
-        """
-        if node_name not in self.node_end_code_routing:
-            return 0
-
-        available_codes = self.node_end_code_routing[node_name].keys()
-        if not available_codes:
-            return 0
-
-        # If desired code is available, use it
-        if desired_code in available_codes:
-            return desired_code
-
-        # If 0 is available, use it as default success code
-        if 0 in available_codes:
-            return 0
-
-        # Return the lowest available code as last resort
-        return min(available_codes)
     
     def tool_list(self, api_manager: APIManager) -> List[ToolFunction]:
         return [func.get_function(api_manager)["tool_function"] for func in self.tasks.values()] if self.tasks else None

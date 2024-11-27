@@ -1,6 +1,6 @@
 from typing import Dict, Any, Optional, List, Tuple
 from workflow.core.data_structures import (
-    FunctionParameters, NodeResponse, ExecutionHistoryItem, Prompt
+    FunctionParameters, NodeResponse, ExecutionHistoryItem, Prompt, ParameterDefinition
 )
 from workflow.util import convert_value_to_type, LOGGER
 
@@ -81,7 +81,7 @@ def generate_node_responses_summary(
             return generate_default_summary(node_responses, verbose)
     
     return generate_default_summary(node_responses, verbose)
-    
+
 def validate_and_process_function_inputs(
     params: FunctionParameters,
     execution_history: List[NodeResponse],
@@ -89,6 +89,11 @@ def validate_and_process_function_inputs(
 ) -> Tuple[Dict[str, Any], Optional[str]]:
     """
     Validates and processes input parameters against a FunctionParameters definition.
+    For each parameter defined in FunctionParameters, checks if:
+    1. Value exists in kwargs
+    2. If not in kwargs, looks for matching node name in execution history
+    3. If not found in history, uses default value if available
+    4. For required parameters, returns error if no value is found
     
     Args:
         params: FunctionParameters object defining expected inputs
@@ -98,58 +103,60 @@ def validate_and_process_function_inputs(
     Returns:
         Tuple containing processed inputs dict and error message (if any)
     """
-    processed_inputs = kwargs.copy()
-
-    # Check each required parameter
-    for param_name in params.required:
-        # Skip if already in kwargs and no matching node exists
-        if param_name in processed_inputs and not any(
-            node.node_name == param_name for node in execution_history
-        ):
-            continue
-
-        # Look for matching node in history
+    def find_in_history(param_name: str) -> Optional[Any]:
+        """Helper to find parameter value in execution history."""
         matching_node = next(
             (node for node in reversed(execution_history)
              if node.node_name == param_name and node.references),
             None
         )
-
         if matching_node:
-            try:
-                # Get value from node references
-                value = matching_node.references.detailed_summary()
-                param_def = params.properties[param_name]
-                
-                # Convert to the correct type
-                processed_inputs[param_name] = convert_value_to_type(
-                    value=value,
-                    param_name=param_name,
-                    param_type=param_def.type
-                )
-                LOGGER.debug(f"Using value from node {param_name} in execution history")
-            except (ValueError, TypeError) as e:
-                return {}, f"Error converting value for parameter '{param_name}': {str(e)}"
-        
-        # If still not found, check for default value
-        elif param_name not in processed_inputs:
-            param_def = params.properties[param_name]
-            if param_def.default is not None:
-                processed_inputs[param_name] = param_def.default
-            else:
-                return {}, f"Missing required parameter: {param_name}"
+            return matching_node.references.detailed_summary()
+        return None
 
-    # Validate and convert all provided inputs
-    for param_name, param_value in list(processed_inputs.items()):
-        if param_name in params.properties:
-            param_def = params.properties[param_name]
+    def process_parameter(param_name: str, param_def: ParameterDefinition) -> Tuple[Optional[Any], Optional[str]]:
+        """Helper to process a single parameter and return (value, error)."""
+        # Check kwargs first
+        if param_name in kwargs:
             try:
-                processed_inputs[param_name] = convert_value_to_type(
-                    value=param_value,
+                return convert_value_to_type(
+                    value=kwargs[param_name],
                     param_name=param_name,
                     param_type=param_def.type
-                )
+                ), None
             except (ValueError, TypeError) as e:
-                return {}, f"Invalid value for parameter '{param_name}': {str(e)}"
+                return None, f"Invalid value for parameter '{param_name}': {str(e)}"
+
+        # Look in history if not in kwargs
+        history_value = find_in_history(param_name)
+        if history_value is not None:
+            try:
+                return convert_value_to_type(
+                    value=history_value,
+                    param_name=param_name,
+                    param_type=param_def.type
+                ), None
+            except (ValueError, TypeError) as e:
+                return None, f"Error converting history value for parameter '{param_name}': {str(e)}"
+
+        # Use default if available
+        if param_def.default is not None:
+            return param_def.default, None
+
+        # If required and we got here, it's missing
+        if param_name in params.required:
+            return None, f"Missing required parameter: {param_name}"
+
+        # Optional parameter with no value found
+        return None, None
+
+    # Process all defined parameters
+    processed_inputs = {}
+    for param_name, param_def in params.properties.items():
+        value, error = process_parameter(param_name, param_def)
+        if error:
+            return {}, error
+        if value is not None:
+            processed_inputs[param_name] = value
 
     return processed_inputs, None

@@ -49,11 +49,11 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
   const isExpanded = activeAccordion === accordionName || localExpanded;
 
   const handleToggle = () => {
-    if (multiple) {
+    if (onAccordionToggle !== undefined) {
       onAccordionToggle(isExpanded ? null : accordionName);
-    } else {
-      setLocalExpanded(!isExpanded);
     }
+    setLocalExpanded(!isExpanded);
+    return;
   };
 
   const handleDelete = useCallback((itemToDelete: T) => {

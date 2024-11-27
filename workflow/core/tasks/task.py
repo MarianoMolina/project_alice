@@ -27,7 +27,9 @@ class AliceTask(BaseDataStructure):
     start_node: Optional[str] = Field(default=None, description="Starting node name")
     recursive: bool = Field(True, description="Whether task can be executed recursively")
     max_attempts: int = Field(1, description="Maximum attempts per node before failure")
-    timeout: Optional[int] = Field(default=None, description="Task timeout in seconds") # TODO: Pass timeout to model API Calls
+
+    timeout: Optional[int] = Field(default=None, description="Task timeout in seconds") # TODO: Pass timeout to model API Calls or move to Agent
+    include_prompt_in_execution: bool = Field(False, description="Whether to include the prompt in code execution")
     
     # Node and execution routing
     node_end_code_routing: TasksEndCodeRouting = Field(
@@ -304,7 +306,7 @@ class AliceTask(BaseDataStructure):
                 # Get next node
                 current_node = self.get_next_node(current_node, execution_history)
             
-            return self.create_final_response(node_responses, **kwargs)
+            return self.create_final_response(node_responses, execution_history=execution_history, **kwargs)
             
         except Exception as e:
             LOGGER.error(f"Error executing task {self.task_name}: {str(e)}\n{get_traceback()}")
@@ -573,6 +575,10 @@ class AliceTask(BaseDataStructure):
             execution_history=exec_history
         )
     
+    def get_external_execution_history_length(self, execution_history: List[NodeResponse]) -> int:
+        """Get the length of the execution history that is external to this task."""
+        return sum(1 for node in execution_history if node.parent_task_id != self.id)
+    
     def create_partial_response(self, node_responses: List[NodeResponse], status: str, **kwargs) -> TaskResponse:
         """Create a response for a partially completed task."""
         output_template = self.get_prompt_template("output_template")
@@ -754,3 +760,33 @@ class AliceTask(BaseDataStructure):
             return node.references
         LOGGER.error(f"No node found with name: {node_name}")
         return None
+
+    def _get_available_exit_code(self, desired_code: int, node_name: str) -> int:
+        """
+        Get the closest available exit code for a node.
+        
+        Args:
+            desired_code: The preferred exit code
+            node_name: The name of the node
+            
+        Returns:
+            The closest available exit code, defaulting to 0 if the desired code
+            isn't available and 0 is defined
+        """
+        if node_name not in self.node_end_code_routing:
+            return 0
+
+        available_codes = self.node_end_code_routing[node_name].keys()
+        if not available_codes:
+            return 0
+
+        # If desired code is available, use it
+        if desired_code in available_codes:
+            return desired_code
+
+        # If 0 is available, use it as default success code
+        if 0 in available_codes:
+            return 0
+
+        # Return the lowest available code as last resort
+        return min(available_codes)

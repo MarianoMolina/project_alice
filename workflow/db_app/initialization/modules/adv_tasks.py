@@ -74,6 +74,31 @@ adv_tasks_module = AdvTasksModule(
                 "type": "number",
                 "description": "The speed of the speech."
             },
+            {
+                "key": "retrieval_result_parameter",
+                "type": "list",
+                "description": "The list of retrieved embeddings."
+            }
+        ],
+        "prompts": [
+            {
+                "key": "retrieval_output_template",
+                "name": "Retrieval output template",
+                "content": """
+{% for result in retrieve_relevant_embeddings %}
+    <tr>
+        <td>{{result}}</td>
+    </tr>
+{% endfor %}""",
+                "is_templated": True,
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "retrieve_relevant_embeddings": "retrieval_result_parameter"
+                    },
+                    "required": ["retrieve_relevant_embeddings"]
+                }
+            },
         ],
         "agents": [
             {
@@ -165,6 +190,9 @@ adv_tasks_module = AdvTasksModule(
                         "update_all": "update_all_parameter",
                     },
                     "required": ["prompt"]
+                },
+                "templates": {
+                    "output_template": "retrieval_output_template"
                 },
                 "required_apis": ["embeddings"]
             },

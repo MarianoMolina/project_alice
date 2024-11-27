@@ -24,6 +24,7 @@ class CodePermission(IntEnum):
     WITH_PERMISSION = 2  # Tools require user permission
     TAGGED_ONLY = 3 # Only blocks with _execute tag are executed
 
+# TODO: Add coding languages available for execution, and execution config
 class AliceAgent(BaseDataStructure):
     id: Optional[str] = Field(default=None, description="The ID of the agent", alias="_id")
     name: str = Field(..., description="The name of the agent")

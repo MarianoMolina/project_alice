@@ -22,6 +22,11 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                 "description": "The clean text of the web scrape task returned by the generate_selectors_and_parse node",
             },
             {
+                "key": "url_summarization_param",
+                "type": "string",
+                "description": "The clean text of the web scraped and summarized by the url_summarization node",
+            },
+            {
                 "key": "web_scrape_param",
                 "type": "string",
                 "description": "The outputs of the web scrape task",
@@ -42,6 +47,19 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                 "key": "web_scrape_selector_agent_prompt",
                 "name": "Web Scrape Selector Agent",
                 "content": get_prompt_file("web_scrape_selector_agent.prompt"),
+            },
+            {
+                "key": "web_scrape_output_prompt_2",
+                "name": "Web Scrape Output Template w/ Summarization",
+                "content": "{{ url_summarization }}",
+                "is_templated": True,
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "url_summarization": "url_summarization_param"
+                    },
+                    "required": ["url_summarization"]
+                }
             },
             {
                 "key": "web_scrape_output_prompt",
@@ -128,6 +146,40 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
         ],
         "tasks": [
             {
+                "key": "web_scrape_task_2",
+                "task_type": "WebScrapeBeautifulSoupTask",
+                "task_name": "Full web scrape task",
+                "task_description": "Scrapes a webpage using BeautifulSoup and an LLM agent",
+                "agent": "web_scrape_selector_agent",
+                "required_apis": ["llm_api"],
+                "templates": {
+                    "task_template": "basic_prompt_url",
+                    "output_template": "web_scrape_output_prompt_2"
+                },
+                "input_variables": {
+                    "type": "object",
+                    "properties": {
+                        "url": "url_param",
+                        "fetch_url_html_content": "web_scrape_content_param"
+                    },
+                    "required": ["url"]
+                },
+                "node_end_code_routing": {
+                    'fetch_url': {
+                        0: ('generate_selectors_and_parse', False),
+                        1: ('fetch_url', True),
+                    }, 
+                    'generate_selectors_and_parse': {
+                        0: ('url_summarization', False),
+                        1: ('generate_selectors_and_parse', True),
+                    },
+                    'url_summarization': {
+                        0: (None, False),
+                        1: ('url_summarization', True),
+                    }
+                },
+            },
+            {
                 "key": "web_scrape_task",
                 "task_type": "WebScrapeBeautifulSoupTask",
                 "task_name": "Scrape_URL",
@@ -154,7 +206,7 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                     'generate_selectors_and_parse': {
                         0: (None, False),
                         1: ('generate_selectors_and_parse', True),
-                    }
+                    },
                 },
             },
             {

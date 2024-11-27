@@ -13,17 +13,16 @@ from .anthropic_vision_engine import AnthropicVisionEngine
 from .oai_stt_engine import OpenAISpeechToTextEngine
 from .oai_timestamped_stt_engine import OpenAIAdvancedSpeechToTextEngine
 from .text_to_speech_engine import TextToSpeechEngine
-from .embedding_engine import EmbeddingEngine
 from .gemini_llm_engine import GeminiLLMEngine
 from .cohere_llm_engine import CohereLLMEngine
 from .gemini_vision import GeminiVisionEngine
-from .gemini_embedding import GeminiEmbeddingsEngine
 from .gemini_stt import GeminiSpeechToTextEngine
 from .gemini_img_gen import GeminiImageGenerationEngine
 from .google_knowledge_graph_engine import GoogleGraphEngine
 from .wolfram_alpha_engine import WolframAlphaEngine
 from .bark_engine import BarkEngine
 from .pixart_img_gen_engine import PixArtImgGenEngine
+from .embedding_engines import EmbeddingEngine, GeminiEmbeddingsEngine
 
 ApiEngineMap = {
     ApiType.LLM_MODEL: {

@@ -1,6 +1,6 @@
 import re
 from pydantic import Field
-from typing import List, Tuple, Dict
+from typing import List
 from openai import AsyncOpenAI
 from openai.types import CreateEmbeddingResponse
 from workflow.core.data_structures import (
@@ -149,7 +149,7 @@ class EmbeddingEngine(APIEngine):
         """
         return {
             "model": response.model,
-            "data_len": len(response.data),
+            "total_data_len": len(response.data),
             "prompt_tokens": response.usage.prompt_tokens,
             "total_tokens": response.usage.total_tokens,
         }

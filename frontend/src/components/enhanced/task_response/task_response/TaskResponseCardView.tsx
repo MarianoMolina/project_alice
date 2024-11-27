@@ -154,6 +154,17 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             )
         },
         {
+            icon: <DataObject />,
+            primary_text: "Execution History",
+            secondary_text: (
+                <AccordionSection
+                    title='Execution History'
+                    content={<CodeBlock language="json" code={JSON.stringify(item.execution_history, null, 2)} />}
+                    disabled={!item.execution_history}
+                />
+            )
+        },
+        {
             icon: <Analytics />,
             primary_text: "Usage Metrics",
             secondary_text: (

@@ -5,7 +5,7 @@ from workflow.core.tasks.task import AliceTask
 from workflow.core.agent.agent import AliceAgent
 from workflow.core.data_structures import (
     ApiType, References, NodeResponse, MessageDict, FunctionParameters, ParameterDefinition, TasksEndCodeRouting, 
-    MessageGenerators, RoleTypes, ContentType, EntityReference, ReferenceCategory
+    MessageGenerators, RoleTypes, ContentType, EntityReference, ReferenceCategory, Prompt
 )
 from workflow.core.api import APIManager
 from workflow.util.web_scrape_utils import (
@@ -43,8 +43,12 @@ class WebScrapeBeautifulSoupTask(AliceTask):
             1: ('fetch_url', True),
         }, 
         'generate_selectors_and_parse': {
-            0: (None, False),
+            0: ('url_summarization', False),
             1: ('generate_selectors_and_parse', True),
+        },
+        'url_summarization': {
+            0: (None, False),
+            1: ('url_summarization', True),
         }
     }, description="A dictionary of tasks/nodes -> exit codes and the task to route to given each exit code")
 
@@ -204,4 +208,93 @@ Example response format:
         LOGGER.info(f"Unique selectors collected: {unique_selectors}")
         return unique_selectors if unique_selectors else None, creation_metadata if creation_metadata else None
     
+    def create_message_list(self, **kwargs) -> List[MessageDict]:
+        template = self.get_prompt_template("task_template")
+        if not template:
+            raise ValueError(f"Template {self.task_name} not retrieved correctly.")
+        if not isinstance(template, Prompt):
+            try: 
+                template = Prompt(**template)
+            except Exception as e:
+                raise ValueError(f"Template {self.task_name} is not a valid prompt configuration: {e}")
+        sanitized_inputs = self.update_inputs(**kwargs)
+        input_string = template.format_prompt(**sanitized_inputs)
+        LOGGER.info(f"Input string for task {self.task_name}: {input_string}")
+        msg_list = [MessageDict(content=input_string, role=RoleTypes.USER, generated_by=MessageGenerators.USER, step=self.task_name)]
+        
+        # Add messages from history
+        execution_history: List[NodeResponse] = kwargs.get("execution_history", [])
+        for node in execution_history:
+            if isinstance(node, NodeResponse) and node.parent_task_id == self.id and node.references and node.references.messages:
+                msg_list.extend(node.references.messages)
+        return msg_list
+    
+    def get_node_exit_code(self, message: MessageDict, node_name: str) -> int:
+        """Determine LLM exit code based on content and available routes."""
+        if not message or not message.content:
+            return self._get_available_exit_code(1, node_name)
+        desired_code = 0
+        # Return available exit code closest to desired behavior
+        return self._get_available_exit_code(desired_code, node_name)
+    
+    async def execute_url_summarization(self, execution_history: List[NodeResponse], node_responses: List[NodeResponse], **kwargs) -> NodeResponse:
+        api_manager: APIManager = kwargs.get("api_manager")
+        messages: List[MessageDict] = []
+        try:
+            generate_selectors_and_parse = self.get_node_reference(execution_history, "generate_selectors_and_parse")
+            if not generate_selectors_and_parse or not generate_selectors_and_parse.entity_references:
+                return NodeResponse(
+                    parent_task_id=self.id,
+                    node_name="url_summarization",
+                    exit_code=1,
+                    references=References(messages=[MessageDict(
+                        role="system",
+                        content="Failed to summarize URL: No content reference found",
+                        generated_by="system"
+                    )]),
+                    execution_order=len(execution_history)
+                )
+            entity_reference = generate_selectors_and_parse.entity_references[-1]
+            prompt = f"""
+WEB Content:
+{str(entity_reference)}
+
+Instructions:
+Provide a concise, cleaar and comprehensive summary of the site's contents. Make good use of markdown to improve your summary's visibility.
+"""
+            
+            msg = MessageDict(
+                role=RoleTypes.USER,
+                content=prompt,
+                generated_by=MessageGenerators.SYSTEM,
+                type=ContentType.TEXT
+            )
+            messages.append(msg)
+            system_msg = "You are in charge of summarizing the contents of a scrapped website. Provide a concise, clear and comprehensive summary of the site's contents. Make good use of markdown to improve your summary's visibility. "
+            self.agent.system_message.content = system_msg
+            llm_response = await self.agent.generate_llm_response(api_manager, messages)
+            exit_code = self.get_node_exit_code(llm_response, "url_summarization")
+            entity_reference.description = llm_response.content
+            return NodeResponse(
+                parent_task_id=self.id,
+                node_name="url_summarization",
+                exit_code=exit_code,
+                execution_order=len(execution_history),
+                references=References(messages=[llm_response], entity_references=[entity_reference])
+            )
+        except Exception as e:
+            LOGGER.error(f"Error in LLM generation: {e}")
+            traceback_str = get_traceback()
+            LOGGER.error(traceback_str)
+            return NodeResponse(
+                parent_task_id=self.id,
+                node_name="url_summarization",
+                exit_code=1,
+                references=References(messages=[MessageDict(
+                    role="system",
+                    content=f"LLM generation failed: {str(e)}" + "\n" + traceback_str,
+                    generated_by="system"
+                )]),
+                execution_order=len(execution_history)
+            )
 ## TODO: Add an optional summarization step that uses the LLM model to summarize the content and create the entity description.

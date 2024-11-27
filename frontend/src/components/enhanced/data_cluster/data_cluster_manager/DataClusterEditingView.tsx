@@ -44,7 +44,6 @@ const DataClusterEditingView: React.FC<DataClusterEditingViewProps> = ({
                 await handleReferenceSelection(config.key, newIds);
             },
             existingRefs as any[],
-            true // multiple selection
         );
     };
 

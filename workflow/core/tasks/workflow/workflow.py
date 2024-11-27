@@ -58,7 +58,7 @@ class Workflow(AliceTask):
                         "generated_by": "system"
                     }]
                 ),
-                execution_order=len(execution_history) + len(node_responses)
+                execution_order=len(execution_history)
             )
         
     def find_task_by_name(self, task_name: str) -> Optional[AliceTask]:

@@ -26,6 +26,12 @@ coding_workflow_module = CodingWorkflowModule(
                 "type": "string",
                 "description": "The unit test code that was generated, passed in case of a recursive call",
             },
+            {
+                "key": "include_prompt_param",
+                "type": "boolean",
+                "description": "Whether to include the prompt in code execution",
+                "default": True
+            }
         ],
         "user_checkpoints": [
             {   
@@ -207,6 +213,7 @@ coding_workflow_module = CodingWorkflowModule(
                         "Plan_Workflow": "param_plan_workflow",
                         "Generate_Code": "param_generate_code",
                         "Generate_Unit_Tests": "param_generate_unit_tests",
+                        "include_prompt_in_execution": "include_prompt_param"
                     },
                     "required": ["Generate_Code"]
                 },

@@ -2,7 +2,7 @@ from enum import IntEnum
 from pydantic import Field
 from typing import List, Dict
 from workflow.core.data_structures import (
-    MessageDict, TasksEndCodeRouting, NodeResponse, RoleTypes, MessageGenerators
+    MessageDict, TasksEndCodeRouting, NodeResponse, RoleTypes, MessageGenerators, FunctionParameters, ParameterDefinition
 )
 from workflow.core.tasks.agent_tasks.prompt_agent_task import PromptAgentTask
 
@@ -39,6 +39,25 @@ class CodeGenerationLLMTask(PromptAgentTask):
     2: Code execution failed
     3: Generated response contained no valid code blocks
     """
+    input_variables: FunctionParameters = Field(
+        default=FunctionParameters(
+            type="object",
+            properties={
+                "prompt": ParameterDefinition(
+                    type="string",
+                    description="The input prompt for the task",
+                    default=None
+                ),
+                "include_prompt_in_execution": ParameterDefinition(
+                    type="boolean",
+                    description="Whether to include the prompt in code execution",
+                    default=True
+                )
+            },
+            required=["prompt"]
+        ),
+        description="Inputs that the agent will require. Default is a 'prompt' string."
+    )
     node_end_code_routing: TasksEndCodeRouting = Field(
         default={
             'llm_generation': {
