@@ -14,7 +14,6 @@ import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import MessageListView from '../../message/message/MessageListView';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import Logger from '../../../../utils/Logger';
-import useStyles from '../ChatStyles';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 import { UserCheckpoint } from '../../../../types/UserCheckpointTypes';
 import UserCheckpointShortListView from '../../user_checkpoint/user_checkpoint/UserCheckpointShortListView';
@@ -36,7 +35,6 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [validationError, setValidationError] = useState<string | null>(null);
-    const classes = useStyles();
 
     const isEditMode = mode === 'edit' || mode === 'create';
     const title = mode === 'create' ? 'Create New Chat' : mode === 'edit' ? 'Edit Chat' : 'Chat Details';

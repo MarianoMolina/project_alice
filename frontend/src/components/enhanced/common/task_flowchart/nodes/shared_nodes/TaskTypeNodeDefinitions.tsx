@@ -51,6 +51,7 @@ const NODE_DEFINITIONS: { [key: string]: NodeDefinition } = {
   },
 
   tool_call_execution: {
+    // TODO: Add include_prompt_in_execution bool
     getInputs: (data: BaseTaskData) => data.templates?.['task_template']?.parameters || null,
     getOutputType: () => OutputType.TASK_RESPONSE,
     requiredApis: [] as ApiType[]
@@ -59,6 +60,11 @@ const NODE_DEFINITIONS: { [key: string]: NodeDefinition } = {
   code_execution: {
     getInputs: (data: BaseTaskData) => data.templates?.['task_template']?.parameters || null,
     getOutputType: () => OutputType.CODE_EXECUTION,
+    requiredApis: [] as ApiType[]
+  },
+  default: {
+    getInputs: (data: BaseTaskData) => data.input_variables || null,
+    getOutputType: () => OutputType.TASK_RESPONSE,
     requiredApis: [] as ApiType[]
   }
 };
@@ -158,5 +164,8 @@ export const NODE_CONFIGS: { [key in TaskType]?: { [nodeName: string]: NodeConfi
       getOutputType: () => OutputType.FILE,
       requiredApis: [ApiType.TEXT_TO_SPEECH]
     }
+  },
+  APITask: {
+    default: { ...NODE_DEFINITIONS.default, getOutputType: () => OutputType.ENTITY_REFERENCE },
   }
 }

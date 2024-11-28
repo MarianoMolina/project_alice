@@ -9,7 +9,7 @@ import ReactFlow, {
   ReactFlowInstance,
   MiniMap,
 } from 'reactflow';
-import { Alert, Box, Typography } from '@mui/material';
+import { Alert, Box, FormControl, InputLabel, Typography } from '@mui/material';
 import TaskNode from './nodes/TaskNode';
 import SimpleTaskNode from './nodes/SimpleTaskNode';
 import { useEnhancedFlowState } from './hooks/useStableFlowState';
@@ -19,9 +19,11 @@ import { AliceTask } from '../../../../types/TaskTypes';
 import 'reactflow/dist/style.css';
 import { DistributedDefaultEdge, DistributedDoubleBackEdge, DistributedSelfLoopEdge } from './edges/Edges';
 import Logger from '../../../../utils/Logger';
+import theme from '../../../../Theme';
 
 interface FlowchartProps {
   task: Partial<AliceTask>;
+  title?: string;
   height?: string | number;
   width?: string | number;
   minWidth?: string | number;
@@ -43,6 +45,7 @@ const nodeTypes: NodeTypes = {
 
 const Flowchart: React.FC<FlowchartProps> = ({
   task,
+  title = 'Node Flowchart',
   height = '1000px',
   width = '100%',
   minWidth = '500px',
@@ -60,27 +63,8 @@ const Flowchart: React.FC<FlowchartProps> = ({
     setFlowInstance
   } = useEnhancedFlowState();
 
-  // Log key state changes
-  useEffect(() => {
-    Logger.debug('[FlowChart] State update', {
-      nodeCount: nodes.length,
-      edgeCount: edges.length,
-      sizedNodes: nodeSizes.size,
-      isInitialLayoutComplete,
-      isDragging,
-      shouldFitView,
-      taskId: task._id,
-    });
-  }, [nodes.length, edges.length, nodeSizes.size, isInitialLayoutComplete, isDragging, shouldFitView, task._id]);
-
   // Handle routing changes
   useEffect(() => {
-    Logger.debug('[FlowChart] Checking routing changes', {
-      taskId: task._id,
-      hasRouting: !!task.node_end_code_routing,
-      nodeCount: Object.keys(task.node_end_code_routing || {}).length
-    });
-
     const { nodes: newNodes, edges: newEdges } = createNodes(task, updateSize);
     const routingSignature = JSON.stringify(task.node_end_code_routing);
     handleRoutingChange(routingSignature, newNodes, newEdges);
@@ -98,30 +82,22 @@ const Flowchart: React.FC<FlowchartProps> = ({
 
   // Handle node drag events
   const onNodeDragStart: NodeDragHandler = useCallback(() => {
-    Logger.debug('[FlowChart] Node drag started');
     setDragging(true);
   }, [setDragging]);
 
   const onNodeDragStop: NodeDragHandler = useCallback(() => {
-    Logger.debug('[FlowChart] Node drag stopped');
     setDragging(false);
   }, [setDragging]);
 
   // Trigger layout updates when necessary
   useEffect(() => {
     if (!isInitialLayoutComplete && nodes.length > 0) {
-      Logger.debug('[FlowChart] Layout update check', {
-        nodeCount: nodes.length,
-        sizedNodes: nodeSizes.size,
-        allNodesHaveSizes: nodes.every(node => nodeSizes.has(node.id))
-      });
       debouncedLayoutUpdate(nodes, edges, nodeSizes);
     }
   }, [nodes, edges, nodeSizes, isInitialLayoutComplete, debouncedLayoutUpdate]);
 
   // Initialize ReactFlow instance
   const onInit = useCallback((instance: ReactFlowInstance) => {
-    Logger.debug('[FlowChart] Flow instance initialized');
     setFlowInstance(instance);
   }, [setFlowInstance]);
 
@@ -137,7 +113,7 @@ const Flowchart: React.FC<FlowchartProps> = ({
   if (!task?.node_end_code_routing || Object.keys(task.node_end_code_routing).length === 0) {
     return (
       <Box sx={containerStyle}>
-        <Typography variant="h6">Node Flowchart</Typography>
+        <Typography variant="h6">{title}</Typography>
         <Alert severity="info" sx={{ width: '100%', marginTop: 10 }}>
           No tasks found to build the flowchart.
         </Alert>
@@ -146,35 +122,40 @@ const Flowchart: React.FC<FlowchartProps> = ({
   }
 
   return (
-    <Box sx={containerStyle}>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        edgeTypes={edgeTypes}
-        nodeTypes={nodeTypes}
-        onInit={onInit}
-        onNodesChange={onNodesChange}
-        onNodeDragStart={onNodeDragStart}
-        onNodeDragStop={onNodeDragStop}
-        fitView={shouldFitView}
-        fitViewOptions={{ padding: 0.2, duration: 200 }}
-        minZoom={0.1}
-        maxZoom={2}
-        attributionPosition="bottom-left"
-        nodesConnectable={false}
-        nodesDraggable={true} // Always allow dragging
-        zoomOnScroll={true}
-        panOnScroll={true}
-        panOnDrag={true}
-        zoomOnDoubleClick={true}
-      >
-        {miniMap &&
-          <MiniMap />
-        }
-        <Controls />
-        <Background color="#aaa" gap={16} />
-      </ReactFlow>
-    </Box>
+    <FormControl fullWidth variant="outlined" sx={{ marginTop: 1, marginBottom: 1 }}>
+      <InputLabel shrink sx={{ backgroundColor: theme.palette.primary.dark }}>{title}</InputLabel>
+      <div className="relative p-4 border border-gray-200/60 rounded-lg">
+        <Box sx={containerStyle}>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            edgeTypes={edgeTypes}
+            nodeTypes={nodeTypes}
+            onInit={onInit}
+            onNodesChange={onNodesChange}
+            onNodeDragStart={onNodeDragStart}
+            onNodeDragStop={onNodeDragStop}
+            fitView={shouldFitView}
+            fitViewOptions={{ padding: 0.2, duration: 200 }}
+            minZoom={0.1}
+            maxZoom={2}
+            attributionPosition="bottom-left"
+            nodesConnectable={false}
+            nodesDraggable={true}
+            zoomOnScroll={true}
+            panOnScroll={true}
+            panOnDrag={true}
+            zoomOnDoubleClick={true}
+          >
+            {miniMap &&
+              <MiniMap />
+            }
+            <Controls />
+            <Background color="#aaa" gap={16} />
+          </ReactFlow>
+        </Box>
+      </div>
+    </FormControl>
   );
 };
 

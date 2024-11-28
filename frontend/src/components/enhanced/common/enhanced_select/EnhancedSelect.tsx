@@ -1,10 +1,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Box, IconButton, Accordion, AccordionSummary, AccordionDetails, Typography, Chip, Tooltip } from '@mui/material';
+import { Box, IconButton, Accordion, AccordionSummary, AccordionDetails, Typography, Chip, Tooltip, FormControl, InputLabel } from '@mui/material';
 import { Edit, Close, ExpandMore, Add, Info } from '@mui/icons-material';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import useStyles from './EnhancedSelectStyles';
 import { CollectionName, CollectionType, CollectionElementString, collectionNameToElementString, collectionNameToEnhancedComponent } from '../../../../types/CollectionTypes';
 import Logger from '../../../../utils/Logger';
+import theme from '../../../../Theme';
 
 interface EnhancedSelectProps<T extends CollectionType[CollectionName]> {
   componentType: CollectionName;
@@ -113,52 +114,54 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
   ), [classes.chip, isInteractable, multiple, selectCardItem, collectionElementString, commonProps, EnhancedView, handleDelete]);
 
   return (
-    <Box className={classes.selectContainer}>
-      <Box className={classes.chipContainer}>
-        {selectedItems?.map(renderSelectedItem)}
-        <Box className={classes.buttonContainer}>
-          {description && (
-            <Tooltip title={description}>
+    <FormControl fullWidth variant="outlined" sx={{ marginTop: 1, marginBottom: 1 }}>
+      <InputLabel shrink sx={{ backgroundColor: theme.palette.primary.dark }}>{label}{multiple ? ' (multiple)' : null}</InputLabel>
+      <div className="relative p-4 border border-gray-200/60 rounded-lg">
+        <Box className={classes.chipContainer}>
+          {selectedItems?.map(renderSelectedItem)}
+          <Box className={classes.buttonContainer}>
+            {description && (
+              <Tooltip title={description}>
+                <IconButton
+                  size="small"
+                >
+                  <Info />
+                </IconButton>
+              </Tooltip>
+            )}
+            <Tooltip title={isInteractable ? isExpanded ? 'Close' : 'Edit' : ''}>
               <IconButton
-                size="small"
-              >
-                <Info />
-              </IconButton>
-            </Tooltip>
-          )}
-          <Tooltip title={isInteractable ? 'Edit' : ''}>
-            <IconButton
-              onClick={handleToggle}
-              disabled={!isInteractable}
-              size="small"
-              className={classes.editButton}
-            >
-              {isExpanded ? <Close /> : <Edit />}
-            </IconButton>
-          </Tooltip>
-          {showCreateButton && (
-            <Tooltip title={isInteractable ? 'Create' : ''}>
-              <IconButton
-                onClick={handleCreate}
+                onClick={handleToggle}
                 disabled={!isInteractable}
                 size="small"
-                className={classes.createButton}
+                className={classes.editButton}
               >
-                <Add />
+                {isExpanded ? <Close /> : <Edit />}
               </IconButton>
             </Tooltip>
-          )}
+            {showCreateButton && (
+              <Tooltip title={isInteractable ? 'Create' : ''}>
+                <IconButton
+                  onClick={handleCreate}
+                  disabled={!isInteractable}
+                  size="small"
+                  className={classes.createButton}
+                >
+                  <Add />
+                </IconButton>
+              </Tooltip>
+            )}
+          </Box>
         </Box>
-      </Box>
-      <Accordion expanded={isExpanded} onChange={handleToggle}>
-        <AccordionSummary expandIcon={<ExpandMore />}>
-          <Typography>{label}{multiple ? ' (multiple)' : null}</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          {memoizedEnhancedComponent}
-        </AccordionDetails>
-      </Accordion>
-    </Box>
+        <Accordion expanded={isExpanded} onChange={handleToggle}>
+          <AccordionSummary expandIcon={<ExpandMore />} sx={{ minHeight: 0 }}>
+          </AccordionSummary>
+          <AccordionDetails>
+            {memoizedEnhancedComponent}
+          </AccordionDetails>
+        </Accordion>
+      </div>
+    </FormControl>
   );
 }
 

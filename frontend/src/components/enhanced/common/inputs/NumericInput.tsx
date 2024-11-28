@@ -1,7 +1,8 @@
 import React from 'react';
-import { TextField, FormHelperText, Box } from '@mui/material';
+import { TextField, FormHelperText } from '@mui/material';
 import { NumericInputProps } from '../../../../types/InputTypes';
 import { BaseInputWrapper } from './BaseInputWrapper';
+import theme from '../../../../Theme';
 
 export const NumericInput: React.FC<NumericInputProps> = ({
   value,
@@ -49,6 +50,7 @@ export const NumericInput: React.FC<NumericInputProps> = ({
       <TextField
         name={name}
         label={label}
+        InputLabelProps={{ sx: {backgroundColor: theme.palette.primary.dark}}}
         value={value ?? ''}
         onChange={handleChange}
         error={Boolean(error)}

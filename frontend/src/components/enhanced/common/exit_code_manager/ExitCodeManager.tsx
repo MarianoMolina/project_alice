@@ -5,8 +5,11 @@ import {
   IconButton,
   Button,
   Typography,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import theme from '../../../../Theme';
 
 interface ExitCode {
   code: number;
@@ -67,41 +70,43 @@ const ExitCodeManager: React.FC<ExitCodeManagerProps> = ({
   };
 
   return (
-    <Box sx={{padding: 1, marginTop: 1, marginBottom: 1}}>
-      <Typography variant="h6" gutterBottom>{title}</Typography>
-      {codes.map((exitCode, index) => (
-        <Box key={index} display="flex" alignItems="center" mb={1}>
-          <TextField
-            label="Code"
-            type="number"
-            value={exitCode.code}
-            onChange={(e) => handleCodeChange(index, 'code', e.target.value)}
-            disabled={index < 2 || !isEditMode}
-            size="small"
-            style={{ width: '80px', marginRight: '8px' }}
-          />
-          <TextField
-            label="Message"
-            value={exitCode.message}
-            onChange={(e) => handleCodeChange(index, 'message', e.target.value)}
-            disabled={!isEditMode}
-            size="small"
-            fullWidth
-            inputProps={{ maxLength: 300 }}
-          />
-          {index >= 2 && isEditMode && (
-            <IconButton onClick={() => handleRemoveCode(index)} size="small">
-              <DeleteIcon />
-            </IconButton>
-          )}
-        </Box>
-      ))}
-      {isEditMode && (
-        <Button onClick={handleAddCode} variant="outlined" size="small">
-          Add Exit Code
-        </Button>
-      )}
-    </Box>
+    <FormControl fullWidth variant="outlined" sx={{ marginTop: 1, marginBottom: 1 }}>
+      <InputLabel shrink sx={{ backgroundColor: theme.palette.primary.dark }}>{title}</InputLabel>
+      <div className="relative p-4 border border-gray-200/60 rounded-lg">
+        {codes.map((exitCode, index) => (
+          <Box key={index} display="flex" alignItems="center" mb={1}>
+            <TextField
+              label="Code"
+              type="number"
+              value={exitCode.code}
+              onChange={(e) => handleCodeChange(index, 'code', e.target.value)}
+              disabled={index < 2 || !isEditMode}
+              size="small"
+              style={{ width: '80px', marginRight: '8px' }}
+            />
+            <TextField
+              label="Message"
+              value={exitCode.message}
+              onChange={(e) => handleCodeChange(index, 'message', e.target.value)}
+              disabled={!isEditMode}
+              size="small"
+              fullWidth
+              inputProps={{ maxLength: 300 }}
+            />
+            {index >= 2 && isEditMode && (
+              <IconButton onClick={() => handleRemoveCode(index)} size="small">
+                <DeleteIcon />
+              </IconButton>
+            )}
+          </Box>
+        ))}
+        {isEditMode && (
+          <Button onClick={handleAddCode} variant="outlined" size="small">
+            Add Exit Code
+          </Button>
+        )}
+      </div>
+    </FormControl>
   );
 };
 

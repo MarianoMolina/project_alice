@@ -7,6 +7,7 @@ import EnhancedCardDialog from '../components/enhanced/common/enhanced_card_dial
 import EnhancedFlexibleDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedFlexibleDialog';
 import PromptParsedDialog from '../components/enhanced/common/enhanced_card_dialog/PromptParsedDialog';
 import EnhancedSelectDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedSelectDialog';
+import { AliceTask } from '../types/TaskTypes';
 
 interface DialogContextType {
   // Card Dialog
@@ -61,6 +62,12 @@ interface DialogContextType {
   selectDialogMultiple: boolean;
   isSelectDialogOpen: boolean;
   closeSelectDialog: () => void;
+
+  // Flowchart Dialog
+  selectTaskFlowchartItem: (itemId: string) => void;
+  selectedTaskFlowchartItem: AliceTask | null;
+  isTaskFlowchartDialogOpen: boolean;
+  closeTaskFlowchartDialog: () => void;
 }
 
 const CardDialogContext = createContext<DialogContextType | undefined>(undefined);
@@ -95,6 +102,10 @@ export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
   const [selectDialogFilters, setSelectDialogFilters] = useState<Record<string, any> | undefined>(undefined);
   const [selectDialogMultiple, setSelectDialogMultiple] = useState<boolean>(false);
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
+
+  // Flowchart Dialog State
+  const [selectedTaskFlowchartItem, setSelectedTaskFlowchartItem] = useState<AliceTask | null>(null);
+  const [isTaskFlowchartDialogOpen, setIsTaskFlowchartDialogOpen] = useState(false);
 
   const closeCardDialog = useCallback(() => {
     setSelectedCardItem(null);
@@ -201,6 +212,16 @@ export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
     setIsSelectDialogOpen(true);
   }, []);
 
+  const selectTaskFlowchartItem = useCallback((itemId: string) => {
+    setSelectedTaskFlowchartItem(null);
+    setIsTaskFlowchartDialogOpen(true);
+  }, []);
+
+  const closeTaskFlowchartDialog = useCallback(() => {
+    setSelectedTaskFlowchartItem(null);
+    setIsTaskFlowchartDialogOpen(false);
+  }, []);
+
   return (
     <CardDialogContext.Provider
       value={{
@@ -240,7 +261,13 @@ export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
         selectDialogFilters,
         selectDialogMultiple,
         isSelectDialogOpen,
-        closeSelectDialog
+        closeSelectDialog,
+
+        // Flowchart Dialog
+        selectTaskFlowchartItem,
+        selectedTaskFlowchartItem,
+        isTaskFlowchartDialogOpen,
+        closeTaskFlowchartDialog        
       }}
     >
       <ApiProvider>

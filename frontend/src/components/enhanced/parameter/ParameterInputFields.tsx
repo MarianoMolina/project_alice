@@ -7,21 +7,24 @@ import {
   Typography
 } from '@mui/material';
 import { FunctionParameters, ParameterDefinition } from '../../../types/ParameterTypes';
-import Logger from '../../../utils/Logger';
 import { formatCamelCaseString } from '../../../utils/StyleUtils';
+import Logger from '../../../utils/Logger';
 
 // Type-specific input components
 const StringInput = ({ 
   param, 
   value, 
-  onChange 
+  onChange,
+  label
 }: { 
   param: ParameterDefinition; 
   value: string; 
   onChange: (value: string) => void; 
+  label?: string;
 }) => (
   <TextField
     fullWidth
+    label={label}
     value={value || ''}
     onChange={(e) => onChange(e.target.value)}
     multiline
@@ -34,12 +37,14 @@ const NumberInput = ({
   param, 
   value, 
   onChange,
-  isInteger = false
+  isInteger = false,
+  label
 }: { 
   param: ParameterDefinition; 
   value: number | undefined; 
   onChange: (value: number | undefined) => void;
   isInteger?: boolean;
+  label?: string;
 }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
@@ -69,6 +74,7 @@ const NumberInput = ({
   return (
     <TextField
       fullWidth
+      label={label}
       type="text" // Changed from "number" to prevent browser's number input behavior
       value={value ?? ''} // Use empty string when value is undefined
       onChange={handleChange}
@@ -91,36 +97,21 @@ const toBooleanValue = (value: any): boolean => {
 const BooleanInput = ({ 
   param, 
   value, 
-  onChange 
+  onChange,
+  label
 }: { 
   param: ParameterDefinition; 
   value: any; 
   onChange: (value: boolean) => void; 
+  label?: string;
 }) => {
-  Logger.debug('BooleanInput props:', { 
-    paramName: param.description, 
-    currentValue: value,
-    valueType: typeof value 
-  });
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.checked;
-    Logger.debug('Boolean Switch changed:', {
-      previous: value,
-      previousType: typeof value,
-      new: newValue,
-      eventTarget: e.target.checked
-    });
     onChange(newValue);
   };
 
   // Convert the value to a proper boolean
   const isChecked = toBooleanValue(value);
-
-  Logger.debug('Boolean Switch rendered with:', { 
-    originalValue: value, 
-    convertedValue: isChecked 
-  });
 
   return (
     <FormControlLabel
@@ -132,6 +123,7 @@ const BooleanInput = ({
       }
       label={
         <Box>
+          <Typography variant='body2'>{label}</Typography>
           <Typography variant="caption" color="textSecondary">
             Type: boolean - {param.description}
           </Typography>
@@ -145,11 +137,13 @@ const BooleanInput = ({
 const JsonInput = ({ 
   param, 
   value, 
-  onChange 
+  onChange,
+  label 
 }: { 
   param: ParameterDefinition; 
   value: string; 
   onChange: (value: string) => void; 
+  label?: string;
 }) => {
   const isValid = (str: string): boolean => {
     if (!str) return true;
@@ -174,6 +168,7 @@ const JsonInput = ({
   return (
     <TextField
       fullWidth
+      label={label}
       value={value ? formatJson(value) : ''}
       onChange={(e) => onChange(e.target.value)}
       multiline
@@ -199,7 +194,7 @@ const ParameterInputFields = ({
   title,
   className = ''
 }: ParameterInputFieldsProps) => {
-  const renderInputField = (key: string, param: ParameterDefinition) => {
+  const renderInputField = (key: string, param: ParameterDefinition, label?: string) => {
     const handleChange = (value: any) => {
       Logger.debug('Parameter value changing:', {
         key,
@@ -217,6 +212,7 @@ const ParameterInputFields = ({
             param={param}
             value={values[key]}
             onChange={handleChange}
+            label={label}
           />
         );
       
@@ -227,6 +223,7 @@ const ParameterInputFields = ({
             value={values[key]}
             onChange={handleChange}
             isInteger
+            label={label}
           />
         );
       
@@ -236,6 +233,7 @@ const ParameterInputFields = ({
             param={param}
             value={values[key]}
             onChange={handleChange}
+            label={label}
           />
         );
       
@@ -245,6 +243,7 @@ const ParameterInputFields = ({
             param={param}
             value={values[key]}
             onChange={handleChange}
+            label={label}
           />
         );
       
@@ -255,6 +254,7 @@ const ParameterInputFields = ({
             param={param}
             value={values[key]}
             onChange={handleChange}
+            label={label}
           />
         );
       
@@ -266,14 +266,13 @@ const ParameterInputFields = ({
   return (
     <Box className={className}>
       {title && (
-        <Typography variant="h6" className="mb-4">{title}</Typography>
+        <Typography variant="subtitle1" sx={{marginBottom:1}}>{title}</Typography>
       )}
       <Box className="space-y-4">
         {parameters?.properties && 
           Object.entries(parameters.properties).map(([key, param]) => (
             <Box key={key} className="mb-4">
-              <Typography variant="body1" className="mb-2">{formatCamelCaseString(key)}</Typography>
-              {renderInputField(key, param)}
+              {renderInputField(key, param, formatCamelCaseString(key))}
             </Box>
           ))
         }

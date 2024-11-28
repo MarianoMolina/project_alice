@@ -10,7 +10,6 @@ import {
 } from '@mui/material';
 import {
   ContentCopy as CopyIcon,
-  DataArray as VectorIcon,
   Timer as TokenIcon,
   TextFields as TextIcon,
   Visibility

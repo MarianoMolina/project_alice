@@ -5,6 +5,7 @@ import {
     Accordion,
     AccordionSummary,
     AccordionDetails,
+    Box,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
@@ -12,7 +13,7 @@ import { CommandLineLog } from '../../../ui/markdown/CommandLog';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import { styled } from '@mui/material/styles';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { AccessTime, CheckCircle, Error, Warning, Output, Code, BugReport, DataObject, Analytics } from '@mui/icons-material';
+import { AccessTime, CheckCircle, Error, Warning, Output, Code, BugReport, DataObject, Analytics, Terminal } from '@mui/icons-material';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
 import TaskResponseViewer from './TaskResponseViewer';
@@ -63,14 +64,14 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
     );
 
     const embeddingChunkViewer = item.embedding && item.embedding?.length > 0 ?
-     item.embedding.map((chunk, index) => (
-        <EmbeddingChunkViewer
-            key={chunk._id || `embedding-${index}`}
-            item={chunk}
-            items={null} onChange={()=>null} mode={'view'} handleSave={async()=>{}}
-        />
-    )) : <Typography>No embeddings available</Typography>;
-    
+        item.embedding.map((chunk, index) => (
+            <EmbeddingChunkViewer
+                key={chunk._id || `embedding-${index}`}
+                item={chunk}
+                items={null} onChange={() => null} mode={'view'} handleSave={async () => { }}
+            />
+        )) : <Typography>No embeddings available</Typography>;
+
     const exitCodeProps = getExitCodeProps(item.result_code);
 
     const listItems = [
@@ -126,7 +127,7 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
                 <AccordionSection
                     title="Node Outputs"
                     content={
-                        item.node_references ? <TaskResponseViewer item={item} items={null} onChange={()=>null} mode={'view'} handleSave={async()=>{}} /> : <Typography>No output content available</Typography>
+                        item.node_references ? <TaskResponseViewer item={item} items={null} onChange={() => null} mode={'view'} handleSave={async () => { }} /> : <Typography>No output content available</Typography>
                     }
                     disabled={!item.node_references?.length}
                 />
@@ -138,7 +139,20 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             secondary_text: (
                 <AccordionSection
                     title="Diagnostics"
-                    content={<CommandLineLog content={item.result_diagnostic ?? ''} />}
+                    content={
+                        <Box className="bg-gray-50 rounded overflow-hidden">
+                            <Box className="flex items-center gap-2 px-3 py-2 bg-gray-100">
+                                <Terminal fontSize="small" className="text-gray-600" />
+                                <Typography variant="subtitle2" className="text-gray-600">
+                                    Output
+                                </Typography>
+                            </Box>
+                            <Box className="p-3">
+                                <CommandLineLog
+                                    content={item.result_diagnostic ?? ''}
+                                />
+                            </Box>
+                        </Box>}
                     disabled={!item.result_diagnostic}
                 />
             )

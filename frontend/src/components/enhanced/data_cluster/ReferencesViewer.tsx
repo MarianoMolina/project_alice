@@ -24,7 +24,7 @@ const ReferencesViewer: React.FC<ReferencesViewerProps> = ({ references }) => {
     <Box>
       {references.messages && references.messages.length > 0 && (
         <Box className={classes.subSection}>
-          <Typography variant="h6">Messages</Typography>
+          <Typography variant="body1">Messages</Typography>
           {references.messages.map((message, index) => (
             <EnhancedMessage
               key={message._id || `message-${index}`}
@@ -38,7 +38,7 @@ const ReferencesViewer: React.FC<ReferencesViewerProps> = ({ references }) => {
 
       {references.files && references.files.length > 0 && (
         <Box className={classes.subSection}>
-          <Typography variant="h6">Files</Typography>
+          <Typography variant="body1">Files</Typography>
           {references.files.map((file, index) => (
             <FileViewer key={file._id || `file-${index}`}
               item={file}
@@ -50,7 +50,7 @@ const ReferencesViewer: React.FC<ReferencesViewerProps> = ({ references }) => {
 
       {references.task_responses && references.task_responses.length > 0 && (
         <Box className={classes.subSection}>
-          <Typography variant="h6">Task Responses</Typography>
+          <Typography variant="body1">Task Responses</Typography>
           {references.task_responses.map((taskResponse, index) => (
             <Box key={taskResponse._id || `task-response-${index}`}>
               {taskResponse.node_references && taskResponse.node_references.length > 0 ? (
@@ -65,7 +65,7 @@ const ReferencesViewer: React.FC<ReferencesViewerProps> = ({ references }) => {
 
       {references.entity_references && references.entity_references.length > 0 && (
         <Box className={classes.subSection}>
-          <Typography variant="h6">Entity References</Typography>
+          <Typography variant="body1">Entity References</Typography>
           {references.entity_references.map((result, index) => (
             <EntityReferenceViewer key={result.url || `search-result-${index}`}
               item={result}
@@ -77,7 +77,7 @@ const ReferencesViewer: React.FC<ReferencesViewerProps> = ({ references }) => {
 
       {references.user_interactions && references.user_interactions.length > 0 && (
         <Box className={classes.subSection}>
-          <Typography variant="h6">User Interactions</Typography>
+          <Typography variant="body1">User Interactions</Typography>
           {references.user_interactions.map((interaction, index) => (
             <UserInteractionViewer
               key={interaction._id || `interaction-${index}`}
@@ -90,7 +90,7 @@ const ReferencesViewer: React.FC<ReferencesViewerProps> = ({ references }) => {
 
       {references.embeddings && references.embeddings.length > 0 && (
         <Box className={classes.subSection}>
-          <Typography variant="h6">Embeddings</Typography>
+          <Typography variant="body1">Embeddings</Typography>
           {references.embeddings.map((chunk, index) => (
             <EmbeddingChunkViewer
               key={chunk._id || `embedding-${index}`}
@@ -103,7 +103,7 @@ const ReferencesViewer: React.FC<ReferencesViewerProps> = ({ references }) => {
 
       {references.tool_calls && references.tool_calls.length > 0 && (
         <Box className={classes.subSection}>
-          <Typography variant="h6">Tool Calls</Typography>
+          <Typography variant="body1">Tool Calls</Typography>
           {references.tool_calls.map((toolCall, index) => (
             <ToolCallViewer
               key={toolCall._id || `tool-call-${index}`}
@@ -115,7 +115,7 @@ const ReferencesViewer: React.FC<ReferencesViewerProps> = ({ references }) => {
       )}
       {references.code_executions && references.code_executions.length > 0 && (
         <Box className={classes.subSection}>
-          <Typography variant="h6">Code Executions</Typography>
+          <Typography variant="body1">Code Executions</Typography>
           {references.code_executions.map((codeExecution, index) => (
             <CodeExecutionViewer
               key={codeExecution._id || `code-execution-${index}`}

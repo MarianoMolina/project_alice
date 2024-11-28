@@ -2,6 +2,7 @@ import React from 'react';
 import { TextField, FormHelperText } from '@mui/material';
 import { TextInputProps } from '../../../../types/InputTypes';
 import { BaseInputWrapper } from './BaseInputWrapper';
+import theme from '../../../../Theme';
 
 export const TextInput: React.FC<TextInputProps> = ({
   value,
@@ -31,6 +32,7 @@ export const TextInput: React.FC<TextInputProps> = ({
       <TextField
         name={name}
         label={label}
+        InputLabelProps={{ sx: {backgroundColor: theme.palette.primary.dark}}}
         value={value || ''}
         onChange={handleChange}
         error={Boolean(error)}

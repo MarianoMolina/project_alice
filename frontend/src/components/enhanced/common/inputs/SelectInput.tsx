@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { SelectInputProps } from '../../../../types/InputTypes';
 import { BaseInputWrapper } from './BaseInputWrapper';
+import theme from '../../../../Theme';
 
 export const SelectInput: React.FC<SelectInputProps> = ({
   value,
@@ -49,7 +50,7 @@ export const SelectInput: React.FC<SelectInputProps> = ({
         required={required}
         disabled={disabled}
       >
-        {label && <InputLabel>{label}</InputLabel>}
+        {label && <InputLabel shrink sx={{backgroundColor: theme.palette.primary.dark}}>{label}</InputLabel>}
         <Select
           name={name}
           value={value || (multiple ? [] : '')}

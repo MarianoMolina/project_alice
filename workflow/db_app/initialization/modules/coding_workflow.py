@@ -237,6 +237,14 @@ coding_workflow_module = CodingWorkflowModule(
                     },
                     "required": ["Generate_Unit_Tests", "Generate_Code"]
                 },
+                "node_end_code_routing": {
+                    'llm_generation': {
+                        0: (None, False),
+                        1: ('llm_generation', True),
+                        2: ('llm_generation', True),
+                        3: (None, True)
+                    }
+                },
                 "exit_code_response_map": {"TEST FAILED": 2, "ALL TESTS PASSED": 0, "TEST CODE ERROR": 3},
                 "exit_codes": {0: "Test Passed", 1: "Response generation failed", 2: "Test Failed", 3: "Test Code Error"},
                 "templates": {

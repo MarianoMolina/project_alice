@@ -17,6 +17,8 @@ import ToolCallShortListView from '../../tool_calls/tool_calls/ToolCallShortList
 import CodeExecutionShortListView from '../../code_execution/code_execution/CodeExecutionShortListView';
 import UserInteractionShortListView from '../../user_interaction/user_interaction/UserInteractionShortListView';
 
+export type ViewType = 'flat' | 'categorized' | 'reference';
+
 export interface DataClusterManagerProps {
     dataCluster: DataCluster | undefined;
     isEditable?: boolean;

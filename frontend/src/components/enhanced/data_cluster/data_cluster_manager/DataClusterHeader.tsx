@@ -1,19 +1,21 @@
 import { memo } from 'react';
-import { Box, Button, ButtonGroup, IconButton, Tooltip } from '@mui/material';
+import { Box, ButtonGroup, ToggleButtonGroup, ToggleButton, Tooltip, Button } from '@mui/material';
 import {
     ViewList as ViewListIcon,
-    ViewModule as ViewModuleIcon
+    ViewModule as ViewModuleIcon,
+    Description as DescriptionIcon
 } from '@mui/icons-material';
 import { DataCluster } from '../../../../types/DataClusterTypes';
 import { hasAnyReferences } from '../../../../types/ReferenceTypes';
 import { ACTION_BUTTON_CONFIG } from './DataClusterManagerTypes';
 import DataClusterShortListView from '../data_cluster/DataClusterShortListView';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { ViewType } from './DataClusterManagerTypes';
 
 interface DataClusterHeaderProps {
     editedCluster: DataCluster | undefined;
-    isFlatView: boolean;
-    setIsFlatView: (value: boolean) => void;
+    viewType: ViewType;
+    setViewType: (value: ViewType) => void;
     isEditable: boolean;
     showEdit: boolean;
     showSelect: boolean;
@@ -25,8 +27,8 @@ interface DataClusterHeaderProps {
 
 const DataClusterHeader = memo(({
     editedCluster,
-    isFlatView,
-    setIsFlatView,
+    viewType,
+    setViewType,
     isEditable,
     showEdit,
     showSelect,
@@ -62,16 +64,30 @@ const DataClusterHeader = memo(({
         if (inEditMode || !editedCluster || !hasAnyReferences(editedCluster)) return null;
 
         return (
-            <Box className="absolute top-4 right-4">
-                <Tooltip title={isFlatView ? "Show Categorized View" : "Show Flat View"}>
-                    <IconButton
-                        onClick={() => setIsFlatView(!isFlatView)}
-                        size="small"
-                        className="bg-white/50 hover:bg-white/75"
-                    >
-                        {isFlatView ? <ViewListIcon /> : <ViewModuleIcon />}
-                    </IconButton>
-                </Tooltip>
+            <Box className="absolute top-0 right-0">
+                <ToggleButtonGroup
+                    value={viewType}
+                    exclusive
+                    onChange={(_, newValue) => newValue && setViewType(newValue)}
+                    size="small"
+                    className="bg-white/50"
+                >
+                    <ToggleButton value="flat">
+                        <Tooltip title="Flat View">
+                            <ViewListIcon />
+                        </Tooltip>
+                    </ToggleButton>
+                    <ToggleButton value="categorized">
+                        <Tooltip title="Categorized View">
+                            <ViewModuleIcon />
+                        </Tooltip>
+                    </ToggleButton>
+                    <ToggleButton value="reference">
+                        <Tooltip title="Reference View">
+                            <DescriptionIcon />
+                        </Tooltip>
+                    </ToggleButton>
+                </ToggleButtonGroup>
             </Box>
         );
     };

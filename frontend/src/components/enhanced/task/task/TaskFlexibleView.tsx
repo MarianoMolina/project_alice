@@ -88,7 +88,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     const handleAccordionToggle = useCallback((accordion: string | null) => {
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
     }, []);
-    
+
     const handlePromptSelect = useCallback(async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {
             const prompt = await fetchItem('prompts', selectedIds[0]) as Prompt;
@@ -192,9 +192,10 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
 
     const memoizedFlowchartTask = useMemo(() => ({
         ...form,
+        start_node: form.start_node,
         node_end_code_routing: form.node_end_code_routing,
         tasks: form.tasks
-    }), [form.node_end_code_routing, form.tasks]);
+    }), [form.node_end_code_routing, form.tasks, form.start_node]);
 
     if (!form || Object.keys(form).length === 0) {
         return <Box>No task data available.</Box>;
@@ -268,16 +269,19 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                 onChange={(value) => handleFieldChange('exit_codes', value)}
                 isEditMode={isEditMode}
             />
-            <Typography variant="h6" className={classes.titleText}>Node End Code Routing</Typography>
-            <Box className={classes.endCodeRoutingContainer}>
-                <TaskEndCodeRoutingBuilder
-                    tasks={taskType === TaskType.Workflow ? Object.values(form.tasks ?? {}) : []}
-                    routing={form.node_end_code_routing || {}}
-                    onChange={(value) => handleFieldChange('node_end_code_routing', value)}
-                    isViewMode={taskType !== TaskType.Workflow ? true : !isEditMode}
-                />
-                <TaskFlowchart task={memoizedFlowchartTask} height={800} miniMap />
-            </Box>
+            <TaskEndCodeRoutingBuilder
+                title="Node End Code Routing"
+                startNode={form.start_node}
+                onChangeStartNode={(value) => handleFieldChange('start_node', value)}
+                tasks={taskType === TaskType.Workflow ? Object.values(form.tasks ?? {}) : []}
+                routing={form.node_end_code_routing || {}}
+                onChange={(value) => handleFieldChange('node_end_code_routing', value)}
+                isViewMode={!isEditMode}
+                taskType={taskType}
+            />
+            {memoizedFlowchartTask && form.node_end_code_routing && (
+                <TaskFlowchart title="Task Flowchart" task={memoizedFlowchartTask} height={800} miniMap />
+            )}
             <NumericInput
                 name="max_attempts"
                 label="Max Attempts"

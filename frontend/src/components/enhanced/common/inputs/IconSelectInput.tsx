@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { IconSelectInputProps, SelectionOptionWithIcon } from '../../../../types/InputTypes';
 import { BaseInputWrapper } from './BaseInputWrapper';
+import theme from '../../../../Theme';
 
 export const IconSelectInput: React.FC<IconSelectInputProps> = ({
   value,
@@ -99,7 +100,7 @@ export const IconSelectInput: React.FC<IconSelectInputProps> = ({
         required={required}
         disabled={disabled}
       >
-        {label && <InputLabel>{label}</InputLabel>}
+        {label && <InputLabel shrink sx={{backgroundColor: theme.palette.primary.dark}}>{label}</InputLabel>}
         <Select
           name={name}
           value={value || (multiple ? [] : '')}
