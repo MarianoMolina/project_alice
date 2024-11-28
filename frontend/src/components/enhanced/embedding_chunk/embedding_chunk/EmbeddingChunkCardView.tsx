@@ -2,9 +2,10 @@ import React from 'react';
 import {
     Typography,
 } from '@mui/material';
-import { Language, QueryBuilder } from '@mui/icons-material';
+import { Expand, FormatListNumbered, Language, QueryBuilder, Tag, Toc } from '@mui/icons-material';
 import { EmbeddingChunkComponentProps } from '../../../../types/EmbeddingChunkTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
+import { CopyButton } from '../../../ui/markdown/CopyButton';
 
 const EmbeddingChunkCardView: React.FC<EmbeddingChunkComponentProps> = ({
     item
@@ -16,19 +17,24 @@ const EmbeddingChunkCardView: React.FC<EmbeddingChunkComponentProps> = ({
 
     const listItems = [
         {
-            icon: <Language />,
+            icon: <Toc />,
             primary_text: "Content",
             secondary_text: item.text_content || 'No content available'
         },
         {
-            icon: <Language />,
+            icon: <FormatListNumbered />,
             primary_text: "Index",
-            secondary_text: item.index === 0 ? 0 : item.index || 'No index available'
+            secondary_text: (item.index === 0 ? 0 : item.index) || 'No index available'
         },
         {
-            icon: <Language />,
+            icon: <Tag />,
             primary_text: "Vector",
-            secondary_text: item.vector || 'No vector available'
+            secondary_text: item.vector && <CopyButton code={JSON.stringify(item.vector)} tooltip='Copy vector to clipboard'/> || 'No vector available'
+        },
+        {
+            icon: <Expand />,
+            primary_text: "Content Length",
+            secondary_text: item.text_content && `Characters: ${item.text_content.length} - Tokens (est.): ${Math.round(item.text_content.length/3)}` || 'No content length available'
         },
         {
             icon: <QueryBuilder />,

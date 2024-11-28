@@ -6,11 +6,10 @@ import {
 } from '@mui/material';
 import { FileComponentProps, FileContentReference, FileReference, FileType, getDefaultFileForm } from '../../../../types/FileTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import FileViewer from '../FileViewer';
+import FileViewer from './FileViewer';
 import Transcript from '../Transcript';
 import { bytesToMB, createFileContentReference, selectFile } from '../../../../utils/FileUtils';
 import { useApi } from '../../../../contexts/ApiContext';
-import { MessageType } from '../../../../types/MessageTypes';
 import { useNotification } from '../../../../contexts/NotificationContext';
 import Logger from '../../../../utils/Logger';
 import { useDialog } from '../../../../contexts/DialogCustomContext';
@@ -86,7 +85,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
         });
     }
 
-    const handleFileUpdate = (updatedFile: FileContentReference | FileReference) => {
+    const handleFileUpdate = (updatedFile: Partial<FileContentReference> | Partial<FileReference>) => {
         if (updatedFile) {
             setForm(updatedFile);
         }
@@ -151,9 +150,10 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
                 </Typography>
                 <Box mt={2}>
                     <FileViewer
-                        file={item as FileReference}
-                        editable={isEditMode}
-                        onUpdate={handleFileUpdate}
+                        item={item as FileReference}
+                        mode={mode}
+                        onChange={handleFileUpdate}
+                        items={null} handleSave={async()=>{}}
                     />
                 </Box>
                 {item && item._id && hasTranscriptSlot && (

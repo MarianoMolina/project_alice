@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import { DataCluster } from '../../../../types/DataClusterTypes';
 import { hasAnyReferences, References } from '../../../../types/ReferenceTypes';
 import { CollectionElementString } from '../../../../types/CollectionTypes';
-import ReferenceChip from '../../common/references/ReferenceChip';
+import ReferenceChip from '../ReferenceChip';
 import { REFERENCE_CONFIG } from './DataClusterManagerTypes';
 
 interface FlatReferenceViewProps {

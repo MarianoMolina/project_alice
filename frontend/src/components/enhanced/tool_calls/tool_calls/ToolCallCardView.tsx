@@ -5,7 +5,7 @@ import { ToolCallComponentProps } from '../../../../types/ToolCallTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
-import EmbeddingChunkViewer from '../../embedding_chunk/EmbeddingChunkViewer';
+import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
 
 const ToolCallCardView: React.FC<ToolCallComponentProps> = ({ item }) => {
 
@@ -13,11 +13,12 @@ const ToolCallCardView: React.FC<ToolCallComponentProps> = ({ item }) => {
         return <Typography>No ToolCall data available.</Typography>;
     }
 
-    const embeddingChunkViewer = item.embedding?.length > 0 ?
+    const embeddingChunkViewer = item.embedding && item.embedding?.length > 0 ?
      item.embedding.map((chunk, index) => (
         <EmbeddingChunkViewer
             key={chunk._id || `embedding-${index}`}
-            chunk={chunk}
+            item={chunk}
+            items={null} onChange={()=>null} mode={'view'} handleSave={async()=>{}}
         />
     )) : <Typography>No embeddings available</Typography>;
     const listItems = [

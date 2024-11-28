@@ -10,18 +10,27 @@ import { useApi } from '../../../../contexts/ApiContext';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import Logger from '../../../../utils/Logger';
-import EmbeddingChunkViewer from '../../embedding_chunk/EmbeddingChunkViewer';
+import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
 
 const UserInteractionCardView: React.FC<UserInteractionComponentProps> = ({
     item: initialItem
 }) => {
     const [item, setItem] = useState(initialItem);
     const { openDialog } = useDialog();
+    const { selectCardItem } = useCardDialog();
     const { updateUserInteraction } = useApi();
 
     if (!item) {
         return <Typography>No User Interaction data available.</Typography>;
     }
+    const handleViewOwner = () => {
+        if (item.owner && item.owner.type === 'task_response') {
+            selectCardItem('TaskResponse', item.owner.id as string);
+        } else if (item.owner && item.owner.type === 'chat') {
+            selectCardItem('Chat', item.owner.id as string);
+        }
+    };
 
     const handleResponseClick = async () => {
         openDialog({
@@ -33,7 +42,7 @@ const UserInteractionCardView: React.FC<UserInteractionComponentProps> = ({
                     try {
                         const updatedInteraction = await updateUserInteraction(
                             item._id as string,
-                            { 
+                            {
                                 user_response: {
                                     selected_option: parseInt(key),
                                 }
@@ -64,13 +73,24 @@ const UserInteractionCardView: React.FC<UserInteractionComponentProps> = ({
             Respond
         </Button>
     );
-    const embeddingChunkViewer = item.embedding?.length > 0 ?
-     item.embedding.map((chunk, index) => (
-        <EmbeddingChunkViewer
-            key={chunk._id || `embedding-${index}`}
-            chunk={chunk}
-        />
-    )) : <Typography>No embeddings available</Typography>;
+    const embeddingChunkViewer = item.embedding && item.embedding?.length > 0 ?
+        item.embedding.map((chunk, index) => (
+            <EmbeddingChunkViewer
+                key={chunk._id || `embedding-${index}`}
+                item={chunk}
+                items={null} onChange={() => null} mode={'view'} handleSave={async () => { }}
+            />
+        )) : <Typography>No embeddings available</Typography>;
+
+    
+    const ownerType = item.owner?.type === 'task_response' ? 'Task Response' : item.owner?.type === 'chat' ? 'Chat' : 'Unknown';
+    const ownerComponent = item.owner ? (
+        <Typography variant="body1" onClick={handleViewOwner} style={{ cursor: 'pointer' }}>
+            {ownerType} - {item.owner.id}
+        </Typography>
+    ) : (
+        <Typography variant="body1">No owner available</Typography>
+    );
     const listItems = [
         {
             icon: <Language />,
@@ -80,7 +100,7 @@ const UserInteractionCardView: React.FC<UserInteractionComponentProps> = ({
         {
             icon: <Functions />,
             primary_text: "Owner",
-            secondary_text: item.owner ? `Type: ${item.owner.type ?? 'N/A'} - ID: ${item.owner.id ?? 'N/A'}` : 'No owner available'
+            secondary_text: ownerComponent
         },
         {
             icon: <DataObject />,

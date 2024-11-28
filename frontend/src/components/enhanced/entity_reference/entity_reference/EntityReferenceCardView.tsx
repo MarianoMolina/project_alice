@@ -23,7 +23,7 @@ import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import { referenceCategoryToIcon } from '../../../../utils/EntityReferenceUtils';
 import { apiTypeIcons } from '../../../../utils/ApiUtils';
-import EmbeddingChunkViewer from '../../embedding_chunk/EmbeddingChunkViewer';
+import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
 
 const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
     item
@@ -82,11 +82,12 @@ const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
         </Box>
     );
 
-    const embeddingChunkViewer = item.embedding?.length > 0 ?
+    const embeddingChunkViewer = item.embedding && item.embedding?.length > 0 ?
      item.embedding.map((chunk, index) => (
         <EmbeddingChunkViewer
             key={chunk._id || `embedding-${index}`}
-            chunk={chunk}
+            item={chunk}
+            items={null} onChange={()=>null} mode={'view'} handleSave={async()=>{}}
         />
     )) : <Typography>No embeddings available</Typography>;
 
@@ -95,6 +96,22 @@ const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
             icon: <Source />,
             primary_text: "Source ID",
             secondary_text: item.source_id
+        },
+        {
+            icon: item.source ? apiTypeIcons[item.source] : <Source />,
+            primary_text: "Source",
+            secondary_text: item.source && (
+                <Chip
+                    icon={apiTypeIcons[item.source]}
+                    label={item.source}
+                    size="small"
+                />
+            )
+        },
+        {
+            icon: <Category />,
+            primary_text: "Categories",
+            secondary_text: renderCategories()
         },
         {
             icon: <Language />,
@@ -116,25 +133,9 @@ const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
             secondary_text: <AliceMarkdown showCopyButton children={item.content ?? ''} />
         },
         {
-            icon: <Category />,
-            primary_text: "Categories",
-            secondary_text: renderCategories()
-        },
-        {
             icon: <Image />,
             primary_text: "Images",
             secondary_text: renderImages()
-        },
-        {
-            icon: item.source ? apiTypeIcons[item.source] : <Source />,
-            primary_text: "Source",
-            secondary_text: item.source && (
-                <Chip
-                    icon={apiTypeIcons[item.source]}
-                    label={item.source}
-                    size="small"
-                />
-            )
         },
         {
             icon: <Cable />,

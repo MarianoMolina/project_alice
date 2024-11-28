@@ -28,7 +28,8 @@ RUN pip install --no-cache-dir \
     plotly \
     seaborn \
     jupyter \
-    python-dotenv 
+    python-dotenv \ 
+    pytest
 
 # Set the working directory
 WORKDIR /app

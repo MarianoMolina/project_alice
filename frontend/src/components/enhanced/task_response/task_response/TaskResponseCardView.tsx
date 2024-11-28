@@ -13,9 +13,9 @@ import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import { styled } from '@mui/material/styles';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { AccessTime, CheckCircle, Error, Warning, Output, Code, BugReport, DataObject, Analytics } from '@mui/icons-material';
-import NodeResponsesViewer from '../../common/references/NodeResponsesViewer';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
-import EmbeddingChunkViewer from '../../embedding_chunk/EmbeddingChunkViewer';
+import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
+import TaskResponseViewer from './TaskResponseViewer';
 
 const ExitCodeChip = styled(Chip)(({ theme }) => ({
     fontWeight: 'bold',
@@ -62,11 +62,12 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
         </Accordion>
     );
 
-    const embeddingChunkViewer = item.embedding?.length > 0 ?
+    const embeddingChunkViewer = item.embedding && item.embedding?.length > 0 ?
      item.embedding.map((chunk, index) => (
         <EmbeddingChunkViewer
             key={chunk._id || `embedding-${index}`}
-            chunk={chunk}
+            item={chunk}
+            items={null} onChange={()=>null} mode={'view'} handleSave={async()=>{}}
         />
     )) : <Typography>No embeddings available</Typography>;
     
@@ -125,7 +126,7 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
                 <AccordionSection
                     title="Node Outputs"
                     content={
-                        item.node_references ? <NodeResponsesViewer nodeResponses={item.node_references} /> : <Typography>No output content available</Typography>
+                        item.node_references ? <TaskResponseViewer item={item} items={null} onChange={()=>null} mode={'view'} handleSave={async()=>{}} /> : <Typography>No output content available</Typography>
                     }
                     disabled={!item.node_references?.length}
                 />

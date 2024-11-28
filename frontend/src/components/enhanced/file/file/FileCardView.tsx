@@ -3,10 +3,11 @@ import { Typography } from '@mui/material';
 import { FileComponentProps } from '../../../../types/FileTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { InsertDriveFile, CalendarToday, AccessTime, TextSnippet, AttachFile, QueryBuilder, DataObject } from '@mui/icons-material';
-import FileViewer from '../FileViewer';
+import FileViewer from './FileViewer';
 import { bytesToMB } from '../../../../utils/FileUtils';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
-import EmbeddingChunkViewer from '../../embedding_chunk/EmbeddingChunkViewer';
+import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
+import FileContentView from './FileContentView';
 
 const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
 
@@ -14,11 +15,12 @@ const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
         return <Typography>No file data available.</Typography>;
     }
 
-    const embeddingChunkViewer = item.embedding?.length > 0 ?
+    const embeddingChunkViewer = item.embedding && item.embedding?.length > 0 ?
      item.embedding.map((chunk, index) => (
         <EmbeddingChunkViewer
             key={chunk._id || `embedding-${index}`}
-            chunk={chunk}
+            item={chunk}
+            items={null} onChange={()=>null} mode={'view'} handleSave={async()=>{}}
         />
     )) : <Typography>No embeddings available</Typography>;
     
@@ -46,7 +48,7 @@ const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
         {
             icon: <AttachFile />,
             primary_text: "File Preview",
-            secondary_text: <FileViewer file={item} editable={false} />
+            secondary_text: <FileContentView item={item} items={null} onChange={()=>null} mode={'view'} handleSave={async()=>{}} />
         },
         {
             icon: <DataObject />,

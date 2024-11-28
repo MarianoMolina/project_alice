@@ -4,7 +4,6 @@ import {
 } from '@mui/material';
 import { ToolCallComponentProps, ToolCall, getDefaultToolCallForm, ToolCallConfig } from '../../../../types/ToolCallTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import Logger from '../../../../utils/Logger';
 import useStyles from '../ToolCallStyles';
 import { TextInput } from '../../common/inputs/TextInput';
 import { useNotification } from '../../../../contexts/NotificationContext';

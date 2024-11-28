@@ -1,20 +1,18 @@
 import React from 'react';
 import {  Box, Stack } from '@mui/material';
-import { NodeResponse } from '../../../../types/TaskResponseTypes';
-import { NodeReferencesViewer } from './NodeReferencesViewer';
-
-interface NodeResponseViewerProps {
-  nodeResponses: NodeResponse[];
+import { TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
+import { NodeReferencesViewer } from '../NodeReferencesViewer';
+interface NodeResponseViewerProps extends TaskResponseComponentProps {
   level?: number;
 }
 
-const NodeResponsesViewer: React.FC<NodeResponseViewerProps> = ({
-  nodeResponses,
+const TaskResponseViewer: React.FC<NodeResponseViewerProps> = ({
+  item,
   level = 0
 }) => {
   return (
     <Stack>
-      {nodeResponses.map((nodeResponse, index) => (
+      {item?.node_references?.map((nodeResponse, index) => (
             <Box key={`${nodeResponse.node_name}-${index}`} sx={{ 'display': 'flex' }}>
               <NodeReferencesViewer
                 references={nodeResponse.references}
@@ -29,4 +27,4 @@ const NodeResponsesViewer: React.FC<NodeResponseViewerProps> = ({
   );
 };
 
-export default NodeResponsesViewer;
+export default TaskResponseViewer;

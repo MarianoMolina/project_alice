@@ -1,15 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import {
-    Typography,
-    Box
-} from '@mui/material';
-import FunctionDefinitionBuilder from '../../common/function_select/FunctionDefinitionBuilder';
+
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import { FunctionParameters } from '../../../../types/ParameterTypes';
 import Logger from '../../../../utils/Logger';
 import { TextInput } from '../../common/inputs/TextInput';
-import { BooleanInput } from '../../common/inputs/BooleanInput';
-import { NumericInput } from '../../common/inputs/NumericInput';
 import { getDefaultUserCheckpointForm, UserCheckpoint, UserCheckpointComponentProps } from '../../../../types/UserCheckpointTypes';
 import ExitCodeManager from '../../common/exit_code_manager/ExitCodeManager';
 

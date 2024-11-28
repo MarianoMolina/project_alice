@@ -266,7 +266,7 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
-            item={item as APIConfig}
+            item={form as APIConfig}
             itemType='apiconfigs'
         >
             {validationError && (

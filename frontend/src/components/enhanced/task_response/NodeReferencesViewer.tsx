@@ -1,10 +1,10 @@
 import React from 'react';
 import { Box, Typography, Chip, Accordion, AccordionSummary, AccordionDetails, Tooltip } from '@mui/material';
-import { References } from '../../../../types/ReferenceTypes';
-import ReferencesViewer from './ReferencesViewer';
-import { useStyles } from './ReferencesStyles';
+import { References } from '../../../types/ReferenceTypes';
+import ReferencesViewer from '../data_cluster/ReferencesViewer';
+import { useStyles } from '../data_cluster/ReferencesStyles';
 import { ExpandMore } from '@mui/icons-material';
-import { formatCamelCaseString } from '../../../../utils/StyleUtils';
+import { formatCamelCaseString } from '../../../utils/StyleUtils';
 
 interface NodeReferencesViewerProps {
     references: References;

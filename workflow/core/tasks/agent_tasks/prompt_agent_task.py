@@ -196,7 +196,7 @@ class PromptAgentTask(AliceTask):
         llm_node = self.get_last_node_by_name(node_responses, "llm_generation")
         
         if not llm_node or not llm_node.references or not llm_node.references.messages:
-            return self._create_error_response("tool_call_execution", "No LLM response found", len(execution_history))
+            return self.get_failed_task_response(diagnostics="No LLM response found", execution_history=execution_history)
 
         try:
             llm_response: MessageDict = llm_node.references.messages[-1]
@@ -222,7 +222,7 @@ class PromptAgentTask(AliceTask):
             )
             
         except Exception as e:
-            return self._create_error_response("tool_call_execution", str(e), len(execution_history))
+            return self.get_failed_task_response(diagnostics=str(e), execution_history=execution_history)
 
     async def execute_code_execution(self, execution_history: List[NodeResponse], node_responses: List[NodeResponse], include_prompt_in_execution: Optional[bool] = False, **kwargs) -> NodeResponse:
         messages: List[MessageDict] = []

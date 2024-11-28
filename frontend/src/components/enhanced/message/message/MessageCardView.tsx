@@ -8,8 +8,8 @@ import CommonCardView from '../../common/enhanced_component/CardView';
 import { hasAnyReferences } from '../../../../types/ReferenceTypes';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import AliceMarkdown, { CustomBlockType } from '../../../ui/markdown/alice_markdown/AliceMarkdown';
-import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
-import EmbeddingChunkViewer from '../../embedding_chunk/EmbeddingChunkViewer';
+import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
+import ReferencesViewer from '../../data_cluster/ReferencesViewer';
 
 const MessageCardView: React.FC<MessageComponentProps> = ({
     item,
@@ -17,11 +17,12 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
     if (!item) {
         return <Typography>No message data available.</Typography>;
     }
-    const embeddingChunkViewer = item.embedding?.length > 0 ?
+    const embeddingChunkViewer = item.embedding && item.embedding?.length > 0 ?
      item.embedding.map((chunk, index) => (
         <EmbeddingChunkViewer
             key={chunk._id || `embedding-${index}`}
-            chunk={chunk}
+            item={chunk}
+            items={null} onChange={()=>null} mode={'view'} handleSave={async()=>{}}
         />
     )) : <Typography>No embeddings available</Typography>;
     const listItems = [
@@ -54,7 +55,11 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
         {
             icon: <AttachFile />,
             primary_text: "References",
-            secondary_text: item.references && hasAnyReferences(item.references) ? <DataClusterManager dataCluster={item.references} /> : <Typography>"N/A"</Typography>,
+            secondary_text: item.references && hasAnyReferences(item.references) ? 
+            <ReferencesViewer
+                references={item.references}
+            /> :
+            <Typography>"N/A"</Typography>,
         },
         {
             icon: <DataObject />,

@@ -12,7 +12,6 @@ import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import useStyles from '../EntityReferenceStyles';
 import { referenceCategoryToIcon } from '../../../../utils/EntityReferenceUtils';
 import { apiTypeIcons } from '../../../../utils/ApiUtils';
-import Logger from '../../../../utils/Logger';
 import { TextInput } from '../../common/inputs/TextInput';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 import { ApiType } from '../../../../types/ApiTypes';

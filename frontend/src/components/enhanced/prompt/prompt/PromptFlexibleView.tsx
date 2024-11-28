@@ -1,13 +1,10 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import {
-    Typography,
     Box
 } from '@mui/material';
 import FunctionDefinitionBuilder from '../../common/function_select/FunctionDefinitionBuilder';
 import { PromptComponentProps, Prompt, getDefaultPromptForm } from '../../../../types/PromptTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import { FunctionParameters } from '../../../../types/ParameterTypes';
-import Logger from '../../../../utils/Logger';
 import { TextInput } from '../../common/inputs/TextInput';
 import { BooleanInput } from '../../common/inputs/BooleanInput';
 import { NumericInput } from '../../common/inputs/NumericInput';

@@ -3,7 +3,7 @@ import {
     Box,
     Typography,
 } from '@mui/material';
-import { AliceTask, getDefaultTaskForm, TaskComponentProps, TasksEndCodeRouting, TaskType } from '../../../../types/TaskTypes';
+import { AliceTask, getDefaultTaskForm, TaskComponentProps, TaskType } from '../../../../types/TaskTypes';
 import { useApi } from '../../../../contexts/ApiContext';
 import { ApiType } from '../../../../types/ApiTypes';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
@@ -208,7 +208,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
-            item={item as AliceTask}
+            item={form as AliceTask}
             itemType='tasks'
         >
             <SelectInput

@@ -1,6 +1,5 @@
-// components/common/inputs/TextInput.tsx
 import React from 'react';
-import { TextField, FormHelperText, Box } from '@mui/material';
+import { TextField, FormHelperText } from '@mui/material';
 import { TextInputProps } from '../../../../types/InputTypes';
 import { BaseInputWrapper } from './BaseInputWrapper';
 

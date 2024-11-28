@@ -4,18 +4,19 @@ import { Category, TypeSpecimen, Description, QueryBuilder, DataObjectRounded } 
 import { CodeExecutionComponentProps } from '../../../../types/CodeExecutionTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
-import EmbeddingChunkViewer from '../../embedding_chunk/EmbeddingChunkViewer';
+import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
 
 const CodeExecutionCardView: React.FC<CodeExecutionComponentProps> = ({ item }) => {
 
     if (!item) {
         return <Typography>No CodeExecution data available.</Typography>;
     }
-    const embeddingChunkViewer = item.embedding?.length > 0 ?
+    const embeddingChunkViewer = item.embedding && item.embedding?.length > 0 ?
         item.embedding.map((chunk, index) => (
             <EmbeddingChunkViewer
                 key={chunk._id || `embedding-${index}`}
-                chunk={chunk}
+                item={chunk}
+                items={null} onChange={()=>null} mode={'view'} handleSave={async()=>{}}
             />
         )) : <Typography>No embeddings available</Typography>;
 

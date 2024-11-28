@@ -7,7 +7,8 @@ import {
 import { Language, DataObject, QueryBuilder } from '@mui/icons-material';
 import { DataClusterComponentProps } from '../../../../types/DataClusterTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import ReferenceChip from '../../common/references/ReferenceChip';
+import ReferenceChip from '../ReferenceChip';
+import ReferencesViewer from '../ReferencesViewer';
 
 const DataClusterCardView: React.FC<DataClusterComponentProps> = ({
     item
@@ -44,13 +45,11 @@ const DataClusterCardView: React.FC<DataClusterComponentProps> = ({
         },
         {
             icon: <Language />,
-            primary_text: "Text Content",
+            primary_text: "References",
             secondary_text: (
-                <Box sx={{ mt: 1 }}>
-                    <Typography variant="body2">
-                        {item.embeddings?.map(chunk => chunk.text_content).join(' ') || 'No content available'}
-                    </Typography>
-                </Box>
+                <ReferencesViewer
+                    references={item}
+                />
             )
         },
         {

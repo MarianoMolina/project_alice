@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Box, TextField, Typography, Button, Card, CardContent, Alert } from '@mui/material';
+import { Box, Typography, Button, Card, CardContent, Alert } from '@mui/material';
 import { Person } from '@mui/icons-material';
 import { useApi } from '../../../contexts/ApiContext';
 import { User, UserDefaultChatConfig } from '../../../types/UserTypes';
@@ -84,11 +84,6 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
         Logger.debug(`Populating items for user ${JSON.stringify(userObject, null, 2)}`);
         populateItems();
     }, [userObject.default_chat_config, fetchItem]);
-
-    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setUserObject(prevUser => prevUser ? { ...prevUser, [name]: value } : null);
-    }, [setUserObject]);
 
     const handleAgentChange = useCallback(async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {

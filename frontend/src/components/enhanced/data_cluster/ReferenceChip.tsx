@@ -1,17 +1,17 @@
 import React from 'react';
 import { Chip } from '@mui/material';
 import { Visibility } from '@mui/icons-material';
-import { MessageType } from '../../../../types/MessageTypes';
-import { FileContentReference, FileReference } from '../../../../types/FileTypes';
-import { TaskResponse } from '../../../../types/TaskResponseTypes';
-import { EntityReference } from '../../../../types/EntityReferenceTypes';
-import { UserInteraction } from '../../../../types/UserInteractionTypes';
-import { EmbeddingChunk } from '../../../../types/EmbeddingChunkTypes';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
-import { CollectionElementString } from '../../../../types/CollectionTypes';
-import { ReferenceType } from '../../../../types/ReferenceTypes';
-import { ToolCall } from '../../../../types/ToolCallTypes';
-import { CodeExecution } from '../../../../types/CodeExecutionTypes';
+import { MessageType } from '../../../types/MessageTypes';
+import { FileContentReference, FileReference } from '../../../types/FileTypes';
+import { TaskResponse } from '../../../types/TaskResponseTypes';
+import { EntityReference } from '../../../types/EntityReferenceTypes';
+import { UserInteraction } from '../../../types/UserInteractionTypes';
+import { EmbeddingChunk } from '../../../types/EmbeddingChunkTypes';
+import { useCardDialog } from '../../../contexts/CardDialogContext';
+import { CollectionElementString } from '../../../types/CollectionTypes';
+import { ReferenceType } from '../../../types/ReferenceTypes';
+import { ToolCall } from '../../../types/ToolCallTypes';
+import { CodeExecution } from '../../../types/CodeExecutionTypes';
 
 interface ReferenceChipProps {
   reference: ReferenceType;

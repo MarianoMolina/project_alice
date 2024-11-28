@@ -4,7 +4,7 @@ import { Add as AddIcon } from '@mui/icons-material';
 import { DataCluster } from '../../../../types/DataClusterTypes';
 import { References } from '../../../../types/ReferenceTypes';
 import { CollectionType } from '../../../../types/CollectionTypes';
-import ReferenceChip from '../../common/references/ReferenceChip';
+import ReferenceChip from '../ReferenceChip';
 import { REFERENCE_CONFIG } from './DataClusterManagerTypes';
 import { useApi } from '../../../../contexts/ApiContext';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';

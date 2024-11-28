@@ -1,10 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import {
-    Typography
-} from '@mui/material';
 import { ContentType, MessageComponentProps, MessageGenerators, MessageType, RoleType, getDefaultMessageForm } from '../../../../types/MessageTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import useStyles from '../MessageStyles';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 import { TextInput } from '../../common/inputs/TextInput';
 import { SelectInput } from '../../common/inputs/SelectInput';
@@ -18,7 +14,6 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
 }) => {
     const [form, setForm] = useState<Partial<MessageType>>(item || getDefaultMessageForm());
     const [isSaving, setIsSaving] = useState(false);
-    const classes = useStyles();
 
     const isEditMode = mode === 'edit' || mode === 'create';
     const title = mode === 'create' ? 'Create New Message' : mode === 'edit' ? 'Edit Message' : 'Message Details';

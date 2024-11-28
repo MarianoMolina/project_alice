@@ -197,7 +197,7 @@ export interface BaseDatabaseObject extends BasicDBObj {
 }
 
 export interface Embeddable extends BaseDatabaseObject {
-    embedding: EmbeddingChunk[];
+    embedding?: EmbeddingChunk[];
 }
 
 // Generic converters that work with any type extending the base interfaces
