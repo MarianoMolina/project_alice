@@ -2,59 +2,14 @@ import google.generativeai as genai
 from google.generativeai.types import GenerateContentResponse
 from pydantic import Field
 from typing import Dict, Any, List, Optional
-from workflow.core.api.engines import APIEngine
+from workflow.core.api.engines.llm_engines.llm_engine import LLMEngine
 from workflow.core.data_structures import (
     MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, ToolCallConfig, RoleTypes, MessageGenerators, 
     ToolFunction
     )
 from workflow.util import LOGGER, est_messages_token_count, prune_messages, est_token_count
 
-class GeminiLLMEngine(APIEngine):
-    input_variables: FunctionParameters = Field(
-        default=FunctionParameters(
-            type="object",
-            properties={
-                "messages": ParameterDefinition(
-                    type="array",
-                    description="The list of messages in the conversation.",
-                    default=None
-                ),
-                "system": ParameterDefinition(
-                    type="string",
-                    description="System message to be used for the conversation.",
-                    default=None
-                ),
-                "tools": ParameterDefinition(
-                    type="array",
-                    description="A list of tool definitions that the model may use.",
-                    default=None
-                ),
-                "max_tokens": ParameterDefinition(
-                    type="integer",
-                    description="The maximum number of tokens to generate.",
-                    default=None
-                ),
-                "temperature": ParameterDefinition(
-                    type="number",
-                    description="The sampling temperature to use.",
-                    default=0.7
-                ),
-                "tool_choice": ParameterDefinition(
-                    type="string",
-                    description="Specifies the function calling mode.",
-                    default="auto"
-                ),
-                "n": ParameterDefinition(
-                    type="integer",
-                    description="The number of chat completion choices to generate.",
-                    default=1
-                )
-            },
-            required=["messages"]
-        ),
-        description="The inputs this API engine takes: requires a list of messages and optional function/tool related inputs."
-    )
-    required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
+class GeminiLLMEngine(LLMEngine):
 
     async def generate_api_response(self, api_data: ModelConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[ToolFunction]] = None, max_tokens: Optional[int] = None, temperature: Optional[float] = 0.7, tool_choice: Optional[str] = "auto", n: Optional[int] = 1, **kwargs) -> References:
         if not api_data.api_key:
@@ -166,13 +121,3 @@ class GeminiLLMEngine(APIEngine):
         except Exception as e:
             LOGGER.error(f"Error in Gemini API call: {str(e)}")
             raise
-
-    @staticmethod
-    def get_usage(message: MessageDict) -> Dict[str, Any]:
-        creation_metadata = message.creation_metadata
-        return {
-            "prompt_tokens": creation_metadata.get('prompt_tokens', 0),
-            "completion_tokens": creation_metadata.get('completion_tokens', 0),
-            "total_tokens": creation_metadata.get('total_tokens', 0),
-            "model": creation_metadata.get('model', ''),
-        }

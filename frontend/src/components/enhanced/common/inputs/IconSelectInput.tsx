@@ -93,6 +93,8 @@ export const IconSelectInput: React.FC<IconSelectInputProps> = ({
   return (
     <BaseInputWrapper
       className={className}
+      error={error}
+      description={description}
     >
       <FormControl 
         fullWidth={fullWidth}
@@ -123,8 +125,6 @@ export const IconSelectInput: React.FC<IconSelectInputProps> = ({
             </MenuItem>
           ))}
         </Select>
-        {error && <FormHelperText>{error}</FormHelperText>}
-        {description && <FormHelperText>{description}</FormHelperText>}
       </FormControl>
     </BaseInputWrapper>
   );

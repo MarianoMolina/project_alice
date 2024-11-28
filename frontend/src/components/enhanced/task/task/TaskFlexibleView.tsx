@@ -101,9 +101,9 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     const handleOutputPromptSelect = useCallback(async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {
             const prompt = await fetchItem('prompts', selectedIds[0]) as Prompt;
-            setForm(prevForm => ({ ...prevForm, templates: { ...prevForm.templates, output_prompt: prompt } }));
+            setForm(prevForm => ({ ...prevForm, templates: { ...prevForm.templates, output_template: prompt } }));
         } else {
-            setForm(prevForm => ({ ...prevForm, templates: { ...prevForm.templates, output_prompt: null } }));
+            setForm(prevForm => ({ ...prevForm, templates: { ...prevForm.templates, output_template: null } }));
         }
     }, [fetchItem]);
 
@@ -132,11 +132,11 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             selectedItems={form?.templates?.task_template ? [form.templates.task_template] : []}
             onSelect={handlePromptSelect}
             isInteractable={isEditMode}
-            label="Select Task Template"
+            label="Select Input Template"
             activeAccordion={activeAccordion}
             onAccordionToggle={handleAccordionToggle}
             accordionEntityName="prompts"
-            description='The prompt template that will be used to structure the task input.'
+            description='The prompt template that will be used to structure the task input. Used in Agent tasks like PromptAgentTask'
             showCreateButton={true}
         />
     ), [form?.templates?.task_template, isEditMode, activeAccordion, handleAccordionToggle, handlePromptSelect]);
@@ -145,17 +145,17 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
         <EnhancedSelect<Prompt>
             componentType="prompts"
             EnhancedView={PromptShortListView}
-            selectedItems={form?.templates?.output_prompt ? [form.templates.output_prompt] : []}
+            selectedItems={form?.templates?.output_template ? [form.templates.output_template] : []}
             onSelect={handleOutputPromptSelect}
             isInteractable={isEditMode}
             label="Select Output Prompt"
             activeAccordion={activeAccordion}
-            description='The prompt template that will be used to structure the task output.'
+            description='The prompt template that will be used to structure the task output. Can be used in any task type.'
             onAccordionToggle={handleAccordionToggle}
-            accordionEntityName="output_prompt"
+            accordionEntityName="output_template"
             showCreateButton={true}
         />
-    ), [form?.templates?.output_prompt, isEditMode, activeAccordion, handleAccordionToggle, handleOutputPromptSelect]);
+    ), [form?.templates?.output_template, isEditMode, activeAccordion, handleAccordionToggle, handleOutputPromptSelect]);
 
     const memoizedAgentSelect = useMemo(() => (
         <EnhancedSelect<AliceAgent>
@@ -168,7 +168,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             activeAccordion={activeAccordion}
             onAccordionToggle={handleAccordionToggle}
             accordionEntityName="agent"
-            description='The agent that will execute this task. The models this agent has will be used when executing the task.'
+            description='The agent responsible for this task. Used in Agent tasks like PromptAgentTask, ImageGenerationTaks, CodeGenerationTask and CheckTask, amongst others. The models this agent has will be used when executing the task.'
             showCreateButton={true}
         />
     ), [form?.agent, isEditMode, activeAccordion, handleAccordionToggle, handleAgentSelect]);
@@ -300,7 +300,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                 value={form.recursive}
                 onChange={(value) => handleFieldChange('recursive', value)}
                 disabled={!isEditMode}
-                description="Normally, if a task being executed is present in the execution history of a task, it will be rejected, unless it is recursive. Workflows usually should have recursion enabled."
+                description="Normally, if a task being executed is present in the execution history of a task, it will be rejected, unless it is recursive. Workflows and tasks used in Workflows usually should have recursion enabled."
             />
 
             <DataClusterManager

@@ -206,7 +206,7 @@ class SearchEngine(APIEngine):
                     type="string",
                     description="Search query"
                 ),
-                "limit": ParameterDefinition(
+                "max_results": ParameterDefinition(
                     type="integer",
                     description="Number of results",
                     default=10
@@ -221,7 +221,7 @@ class SearchEngine(APIEngine):
         self, 
         api_data: Dict[str, Any],
         query: str,
-        limit: int = 10,
+        max_results: int = 10,
         **kwargs
     ) -> References:
         endpoint = api_data['endpoint']

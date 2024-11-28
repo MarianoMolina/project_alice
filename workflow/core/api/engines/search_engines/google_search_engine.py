@@ -4,7 +4,7 @@ from workflow.util import LOGGER
 from workflow.core.data_structures import (
     References, ApiType, EntityReference, ReferenceCategory, ImageReference
     )    
-from workflow.core.api.engines.search_engine import APISearchEngine
+from workflow.core.api.engines.search_engines.search_engine import APISearchEngine
 
 class GoogleSearchAPI(APISearchEngine):
     """
@@ -18,7 +18,7 @@ class GoogleSearchAPI(APISearchEngine):
     Note:
         Requires valid API key and Custom Search Engine ID in api_data.
     """
-    required_api: ApiType = "google_search"
+    required_api: ApiType = ApiType.GOOGLE_SEARCH
 
     async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> References:
         if not api_data.get('api_key') or not api_data.get('cse_id'):

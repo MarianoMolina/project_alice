@@ -46,6 +46,8 @@ export const NumericInput: React.FC<NumericInputProps> = ({
   return (
     <BaseInputWrapper
       className={className}
+      error={error}
+      description={description}
     >
       <TextField
         name={name}
@@ -68,7 +70,6 @@ export const NumericInput: React.FC<NumericInputProps> = ({
           pattern: isInteger ? '[0-9]*' : '[0-9]*[.,]?[0-9]*',
         }}
       />
-      {description && <FormHelperText>{description}</FormHelperText>}
     </BaseInputWrapper>
   );
 };

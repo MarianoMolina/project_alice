@@ -1,59 +1,20 @@
 import torch, gc, base64, os
 from typing import List, Optional
-from pydantic import Field
 from diffusers import PixArtAlphaPipeline
 from workflow.core.data_structures import (
-    ApiType,
     FileContentReference,
     MessageDict,
     ContentType,
     FileType,
     References,
-    FunctionParameters,
-    ParameterDefinition,
     ModelConfig,
     MessageGenerators,
     RoleTypes
 )
-from workflow.core.api.engines.image_gen_engine import ImageGenerationEngine
+from workflow.core.api.engines.image_engines.image_gen_engine import ImageGenerationEngine
 from workflow.util import LOGGER, get_traceback, check_cuda_availability
 
 class PixArtImgGenEngine(ImageGenerationEngine):
-    input_variables: FunctionParameters = Field(
-        default=FunctionParameters(
-            type="object",
-            properties={
-                "prompt": ParameterDefinition(
-                    type="string", description="A text description of the desired image(s)."
-                ),
-                "negative_prompt": ParameterDefinition(
-                    type="string",
-                    description="A negative text description to avoid certain aspects in the image(s).",
-                    default=None,
-                ),
-                "n": ParameterDefinition(
-                    type="integer",
-                    description="The number of images to generate.",
-                    default=1,
-                ),
-                "size": ParameterDefinition(
-                    type="string",
-                    description="The size of the generated images.",
-                    default="1024x1024"
-                ),
-                "quality": ParameterDefinition(
-                    type="string",
-                    description="The quality of the image generation.",
-                    default="standard"
-                ),
-            },
-            required=["prompt"],
-        )
-    )
-    required_api: ApiType = Field(
-        ApiType.IMG_GENERATION, title="The API engine required"
-    )
-
     async def generate_api_response(
         self,
         api_data: ModelConfig,

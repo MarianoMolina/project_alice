@@ -137,17 +137,6 @@ adv_tasks_module = AdvTasksModule(
                 "max_consecutive_auto_reply": 1,
             },
             {
-                "key": "groq_tts_agent",
-                "name": "Groq TTS Agent",
-                "system_message": "default_system_message",
-                "models": {
-                    "tts": "groq_llama_3_2_11b_vision",
-                },
-                "has_code_exec": 0,
-                "has_tools": 0,
-                "max_consecutive_auto_reply": 1,
-            },
-            {
                 "key": "image_gen_gemini_agent",
                 "name": "Gemini Img Gen Agent",
                 "system_message": "default_system_message",
@@ -277,23 +266,6 @@ adv_tasks_module = AdvTasksModule(
                 "task_name": "OAI_TTS_Task",
                 "agent": "oai_agent",
                 "task_description": "Converts text to speech using the OpenAI TTS API",
-                "input_variables": {
-                    "type": "object",
-                    "properties": {
-                        "text": "text_parameter",
-                        "voice": "voice_parameter",
-                        "speed": "speed_parameter"
-                    },
-                    "required": ["text"]
-                },
-                "required_apis": ["text_to_speech"]
-            },
-            {
-                "key": "groq_tts_task",
-                "task_type": "TextToSpeechTask",
-                "task_name": "Groq_TTS_Task",
-                "agent": "groq_tts_agent",
-                "task_description": "Converts text to speech using the Groq TTS API",
                 "input_variables": {
                     "type": "object",
                     "properties": {

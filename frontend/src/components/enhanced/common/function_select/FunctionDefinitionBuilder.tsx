@@ -119,7 +119,7 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
     return (
         <FormControl fullWidth variant="outlined" sx={{ marginTop: 1, marginBottom: 1 }}>
             <InputLabel shrink sx={{ backgroundColor: theme.palette.primary.dark }}>{title}</InputLabel>
-            <div className={`relative p-4 border border-gray-200/60 rounded-lg ${classes.container}`}>
+            <div className={`relative p-4 border border-gray-200/60 rounded-lg ml-2 mr-2 ${classes.container}`}>
                 {!isViewOnly && (
                     <Box display="flex" justifyContent="space-between" alignItems="center">
                         <Button

@@ -5,7 +5,7 @@ from typing import Dict, Any, List
 from workflow.core.data_structures import (
     References, ApiType, EntityReference, ReferenceCategory
     )
-from workflow.core.api.engines.search_engine import APISearchEngine
+from workflow.core.api.engines.search_engines.search_engine import APISearchEngine
 
 class ArxivSearchAPI(APISearchEngine):
     """
@@ -19,7 +19,7 @@ class ArxivSearchAPI(APISearchEngine):
     Note:
         This API does not require authentication, so api_data is not used in the generate_api_response method.
     """
-    required_api: ApiType = "arxiv_search"
+    required_api: ApiType = ApiType.ARXIV_SEARCH
 
     async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> References:
         # arXiv doesn't require API keys, so we don't need to use api_data

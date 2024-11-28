@@ -6,7 +6,7 @@ from workflow.core.data_structures import (
     ModelConfig, ApiType, FileContentReference, MessageDict, ContentType, FileType, References, FunctionParameters, ParameterDefinition, RoleTypes, MessageGenerators
     )
 from workflow.core.api.engines.api_engine import APIEngine
-from workflow.util import LOGGER, chunk_text, get_traceback
+from workflow.util import LOGGER, get_traceback, TextSplitter, Language, LengthType
 
 class TextToSpeechEngine(APIEngine):
     input_variables: FunctionParameters = Field(
@@ -51,13 +51,13 @@ class TextToSpeechEngine(APIEngine):
         )
         model = api_data.model
         inputs: List[str] = []
-        if len(input) > api_data.ctx_size:
-            # Calculate the average chunk size
-            num_chunks = -(-len(input) // api_data.ctx_size)  # Ceiling division
-            avg_chunk_size = len(input) // num_chunks
-
-            # Use the chunk_text utility to split the input
-            inputs = chunk_text(input, avg_chunk_size)
+        if len(input) > api_data.ctx_size:        
+            splitter = TextSplitter(
+                language=Language.TEXT,
+                chunk_size=api_data.ctx_size, 
+                length_function=LengthType.CHARACTER
+            )
+            inputs = splitter.split_text(input)
         else:
             inputs.append(input)
         responses: List[FileContentReference] = [

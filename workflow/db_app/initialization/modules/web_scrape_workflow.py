@@ -149,7 +149,7 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                 "key": "web_scrape_task_2",
                 "task_type": "WebScrapeBeautifulSoupTask",
                 "task_name": "Full web scrape task",
-                "task_description": "Scrapes a webpage using BeautifulSoup and an LLM agent",
+                "task_description": "Scrapes a webpage using BeautifulSoup and an LLM agent to both parse and summarize the content",
                 "agent": "web_scrape_selector_agent",
                 "required_apis": ["llm_api"],
                 "templates": {
@@ -183,7 +183,7 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                 "key": "web_scrape_task",
                 "task_type": "WebScrapeBeautifulSoupTask",
                 "task_name": "Scrape_URL",
-                "task_description": "Scrapes a webpage using BeautifulSoup and an LLM agent",
+                "task_description": "Scrapes a webpage using BeautifulSoup and an LLM agent to parse the content",
                 "agent": "web_scrape_selector_agent",
                 "required_apis": ["llm_api"],
                 "templates": {
@@ -237,7 +237,7 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                 "key": "web_scrape_workflow",
                 "task_type": "Workflow",
                 "task_name": "Web_Scrape_Workflow",
-                "task_description": "Executes the web scrape and summarize tasks",
+                "task_description": "Scrapes a webpage using BeautifulSoup and an LLM agent to parse and summarize the content",
                 "tasks": {
                     "Scrape_URL": "web_scrape_task",
                     "Summarize_URL": "web_summarize_task",

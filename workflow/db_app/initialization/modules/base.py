@@ -262,12 +262,12 @@ base_module = BaseModule(
                 "api_name": "groq",
             },
             {
-                "key": "groq_tts_whisper",
+                "key": "groq_stt_whisper",
                 "short_name": "Groq Whisper",
                 "model_name": "whisper-large-v3",
                 "model_format": "Base",
                 "ctx_size": 2048,
-                "model_type": "tts",
+                "model_type": "stt",
                 "api_name": "groq",
             },
             {
@@ -284,7 +284,7 @@ base_module = BaseModule(
                 "short_name": "Bark Large",
                 "model_name": "suno/bark",
                 "model_format": "OpenChat", # random value
-                "ctx_size": 1024,
+                "ctx_size": 256,
                 "model_type": "tts",
                 "api_name": "bark",
             }, 
@@ -724,13 +724,13 @@ base_module = BaseModule(
                 "default_model": "groq_llama_3_2_11b_vision",
             },
             {
-                "key": "groq_tts",
+                "key": "groq_stt",
                 "api_type": "text_to_speech",
                 "api_name": "groq",
                 "name": "Groq Text to Speech API",
                 "api_config": "groq_api_config",
                 "is_active": True,
-                "default_model": "groq_tts_whisper",
+                "default_model": "groq_stt_whisper",
             },
             {
                 "key": "bark_tts",

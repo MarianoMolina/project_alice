@@ -116,7 +116,7 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
   return (
     <FormControl fullWidth variant="outlined" sx={{ marginTop: 1, marginBottom: 1 }}>
       <InputLabel shrink sx={{ backgroundColor: theme.palette.primary.dark }}>{label}{multiple ? ' (multiple)' : null}</InputLabel>
-      <div className="relative p-4 border border-gray-200/60 rounded-lg">
+      <div className="relative p-4 border border-gray-200/60 rounded-lg ml-2 mr-2">
         <Box className={classes.chipContainer}>
           {selectedItems?.map(renderSelectedItem)}
           <Box className={classes.buttonContainer}>

@@ -42,9 +42,10 @@ export const SelectInput: React.FC<SelectInputProps> = ({
   return (
     <BaseInputWrapper
       className={className}
+      error={error}
+      description={description}
     >
       <FormControl
-        className={className}
         fullWidth={fullWidth}
         error={Boolean(error)}
         required={required}
@@ -80,8 +81,6 @@ export const SelectInput: React.FC<SelectInputProps> = ({
             </MenuItem>
           ))}
         </Select>
-        {error && <FormHelperText>{error}</FormHelperText>}
-        {description && <FormHelperText>{description}</FormHelperText>}
       </FormControl>
     </BaseInputWrapper>
   );

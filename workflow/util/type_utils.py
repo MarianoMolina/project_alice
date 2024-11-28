@@ -1,9 +1,23 @@
+import json, re
 from datetime import datetime, date, time
 from decimal import Decimal
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Type, Tuple
 from uuid import UUID
-import json
-import re
+from workflow.util.logger import LOGGER 
+
+def json_to_python_type_mapping(json_type: str) -> Type | Tuple[Type, ...] | None:
+    type_mapping = {
+        "string": str,
+        "integer": int,
+        "number": (int, float),
+        "boolean": bool,
+        "array": list,
+        "object": dict
+    }
+    if json_type in type_mapping:
+        return type_mapping[json_type]
+    LOGGER.error(f"Invalid JSON type: {json_type}")
+    return None
 
 # JSON Schema Type to Python Type mapping
 type_map = {

@@ -28,6 +28,8 @@ export const TextInput: React.FC<TextInputProps> = ({
   return (
     <BaseInputWrapper
       className={className}
+      error={error}
+      description={description}
     >
       <TextField
         name={name}
@@ -48,7 +50,6 @@ export const TextInput: React.FC<TextInputProps> = ({
           minLength,
         }}
       />
-      {description && <FormHelperText>{description}</FormHelperText>}
     </BaseInputWrapper>
   );
 };

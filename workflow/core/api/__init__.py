@@ -4,10 +4,10 @@ from .api_config import APIConfig
 from .engines import (
     ArxivSearchAPI, ExaSearchAPI, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI, 
     APIEngine, LLMEngine, LLMAnthropic, VisionModelEngine, ImageGenerationEngine, AnthropicVisionEngine, 
-    OpenAISpeechToTextEngine, OpenAIAdvancedSpeechToTextEngine, TextToSpeechEngine, 
+    SpeechToTextEngine, TextToSpeechEngine, 
     EmbeddingEngine, GoogleGraphEngine, WolframAlphaEngine, ApiEngineMap
     )
 __all__ = ["API", "APIManager", "ArxivSearchAPI", "ExaSearchAPI", "GoogleSearchAPI", "RedditSearchAPI", "APIConfig",
            "WikipediaSearchAPI", "APIEngine", "LLMEngine", "LLMAnthropic", "ImageGenerationEngine", 
-           "VisionModelEngine", "AnthropicVisionEngine", "OpenAISpeechToTextEngine", "OpenAIAdvancedSpeechToTextEngine", 
+           "VisionModelEngine", "AnthropicVisionEngine", "SpeechToTextEngine", 
            "TextToSpeechEngine", "EmbeddingEngine", "GoogleGraphEngine", "WolframAlphaEngine", "ApiEngineMap"]

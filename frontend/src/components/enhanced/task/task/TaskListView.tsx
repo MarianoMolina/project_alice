@@ -1,7 +1,9 @@
 import React from 'react';
 import { AliceTask, TaskComponentProps } from '../../../../types/TaskTypes';
-import { Typography } from '@mui/material';
+import { IconButton, Tooltip, Typography } from '@mui/material';
 import EnhancedListView from '../../common/enhanced_component/ListView';
+import { taskTypeIcons } from '../../../../utils/TaskUtils';
+import { Functions } from '@mui/icons-material';
 
 const TaskListView: React.FC<TaskComponentProps> = ({
     items,
@@ -13,12 +15,13 @@ const TaskListView: React.FC<TaskComponentProps> = ({
     const getSecondaryText = (task: AliceTask) => (
             <>
                 <Typography component="span" variant="body2" color="textPrimary">
-                    Description: {task.task_description || 'N/A'}
+                    {task.task_description || 'N/A'}
                 </Typography>
-                <br />
-                <Typography component="span" variant="body2" color="textSecondary">
-                    Type: {task.task_type || 'N/A'}
-                </Typography>
+                <Tooltip title={`Task type: ${task.task_type}`}>
+                    <IconButton size="small">
+                        {taskTypeIcons[task.task_type] || <Functions />}
+                    </IconButton>
+                </Tooltip>
             </>
     );
 

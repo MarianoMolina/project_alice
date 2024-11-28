@@ -1,37 +1,12 @@
 import google.generativeai as genai
-from pydantic import Field
 from typing import List, Optional
 from workflow.core.data_structures import (
-    MessageDict, ModelConfig, FileReference, get_file_content, ApiType, References, FunctionParameters, ParameterDefinition, RoleTypes, MessageGenerators, ContentType
+    MessageDict, ModelConfig, FileReference, get_file_content, References, RoleTypes, MessageGenerators, ContentType
     )
-from workflow.core.api.engines.api_engine import APIEngine
+from workflow.core.api.engines.vision_engines.vision_model_engine import VisionModelEngine
 from workflow.util import LOGGER
 
-class GeminiVisionEngine(APIEngine):
-    input_variables: FunctionParameters = Field(
-        default=FunctionParameters(
-            type="object",
-            properties={
-                "file_references": ParameterDefinition(
-                    type="array",
-                    description="List of FileReference objects for the images to analyze."
-                ),
-                "prompt": ParameterDefinition(
-                    type="string",
-                    description="A text prompt to guide the image analysis.",
-                    default="Describe this image"
-                ),
-                "max_tokens": ParameterDefinition(
-                    type="integer",
-                    description="The maximum number of tokens to generate.",
-                    default=None
-                )
-            },
-            required=["file_references", "prompt"]
-        )
-    )
-    required_api: ApiType = Field(ApiType.IMG_VISION, title="The API engine required")
-        
+class GeminiVisionEngine(VisionModelEngine):        
     async def generate_api_response(self, api_data: ModelConfig, file_references: List[FileReference], prompt: str, max_tokens: Optional[int] = None) -> References:
         """
         Analyzes images using Google's Gemini vision model.

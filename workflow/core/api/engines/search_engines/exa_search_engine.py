@@ -5,7 +5,7 @@ from workflow.util import LOGGER
 from workflow.core.data_structures import (
     References, ApiType, EntityReference, ReferenceCategory, ImageReference
     )
-from workflow.core.api.engines.search_engine import APISearchEngine
+from workflow.core.api.engines.search_engines.search_engine import APISearchEngine
 
 class ExaSearchAPI(APISearchEngine):
     """
@@ -19,7 +19,7 @@ class ExaSearchAPI(APISearchEngine):
     Note:
         Requires a valid API key in api_data.
     """
-    required_api: ApiType = "exa_search"
+    required_api: ApiType = ApiType.EXA_SEARCH
 
     async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, max_results: int = 10, **kwargs) -> References:
         if not api_data.get('api_key'):

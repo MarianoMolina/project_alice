@@ -5,7 +5,7 @@ from workflow.core.api import APIManager
 from workflow.core.data_structures import (
     MessageDict, References, NodeResponse, FunctionParameters, ParameterDefinition, ToolFunction, ApiType, TasksEndCodeRouting, Prompt, ContentType, RoleTypes, MessageGenerators
 )
-from workflow.util.utils import json_to_python_type_mapping, get_traceback
+from workflow.util import json_to_python_type_mapping, get_traceback
 from workflow.core.agent.agent import AliceAgent
 from workflow.core.tasks.task import AliceTask
 

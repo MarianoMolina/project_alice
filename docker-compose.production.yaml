@@ -56,6 +56,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - logs:/app/logs
       - shared-uploads:/app/shared-uploads:ro
+      - model_cache:/app/model_cache
     depends_on:
       volume-init:
         condition: service_completed_successfully
@@ -81,19 +82,22 @@ services:
     volumes:
       - ${COMPOSE_PROJECT_DIR}/logs:/logs
       - ${COMPOSE_PROJECT_DIR}/shared-uploads:/shared-uploads
+      - ${COMPOSE_PROJECT_DIR}/model_cache:/model_cache 
     command: |
       sh -c "
         echo 'Starting volume initialization' &&
         ls -la / &&
         echo 'Creating directories' &&
-        mkdir -p /logs /shared-uploads &&
+        mkdir -p /logs /shared-uploads /model_cache &&
         echo 'Setting permissions' &&
         chmod -R 755 /logs &&
         chown -R 1000:1000 /logs &&
         chmod -R 755 /shared-uploads &&
         chown -R 1000:1000 /shared-uploads &&
+        chmod -R 755 /model_cache &&
+        chown -R 1000:1000 /model_cache &&
         echo 'Finished volume initialization' &&
-        ls -la /logs /shared-uploads
+        ls -la /logs /shared-uploads /model_cache
       "
 
   mongo:
@@ -132,3 +136,9 @@ volumes:
       o: bind
       device: ${COMPOSE_PROJECT_DIR}/shared-uploads
   mongo_data:
+  model_cache:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${COMPOSE_PROJECT_DIR}/model_cache

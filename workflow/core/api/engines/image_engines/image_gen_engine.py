@@ -2,7 +2,9 @@ from pydantic import Field
 from typing import List
 from openai import AsyncOpenAI
 from workflow.core.data_structures import (
-    ModelConfig, ApiType, FileContentReference, MessageDict, ContentType, FileType, References, FunctionParameters, ParameterDefinition, RoleTypes, MessageGenerators
+    ModelConfig, ApiType, FileContentReference, MessageDict, 
+    ContentType, FileType, References, FunctionParameters, 
+    ParameterDefinition, RoleTypes, MessageGenerators
     )
 from workflow.core.api.engines.api_engine import APIEngine
 from workflow.util import LOGGER, get_traceback
@@ -15,6 +17,10 @@ class ImageGenerationEngine(APIEngine):
                 "prompt": ParameterDefinition(
                     type="string",
                     description="A text description of the desired image(s)."
+                ),
+                "negative_prompt": ParameterDefinition(
+                    type="string",
+                    description="A text description undesired elements. Not all models use it."
                 ),
                 "n": ParameterDefinition(
                     type="integer",
@@ -37,7 +43,7 @@ class ImageGenerationEngine(APIEngine):
     )
     required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
 
-    async def generate_api_response(self, api_data: ModelConfig, prompt: str, n: int = 1, size: str = "1024x1024", quality: str = "standard") -> References:
+    async def generate_api_response(self, api_data: ModelConfig, prompt: str, n: int = 1, size: str = "1024x1024", quality: str = "standard", **kwargs) -> References:
         """
         Generates images using OpenAI's DALL-E model.
         Args:

@@ -2,7 +2,7 @@ import aiohttp
 import urllib.parse
 from pydantic import Field
 from typing import Dict, Any, List, Optional
-from workflow.core.api.engines import APIEngine
+from workflow.core.api.engines.search_engines.search_engine import APISearchEngine
 from workflow.core.data_structures import (
     References,
     FunctionParameters,
@@ -21,19 +21,18 @@ ALLOWED_TYPES = [
     "videogame", "videogameseries", "website", "thing"
 ]
 
-class GoogleGraphEngine(APIEngine):
+class GoogleGraphEngine(APISearchEngine):
     """
     GoogleGraphEngine for searching a single entity using the Google Knowledge Graph Search API.
 
-    This engine accepts a 'query' string representing the entity to search for,
+    This engine accepts a 'prompt' string representing the entity to search for,
     and an optional list of 'types' to restrict the results to specific entity types.
     """
-
     input_variables: FunctionParameters = Field(
         default=FunctionParameters(
             type="object",
             properties={
-                "query": ParameterDefinition(
+                "prompt": ParameterDefinition(
                     type="string",
                     description="The entity to search for in the Knowledge Graph.",
                 ),
@@ -42,15 +41,15 @@ class GoogleGraphEngine(APIEngine):
                     description="An optional list of entity types to restrict the results. Provide as comma separated values. Types can be: Book, BookSeries, EducationalOrganization, Event, GovernmentOrganization, LocalBusiness, Movie, MovieSeries, MusicAlbum, MusicGroup, MusicRecording, Organization, Periodical, Person, Place, SportsTeam, TVEpisode, TVSeries, VideoGame, VideoGameSeries, WebSite",
                     default=None,
                 ),
-                "limit": ParameterDefinition(
+                "max_results": ParameterDefinition(
                     type="integer",
                     description="Limits the number of entities to be returned. Maximum is 500. Default is 10.",
                     default=10,
                 ),
             },
-            required=["query"],
+            required=["prompt"],
         ),
-        description="Inputs: 'query' string for the entity, optional 'types' list, and optional 'limit'.",
+        description="Inputs: 'prompt' string for the entity, optional 'types' list, and optional 'limit'.",
     )
 
     required_api: ApiType = Field(ApiType.GOOGLE_KNOWLEDGE_GRAPH, title="The API engine required")
@@ -58,9 +57,9 @@ class GoogleGraphEngine(APIEngine):
     async def generate_api_response(
         self,
         api_data: Dict[str, Any],
-        query: str,
+        prompt: str,
         types: Optional[List[str]] = None,
-        limit: Optional[int] = 10,
+        max_results: Optional[int] = 10,
         **kwargs,
     ) -> References:
         """
@@ -68,9 +67,9 @@ class GoogleGraphEngine(APIEngine):
 
         Args:
             api_data (Dict[str, Any]): Configuration data for the API (e.g., API key).
-            query (str): The entity to search for.
+            prompt (str): The entity to search for.
             types (Optional[List[str]]): An optional list of entity types to restrict the results.
-            limit (Optional[int]): Limits the number of entities to be returned. Max is 500. Default is 10.
+            max_results (Optional[int]): max_resultss the number of entities to be returned. Max is 500. Default is 10.
             **kwargs: Additional keyword arguments.
 
         Returns:
@@ -80,14 +79,14 @@ class GoogleGraphEngine(APIEngine):
         if not api_key:
             raise ValueError("API key not found in API data")
 
-        # Validate 'limit'
-        if limit > 500 or limit < 1:
-            raise ValueError("Limit must be between 1 and 500")
+        # Validate 'max_results'
+        if max_results > 500 or max_results < 1:
+            raise ValueError("max_results must be between 1 and 500")
 
         # Prepare the API request parameters
         params = {
-            'query': query,
-            'limit': limit,
+            'query': prompt,
+            'limit': max_results,
             'key': api_key,
             'indent': True,
         }
@@ -126,7 +125,7 @@ class GoogleGraphEngine(APIEngine):
                             LOGGER.error(f"Error parsing entity data: {e} -> {element}")
                             continue
             except Exception as e:
-                LOGGER.error(f"Error fetching data for query '{query}': {e}")
+                LOGGER.error(f"Error fetching data for prompt '{prompt}': {e}")
                 raise
 
         return References(entity_references=entity_references)

@@ -5,9 +5,9 @@ from typing import Dict, Any, List
 from workflow.core.data_structures import (
     References, ApiType, FunctionParameters, ParameterDefinition, EntityReference, ReferenceCategory, ImageReference
     )
-from workflow.core.api.engines.api_engine import APIEngine
+from workflow.core.api.engines.search_engines.search_engine import APISearchEngine
 
-class RedditSearchAPI(APIEngine):
+class RedditSearchAPI(APISearchEngine):
     """
     API engine for Reddit Search.
 
@@ -46,7 +46,7 @@ class RedditSearchAPI(APIEngine):
                 description="Name of the subreddit, like 'all' for r/all.",
                 default="all"
             ),
-            "limit": ParameterDefinition(
+            "max_results": ParameterDefinition(
                 type="integer",
                 description="Maximum number of results to return.",
                 default=10
@@ -54,9 +54,9 @@ class RedditSearchAPI(APIEngine):
         },
         required=["prompt"]
     ), description="This inputs this API engine takes: requires a prompt input, and optional inputs such as sort, time_filter, subreddit, and limit. Default is 'hot', 'week', 'all', and 10.")
-    required_api: ApiType = "reddit_search"
+    required_api: ApiType = ApiType.REDDIT_SEARCH
 
-    async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, sort: str = "hot", time_filter: str = "week", subreddit: str = "all", limit: int = 10, **kwargs) -> References:
+    async def generate_api_response(self, api_data: Dict[str, Any], prompt: str, sort: str = "hot", time_filter: str = "week", subreddit: str = "all", max_results: int = 10, **kwargs) -> References:
         """
         Generate a response from a Reddit search.
 
@@ -66,7 +66,7 @@ class RedditSearchAPI(APIEngine):
             sort (str): Sort method for results. Defaults to "hot".
             time_filter (str): Time period to filter by. Defaults to "week".
             subreddit (str): Subreddit to search in. Defaults to "all".
-            limit (int): Maximum number of results to return. Defaults to 10.
+            max_results (int): Maximum number of results to return. Defaults to 10.
 
         Returns:
             References: A collection of EntityReference objects containing Reddit submission information.
@@ -86,7 +86,7 @@ class RedditSearchAPI(APIEngine):
             user_agent=user_agent,
         )
         subredditObject: Subreddits = reddit.subreddit(subreddit)
-        submissions: ListingGenerator = subredditObject.search(query=prompt, limit=int(limit), params={"sort": sort, "time_filter": time_filter})
+        submissions: ListingGenerator = subredditObject.search(query=prompt, limit=int(max_results), params={"sort": sort, "time_filter": time_filter})
         submissions_list: List[Submission]  = list(submissions)
         if not submissions_list:
             raise ValueError("No results found")

@@ -36,7 +36,7 @@ base_tasks_module = BaseTasksModule(
                 "default": "all"
             },
             {
-                "key": "query_parameter",
+                "key": "prompt_parameter",
                 "type": "string",
                 "description": "The entity to search for in the Knowledge Graph."
             },
@@ -51,9 +51,9 @@ base_tasks_module = BaseTasksModule(
                 "description": "Limits the number of entities to be returned. Maximum is 500. Default is 10."
             },
             {
-                "key": "wolfram_query_parameter",
+                "key": "wolfram_prompt_parameter",
                 "type": "string",
-                "description": "The query string to be sent to Wolfram Alpha."
+                "description": "The prompt string to be sent to Wolfram Alpha."
             },
             {
                 "key": "units_parameter",
@@ -96,11 +96,11 @@ base_tasks_module = BaseTasksModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "query": "wolfram_query_parameter",
+                        "prompt": "wolfram_prompt_parameter",
                         "units": "units_parameter",
                         "format": "format_parameter"
                     },
-                    "required": ["query"]
+                    "required": ["prompt"]
                 },
                 "required_apis": ["wolfram_alpha"]
             },
@@ -112,11 +112,11 @@ base_tasks_module = BaseTasksModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "query": "query_parameter",
+                        "prompt": "prompt_parameter",
                         "types": "types_parameter",
-                        "limit": "limit_parameter"
+                        "max_results": "limit_parameter"
                     },
-                    "required": ["query"]
+                    "required": ["prompt"]
                 },
                 "required_apis": ["google_knowledge_graph"]
             },
@@ -132,7 +132,7 @@ base_tasks_module = BaseTasksModule(
                         "sort": "sort_parameter",
                         "time_filter": "time_filter_parameter",
                         "subreddit": "subreddit_parameter",
-                        "limit": "max_results_parameter"
+                        "max_results": "max_results_parameter"
                     },
                     "required": ["prompt"]
                 },
@@ -147,7 +147,7 @@ base_tasks_module = BaseTasksModule(
                     "type": "object",
                     "properties": {
                         "prompt": "prompt_parameter",
-                        "limit": "max_results_parameter"
+                        "max_results": "max_results_parameter"
                     },
                     "required": ["prompt"]
                 },
@@ -162,7 +162,7 @@ base_tasks_module = BaseTasksModule(
                     "type": "object",
                     "properties": {
                         "prompt": "prompt_parameter",
-                        "limit": "max_results_parameter"
+                        "max_results": "max_results_parameter"
                     },
                     "required": ["prompt"]
                 },
@@ -177,7 +177,7 @@ base_tasks_module = BaseTasksModule(
                     "type": "object",
                     "properties": {
                         "prompt": "prompt_parameter",
-                        "limit": "max_results_parameter"
+                        "max_results": "max_results_parameter"
                     },
                     "required": ["prompt"]
                 },
@@ -192,7 +192,7 @@ base_tasks_module = BaseTasksModule(
                     "type": "object",
                     "properties": {
                         "prompt": "prompt_parameter",
-                        "limit": "max_results_parameter"
+                        "max_results": "max_results_parameter"
                     },
                     "required": ["prompt"]
                 },

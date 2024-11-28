@@ -1,28 +1,12 @@
 from workflow.core.data_structures import ApiType, ApiName
-from .api_engine import APIEngine
-from .arxiv_search_engine import ArxivSearchAPI
-from .exa_search_engine import ExaSearchAPI
-from .reddit_search_engine import RedditSearchAPI
-from .google_search_engine import GoogleSearchAPI
-from .wikipedia_search_engine import WikipediaSearchAPI
-from .llm_engine import LLMEngine
-from .anthropic_llm_engine import LLMAnthropic
-from .image_gen_engine import ImageGenerationEngine
-from .vision_model_engine import VisionModelEngine
-from .anthropic_vision_engine import AnthropicVisionEngine
-from .oai_stt_engine import OpenAISpeechToTextEngine
-from .oai_timestamped_stt_engine import OpenAIAdvancedSpeechToTextEngine
-from .text_to_speech_engine import TextToSpeechEngine
-from .gemini_llm_engine import GeminiLLMEngine
-from .cohere_llm_engine import CohereLLMEngine
-from .gemini_vision import GeminiVisionEngine
-from .gemini_stt import GeminiSpeechToTextEngine
-from .gemini_img_gen import GeminiImageGenerationEngine
-from .google_knowledge_graph_engine import GoogleGraphEngine
-from .wolfram_alpha_engine import WolframAlphaEngine
-from .bark_engine import BarkEngine
-from .pixart_img_gen_engine import PixArtImgGenEngine
 from .embedding_engines import EmbeddingEngine, GeminiEmbeddingsEngine
+from .image_engines import ImageGenerationEngine, GeminiImageGenerationEngine, PixArtImgGenEngine
+from .llm_engines import LLMEngine, LLMAnthropic, GeminiLLMEngine, CohereLLMEngine
+from .search_engines import ArxivSearchAPI, ExaSearchAPI, RedditSearchAPI, GoogleSearchAPI, WikipediaSearchAPI, GoogleGraphEngine, WolframAlphaEngine
+from .stt_engines import SpeechToTextEngine, GeminiSpeechToTextEngine
+from .tts_engines import TextToSpeechEngine, BarkEngine
+from .vision_engines import VisionModelEngine, AnthropicVisionEngine, GeminiVisionEngine
+from .api_engine import APIEngine
 
 ApiEngineMap = {
     ApiType.LLM_MODEL: {
@@ -72,8 +56,7 @@ ApiEngineMap = {
         ApiName.PIXART: PixArtImgGenEngine
     },
     ApiType.SPEECH_TO_TEXT: {
-        ApiName.OPENAI: OpenAISpeechToTextEngine,
-        ApiName.OPENAI: OpenAIAdvancedSpeechToTextEngine,
+        ApiName.OPENAI: SpeechToTextEngine,
         ApiName.GEMINI: GeminiSpeechToTextEngine
     },
     ApiType.TEXT_TO_SPEECH: {
@@ -91,5 +74,5 @@ ApiEngineMap = {
 
 __all__ = ["ArxivSearchAPI", "ExaSearchAPI", "GoogleSearchAPI", "RedditSearchAPI", "WikipediaSearchAPI", "APIEngine", "GeminiImageGenerationEngine",
            "LLMEngine", "LLMOpenAI", "LLMAnthropic", "ImageGenerationEngine", "CohereLLMEngine", "GeminiVisionEngine", "GeminiEmbeddingsEngine", "GeminiSpeechToTextEngine",
-           "VisionModelEngine", "AnthropicVisionEngine", "OpenAISpeechToTextEngine", "OpenAIAdvancedSpeechToTextEngine", "BarkEngine", "WolframAlphaEngine", "PixArtImgGenEngine",
+           "VisionModelEngine", "AnthropicVisionEngine", "BarkEngine", "WolframAlphaEngine", "PixArtImgGenEngine", 'SpeechToTextEngine', 
            "TextToSpeechEngine", "EmbeddingEngine", "GeminiLLMEngine", "CohereLLMEngine", "GoogleGraphEngine"]

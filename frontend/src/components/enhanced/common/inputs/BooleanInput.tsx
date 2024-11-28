@@ -14,9 +14,9 @@ export const BooleanInput: React.FC<BooleanInputProps> = ({
   name,
   label,
   error,
+  description,
   required = false,
   disabled = false,
-  description,
   className,
   labelPlacement = 'end',
   displayAsSwitch = false,
@@ -30,6 +30,8 @@ export const BooleanInput: React.FC<BooleanInputProps> = ({
   return (
     <BaseInputWrapper
       className={className}
+      error={error}
+      description={description}
     >
       <FormControlLabel
         control={
@@ -44,8 +46,6 @@ export const BooleanInput: React.FC<BooleanInputProps> = ({
         label={label || ''}
         labelPlacement={labelPlacement}
       />
-      {error && <FormHelperText error>{error}</FormHelperText>}
-      {description && <FormHelperText>{description}</FormHelperText>}
     </BaseInputWrapper>
   );
 };

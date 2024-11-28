@@ -1,32 +1,13 @@
 from google.generativeai.types import GenerateContentResponse
 import google.generativeai as genai
-from pydantic import Field
 from workflow.core.data_structures import (
-    ModelConfig, ApiType, FileReference, MessageDict, References, FunctionParameters, ParameterDefinition, MessageGenerators, RoleTypes, ContentType
+    ModelConfig, ApiType, FileReference, MessageDict, References, MessageGenerators, RoleTypes, ContentType
     )
-from workflow.core.api.engines.api_engine import APIEngine
+from workflow.core.api.engines.stt_engines.stt_engine import SpeechToTextEngine
 from workflow.util import LOGGER
 import io
 
-class GeminiSpeechToTextEngine(APIEngine):
-    input_variables: FunctionParameters = Field(
-        default=FunctionParameters(
-            type="object",
-            properties={
-                "file_reference": ParameterDefinition(
-                    type="object",
-                    description="FileReference object for the audio file to transcribe."
-                ),
-                "prompt": ParameterDefinition(
-                    type="string",
-                    description="A prompt to guide the audio transcription and analysis.",
-                    default="Transcribe and describe this audio clip"
-                )
-            },
-            required=["file_reference"]
-        )
-    )
-    required_api: ApiType = Field(ApiType.SPEECH_TO_TEXT, title="The API engine required")
+class GeminiSpeechToTextEngine(SpeechToTextEngine):
 
     async def generate_api_response(self, api_data: ModelConfig, file_reference: FileReference, prompt: str = "Transcribe and describe this audio clip") -> References:
         """

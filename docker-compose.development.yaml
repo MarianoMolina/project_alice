@@ -90,7 +90,7 @@ services:
       volumes:
         - ${COMPOSE_PROJECT_DIR}/logs:/logs
         - ${COMPOSE_PROJECT_DIR}/shared-uploads:/shared-uploads
-        - ${COMPOSE_PROJECT_DIR}/model_cache:/model_cache  # Add this line
+        - ${COMPOSE_PROJECT_DIR}/model_cache:/model_cache
       command: |
         sh -c "
           echo 'Starting volume initialization' &&

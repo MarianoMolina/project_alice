@@ -1,6 +1,6 @@
 from typing import List
 from workflow.core.data_structures import get_file_content, MessageDict, ModelConfig, FileReference, References, RoleTypes, MessageGenerators, ContentType
-from workflow.core.api.engines.vision_model_engine import VisionModelEngine
+from workflow.core.api.engines.vision_engines.vision_model_engine import VisionModelEngine
 from anthropic import AsyncAnthropic
 
 class AnthropicVisionEngine(VisionModelEngine):

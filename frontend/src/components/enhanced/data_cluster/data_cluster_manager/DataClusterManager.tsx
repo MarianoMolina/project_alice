@@ -104,7 +104,7 @@ const DataClusterManager: React.FC<DataClusterManagerProps> = ({
     return (
         <FormControl fullWidth variant="outlined" sx={{ marginTop: 1, marginBottom: 1 }}>
             <InputLabel shrink sx={{ backgroundColor: theme.palette.primary.dark }}>{title}</InputLabel>
-            <div className="relative p-4 border border-gray-200/60 rounded-lg">
+            <div className="relative p-4 border border-gray-200/60 rounded-lg ml-2 mr-2">
                 <DataClusterHeader
                     editedCluster={editedCluster}
                     viewType={viewType}

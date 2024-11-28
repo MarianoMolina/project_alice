@@ -3,7 +3,7 @@ from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletion
 from pydantic import Field
 from typing import Dict, Any, List, Optional
-from workflow.core.api.engines import APIEngine
+from workflow.core.api.engines.api_engine import APIEngine
 from workflow.util import LOGGER, est_messages_token_count, prune_messages
 from workflow.core.data_structures import (
     MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, RoleTypes, MessageGenerators, ToolFunction
@@ -180,27 +180,6 @@ class LLMEngine(APIEngine):
             LOGGER.error(f"Error in LLM API call: {str(e)}")
             LOGGER.error(traceback.format_exc())
             raise
-
-    @staticmethod
-    def get_usage(message: MessageDict) -> Dict[str, Any]:
-        """
-        Return usage summary of the response.
-
-        Args:
-            message (MessageDict): The message containing usage information.
-
-        Returns:
-            Dict[str, Any]: A dictionary summarizing token usage and cost.
-        """
-        creation_metadata = message.creation_metadata
-        usage = creation_metadata.get('usage', {})
-        return {
-            "prompt_tokens": usage.get('prompt_tokens', 0),
-            "completion_tokens": usage.get('completion_tokens', 0),
-            "total_tokens": usage.get('total_tokens', 0),
-            "cost": creation_metadata.get('cost', 0.0),
-            "model": creation_metadata.get('model', ''),
-        }
 
     def calculate_cost(self, prompt_tokens: int, completion_tokens: int, model: str) -> float:
         """

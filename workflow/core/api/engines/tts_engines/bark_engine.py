@@ -1,50 +1,20 @@
 import base64, asyncio, torch, scipy.io.wavfile, numpy as np, os, gc
 from typing import List
-from pydantic import Field
 from workflow.core.data_structures import (
-    ApiType,
     FileContentReference,
     MessageDict,
     ContentType,
     FileType,
     References,
-    FunctionParameters,
-    ParameterDefinition,
     ModelConfig,
     RoleTypes, 
     MessageGenerators
 )
-from workflow.core.api.engines.text_to_speech_engine import TextToSpeechEngine
-from workflow.util import LOGGER, chunk_text, get_traceback, check_cuda_availability
+from workflow.core.api.engines.tts_engines.text_to_speech_engine import TextToSpeechEngine
+from workflow.util import LOGGER, get_traceback, check_cuda_availability, TextSplitter, Language, LengthType
 from transformers import AutoProcessor, BarkModel, AutoTokenizer
 
 class BarkEngine(TextToSpeechEngine):
-    input_variables: FunctionParameters = Field(
-        default=FunctionParameters(
-            type="object",
-            properties={
-                "input": ParameterDefinition(
-                    type="string", 
-                    description="The text to convert to speech."
-                ),
-                "voice": ParameterDefinition(
-                    type="string",
-                    description="The voice preset to use for speech generation.",
-                    default="v2/en_speaker_6"
-                ),
-                "speed": ParameterDefinition(
-                    type="number",
-                    description="Speed factor for speech generation.",
-                    default=1.0
-                ),
-            },
-            required=["input"],
-        )
-    )
-    required_api: ApiType = Field(
-        ApiType.TEXT_TO_SPEECH, title="The API engine required"
-    )
-
     async def generate_api_response(
         self, 
         api_data: ModelConfig, 
@@ -114,7 +84,12 @@ class BarkEngine(TextToSpeechEngine):
 
             # Split input into chunks if necessary
             if len(input) > max_length:
-                inputs = chunk_text(input, max_length)
+                splitter = TextSplitter(
+                    language=Language.TEXT,
+                    chunk_size=max_length, 
+                    length_function=LengthType.CHARACTER
+                )
+                inputs = splitter.split_text(input)
             else:
                 inputs = [input]
 
