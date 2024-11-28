@@ -28,17 +28,10 @@ const EntityReferenceFlexibleView: React.FC<EntityReferenceComponentProps> = ({
     const [form, setForm] = useState<Partial<EntityReference>>(item || getDefaultEntityReferenceForm());
     const [isSaving, setIsSaving] = useState(false);
     const classes = useStyles();
-    const isEditMode = mode === 'edit' || mode === 'create';
 
-    useEffect(() => {
-        if (!item || Object.keys(item).length === 0) {
-            setForm(getDefaultEntityReferenceForm());
-        } else {
-            setForm(item);
-        }
-        Logger.debug('EntityReferenceFlexibleView', 'item', item);
-        Logger.debug('EntityReferenceFlexibleView', getDefaultEntityReferenceForm());
-    }, [item]);
+    const isEditMode = mode === 'edit' || mode === 'create';
+    const title = mode === 'create' ? 'Create New Entity Reference' : mode === 'edit' ? 'Edit Entity Reference' : 'Entity Reference Details';
+    const saveButtonText = form._id ? 'Update Entity Reference' : 'Create Entity Reference';
 
     useEffect(() => {
         if (isSaving) {
@@ -46,6 +39,19 @@ const EntityReferenceFlexibleView: React.FC<EntityReferenceComponentProps> = ({
             setIsSaving(false);
         }
     }, [isSaving, handleSave]);
+
+    useEffect(() => {
+        if (!item || Object.keys(item).length === 0) {
+            setForm(getDefaultEntityReferenceForm());
+        } else {
+            setForm(item);
+        }
+    }, [item]);
+
+    const handleLocalSave = useCallback(() => {
+        onChange(form);
+        setIsSaving(true);
+    }, [form, onChange]);
 
     const handleLocalDelete = useCallback(() => {
         if (item && Object.keys(item).length > 0 && handleDelete) {
@@ -81,10 +87,6 @@ const EntityReferenceFlexibleView: React.FC<EntityReferenceComponentProps> = ({
         });
     };
 
-    const handleLocalSave = useCallback(() => {
-        onChange(form);
-        setIsSaving(true);
-    }, [form, onChange]);
     const sourceOptions = Object.values(ApiType).map((type) => ({
         value: type,
         label: formatCamelCaseString(type),
@@ -97,9 +99,6 @@ const EntityReferenceFlexibleView: React.FC<EntityReferenceComponentProps> = ({
         icon: referenceCategoryToIcon[category],  
     }));
 
-    const title = mode === 'create' ? 'Create New Entity Reference' : mode === 'edit' ? 'Edit Entity Reference' : 'Entity Reference Details';
-    const saveButtonText = form._id ? 'Update Entity Reference' : 'Create Entity Reference';
-
     return (
         <GenericFlexibleView
             elementType="Entity Reference"
@@ -108,7 +107,7 @@ const EntityReferenceFlexibleView: React.FC<EntityReferenceComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
-            item={item as EntityReference}
+            item={form as EntityReference}
             itemType="entityreferences"
         >
             <TextInput

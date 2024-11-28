@@ -21,15 +21,13 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
     handleSave,
     handleDelete,
 }) => {
-    const [form, setForm] = useState<Partial<APIConfig>>(() => ({
-        ...(item || getDefaultAPIConfigForm()),
-    }));
+    const [form, setForm] = useState<Partial<APIConfig>>((item || getDefaultAPIConfigForm()));
     const [isSaving, setIsSaving] = useState(false);
     const [validationError, setValidationError] = useState<string | null>(null);
     const classes = useStyles();
 
-    const isEditMode = mode === 'edit' || mode === 'create';
     const isCreateMode = mode === 'create';
+    const isEditMode = mode === 'edit' || mode === 'create';
 
     useEffect(() => {
         if (isSaving) {
@@ -45,37 +43,9 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
             onChange(getDefaultAPIConfigForm());
         }
     }, [item, onChange]);
-
-    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setForm(prevForm => ({ ...prevForm, [name]: value }));
-    }, []);
-
-    const handleHealthStatusChange = useCallback((status: HealthStatus) => {
-        setForm(prevForm => ({ ...prevForm, health_status: status }));
-    }, []);
-
-    const handleDataChange = useCallback((field: string, value: string | undefined) => {
-        setForm(prevForm => ({
-            ...prevForm,
-            data: {
-                ...prevForm.data,
-                [field]: value
-            }
-        }));
-    }, []);
-
-    const handleApiNameChange = useCallback((newApiName: ApiName) => {
-        // Pre-fill base_url if available
-        const baseUrl = API_BASE_URLS[newApiName] || '';
-
-        setForm(prevForm => ({
-            ...prevForm,
-            api_name: newApiName,
-            data: {
-                base_url: baseUrl,
-            }
-        }));
+    
+    const handleFieldChange = useCallback((field: keyof APIConfig, value: any) => {
+        setForm(prevForm => ({ ...prevForm, [field]: value }));
     }, []);
 
     const validateForm = useCallback(() => {
@@ -143,7 +113,7 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
         setValidationError(null);
         return true;
     }, [form]);
-
+    
     const handleLocalSave = useCallback(() => {
         if (validateForm()) {
             onChange(form);
@@ -156,6 +126,29 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
             handleDelete(item);
         }
     }, [item, handleDelete]);
+
+    const handleDataChange = useCallback((field: string, value: string | undefined) => {
+        setForm(prevForm => ({
+            ...prevForm,
+            data: {
+                ...prevForm.data,
+                [field]: value
+            }
+        }));
+    }, []);
+
+    const handleApiNameChange = useCallback((newApiName: ApiName) => {
+        // Pre-fill base_url if available
+        const baseUrl = API_BASE_URLS[newApiName] || '';
+
+        setForm(prevForm => ({
+            ...prevForm,
+            api_name: newApiName,
+            data: {
+                base_url: baseUrl,
+            }
+        }));
+    }, []);
 
     const renderConfigFields = () => {
         if (!form.api_name) return null;
@@ -285,7 +278,7 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
                 name='name'
                 label='Config Name'
                 value={form.name || ''}
-                onChange={(value) => handleInputChange({ target: { name: 'name', value } } as any)}
+                onChange={(value) => handleFieldChange('name', value)}
                 disabled={!isEditMode}
                 description='Enter a name for the API configuration'
                 fullWidth
@@ -305,7 +298,7 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
                 name='health_status'
                 label='Health Status'
                 value={form.health_status || HealthStatus.HEALTHY}
-                onChange={(status) => handleHealthStatusChange(status as HealthStatus)}
+                onChange={(status) => handleFieldChange('health_status', status)}
                 options={Object.values(HealthStatus).map((status) => ({ value: status, label: formatCamelCaseString(status) }))}
                 description='Select the health status of the API'
                 disabled={!isEditMode}

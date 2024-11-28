@@ -9,7 +9,7 @@ import Logger from '../../../utils/Logger';
 interface FileViewerProps {
   file: Partial<FileReference> | Partial<FileContentReference>;
   editable?: boolean;
-  onUpdate?: (updatedFile: FileContentReference) => void;
+  onUpdate?: (updatedFile: FileContentReference | FileReference) => void;
 }
 
 const FileViewer: React.FC<FileViewerProps> = ({ file, editable = false, onUpdate }) => {
@@ -54,6 +54,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ file, editable = false, onUpdat
     if (updatedFile) {
       Logger.info('File updated successfully:', updatedFile);
       file = updatedFile;
+      onUpdate && onUpdate(updatedFile);
     } else {
       addNotification('File upload failed or was cancelled', 'error');
       Logger.info('File update failed or was cancelled');

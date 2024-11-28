@@ -21,7 +21,10 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
 }) => {
     const [form, setForm] = useState<Partial<Prompt>>(item || getDefaultPromptForm());
     const [isSaving, setIsSaving] = useState(false);
-    Logger.debug('PromptFlexibleView', 'form', form);
+
+    const isEditMode = mode === 'edit' || mode === 'create';
+    const title = mode === 'create' ? 'Create New Prompt' : mode === 'edit' ? 'Edit Prompt' : 'Prompt Details';
+    const saveButtonText = form._id ? 'Update Prompt' : 'Create Prompt';
 
     useEffect(() => {
         if (isSaving) {
@@ -31,15 +34,15 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
     }, [isSaving, handleSave]);
     
     useEffect(() => {
-        if (item) {
+        if (item && Object.keys(item).length > 0) {
             setForm(item);
         } else {
             onChange(getDefaultPromptForm());
         }
     }, [item, onChange]);
-    
-    const handleFunctionDefinitionChange = useCallback((newDefinition: FunctionParameters) => {
-        setForm(prevForm => ({ ...prevForm, parameters: newDefinition }));
+
+    const handleFieldChange = useCallback((field: keyof Prompt, value: any) => {
+        setForm(prevForm => ({ ...prevForm, [field]: value }));
     }, []);
 
     const handleLocalSave = useCallback(() => {
@@ -53,14 +56,6 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
         }
     }, [item, handleDelete]);
 
-    if (!form) {
-        return <Typography>No Prompt data available.</Typography>;
-    }
-
-    const isEditMode = mode === 'edit' || mode === 'create';
-    const title = mode === 'create' ? 'Create New Prompt' : mode === 'edit' ? 'Edit Prompt' : 'Prompt Details';
-    const saveButtonText = form._id ? 'Update Prompt' : 'Create Prompt';
-
     return (
         <GenericFlexibleView
             elementType="Prompt"
@@ -69,14 +64,14 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
-            item={item as Prompt}
+            item={form as Prompt}
             itemType="prompts"
         >
             <TextInput
                 name="name"
                 label="Name"
                 value={form.name || ''}
-                onChange={(value) => onChange({ name: value })}
+                onChange={(value) => handleFieldChange('name', value)}
                 disabled={!isEditMode}
                 description='Enter the name of the prompt'
             />
@@ -84,7 +79,7 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
                 name="content"
                 label="Content"
                 value={form.content || ''}
-                onChange={(value) => onChange({ content: value })}
+                onChange={(value) => handleFieldChange('content', value)}
                 disabled={!isEditMode}
                 multiline
                 rows={4}
@@ -94,7 +89,7 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
                 name="is_templated"
                 label="Is Templated"
                 value={form.is_templated || false}
-                onChange={(value) => onChange({ is_templated: value })}
+                onChange={(value) => handleFieldChange('is_templated', value)}
                 disabled={!isEditMode}
                 description='Check if the prompt is templated. If templated, it can use input variables'
                 
@@ -104,7 +99,7 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
                     <FunctionDefinitionBuilder
                         title='Template Parameters'
                         initialParameters={form.parameters}
-                        onChange={handleFunctionDefinitionChange}
+                        onChange={(value) => handleFieldChange('parameters', value)}
                         isViewOnly={!isEditMode}
                     />
                 </Box>
@@ -113,7 +108,7 @@ const PromptFlexibleView: React.FC<PromptComponentProps> = ({
                 name="version"
                 label="Version"
                 value={form.version || 0}
-                onChange={(value) => onChange({ version: value })}
+                onChange={(value) => handleFieldChange('version', value)}
                 disabled={!isEditMode}
                 description='Prompt version number'
             />

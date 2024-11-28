@@ -1,5 +1,5 @@
 import { ColorLens, Download, Edit, EditNote, Google, RecordVoiceOver, Reddit, Search, Tag, Visibility } from "@mui/icons-material";
-import { ApiType, ApiName } from "../types/ApiTypes";
+import { ApiType, ApiName, ModelApiType } from "../types/ApiTypes";
 import { AIIcon, AnthropicIcon, ArxivIcon, AzureIcon, BarkIcon, CohereIcon, GeminiIcon, GroqIcon, LlamaIcon, LMStudioIcon, 
   MistralIcon, OpenAiIcon, WikipediaIcon, WolframAlphaIcon } from "./CustomIcons";
 import { ModelType } from "../types/ModelTypes";
@@ -203,3 +203,7 @@ export const modelTypeIcons: Record<ModelType, React.ReactElement> = {
   [ModelType.EMBEDDINGS]: <Tag />,
   [ModelType.VISION]: <Visibility />,
 };
+
+export function isModelApiType(apiType: ApiType): apiType is ApiType & ModelApiType {
+  return Object.values(ModelApiType).includes(apiType as any);
+}

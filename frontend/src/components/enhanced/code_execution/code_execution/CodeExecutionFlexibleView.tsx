@@ -1,25 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-    Typography,
-    TextField,
-    Box,
-    MenuItem,
-    FormControl,
-    InputLabel,
-    Select,
-    Chip,
-} from '@mui/material';
 import { CodeExecutionComponentProps, CodeExecution, getDefaultCodeExecutionForm, LANGUAGES, CodeBlock, CodeOutput } from '../../../../types/CodeExecutionTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import Logger from '../../../../utils/Logger';
-import useStyles from '../CodeExecutionStyles';
-import { CodeBlock as MarkdownCodeBlock } from '../../../ui/markdown/CodeBlock';
-import { Check, Error } from '@mui/icons-material';
 import { SelectInput } from '../../common/inputs/SelectInput';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 import { TextInput } from '../../common/inputs/TextInput';
 import { NumericInput } from '../../common/inputs/NumericInput';
-
 
 const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
     item,
@@ -28,10 +13,12 @@ const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
     handleSave,
     handleDelete
 }) => {
-    const classes = useStyles();
     const isEditMode = mode === 'edit' || mode === 'create';
     const [form, setForm] = useState<Partial<CodeExecution>>(item || getDefaultCodeExecutionForm());
     const [isSaving, setIsSaving] = useState(false);
+    
+    const title = mode === 'create' ? 'Create New Code Execution' : mode === 'edit' ? 'Edit Code Execution' : 'Code Execution Details';
+    const saveButtonText = item?._id ? 'Update Code Execution' : 'Create Code Execution';
 
     useEffect(() => {
         if (isSaving) {
@@ -43,14 +30,14 @@ const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
     useEffect(() => {
         if (item && Object.keys(item).length !== 0) {
             setForm(item);
-        }
-    }, [item]);
-
-    useEffect(() => {
-        if (!item || Object.keys(item).length === 0) {
+        } else {
             onChange(getDefaultCodeExecutionForm());
         }
     }, [item, onChange]);
+
+    const handleFieldChange = useCallback((field: keyof CodeExecution, value: any) => {
+        setForm(prevForm => ({ ...prevForm, [field]: value }));
+    }, []);
    
     const handleLocalDelete = useCallback(() => {
         if (item && Object.keys(item).length > 0 && handleDelete) {
@@ -62,10 +49,6 @@ const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
         onChange(form);
         setIsSaving(true);
     }, [form, onChange]);
-
-    const handleFieldChange = useCallback((field: keyof CodeExecution, value: any) => {
-        setForm(prevForm => ({ ...prevForm, [field]: value }));
-    }, []);
 
     const handleCodeChange = (value: string | undefined) => {
         if (!value) {
@@ -128,9 +111,6 @@ const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
         handleFieldChange('code_output', newOutput);
     };
 
-    const title = mode === 'create' ? 'Create New Code Execution' : mode === 'edit' ? 'Edit Code Execution' : 'Code Execution Details';
-    const saveButtonText = item?._id ? 'Update Code Execution' : 'Create Code Execution';
-
     return (
         <GenericFlexibleView
             elementType='Code Execution'
@@ -139,13 +119,13 @@ const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
-            item={item as CodeExecution}
+            item={form as CodeExecution}
             itemType='codeexecutions'
         >
             <SelectInput
                 name='type'
                 label='Type'
-                value={item?.code_block.language || 'text'}
+                value={form?.code_block?.language || 'text'}
                 onChange={(value) => handleLanguageChange(value)}
                 description='Type is always code.'
                 options={LANGUAGES.map((lang) => ({
@@ -157,7 +137,7 @@ const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
             <TextInput
                 name='code'
                 label='Code'
-                value={item?.code_block.code || ''}
+                value={form?.code_block?.code || ''}
                 onChange={(value) => handleCodeChange(value)}
                 disabled={!isEditMode}
                 description='Enter the code to be executed'
@@ -168,7 +148,7 @@ const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
             <TextInput
                 name='output'
                 label='Output'
-                value={item?.code_output.output || ''}
+                value={form?.code_output?.output || ''}
                 onChange={(value) => handleOutputChange(value)}
                 disabled={!isEditMode}
                 description='Enter the output of the code execution'
@@ -179,7 +159,7 @@ const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
             <NumericInput
                 name='exit_code'
                 label='Exit Code'
-                value={item?.code_output.exit_code || 0}
+                value={form?.code_output?.exit_code || 0}
                 onChange={(value) => handleExitCodeChange(value)}
                 disabled={!isEditMode}
                 description='Enter the exit code of the code execution'

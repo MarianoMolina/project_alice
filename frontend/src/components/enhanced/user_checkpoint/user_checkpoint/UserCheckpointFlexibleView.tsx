@@ -55,13 +55,10 @@ const UserCheckpointFlexibleView: React.FC<UserCheckpointComponentProps> = ({
         }
     }, [item, handleDelete]);
 
-    const handleExitCodesChange = useCallback((newExitCodes: { [key: string]: string }) => {
-        setForm(prevForm => ({ ...prevForm, exit_codes: newExitCodes }));
+    const handleFieldChange = useCallback((field: keyof UserCheckpoint, value: any) => {
+        setForm(prevForm => ({ ...prevForm, [field]: value }));
     }, []);
 
-    if (!form) {
-        return <Typography>No UserCheckpoint data available.</Typography>;
-    }
     return (
         <GenericFlexibleView
             elementType="UserCheckpoint"
@@ -70,7 +67,7 @@ const UserCheckpointFlexibleView: React.FC<UserCheckpointComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
-            item={item as UserCheckpoint}
+            item={form as UserCheckpoint}
             itemType="usercheckpoints"
         >
             <TextInput
@@ -84,7 +81,7 @@ const UserCheckpointFlexibleView: React.FC<UserCheckpointComponentProps> = ({
             <ExitCodeManager
                 title="User Options"
                 exitCodes={form.options_obj || {}}
-                onChange={handleExitCodesChange}
+                onChange={(value) => handleFieldChange('options_obj', value)}
                 isEditMode={isEditMode}
             />
             <ExitCodeManager

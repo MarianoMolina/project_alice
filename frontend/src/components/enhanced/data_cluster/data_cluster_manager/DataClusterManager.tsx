@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { DataCluster } from '../../../../types/DataClusterTypes';
 import { References } from '../../../../types/ReferenceTypes';
 import DataClusterHeader from './DataClusterHeader';
@@ -15,7 +15,8 @@ const DataClusterManager: React.FC<DataClusterManagerProps> = ({
     isEditable = false,
     showEdit = true,
     showSelect = true,
-    flatten = true
+    flatten = true,
+    title = 'Data Cluster'
 }) => {
     const [inEditMode, setInEditMode] = useState(false);
     const [editedCluster, setEditedCluster] = useState<DataCluster | undefined>(dataCluster);
@@ -86,6 +87,7 @@ const DataClusterManager: React.FC<DataClusterManagerProps> = ({
 
     return (
         <div className="relative p-4 border rounded-lg shadow-sm">
+            <Typography variant="h6" className="mb-4">{title}</Typography>
             <DataClusterHeader
                 editedCluster={editedCluster}
                 isFlatView={isFlatView}

@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { ApiComponentProps, API, ApiType, ApiName, getDefaultApiForm, ModelApiType } from '../../../../types/ApiTypes';
-import { API_CAPABILITIES, apiNameIcons, apiTypeIcons } from '../../../../utils/ApiUtils';
+import { ApiComponentProps, API, ApiType, ApiName, getDefaultApiForm } from '../../../../types/ApiTypes';
+import { API_CAPABILITIES, apiNameIcons, apiTypeIcons, isModelApiType } from '../../../../utils/ApiUtils';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import ModelShortListView from '../../model/model/ModelShortListView';
 import APIConfigShortListView from '../../api_config/api_config/APIConfigShortListView';
@@ -9,9 +9,7 @@ import { APIConfig } from '../../../../types/ApiConfigTypes';
 import { useApi } from '../../../../contexts/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import Logger from '../../../../utils/Logger';
-import useStyles from '../ApiStyles';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
-import { SelectInput } from '../../common/inputs/SelectInput';
 import { TextInput } from '../../common/inputs/TextInput';
 import { BooleanInput } from '../../common/inputs/BooleanInput';
 import { IconSelectInput } from '../../common/inputs/IconSelectInput';
@@ -24,14 +22,15 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
     handleDelete,
 }) => {
     const { fetchItem } = useApi();
-    const [form, setForm] = useState<Partial<API>>(() => item || getDefaultApiForm());
     const [availableApiTypes, setAvailableApiTypes] = useState<ApiType[]>([]);
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
-
-    const isEditMode = mode === 'edit' || mode === 'create';
-    const isCreateMode = mode === 'create';
+    const [form, setForm] = useState<Partial<API>>(() => item || getDefaultApiForm());
     const [isSaving, setIsSaving] = useState(false);
-    const classes = useStyles();
+    
+    const isCreateMode = mode === 'create';
+    const isEditMode = mode === 'edit' || mode === 'create';
+    const title = mode === 'create' ? 'Create New API' : mode === 'edit' ? 'Edit API' : 'API Details';
+    const saveButtonText = form._id ? 'Update API' : 'Create API';
 
     useEffect(() => {
         if (isSaving) {
@@ -52,6 +51,21 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
         setForm(prevForm => ({ ...prevForm, [field]: value }));
     }, []);
 
+    const handleLocalSave = useCallback(() => {
+        onChange(form);
+        setIsSaving(true);
+    }, [form, onChange]);
+
+    const handleLocalDelete = useCallback(() => {
+        if (item && Object.keys(item).length > 0 && handleDelete) {
+            handleDelete(item);
+        }
+    }, [item, handleDelete]);
+
+    const handleAccordionToggle = useCallback((accordion: string | null) => {
+        setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
+    }, []);
+
     const updateAvailableApiTypes = useCallback((apiName: ApiName | undefined) => {
         Logger.debug('updateAvailableApiTypes', apiName);
         if (apiName && apiName in API_CAPABILITIES) {
@@ -67,15 +81,6 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
             updateAvailableApiTypes(form.api_name);
         }
     }, [form.api_name, updateAvailableApiTypes]);
-
-    function isModelApiType(apiType: ApiType): apiType is ApiType & ModelApiType {
-        return Object.values(ModelApiType).includes(apiType as any);
-    }
-
-    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setForm(prevForm => ({ ...prevForm, [name]: value }));
-    }, []);
 
     const handleApiNameChange = useCallback((newApiName: ApiName) => {
         setForm(prevForm => ({
@@ -111,21 +116,6 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
         }
     }, [fetchItem]);
 
-    const handleAccordionToggle = useCallback((accordion: string | null) => {
-        setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
-    }, []);
-
-    const handleLocalSave = useCallback(() => {
-        onChange(form);
-        setIsSaving(true);
-    }, [form, onChange]);
-
-    const handleLocalDelete = useCallback(() => {
-        if (item && Object.keys(item).length > 0 && handleDelete) {
-            handleDelete(item);
-        }
-    }, [item, handleDelete]);
-
     const apiOptions = Object.values(ApiName).map((name) => ({
         value: name,
         label: formatCamelCaseString(name),
@@ -137,9 +127,6 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
         label: formatCamelCaseString(type),
         icon: apiTypeIcons[type],
     }));
-
-    const title = mode === 'create' ? 'Create New API' : mode === 'edit' ? 'Edit API' : 'API Details';
-    const saveButtonText = form._id ? 'Update API' : 'Create API';
 
     return (
         <GenericFlexibleView

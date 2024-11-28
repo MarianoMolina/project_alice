@@ -24,30 +24,46 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
     handleDelete,
 }) => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [form, setForm] = useState<Partial<FileReference | FileContentReference>>(() => item || getDefaultFileForm());
+    const [isSaving, setIsSaving] = useState(false);
     const { uploadFileContentReference } = useApi();
     const { addNotification } = useNotification();
     const { openDialog } = useDialog();
 
+    const isEditMode = mode === 'edit' || mode === 'create';
+    const title = mode === 'create' ? 'Upload New File' : mode === 'edit' ? 'Edit File' : 'File Details';
+    const saveButtonText = item?._id ? 'Update File' : 'Upload File';
+    const hasTranscriptSlot = item && item._id && item.type !== 'file';
+
     useEffect(() => {
-        if (!item || Object.keys(item).length === 0) {
+        if (isSaving) {
+            handleSave();
+            setIsSaving(false);
+        }
+    }, [isSaving, handleSave]);
+
+    useEffect(() => {
+        if (item) {
+            setForm(item);
+        } else if (!item || Object.keys(item).length === 0) {
             onChange(getDefaultFileForm());
         }
     }, [item, onChange]);
+
+    const handleFieldChange = useCallback((field: keyof FileReference | keyof FileContentReference, value: any) => {
+        setForm(prevForm => ({ ...prevForm, [field]: value }));
+    }, []);
+
+    const handleLocalSave = useCallback(() => {
+        onChange(form);
+        setIsSaving(true);
+    }, [form, onChange]);
 
     const handleLocalDelete = useCallback(() => {
         if (item && Object.keys(item).length > 0 && handleDelete) {
             handleDelete(item);
         }
     }, [item, handleDelete]);
-
-    if (!item && mode !== 'create') {
-        return <Typography>No file data available.</Typography>;
-    }
-
-    const isEditMode = mode === 'edit' || mode === 'create';
-    const title = mode === 'create' ? 'Upload New File' : mode === 'edit' ? 'Edit File' : 'File Details';
-    const saveButtonText = item?._id ? 'Update File' : 'Upload File';
-    const hasTranscriptSlot = item && item._id && item.type !== 'file';
 
     const handleOpenDialog = () => {
         openDialog({
@@ -70,8 +86,10 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
         });
     }
 
-    const handleFileUpdate = (updatedFile: FileContentReference) => {
-        onChange(updatedFile);
+    const handleFileUpdate = (updatedFile: FileContentReference | FileReference) => {
+        if (updatedFile) {
+            setForm(updatedFile);
+        }
     };
 
     const handleFileSelect = async () => {
@@ -91,7 +109,6 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
         }
     };
 
-
     const handleUploadConfirm = async () => {
         if (selectedFile) {
             const fileContentReference = await createFileContentReference(selectedFile);
@@ -101,12 +118,8 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
                 Logger.info('File upload failed or was cancelled');
                 return;
             }
-            onChange(file);
+            setForm(file);
         }
-    };
-
-    const handleTranscriptUpdate = (newTranscript: MessageType) => {
-        onChange({ ...item, transcript: newTranscript } as FileReference);
     };
 
     const renderContent = () => {
@@ -126,7 +139,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
                     name='filename'
                     label='Filename'
                     value={item?.filename || ''}
-                    onChange={(e) => onChange({ ...item, filename: e } as FileReference)}
+                    onChange={(value) => handleFieldChange('filename', value)}
                     disabled={!isEditMode}
                     description='Enter the filename for the file. It should contain its extension.'
                 />
@@ -148,7 +161,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
                         <Transcript
                             fileId={item._id}
                             transcript={item.transcript}
-                            onTranscriptUpdate={handleTranscriptUpdate}
+                            onTranscriptUpdate={(value) => handleFieldChange('transcript', value)}
                         />
                     </Box>
                 )}
@@ -156,15 +169,19 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
         );
     };
 
+    if (!item && mode !== 'create') {
+        return <Typography>No file data available.</Typography>;
+    }
+
     return (
         <GenericFlexibleView
             elementType='File'
             title={title}
-            onSave={handleSave}
+            onSave={handleLocalSave}
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={mode === "create" ? false : isEditMode}
-            item={item as FileReference}
+            item={form as FileReference}
             itemType='files'
         >
             {renderContent()}

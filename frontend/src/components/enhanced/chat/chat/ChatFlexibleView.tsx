@@ -40,40 +40,11 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     const classes = useStyles();
 
     const isEditMode = mode === 'edit' || mode === 'create';
+    const title = mode === 'create' ? 'Create New Chat' : mode === 'edit' ? 'Edit Chat' : 'Chat Details';
+    const saveButtonText = form._id ? 'Update Chat' : 'Create Chat';
 
     Logger.debug('ChatFlexibleView', { item, handleDelete });
     useEffect(() => {
-        const populateConfig = async () => {
-            if (mode === 'create' && user?.default_chat_config && !item) {
-                const config = user.default_chat_config;
-                const [agent, agentTools, retrievalTools, toolCallCheckpoint, codeExecCheckpoint, dataCluster] = await Promise.all([
-                    config.alice_agent ? fetchItem('agents', config.alice_agent) : undefined,
-                    Promise.all((config.agent_tools || []).map(id => fetchItem('tasks', id))),
-                    Promise.all((config.retrieval_tools || []).map(id => fetchItem('tasks', id))),
-                    config.default_user_checkpoints[CheckpointType.TOOL_CALL] ?
-                        fetchItem('usercheckpoints', config.default_user_checkpoints[CheckpointType.TOOL_CALL]) : undefined,
-                    config.default_user_checkpoints[CheckpointType.CODE_EXECUTION] ?
-                        fetchItem('usercheckpoints', config.default_user_checkpoints[CheckpointType.CODE_EXECUTION]) : undefined,
-                    config.data_cluster ? fetchItem('dataclusters', config.data_cluster) : undefined
-                ]);
-
-                setForm(prevForm => ({
-                    ...prevForm,
-                    alice_agent: agent as AliceAgent,
-                    agent_tools: agentTools as AliceTask[],
-                    retrieval_tools: retrievalTools as AliceTask[],
-                    default_user_checkpoints: {
-                        [CheckpointType.TOOL_CALL]: toolCallCheckpoint as UserCheckpoint,
-                        [CheckpointType.CODE_EXECUTION]: codeExecCheckpoint as UserCheckpoint
-                    },
-                    data_cluster: dataCluster as DataCluster,
-                }));
-            } else if (item) {
-                setForm(item);
-            } else if (!item || Object.keys(item).length === 0) {
-                onChange(getDefaultChatForm());
-            }
-        };
         populateConfig();
     }, [item, onChange, user, mode, fetchItem]);
 
@@ -86,6 +57,47 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
 
     const handleFieldChange = useCallback((field: keyof AliceAgent, value: any) => {
         setForm(prevForm => ({ ...prevForm, [field]: value }));
+    }, []);
+    
+    const validateForm = useCallback(() => {
+        if (!form.name) {
+            setValidationError('Chat name is required');
+            return false;
+        }
+
+        if (!form.default_user_checkpoints) {
+            setValidationError('Both Tool Call and Code Execution checkpoints are required');
+            return false;
+        }
+
+        const hasToolCall = !!form.default_user_checkpoints[CheckpointType.TOOL_CALL];
+        const hasCodeExec = !!form.default_user_checkpoints[CheckpointType.CODE_EXECUTION];
+
+        if (!hasToolCall || !hasCodeExec) {
+            setValidationError('Both Tool Call and Code Execution checkpoints are required');
+            return false;
+        }
+
+        setValidationError(null);
+        return true;
+    }, [form.default_user_checkpoints, form.name]);
+    
+    const handleLocalSave = useCallback(() => {
+        if (validateForm()) {
+            onChange(form);
+            setIsSaving(true);
+        }
+    }, [form, onChange, validateForm]);
+
+    const handleLocalDelete = useCallback(() => {
+        Logger.debug('ChatFlexibleView handleLocalDelete', { item, handleDelete });
+        if (item && Object.keys(item).length > 0 && handleDelete) {
+            handleDelete(item);
+        }
+    }, [item, handleDelete]);
+    
+    const handleAccordionToggle = useCallback((accordion: string | null) => {
+        setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
     }, []);
 
     const handleAgentChange = useCallback(async (selectedIds: string[]) => {
@@ -106,28 +118,6 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
         const functions = await Promise.all(selectedIds.map(id => fetchItem('tasks', id) as Promise<AliceTask>));
         setForm(prevForm => ({ ...prevForm, retrieval_tools: functions }));
     }, [fetchItem]);
-
-    const handleAccordionToggle = useCallback((accordion: string | null) => {
-        setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
-    }, []);
-
-    const validateCheckpoints = useCallback(() => {
-        if (!form.default_user_checkpoints) {
-            setValidationError('Both Tool Call and Code Execution checkpoints are required');
-            return false;
-        }
-
-        const hasToolCall = !!form.default_user_checkpoints[CheckpointType.TOOL_CALL];
-        const hasCodeExec = !!form.default_user_checkpoints[CheckpointType.CODE_EXECUTION];
-
-        if (!hasToolCall || !hasCodeExec) {
-            setValidationError('Both Tool Call and Code Execution checkpoints are required');
-            return false;
-        }
-
-        setValidationError(null);
-        return true;
-    }, [form.default_user_checkpoints]);
 
     const handleToolCallCheckpointChange = useCallback(async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {
@@ -181,23 +171,37 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
         }
     }, [fetchItem]);
 
-    const handleLocalSave = useCallback(() => {
-        if (validateCheckpoints()) {
-            onChange(form);
-            setIsSaving(true);
+    const populateConfig = async () => {
+        if (mode === 'create' && user?.default_chat_config && !item) {
+            const config = user.default_chat_config;
+            const [agent, agentTools, retrievalTools, toolCallCheckpoint, codeExecCheckpoint, dataCluster] = await Promise.all([
+                config.alice_agent ? fetchItem('agents', config.alice_agent) : undefined,
+                Promise.all((config.agent_tools || []).map(id => fetchItem('tasks', id))),
+                Promise.all((config.retrieval_tools || []).map(id => fetchItem('tasks', id))),
+                config.default_user_checkpoints[CheckpointType.TOOL_CALL] ?
+                    fetchItem('usercheckpoints', config.default_user_checkpoints[CheckpointType.TOOL_CALL]) : undefined,
+                config.default_user_checkpoints[CheckpointType.CODE_EXECUTION] ?
+                    fetchItem('usercheckpoints', config.default_user_checkpoints[CheckpointType.CODE_EXECUTION]) : undefined,
+                config.data_cluster ? fetchItem('dataclusters', config.data_cluster) : undefined
+            ]);
+
+            setForm(prevForm => ({
+                ...prevForm,
+                alice_agent: agent as AliceAgent,
+                agent_tools: agentTools as AliceTask[],
+                retrieval_tools: retrievalTools as AliceTask[],
+                default_user_checkpoints: {
+                    [CheckpointType.TOOL_CALL]: toolCallCheckpoint as UserCheckpoint,
+                    [CheckpointType.CODE_EXECUTION]: codeExecCheckpoint as UserCheckpoint
+                },
+                data_cluster: dataCluster as DataCluster,
+            }));
+        } else if (item) {
+            setForm(item);
+        } else if (!item || Object.keys(item).length === 0) {
+            onChange(getDefaultChatForm());
         }
-    }, [form, onChange, validateCheckpoints]);
-
-
-    const handleLocalDelete = useCallback(() => {
-        Logger.debug('ChatFlexibleView handleLocalDelete', { item, handleDelete });
-        if (item && Object.keys(item).length > 0 && handleDelete) {
-            handleDelete(item);
-        }
-    }, [item, handleDelete]);
-
-    const title = mode === 'create' ? 'Create New Chat' : mode === 'edit' ? 'Edit Chat' : 'Chat Details';
-    const saveButtonText = form._id ? 'Update Chat' : 'Create Chat';
+    };
 
     const memoizedAgentSelect = useMemo(() => (
         <EnhancedSelect<AliceAgent>
@@ -292,7 +296,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
-            item={item as AliceChat}
+            item={form as AliceChat}
             itemType='chats'
         >
             {validationError && (
@@ -330,7 +334,6 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             )}
             {memoizedToolCallCheckpointSelect}
             {memoizedCodeExecCheckpointSelect}
-            <Typography variant="h6" className={classes.titleText}>Data Cluster</Typography>
             <DataClusterManager
                 dataCluster={form.data_cluster}
                 isEditable={true}

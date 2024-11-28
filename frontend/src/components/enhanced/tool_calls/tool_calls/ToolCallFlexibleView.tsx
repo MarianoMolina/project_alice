@@ -7,6 +7,7 @@ import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import Logger from '../../../../utils/Logger';
 import useStyles from '../ToolCallStyles';
 import { TextInput } from '../../common/inputs/TextInput';
+import { useNotification } from '../../../../contexts/NotificationContext';
 
 const ToolCallFlexibleView: React.FC<ToolCallComponentProps> = ({
     item,
@@ -15,35 +16,67 @@ const ToolCallFlexibleView: React.FC<ToolCallComponentProps> = ({
     handleSave,
     handleDelete
 }) => {
+    const { addNotification } = useNotification();
     const classes = useStyles();
+    const [form, setForm] = useState<Partial<ToolCall>>(item || getDefaultToolCallForm());
+    const [isSaving, setIsSaving] = useState(false);
+
     const [localArguments, setLocalArguments] = useState<string>('');
     const [argumentsError, setArgumentsError] = useState<string>('');
+
     const isEditMode = mode === 'edit' || mode === 'create';
+    const title = mode === 'create' ? 'Create New Tool Call' : mode === 'edit' ? 'Edit Tool Call' : 'Tool Call Details';
+    const saveButtonText = item?._id ? 'Update Tool Call' : 'Create Tool Call';
 
     useEffect(() => {
-        if (!item || Object.keys(item).length === 0) {
+        if (isSaving) {
+            handleSave();
+            setIsSaving(false);
+        }
+    }, [isSaving, handleSave]);
+
+    useEffect(() => {
+        if (item && Object.keys(item).length > 0) {
+            setForm(item);
+            if (item?.function?.arguments) {
+                const argsString = typeof item.function.arguments === 'string'
+                    ? item.function.arguments
+                    : JSON.stringify(item.function.arguments, null, 2);
+                setLocalArguments(argsString);
+            }
+        } else {
             onChange(getDefaultToolCallForm());
         }
-        // Update local state when item changes
-        if (item?.function?.arguments) {
-            const argsString = typeof item.function.arguments === 'string' 
-                ? item.function.arguments 
-                : JSON.stringify(item.function.arguments, null, 2);
-            setLocalArguments(argsString);
-        }
-        Logger.debug('ToolCallFlexibleView', 'item', item);
     }, [item, onChange]);
+
+    const handleFieldChange = useCallback((field: keyof ToolCall, value: any) => {
+        setForm(prevForm => ({ ...prevForm, [field]: value }));
+    }, []);
+
+    const handleLocalSave = useCallback(() => {
+        try {
+            // If it looks like JSON, verify it's valid
+            if (localArguments.trim().startsWith('{') || localArguments.trim().startsWith('[')) {
+                JSON.parse(localArguments);
+            }
+            onChange(form);
+            setIsSaving(true);
+        } catch (error) {
+            addNotification('Invalid JSON format', 'error');
+            setArgumentsError('Invalid JSON format');
+        }
+    }, [form, onChange]);
 
     const handleLocalDelete = useCallback(() => {
         if (item && Object.keys(item).length > 0 && handleDelete) {
             handleDelete(item);
         }
     }, [item, handleDelete]);
-    
-    const handleArgumentsChange = (value: string | undefined) => {
+
+    const handleArgumentsChange = useCallback((value: string | undefined) => {
         const newValue = value || '';
         setLocalArguments(newValue);
-        
+
         try {
             // Handle both string and object arguments
             let parsedValue: Record<string, any> | string = newValue;
@@ -59,43 +92,23 @@ const ToolCallFlexibleView: React.FC<ToolCallComponentProps> = ({
                 arguments: parsedValue
             };
 
-            onChange({
-                function: functionConfig
-            });
+            handleFieldChange('function', functionConfig);
             setArgumentsError('');
         } catch (error) {
             setArgumentsError('Invalid JSON format');
         }
-    };
+    }, [item, handleFieldChange]);
 
-    const handleNameChange = (newName: string | undefined) => {
+    const handleNameChange = useCallback((newName: string | undefined) => {
         if (!newName) return;
-        
+
         const functionConfig: ToolCallConfig = {
             name: newName,
             arguments: item?.function?.arguments || {}
         };
 
-        onChange({
-            function: functionConfig
-        });
-    };
-
-    const handleLocalSave = () => {
-        try {
-            // If it looks like JSON, verify it's valid
-            if (localArguments.trim().startsWith('{') || localArguments.trim().startsWith('[')) {
-                JSON.parse(localArguments);
-            }
-            // If we get here, either parsing succeeded or it's a valid string
-            handleSave();
-        } catch (error) {
-            setArgumentsError('Invalid JSON format');
-        }
-    };
-
-    const title = mode === 'create' ? 'Create New Tool Call' : mode === 'edit' ? 'Edit Tool Call' : 'Tool Call Details';
-    const saveButtonText = item?._id ? 'Update Tool Call' : 'Create Tool Call';
+        handleFieldChange('function', functionConfig);
+    }, [item, handleFieldChange]);
 
     return (
         <GenericFlexibleView
@@ -105,21 +118,21 @@ const ToolCallFlexibleView: React.FC<ToolCallComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
-            item={item as ToolCall}
+            item={form as ToolCall}
             itemType='toolcalls'
         >
             <TextInput
                 name='type'
                 label='Type'
-                value={item?.type || 'function'}
-                onChange={() => {}}
+                value={form?.type || 'function'}
+                onChange={() => { }}
                 description='Type is always function.'
                 disabled={true}
             />
             <TextInput
                 name='function.name'
                 label='Function Name'
-                value={item?.function?.name || ''}
+                value={form?.function?.name || ''}
                 onChange={handleNameChange}
                 disabled={!isEditMode}
                 required

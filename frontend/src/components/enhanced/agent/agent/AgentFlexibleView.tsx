@@ -63,6 +63,17 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
         setForm(prevForm => ({ ...prevForm, [field]: value }));
     }, []);
 
+    const handleLocalSave = useCallback(() => {
+        onChange(form);
+        setIsSaving(true);
+    }, [form, onChange]);
+
+    const handleLocalDelete = useCallback(() => {
+        if (item && Object.keys(item).length > 0 && handleDelete) {
+            handleDelete(item);
+        }
+    }, [item, handleDelete]);
+
     const handleModelChange = useCallback(async (selectedIds: string[]) => {
         const updatedModels: { [key in ModelType]?: AliceModel } = {};
         for (const id of selectedIds) {
@@ -85,17 +96,6 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     const handleAccordionToggle = useCallback((accordion: string | null) => {
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
     }, []);
-
-    const handleLocalSave = useCallback(() => {
-        onChange(form);
-        setIsSaving(true);
-    }, [form, onChange]);
-
-    const handleLocalDelete = useCallback(() => {
-        if (item && Object.keys(item).length > 0 && handleDelete) {
-            handleDelete(item);
-        }
-    }, [item, handleDelete]);
 
     // Convert enums to selection options
     const toolPermissionOptions = useMemo(() => enumToOptions(ToolPermission), []);

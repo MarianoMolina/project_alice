@@ -2,11 +2,9 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
     Box,
     Typography,
-    SelectChangeEvent
 } from '@mui/material';
 import { AliceTask, getDefaultTaskForm, TaskComponentProps, TasksEndCodeRouting, TaskType } from '../../../../types/TaskTypes';
 import { useApi } from '../../../../contexts/ApiContext';
-import { FunctionParameters } from '../../../../types/ParameterTypes';
 import { ApiType } from '../../../../types/ApiTypes';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import PromptShortListView from '../../prompt/prompt/PromptShortListView';
@@ -16,14 +14,12 @@ import AgentShortListView from '../../agent/agent/AgentShortListView';
 import TaskShortListView from './TaskShortListView';
 import TaskEndCodeRoutingBuilder from '../../common/task_end_code_routing/TaskEndCodeRoutingBuilder';
 import FunctionDefinitionBuilder from '../../common/function_select/FunctionDefinitionBuilder';
-import Logger from '../../../../utils/Logger';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import TaskFlowchart from '../../common/task_flowchart/FlowChart';
 import useStyles from '../TaskStyles';
 import ExitCodeManager from '../../common/exit_code_manager/ExitCodeManager';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
-import { DataCluster } from '../../../../types/DataClusterTypes';
 import { taskDescriptions } from '../../../../types/TaskTypes';
 import { TextInput } from '../../common/inputs/TextInput';
 import { NumericInput } from '../../common/inputs/NumericInput';
@@ -63,33 +59,35 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     }, [item]);
 
     useEffect(() => {
-        if (item?.task_type) {
-            setTaskType(item.task_type);
-        }
-    }, [item?.task_type]);
-
-    useEffect(() => {
         if (!item || Object.keys(item).length === 0) {
             onChange(getDefaultTaskForm(taskType));
         }
     }, [item, onChange, taskType]);
 
-    const handleAccordionToggle = useCallback((accordion: string | null) => {
-        setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
-    }, []);
-
-    const handleInputVariablesChange = useCallback((newDefinition: FunctionParameters) => {
-        setForm(prevForm => ({ ...prevForm, input_variables: newDefinition }));
-    }, []);
+    useEffect(() => {
+        if (item?.task_type) {
+            setTaskType(item.task_type);
+        }
+    }, [item?.task_type]);
 
     const handleFieldChange = useCallback((field: keyof AliceTask, value: any) => {
         setForm(prevForm => ({ ...prevForm, [field]: value }));
     }, []);
 
-    const handleDataClusterChange = useCallback((newCluster: DataCluster | undefined) => {
-        Logger.debug('[handleDataClusterChange]', newCluster);
-        setForm(prevForm => ({ ...prevForm, data_cluster: newCluster }));
-    }, []); 
+    const handleLocalSave = useCallback(async () => {
+        onChange(form);
+        setIsSaving(true);
+    }, [form, onChange]);
+
+    const handleLocalDelete = useCallback(() => {
+        if (item && Object.keys(item).length > 0 && handleDelete) {
+            handleDelete(item);
+        }
+    }, [item, handleDelete]);
+
+    const handleAccordionToggle = useCallback((accordion: string | null) => {
+        setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
+    }, []);
     
     const handlePromptSelect = useCallback(async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {
@@ -118,10 +116,6 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
         }
     }, [fetchItem]);
 
-    const handleTaskEndCodeRoutingChange = useCallback((newRouting: TasksEndCodeRouting) => {
-        setForm(prevForm => ({ ...prevForm, node_end_code_routing: newRouting }));
-    }, []);
-
     const handleTaskSelect = useCallback(async (selectedIds: string[]) => {
         const tasks = await Promise.all(selectedIds.map(id => fetchItem('tasks', id) as Promise<AliceTask>));
         const tasksObject = tasks.reduce((acc, task) => {
@@ -130,10 +124,6 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
         }, {} as Record<string, AliceTask>);
         setForm(prevForm => ({ ...prevForm, tasks: tasksObject }));
     }, [fetchItem]);
-
-    const handleExitCodesChange = useCallback((newExitCodes: { [key: string]: string }) => {
-        setForm(prevForm => ({ ...prevForm, exit_codes: newExitCodes }));
-    }, []);
 
     const memoizedPromptSelect = useMemo(() => (
         <EnhancedSelect<Prompt>
@@ -199,17 +189,6 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             showCreateButton={true}
         />
     ), [form?.tasks, isEditMode, activeAccordion, handleAccordionToggle, handleTaskSelect]);
-
-    const handleLocalSave = useCallback(async () => {
-        onChange(form);
-        setIsSaving(true);
-    }, [form, onChange]);
-
-    const handleLocalDelete = useCallback(() => {
-        if (item && Object.keys(item).length > 0 && handleDelete) {
-            handleDelete(item);
-        }
-    }, [item, handleDelete]);
 
     const memoizedFlowchartTask = useMemo(() => ({
         ...form,
@@ -280,13 +259,13 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             <FunctionDefinitionBuilder
                 title="Input Variables"
                 initialParameters={form.input_variables || undefined}
-                onChange={handleInputVariablesChange}
+                onChange={(newDefinition) => handleFieldChange('input_variables', newDefinition)}
                 isViewOnly={!isEditMode}
             />
             <ExitCodeManager
                 title="Exit Codes"
                 exitCodes={form.exit_codes || {}}
-                onChange={handleExitCodesChange}
+                onChange={(value) => handleFieldChange('exit_codes', value)}
                 isEditMode={isEditMode}
             />
             <Typography variant="h6" className={classes.titleText}>Node End Code Routing</Typography>
@@ -294,7 +273,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                 <TaskEndCodeRoutingBuilder
                     tasks={taskType === TaskType.Workflow ? Object.values(form.tasks ?? {}) : []}
                     routing={form.node_end_code_routing || {}}
-                    onChange={handleTaskEndCodeRoutingChange}
+                    onChange={(value) => handleFieldChange('node_end_code_routing', value)}
                     isViewMode={taskType !== TaskType.Workflow ? true : !isEditMode}
                 />
                 <TaskFlowchart task={memoizedFlowchartTask} height={800} miniMap />
@@ -320,11 +299,10 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                 description="Normally, if a task being executed is present in the execution history of a task, it will be rejected, unless it is recursive. Workflows usually should have recursion enabled."
             />
 
-            <Typography variant="h6" className={classes.titleText}>Data Cluster</Typography>
             <DataClusterManager
                 dataCluster={form.data_cluster}
                 isEditable={true}
-                onDataClusterChange={handleDataClusterChange}
+                onDataClusterChange={(value) => handleFieldChange('data_cluster', value)}
                 flatten={false}
             />
 

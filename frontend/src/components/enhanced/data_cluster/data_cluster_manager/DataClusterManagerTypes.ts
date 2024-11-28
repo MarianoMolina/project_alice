@@ -25,6 +25,7 @@ export interface DataClusterManagerProps {
     showEdit?: boolean;
     showSelect?: boolean;
     flatten?: boolean;
+    title?: string;
 }
 
 interface ReferenceTypeConfig {

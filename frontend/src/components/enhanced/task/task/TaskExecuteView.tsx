@@ -39,12 +39,12 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
     const taskTemplate = useMemo(() =>
         item?.templates?.task_template || undefined
         , [item?.templates]);
-    
+
     const systemTemplate = useMemo(() =>
         item?.agent?.system_message || undefined
-    , [item?.agent]);
+        , [item?.agent]);
 
-    if (!item) return null;
+    if (!item) return <Typography>No task data available.</Typography>;
 
     const handleInputChange = (key: string, value: string | boolean | number) => {
         taskHandleInputChange(key, value.toString());
@@ -116,7 +116,7 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
                     </Box>
                 </Box>
                 <Typography variant="body2" mb={2}>{item.task_description || ''}</Typography>
-                
+
                 {item.input_variables && (
                     <ParameterInputFields
                         parameters={item.input_variables}
