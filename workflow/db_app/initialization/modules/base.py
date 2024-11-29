@@ -70,6 +70,15 @@ base_module = BaseModule(
                 "api_name": "anthropic",
             },
             {
+                "key": "Claude3.5_v",
+                "short_name": "Claude3.5",
+                "model_format": "OpenChat",
+                "model_name": "claude-3-5-sonnet-20240620",
+                "ctx_size": 200000,
+                "model_type": "vision",
+                "api_name": "anthropic",
+            },
+            {
                 "key": "Llama3_8B_Hermes",
                 "short_name": "Llama3_8B_Hermes",
                 "model_format": "Llama3",

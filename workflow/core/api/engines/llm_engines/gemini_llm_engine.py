@@ -38,14 +38,15 @@ class GeminiLLMEngine(LLMEngine):
             }
         LOGGER.debug(f"Tool config: {tool_config}")
 
-        estimated_tokens = est_messages_token_count(messages, tools)
-        if estimated_tokens > (api_data.ctx_size - est_token_count(system)):
-            LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning. ")
-        elif estimated_tokens > 0.8 * (api_data.ctx_size - est_token_count(system)):
-            LOGGER.warning(f"Estimated tokens ({estimated_tokens}) are over 80% of context size ({api_data.ctx_size}).")
+        estimated_tokens = est_messages_token_count(messages, tools) + est_token_count(system)
         # Prune messages if estimated tokens exceed context size
-        if estimated_tokens > (api_data.ctx_size - est_token_count(system)):
+        if estimated_tokens > api_data.ctx_size:
+            LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning. ")
             messages = prune_messages(messages, api_data.ctx_size)
+            estimated_tokens = est_messages_token_count(messages, tools) + est_token_count(system)
+            LOGGER.debug(f"Pruned message len: {estimated_tokens}")
+        elif estimated_tokens > 0.8 * api_data.ctx_size:
+            LOGGER.warning(f"Estimated tokens ({estimated_tokens}) are over 80% of context size ({api_data.ctx_size}).")
         try:
             # Prepare the chat history (all messages except the last one)
             history = []
@@ -113,7 +114,8 @@ class GeminiLLMEngine(LLMEngine):
                     "prompt_tokens": response.usage_metadata.prompt_token_count,
                     "completion_tokens": response.usage_metadata.candidates_token_count,
                     "total_tokens": response.usage_metadata.total_token_count,
-                    "finish_reason": response.candidates[0].finish_reason.name
+                    "finish_reason": response.candidates[0].finish_reason.name,
+                    "estimated_tokens": estimated_tokens
                 }
             )
             return References(messages=[msg])

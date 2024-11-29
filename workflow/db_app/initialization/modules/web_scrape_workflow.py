@@ -75,11 +75,6 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                 }
             },
             {
-                "key": "web_summarizer_prompt",
-                "name": "Web Summarizer",
-                "content": get_prompt_file("web_summarizer.prompt"),
-            },
-            {
                 "key": "basic_prompt_url",
                 "name": "URL Prompt",
                 "content": "{{ url }}",
@@ -91,6 +86,11 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
                     },
                     "required": ["url"]
                 }
+            },
+            {
+                "key": "web_summarizer_prompt",
+                "name": "Web Summarizer",
+                "content": get_prompt_file("web_summarizer.prompt"),
             },
             {
                 "key": "web_summarize_task_prompt",

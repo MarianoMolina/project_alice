@@ -14,12 +14,12 @@ research_workflow_module = ResearchWorkflowModule(
             {
                 "key": "param_research_brief_task",
                 "type": "string",
-                "description": "The research brief created based on the user prompt",
+                "description": "The research brief for the data retrieval expert",
             },
             {
                 "key": "param_research_check_task",
                 "type": "string",
-                "description": "The conclusion of the data retrieval check during the research process",
+                "description": "Optional feedback in case the research has already be ran unsuccessfully",
             },
             {
                 "key": "param_data_retrieval_task",
@@ -61,10 +61,10 @@ research_workflow_module = ResearchWorkflowModule(
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "Research_Brief_Task": "param_research_brief_task",
-                        "Research_Check_Task": "param_research_check_task",
+                        "Research_Brief": "param_research_brief_task",
+                        "Check_Research": "param_research_check_task",
                     },
-                    "required": ["Research_Brief_Task"]
+                    "required": ["Research_Brief"]
                 }
             },
             {
@@ -75,10 +75,10 @@ research_workflow_module = ResearchWorkflowModule(
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "Research_Brief_Task": "param_research_brief_task",
-                        "Data_Retrieval_Task": "param_data_retrieval_task",
+                        "Research_Brief": "param_research_brief_task",
+                        "Retrieve_Data": "param_data_retrieval_task",
                     },
-                    "required": ["Data_Retrieval_Task", "Research_Brief_Task"]
+                    "required": ["Retrieve_Data", "Research_Brief"]
                 }
             },
             {
@@ -90,23 +90,23 @@ research_workflow_module = ResearchWorkflowModule(
                     "type": "object",
                     "properties": {
                         "prompt": "prompt_parameter",
-                        "Data_Retrieval_Task": "param_data_retrieval_task",
+                        "Retrieve_Data": "param_data_retrieval_task",
                     },
-                    "required": ["prompt", "Data_Retrieval_Task"]
+                    "required": ["prompt", "Retrieve_Data"]
                 }
             },
             {
                 "key": "research_output_prompt",
                 "name": "Research Output Template",
-                "content": "Research Brief: {{ Research_Brief_Task }}\n\nSummary: {{ Research_Summary_Task }}",
+                "content": "Research Brief: {{ Research_Brief }}\n\nSummary: {{ Summarize_Research }}",
                 "is_templated": True,
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "Research_Brief_Task": "param_research_brief_task",
-                        "Research_Summary_Task": "research_summary_param"
+                        "Research_Brief": "param_research_brief_task",
+                        "Summarize_Research": "research_summary_param"
                     },
-                    "required": ["Research_Brief_Task", "Research_Summary_Task"]
+                    "required": ["Research_Brief", "Summarize_Research"]
                 }
             }
         ],
@@ -127,7 +127,7 @@ research_workflow_module = ResearchWorkflowModule(
                 "name": "Data Retrieval Expert",
                 "system_message": "data_retrieval_expert_prompt",
                 "models": {
-                    "chat": "gpt-4o-mini",
+                    "chat": "gpt-4o-mini", # Has to be mini bc some models can't use tools
                 },
                 "max_consecutive_auto_reply": 1,
                 "has_tools": 1,
@@ -135,7 +135,7 @@ research_workflow_module = ResearchWorkflowModule(
             },
             {
                 "key": "research_check",
-                "name": "Research Check",
+                "name": "Research Reviewer",
                 "system_message": "research_check_prompt",
                 "models": {
                     "chat": "GPT4o",
@@ -160,7 +160,7 @@ research_workflow_module = ResearchWorkflowModule(
             {
                 "key": "research_brief_task",
                 "task_type": "PromptAgentTask",
-                "task_name": "Research_Brief_Task",
+                "task_name": "Research_Brief",
                 "task_description": "Takes a simple prompt and generates a research brief",
                 "agent": "brief_specialist",
                 "required_apis": ["llm_api"],
@@ -184,16 +184,16 @@ research_workflow_module = ResearchWorkflowModule(
             {
                 "key": "data_retrieval_task",
                 "task_type": "PromptAgentTask",
-                "task_name": "Data_Retrieval_Task",
-                "task_description": "Generates tool calls for data retrieval based on the prompt",
+                "task_name": "Retrieve_Data",
+                "task_description": "Generates tool calls for data retrieval based on the research brief provided",
                 "agent": "data_retrieval_expert",
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "Research_Brief_Task": "param_research_brief_task",
+                        "Research_Brief": "param_research_brief_task",
                         "Research_Check_Task": "param_research_check_task",
                     },
-                    "required": ["Research_Brief_Task"]
+                    "required": ["Research_Brief"]
                 },
                 "tasks": {
                     "Exa_Search": "exa_search",
@@ -202,6 +202,7 @@ research_workflow_module = ResearchWorkflowModule(
                     "Arxiv_Search": "arxiv_search",
                     "Knowledge_Graph_Search": "knowledge_graph_search_task",
                     "Wolfram_Alpha_Query": "wolfram_alpha_query_task",
+                    "Reddit_Search": "reddit_search",
                 },
                 "required_apis": ["llm_api"],
                 "templates": {
@@ -221,7 +222,7 @@ research_workflow_module = ResearchWorkflowModule(
             {
                 "key": "research_check_task",
                 "task_type": "CheckTask",
-                "task_name": "Research_Check_Task",
+                "task_name": "Check_Research",
                 "task_description": "Checks the data retrieval results and generates a conclusion",
                 "agent": "research_check",
                 "exit_code_response_map": {"APPROVED": 0, "REJECTED": 2},
@@ -229,10 +230,10 @@ research_workflow_module = ResearchWorkflowModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "Research_Brief_Task": "param_research_brief_task",
-                        "Data_Retrieval_Task": "param_data_retrieval_task",
+                        "Research_Brief": "param_research_brief_task",
+                        "Retrieve_Data": "param_data_retrieval_task",
                     },
-                    "required": ["Data_Retrieval_Task", "Research_Brief_Task"]
+                    "required": ["Retrieve_Data", "Research_Brief"]
                 },
                 "templates": {
                     "task_template": "research_check_task_prompt"
@@ -241,16 +242,16 @@ research_workflow_module = ResearchWorkflowModule(
             {
                 "key": "research_summary_task",
                 "task_type": "PromptAgentTask",
-                "task_name": "Research_Summary_Task",
+                "task_name": "Summarize_Research",
                 "task_description": "Generates a summary of the data retrieved during the research process",
                 "agent": "research_summarizer_agent",
                 "input_variables": {
                     "type": "object",
                     "properties": {
                         "prompt": "prompt_parameter",
-                        "Data_Retrieval_Task": "param_data_retrieval_task",
+                        "Retrieve_Data": "param_data_retrieval_task",
                     },
-                    "required": ["prompt", "Data_Retrieval_Task"]
+                    "required": ["prompt", "Retrieve_Data"]
                 },
                 "templates": {
                     "task_template": "research_summary_task_prompt"
@@ -265,36 +266,36 @@ research_workflow_module = ResearchWorkflowModule(
             {
                 "key": "research_workflow",
                 "task_type": "Workflow",
-                "task_name": "research_workflow",
+                "task_name": "Research_Workflow",
                 "task_description": "Executes the research workflow based on a string prompt",
                 "tasks": {
-                    "Research_Brief_Task": "research_brief_task",
-                    "Data_Retrieval_Task": "data_retrieval_task",
-                    "Research_Check_Task": "research_check_task",
-                    "Research_Summary_Task": "research_summary_task",
+                    "Research_Brief": "research_brief_task",
+                    "Retrieve_Data": "data_retrieval_task",
+                    "Check_Research": "research_check_task",
+                    "Summarize_Research": "research_summary_task",
                 },
-                "start_node": "Research_Brief_Task",
+                "start_node": "Research_Brief",
                 "node_end_code_routing": {
-                    "Research_Brief_Task": {
-                        0: ("Data_Retrieval_Task", False),
-                        1: ("Research_Brief_Task", True),
+                    "Research_Brief": {
+                        0: ("Retrieve_Data", False),
+                        1: ("Research_Brief", True),
                     },
-                    "Data_Retrieval_Task": {
-                        0: ("Research_Check_Task", False),
-                        1: ("Data_Retrieval_Task", True),
+                    "Retrieve_Data": {
+                        0: ("Check_Research", False),
+                        1: ("Retrieve_Data", True),
                     },
-                    "Research_Check_Task": {
-                        0: ("Research_Summary_Task", False),
-                        1: ("Research_Check_Task", True),
-                        2: ("Research_Summary_Task", False),
+                    "Check_Research": {
+                        0: ("Summarize_Research", False),
+                        1: ("Check_Research", True),
+                        2: ("Retrieve_Data", False),
                     },
-                    "Research_Summary_Task": {
+                    "Summarize_Research": {
                         0: (None, False),
-                        1: ("Research_Summary_Task", True),
+                        1: ("Summarize_Research", True),
                     },
                 },
                 "max_attempts": 2,
-                "recursive": False,
+                "recursive": True,
                 "input_variables": {
                     "type": "object",
                     "properties": {

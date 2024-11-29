@@ -4,7 +4,7 @@ from openai.types.chat import ChatCompletion
 from pydantic import Field
 from typing import Dict, Any, List, Optional
 from workflow.core.api.engines.api_engine import APIEngine
-from workflow.util import LOGGER, est_messages_token_count, prune_messages
+from workflow.util import LOGGER, est_messages_token_count, prune_messages, est_token_count
 from workflow.core.data_structures import (
     MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, RoleTypes, MessageGenerators, ToolFunction
     )
@@ -115,11 +115,13 @@ class LLMEngine(APIEngine):
         
         if tools:
             tools = [tool.get_dict() for tool in tools]
+        estimated_tokens = est_messages_token_count(messages, tools) + est_token_count(system)
 
-        estimated_tokens = est_messages_token_count(messages, tools)
         if estimated_tokens > api_data.ctx_size:
             LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning. ")
             messages = prune_messages(messages, api_data.ctx_size)
+            estimated_tokens = est_messages_token_count(messages, tools) + est_token_count(system)
+            LOGGER.debug(f"Pruned message len: {estimated_tokens}")
         elif estimated_tokens > 0.8 * api_data.ctx_size:
             LOGGER.warning(f"Estimated tokens ({estimated_tokens}) are over 80% of context size ({api_data.ctx_size}).")
 
@@ -172,6 +174,7 @@ class LLMEngine(APIEngine):
                     "finish_reason": choice.finish_reason,
                     "system_fingerprint": response.system_fingerprint,
                     "cost": self.calculate_cost(response.usage.prompt_tokens, response.usage.completion_tokens, response.model),
+                    "estimated_tokens": estimated_tokens
                 }
             )
             return References(messages=[msg])

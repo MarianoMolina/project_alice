@@ -15,7 +15,7 @@ base_tasks_module = BaseTasksModule(
                 "key": "max_results_parameter",
                 "type": "integer",
                 "description": "The maximum number of results to return",
-                "default": 10
+                "default": 4
             },
             {
                 "key": "sort_parameter",
@@ -66,27 +66,6 @@ base_tasks_module = BaseTasksModule(
                 "description": "Output format. Options are 'plaintext', 'image', 'html', 'json'. Default is 'plaintext'."
             }
         ],
-        "prompts": [
-            {
-                "key": "research_agent_prompt",
-                "name": "Research Agent",
-                "content": get_prompt_file("research_agent.prompt"),
-                "is_templated": False
-            },
-        ],
-        "agents": [
-            {
-                "key": "research_agent",
-                "name": "Research Agent",
-                "system_message": "research_agent_prompt",
-                "models": {
-                    "chat": "gpt-4o-mini",
-                },
-                "has_code_exec": 0,
-                "has_tools": 1,
-                "max_consecutive_auto_reply": 2,
-            },
-        ],
         "tasks": [
             {
                 "key": "wolfram_alpha_query_task",
@@ -108,7 +87,7 @@ base_tasks_module = BaseTasksModule(
                 "key": "knowledge_graph_search_task",
                 "task_type": "APITask",
                 "task_name": "Knowledge_Graph_Search",
-                "task_description": "Searches the Google Knowledge Graph for information",
+                "task_description": "Searches Google Knowledge Graph for information",
                 "input_variables": {
                     "type": "object",
                     "properties": {
@@ -197,42 +176,6 @@ base_tasks_module = BaseTasksModule(
                     "required": ["prompt"]
                 },
                 "required_apis": ["arxiv_search"]
-            },
-            {   
-                "key": "search_hub",
-                "task_type": "PromptAgentTask", 
-                "task_name": "search_hub",
-                "task_description": "Searches multiple sources and returns the results",
-                "agent": "research_agent",
-                "templates": {
-                    "task_template": "basic_prompt"
-                },
-                "tasks":{
-                    "Reddit_Search": "reddit_search",
-                    "Exa_Search": "exa_search",
-                    "Wikipedia_Search": "wikipedia_search",
-                    "Google_Search": "google_search",
-                    "Arxiv_Search": "arxiv_search",
-                    "Knowledge_Graph_Search": "knowledge_graph_search_task"
-                },
-                "input_variables": {
-                    "type": "object",
-                    "properties": {
-                        "prompt": "prompt_parameter",
-                    },
-                    "required": ["prompt"]
-                },
-                "required_apis": ["llm_api"],
-                "node_end_code_routing": {
-                    'llm_generation':{
-                        0: ('tool_call_execution', False),
-                        1: ('llm_generation', True),
-                    }, 
-                    'tool_call_execution':{
-                        0: (None, False),
-                        1: ('tool_call_execution', True),
-                    }, 
-                },
             },
         ]
     }

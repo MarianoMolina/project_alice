@@ -1,8 +1,7 @@
 import re
-from bson import ObjectId
 from jinja2 import Template
 from typing import Optional, List, Any, Dict, Union
-from pydantic import Field, field_validator, model_validator, ConfigDict
+from pydantic import Field, field_validator, model_validator
 from workflow.core.data_structures.parameters import FunctionParameters
 from workflow.core.data_structures.base_models import BaseDataStructure
 
@@ -12,6 +11,7 @@ TYPE_MAPPING = {
     "float": float,
     "boolean": bool,
     "list": list,
+    "object": dict,
     "dict": dict
 }
 
@@ -103,7 +103,7 @@ class Prompt(BaseDataStructure):
             param_def = self.parameters.properties[param_name]
             expected_type = TYPE_MAPPING.get(param_def.type)
             if expected_type is None:
-                return f"Unknown type for parameter: {param_name}"
+                return f"Unknown type for parameter: {param_name} ({param_def.type})"
             
             if param_value is not None and not isinstance(param_value, expected_type):
                 return f"Parameter {param_name} should be of type {param_def.type}"

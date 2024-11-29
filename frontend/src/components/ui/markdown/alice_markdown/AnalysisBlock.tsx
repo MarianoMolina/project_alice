@@ -1,4 +1,4 @@
-import { Box, Typography, Divider } from "@mui/material";
+import { Box, Typography, Divider, Paper } from "@mui/material";
 import React from "react";
 import { DialogWrapper } from "./DialogWrapper";
 import { getNodeContent } from "./CustomBlockUtils";
@@ -17,21 +17,18 @@ export const AnalysisBlockComponent: React.FC<{ node: any }> = ({ node }) => {
 
   return (
     <>
-      <Box
+      <Paper
         onClick={() => setOpen(true)}
-        className="cursor-pointer border rounded-md hover:bg-gray-50 transition-colors flex items-center h-12 px-4 gap-4 w-fit my-2"
+        className="cursor-pointer border rounded-md transition-colors flex items-center h-12 px-4 gap-4 w-fit my-2 hover:-translate-y-1 hover:bg-slate-800"
       >
         <Box className="flex items-center gap-4 flex-1">
-          <Psychology className="text-gray-600" />
+          <Psychology/>
           <Divider orientation="vertical" flexItem />
           <Typography variant="body1" className="font-medium">
             {title}
           </Typography>
         </Box>
-        <Typography variant="body2" color="text.secondary" className="text-sm">
-          Click to view
-        </Typography>
-      </Box>
+      </Paper>
 
       <DialogWrapper open={open} onClose={() => setOpen(false)} title={title}>
         <AliceMarkdown showCopyButton>{content}</AliceMarkdown>

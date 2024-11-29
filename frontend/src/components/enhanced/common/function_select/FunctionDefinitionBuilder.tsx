@@ -26,6 +26,7 @@ import useStyles from './FunctionStyles';
 import * as FunctionUtils from './FunctionUtils';
 import Logger from '../../../../utils/Logger';
 import theme from '../../../../Theme';
+import { Visibility } from '@mui/icons-material';
 
 interface FunctionDefinitionBuilderProps {
     title?: string | undefined;
@@ -42,7 +43,7 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
 }) => {
     const classes = useStyles();
     const { fetchItem } = useApi();
-    const { selectFlexibleItem } = useCardDialog();
+    const { selectFlexibleItem, selectCardItem } = useCardDialog();
     const [parameters, setParameters] = useState<ParameterDefinition[]>([]);
     const [activeParameters, setActiveParameters] = useState<FunctionUtils.ActiveParameter[]>([]);
     const initializedRef = useRef(false);
@@ -149,6 +150,7 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
                                     onInteraction={(param: ParameterDefinition) => {
                                         handleParameterToggle(param._id!);
                                     }}
+                                    onView={(param: ParameterDefinition) => selectCardItem('Parameter', param._id!, param)}
                                 />
                             </Paper>
                         </Grid>
@@ -182,6 +184,13 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
                                                     label="Required"
                                                 />
                                             </Box>
+                                            <IconButton
+                                                edge="end"
+                                                aria-label="view"
+                                                onClick={() => selectCardItem('Parameter', param._id!, param)}
+                                            >
+                                                <Visibility />
+                                            </IconButton>
                                             {!isViewOnly && (
                                                 <Tooltip title="Deactivate">
                                                     <IconButton

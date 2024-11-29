@@ -7,7 +7,7 @@ from workflow.core.data_structures import (
     MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, 
     RoleTypes, MessageGenerators, ToolFunction
     ) 
-from workflow.util import LOGGER, est_messages_token_count, prune_messages
+from workflow.util import LOGGER, est_messages_token_count, prune_messages, est_token_count
 
 class CohereLLMEngine(LLMEngine):
     async def generate_api_response(self, api_data: ModelConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[ToolFunction]] = None, max_tokens: Optional[int] = None, temperature: Optional[float] = 0.7, tool_choice: Optional[str] = "auto", n: Optional[int] = 1, **kwargs) -> References:
@@ -25,15 +25,16 @@ class CohereLLMEngine(LLMEngine):
                 role = message["role"].upper()
                 cohere_messages.append({"role": role, "message": message["content"]})
 
+            estimated_tokens = est_messages_token_count(messages, tools) + est_token_count(system)
 
-            estimated_tokens = est_messages_token_count(cohere_messages, tools)
-            if estimated_tokens > api_data.ctx_size:
-                LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning. ")
-            elif estimated_tokens > 0.8 * api_data.ctx_size:
-                LOGGER.warning(f"Estimated tokens ({estimated_tokens}) are over 80% of context size ({api_data.ctx_size}).")
             # Prune messages if estimated tokens exceed context size
             if estimated_tokens > api_data.ctx_size:
+                LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning. ")
                 cohere_messages = prune_messages(cohere_messages, api_data.ctx_size)
+                estimated_tokens = est_messages_token_count(messages, tools) + est_token_count(system)
+                LOGGER.debug(f"Pruned message len: {estimated_tokens}")
+            elif estimated_tokens > 0.8 * api_data.ctx_size:
+                LOGGER.warning(f"Estimated tokens ({estimated_tokens}) are over 80% of context size ({api_data.ctx_size}).")
 
             # Prepare tools
             cohere_tools = []
@@ -64,6 +65,7 @@ class CohereLLMEngine(LLMEngine):
                     "model": api_data.model,
                     "token_count": response.meta.tokens,
                     "finish_reason": response.finish_reason,
+                    "estimated_tokens": estimated_tokens
                 }
             )
             return References(messages=[msg])

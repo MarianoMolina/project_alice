@@ -5,7 +5,7 @@ from anthropic.types import TextBlock, ToolUseBlock, ToolParam, Message
 from workflow.core.data_structures import ToolCall, ToolCallConfig, ToolFunction
 from workflow.core.api.engines.llm_engines.llm_engine import LLMEngine
 from workflow.core.data_structures import MessageDict, ContentType, ModelConfig, References, RoleTypes, MessageGenerators
-from workflow.util import LOGGER, est_messages_token_count, prune_messages
+from workflow.util import LOGGER, est_messages_token_count, prune_messages, est_token_count
 
 ANTHROPIC_PRICING_1k = {
     "claude-3-5-sonnet-20240620": (0.003, 0.015),
@@ -124,14 +124,15 @@ class LLMAnthropic(LLMEngine):
             api_key=api_data.api_key, 
             base_url=api_data.base_url
         )
-        estimated_tokens = est_messages_token_count(messages, tools)
-        if estimated_tokens > api_data.ctx_size:
-            LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning. ")
-        elif estimated_tokens > 0.8 * api_data.ctx_size:
-            LOGGER.warning(f"Estimated tokens ({estimated_tokens}) are over 80% of context size ({api_data.ctx_size}).")
+        estimated_tokens = est_messages_token_count(messages, tools) + est_token_count(system)
         # Prune messages if estimated tokens exceed context size
         if estimated_tokens > api_data.ctx_size:
+            LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning. ")
             messages = prune_messages(messages, api_data.ctx_size)
+            estimated_tokens = est_messages_token_count(messages, tools) + est_token_count(system)
+            LOGGER.debug(f"Pruned message len: {estimated_tokens}")
+        elif estimated_tokens > 0.8 * api_data.ctx_size:
+            LOGGER.warning(f"Estimated tokens ({estimated_tokens}) are over 80% of context size ({api_data.ctx_size}).")
 
         anthropic_tools: Optional[List[ToolParam]] = self._convert_into_tool_params(tools) if tools else None
 
@@ -185,7 +186,8 @@ class LLMAnthropic(LLMEngine):
                     "usage": response.usage.model_dump(),
                     "finish_reason": response.stop_reason,
                     "system_fingerprint": response.id,
-                    "cost": cost
+                    "cost": cost,
+                    "estimated_tokens": estimated_tokens
                 }
             )
             return References(messages=[msg])

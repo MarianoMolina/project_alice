@@ -16,7 +16,7 @@ module_list: List[InitializationModule] = [
     advanced_chat_module, 
     adv_tasks_module, 
     research_workflow_module,
-    web_scrape_workflow_module
+    # web_scrape_workflow_module # Not used anymore
 ]
 
 __all__ = ['InitializationModule']
