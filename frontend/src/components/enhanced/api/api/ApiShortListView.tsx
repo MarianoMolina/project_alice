@@ -1,6 +1,7 @@
 import React from 'react';
 import { API, ApiComponentProps } from '../../../../types/ApiTypes';
 import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
+import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
 
 const APIShortListView: React.FC<ApiComponentProps> = ({
     items,
@@ -9,7 +10,7 @@ const APIShortListView: React.FC<ApiComponentProps> = ({
     onView,
 }) => {
     const getPrimaryText = (api: API) => api.name ?? 'API';
-    const getSecondaryText = (api: API) => api.api_type;
+    const getSecondaryText = (api: API) => `Type: ${formatStringWithSpaces(api.api_type)}`;
 
     return (
         <EnhancedShortListView<API>

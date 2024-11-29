@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Box, IconButton, Accordion, AccordionSummary, AccordionDetails, Typography, Chip, Tooltip, FormControl, InputLabel } from '@mui/material';
+import { Box, IconButton, Accordion, AccordionSummary, AccordionDetails, Chip, Tooltip, FormControl, InputLabel } from '@mui/material';
 import { Edit, Close, ExpandMore, Add, Info } from '@mui/icons-material';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import useStyles from './EnhancedSelectStyles';

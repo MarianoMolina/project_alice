@@ -221,20 +221,23 @@ const TaskEndCodeRoutingBuilder: React.FC<TaskEndCodeRoutingBuilderProps> = ({
 
           {!isViewMode && unusedNodes.length > 0 && (
             <Box mt={2}>
-              <Select
-                value={selectedNode}
-                onChange={(e) => {
-                  const value = e.target.value as string;
-                  setSelectedNode(value);
-                  handleNodeAdd(value);
-                }}
-                displayEmpty
-              >
-                <MenuItem value="" disabled>Add a {taskType === TaskType.Workflow ? 'task' : 'node'}</MenuItem>
-                {unusedNodes.map(node => (
-                  <MenuItem key={node} value={node}>{formatCamelCaseString(node)}</MenuItem>
-                ))}
-              </Select>
+              {/* Wrap the second select in its own FormControl */}
+              <FormControl fullWidth>
+                <Select
+                  value={selectedNode}
+                  onChange={(e) => {
+                    const value = e.target.value as string;
+                    setSelectedNode(value);
+                    handleNodeAdd(value);
+                  }}
+                  displayEmpty
+                >
+                  <MenuItem value="" disabled>Add a {taskType === TaskType.Workflow ? 'task' : 'node'}</MenuItem>
+                  {unusedNodes.map(node => (
+                    <MenuItem key={node} value={node}>{formatCamelCaseString(node)}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Box>
           )}
         </Box>

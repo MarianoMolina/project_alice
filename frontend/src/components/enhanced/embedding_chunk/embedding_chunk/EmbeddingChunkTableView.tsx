@@ -18,6 +18,11 @@ const EmbeddingChunkTableView: React.FC<EmbeddingChunkComponentProps> = ({
     {
       header: 'Index',
       render: (EmbeddingChunk: EmbeddingChunk) => EmbeddingChunk.index.toString(),
+      sortKey: 'index'
+    },
+    {
+      header: 'Length',
+      render: (EmbeddingChunk: EmbeddingChunk) => EmbeddingChunk.text_content.length,
     },
     {
       header: 'Created At',

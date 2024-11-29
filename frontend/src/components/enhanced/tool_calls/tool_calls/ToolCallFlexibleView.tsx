@@ -64,7 +64,7 @@ const ToolCallFlexibleView: React.FC<ToolCallComponentProps> = ({
             addNotification('Invalid JSON format', 'error');
             setArgumentsError('Invalid JSON format');
         }
-    }, [form, onChange]);
+    }, [form, onChange, addNotification, localArguments]);
 
     const handleLocalDelete = useCallback(() => {
         if (item && Object.keys(item).length > 0 && handleDelete) {

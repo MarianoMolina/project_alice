@@ -1,6 +1,7 @@
 import { AliceAgent } from "./AgentTypes";
 import { Prompt } from "./PromptTypes";
 import { FunctionParameters } from "./ParameterTypes";
+import { Api, Code, Downloading, ForkLeft, Image, LogoDev, RecordVoiceOver, Schema, SimCardDownload, SupportAgent, Tag } from "@mui/icons-material";
 import { ApiType } from './ApiTypes';
 import { BaseDatabaseObject, convertToBaseDatabaseObject, EnhancedComponentProps } from "./CollectionTypes";
 import { API } from './ApiTypes';
@@ -250,3 +251,17 @@ Best used for: Creating voiceovers, generating spoken content for accessibility,
   [TaskType.CodeExecutionLLMTask]: ``,
 
 };
+
+export const taskTypeIcons: Record<TaskType, React.ReactElement> = {
+    [TaskType.APITask]: <Api />,
+    [TaskType.CheckTask]: <ForkLeft />,
+    [TaskType.CodeExecutionLLMTask]: <Code />,
+    [TaskType.CodeGenerationLLMTask]: <LogoDev />,
+    [TaskType.EmbeddingTask]: <Tag/>,
+    [TaskType.GenerateImageTask]: <Image />,
+    [TaskType.PromptAgentTask]: <SupportAgent />,
+    [TaskType.RetrievalTask]: <SimCardDownload />,
+    [TaskType.TextToSpeechTask]: <RecordVoiceOver />,
+    [TaskType.WebScrapeBeautifulSoupTask]: <Downloading />,
+    [TaskType.Workflow]: <Schema />,
+} as const;

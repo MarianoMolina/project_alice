@@ -5,8 +5,9 @@ import {
     Chip,
     ListItemButton,
     Tooltip,
+    IconButton,
 } from '@mui/material';
-import { Category, Description, Functions, Person, ApiRounded, Settings, Logout, ExitToApp, AttachFile } from '@mui/icons-material';
+import { Category, Description, Functions, Person, ApiRounded, Settings, Logout, ExitToApp, AttachFile, Api } from '@mui/icons-material';
 import { TaskComponentProps, taskDescriptions } from '../../../../types/TaskTypes';
 import useStyles from '../TaskStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
@@ -15,6 +16,8 @@ import TaskFlowchart from '../../common/task_flowchart/FlowChart';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 import { hasAnyReferences } from '../../../../types/ReferenceTypes';
 import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
+import { apiTypeIcons } from '../../../../utils/ApiUtils';
+import { ApiType } from '../../../../types/ApiTypes';
 
 interface ChipItem {
     _id?: string;
@@ -71,7 +74,7 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
                 <ListItemButton onClick={() => item.agent?._id && selectCardItem && selectCardItem('Agent', item.agent._id, item.agent)}>
                     {item.agent?.name}
                 </ListItemButton> : <Typography variant="body2" color="textSecondary">No agent</Typography>
-                )
+            )
         },
         {
             icon: <Description />,
@@ -86,31 +89,41 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
         {
             icon: <ApiRounded />,
             primary_text: "Required APIs",
-            secondary_text: item.required_apis?.length! > 0 ? item.required_apis?.join(", ") : "No required APIs"
+            secondary_text: item.required_apis && item.required_apis.length > 0 ? (
+                <Box>
+                    {item.required_apis.map((api: ApiType) => (
+                        <Tooltip title={formatStringWithSpaces(api)}>
+                            <IconButton size="small">
+                                {apiTypeIcons[api] || <Api />}
+                            </IconButton>
+                        </Tooltip>
+                    ))}
+                </Box>
+            ) : "No required APIs"
         },
         {
             icon: <Settings />,
             primary_text: "Input Variables",
             secondary_text: (
                 !item.input_variables?.properties || Object.keys(item.input_variables.properties).length === 0 ?
-                <Typography variant="body2" color="textSecondary">No input variables defined</Typography> :
-                <Box onClick={(e) => e.stopPropagation()}>
-                    {Object.entries(item.input_variables.properties).map(([key, param]: [string, any]) => (
-                        <Chip
-                            key={key}
-                            label={`${key}: ${param.type}`}
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                if (selectCardItem && param._id) {
-                                    selectCardItem('Parameter', param._id, param);
-                                }
-                            }}
-                            className={classes.chip}
-                            color={item.input_variables?.required?.includes(key) ? "primary" : "default"}
-                        />
-                    ))}
-                </Box>
+                    <Typography variant="body2" color="textSecondary">No input variables defined</Typography> :
+                    <Box onClick={(e) => e.stopPropagation()}>
+                        {Object.entries(item.input_variables.properties).map(([key, param]: [string, any]) => (
+                            <Chip
+                                key={key}
+                                label={`${key}: ${param.type}`}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (selectCardItem && param._id) {
+                                        selectCardItem('Parameter', param._id, param);
+                                    }
+                                }}
+                                className={classes.chip}
+                                color={item.input_variables?.required?.includes(key) ? "primary" : "default"}
+                            />
+                        ))}
+                    </Box>
             )
         },
         {
@@ -118,16 +131,16 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
             primary_text: "Exit Codes",
             secondary_text: (
                 !item.exit_codes || Object.keys(item.exit_codes).length === 0 ?
-                <Typography variant="body2" color="textSecondary">No exit codes defined</Typography> :
-                <Box>
-                    {Object.entries(item.exit_codes).map(([code, description]) => (
-                        <Chip
-                            key={code}
-                            label={`${code}: ${description}`}
-                            className={classes.exitCodeChip}
-                        />
-                    ))}
-                </Box>
+                    <Typography variant="body2" color="textSecondary">No exit codes defined</Typography> :
+                    <Box>
+                        {Object.entries(item.exit_codes).map(([code, description]) => (
+                            <Chip
+                                key={code}
+                                label={`${code}: ${description}`}
+                                className={classes.exitCodeChip}
+                            />
+                        ))}
+                    </Box>
             )
         },
         {
@@ -138,8 +151,8 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
         {
             icon: <ExitToApp />,
             primary_text: "Task flow",
-            secondary_text: (item.node_end_code_routing && Object.keys(item.node_end_code_routing).length > 0) ? 
-                <TaskFlowchart task={item} height={500} minWidth={500}/>
+            secondary_text: (item.node_end_code_routing && Object.keys(item.node_end_code_routing).length > 0) ?
+                <TaskFlowchart task={item} height={500} minWidth={500} />
                 : "No exit code routing defined"
         },
     ];

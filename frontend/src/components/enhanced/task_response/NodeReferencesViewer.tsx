@@ -51,13 +51,13 @@ export const NodeReferencesViewer: React.FC<NodeReferencesViewerProps> = ({
                             {`Node: ${formatCamelCaseString(nodeName)}`}
                         </Typography>
                     </Tooltip>
-                    {executionOrder !== undefined && (
+                    {/* {executionOrder !== undefined && (
                         <Chip
                             size="small"
                             label={`Order: ${executionOrder}`}
                             sx={{ mr: 1 }}
                         />
-                    )}
+                    )} */}
                     {exitCode !== undefined && (
                         <Chip
                             size="small"

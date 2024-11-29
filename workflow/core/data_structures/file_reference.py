@@ -37,7 +37,7 @@ class FileReference(Embeddable):
     def __str__(self) -> str:
         return self.get_content_string()
 
-    def get_content_string(self, max_chars: int = 1000) -> str:
+    def get_content_string(self, max_chars: int = 5000) -> str:
         """
         Retrieves the content of the file as a string, with contextual information.
         
@@ -50,7 +50,7 @@ class FileReference(Embeddable):
         Returns:
             str: A string containing file information and content.
         """
-        file_info = f"\n\nFile: {self.filename}\n\nType: {self.type.value}"
+        file_info = f"\n\nName: {self.filename}\n\nType: {self.type.value}\n\n"
         
         if self.type == FileType.FILE:
             try:

@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextField, FormHelperText } from '@mui/material';
+import { TextField } from '@mui/material';
 import { NumericInputProps } from '../../../../types/InputTypes';
 import { BaseInputWrapper } from './BaseInputWrapper';
 import theme from '../../../../Theme';

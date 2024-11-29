@@ -1,9 +1,9 @@
 import React from 'react';
-import { AliceTask, TaskComponentProps } from '../../../../types/TaskTypes';
+import { AliceTask, TaskComponentProps, taskTypeIcons } from '../../../../types/TaskTypes';
 import { IconButton, Tooltip, Typography } from '@mui/material';
 import EnhancedListView from '../../common/enhanced_component/ListView';
-import { taskTypeIcons } from '../../../../utils/TaskUtils';
 import { Functions } from '@mui/icons-material';
+import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 
 const TaskListView: React.FC<TaskComponentProps> = ({
     items,
@@ -13,16 +13,16 @@ const TaskListView: React.FC<TaskComponentProps> = ({
 }) => {
     const getPrimaryText = (task: AliceTask) => task.task_name;
     const getSecondaryText = (task: AliceTask) => (
-            <>
-                <Typography component="span" variant="body2" color="textPrimary">
-                    {task.task_description || 'N/A'}
-                </Typography>
-                <Tooltip title={`Task type: ${task.task_type}`}>
-                    <IconButton size="small">
-                        {taskTypeIcons[task.task_type] || <Functions />}
-                    </IconButton>
-                </Tooltip>
-            </>
+        <>
+            <Tooltip title={formatCamelCaseString(task.task_type)}>
+                <IconButton size="small">
+                    {taskTypeIcons[task.task_type] || <Functions />}
+                </IconButton>
+            </Tooltip>
+            <Typography component="span" variant="body2" color="textPrimary">
+                {task.task_description || 'N/A'}
+            </Typography>
+        </>
     );
 
     return (

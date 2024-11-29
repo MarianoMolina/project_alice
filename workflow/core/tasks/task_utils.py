@@ -22,7 +22,7 @@ def generate_default_summary(node_responses: List[NodeResponse], verbose: bool =
     if verbose:
         summaries = []
         for i, node in enumerate(sorted_nodes, 1):
-            node_summary = f"Node {i} (Order: {node.execution_order}, Name: {node.node_name}, Exit: {node.exit_code}):"
+            node_summary = f"Node {i} - {node.node_name} (Exit: {node.exit_code}):"
             references_summary = node.references.detailed_summary() if node.references else "No references"
             node_summary += f"\n    {references_summary}"
             summaries.append(node_summary)

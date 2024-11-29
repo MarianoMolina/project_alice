@@ -159,17 +159,6 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
         },
         {
             icon: <DataObject />,
-            primary_text: "Embedding",
-            secondary_text: (
-                <AccordionSection
-                    title='Embedding'
-                    content={embeddingChunkViewer}
-                    disabled={!item.embedding?.length}
-                />
-            )
-        },
-        {
-            icon: <DataObject />,
             primary_text: "Execution History",
             secondary_text: (
                 <AccordionSection
@@ -180,15 +169,27 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             )
         },
         {
+            icon: <DataObject />,
+            primary_text: "Embedding",
+            secondary_text: (
+                <AccordionSection
+                    title='Embedding'
+                    content={embeddingChunkViewer}
+                    disabled={!item.embedding?.length}
+                />
+            )
+        },
+        {
             icon: <Analytics />,
             primary_text: "Usage Metrics",
-            secondary_text: (
+            secondary_text: item.usage_metrics && Object.keys(item.usage_metrics).length > 0 ? 
+            (
                 <AccordionSection
                     title="Usage Metrics"
                     content={<CodeBlock language="json" code={JSON.stringify(item.usage_metrics, null, 2)} />}
                     disabled={!item.usage_metrics}
                 />
-            )
+            ) : null
         }
     ];
 

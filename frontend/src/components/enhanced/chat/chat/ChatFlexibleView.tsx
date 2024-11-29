@@ -40,7 +40,6 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     const title = mode === 'create' ? 'Create New Chat' : mode === 'edit' ? 'Edit Chat' : 'Chat Details';
     const saveButtonText = form._id ? 'Update Chat' : 'Create Chat';
 
-    Logger.debug('ChatFlexibleView', { item, handleDelete });
     useEffect(() => {
         populateConfig();
     }, [item, onChange, user, mode, fetchItem]);

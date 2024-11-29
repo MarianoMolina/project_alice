@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useReducer, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { Node, Edge, ReactFlowInstance } from 'reactflow';
 import debounce from 'lodash/debounce';
-import Logger from '../../../../../utils/Logger';
 import { applyLayout } from '../utils/applyLayout';
 
 interface FlowState {
@@ -25,10 +24,6 @@ type FlowAction =
 function flowReducer(state: FlowState, action: FlowAction): FlowState {
   switch (action.type) {
     case 'SET_INITIAL':
-      Logger.debug('[FlowState] Setting initial state', {
-        nodeCount: action.nodes.length,
-        edgeCount: action.edges.length
-      });
       return {
         nodes: action.nodes,
         edges: action.edges,
@@ -142,48 +137,63 @@ export function useEnhancedFlowState() {
 
   const fitView = useCallback(() => {
     if (flowInstanceRef.current) {
-      Logger.debug('[useEnhancedFlowState] Fitting view');
       flowInstanceRef.current.fitView({ padding: 0.2, duration: 200 });
       dispatch({ type: 'SET_SHOULD_FIT_VIEW', shouldFit: false });
     }
   }, []);
 
   // Debounced layout update with view fitting
-  const debouncedLayoutUpdate = useCallback(
-    debounce((nodes: Node[], edges: Edge[], nodeSizes: Map<string, { width: number; height: number }>) => {
-      Logger.debug('[useEnhancedFlowState] Running debounced layout update', {
-        nodeCount: nodes.length,
-        sizesCount: nodeSizes.size
-      });
+  // const debouncedLayoutUpdate = useCallback(
+  //   debounce((nodes: Node[], edges: Edge[], nodeSizes: Map<string, { width: number; height: number }>) => {
       
-      if (layoutTimeoutRef.current) {
-        clearTimeout(layoutTimeoutRef.current);
-      }
+  //     if (layoutTimeoutRef.current) {
+  //       clearTimeout(layoutTimeoutRef.current);
+  //     }
 
-      const allSized = nodes.length > 0 && nodes.every(node => nodeSizes.has(node.id));
-      if (!allSized) return;
+  //     const allSized = nodes.length > 0 && nodes.every(node => nodeSizes.has(node.id));
+  //     if (!allSized) return;
 
-      const layoutedNodes = applyLayout(nodes, edges, nodeSizes);
-      updateLayout(layoutedNodes);
+  //     const layoutedNodes = applyLayout(nodes, edges, nodeSizes);
+  //     updateLayout(layoutedNodes);
 
-      requestAnimationFrame(() => {
-        layoutTimeoutRef.current = setTimeout(() => {
-          markInitialLayoutComplete();
-          if (flowInstanceRef.current) {
-            fitView();
+  //     requestAnimationFrame(() => {
+  //       layoutTimeoutRef.current = setTimeout(() => {
+  //         markInitialLayoutComplete();
+  //         if (flowInstanceRef.current) {
+  //           fitView();
+  //         }
+  //       }, 100);
+  //     });
+  //   }, 150
+  // ), [updateLayout, markInitialLayoutComplete, fitView]);
+  const debouncedLayoutUpdate = useMemo(
+    () =>
+      debounce(
+        (nodes: Node[], edges: Edge[], nodeSizes: Map<string, { width: number; height: number }>) => {
+
+          if (layoutTimeoutRef.current) {
+            clearTimeout(layoutTimeoutRef.current);
           }
-        }, 100);
-      });
-    }, 150
-  ), [updateLayout, markInitialLayoutComplete, fitView]);
+          const allSized = nodes.length > 0 && nodes.every(node => nodeSizes.has(node.id));
+          if (!allSized) return;
+          const layoutedNodes = applyLayout(nodes, edges, nodeSizes);
+          updateLayout(layoutedNodes);
+          requestAnimationFrame(() => {
+            layoutTimeoutRef.current = setTimeout(() => {
+              markInitialLayoutComplete();
+              if (flowInstanceRef.current) {
+                fitView();
+              }
+            }, 100);
+          });
+        },
+        150
+      ),
+    [updateLayout, markInitialLayoutComplete, fitView]
+  );
 
   const handleRoutingChange = useCallback((routingSignature: string, nodes: Node[], edges: Edge[]) => {
-    if (routingSignatureRef.current !== routingSignature) {
-      Logger.debug('[useEnhancedFlowState] Routing changed, updating flow', {
-        previousSignature: routingSignatureRef.current,
-        newSignature: routingSignature
-      });
-      
+    if (routingSignatureRef.current !== routingSignature) {      
       routingSignatureRef.current = routingSignature;
       setInitial(nodes, edges);
     }

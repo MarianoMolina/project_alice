@@ -1,6 +1,7 @@
 import React from 'react';
 import { EntityReference, EntityReferenceComponentProps } from '../../../../types/EntityReferenceTypes';
 import EnhancedTableView from '../../common/enhanced_component/TableView';
+import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 
 const EntityReferenceTableView: React.FC<EntityReferenceComponentProps> = ({
   items,
@@ -11,14 +12,14 @@ const EntityReferenceTableView: React.FC<EntityReferenceComponentProps> = ({
 }) => {
   const columns = [
     {
-      header: 'name',
+      header: 'Name',
       render: (entityReference: EntityReference) => entityReference.name ?? '',
       sortKey: 'name'
     },
     {
-      header: 'Categories',
-      render: (entityReference: EntityReference) => entityReference.categories.join(', '),
-      sortKey: 'categories'
+      header: 'Source',
+      render: (entityReference: EntityReference) => formatCamelCaseString(entityReference.source as string),
+      sortKey: 'source'
     },
     {
       header: 'Created At',

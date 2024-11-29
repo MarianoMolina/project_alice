@@ -4,7 +4,6 @@ import {
   TextField,
   IconButton,
   Button,
-  Typography,
   FormControl,
   InputLabel,
 } from '@mui/material';

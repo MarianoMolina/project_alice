@@ -3,7 +3,6 @@ import {
   FormControlLabel,
   Switch,
   Checkbox,
-  FormHelperText
 } from '@mui/material';
 import { BooleanInputProps } from '../../../../types/InputTypes';
 import { BaseInputWrapper } from './BaseInputWrapper';

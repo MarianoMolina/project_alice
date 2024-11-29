@@ -12,7 +12,7 @@ const EmbeddingChunkListView: React.FC<EmbeddingChunkComponentProps> = ({
     const getPrimaryText = (EmbeddingChunk: EmbeddingChunk) => EmbeddingChunk.text_content.substring(0, 50);
     const getSecondaryText = (EmbeddingChunk: EmbeddingChunk) => (
         <Typography component="span" variant="body2" color="textSecondary">
-            {EmbeddingChunk.index.toString()}
+            # {EmbeddingChunk.index.toString()} - {EmbeddingChunk.text_content.length} chars - {Math.round(EmbeddingChunk.text_content.length / 3)} tokens (est.)
         </Typography>
     );
 

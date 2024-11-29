@@ -12,6 +12,7 @@ import { Api, Category, PowerSettingsNew, QueryBuilder, Settings } from '@mui/ic
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import { apiNameIcons, apiTypeIcons } from '../../../../utils/ApiUtils';
 import { AIIcon } from '../../../../utils/CustomIcons';
+import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
 
 type ListItemType = {
     icon: React.ReactElement;
@@ -43,12 +44,12 @@ const ApiCardView: React.FC<ApiComponentProps> = ({
         {
             icon: apiTypeIcons[item.api_type] || <Api />,
             primary_text: "API Type",
-            secondary_text: item.api_type
+            secondary_text: formatStringWithSpaces(item.api_type)
         },
         {
             icon: apiNameIcons[item.api_name as ApiName] || <Category />,
             primary_text: "API Name",
-            secondary_text: item.api_name
+            secondary_text: formatStringWithSpaces(item.api_name)
         },
         {
             icon: <PowerSettingsNew />,

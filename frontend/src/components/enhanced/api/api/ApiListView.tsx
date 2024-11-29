@@ -4,6 +4,7 @@ import { API, ApiComponentProps } from '../../../../types/ApiTypes';
 import EnhancedListView from '../../common/enhanced_component/ListView';
 import { CheckCircle, Cancel, Api } from '@mui/icons-material';
 import { apiNameIcons, apiTypeIcons } from '../../../../utils/ApiUtils';
+import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
 
 const ApiListView: React.FC<ApiComponentProps> = ({
     items,
@@ -15,12 +16,12 @@ const ApiListView: React.FC<ApiComponentProps> = ({
 
     const getSecondaryText = (api: API) => (
         <Box display="flex" alignItems="center">
-            <Tooltip title={`API name: ${api.api_name}`}>
+            <Tooltip title={`API name: ${formatStringWithSpaces(api.api_name)}`}>
                 <IconButton size="small">
                     {apiNameIcons[api.api_name] || <Api />}
                 </IconButton>
             </Tooltip>
-            <Tooltip title={`API type: ${api.api_type}`}>
+            <Tooltip title={`API type: ${formatStringWithSpaces(api.api_type)}`}>
                 <IconButton size="small">
                     {apiTypeIcons[api.api_type] || <Api />}
                 </IconButton>

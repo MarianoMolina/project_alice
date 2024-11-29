@@ -161,7 +161,7 @@ class References(BaseModel):
         for attr, value in self.__dict__.items():
             if value is not None and len(value) > 0:
                 for i, item in enumerate(value, 1):
-                    detailed_summary.append(f"[{attr.capitalize()}:{i}/{len(value)}] {str(item)}")
+                    detailed_summary.append(f"[{attr.capitalize()}: {i}/{len(value)}] {str(item)}")
         return " ".join(detailed_summary)
 
     def __bool__(self) -> bool:

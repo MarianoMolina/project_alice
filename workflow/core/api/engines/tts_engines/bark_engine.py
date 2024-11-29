@@ -97,10 +97,24 @@ class BarkEngine(TextToSpeechEngine):
 
             # Generate audio for each chunk
             for idx, chunk in enumerate(inputs):
-                response = await self.generate_audio_chunk(
-                    processor, model, device, sample_rate, chunk, voice, idx
-                )
-                responses.append(response)
+                try:
+                    response = await self.generate_audio_chunk(
+                        processor, model, device, sample_rate, chunk, voice, idx, model_name
+                    )
+                    responses.append(response)
+                except Exception as e:
+                    LOGGER.error(f"Error generating audio chunk: {str(e)}")
+                    responses.append(
+                        References(
+                            messages=[
+                                MessageDict(
+                                    role="system",
+                                    content=f"Error generating audio chunk: {str(e)}\n Traceback: {get_traceback()}",
+                                    type=ContentType.TEXT,
+                                )
+                            ]
+                        )
+                    )
 
             # Combine all file references
             all_files = []
@@ -133,22 +147,14 @@ class BarkEngine(TextToSpeechEngine):
                 del model
             flush()
 
-    async def generate_audio_chunk(
-        self,
-        processor: AutoProcessor,
-        model: BarkModel,
-        device: torch.device,
-        sample_rate: int,
-        input_text: str,
-        voice: str,
-        idx: int,
-    ) -> References:
+    async def generate_audio_chunk(self, processor: AutoProcessor, model: BarkModel, device: torch.device, input: str, voice: str = "alloy", 
+                                   speed: float = 1.0, index: int = 0, model_name: str = None) -> FileContentReference:
         try:
-            LOGGER.debug(f"Generating audio for chunk {idx} with voice {voice}")
+            LOGGER.debug(f"Generating audio for chunk {index} with voice {voice}")
 
             # Process the input text with attention mask
             inputs = processor(
-                text=[input_text],  # Wrap in list to ensure batch processing
+                text=[input],  # Wrap in list to ensure batch processing
                 voice_preset=voice,
                 return_tensors="pt"
             )
@@ -183,7 +189,7 @@ class BarkEngine(TextToSpeechEngine):
                     buffer = io.BytesIO()
                     scipy.io.wavfile.write(
                         buffer,
-                        rate=sample_rate,
+                        rate=speed,
                         data=(audio_array * 32767).astype(np.int16),
                     )
                     buffer.seek(0)
@@ -195,18 +201,19 @@ class BarkEngine(TextToSpeechEngine):
             )
 
             # Generate filename
-            output_filename = self.generate_filename(input_text, voice, idx, "wav")
+            output_filename = self.generate_filename(input, voice, index, "wav")
 
             creation_metadata = {
+                "model": model_name,
                 "voice": voice,
-                "input_text_length": len(input_text),
-                "sample_rate": sample_rate,
+                "input_text_length": len(input),
+                "sample_rate": speed,
             }
 
             # Create transcript message
             transcript_message = MessageDict(
                 role=RoleTypes.TOOL,
-                content=input_text,
+                content=input,
                 type=ContentType.TEXT,
                 generated_by=MessageGenerators.USER,
                 creation_metadata=creation_metadata,
@@ -220,16 +227,8 @@ class BarkEngine(TextToSpeechEngine):
                 transcript=transcript_message,
             )
 
-            return References(files=[file_reference])
+            return file_reference
 
         except Exception as e:
-            LOGGER.error(f"Error generating audio chunk: {get_traceback()}")
-            return References(
-                messages=[
-                    MessageDict(
-                        role="system",
-                        content=f"Error generating audio chunk: {str(e)}\n\n" + get_traceback(),
-                        type=ContentType.TEXT,
-                    )
-                ]
-            )
+            LOGGER.error(f"Error generating audio chunk: {e}\n Traceback: {get_traceback()}")
+            raise e

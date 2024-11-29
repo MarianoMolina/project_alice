@@ -4,6 +4,7 @@ import { Box, IconButton, Tooltip, Typography } from '@mui/material';
 import EnhancedListView from '../../common/enhanced_component/ListView';
 import { Api, CheckCircle, Error, Warning } from '@mui/icons-material';
 import { apiNameIcons } from '../../../../utils/ApiUtils';
+import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
 
 const APIConfigListView: React.FC<APIConfigComponentProps> = ({
     items,
@@ -14,7 +15,7 @@ const APIConfigListView: React.FC<APIConfigComponentProps> = ({
     const getPrimaryText = (apiConfig: APIConfig) => apiConfig.name;
     const getSecondaryText = (apiConfig: APIConfig) => (
         <Box display="flex" alignItems="center">
-            <Tooltip title={`API name: ${apiConfig.api_name}`}>
+            <Tooltip title={`API name: ${formatStringWithSpaces(apiConfig.api_name)}`}>
                 <IconButton size="small">
                     {apiNameIcons[apiConfig.api_name] || <Api />}
                 </IconButton>

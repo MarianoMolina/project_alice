@@ -37,7 +37,7 @@ coding_workflow_module = CodingWorkflowModule(
             {   
                 "key": "generate_unit_tests_checkpoint",
                 "user_prompt": "Please approve or reject the code generated before the unit tests are generated. Provide feedback, if any, for the unit test agent to consider.",
-                "task_next_obj": {0: "generate_unit_tests", 1: "generate_code"},
+                "task_next_obj": {0: "Generate_Unit_Tests", 1: None},
                 "options_obj": {0: "Approve", 1: "Reject"},
                 "request_feedback": True
             }

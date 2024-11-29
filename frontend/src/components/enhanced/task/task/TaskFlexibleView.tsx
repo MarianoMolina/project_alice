@@ -1,31 +1,29 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
     Box,
-    Typography,
 } from '@mui/material';
 import { AliceTask, getDefaultTaskForm, TaskComponentProps, TaskType } from '../../../../types/TaskTypes';
-import { useApi } from '../../../../contexts/ApiContext';
 import { ApiType } from '../../../../types/ApiTypes';
-import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
-import PromptShortListView from '../../prompt/prompt/PromptShortListView';
 import { Prompt } from '../../../../types/PromptTypes';
 import { AliceAgent } from '../../../../types/AgentTypes';
+import { taskDescriptions } from '../../../../types/TaskTypes';
+import { LANGUAGES } from '../../../../types/CodeExecutionTypes';
+import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
+import PromptShortListView from '../../prompt/prompt/PromptShortListView';
 import AgentShortListView from '../../agent/agent/AgentShortListView';
 import TaskShortListView from './TaskShortListView';
 import TaskEndCodeRoutingBuilder from '../../common/task_end_code_routing/TaskEndCodeRoutingBuilder';
 import FunctionDefinitionBuilder from '../../common/function_select/FunctionDefinitionBuilder';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import TaskFlowchart from '../../common/task_flowchart/FlowChart';
-import useStyles from '../TaskStyles';
 import ExitCodeManager from '../../common/exit_code_manager/ExitCodeManager';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
-import { formatCamelCaseString } from '../../../../utils/StyleUtils';
-import { taskDescriptions } from '../../../../types/TaskTypes';
 import { TextInput } from '../../common/inputs/TextInput';
 import { NumericInput } from '../../common/inputs/NumericInput';
 import { BooleanInput } from '../../common/inputs/BooleanInput';
 import { SelectInput } from '../../common/inputs/SelectInput';
-import { LANGUAGES } from '../../../../types/CodeExecutionTypes';
+import { formatCamelCaseString } from '../../../../utils/StyleUtils';
+import { useApi } from '../../../../contexts/ApiContext';
 
 const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     item,
@@ -39,7 +37,6 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     const [form, setForm] = useState<Partial<AliceTask>>(item || getDefaultTaskForm(taskType));
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
-    const classes = useStyles();
 
     const isEditMode = mode === 'edit' || mode === 'create';
     const title = mode === 'create' ? 'Create New Task' : mode === 'edit' ? 'Edit Task' : 'Task Details';

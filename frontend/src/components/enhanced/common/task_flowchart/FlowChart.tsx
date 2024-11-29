@@ -18,7 +18,6 @@ import EndNode from './nodes/EndNode';
 import { AliceTask } from '../../../../types/TaskTypes';
 import 'reactflow/dist/style.css';
 import { DistributedDefaultEdge, DistributedDoubleBackEdge, DistributedSelfLoopEdge } from './edges/Edges';
-import Logger from '../../../../utils/Logger';
 import theme from '../../../../Theme';
 
 interface FlowchartProps {

@@ -4,7 +4,6 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  FormHelperText,
   Chip,
   Box
 } from '@mui/material';

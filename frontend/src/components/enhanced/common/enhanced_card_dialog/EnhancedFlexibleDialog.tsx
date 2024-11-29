@@ -139,6 +139,8 @@ const EnhancedFlexibleDialog: React.FC = () => {
           return <EnhancedEmbeddingChunk {...commonProps} />;
         case 'DataCluster':
           return <EnhancedDataCluster {...commonProps} />;
+        case 'APIConfig':
+          return <EnhancedAPIConfig {...commonProps} />;
         default:
           return null;
       }

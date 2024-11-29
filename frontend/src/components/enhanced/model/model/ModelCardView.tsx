@@ -4,10 +4,12 @@ import {
     Chip,
     Box,
 } from '@mui/material';
-import { Category, Memory, FormatShapes, Speed, Thermostat, Cached, Info, QueryBuilder } from '@mui/icons-material';
+import { Category, Memory, FormatShapes, Thermostat, Cached, Info, QueryBuilder, Api } from '@mui/icons-material';
 import { ModelComponentProps } from '../../../../types/ModelTypes';
 import useStyles from '../ModelStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
+import { apiNameIcons, modelTypeIcons } from '../../../../utils/ApiUtils';
+import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 
 const ModelCardView: React.FC<ModelComponentProps> = ({ item }) => {
     const classes = useStyles();
@@ -18,8 +20,8 @@ const ModelCardView: React.FC<ModelComponentProps> = ({ item }) => {
 
     const listItems = [
         { icon: <Info />, primary_text: "Model Name", secondary_text: item.model_name || 'N/A' },
-        { icon: <Speed />, primary_text: "API Name", secondary_text: item.api_name },
-        { icon: <Category />, primary_text: "Model Type", secondary_text: item.model_type },
+        { icon: apiNameIcons[item.api_name] || <Api />, primary_text: "API Name", secondary_text: formatCamelCaseString(item.api_name) },
+        { icon: modelTypeIcons[item.model_type] || <Category/>, primary_text: "Model Type", secondary_text: formatCamelCaseString(item.model_type) },
         { icon: <FormatShapes />, primary_text: "Model Format", secondary_text: item.model_format || 'N/A' },
         { icon: <Memory />, primary_text: "Context Size", secondary_text: item.ctx_size ? `${item.ctx_size} tokens` : 'N/A' },
         {
