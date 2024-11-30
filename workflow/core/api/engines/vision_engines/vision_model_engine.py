@@ -9,6 +9,31 @@ from workflow.core.api.engines.api_engine import APIEngine
 from workflow.util import LOGGER
 
 class VisionModelEngine(APIEngine):
+    """
+    Vision analysis API engine implementing the OpenAI GPT-4V interface.
+    
+    Provides a standardized interface for image analysis and understanding,
+    supporting multiple images with text prompts. The engine handles:
+    - Multiple image processing
+    - Base64 image conversion
+    - Prompt-guided analysis
+    
+    Input Interface:
+        - file_references: List of images to analyze
+        - prompt: Text to guide the analysis
+        - max_tokens: Response length control
+    
+    Returns:
+        References object containing MessageDict with:
+        - Analysis text
+        - Model usage statistics
+        - Generation metadata
+    
+    Notes:
+        - Automatically handles image format conversion
+        - Supports multiple images in a single request
+        - Maintains consistent response format across different vision models
+    """
     input_variables: FunctionParameters = Field(
         default=FunctionParameters(
             type="object",

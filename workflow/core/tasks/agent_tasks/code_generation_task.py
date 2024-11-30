@@ -24,20 +24,51 @@ class CodeGenerationExitCode(IntEnum):
 
 class CodeGenerationLLMTask(PromptAgentTask):
     """
-    A task specifically designed for generating and executing code from a given prompt.
-    
-    This task implements a two-node workflow:
-    1. LLM Generation: Processes the prompt and generates code
-    2. Code Execution: Executes and validates the generated code
-    
-    The task supports recursive attempts when code generation or execution fails,
-    providing relevant context for retries based on previous attempts.
-    
-    Final exit codes:
-    0: Code generated and executed successfully
-    1: Generation failed
-    2: Code execution failed
-    3: Generated response contained no valid code blocks
+    A specialized PromptAgentTask that focuses on generating and executing code through a two-node pattern.
+
+    This task implements a focused subset of the PromptAgentTask pattern, using two nodes
+    to handle code generation and execution. It's designed for scenarios where you need
+    the LLM to generate and test code solutions.
+
+    Node Structure:
+    --------------
+    1. llm_generation:
+        - Generates code based on prompt
+        - Validates code presence and structure
+        - Exit codes:
+            * SUCCESS_WITH_CODE (0): Valid code generated, proceed to execution
+            * GENERATION_FAILED (1): Failed to generate code, retry
+            * NO_CODE_BLOCKS (2): No valid code in response, retry
+
+    2. code_execution:
+        - Executes generated code
+        - Validates outputs
+        - Exit codes:
+            * SUCCESS (0): Code executed successfully
+            * EXECUTION_ERROR (1): Runtime/syntax error, return to generation
+            * VALIDATION_ERROR (2): Failed tests/validation, return to generation
+
+    Final Task Exit Codes:
+    --------------------
+    * SUCCESS (0): Code generated and executed successfully
+    * GENERATION_FAILED (1): Could not generate valid code
+    * EXECUTION_FAILED (2): Code execution failed
+    * NO_CODE_BLOCKS (3): Generated response had no code
+
+    Example:
+    --------
+    ```python
+    task = CodeGenerationLLMTask(
+        agent=agent_with_code_exec,
+        task_name="generate_sort_function",
+        task_description="Generate and test a sorting function",
+        templates={
+            "task_template": Prompt(
+                content="Write a function that sorts a list: {{prompt}}"
+            )
+        }
+    )
+    ```
     """
     input_variables: FunctionParameters = Field(
         default=FunctionParameters(

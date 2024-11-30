@@ -2,12 +2,11 @@ import json, re
 from enum import Enum
 from pydantic import Field, BaseModel
 from typing import Dict, Any, List, Optional, Tuple, Callable, Union
-from workflow.core.data_structures import ToolFunction, ToolCall, ensure_tool_function
 from workflow.core.api import APIManager
 from workflow.core.data_structures import (
     TaskResponse, FileReference, ContentType, MessageDict, ModelType, FileType, References, 
     FileContentReference, EmbeddingChunk, AliceModel, Prompt, BaseDataStructure, RoleTypes, MessageGenerators,
-    CodeBlock, CodeOutput, CodeExecution, ApiType
+    CodeBlock, CodeOutput, CodeExecution, ApiType, ToolFunction, ToolCall, ensure_tool_function
     )
 from workflow.util import LOGGER, run_code, LOG_LEVEL, Language, get_language_matching, resolve_json_type, convert_value_to_type
 from enum import IntEnum
@@ -26,6 +25,48 @@ class CodePermission(IntEnum):
 
 # TODO: Add coding languages available for execution, and execution config
 class AliceAgent(BaseDataStructure):
+    """
+    A versatile AI agent that manages model interactions, tool usage, and code execution within a message-based architecture.
+    
+    AliceAgent serves as a unified interface for various AI model interactions, handling everything from
+    basic LLM communication to specialized tasks like speech-to-text or image generation. It maintains
+    a dictionary of models for different capabilities (chat, vision, speech, etc.) and processes all
+    interactions through a consistent message-based interface.
+    
+    The agent's architecture is built around MessageDict objects, which serve as the primary data
+    structure for all interactions. These messages can contain various types of content (text,
+    tool calls, code blocks) and are stored in References objects for persistence and retrieval.
+    
+    Key Capabilities:
+    1. Model Management:
+        - Supports multiple model types (chat, instruct, vision, STT, TTS, embeddings, image generation)
+        - Handles model-specific configurations and interactions
+        - Provides unified interface across different model capabilities
+    
+    2. Message Processing:
+        - Manages conversation flow through MessageDict objects
+        - Handles system prompts and conversation context
+        - Supports multiple content types in messages
+    
+    3. Tool & Code Execution:
+        - Configurable permission systems for both tools and code
+        - Supports multiple programming languages
+        - Creates structured outputs (ToolCall, CodeExecution) stored in References
+    
+    Attributes:
+        name (str): Identifier for the agent
+        system_message (Prompt): Base system prompt
+        models (Dict[ModelType, Optional[AliceModel]]): Available models for different tasks
+            - CHAT/INSTRUCT: Language model interactions
+            - VISION: Image understanding
+            - STT: Speech-to-text conversion
+            - TTS: Text-to-speech generation
+            - EMBEDDINGS: Text embedding generation
+            - IMG_GEN: Image generation
+        has_tools (ToolPermission): Tool usage permission level
+        has_code_exec (CodePermission): Code execution permission level
+        max_consecutive_auto_reply (int): Auto-reply limit
+    """
     id: Optional[str] = Field(default=None, description="The ID of the agent", alias="_id")
     name: str = Field(..., description="The name of the agent")
     system_message: Prompt = Field(default=Prompt(name="default", content="You are an AI assistant"), description="The prompt to use for system message")
@@ -148,6 +189,27 @@ print("This is just for demonstration")
         return "\n\n".join(prompts)
     
     async def generate_llm_response(self, api_manager: APIManager, messages: List[MessageDict], tools_list: List[ToolFunction] = [], **kwargs) -> MessageDict:
+        """
+        Generate a response from the language model with support for tool calling.
+        
+        This method handles the core LLM interaction, processing both standard text responses
+        and tool-calling scenarios. It uses the agent's system message and handles all responses
+        through the MessageDict format.
+        
+        Args:
+            api_manager: Manager for API interactions
+            messages: List of previous messages in the conversation
+            tools_list: Optional list of available tools
+            **kwargs: Additional parameters for the LLM
+        
+        Returns:
+            MessageDict containing the model's response and any tool calls
+        
+        Notes:
+            - Automatically includes system message in the context
+            - Handles tool calls based on agent's permission level
+            - Stores response in standardized MessageDict format
+        """
         LOGGER.info("Generating LLM response")
         chat_model = self.llm_model
         response_ref: References = await api_manager.generate_response_with_api_engine(
@@ -224,7 +286,26 @@ print("This is just for demonstration")
         return code_blocks
 
     async def process_code_execution(self, messages: List[MessageDict]) -> Tuple[List[CodeExecution], int]:
-        """Process code execution based on permission level."""
+        """
+        Process and execute code blocks found in messages.
+        
+        Extracts, validates, and executes code blocks from messages based on the agent's
+        code execution permissions. Supports multiple programming languages and provides
+        structured output for each execution.
+        
+        Args:
+            messages: List of messages that may contain code blocks
+        
+        Returns:
+            Tuple containing:
+            - List of CodeExecution objects with results
+            - Exit code indicating overall success/failure
+        
+        Notes:
+            - Respects code execution permissions (DISABLED, NORMAL, WITH_PERMISSION, TAGGED_ONLY)
+            - Groups code blocks by language for efficient execution
+            - Creates CodeExecution objects for result tracking
+        """
         if self.has_code_exec == CodePermission.DISABLED:
             return [], {}, 0
             
@@ -255,7 +336,25 @@ print("This is just for demonstration")
         return code_executions, exit_code
 
     async def process_tool_calls(self, tool_calls: List[ToolCall] = [], tool_map: Dict[str, Callable] = {}, tools_list: List[ToolFunction] = []) -> List[MessageDict]:
-        """Process tool calls based on permission level."""
+        """
+        Process tool calls based on the agent's permission level.
+        
+        Executes or simulates tool calls based on the agent's configuration and creates
+        appropriate message responses for each tool interaction.
+        
+        Args:
+            tool_calls: List of tool calls to process
+            tool_map: Dictionary mapping tool names to their implementations
+            tools_list: List of available tool definitions
+        
+        Returns:
+            List of MessageDict objects containing tool responses
+        
+        Notes:
+            - Respects tool permission levels (DISABLED, NORMAL, WITH_PERMISSION, DRY_RUN)
+            - Validates tool inputs against their schemas
+            - Creates structured responses for all tool interactions
+        """
         if self.has_tools == ToolPermission.DISABLED:
             return []
             
@@ -372,6 +471,26 @@ print("This is just for demonstration")
         return [msg.convert_to_api_format() for msg in messages]
     
     async def generate_vision_response(self, api_manager: APIManager, file_references: List[FileReference], prompt: str) -> MessageDict:
+        """
+        Generate responses for image inputs using the vision model.
+        
+        Processes images and generates text descriptions or answers questions about
+        the image content.
+        
+        Args:
+            api_manager: Manager for API interactions
+            file_references: List of image files to process
+            prompt: Text prompt or question about the images
+        
+        Returns:
+            MessageDict containing the vision model's response
+        
+        Notes:
+            - Uses the agent's configured vision model if available
+            - Handles multiple image inputs
+            - Returns structured responses in MessageDict format
+        """
+
         vision_model = self.models[ModelType.VISION] or api_manager.get_api_by_type(ApiType.IMG_VISION).default_model
         if not vision_model:
             raise ValueError("No vision model available for the agent or in the API manager")
@@ -421,6 +540,25 @@ print("This is just for demonstration")
         return refs.files
     
     async def generate_speech(self, api_manager: APIManager, input: str, voice: str, speed: float = 1.0) -> List[FileContentReference]:
+        """
+        Generate speech from text using the text-to-speech model.
+        
+        Converts text input into speech using specified voice and speed settings.
+        
+        Args:
+            api_manager: Manager for API interactions
+            input: Text to convert to speech
+            voice: Voice identifier to use
+            speed: Speech speed multiplier
+        
+        Returns:
+            List of FileContentReference objects containing audio data
+        
+        Notes:
+            - Uses the agent's configured TTS model if available
+            - Creates structured FileContentReference objects for audio storage
+            - Supports various voice options and speed adjustments
+        """
         tts_model = self.models[ModelType.TTS] or api_manager.get_api_by_type(ApiType.TEXT_TO_SPEECH).default_model
         if not tts_model:
             raise ValueError("No text-to-speech model available for the agent or in the API manager")
@@ -438,6 +576,25 @@ print("This is just for demonstration")
         return refs.files
     
     async def generate_embeddings(self, api_manager: APIManager, input: Union[str, List[str]], language: Optional[Language]) -> List[EmbeddingChunk]:
+        """
+        Generate embeddings for input text using the configured embeddings model.
+        
+        Creates vector representations of text that can be used for similarity search
+        and other semantic operations.
+        
+        Args:
+            api_manager: Manager for API interactions
+            input: Text to generate embeddings for
+            language: Optional language specification for the text
+        
+        Returns:
+            List of EmbeddingChunk objects containing vectors and metadata
+        
+        Notes:
+            - Uses the agent's configured embeddings model if available
+            - Handles both single strings and lists of strings
+            - Creates structured EmbeddingChunk objects for storage
+        """
         embeddings_model = self.models[ModelType.EMBEDDINGS] or api_manager.get_api_by_type(ApiType.EMBEDDINGS).default_model
         LOGGER.info(f'Generating embedding for length {len(input)}')
         if not embeddings_model:

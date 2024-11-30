@@ -12,11 +12,127 @@ from workflow.core.tasks.task_utils import validate_and_process_function_inputs,
 
 class AliceTask(BaseDataStructure):
     """
-    Base class for all tasks in the Alice workflow system, incorporating node-based execution.
-    
-    This class provides the foundation for creating complex, multi-step tasks with
-    built-in support for node-based execution flow, attempt tracking, recursion control,
-    API validation, and function representation, and user interactions.
+    Base class for all tasks in the Alice workflow system, providing a robust foundation for
+    node-based execution with built-in support for recursion, API validation, and user interactions.
+
+    AliceTask implements a flexible node-based execution model where each task can consist of multiple
+    nodes that execute in sequence based on configurable routing rules. The execution flow is determined
+    by exit codes and can include conditional branching, retries, and user checkpoints.
+
+    Key Features:
+    -------------
+    * Node-Based Execution:
+        - Tasks are divided into nodes that execute sequentially
+        - Node routing is controlled by exit codes and routing rules
+        - Support for conditional execution paths and retries
+
+    * User Interaction:
+        - Built-in support for user checkpoints
+        - Configurable interaction points within task flow
+        - Structured handling of user responses
+
+    * API Integration:
+        - Automatic validation of required APIs
+        - Integration with multiple API types
+        - Standardized API interaction patterns
+
+    * Input/Output Management:
+        - Structured parameter validation
+        - Type checking and conversion
+        - Flexible output formatting
+
+    Attributes:
+    -----------
+    id : Optional[str]
+        Unique identifier for the task
+
+    task_name : str
+        Name of the task
+
+    task_description : str
+        Clear description of the task's purpose
+
+    start_node : Optional[str]
+        Name of the initial node to execute
+
+    recursive : bool
+        Whether the task can execute nodes recursively (default: True)
+
+    max_attempts : int
+        Maximum number of attempts per node before failure (default: 1)
+
+    timeout : Optional[int]
+        Task timeout in seconds
+
+    include_prompt_in_execution : bool
+        Whether to include the prompt in code execution
+
+    node_end_code_routing : TasksEndCodeRouting
+        Dictionary defining routing rules between nodes based on exit codes
+
+    user_checkpoints : Dict[str, UserCheckpoint]
+        Node-specific user interaction checkpoints
+
+    input_variables : FunctionParameters
+        Expected input structure for the task
+
+    exit_codes : Dict[int, str]
+        Mapping of exit codes to their descriptions
+
+    required_apis : List[ApiType]
+        List of required API types for the task
+
+    templates : Dict[str, Prompt]
+        Task prompt templates, including output formatting
+
+    tasks : Dict[str, AliceTask]
+        Subtasks that can be executed as part of this task
+
+    Example:
+    --------
+    ```python
+    class CustomTask(AliceTask):
+        def __init__(self):
+            super().__init__(
+                task_name="custom_task",
+                task_description="A custom task implementation",
+                node_end_code_routing={
+                    'node1': {
+                        0: ('node2', False),  # Success, proceed to node2
+                        1: ('node1', True)    # Failure, retry node1
+                    },
+                    'node2': {
+                        0: (None, False),     # Success, end task
+                        1: ('node1', False)   # Failure, return to node1
+                    }
+                }
+            )
+
+        async def execute_node1(self, execution_history, node_responses, **kwargs):
+            # Node implementation
+            pass
+
+        async def execute_node2(self, execution_history, node_responses, **kwargs):
+            # Node implementation
+            pass
+    ```
+
+    Notes:
+    ------
+    1. Node Implementation:
+        - Each node should be implemented as an async method named `execute_<node_name>`
+        - Nodes must return NodeResponse objects indicating success/failure
+        - Node execution order is determined by routing rules
+
+    2. Error Handling:
+        - Tasks should use the built-in retry mechanism for recoverable errors
+        - Unrecoverable errors should be captured in NodeResponse objects
+        - Maximum retry attempts are enforced automatically
+
+    3. User Interaction:
+        - User checkpoints can be added to any node
+        - Responses are automatically handled in the execution flow
+        - Task execution pauses at checkpoints until user input is received
     """
     # Basic task information
     id: Optional[str] = Field(default=None, description="Task ID", alias="_id")
@@ -240,16 +356,67 @@ class AliceTask(BaseDataStructure):
         **kwargs
         ) -> TaskResponse:
         """
-        Execute the task with node-based flow and attempt tracking.
-        
-        Validates inputs, handles API validation, and manages node execution flow.
-        
+        Execute the complete task with full node-based flow control and state management.
+
+        This method orchestrates the entire task execution process, managing:
+        1. Input validation and processing
+        2. API availability verification
+        3. Node-based execution flow
+        4. State tracking and history management
+        5. Error handling and recovery
+        6. Final response generation
+
+        The execution flow follows these steps:
+        1. Validates and processes all input parameters
+        2. Verifies availability of required APIs
+        3. Determines the starting node based on execution history
+        4. Executes nodes in sequence based on routing rules
+        5. Handles user interactions when encountered
+        6. Generates appropriate final response
+
         Args:
-            execution_history (List[NodeResponse], optional): Previous execution history.
-            **kwargs: Task input parameters, including api_manager.
-        
+            execution_history (Optional[List[NodeResponse]]): Previous execution history
+            node_responses (Optional[List[NodeResponse]]): Previous node responses
+            data_cluster (Optional[References]): Associated data cluster for the task
+            **kwargs: Task input parameters, including api_manager and any task-specific inputs
+
         Returns:
-            TaskResponse: The result of the task execution.
+            TaskResponse: Object containing:
+                - Task execution results and status
+                - Complete execution history
+                - Node responses
+                - Error diagnostics if applicable
+                - Output formatted according to task template
+
+        Raises:
+            ValueError: If input validation fails or required APIs are unavailable
+
+        Notes:
+            - The method maintains execution state through node responses
+            - User interactions pause execution until response received
+            - API validation occurs before any node execution
+            - Node routing follows configured routing rules
+            - Execution history is preserved in the response
+
+        Example:
+            ```python
+            # Execute a task
+            response = await task.run(
+                api_manager=api_manager,
+                prompt="Example input",
+                custom_param="value"
+            )
+            
+            if response.status == "complete":
+                # Process successful execution
+                print(response.task_outputs)
+            elif response.status == "pending":
+                # Handle user interaction required
+                pass
+            else:
+                # Handle failure
+                print(response.result_diagnostic)
+            ```
         """
         execution_history = execution_history or []
         node_responses: List[NodeResponse] = node_responses or []
@@ -313,7 +480,60 @@ class AliceTask(BaseDataStructure):
             return self.get_failed_task_response(str(e)+ get_traceback(), **kwargs)
         
     async def execute_node(self, node_name: str, execution_history: List[NodeResponse], node_responses: List[NodeResponse], **kwargs) -> NodeResponse:
-        """Execute a single node with user checkpoint handling."""
+        """
+        Execute a single node within the task, handling user checkpoints and method routing.
+
+        This method serves as the central execution point for individual nodes within a task.
+        It handles:
+        1. User checkpoint verification and processing
+        2. Dynamic method routing to node-specific implementations
+        3. Result capture and error handling
+        4. Variable updates based on node outputs
+
+        The method follows these steps:
+        1. Checks for and handles any user checkpoints for the node
+        2. Locates and validates the node's implementation method
+        3. Executes the node implementation with provided context
+        4. Updates any matching variables in kwargs with node outputs
+        5. Returns a structured response containing execution results
+
+        Args:
+            node_name (str): Name of the node to execute, corresponding to an `execute_<node_name>` method
+            execution_history (List[NodeResponse]): Complete history of all node executions in this task
+            node_responses (List[NodeResponse]): List of responses from nodes executed in current task
+            **kwargs: Additional keyword arguments passed to the node implementation
+
+        Returns:
+            NodeResponse: Object containing:
+                - parent_task_id: ID of the parent task
+                - node_name: Name of the executed node
+                - execution_order: Order of execution in the sequence
+                - exit_code: Result code (0 for success)
+                - references: Any output data or messages
+
+        Raises:
+            Exception: If node execution fails, returns NodeResponse with error details
+
+        Notes:
+            - Node implementations should be methods named `execute_<node_name>`
+            - User checkpoints take precedence over node execution
+            - Node output can update variables if their names match input parameters
+            - All errors are captured and returned in NodeResponse format
+
+        Example:
+            ```python
+            # Within a task execution:
+            node_response = await self.execute_node(
+                node_name="process_data",
+                execution_history=history,
+                node_responses=responses,
+                data_input="example"
+            )
+            if node_response.exit_code == 0:
+                # Process successful node execution
+                pass
+            ```
+        """
         # Check for user interaction
         user_interaction = self.handle_user_checkpoints(execution_history, node_name)
         if user_interaction:

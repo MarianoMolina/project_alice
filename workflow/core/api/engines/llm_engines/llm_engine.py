@@ -11,18 +11,34 @@ from workflow.core.data_structures import (
 
 class LLMEngine(APIEngine):
     """
-    LLMEngine for generating chat completions from OpenAI-compatible endpoints.
-
-    This class can interact with any OpenAI-compatible endpoint, including Azure, OpenAI,
-    and LMStudio. It's capable of generating chat completions from any of these services.
-
-    Note: For LMStudio endpoints, the 'model' property uses the modelId instead of the
-    model_name. This parsing is handled by the API's get_api_data method.
-
-    Attributes:
-        input_variables (FunctionParameters): Defines the expected input structure for the engine.
-        required_api (ApiType): Specifies the required API type (LLM_MODEL).
-
+    Language Model API engine implementing the OpenAI chat completions interface.
+    
+    This engine defines the standard interface for language model interactions,
+    with a default implementation using the OpenAI SDK. It works with any
+    OpenAI-compatible endpoint (OpenAI, Azure, LMStudio, etc.) and handles:
+    - Message-based interactions
+    - Tool/function calling
+    - Token counting and context management
+    - Cost calculation
+    
+    The engine implements automatic message pruning when context limits are
+    approached and provides detailed usage metrics in the response metadata.
+    
+    Input Interface:
+        - messages: List of conversation messages
+        - system: Optional system prompt
+        - tools: Optional list of available tools
+        - max_tokens: Optional response length limit
+        - temperature: Sampling temperature
+        - tool_choice: Control over tool usage
+        - n: Number of completions to generate
+    
+    Returns:
+        References object containing MessageDict with:
+        - Generated response
+        - Tool calls (if any)
+        - Usage statistics and cost calculation
+        - Metadata about pruning and token estimation
     """
     input_variables: FunctionParameters = Field(
         default=FunctionParameters(

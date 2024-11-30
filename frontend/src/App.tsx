@@ -69,7 +69,7 @@ const App: React.FC = () => {
                         />
                       }
                     />
-                    <Route path="/knowledgebase/*" element={<Knowledgebase />} />
+                    <Route path="/shared/*" element={<Knowledgebase />} />
                   </Routes>
                 </MainLayout>
               </NavigationGuard>

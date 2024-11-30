@@ -18,6 +18,7 @@ services:
       - ./frontend:/app:consistent
       - /app/node_modules
       - /app/dist
+      - shared:/app/public/shared
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       CHOKIDAR_USEPOLLING: "true"
@@ -119,14 +120,14 @@ services:
   python_image:
     build:
       context: .
-      dockerfile: Dockerfile.python
+      dockerfile: /workflow/Dockerfile.python
     image: mypython:latest
     command: ["bash"]
 
   bash_image:
     build:
       context: .
-      dockerfile: Dockerfile.bash
+      dockerfile: /workflow/Dockerfile.bash
     image: mybash:latest
     command: ["bash"]
 
@@ -143,6 +144,12 @@ volumes:
       type: none
       o: bind
       device: ${COMPOSE_PROJECT_DIR}/shared-uploads
+  shared:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${COMPOSE_PROJECT_DIR}/shared
   mongo_data:
   model_cache:
     driver: local

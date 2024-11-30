@@ -9,6 +9,69 @@ from workflow.core.api import APIManager
 from workflow.util import LOGGER, get_traceback
 
 class GenerateImageTask(AliceTask):
+    """
+    A specialized task for generating images from text descriptions using AI image generation models.
+
+    GenerateImageTask handles text-to-image generation, supporting various image sizes,
+    quality settings, and the ability to generate multiple images from a single prompt.
+
+    Key Features:
+    -------------
+    * Image Generation:
+        - Creates images from text descriptions
+        - Supports multiple image sizes
+        - Configurable quality settings
+
+    * Batch Processing:
+        - Can generate multiple images
+        - Consistent naming and metadata
+        - Parallel generation support
+
+    Attributes:
+    -----------
+    agent : AliceAgent
+        Agent configured with image generation model capabilities
+        
+    input_variables : FunctionParameters
+        Accepts:
+        - prompt (str): Text description of desired image(s)
+        - n (int, optional): Number of images to generate (default: 1)
+        - size (str, optional): Image dimensions (default: "1024x1024")
+        - quality (str, optional): Generation quality (default: "standard")
+        
+    required_apis : List[ApiType]
+        [ApiType.IMG_GENERATION]
+
+    Example:
+    --------
+    ```python
+    image_task = GenerateImageTask(
+        agent=agent_with_image_gen,
+        task_name="generate_images",
+        task_description="Create images from text descriptions"
+    )
+    
+    response = await image_task.run(
+        prompt="A serene mountain landscape at sunset",
+        n=2,
+        size="1024x1024",
+        quality="high"
+    )
+    # Access generated images through response.node_references[0].references.files
+    ```
+
+    Notes:
+    ------
+    1. File Management:
+        - Generated images are returned as FileContentReference objects
+        - Includes both base64 content and metadata
+        - Consistent file naming based on prompts
+
+    2. Quality Control:
+        - Supports different quality levels
+        - Size validation and adjustment
+        - Error handling for generation failures
+    """
     agent: AliceAgent = Field(..., description="The agent to use for the task")
     input_variables: FunctionParameters = Field(
         default=FunctionParameters(

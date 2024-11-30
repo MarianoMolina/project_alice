@@ -1,29 +1,27 @@
-# API Tasks
+# APITask
 
-API Tasks are specialized tasks designed to handle interactions with external APIs in a standardized way. They provide a consistent interface for making API calls while integrating with Alice's node-based execution model.
+A specialized task implementation for straightforward API interactions. Unlike other task types, APITask simplifies the node structure to a single 'default' node while providing robust API validation and error handling.
 
-## Overview
+## Key Features
+- Single node, focused execution pattern
+- Automatic API validation and configuration
+- Built-in retry handling
+- Direct mapping to API engines
 
-An API Task:
-- Handles interaction with a single specific API type
-- Validates API configuration and requirements
-- Provides standardized error handling
-- Integrates with Alice's task execution framework
-
-## Structure
-
-```typescript
-interface APITask extends AliceTask {
-    required_apis: [ApiType];  // Exactly one API type
-    api_engine: Type[APIEngine];
-    start_node: 'default';
-    node_end_code_routing: {
-        'default': {
-            0: [null, false],    // Success
-            1: ['default', true] // Retry on failure
-        }
-    };
-}
+## Usage
+```python
+class SearchAPITask(APITask):
+    required_apis = [ApiType.GOOGLE_SEARCH]
+    api_engine = GoogleSearchEngine
+    input_variables = FunctionParameters(
+        properties={
+            "query": ParameterDefinition(
+                type="string",
+                description="Search query"
+            )
+        },
+        required=["query"]
+    )
 ```
 
 ## Supported API Types

@@ -11,7 +11,7 @@ Project Alice provides a powerful task execution interface for running various A
 
 ### Selecting an Existing Task
 1. In the sidebar, make sure the `Task` tab is selected.
-2. You'll see a list of available [tasks](/knowledgebase/task).
+2. You'll see a list of available [tasks](/shared/knowledgebase/core/task/task).
 3. Use the filter at the top to narrow down tasks by their type (e.g., APITask, PromptAgentTask, CodeGenerationLLMTask).
 4. Click on a task to load it in the main execution area.
 
@@ -29,12 +29,12 @@ Project Alice provides a powerful task execution interface for running various A
 ## Viewing Recent Executions
 
 1. On the right side of the interface, you'll find an `Recent Executions` accordion.
-2. Expand this section to see a list of your recently executed tasks' [task responses](/knowledgebase/task_response).
+2. Expand this section to see a list of your recently executed tasks' [task responses](/shared/knowledgebase/core/task_response).
 3. Click on any recent execution to view its details or load its inputs for re-execution.
 
 ## Checking API Status
 
-1. At the top-right of the interface, you'll find an "[API](/knowledgebase/api) Status" section.
+1. At the top-right of the interface, you'll find an "[API](/shared/knowledgebase/core//api) Status" section.
 2. This area provides a quick overview of the status of various APIs available and their current status.
 3. Click on an API to view more details or troubleshoot any issues.
 

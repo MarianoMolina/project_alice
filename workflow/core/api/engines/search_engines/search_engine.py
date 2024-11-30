@@ -6,14 +6,29 @@ from workflow.core.api.engines.api_engine import APIEngine
 
 class APISearchEngine(APIEngine):
     """
-    Base class for search-based API engines.
-
-    This class extends APIEngine to provide a common structure for search APIs.
-    It defines a standard set of input parameters suitable for most search operations.
-
-    Attributes:
-        input_variables (FunctionParameters): Defines the input structure for search operations,
-                                              including 'prompt' and 'max_results'.
+    Base class defining the standard interface for search-based APIs.
+    
+    Establishes a common foundation for various search implementations
+    (web search, knowledge graphs, specialized databases, etc.) with
+    a unified set of parameters. Features:
+    - Flexible query parameters
+    - Output format control
+    - Result filtering and sorting
+    
+    Input Interface:
+        - prompt: Search query text
+        - max_results: Result count limit
+        - units: Measurement system preference
+        - format: Output format control
+        - types: Entity type filtering
+        - sort: Result ordering method
+        - time_filter: Time-based filtering
+        - subreddit: Platform-specific scope (e.g., for Reddit)
+    
+    Notes:
+        - Acts as a template for specific search implementations
+        - Provides consistent parameter handling across different search types
+        - Supports both general and platform-specific parameters
     """
     input_variables: FunctionParameters = Field(FunctionParameters(
         type="object",

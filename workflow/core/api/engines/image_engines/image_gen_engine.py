@@ -10,6 +10,28 @@ from workflow.core.api.engines.api_engine import APIEngine
 from workflow.util import LOGGER, get_traceback
 
 class ImageGenerationEngine(APIEngine):
+    """
+    Image generation API engine implementing the DALL-E interface.
+    
+    Provides a standardized interface for text-to-image generation,
+    supporting multiple images and quality options. Features:
+    - Multiple image generation
+    - Size and quality control
+    - Base64 image encoding
+    
+    Input Interface:
+        - prompt: Text description of desired image(s)
+        - negative_prompt: Undesired elements (model-dependent)
+        - n: Number of images to generate
+        - size: Image dimensions
+        - quality: Generation quality level
+    
+    Returns:
+        References object containing FileContentReference(s) with:
+        - Generated image(s) in base64 format
+        - Generation parameters and metadata
+        - Transcripts containing prompts and settings
+    """
     input_variables: FunctionParameters = Field(
         default=FunctionParameters(
             type="object",

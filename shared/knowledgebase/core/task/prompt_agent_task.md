@@ -1,14 +1,33 @@
 # Prompt Agent Tasks
 
-Prompt Agent Tasks are sophisticated tasks that enable AI agents to process prompts, execute tools, and run code in a structured flow. They implement a three-node workflow that handles the complexities of LLM interactions, tool execution, and code processing.
 
-## Overview
+Base task for LLM interactions implementing a sophisticated three-node pattern for handling various types of LLM responses. Distinguished by its ability to dynamically route between tool usage and code execution based on LLM output.
 
-A Prompt Agent Task:
-- Processes input prompts using an AI agent
-- Handles tool/function calls
-- Manages code execution
-- Provides flexible routing based on content analysis
+## Key Features
+- Three-node execution pattern (llm → tools → code)
+- Dynamic response analysis and routing
+- Integrated tool and code handling
+- Flexible template system
+
+## Node Structure
+1. `llm_generation`: Processes prompt and analyzes response
+2. `tool_call_execution`: Handles any tool calls
+3. `code_execution`: Executes any code blocks
+
+## Usage
+```python
+class CustomAssistantTask(PromptAgentTask):
+    def __init__(self):
+        super().__init__(
+            agent=agent_with_capabilities,
+            task_name="smart_assistant",
+            templates={
+                "task_template": Prompt(
+                    content="Solve this task: {{prompt}}"
+                )
+            }
+        )
+```
 
 ## Core Components
 

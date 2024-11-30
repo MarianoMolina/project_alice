@@ -9,6 +9,52 @@ from workflow.core.api import APIManager
 from workflow.util import LOGGER, get_traceback, Language
 
 class EmbeddingTask(AliceTask):
+    """
+    A specialized task for generating text embeddings using AI embedding models.
+
+    EmbeddingTask handles the generation of vector representations for text inputs,
+    supporting both single strings and arrays of text. These embeddings can be used
+    for semantic search, similarity comparisons, and other vector-based operations.
+
+    Key Features:
+    -------------
+    * Embedding Generation:
+        - Converts text to vector representations
+        - Supports batch processing
+        - Preserves text-vector relationships
+
+    * Language Support:
+        - Language-specific embedding generation
+        - Automatic language detection
+        - Consistent vector dimensionality
+
+    Attributes:
+    -----------
+    agent : AliceAgent
+        Agent configured with embedding model capabilities
+        
+    input_variables : FunctionParameters
+        Accepts:
+        - input (str): Text to generate embeddings for
+        
+    required_apis : List[ApiType]
+        [ApiType.EMBEDDINGS]
+
+    Example:
+    --------
+    ```python
+    embedding_task = EmbeddingTask(
+        agent=agent_with_embeddings,
+        task_name="generate_embeddings",
+        task_description="Generate text embeddings for semantic search"
+    )
+    
+    response = await embedding_task.run(
+        input="Sample text for embedding"
+    )
+    # Access embeddings through response.node_references[0].references.embeddings
+    ```
+    """
     agent: AliceAgent = Field(..., description="The agent to use for the task")
     input_variables: FunctionParameters = Field(
         default=FunctionParameters(

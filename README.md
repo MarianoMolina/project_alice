@@ -6,21 +6,25 @@
 Alice is an agentic workflow framework that integrates task execution and intelligent chat capabilities. It provides a flexible environment for creating, managing, and deploying AI agents for various purposes, leveraging a microservices architecture with MongoDB for data persistence.
 
 > What's new? v0.3 brings:
-> - RAG: Support for RAG with the new Retrieval Task, which takes a prompt and a Data Cluster, and returns chunks with highest similarity. 
+> - RAG: Support for RAG with the new Retrieval Task, which takes a prompt and a Data Cluster, and returns chunks with highest similarity. It can also be used to ensure a Data Cluster is fully embedded. 
 > - HITL: Human-in-the-loop mechanics to tasks -> Add a User Checkpoint to a task or a chat, and force a user interaction 'pause' whenever the chosen node is reached
 > - COT: A basic Chain-of-thought implementation: [analysis] tags are parsed on the frontend, and added to the agent's system prompts allowing them think through requests more effectively
 > - DOCUMENTS: Alice Documents, represented by the [aliceDocument] tag, are parsed on the frontend and added to the agent's system prompts allowing them to structure their responses better
 > - NODE FLOW: Fully implemented node execution logic to tasks, making workflows simply a case where the nodes are other tasks. This allows for greater clarity on what each task is doing and why
-> - FLOW VIEWER: Updated the task UI to show more details on the task's inner node logic
-> - APIS: New APIs for Wolfram Alpha, Google's Knowledge Graph, PixArt Image Generation (local), Bark TTS (local). Support for local embeddings. 
-> - DATA CLUSTERS: Now chats and tasks can hold updatable data clusters that hold embeddable references like messages, files, task responses, etc. You can add any reference in your environment to a data cluster to give your agents/tasks access to it.
-> - **NOTE**: If you update to this version, you'll need to reinitialize your database (User settings -> Danger Zone). This update required a lot of changes to the framework, and making it backwards compatible is inefficient at this stage. Keep in mind Project ALice is still in Alpha, and changes should be expected. 
+> - FLOW VIEWER: Updated the task UI to show more details on the task's inner node logic and flow
+> - PROMPT PARSER: Added the option to view templated prompts dynamically, to see how they look with certain inputs, and get a better sense of what your agents see
+> - APIS: New APIs for Wolfram Alpha, Google's Knowledge Graph, PixArt Image Generation (local), Bark TTS (local). Support for local embeddings
+> - DATA CLUSTERS: Now chats and tasks can hold updatable data clusters that hold embeddable references like messages, files, task responses, etc. You can add any reference in your environment to a data cluster to give your chats/tasks access to it. The new retrieval tasks leverage this. 
+> - TEXT MGMT: Added 2 Text Splitter methods (recursive and semantic), which are used by the embedding and RAG logic (as well as other APIs with that need to chunk the input, except LLMs), and a Message Pruner class that scores and prunes messages, which is used by the LLM API engines to avoid contex size issues
+> - **NOTE**: If you update to this version, you'll need to reinitialize your database (User settings -> Danger Zone). This update required a lot of changes to the framework, and making it backwards compatible is inefficient at this stage. Keep in mind Project ALice is still in Alpha, and changes should be expected
 
 > What's next? Planned developments for v0.4 (find detailed info below):
 > - Agent using computer
 > - Communication APIs -> Gmail, potentially messaging
 > - Recurring tasks -> Tasks that run periodically, accumulating information in their Data Cluster
 > - CUDA support for the Workflow container -> Run a wide variety of local models, with a lot more flexibility
+> - Testing module -> Build a set of tests (inputs + tasks), execute it, update your tasks/prompts/agents/models/etc. and run them again to compare
+> - Context Management w/LLM -> Use an LLM model to (1) summarize long messages to keep them in context or (2) identify repeated information that can be removed
 
 ## Project Structure
 
@@ -30,7 +34,7 @@ The project consists of three main components:
 2. Workflow (Python - Pydantic) -> Handles (most) of the logic, interacts with external APIs, consumes the Database through the Backend, and reads from the file system. Main endpoints are task execution and chat response generation. 
 3. Frontend (React - TS) -> UI that consumes/interacts with the DB and file system through the Backend and calls Workflow's endpoints to trigger executions. 
 
-![Container Flow](./img/Container_flow.png)
+![Container Flow](./shared/img/diagrams/Container_flow.png)
 
 ## The Goal
 1. Provide a tool to create, test and deploy agentic solutions
@@ -67,7 +71,7 @@ This will build and launch the containers. Once ready, the frontend will be acce
 
 ## Framework
 
-![Logic Flow](./img/basic_logic_flow.png)
+![Logic Flow](./shared/img/diagrams/basic_logic_flow.png)
 
 The framework is based around 4 main components:
 - APIs and their engine
@@ -125,20 +129,21 @@ These components share information in one of 6 main ways, all of which have a st
 
 The Alice framework provides a user-friendly frontend interface for interacting with the system. Through this interface, you can:
 
-1. Create and manage AI agents, models, prompts, parameters, tasks, api, etc. in your personal database
-![Database](./img/database_1.PNG "View, create and edit all the elements you'll need")
+1. Create and manage AI agents, models, prompts, parameters, tasks, api, etc. in your personal database ([Getting Started](./shared/knowledgebase/general/getting_started))
+![Database](./shared/img/frontend_screenshots/database_1.PNG "View, create and edit all the elements you'll need")
 View all the references you've created, like files, messages, task responses, etc:
-![Database](./img/database_2.PNG "View, create and edit all the elements you'll need")
-2. Start and manage chat conversations
-![Chat](./img/chat_1.PNG "Chat with your own Alice AI Assistant")
+![Database](./shared/img/frontend_screenshots/database_2.PNG "View, create and edit all the elements you'll need")
+2. Start and manage chat conversations ([Start Chat](./shared/knowledgebase/general/start_chat))
+![Chat](./shared/img/frontend_screenshots/chat_1.PNG "Chat with your own Alice AI Assistant")
 Select a chat or create a new one, and start interacting with your agents. 
-![Chat](./img/chat_2.PNG "Chat with your own Alice AI Assistant")
-3. Create and execute various types of tasks
-![Execute Task](./img/exec_task_1.PNG "Execute tasks to test them extensively")
+![Chat](./shared/img/frontend_screenshots/chat_2.PNG "Chat with your own Alice AI Assistant")
+3. Create and execute various types of tasks ([Execute Task](./shared/knowledgebase/general/execute_task))
+![Execute Task](./shared/img/frontend_screenshots/exec_task_1.PNG "Execute tasks to test them extensively")
 View their outputs, run them again, change their settings, etc.
-![Execute Task](./img/exec_task_2.PNG "Execute tasks to test them extensively")
+![Execute Task](./shared/img/frontend_screenshots/exec_task_2.PNG "Execute tasks to test them extensively")
 4. Manage your user account and api config. 
-![User APIs](./img/user.PNG "View your user details and API configs - also you can re-set your database")
+![User APIs](./shared/img/frontend_screenshots/user.PNG "View your user details and API configs - also you can re-set your database")
+
 
 ### How tasks work
 All tasks execute a set of "inner nodes", which can be one or more. The execution logic for these nodes is defined by the node_end_code_routing object and the start_node string. The task will execute the start_node node, and then use the routing and the result retrieved, to decide what node to execute next. 
@@ -149,7 +154,7 @@ In the case of Workflows, these nodes are "inner tasks" instead of specific meth
 
 > Here's an example of both a workflow and a task, and how they pass and use the data produced:
 
-![Task logic](./img/Task_logic.png "Task logic flow")
+![Task logic](./shared/img/diagrams/Task_logic.png "Task logic flow")
 
 ### Types of Tasks
 - `API tasks`: Tasks that use non-model APIs. Examples include the Google, Wikipidia, Arxiv, Exa and Reddit search tasks, and Google's Knowledge graph. Normally have a single 'default' node. 
@@ -166,7 +171,7 @@ In the case of Workflows, these nodes are "inner tasks" instead of specific meth
 - `Workflow`: The simplest and most complex task. Simple because all it does is run other tasks. Complex because the options are endless. Main difference is they use the node_end_code_routing to map the logic path between the inner tasks available, starting from the start_node. 
 
 ### Available APIs
-![APIS](./img/APIs.PNG "Available API endpoints")
+![APIS](./shared/img/diagrams/APIs.PNG "Available API endpoints")
 
 ```typescript
 export enum ApiType {
@@ -206,118 +211,9 @@ export enum ApiName {
     LM_STUDIO = 'lm_studio',
     CUSTOM = 'Custom',
 }
-// This map shows which ApiType each ApiName has available
-export const API_CAPABILITIES: Record<ApiName, Set<ApiType>> = {
-  [ApiName.OPENAI]: new Set([
-    ApiType.LLM_MODEL,
-    ApiType.IMG_VISION,
-    ApiType.IMG_GENERATION,
-    ApiType.SPEECH_TO_TEXT,
-    ApiType.TEXT_TO_SPEECH,
-    ApiType.EMBEDDINGS
-  ]),
-  [ApiName.ANTHROPIC]: new Set([
-    ApiType.LLM_MODEL,
-    ApiType.IMG_VISION
-  ]),
-  [ApiName.GEMINI]: new Set([
-    ApiType.LLM_MODEL,
-    ApiType.IMG_VISION,
-    ApiType.IMG_GENERATION,
-    ApiType.SPEECH_TO_TEXT,
-    ApiType.EMBEDDINGS
-  ]),
-  [ApiName.MISTRAL]: new Set([
-    ApiType.LLM_MODEL,
-    ApiType.IMG_VISION,
-    ApiType.EMBEDDINGS
-  ]),
-  [ApiName.COHERE]: new Set([
-    ApiType.LLM_MODEL
-  ]),
-  [ApiName.LLAMA]: new Set([
-    ApiType.LLM_MODEL,
-    ApiType.IMG_VISION
-  ]),
-  [ApiName.LM_STUDIO]: new Set([
-    ApiType.LLM_MODEL,
-    ApiType.IMG_VISION,
-    ApiType.EMBEDDINGS
-  ]),
-  [ApiName.GROQ]: new Set([
-    ApiType.LLM_MODEL,
-    ApiType.IMG_VISION,
-    ApiType.TEXT_TO_SPEECH
-  ]),
-  [ApiName.AZURE]: new Set([
-    ApiType.LLM_MODEL
-  ]),
-  [ApiName.BARK]: new Set([
-    ApiType.TEXT_TO_SPEECH
-  ]),
-  [ApiName.PIXART]: new Set([
-    ApiType.IMG_GENERATION
-  ]),
-  [ApiName.GOOGLE_SEARCH]: new Set([
-    ApiType.GOOGLE_SEARCH
-  ]),
-  [ApiName.REDDIT]: new Set([
-    ApiType.REDDIT_SEARCH
-  ]),
-  [ApiName.WIKIPEDIA]: new Set([
-    ApiType.WIKIPEDIA_SEARCH
-  ]),
-  [ApiName.EXA]: new Set([
-    ApiType.EXA_SEARCH
-  ]),
-  [ApiName.ARXIV]: new Set([
-    ApiType.ARXIV_SEARCH
-  ]),
-  [ApiName.GOOGLE_KNOWLEDGE_GRAPH]: new Set([
-    ApiType.GOOGLE_KNOWLEDGE_GRAPH
-  ]),
-  [ApiName.WOLFRAM_ALPHA]: new Set([
-    ApiType.WOLFRAM_ALPHA
-  ]),
-  [ApiName.CUSTOM]: new Set([
-    ApiType.LLM_MODEL,
-    ApiType.IMG_VISION,
-    ApiType.IMG_GENERATION,
-    ApiType.SPEECH_TO_TEXT,
-    ApiType.TEXT_TO_SPEECH,
-    ApiType.EMBEDDINGS
-  ]),
-};
-```
+``` 
 
-## Development
-
-### Adding New Task Types
-
-1. Create a new task class in the Workflow module, extending the `AliceTask` base class.
-2. Implement the `run` method to define the task's behavior.
-3. Add the new task to the `available_task_types` list in `workflow/core/tasks/__init__.py`.
-4. Add the new task type to the `TaskType` enum in the `backend/interfaces/task.model.ts` and `frontend/src/types/TaskTypes` files.
-
-### Adding New API Types and API Names
-
-1. Update the `ApiType` and `ApiName` enums in the backend, frontend and workflow containers.
-2. Implement the necessary logic in the workflow container to handle the new API type.
-3. Update the frontend to support the new API type in the API management interface.
-
-For detailed instructions on adding new API types and names, refer to the backend and workflow README files.
-
-### Adding New Models, APIs, Tasks, Chats, Agents
-
-To add new instances: 
-
-1. Navigate to the Database page in the frontend and select the entity type you want to create and click on create new.
-2. To add new entities that will be available to new users (or to yourself if you decide to re-initialize your DB), you can modify the workflow initialization modules:
-   - Locate the `workflow/db_app/initialization/modules` directory in the workflow container.
-   - Create a new module file or modify existing ones to include your new entities.
-   - Update the `module_list` list in `workflow/db_app/initialization/modules/__init__.py` to include your new module.
-
-For more detailed information on creating and managing initialization modules, refer to the workflow container README.
+## For more details, check the [ReadMe Index](/shared/knowledgebase/index)
 
 ## Contributing
 

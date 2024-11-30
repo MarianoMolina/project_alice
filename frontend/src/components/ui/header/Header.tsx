@@ -29,7 +29,7 @@ const Header: React.FC = () => {
   };
 
   const isActive = (path: string): boolean => {
-    if (path === '/knowledgebase') {
+    if (path === '/shared/knowledgebase/') {
       return location.pathname.startsWith(path);
     }
     return location.pathname === path;
@@ -105,8 +105,8 @@ const Header: React.FC = () => {
               <Tooltip title="Learn">
                 <IconButton
                   color="inherit"
-                  onClick={() => handleNavigation('/knowledgebase')}
-                  className={isActive('/knowledgebase') ? classes.activeButton : ''}
+                  onClick={() => handleNavigation('/shared/knowledgebase/')}
+                  className={isActive('/shared/knowledgebase/') ? classes.activeButton : ''}
                 >
                   <School />
                 </IconButton>

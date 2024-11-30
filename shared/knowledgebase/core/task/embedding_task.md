@@ -1,15 +1,24 @@
-# Embedding Task
+# EmbeddingTask
 
-The Embedding Task is a simple yet powerful component that generates vector embeddings for input text using an AI model. This task provides the foundation for semantic search, similarity analysis, and other embedding-based features in the Alice system.
+A focused task for generating text embeddings. Uses a single node to handle both individual and batch embedding generation with language awareness.
 
-## Structure
+## Key Features
+- Single-node design
+- Language-specific processing
+- Batch embedding support
+- Consistent vector dimensionality
 
+## Usage
 ```python
-class EmbeddingTask(AliceTask):
-    agent: AliceAgent
-    input_variables: FunctionParameters
-    required_apis: List[ApiType] = [ApiType.EMBEDDINGS]
-    start_node: str = 'generate_embedding'
+embedding_task = EmbeddingTask(
+    agent=agent_with_embeddings,
+    task_name="text_embedder",
+    task_description="Generate text embeddings"
+)
+
+embeddings = await embedding_task.run(
+    input="Text to embed",
+)
 ```
 
 ### Input Parameters

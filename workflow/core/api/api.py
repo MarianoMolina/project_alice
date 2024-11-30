@@ -6,18 +6,45 @@ from workflow.util import LOGGER
 
 class API(BaseDataStructure):
     """
-    Represents an API configuration for various services, including LLM models and search APIs.
-    This class encapsulates the properties and methods needed to define and manage
-    an API configuration, including its type, name, status, and associated model.
+    Represents a configured API endpoint with its associated settings and capabilities.
+    
+    The API class encapsulates all information needed to interact with a specific API
+    service, including its type, configuration, and optional default model. It provides
+    methods to validate configurations and prepare API data for requests.
+    
+    APIs can be broadly categorized into:
+    1. Model APIs: Require model configurations (LLM, Vision, etc.)
+    2. Service APIs: Require standard API credentials (Search, Knowledge Graph, etc.)
+    
+    Key Features:
+    - Type-specific configuration validation
+    - Model management for AI services
+    - Health status tracking
+    - Configuration data preparation
     
     Attributes:
-        id (Optional[str]): The unique identifier for the API configuration.
-        api_type (ApiType): The type of API (e.g., LLM_MODEL, GOOGLE_SEARCH).
-        api_name (ApiName): The specific name or provider of the API.
-        name (str): A human-readable name for this API configuration.
-        is_active (bool): Indicates whether this API is currently active.
-        default_model (Optional[AliceModel]): The default language model associated with this API.
-        config (Optional[APIConfig]): The configuration for this API including required credentials.
+        api_type (ApiType): The type of API service
+        api_name (ApiName): The specific provider or implementation
+        api_config (Optional[APIConfig]): Configuration details
+        name (str): Human-readable name for the API
+        is_active (bool): Current status of the API
+        default_model (Optional[AliceModel]): Default model for AI services
+    
+    Example:
+        ```python
+        # Configure an LLM API
+        llm_api = API(
+            api_type=ApiType.LLM_MODEL,
+            api_name=ApiName.OPENAI,
+            api_config=APIConfig(
+                name="openai-config",
+                api_name=ApiName.OPENAI,
+                data={"api_key": "key", "base_url": "url"}
+            ),
+            name="OpenAI GPT-4",
+            default_model=gpt4_model
+        )
+        ```
     """
     api_type: ApiType
     api_name: ApiName

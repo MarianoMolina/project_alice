@@ -4,7 +4,7 @@ Welcome to the Alice system documentation. Alice is a sophisticated AI-driven pl
 ```User_prompt 
 Lets do something fun: Why don't you use the image_gen_task to create a representation of yourself?
 ```
-![Alice represents itself](/content/img/alice_represented_1_small.png)
+![Alice represents itself](../../shared/img/random/alice_represented_1_small.png)
 ```Assistant_prompt 
 A friendly and intelligent AI assistant named Alice, represented as a glowing, ethereal blue hologram of a female face with circuit-like patterns, floating above a futuristic desk with holographic screens. The image should convey warmth, intelligence, and helpfulness
 ```
@@ -12,17 +12,17 @@ A friendly and intelligent AI assistant named Alice, represented as a glowing, e
 
 Alice is built on several core components that work together to create a versatile and powerful AI interaction environment:
 
-1. **Agents**: The primary AI entities that interact with users and perform tasks. [LINK](/knowledgebase/agent)
-2. **Models**: The underlying AI models that power the agents' capabilities. [LINK](/knowledgebase/model)
-3. **Chats**: Conversational interfaces where users interact with agents. [LINK](/knowledgebase/chat)
-4. **Tasks**: Predefined operations that can be executed by agents or triggered within chats. [LINK](/knowledgebase/task)
-5. **APIs**: Interfaces to external services and AI providers. [LINK](/knowledgebase/api)
-6. **Prompts**: Templated instructions that guide AI behavior. [LINK](/knowledgebase/prompt)
-7. **Parameters**: Structured input definitions for tasks and prompts. [LINK](/knowledgebase/parameter)
-8. **Messages**: Individual units of communication within chats. [LINK](/knowledgebase/message)
-9. **Task Responses**: Results and metadata from executed tasks. [LINK](/knowledgebase/task_response)
-10. **Entity References**: Managed references to external web resources. [LINK](/knowledgebase/entity_reference)
-11. **Files**: Handling of various file types with AI-readable transcripts. [LINK](/knowledgebase/file)
+1. **Agents**: The primary AI entities that interact with users and perform tasks. [LINK](/shared/knowledgebase/core/agent)
+2. **Models**: The underlying AI models that power the agents' capabilities. [LINK](/shared/knowledgebase/core/model)
+3. **Chats**: Conversational interfaces where users interact with agents. [LINK](/shared/knowledgebase/core/chat)
+4. **Tasks**: Predefined operations that can be executed by agents or triggered within chats. [LINK](/shared/knowledgebase/core/task/task)
+5. **APIs**: Interfaces to external services and AI providers. [LINK](/shared/knowledgebase/core/api/api)
+6. **Prompts**: Templated instructions that guide AI behavior. [LINK](/shared/knowledgebase/core/prompt)
+7. **Parameters**: Structured input definitions for tasks and prompts. [LINK](/shared/knowledgebase/core/parameter)
+8. **Messages**: Individual units of communication within chats. [LINK](/shared/knowledgebase/core/message)
+9. **Task Responses**: Results and metadata from executed tasks. [LINK](/shared/knowledgebase/core/task_response)
+10. **Entity References**: Managed references to external web resources. [LINK](/shared/knowledgebase/core/entity_reference)
+11. **Files**: Handling of various file types with AI-readable transcripts. [LINK](/shared/knowledgebase/core/file)
 12. **|COMING| Data Clusters**: Group references with managed embeddings to facilitate RAG and Fine-tunning, as well as providing a reusable context.
 
 ## Key Features
@@ -45,7 +45,7 @@ The Alice system is designed with a modular architecture:
 - **Backend**: A NodeJS/TS module in charge of managing data persistence and authentication.
 - **Workflow Engine**: Handles task execution and complex workflows, interfaces with various AI models and providers: handles all of the logic.
 
-![Alice represents itself 2](/content/img/alice_represented_2_small.png)
+![Alice represents itself 2](../img/random/alice_represented_2_small.png)
 ```Assistant_prompt 
 A friendly and intelligent AI assistant named Alice, represented as a glowing, ethereal blue hologram of a female face with circuit-like patterns, floating above a futuristic desk with holographic screens. The image should convey warmth, intelligence, and helpfulness.
 ```

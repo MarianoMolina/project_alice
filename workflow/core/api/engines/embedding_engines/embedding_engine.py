@@ -15,6 +15,32 @@ from workflow.core.api.engines.api_engine import APIEngine
 from workflow.util import LOGGER, est_token_count, Language, TextSplitter, SemanticTextSplitter, SplitterType, cosine_similarity, get_language_matching, get_traceback
 
 class EmbeddingEngine(APIEngine):
+    """
+    Text embedding API engine implementing the OpenAI embeddings interface.
+    
+    Provides a standardized interface for generating text embeddings,
+    with support for different text splitting strategies and language
+    types. Features:
+    - Multiple splitting strategies (semantic/recursive)
+    - Language-specific handling
+    - Automatic chunking and validation
+    
+    Input Interface:
+        - input: Text to generate embeddings for
+        - language: Input text language (including programming languages)
+        - splitter_method: Text splitting strategy
+    
+    Returns:
+        References object containing EmbeddingChunk(s) with:
+        - Embedding vectors
+        - Original text segments
+        - Creation metadata and usage statistics
+    
+    Notes:
+        - Implements both chunked and direct embedding generation
+        - Provides similarity calculation utilities
+        - Handles context size validation and token estimation
+    """
     input_variables: FunctionParameters = Field(
         default=FunctionParameters(
             type="object",

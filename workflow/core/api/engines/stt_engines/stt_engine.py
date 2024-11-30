@@ -8,6 +8,31 @@ from workflow.core.api.engines.api_engine import APIEngine
 from workflow.util import LOGGER
 
 class SpeechToTextEngine(APIEngine):
+    """
+    Speech-to-text API engine implementing the OpenAI Whisper interface.
+    
+    Provides a standardized interface for audio transcription services,
+    with a default implementation using OpenAI's Whisper model. Supports:
+    - Audio file transcription
+    - Optional timestamp generation
+    - Multiple granularity levels
+    
+    Input Interface:
+        - file_reference: Audio file to transcribe
+        - prompt: Optional guidance for transcription
+        - timestamp_granularities: Optional timestamp detail levels
+    
+    Returns:
+        References object containing MessageDict with:
+        - Transcribed text
+        - Timestamps (if requested)
+        - Model and processing metadata
+    
+    Note:
+        While the default implementation uses Whisper, the interface
+        is designed to work with any speech-to-text service that can
+        accept audio files and return text transcriptions.
+    """
     input_variables: FunctionParameters = Field(
         default=FunctionParameters(
             type="object",

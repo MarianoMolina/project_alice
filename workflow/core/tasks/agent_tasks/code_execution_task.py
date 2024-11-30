@@ -9,7 +9,37 @@ from workflow.core.agent.agent import AliceAgent
 
 class CodeExecutionLLMTask(PromptAgentTask):
     """
-    A task for executing code that is extracted from a prompt or previous outputs.
+    A specialized PromptAgentTask focused solely on executing code from LLM responses.
+
+    This task simplifies the PromptAgentTask pattern by using only the 'code_execution'
+    node, making it ideal for scenarios where you specifically want to execute code
+    from LLM output.
+
+    Node Structure:
+    --------------
+    1. code_execution:
+        - Single node focused on code execution
+        - Supports multiple programming languages
+        - Handles execution environment setup
+        - Exit codes:
+            * SUCCESS (0): Code executed successfully
+            * FAILURE (1): Execution failed, retry
+
+    Key Features:
+    -------------
+    * Code Focus:
+        - Streamlined for code execution
+        - Language validation
+        - Execution timeout management
+        - Error capture and formatting
+
+    Attributes:
+    -----------
+    valid_languages : list[Language]
+        Supported programming languages (default: [PYTHON, SHELL])
+        
+    timeout : int
+        Maximum execution time in seconds (default: 50)
     """
     agent: AliceAgent = Field(..., description="The agent to use for the task")
     task_name: str = Field("execute_code", description="The name of the task")

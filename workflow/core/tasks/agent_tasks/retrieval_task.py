@@ -31,6 +31,78 @@ class ChunkedEmbedding(TypedDict):
     embedding_chunk: EmbeddingChunk
 
 class RetrievalTask(AliceTask):
+    """
+    A specialized task for managing and querying embedded content within a DataCluster,
+    implementing a two-node pattern for embedding management and similarity search.
+
+    RetrievalTask handles both the maintenance of embeddings for stored content and
+    the retrieval of relevant information based on semantic similarity. It uses a
+    sophisticated two-node pattern to ensure embeddings are current before performing searches.
+
+    Node Structure:
+    --------------
+    1. ensure_embeddings_in_data_cluster:
+        - Validates and updates embeddings for all content
+        - Processes multiple content types (files, code, text)
+        - Handles batch embedding generation
+        - Exit codes:
+            * SUCCESS (0): All embeddings current, proceed to retrieval
+            * FAILURE (1): Embedding generation failed, retry
+
+    2. retrieve_relevant_embeddings:
+        - Performs similarity search against embedded content
+        - Ranks and filters results by similarity
+        - Creates contextualized response bundles
+        - Exit codes:
+            * SUCCESS (0): Relevant content found and retrieved
+            * FAILURE (1): Search failed or no matches found, retry
+
+    Key Features:
+    -------------
+    * Embedding Management:
+        - Automatic embedding generation for new content
+        - Support for multiple content types
+        - Batch processing capabilities
+        - Language-specific handling
+
+    * Similarity Search:
+        - Configurable similarity thresholds
+        - Result count limiting
+        - Multi-type content retrieval
+        - Contextual result bundling
+
+    Attributes:
+    -----------
+    agent : AliceAgent
+        Agent with embedding model capabilities
+        
+    input_variables : FunctionParameters
+        Accepts:
+        - prompt (str): Query text for similarity search
+        - max_results (int, optional): Result limit (default: 10)
+        - similarity_threshold (float, optional): Minimum similarity score (default: 0.6)
+        - update_all (bool, optional): Force embedding updates (default: False)
+        
+    required_apis : List[ApiType]
+        [ApiType.EMBEDDINGS]
+
+    Example:
+    --------
+    ```python
+    retrieval_task = RetrievalTask(
+        agent=agent_with_embeddings,
+        task_name="semantic_search",
+        task_description="Find relevant content using semantic search",
+        data_cluster=my_data_cluster
+    )
+    
+    response = await retrieval_task.run(
+        prompt="Find content about machine learning",
+        max_results=5,
+        similarity_threshold=0.7
+    )
+    ```
+    """
     agent: AliceAgent = Field(..., description="The agent to use for the task")
     input_variables: FunctionParameters = Field(
         default=FunctionParameters(

@@ -7,8 +7,89 @@ from workflow.core.tasks import AliceTask
 
 class Workflow(AliceTask):
     """
-    Represents a sequence of tasks that are executed in a defined order.
-    Provides automatic variable passing between tasks based on node names and input requirements.
+    A specialized AliceTask implementation that orchestrates multiple tasks in a defined sequence.
+
+    Workflow extends AliceTask to manage a collection of tasks that execute in a coordinated manner.
+    It treats each task as a node in its execution flow, automatically handling variable passing
+    between tasks and managing the overall execution state.
+
+    Key Features:
+    -------------
+    * Task Orchestration:
+        - Executes multiple tasks in sequence
+        - Manages data flow between tasks
+        - Handles task dependencies
+
+    * Variable Management:
+        - Automatic variable passing between tasks
+        - Type validation and conversion
+        - Context preservation across task boundaries
+
+    * Execution Control:
+        - Task-level retry logic
+        - Error propagation and handling
+        - State management across tasks
+
+    Attributes:
+    -----------
+    tasks : Dict[str, AliceTask]
+        Collection of tasks to be executed (Required)
+        
+    recursive : bool
+        Always False for workflows to prevent infinite loops
+        
+    node_end_code_routing : TasksEndCodeRouting
+        Routing rules for task execution sequence
+
+    Example:
+    --------
+    ```python
+    workflow = Workflow(
+        task_name="data_processing",
+        task_description="Process and analyze data",
+        tasks={
+            "fetch_data": DataFetchTask(),
+            "analyze_data": AnalysisTask(),
+            "generate_report": ReportTask()
+        },
+        node_end_code_routing={
+            'fetch_data': {
+                0: ('analyze_data', False),
+                1: ('fetch_data', True)
+            },
+            'analyze_data': {
+                0: ('generate_report', False),
+                1: ('analyze_data', True)
+            },
+            'generate_report': {
+                0: (None, False),
+                1: ('generate_report', True)
+            }
+        }
+    )
+    ```
+
+    Notes:
+    ------
+    1. Task Management:
+        - Each task becomes a node in the workflow
+        - Tasks must be instances of AliceTask
+        - Task names must be unique
+
+    2. Data Flow:
+        - Variables can flow between tasks
+        - Type checking is performed automatically
+        - Task outputs can be used as inputs for subsequent tasks
+
+    3. Error Handling:
+        - Task-level errors are captured and managed
+        - Workflow can retry failed tasks
+        - Error states are preserved in workflow history
+
+    4. Implementation:
+        - No need to implement individual node methods
+        - Tasks define their own execution logic
+        - Workflow manages orchestration automatically
     """
     tasks: Dict[str, AliceTask] = Field(..., description="A dictionary of tasks in the workflow")
     recursive: bool = Field(False, description="Whether the workflow can be executed recursively")

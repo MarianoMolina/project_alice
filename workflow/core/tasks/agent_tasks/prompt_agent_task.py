@@ -25,26 +25,67 @@ class ToolExitCode(IntEnum):
     
 class PromptAgentTask(AliceTask):
     """
-    A task class that processes prompts using an AI agent, with support for conditional tool and code execution.
+    Base class for tasks that interact with language models using a three-node execution pattern.
 
-    This task implements a three-node workflow:
-    1. LLM Generation: Processes the input prompt and determines execution path
-    2. Tool Execution: Handles any tool/function calls (if present and permitted)
-    3. Code Execution: Processes any code blocks (if present and permitted)
+    PromptAgentTask implements a sophisticated execution flow designed to handle LLM interactions,
+    tool usage, and code execution. It uses a three-node architecture that allows for flexible
+    response processing:
 
-    The workflow is controlled by a flexible routing system where each node's exit code determines
-    the next step. The LLM generation node analyzes its output to determine if tool calls and/or
-    code execution are needed, and the tool execution node can optionally proceed to code execution
-    based on the original LLM output.
+    Node Structure:
+    --------------
+    1. llm_generation:
+        - Primary node for LLM interaction
+        - Analyzes responses for tool calls and code blocks
+        - Routes to appropriate next node based on content
+        - Exit codes:
+            * SUCCESS_NO_EXEC (0): Clean response, no further execution needed
+            * FAILURE (1): Generation failed, retry
+            * SUCCESS_TOOLS (2): Contains tool calls, proceed to tool execution
+            * SUCCESS_CODE (3): Contains code blocks, proceed to code execution
+            * SUCCESS_BOTH (4): Contains both, proceed to tool execution first
 
-    Exit codes are automatically adjusted based on agent capabilities and available routes,
-    ensuring graceful handling even with partial routing tables or disabled features.
+    2. tool_call_execution:
+        - Executes tool calls found in LLM response
+        - Processes results for potential code execution
+        - Exit codes:
+            * SUCCESS (0): Tools executed successfully, no code needed
+            * FAILURE (1): Tool execution failed, retry
+            * SUCCESS_CODE (2): Tools successful, proceed to code execution
+
+    3. code_execution:
+        - Executes code blocks from LLM response
+        - Handles multiple languages and execution environments
+        - Exit codes:
+            * SUCCESS (0): Code executed successfully
+            * FAILURE (1): Execution failed, retry
 
     Attributes:
-        agent (AliceAgent): The agent responsible for LLM interaction and execution
-        required_apis (List[ApiType]): Required APIs, defaults to [LLM_MODEL]
-        input_variables (FunctionParameters): Expected input structure
-        node_end_code_routing (TasksEndCodeRouting): Routing rules between nodes
+    -----------
+    agent : AliceAgent
+        Agent with LLM model and optional tool/code permissions
+        
+    required_apis : List[ApiType]
+        [ApiType.LLM_MODEL]
+        
+    templates : Dict[str, Prompt]
+        Must include task_template for input formatting and optional output_template
+
+    Example:
+    --------
+    ```python
+    class CustomPromptTask(PromptAgentTask):
+        def __init__(self):
+            super().__init__(
+                agent=agent_with_tools_and_code,
+                task_name="custom_prompt",
+                task_description="Process prompts with tools and code",
+                templates={
+                    "task_template": Prompt(
+                        content="Process this: {{prompt}}"
+                    )
+                }
+            )
+    ```
     """
     agent: AliceAgent = Field(..., description="The agent to use for the task")
     required_apis: List[ApiType] = Field([ApiType.LLM_MODEL], description="A list of required APIs for the task")

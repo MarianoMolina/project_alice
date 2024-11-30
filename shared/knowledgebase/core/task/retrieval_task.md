@@ -1,6 +1,31 @@
-# Retrieval Task
+# RetrievalTask
 
-The Retrieval Task handles semantic search over embedded content, enabling the discovery of relevant information based on semantic similarity. It combines embedding generation with sophisticated matching logic to find the most relevant content.
+A specialized task for semantic search and retrieval using embeddings. Implements a two-node pattern that ensures embedding consistency before performing similarity search.
+
+## Key Features
+- Two-node pattern (embedding maintenance → retrieval)
+- Automatic embedding updates
+- Configurable similarity thresholds
+- Multi-type content support
+
+## Node Structure
+1. `ensure_embeddings_in_data_cluster`: Updates/verifies embeddings
+2. `retrieve_relevant_embeddings`: Performs similarity search
+
+## Usage
+```python
+retrieval = RetrievalTask(
+    agent=agent_with_embeddings,
+    task_name="semantic_search",
+    data_cluster=content_cluster
+)
+
+results = await retrieval.run(
+    prompt="Find similar content",
+    similarity_threshold=0.7,
+    max_results=5
+)
+```
 
 ## Structure
 

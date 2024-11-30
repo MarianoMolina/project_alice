@@ -10,26 +10,78 @@ from workflow.util import get_traceback
 
 class APITask(AliceTask):
     """
-    Represents a task that interacts with a specific API, using a node-based execution model.
+    A specialized AliceTask implementation for direct API interactions with a single, focused purpose.
 
-    This class is designed to handle tasks that require interaction with external APIs.
-    It validates the API configuration and uses the appropriate API engine for execution.
-    It inherits from AliceTask to integrate with the node-based execution framework.
+    APITask provides a streamlined way to interact with external APIs by implementing a simplified
+    node structure with a single 'default' node. This design is ideal for straightforward API
+    operations that don't require complex workflow logic.
+
+    Key Features:
+    -------------
+    * Single API Focus:
+        - Each instance works with exactly one API type
+        - Built-in API validation and configuration
+        - Automatic routing for retry attempts
+
+    * Simplified Node Structure:
+        - Single 'default' node implementation
+        - Automatic retry handling
+        - Standardized error management
+
+    * API Engine Integration:
+        - Direct mapping to API engine classes
+        - Automatic configuration validation
+        - Consistent response formatting
 
     Attributes:
-        required_apis (List[ApiType]): List containing exactly one ApiType, specifying the required API.
-        api_engine (Type[APIEngine]): The class of the API engine to be used.
-        start_node (str): The name of the starting node, set to 'default'.
-        node_end_code_routing (TasksEndCodeRouting): The routing logic for nodes, configured for a single 'default' node.
+    -----------
+    required_apis : List[ApiType]
+        Must contain exactly one ApiType
+        
+    api_engine : Type[APIEngine]
+        The class of the API engine to be used
+        
+    start_node : str
+        Always 'default' for this implementation
+        
+    node_end_code_routing : TasksEndCodeRouting
+        Pre-configured for single node with retry logic:
+        - Exit code 0: Success, end task
+        - Exit code 1: Failure, retry if attempts remain
 
-    Class Methods:
-        validate_api_task: Validates the API task configuration.
+    Example:
+    --------
+    ```python
+    class SearchAPITask(APITask):
+        required_apis = [ApiType.GOOGLE_SEARCH]
+        api_engine = GoogleSearchEngine
+        input_variables = FunctionParameters(
+            properties={
+                "query": ParameterDefinition(
+                    type="string",
+                    description="Search query"
+                )
+            },
+            required=["query"]
+        )
+    ```
 
-    Methods:
-        execute_default: Executes the default node, which performs the API interaction.
+    Notes:
+    ------
+    1. API Validation:
+        - Validates exactly one required API
+        - Ensures API type matches engine capabilities
+        - Verifies input variable compatibility
 
-    Raises:
-        ValueError: If the API configuration is invalid or if required parameters are missing.
+    2. Execution Flow:
+        - Single node execution with automatic retry
+        - Standardized error handling
+        - Consistent response formatting
+
+    3. Implementation:
+        - No need to implement node methods
+        - Can override default behavior if needed
+        - Handles all basic API interaction patterns
     """
     required_apis: List[ApiType] = Field(..., min_length=1, max_length=1)
     api_engine: Type[APIEngine] = Field(None)

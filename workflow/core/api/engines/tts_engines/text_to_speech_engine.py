@@ -9,6 +9,31 @@ from workflow.core.api.engines.api_engine import APIEngine
 from workflow.util import LOGGER, get_traceback, TextSplitter, Language, LengthType
 
 class TextToSpeechEngine(APIEngine):
+    """
+    Text-to-speech API engine implementing the OpenAI TTS interface.
+    
+    Defines the standard interface for text-to-speech conversion,
+    including automatic text splitting for long inputs. Features:
+    - Multiple voice options
+    - Speed control
+    - Automatic chunking for long texts
+    
+    Input Interface:
+        - input: Text to convert to speech
+        - voice: Voice identifier to use
+        - speed: Speech rate control
+    
+    Returns:
+        References object containing FileContentReference with:
+        - Generated audio in base64 format
+        - Original text and generation parameters
+        - Model and voice metadata
+    
+    Note:
+        Handles text splitting and multiple file generation when
+        input exceeds model context limits, maintaining consistent
+        voice and speed across segments.
+    """
     input_variables: FunctionParameters = Field(
         default=FunctionParameters(
             type="object",

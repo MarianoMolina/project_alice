@@ -7,14 +7,40 @@ from workflow.core.api.engines import APIEngine, ApiEngineMap
     
 class APIManager(BaseModel):
     """
-    Manages a collection of APIs and provides methods to interact with them.
-
-    This class is responsible for storing, retrieving, and utilizing various API
-    configurations. It supports different types of APIs, including LLM (Language
-    Model) APIs and search APIs.
-
+    Central manager for API configurations and interactions within the workflow system.
+    
+    APIManager serves as the orchestrator for all API interactions, maintaining a collection
+    of configured APIs and providing methods to validate, access, and utilize them. It works
+    in conjunction with APIEngine implementations to handle actual API calls.
+    
+    The manager supports two primary types of APIs:
+    1. Model APIs (LLM, Vision, STT, TTS, etc.) that return model-specific configurations
+    2. Service APIs (Search, Knowledge Graph, etc.) that return standard API configurations
+    
+    Key Responsibilities:
+    - Managing API configurations and their lifecycle
+    - Validating API availability and health
+    - Routing API requests to appropriate engines
+    - Providing standardized access to API configurations
+    
     Attributes:
-        apis (Dict[str, API]): A dictionary storing API objects, keyed by their names.
+        apis (Dict[str, API]): Collection of configured APIs indexed by their IDs
+    
+    Example:
+        ```python
+        # Initialize manager with APIs
+        manager = APIManager(apis={
+            'gpt4': API(api_type=ApiType.LLM_MODEL, api_name=ApiName.OPENAI, ...),
+            'search': API(api_type=ApiType.GOOGLE_SEARCH, api_name=ApiName.GOOGLE_SEARCH, ...)
+        })
+        
+        # Generate response using appropriate engine
+        response = await manager.generate_response_with_api_engine(
+            api_type=ApiType.LLM_MODEL,
+            model=my_model,
+            messages=my_messages
+        )
+        ```
     """
     apis: Dict[str, API] = {}
 
@@ -123,17 +149,23 @@ class APIManager(BaseModel):
 
     def _validate_inputs(self, api_engine: APIEngine, kwargs: Dict[str, Any]) -> None:
         """
-        Validate the input parameters against the API engine's expected inputs.
-
-        This method checks if all required inputs are provided and if there are
-        any unexpected inputs.
-
+        Validate input parameters against the engine's schema.
+        
+        Internal method to ensure all provided parameters match the expectations
+        defined in input_variables.
+        
         Args:
-            api_engine (APIEngine): The API engine to validate against.
-            kwargs (Dict[str, Any]): The input parameters to validate.
-
+            api_engine: The engine instance to validate against
+            kwargs: Input parameters to validate
+        
         Raises:
-            ValueError: If there are missing required inputs or unexpected inputs.
+            ValueError: If validation fails
+        
+        Notes:
+            - Checks for required parameters
+            - Validates parameter types
+            - Handles default values
+            - Used internally before API calls
         """
         LOGGER.debug(f"Validating inputs for API engine: {api_engine.__class__.__name__}")
         expected_inputs = api_engine.input_variables.properties

@@ -11,11 +11,14 @@ const KnowledgebaseContent: React.FC = () => {
     const fetchContent = async () => {
       try {
         // Get everything after 'knowledgebase'
-        const path = location.pathname.split('/knowledgebase/')[1] || 'general/index';
+        Logger.info(`Fetching content for path: ${location.pathname}`);
+        const path = location.pathname.split('/shared/')[1] || 'knowledgebase/index';
+
+        let new_ath = (path === "knowledgebase" || path === "knowledgebase/")? "knowledgebase/index" : path;
         
-        Logger.info(`Fetching content for path: ${path}`);
+        Logger.info(`Fetching content for path: ${new_ath}`);
         
-        const response = await fetch(`/content/knowledgebase/${path}.md`);
+        const response = await fetch(`/shared/${new_ath}.md`);
         
         if (!response.ok) {
           throw new Error(`Failed to fetch content: ${response.statusText}`);

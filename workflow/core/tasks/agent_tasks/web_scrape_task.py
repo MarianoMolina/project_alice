@@ -18,6 +18,103 @@ class SelectorModel(BaseModel):
     selectors: List[str]
 
 class WebScrapeBeautifulSoupTask(AliceTask):
+    """
+    A specialized task for web scraping that implements a three-node pattern for
+    content fetching, parsing, and summarization using BeautifulSoup and LLM assistance.
+
+    WebScrapeBeautifulSoupTask provides a robust approach to web scraping by combining
+    traditional parsing with AI-assisted content extraction and summarization. Its
+    three-node pattern ensures reliable content extraction and meaningful summaries.
+
+    Node Structure:
+    --------------
+    1. fetch_url:
+        - Handles URL fetching and initial HTML retrieval
+        - Validates response status and content
+        - Manages connection timeouts and retries
+        - Exit codes:
+            * SUCCESS (0): Content retrieved, proceed to parsing
+            * FAILURE (1): Fetch failed, retry
+
+    2. generate_selectors_and_parse:
+        - Uses LLM to generate optimal CSS selectors
+        - Applies selectors to extract main content
+        - Falls back to default selectors if needed
+        - Exit codes:
+            * SUCCESS (0): Content extracted, proceed to summarization
+            * FAILURE (1): Parsing failed, retry
+
+    3. url_summarization:
+        - Generates concise content summary using LLM
+        - Creates structured metadata
+        - Formats final output
+        - Exit codes:
+            * SUCCESS (0): Summary generated successfully
+            * FAILURE (1): Summarization failed, retry
+
+    Key Features:
+    -------------
+    * Intelligent Parsing:
+        - LLM-assisted selector generation
+        - Automatic main content detection
+        - Noise removal and cleaning
+        - Fallback parsing strategies
+
+    * Content Processing:
+        - HTML preprocessing
+        - Text cleaning and formatting
+        - Metadata extraction
+        - Content summarization
+
+    Attributes:
+    -----------
+    agent : AliceAgent
+        Agent with LLM capabilities for selector generation and summarization
+        
+    input_variables : FunctionParameters
+        Accepts:
+        - url (str): Target URL to scrape
+        - fetch_url_html_content (str, optional): Pre-fetched HTML content
+        
+    required_apis : List[ApiType]
+        [ApiType.LLM_MODEL]
+
+    Example:
+    --------
+    ```python
+    scrape_task = WebScrapeBeautifulSoupTask(
+        agent=agent_with_llm,
+        task_name="web_scraper",
+        task_description="Extract and summarize web content",
+        templates={
+            "task_template": Prompt(
+                content="Extract main content from: {{url}}"
+            )
+        }
+    )
+    
+    response = await scrape_task.run(
+        url="https://example.com/article"
+    )
+    ```
+    Notes:
+    ------
+    1. Content Extraction:
+        - Prioritizes main content over navigation/ads
+        - Preserves important structural elements
+        - Handles different HTML structures
+
+    2. Error Handling:
+        - Connection timeout management
+        - Invalid HTML recovery
+        - Selector generation fallbacks
+        - Summary retry logic
+
+    3. Performance:
+        - Efficient HTML sampling
+        - Cached selector patterns
+        - Optimized content cleaning
+    """
     agent: AliceAgent = Field(..., description="The agent to use for the task")
     input_variables: FunctionParameters = Field(
         default=FunctionParameters(
