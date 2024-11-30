@@ -1,16 +1,15 @@
 import cohere
 from cohere import NonStreamedChatResponse
-from pydantic import Field
-from typing import Dict, Any, List, Optional
+from typing import List, Optional
 from workflow.core.api.engines.llm_engines.llm_engine import LLMEngine
 from workflow.core.data_structures import (
-    MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, 
+    MessageDict, ContentType, ModelConfig, References, ToolCall, 
     RoleTypes, MessageGenerators, ToolFunction
     ) 
-from workflow.util import LOGGER, est_messages_token_count, prune_messages, est_token_count
+from workflow.util import LOGGER, est_messages_token_count, est_token_count, CHAR_PER_TOKEN, MessagePruner, ScoreConfig, MessageApiFormat
 
 class CohereLLMEngine(LLMEngine):
-    async def generate_api_response(self, api_data: ModelConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[ToolFunction]] = None, max_tokens: Optional[int] = None, temperature: Optional[float] = 0.7, tool_choice: Optional[str] = "auto", n: Optional[int] = 1, **kwargs) -> References:
+    async def generate_api_response(self, api_data: ModelConfig, messages: List[MessageApiFormat], system: Optional[str] = None, tools: Optional[List[ToolFunction]] = None, max_tokens: Optional[int] = None, temperature: Optional[float] = 0.7, tool_choice: Optional[str] = "auto", n: Optional[int] = 1, **kwargs) -> References:
         if not api_data.api_key:
             raise ValueError("API key not found in API data")
 
@@ -30,7 +29,11 @@ class CohereLLMEngine(LLMEngine):
             # Prune messages if estimated tokens exceed context size
             if estimated_tokens > api_data.ctx_size:
                 LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning. ")
-                cohere_messages = prune_messages(cohere_messages, api_data.ctx_size)
+                pruner = MessagePruner(
+                    max_total_size=api_data.ctx_size * CHAR_PER_TOKEN,
+                    score_config=ScoreConfig(),
+                    )
+                messages = pruner.prune(messages, self, api_data)
                 estimated_tokens = est_messages_token_count(messages, tools) + est_token_count(system)
                 LOGGER.debug(f"Pruned message len: {estimated_tokens}")
             elif estimated_tokens > 0.8 * api_data.ctx_size:

@@ -2,9 +2,9 @@ import traceback
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletion
 from pydantic import Field
-from typing import Dict, Any, List, Optional
+from typing import List, Optional
 from workflow.core.api.engines.api_engine import APIEngine
-from workflow.util import LOGGER, est_messages_token_count, prune_messages, est_token_count
+from workflow.util import LOGGER, est_messages_token_count, ScoreConfig, est_token_count, MessagePruner, CHAR_PER_TOKEN, MessageApiFormat
 from workflow.core.data_structures import (
     MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, RoleTypes, MessageGenerators, ToolFunction
     )
@@ -70,7 +70,8 @@ class LLMEngine(APIEngine):
     )
     required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
 
-    async def generate_api_response(self, api_data: ModelConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[ToolFunction]] = None, max_tokens: Optional[int] = None, tool_choice: Optional[str] = 'auto', n: Optional[int] = 1, **kwargs) -> References:
+
+    async def generate_api_response(self, api_data: ModelConfig, messages: List[MessageApiFormat], system: Optional[str] = None, tools: Optional[List[ToolFunction]] = None, max_tokens: Optional[int] = None, tool_choice: Optional[str] = 'auto', n: Optional[int] = 1, **kwargs) -> References:
         """
         Generates the API response for the task, using the provided API data and messages.
 
@@ -116,10 +117,17 @@ class LLMEngine(APIEngine):
         if tools:
             tools = [tool.get_dict() for tool in tools]
         estimated_tokens = est_messages_token_count(messages, tools) + est_token_count(system)
+        if not api_data.ctx_size:
+            LOGGER.warning(f"Context size not set for model {api_data.model}. Using default value of 4096.")
+            api_data.ctx_size = 4096
 
         if estimated_tokens > api_data.ctx_size:
+            pruner = MessagePruner(
+                max_total_size=api_data.ctx_size * CHAR_PER_TOKEN,
+                score_config=ScoreConfig(),
+                )
             LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning. ")
-            messages = prune_messages(messages, api_data.ctx_size)
+            messages = pruner.prune(messages, self, api_data)
             estimated_tokens = est_messages_token_count(messages, tools) + est_token_count(system)
             LOGGER.debug(f"Pruned message len: {estimated_tokens}")
         elif estimated_tokens > 0.8 * api_data.ctx_size:

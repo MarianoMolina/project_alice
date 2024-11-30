@@ -5,7 +5,7 @@ from anthropic.types import TextBlock, ToolUseBlock, ToolParam, Message
 from workflow.core.data_structures import ToolCall, ToolCallConfig, ToolFunction
 from workflow.core.api.engines.llm_engines.llm_engine import LLMEngine
 from workflow.core.data_structures import MessageDict, ContentType, ModelConfig, References, RoleTypes, MessageGenerators
-from workflow.util import LOGGER, est_messages_token_count, prune_messages, est_token_count
+from workflow.util import LOGGER, est_messages_token_count, est_token_count, CHAR_PER_TOKEN, MessagePruner, ScoreConfig, MessageApiFormat
 
 ANTHROPIC_PRICING_1k = {
     "claude-3-5-sonnet-20240620": (0.003, 0.015),
@@ -36,7 +36,7 @@ class LLMAnthropic(LLMEngine):
         This class assumes the use of Anthropic's AsyncAnthropic client and
         follows Anthropic's API conventions for chat completions.
     """
-    def adapt_messages(self, messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def adapt_messages(self, messages: List[MessageApiFormat]) -> List[Dict[str, Any]]:
         """
         Adapt the input messages to fit Anthropic's expected format.
 
@@ -45,7 +45,7 @@ class LLMAnthropic(LLMEngine):
         cases where messages have roles other than 'user' or 'assistant'.
 
         Args:
-            messages (List[Dict[str, Any]]): The original list of messages.
+            messages (List[MessageApiFormat]): The original list of messages.
 
         Returns:
             List[Dict[str, Any]]: The adapted list of messages suitable for Anthropic's API.
@@ -91,7 +91,7 @@ class LLMAnthropic(LLMEngine):
 
         return final_adapted
     
-    async def generate_api_response(self, api_data: ModelConfig, messages: List[Dict[str, Any]], system: Optional[str] = None, tools: Optional[List[ToolFunction]] = None, max_tokens: Optional[int] = None, tool_choice: str = 'auto', n: Optional[int] = 1, **kwargs) -> References:
+    async def generate_api_response(self, api_data: ModelConfig, messages: List[MessageApiFormat], system: Optional[str] = None, tools: Optional[List[ToolFunction]] = None, max_tokens: Optional[int] = None, tool_choice: str = 'auto', n: Optional[int] = 1, **kwargs) -> References:
         """
         Generate a chat completion response using Anthropic's API.
 
@@ -128,7 +128,11 @@ class LLMAnthropic(LLMEngine):
         # Prune messages if estimated tokens exceed context size
         if estimated_tokens > api_data.ctx_size:
             LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning. ")
-            messages = prune_messages(messages, api_data.ctx_size)
+            pruner = MessagePruner(
+                max_total_size=api_data.ctx_size * CHAR_PER_TOKEN,
+                score_config=ScoreConfig(),
+                )
+            messages = pruner.prune(messages, self, api_data)
             estimated_tokens = est_messages_token_count(messages, tools) + est_token_count(system)
             LOGGER.debug(f"Pruned message len: {estimated_tokens}")
         elif estimated_tokens > 0.8 * api_data.ctx_size:

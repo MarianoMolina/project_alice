@@ -4,6 +4,7 @@ from typing import Optional, Dict, Any, List, TYPE_CHECKING
 from pydantic import Field, field_validator
 from workflow.core.data_structures.base_models import Embeddable, ContentType, FileType
 from workflow.core.data_structures.central_types import ReferencesType
+from workflow.util.message_prune.message_prune_utils import RoleTypes, MessageApiFormat
 
 if TYPE_CHECKING:
     from workflow.core.data_structures.references import References
@@ -18,11 +19,11 @@ class MessageGenerators(str, Enum):
     TOOL = "tool"
     SYSTEM = "system"
 
-class RoleTypes(str, Enum):
-    USER = "user"
-    ASSISTANT = "assistant"
-    SYSTEM = "system"
-    TOOL = "tool"
+# class RoleTypes(str, Enum):
+#     USER = "user"
+#     ASSISTANT = "assistant"
+#     SYSTEM = "system"
+#     TOOL = "tool"
 
 class MessageDict(Embeddable):
     role: RoleTypes = Field(default=RoleTypes.USER, description="Role of the message")
@@ -124,3 +125,13 @@ class MessageDict(Embeddable):
         Get references by type. This returns references of the specified type.
         """
         return self.references.get_references(ref_type)
+    
+    def convert_to_api_format(self) -> MessageApiFormat:
+        """Convert a MessageDict to the API format."""
+        api_message = MessageApiFormat(
+            role=self.role,
+            content=self.content
+        )
+        if self.references.tool_calls:
+            api_message["tool_calls"] = [tool_call.model_dump() for tool_call in self.references.tool_calls]
+        return api_message

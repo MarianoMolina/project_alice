@@ -369,17 +369,7 @@ print("This is just for demonstration")
 
     def _prepare_messages_for_api(self, messages: List[MessageDict]) -> List[Dict[str, Any]]:
         """Prepare messages for the API call."""
-        return [self._convert_message_dict_to_api_format(msg) for msg in messages]
-
-    def _convert_message_dict_to_api_format(self, message: MessageDict) -> Dict[str, Any]:
-        """Convert a MessageDict to the API format."""
-        api_message = {
-            "role": message.role,
-            "content": message.content
-        }
-        if message.references.tool_calls:
-            api_message["tool_calls"] = [tool_call.model_dump() for tool_call in message.references.tool_calls]
-        return api_message
+        return [msg.convert_to_api_format() for msg in messages]
     
     async def generate_vision_response(self, api_manager: APIManager, file_references: List[FileReference], prompt: str) -> MessageDict:
         vision_model = self.models[ModelType.VISION] or api_manager.get_api_by_type(ApiType.IMG_VISION).default_model
