@@ -21,6 +21,7 @@ import { useDialog } from '../../../../contexts/DialogCustomContext';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import { useApi } from '../../../../contexts/ApiContext';
 import Logger from '../../../../utils/Logger';
+import theme from '../../../../Theme';
 
 const UserInteractionViewer: React.FC<UserInteractionComponentProps> = ({ item }) => {
   const [interaction, setInteraction] = useState(item);
@@ -146,12 +147,12 @@ const UserInteractionViewer: React.FC<UserInteractionComponentProps> = ({ item }
                 Response
               </Typography>
               <Box className="bg-gray-50 rounded p-3">
-                <Typography variant="body2">
+                <Typography variant="body2" className="text-black">
                   Selected Option: {interaction.user_response.selected_option}
                 </Typography>
                 {interaction.user_response.user_feedback && (
                   <Box className="mt-2 pt-2 border-t border-gray-200">
-                    <Typography variant="subtitle2" className="text-gray-600 mb-1">
+                    <Typography variant="subtitle2">
                       Feedback
                     </Typography>
                     <CustomMarkdown>

@@ -54,6 +54,16 @@ services:
       retries: 5
       start_period: 10s
 
+  redis:
+    image: redis:6.0-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   workflow:
     build:
       context: ./workflow
@@ -73,9 +83,12 @@ services:
         condition: service_completed_successfully
       bash_image:
         condition: service_completed_successfully
+      redis:
+        condition: service_healthy
     environment:
       - PYTHONPATH=/app
       - HOST=host.docker.internal
+      - REDIS_URL=redis://redis:6379/0
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
@@ -92,21 +105,18 @@ services:
         - ${COMPOSE_PROJECT_DIR}/logs:/logs
         - ${COMPOSE_PROJECT_DIR}/shared-uploads:/shared-uploads
         - ${COMPOSE_PROJECT_DIR}/model_cache:/model_cache
+        - ${COMPOSE_PROJECT_DIR}/shared:/shared 
       command: |
         sh -c "
           echo 'Starting volume initialization' &&
           ls -la / &&
           echo 'Creating directories' &&
-          mkdir -p /logs /shared-uploads /model_cache &&
+          mkdir -p /logs /shared-uploads /model_cache /shared &&
           echo 'Setting permissions' &&
-          chmod -R 755 /logs &&
-          chown -R 1000:1000 /logs &&
-          chmod -R 755 /shared-uploads &&
-          chown -R 1000:1000 /shared-uploads &&
-          chmod -R 755 /model_cache &&
-          chown -R 1000:1000 /model_cache &&
+          chmod -R 755 /logs /shared-uploads /model_cache /shared &&
+          chown -R 1000:1000 /logs /shared-uploads /model_cache /shared &&
           echo 'Finished volume initialization' &&
-          ls -la /logs /shared-uploads /model_cache
+          ls -la /logs /shared-uploads /model_cache /shared
         "
 
   mongo:
@@ -120,14 +130,14 @@ services:
   python_image:
     build:
       context: .
-      dockerfile: /workflow/Dockerfile.python
+      dockerfile: workflow/Dockerfile.python
     image: mypython:latest
     command: ["bash"]
 
   bash_image:
     build:
       context: .
-      dockerfile: /workflow/Dockerfile.bash
+      dockerfile: workflow/Dockerfile.bash
     image: mybash:latest
     command: ["bash"]
 

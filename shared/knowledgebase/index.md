@@ -12,17 +12,17 @@ A friendly and intelligent AI assistant named Alice, represented as a glowing, e
 
 Alice is built on several core components that work together to create a versatile and powerful AI interaction environment:
 
-1. **Agents**: The primary AI entities that interact with users and perform tasks. [LINK](/shared/knowledgebase/core/agent)
-2. **Models**: The underlying AI models that power the agents' capabilities. [LINK](/shared/knowledgebase/core/model)
-3. **Chats**: Conversational interfaces where users interact with agents. [LINK](/shared/knowledgebase/core/chat)
-4. **Tasks**: Predefined operations that can be executed by agents or triggered within chats. [LINK](/shared/knowledgebase/core/task/task)
-5. **APIs**: Interfaces to external services and AI providers. [LINK](/shared/knowledgebase/core/api/api)
-6. **Prompts**: Templated instructions that guide AI behavior. [LINK](/shared/knowledgebase/core/prompt)
-7. **Parameters**: Structured input definitions for tasks and prompts. [LINK](/shared/knowledgebase/core/parameter)
-8. **Messages**: Individual units of communication within chats. [LINK](/shared/knowledgebase/core/message)
-9. **Task Responses**: Results and metadata from executed tasks. [LINK](/shared/knowledgebase/core/task_response)
-10. **Entity References**: Managed references to external web resources. [LINK](/shared/knowledgebase/core/entity_reference)
-11. **Files**: Handling of various file types with AI-readable transcripts. [LINK](/shared/knowledgebase/core/file)
+1. **Agents**: The primary AI entities that interact with users and perform tasks. [LINK](/shared/knowledgebase/core/agent.md)
+2. **Models**: The underlying AI models that power the agents' capabilities. [LINK](/shared/knowledgebase/core/model.md)
+3. **Chats**: Conversational interfaces where users interact with agents. [LINK](/shared/knowledgebase/core/chat.md)
+4. **Tasks**: Predefined operations that can be executed by agents or triggered within chats. [LINK](/shared/knowledgebase/core/task/task.md)
+5. **APIs**: Interfaces to external services and AI providers. [LINK](/shared/knowledgebase/core/api/api.md)
+6. **Prompts**: Templated instructions that guide AI behavior. [LINK](/shared/knowledgebase/core/prompt.md)
+7. **Parameters**: Structured input definitions for tasks and prompts. [LINK](/shared/knowledgebase/core/parameter.md)
+8. **Messages**: Individual units of communication within chats. [LINK](/shared/knowledgebase/core/message.md)
+9. **Task Responses**: Results and metadata from executed tasks. [LINK](/shared/knowledgebase/core/task_response.md)
+10. **Entity References**: Managed references to external web resources. [LINK](/shared/knowledgebase/core/entity_reference.md)
+11. **Files**: Handling of various file types with AI-readable transcripts. [LINK](/shared/knowledgebase/core/file.md)
 12. **|COMING| Data Clusters**: Group references with managed embeddings to facilitate RAG and Fine-tunning, as well as providing a reusable context.
 
 ## Key Features

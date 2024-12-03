@@ -705,7 +705,7 @@ class AliceTask(BaseDataStructure):
 
     def get_next_node(self, current_node: str, execution_history: List[NodeResponse]) -> Optional[str]:
         """
-        Determine the next node to execute based on either the task selection method or routing configuration,
+        Determine the next node to execute based on the routing configuration,
         and attempt limits.
         """
 
@@ -757,7 +757,7 @@ class AliceTask(BaseDataStructure):
         )
         
         if last_task_node:
-            # If node has a user checkpoint with response, get next node from checkpoint
+            # If node has a user interaction with response, get next node from interaction
             if last_task_node.references and last_task_node.references.user_interactions:
                 user_interaction = last_task_node.references.user_interactions[-1]
                 if user_interaction.user_response:

@@ -6,9 +6,11 @@ pytest-asyncio
 aiohttp
 
 # API
-uvicorn
+uvicorn[standard]
 fastapi
 fastapi-cors
+redis>=4.2.0
+websockets
 
 # Docker
 docker

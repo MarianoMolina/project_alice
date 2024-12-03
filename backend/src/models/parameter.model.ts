@@ -1,10 +1,13 @@
 import mongoose, { Schema } from 'mongoose';
-import { IParameterDefinitionDocument, IParameterDefinitionModel } from '../interfaces/parameter.interface';
+import { IParameterDefinitionDocument, IParameterDefinitionModel, ParameterTypes } from '../interfaces/parameter.interface';
 import { getObjectId } from '../utils/utils';
 import mongooseAutopopulate from 'mongoose-autopopulate';
 
 const parameterDefinitionSchema = new Schema<IParameterDefinitionDocument, IParameterDefinitionModel>({
-  type: { type: String, required: true, description: "Type of the parameter, like string or integer" },
+  type: { 
+    type: String, 
+    enum: Object.values(ParameterTypes).filter(value => typeof value === 'string'), 
+    required: true, description: "Type of the parameter, like string or integer" },
   description: { type: String, required: true, description: "Description of the parameter" },
   default: { type: Schema.Types.Mixed, default: null, description: "Default value of the parameter" },
   created_by: { type: Schema.Types.ObjectId, ref: 'User', required: true, autopopulate: true },

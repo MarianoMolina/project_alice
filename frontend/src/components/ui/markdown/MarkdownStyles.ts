@@ -63,6 +63,13 @@ const useStyles = makeStyles((theme: Theme) => ({
     markdownTitle: {
         fontSize: '1.25em !important',
     },
+    link: {
+        color: theme.palette.primary.main,
+        textDecoration: 'none',
+        '&:hover': {
+            textDecoration: 'underline',
+        },
+    },
     h1: {
         fontWeight: 600,
         marginTop: '25px !important',

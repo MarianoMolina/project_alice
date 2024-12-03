@@ -16,6 +16,7 @@ Alice is an agentic workflow framework that integrates task execution and intell
 > - APIS: New APIs for Wolfram Alpha, Google's Knowledge Graph, PixArt Image Generation (local), Bark TTS (local). Support for local embeddings
 > - DATA CLUSTERS: Now chats and tasks can hold updatable data clusters that hold embeddable references like messages, files, task responses, etc. You can add any reference in your environment to a data cluster to give your chats/tasks access to it. The new retrieval tasks leverage this. 
 > - TEXT MGMT: Added 2 Text Splitter methods (recursive and semantic), which are used by the embedding and RAG logic (as well as other APIs with that need to chunk the input, except LLMs), and a Message Pruner class that scores and prunes messages, which is used by the LLM API engines to avoid contex size issues
+> - REDIS QUEUE: Implemented a queue system for the Workflow module to handle incoming requests. 
 > - **NOTE**: If you update to this version, you'll need to reinitialize your database (User settings -> Danger Zone). This update required a lot of changes to the framework, and making it backwards compatible is inefficient at this stage. Keep in mind Project ALice is still in Alpha, and changes should be expected
 
 > What's next? Planned developments for v0.4 (find detailed info below):
@@ -91,19 +92,31 @@ These components share information in one of 6 main ways, all of which have a st
 
 ### 1. Task Execution
 - Create and execute custom tasks using predefined classes or by creating new ones in the Workflow module
+![Execute Task](./shared/img/frontend_screenshots/exec_task_3.jpg "Execute tasks to test them extensively")
 - Define new parameters, prompts/templates, and agents for task deployment
-- Execute tasks with custom parameters
+![Database](./shared/img/frontend_screenshots/database_1.PNG "View, create and edit all the elements you'll need")
+- Execute tasks with custom parameters, and visualize your prompts with the inputs parsed
+![Execute Task](./shared/img/frontend_screenshots/exec_task_4.jpg "Execute tasks to test them extensively")
 - Run tasks directly from the frontend, or programatically with the workflow container's API
+- Visualize the task logic in the flow viewer
+![Visualize Task](./shared/img/frontend_screenshots/task_flow.jpg "Execute tasks to test them extensively")
 - Supported task types include:
   - Workflow -> Combine other tasks
   - API tasks: Reddit, Wikipedia, Google, Exa, and Arxiv search -> Retrieve information
   - Agentic tasks:
     - Prompt Agent Tasks: Including the base PromptAgentTask, and CheckTask, CodeExecutionLLMTask and CodeGenerationLLMTask
     - Agent Tasks: WebScrapeBeautifulSoupTask, TextToSpeechTask, GenerateImageTask, RetrievalTask and EmbeddingTask
+- View the task results, with the output organized by node, visually explaining the process:
+![Visualize Task Results](./shared/img/frontend_screenshots/task_response_0.jpg "Execute tasks to test them extensively")
+![Visualize Task Results](./shared/img/frontend_screenshots/task_response_1.jpg "Execute tasks to test them extensively")
 
 ### 2. Intelligent Chat
 - Create and manage chat conversations with AI agents
+![Chat](./shared/img/frontend_screenshots/chat_2.PNG "Chat with your own Alice AI Assistant")
 - Add references from other conversations or task executions to enrich the chat context
+- Give your agents the system prompt instructions to use analys and document blocks:
+![Chat](./shared/img/frontend_screenshots/chat_3.jpg "Chat with your own Alice AI Assistant")
+![Chat](./shared/img/frontend_screenshots/chat_4.jpg "Chat with your own Alice AI Assistant")
 - Integrate new tasks as tools for the active agent during chat
 - Support for various message types (text, image, video, audio, file) -> automatic transcript is created so the agent can interpret
 - Deploy these agents wherever you want, since the workflow API offers an endpoint to create chat completions
@@ -114,7 +127,8 @@ These components share information in one of 6 main ways, all of which have a st
 - Support for multiple AI models, including local and remote deployments
 
 ### 4. User Management
-- User authentication and authorization
+- User authentication, authorization and configuration
+![User APIs](./shared/img/frontend_screenshots/user.PNG "View your user details and API configs - also you can re-set your database")
 - Role-based access control (user and admin roles)
 
 ### 5. Flexible Model Deployment
@@ -125,26 +139,6 @@ These components share information in one of 6 main ways, all of which have a st
 - The Workflow container exposes its API to your `http://localhost:8000/`, with routes `/execute_task` and `/chat_response/{chat_id}` as the primary entry points. You'll need the token for validation. 
 -  Check the relevant routes files for the prop structure. 
 
-## Usage
-
-The Alice framework provides a user-friendly frontend interface for interacting with the system. Through this interface, you can:
-
-1. Create and manage AI agents, models, prompts, parameters, tasks, api, etc. in your personal database ([Getting Started](./shared/knowledgebase/general/getting_started))
-![Database](./shared/img/frontend_screenshots/database_1.PNG "View, create and edit all the elements you'll need")
-View all the references you've created, like files, messages, task responses, etc:
-![Database](./shared/img/frontend_screenshots/database_2.PNG "View, create and edit all the elements you'll need")
-2. Start and manage chat conversations ([Start Chat](./shared/knowledgebase/general/start_chat))
-![Chat](./shared/img/frontend_screenshots/chat_1.PNG "Chat with your own Alice AI Assistant")
-Select a chat or create a new one, and start interacting with your agents. 
-![Chat](./shared/img/frontend_screenshots/chat_2.PNG "Chat with your own Alice AI Assistant")
-3. Create and execute various types of tasks ([Execute Task](./shared/knowledgebase/general/execute_task))
-![Execute Task](./shared/img/frontend_screenshots/exec_task_1.PNG "Execute tasks to test them extensively")
-View their outputs, run them again, change their settings, etc.
-![Execute Task](./shared/img/frontend_screenshots/exec_task_2.PNG "Execute tasks to test them extensively")
-4. Manage your user account and api config. 
-![User APIs](./shared/img/frontend_screenshots/user.PNG "View your user details and API configs - also you can re-set your database")
-
-
 ### How tasks work
 All tasks execute a set of "inner nodes", which can be one or more. The execution logic for these nodes is defined by the node_end_code_routing object and the start_node string. The task will execute the start_node node, and then use the routing and the result retrieved, to decide what node to execute next. 
 
@@ -152,7 +146,7 @@ These nodes are, in normal tasks, inner methods that the task calls when executi
 
 In the case of Workflows, these nodes are "inner tasks" instead of specific methods defined in the class. These are provided in the "tasks" object of the parent Workflow, and they are executed as a normal inner node would. 
 
-> Here's an example of both a workflow and a task, and how they pass and use the data produced:
+> Here's an example of both a workflow and a task, and how they pass and use the data produced: [*Note:* These tasks/workflows have been redesigned since then, but the diagram is still relevant]
 
 ![Task logic](./shared/img/diagrams/Task_logic.png "Task logic flow")
 
@@ -213,7 +207,7 @@ export enum ApiName {
 }
 ``` 
 
-## For more details, check the [ReadMe Index](/shared/knowledgebase/index)
+## For more details, check the [ReadMe Index](/shared/knowledgebase/index.md)
 
 ## Contributing
 

@@ -26,12 +26,20 @@ const userInteractionSchema = new Schema<IUserInteractionDocument, IUserInteract
         default: null,
         validate: {
             validator: function(v: any) {
-                return v === null
-                    || (typeof v === 'object' 
-                        && (v.selected_option === undefined || typeof v.selected_option === 'number')
-                        && (v.user_feedback === undefined || typeof v.user_feedback === 'string'));
-            }
-        },
+                if (v === null) return true;
+                
+                if (typeof v !== 'object') return false;
+                
+                // selected_option must be present and must be a number
+                if (typeof v.selected_option !== 'number') return false;
+                
+                // user_feedback is optional but must be string if present
+                if (v.user_feedback !== undefined && typeof v.user_feedback !== 'string') return false;
+                
+                return true;
+            },
+            message: 'Invalid user_response format. Must have selected_option as number and optional user_feedback as string'
+        }
     },
     embedding: [{ type: Schema.Types.ObjectId, ref: 'EmbeddingChunk', autopopulate: true }],
     created_by: { 

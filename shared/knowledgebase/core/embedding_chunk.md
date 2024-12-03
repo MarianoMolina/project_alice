@@ -49,7 +49,7 @@ async def execute_generate_embedding(
     )
 ```
 
-### 2. Semantic Retrieval (RetrievalTask)
+### 2. RAG (RetrievalTask)
 Task for finding semantically similar content:
 ```python
 async def execute_retrieve_relevant_embeddings(
@@ -159,7 +159,7 @@ updated_cluster = await retrieval_task.ensure_embeddings_for_data_cluster(
 
 ## Text Chunking
 
-### 1. Language-Specific Chunking
+### 1. Recursive (Language-Specific) Chunking
 The system uses different strategies based on content type:
 
 ```python

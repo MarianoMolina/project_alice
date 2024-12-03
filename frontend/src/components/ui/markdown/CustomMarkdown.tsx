@@ -1,5 +1,6 @@
 import React from 'react';
 import Markdown, { Components } from 'react-markdown';
+import { useNavigate } from 'react-router-dom';
 import {
   Typography,
   Link as MuiLink,
@@ -16,9 +17,10 @@ export interface CustomMarkdownProps {
 
 const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) => {
   const classes = useStyles();
+  const navigate = useNavigate();
 
   const logProps = (componentName: string, props: any) => {
-    Logger.debug(`${componentName} props:`, props);
+    Logger.info(`${componentName} props:`, props);
   };
 
   const components: Components = {
@@ -47,12 +49,39 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
       return <Typography className={classes.h6} component="h6" variant="h6" {...props} />;
     },
     p: ({ node, ...props }) => {
-      // logProps('p', props);
       return <Typography paragraph className={classes.markdownText} {...props} />;
     },
-    a: ({ href, ...props }) => {
+    a: ({ href, children, ...props }) => {
       logProps('a', { href, ...props });
-      return <MuiLink href={href} target="_blank" rel="noopener noreferrer" {...props} />;
+      
+      const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        e.preventDefault();
+        
+        if (!href) return;
+
+        // Handle internal knowledgebase links
+        if (href.startsWith('/shared/knowledgebase')) {
+          const cleanPath = href.replace(/\.md$/, '');
+          navigate(cleanPath);
+        } else if (href.startsWith('http://') || href.startsWith('https://')) {
+          // External links open in new tab
+          window.open(href, '_blank', 'noopener,noreferrer');
+        } else {
+          // Other internal links
+          navigate(href);
+        }
+      };
+
+      return (
+        <MuiLink
+          onClick={handleClick}
+          style={{ cursor: 'pointer' }}
+          className={classes.link}
+          {...props}
+        >
+          {children}
+        </MuiLink>
+      );
     },
     ol: ({ node, ...props }) => {
       logProps('ol', props);
@@ -72,6 +101,7 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
     },
     ul: ({ node, ...props }) => {
       logProps('ul', props);
+      const { ordered, ...restProps } = props;
       return (
         <Typography
           component="ul"
@@ -81,17 +111,18 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
             paddingLeft: '2rem',
             marginBottom: '1rem'
           }}
-          {...props}
+          {...restProps}
         />
       );
     },
     li: ({ node, ...props }) => {
       logProps('li', props);
+      const { ordered, ...restProps } = props;
       return (
         <Typography
           component="li"
           className={classes.markdownText}
-          {...props}
+          {...restProps}
         />
       );
     },
@@ -130,5 +161,3 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
 };
 
 export default CustomMarkdown;
-
-

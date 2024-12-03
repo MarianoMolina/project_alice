@@ -18,6 +18,7 @@ services:
       - ./frontend:/app:consistent
       - /app/node_modules
       - /app/dist
+      - shared:/app/public/shared
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       CHOKIDAR_USEPOLLING: "true"
@@ -91,21 +92,18 @@ services:
         - ${COMPOSE_PROJECT_DIR}/logs:/logs
         - ${COMPOSE_PROJECT_DIR}/shared-uploads:/shared-uploads
         - ${COMPOSE_PROJECT_DIR}/model_cache:/model_cache
+        - ${COMPOSE_PROJECT_DIR}/shared:/shared 
       command: |
         sh -c "
           echo 'Starting volume initialization' &&
           ls -la / &&
           echo 'Creating directories' &&
-          mkdir -p /logs /shared-uploads /model_cache &&
+          mkdir -p /logs /shared-uploads /model_cache /shared &&
           echo 'Setting permissions' &&
-          chmod -R 755 /logs &&
-          chown -R 1000:1000 /logs &&
-          chmod -R 755 /shared-uploads &&
-          chown -R 1000:1000 /shared-uploads &&
-          chmod -R 755 /model_cache &&
-          chown -R 1000:1000 /model_cache &&
+          chmod -R 755 /logs /shared-uploads /model_cache /shared &&
+          chown -R 1000:1000 /logs /shared-uploads /model_cache /shared &&
           echo 'Finished volume initialization' &&
-          ls -la /logs /shared-uploads /model_cache
+          ls -la /logs /shared-uploads /model_cache /shared
         "
 
   mongo:
@@ -119,14 +117,14 @@ services:
   python_image:
     build:
       context: .
-      dockerfile: Dockerfile.python
+      dockerfile: workflow/Dockerfile.python
     image: mypython:latest
     command: ["bash"]
 
   bash_image:
     build:
       context: .
-      dockerfile: Dockerfile.bash
+      dockerfile: workflow/Dockerfile.bash
     image: mybash:latest
     command: ["bash"]
 
@@ -143,6 +141,12 @@ volumes:
       type: none
       o: bind
       device: ${COMPOSE_PROJECT_DIR}/shared-uploads
+  shared:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${COMPOSE_PROJECT_DIR}/shared
   mongo_data:
   model_cache:
     driver: local

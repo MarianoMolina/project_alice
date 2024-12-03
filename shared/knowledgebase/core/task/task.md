@@ -160,50 +160,50 @@ class BranchingTask(AliceTask):
 # Task Type Quick Reference
 
 ## Single-Node Tasks
-- **TextToSpeechTask**: Audio generation [Link](/shared/knowledgebase/core/task/text_to_speech_task)
+- **TextToSpeechTask**: Audio generation [Link](/shared/knowledgebase/core/task/text_to_speech_task.md)
 
     Converts text to speech using AI models. Single-node implementation with voice selection and speed adjustment capabilities.
 
-- **EmbeddingTask**: Vector embeddings [Link](/shared/knowledgebase/core/task/embedding_task)
+- **EmbeddingTask**: Vector embeddings [Link](/shared/knowledgebase/core/task/embedding_task.md)
 
     Generates vector representations of text. Single-node task with language-specific embedding generation and batch processing support.
 - **GenerateImageTask**: Image creation
 
     Creates images from text descriptions. Single-node implementation supporting multiple sizes, quality settings, and batch generation.
 
-- **CheckTask**: Content validation [Link](/shared/knowledgebase/core/task/check_task)
+- **CheckTask**: Content validation [Link](/shared/knowledgebase/core/task/check_task.md)
 
     Simple validation task using LLM responses. Single-node pattern looking for specific approval/failure strings. Perfect for content moderation or quality checks.
 
-- **CodeExecutionLLMTask**: Code execution [Link](/shared/knowledgebase/core/task/code_exec_task)
+- **CodeExecutionLLMTask**: Code execution [Link](/shared/knowledgebase/core/task/code_exec_task.md)
 
     Focused task for executing code from LLM responses. Uses single-node pattern with comprehensive language support and execution environment management.
 
 ## Two-Node Tasks
-- **CodeGenerationLLMTask**: Code generation and testing [Link](/shared/knowledgebase/core/task/code_gen_task)
+- **CodeGenerationLLMTask**: Code generation and testing [Link](/shared/knowledgebase/core/task/code_gen_task.md)
 
     Two-node task for generating and testing code solutions. Implements feedback loop between generation and execution with robust error handling.
 
-- **RetrievalTask**: Embedding maintenance and search [Link](/shared/knowledgebase/core/task/retrieval_task)
+- **RetrievalTask**: Embedding maintenance and search [Link](/shared/knowledgebase/core/task/retrieval_task.md)
 
     Two-node task for managing and querying embedded content. Handles embedding maintenance and similarity-based retrieval with configurable thresholds.
 
 
 ## Three-Node Tasks
-- **PromptAgentTask**: Full LLM interaction pattern [Link](/shared/knowledgebase/core/task/prompt_agent_task)
+- **PromptAgentTask**: Full LLM interaction pattern [Link](/shared/knowledgebase/core/task/prompt_agent_task.md)
 
-    Base class for LLM interactions with three-node pattern (LLM generation → tool execution → code execution). Provides sophisticated handling of LLM responses including tool calls and code execution.
+    Base class for LLM interactions with three-node pattern (LLM generation → tool execution → code execution.md). Provides sophisticated handling of LLM responses including tool calls and code execution.
     
-- **WebScrapeBeautifulSoupTask**: Intelligent web scraping [Link](/shared/knowledgebase/core/task/web_scrape_task)
+- **WebScrapeBeautifulSoupTask**: Intelligent web scraping [Link](/shared/knowledgebase/core/task/web_scrape_task.md)
 
     Three-node task combining traditional web scraping with AI assistance. Uses LLM for selector generation and content summarization with robust fallback strategies.
 
 ## Special Patterns
-- **APITask**: Single-node API interaction [Link](/shared/knowledgebase/core/task/api_task)
+- **APITask**: Single-node API interaction [Link](/shared/knowledgebase/core/task/api_task.md)
 
     Single-node task designed for direct API interactions. Handles validation, retries, and response formatting for any API type. Perfect for simple API operations with built-in error handling.
     
-- **Workflow**: Multi-task orchestration [Link](/shared/knowledgebase/core/task/workflow)
+- **Workflow**: Multi-task orchestration [Link](/shared/knowledgebase/core/task/workflow.md)
 
     Orchestrates multiple tasks as nodes in a sequence. Manages variable passing between tasks and provides high-level workflow control. Ideal for complex processes involving multiple operations.
 

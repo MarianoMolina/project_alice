@@ -45,7 +45,7 @@ export async function updateEntityReference(
   userId: string
 ): Promise<IEntityReferenceDocument | null> {
   try {
-    Logger.info('entityReferenceData received in updateEntityReference:', entityReferenceData);
+    Logger.debug('entityReferenceData received in updateEntityReference:', entityReferenceData);
     const existingEntityReference = await EntityReference.findById(entityReferenceId);
     if (!existingEntityReference) {
       throw new Error('Entity reference not found');

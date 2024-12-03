@@ -31,7 +31,7 @@ export const navigation: NavSection[] = [
         ]
     },
     {
-        title: 'Components',
+        title: 'Structures',
         depth: 0,
         items: [
             { title: 'Agent', path: '/shared/knowledgebase/core/agent', type: 'subtitle', depth: 1 },

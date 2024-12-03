@@ -38,7 +38,7 @@ export async function updateEmbeddingChunk(
     userId: string
 ): Promise<IEmbeddingChunkDocument | null> {
     try {
-        Logger.info('embeddingChunkData received in updateEmbeddingChunk:', embeddingChunkData);
+        Logger.debug('embeddingChunkData received in updateEmbeddingChunk:', embeddingChunkData);
 
         const existingEmbeddingChunk = await EmbeddingChunk.findById(embeddingChunkId);
         if (!existingEmbeddingChunk) {

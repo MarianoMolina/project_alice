@@ -1,4 +1,5 @@
 import traceback, json
+from pydantic import Field
 from typing import Dict, Any, List, Optional
 from anthropic import AsyncAnthropic
 from anthropic.types import TextBlock, ToolUseBlock, ToolParam, Message
@@ -6,6 +7,7 @@ from workflow.core.data_structures import ToolCall, ToolCallConfig, ToolFunction
 from workflow.core.api.engines.llm_engines.llm_engine import LLMEngine
 from workflow.core.data_structures import MessageDict, ContentType, ModelConfig, References, RoleTypes, MessageGenerators
 from workflow.util import LOGGER, est_messages_token_count, est_token_count, CHAR_PER_TOKEN, MessagePruner, ScoreConfig, MessageApiFormat
+from workflow.core.api.engines.llm_engines.anthropic_tool_util import ToolNameMapping
 
 ANTHROPIC_PRICING_1k = {
     "claude-3-5-sonnet-20240620": (0.003, 0.015),
@@ -36,6 +38,8 @@ class LLMAnthropic(LLMEngine):
         This class assumes the use of Anthropic's AsyncAnthropic client and
         follows Anthropic's API conventions for chat completions.
     """
+    tool_mapping: ToolNameMapping = Field(default_factory=ToolNameMapping)
+    
     def adapt_messages(self, messages: List[MessageApiFormat]) -> List[Dict[str, Any]]:
         """
         Adapt the input messages to fit Anthropic's expected format.
@@ -81,7 +85,6 @@ class LLMAnthropic(LLMEngine):
                 final_adapted.append(msg)
                 expected_role = RoleTypes.ASSISTANT if expected_role == RoleTypes.USER else RoleTypes.USER
             else:
-                # Log warning about incorrect order
                 LOGGER.warning(f"Message order issue: Expected {expected_role}, got {msg['role']}. Message content: {msg['content'][:50]}...")
 
         # Ensure it starts with a user message
@@ -91,6 +94,32 @@ class LLMAnthropic(LLMEngine):
 
         return final_adapted
     
+    def _convert_into_tool_params(self, tools: List[ToolFunction]) -> List[ToolParam]:
+        """Convert tool functions into Anthropic-compliant tool parameters."""
+        converted_tools = []
+        for tool in tools:
+            if not isinstance(tool, ToolFunction):
+                tool = ToolFunction(**tool)
+            
+            # Create a copy and update the name
+            tool_copy = tool.model_copy()
+            tool_copy.name = self.tool_mapping.register_tool(tool.name)
+            converted_tools.append(tool_copy.convert_to_tool_params())
+            
+        return converted_tools
+    
+    def _process_tool_call(self, content: ToolUseBlock) -> ToolCall:
+        """Process a tool call and restore original tool names."""
+        original_name = self.tool_mapping.get_original_name(content.name) or content.name
+        return ToolCall(
+            id=content.id,
+            type="function",
+            function=ToolCallConfig(
+                name=original_name,
+                arguments=json.dumps(content.input)
+            )
+        )
+        
     async def generate_api_response(self, api_data: ModelConfig, messages: List[MessageApiFormat], system: Optional[str] = None, tools: Optional[List[ToolFunction]] = None, max_tokens: Optional[int] = None, tool_choice: str = 'auto', n: Optional[int] = 1, **kwargs) -> References:
         """
         Generate a chat completion response using Anthropic's API.
@@ -124,23 +153,25 @@ class LLMAnthropic(LLMEngine):
             api_key=api_data.api_key, 
             base_url=api_data.base_url
         )
+
+        # Handle token estimation and pruning
         estimated_tokens = est_messages_token_count(messages, tools) + est_token_count(system)
-        # Prune messages if estimated tokens exceed context size
         if estimated_tokens > api_data.ctx_size:
-            LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning. ")
+            LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning.")
             pruner = MessagePruner(
                 max_total_size=api_data.ctx_size * CHAR_PER_TOKEN,
                 score_config=ScoreConfig(),
-                )
+            )
             messages = pruner.prune(messages, self, api_data)
             estimated_tokens = est_messages_token_count(messages, tools) + est_token_count(system)
             LOGGER.debug(f"Pruned message len: {estimated_tokens}")
         elif estimated_tokens > 0.8 * api_data.ctx_size:
             LOGGER.warning(f"Estimated tokens ({estimated_tokens}) are over 80% of context size ({api_data.ctx_size}).")
 
+        # Prepare API parameters
         anthropic_tools: Optional[List[ToolParam]] = self._convert_into_tool_params(tools) if tools else None
-
         adjusted_messages = self.adapt_messages(messages=messages)
+        
         api_params = {
             "model": api_data.model,
             "messages": adjusted_messages,
@@ -149,7 +180,6 @@ class LLMAnthropic(LLMEngine):
             "system": system,
         }
 
-        # Only add tools and tool_choice if tools are provided
         if anthropic_tools:
             api_params["tools"] = anthropic_tools
             api_params["tool_choice"] = {"type": "auto"}
@@ -157,32 +187,25 @@ class LLMAnthropic(LLMEngine):
         LOGGER.debug(f'API parameters: {api_params}')
         
         try:
-            
             response: Message = await client.messages.create(**api_params)
             
             message_text = ""
             tool_calls: Optional[List[ToolCall]] = None
+            
             for content in response.content:
                 if isinstance(content, TextBlock):
                     message_text += content.text
                 elif isinstance(content, ToolUseBlock):
                     if tool_calls is None:
                         tool_calls = []
-                    tool_calls.append(ToolCall(
-                        id = content.id,
-                        type = "function",
-                        function = ToolCallConfig(
-                            name = content.name,
-                            arguments = json.dumps(content.input)
-                        )
-                    ))
+                    tool_calls.append(self._process_tool_call(content))
 
             cost = self.calculate_cost(response.usage.input_tokens, response.usage.output_tokens, response.model)
 
             msg = MessageDict(
                 role=RoleTypes.ASSISTANT,
                 content=message_text,
-                references=References(tool_calls=[tool_call for tool_call in tool_calls] if tool_calls else None),
+                references=References(tool_calls=tool_calls),
                 generated_by=MessageGenerators.LLM,
                 type=ContentType.TEXT,
                 creation_metadata={

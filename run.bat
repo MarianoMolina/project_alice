@@ -1,6 +1,21 @@
 @echo off
+
+:: Create required directories
+echo Creating required directories...
+mkdir logs 2>nul
+mkdir shared-uploads 2>nul
+mkdir model_cache 2>nul
+mkdir shared 2>nul
+
+:: Set permissions (equivalent to chmod 777 on Unix)
+echo Setting directory permissions...
+icacls logs /grant Everyone:F /T
+icacls shared-uploads /grant Everyone:F /T
+icacls model_cache /grant Everyone:F /T
+icacls shared /grant Everyone:F /T
+
 echo Launching Docker Desktop...
-start "" "C:\Program Files\Docker\Docker\Docker Desktop.exe" 
+start "" "C:\Program Files\Docker\Docker\Docker Desktop.exe"
 
 echo Waiting for Docker to start...
 :DOCKER_WAIT_LOOP
@@ -10,7 +25,6 @@ if %errorlevel% neq 0 (
     echo Docker is not ready yet. Waiting...
     goto DOCKER_WAIT_LOOP
 )
-
 echo Docker is ready!
 
 echo Starting LM Studio server...

@@ -16,13 +16,13 @@ Project Alice provides a powerful chat interface for interacting with AI models 
 4. Click on a chat to load it in the main area.
 
 ### Creating a New Chat
-1. Click the "Create [chat](/shared/knowledgebase/core/chat)" button (with a '+' icon) at the top of the sidebar. 
-2. Follow the dialog to set up your new chat, including selecting an AI [agent](/shared/knowledgebase/core/agent) and any tools ([tasks](/shared/knowledgebase/core/task/task)) you want the agent to have access to.
+1. Click the "Create [chat](/shared/knowledgebase/core/chat.md)" button (with a '+' icon) at the top of the sidebar. 
+2. Follow the dialog to set up your new chat, including selecting an AI [agent](/shared/knowledgebase/core/agent.md) and any tools ([tasks](/shared/knowledgebase/core/task/task.md)) you want the agent to have access to.
 
 ## Chatting with Alice
 
 1. Once you've selected or created a chat, you can start sending messages in the input box at the bottom of the main area.
-2. Type your [message](/shared/knowledgebase/core/message) and press Enter or click the send button.
+2. Type your [message](/shared/knowledgebase/core/message.md) and press Enter or click the send button.
 3. Alice will respond in the chat area above.
 
 ## Adding Functions
@@ -39,10 +39,10 @@ You can enhance Alice's capabilities within a chat by adding specific functions:
 You can add various types of references to enrich your conversation:
 
 1. Use the respective tabs in the sidebar:
-   - "Add [File Reference](/shared/knowledgebase/core/file)"
-   - "Add [Message Reference](/shared/knowledgebase/core/message)"
-   - "Add [Task Results](/shared/knowledgebase/core/task_response)"
-   - "Add [Entity Reference](/shared/knowledgebase/core/entity_reference)"
+   - "Add [File Reference](/shared/knowledgebase/core/file.md)"
+   - "Add [Message Reference](/shared/knowledgebase/core/message.md)"
+   - "Add [Task Results](/shared/knowledgebase/core/task_response.md)"
+   - "Add [Entity Reference](/shared/knowledgebase/core/entity_reference.md)"
 2. Select the item you want to reference.
 3. The reference will be added to your current message input.
 

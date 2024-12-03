@@ -76,8 +76,8 @@ adv_tasks_module = AdvTasksModule(
             },
             {
                 "key": "retrieval_result_parameter",
-                "type": "list",
-                "description": "The list of retrieved embeddings."
+                "type": "string",
+                "description": "The list of retrieved embeddings as a string."
             },
             {
                 "key": "url_param",
@@ -104,12 +104,7 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "retrieval_output_template",
                 "name": "Retrieval output template",
-                "content": """
-{% for result in retrieve_relevant_embeddings %}
-    <tr>
-        <td>{{result}}</td>
-    </tr>
-{% endfor %}""",
+                "content": """  """,
                 "is_templated": True,
                 "parameters": {
                     "type": "object",
