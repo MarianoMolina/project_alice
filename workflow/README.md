@@ -169,7 +169,7 @@ The Workflow container supports various task types, each designed for specific p
    - Purpose: Tasks that use templated prompts for execution
    - Key Properties:
      - `agent`: The AI agent executing the task
-     - `templates`: Dictionary of prompts/templates, including a `task_template`
+     - `templates`: Dictionary of prompts/templates, including a `task_template` to format the inputs for the agent, as well as the optional `output_template` to structure the outputs of the task 
    - Usage: Suitable for tasks with structured input and output requirements
 
 3. **APITask**
@@ -183,8 +183,8 @@ The Workflow container supports various task types, each designed for specific p
    - Purpose: Combine multiple tasks into a sequential or conditional flow
    - Key Properties:
      - `tasks`: Dictionary of subtasks
-     - `start_task`: The initial task to execute
-     - `tasks_end_code_routing`: Dictionary defining the flow between tasks based on exit codes
+     - `start_node`: The initial task to execute
+     - `node_end_code_routing`: Dictionary defining the flow between tasks based on exit codes
    - Usage: For creating complex processes involving multiple steps or decision points
 
 ### PromptAgentTask Variations
@@ -213,6 +213,7 @@ The Workflow container supports various task types, each designed for specific p
 2.  **WebScrapeBeautifulSoupTask**: Takes a URL, retrieves it, task a string sample of the html to show an agent who creates the selectors for BeautifulSoup parsing of the content. 
 3.  **GenerateImageTask**: Takes an image prompt and uses the agent's img_gen model to generate an image based on it. 
 4. **EmbeddingTask**: Takes a string and the agent's embeddings model to generate the vector embeddings for the text provided. 
+5. **RetrievalTask**: 
 
 
 ### Creating New Task Implementations
@@ -223,36 +224,6 @@ To create a new task implementation:
 2. Create a new class that inherits from the appropriate base task type.
 3. Override the `run` method to implement the specific logic of your task, or whatever method you want to adjust
 4. Add any additional properties or methods specific to your task.
-
-Example of creating a new PromptAgentTask:
-
-```python
-from workflow.core.tasks import PromptAgentTask
-from workflow.core.data_structures import TaskResponse
-
-class MyCustomTask(PromptAgentTask):
-    custom_property: str = "default_value"
-
-    async def run(self, **kwargs) -> TaskResponse:
-        # Implement your task logic here
-        result = await self.agent.generate_response(
-            api_manager=kwargs['api_manager'],
-            messages=[{"role": "user", "content": kwargs['prompt']}]
-        )
-        
-        # Process the result and create a TaskResponse
-        return TaskResponse(
-            task_id=self.id,
-            task_name=self.task_name,
-            task_description=self.task_description,
-            status="complete",
-            result_code=0,
-            task_outputs=str(result),
-            task_inputs=kwargs
-        )
-
-# Don't forget to add your new task to available_task_types in task_utils.py
-```
 
 When creating new tasks, consider the following:
 

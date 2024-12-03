@@ -48,7 +48,7 @@ const RouteMapView: React.FC<RouteMapProps> = ({
             ) : (
               <Select
                 value={nextTask || undefined}
-                onChange={(e) => handleRouteChange(parseInt(exitCode), e.target.value as string, retry)}
+                onChange={(e) => handleRouteChange(parseInt(exitCode), (e.target.value as string ?? null), retry)}
                 size="small"
                 className={classes.select}
                 disabled={isViewMode}

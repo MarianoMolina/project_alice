@@ -3,9 +3,11 @@ from enum import Enum
 from typing import get_type_hints, get_origin, get_args, Dict, Any, Union, Optional, List
 from pydantic import BaseModel, Field, ConfigDict, ValidationError
 from workflow.db_app.app import BackendAPI
-from workflow.util.logging_config import LOGGER
-from workflow.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, ParameterDefinition, FunctionParameters, API, TaskResponse, User
-from workflow.core.data_structures import EntityType
+from workflow.util.logger import LOGGER
+from workflow.core import AliceAgent, AliceChat, AliceTask, API, APIConfig
+from workflow.core.data_structures import (
+    EntityType, ParameterDefinition, FunctionParameters, TaskResponse, User, UserCheckpoint, Prompt, AliceModel, UserInteraction
+    )
 from workflow.core.tasks import available_task_types
 
 class DBInitManager(BaseModel):
@@ -41,43 +43,64 @@ class DBInitManager(BaseModel):
         "users": {}, 
         "models": {}, 
         "prompts": {}, 
+        "user_checkpoints": {},
         "agents": {}, 
         "tasks": {}, 
         "chats": {}, 
         "parameters": {}, 
         "task_responses": {},
-        "apis": {}
+        "api_configs": {},
+        "apis": {},
+        "user_interactions": {},
     }, description="Map of entity keys to entity objects")
     entity_obj_key_map: Dict[EntityType, Dict[str, BaseModel]] = Field(default_factory=lambda: {
         "users": {}, 
         "models": {}, 
         "prompts": {}, 
+        "user_checkpoints": {},
         "agents": {}, 
         "tasks": {}, 
         "chats": {}, 
         "parameters": {}, 
+        "api_configs": {},
         "task_responses": {},
-        "apis": {}
+        "apis": {},
+        "user_interactions": {},
     }, description="Map of entity keys to Pydantic model instances")
     entity_class_map: Dict[str, BaseModel] = Field(default_factory=lambda: {
         "agents": AliceAgent,
         "chats": AliceChat,
         "prompts": Prompt,
+        "user_checkpoints": UserCheckpoint,
         "models": AliceModel,
         "tasks": AliceTask,
         "users": User,
         "parameters": ParameterDefinition, 
+        "api_configs": APIConfig,
         "task_responses": TaskResponse,
-        "apis": API
+        "apis": API,
+        "user_interactions": UserInteraction,
     }, description="Map of entity types to Pydantic model classes")
     model_config = ConfigDict(arbitrary_types_allowed=True)
+    
+    def model_dump(self, *args, **kwargs):
+        # Ensure we exclude model_config from serialization
+        kwargs['exclude'] = {
+            'model_config', 
+            *kwargs.get('exclude', set())
+        }
+        
+        data = super().model_dump(*args, **kwargs)
+        return data
 
     def _get_entity_class(self, entity_type: EntityType) -> BaseModel:
         return self.entity_class_map.get(entity_type)
         
     def get_entity_instance(self, entity_type: EntityType, entity_data: dict) -> BaseModel:
         EntityClass = self._get_entity_class(entity_type)
+        LOGGER.debug(f"get_entity_instance: Creating entity instance for {entity_type}: {entity_data}")
         entity_data_copy = self.clean_entity_object(deepcopy(entity_data))
+        LOGGER.debug(f"Cleaned entity data: {entity_data_copy}")
         entity_data_copy.pop("key", None)
         try:
             if entity_type == "tasks":
@@ -92,7 +115,10 @@ class DBInitManager(BaseModel):
             raise ValueError(f"Error creating entity instance for {entity_type}: {str(e)}")
         
     def clean_entity_object(self, entity_data: dict) -> dict:
-        return {k: v for k, v in entity_data.items() if v}
+        return {
+            k: v for k, v in entity_data.items() 
+            if v is not None and v != "" and (not hasattr(v, '__len__') or len(v) > 0)
+        }
 
     def get_entity_by_key(self, entity_type: EntityType, key: str) -> Dict[str, Any]:
         entity = self.entity_key_map[entity_type].get(key).copy
@@ -116,15 +142,23 @@ class DBInitManager(BaseModel):
             LOGGER.debug(f"Creating entity instance for {entity_type}: {entity_data_copy}")
             if not entity_data_copy.get('key'):
                 raise ValueError(f"Key not found for entity {entity_type}")
+            
+            # First resolve references
             resolved_data = self.resolve_references_in_data(entity_type, entity_data_copy)
             LOGGER.debug(f"Resolved data for {entity_type}: {resolved_data}")
-            if db_app:
-                LOGGER.debug(f"Creating entity in DB: {entity_type}, {resolved_data}")
-                response = await db_app.create_entity_in_db(entity_type, resolved_data)
-                resolved_data['_id'] = response.get('_id', response.get('id', ''))
-                LOGGER.debug(f"Entity created in DB with ID: {resolved_data['_id']}")
+            
+            # Create the instance with resolved data
             entity_instance = self.get_entity_instance(entity_type, resolved_data)
             LOGGER.debug(f"Created entity instance: {entity_instance}")
+            
+            if db_app:
+                # Use the full serialized instance data for DB creation
+                complete_data = entity_instance.model_dump(by_alias=True)
+                LOGGER.debug(f"Creating entity in DB: {entity_type}, {complete_data}")
+                response = await db_app.create_entity_in_db(entity_type, complete_data)
+                entity_instance.id = response.get('_id', response.get('id', ''))
+                LOGGER.debug(f"Entity created in DB with ID: {entity_instance.id}")
+            
             self.entity_obj_key_map[entity_type][entity_data_copy.get('key')] = entity_instance
             LOGGER.debug(f"Stored entity in map: {entity_type}, key: {entity_data_copy.get('key')}, value: {entity_instance}")
             return entity_instance
@@ -158,8 +192,10 @@ class DBInitManager(BaseModel):
 
         for task_class in available_task_types:
             if task_type == task_class.__name__:
-                try:
-                    return task_class(**task_dict)
+                try:                
+                    task = task_class(**task_dict)
+                    # LOGGER.debug(f"Just created task: {task.model_dump()}")
+                    return task
                 except Exception as e:
                     LOGGER.error(f"Error creating task of type {task_type}: {str(e)} \n Task data: {task_dict}")
                     raise ValidationError(f"Error creating task of type {task_type}: {str(e)}")
@@ -238,7 +274,9 @@ class DBInitManager(BaseModel):
             elif isinstance(value, dict):
                 resolved_data[field] = self._resolve_dict_value(field_type, origin, args, value)
                 LOGGER.debug(f"Resolved string value for {field}: {resolved_data[field]}")
-        
+            else:
+                LOGGER.debug(f"Field {field} is not a string, list, or dict: {value}")
+                resolved_data[field] = value
         if 'key' in resolved_data:
             resolved_data.pop('key')
 

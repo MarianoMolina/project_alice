@@ -1,18 +1,21 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser, registerUser, LoginResponse, initializeUserDatabase } from '../services/authService';
 import { User } from '../types/UserTypes';
 import Logger from '../utils/Logger';
+import { fetchItem, updateItem } from '../services/api';
 
 interface AuthContextProps {
   isAuthenticated: boolean;
   user: User | null;
+  refreshUserData: () => Promise<void>;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   loginAndNavigate: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   getToken: () => string | null;
+  updateUser: (userData: Partial<User>) => Promise<void>;
 }
 
 interface AuthProviderProps {
@@ -44,20 +47,47 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const getToken = () => {
+  const getToken = useCallback(() => {
     return localStorage.getItem('token');
-  };
+  }, []);
 
-  const saveUserData = (userData: LoginResponse) => {
+  const saveUserData = useCallback((userData: LoginResponse | User) => {
     try {
-      localStorage.setItem('user', JSON.stringify(userData.user));
-      localStorage.setItem('token', userData.token);
-      setUser(userData.user);
+      const userToSave = 'user' in userData ? userData.user : userData;
+      const token = 'token' in userData ? userData.token : getToken();
+
+      localStorage.setItem('user', JSON.stringify(userToSave));
+      if (token) localStorage.setItem('token', token);
+      
+      setUser(userToSave);
       setIsAuthenticated(true);
     } catch (error) {
       Logger.error('Error saving user data:', error);
     }
-  };
+  }, [getToken]);
+
+  const refreshUserData = useCallback(async () => {
+    try {
+      if (!user?._id) throw new Error('No user ID found');
+      const refreshedUser = await fetchItem('users', user._id) as User;
+      saveUserData(refreshedUser);
+    } catch (error) {
+      Logger.error('Error refreshing user data:', error);
+      throw error;
+    }
+  }, [user?._id, saveUserData]);
+
+  const updateUser = useCallback(async (userData: Partial<User>) => {
+    try {
+      if (!user?._id) throw new Error('No user ID found');
+      const updatedUser = await updateItem('users', user._id, userData);
+      Logger.debug('Updated user:', updatedUser);
+      saveUserData(updatedUser);
+    } catch (error) {
+      Logger.error('Error updating user:', error);
+      throw error;
+    }
+  }, [user?._id, saveUserData]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -99,7 +129,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, loading, login, loginAndNavigate, register, logout, getToken }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, loading, login, loginAndNavigate, register, logout, getToken, updateUser, refreshUserData  }}>
       {children}
     </AuthContext.Provider>
   );

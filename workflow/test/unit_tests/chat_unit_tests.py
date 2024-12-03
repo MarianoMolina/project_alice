@@ -14,7 +14,7 @@ def sample_chat():
         alice_agent=AliceAgent(
             name="TestAgent",
             system_message=Prompt(name="test", content="You are a test assistant"),
-            has_functions=True,
+            has_tools=True,
             has_code_exec=True,
         ),
     )

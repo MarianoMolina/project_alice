@@ -22,6 +22,7 @@ FROM node:16-alpine
 WORKDIR /app
 # Copy the build output to the production image
 COPY --from=build /app/build ./build
+COPY --from=build /app/public ./public
 COPY --from=build /app/node_modules ./node_modules
 COPY package.json ./
 ENV NODE_ENV production

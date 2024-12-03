@@ -1,3 +1,3 @@
 This is the code: 
 
-{{ outputs_generate_code }}
+{{ Generate_Code }}

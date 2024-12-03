@@ -18,9 +18,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     justifyContent: 'flex-start',
   },
   centerSection: {
-    flex: 1,
+    flex: 2,
     display: 'flex',
     justifyContent: 'center',
+    gap: theme.spacing(3), 
   },
   rightSection: {
     flex: 1,
@@ -38,6 +39,32 @@ const useStyles = makeStyles((theme: Theme) => ({
       '&:hover': {
         backgroundColor: `${theme.palette.primary.main} !important`,
       },
+    },
+  },
+  navGroup: {
+    display: 'flex',
+    padding: theme.spacing(1, 2),
+    borderRadius: theme.shape.borderRadius,
+    '& .MuiIconButton-root': {
+      margin: theme.spacing(0, 0.5),
+    },
+  },
+  group1: {
+    backgroundColor: hexToRgba(theme.palette.primary.main, 0.1),
+    '&:hover': {
+      backgroundColor: hexToRgba(theme.palette.primary.main, 0.15),
+    },
+  },
+  group2: {
+    backgroundColor: hexToRgba(theme.palette.secondary.main, 0.1),
+    '&:hover': {
+      backgroundColor: hexToRgba(theme.palette.secondary.main, 0.15),
+    },
+  },
+  group3: {
+    backgroundColor: hexToRgba(theme.palette.info.light, 0.1),
+    '&:hover': {
+      backgroundColor: hexToRgba(theme.palette.info.light, 0.15),
     },
   },
 }));

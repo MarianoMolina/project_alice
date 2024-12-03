@@ -2,19 +2,27 @@ import React from 'react';
 import { Typography } from '@mui/material';
 import { FileComponentProps } from '../../../../types/FileTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { InsertDriveFile, CalendarToday, AccessTime, TextSnippet, AttachFile } from '@mui/icons-material';
-import FileViewer from '../FileViewer';
-import useStyles from '../FileStyles';
+import { InsertDriveFile, CalendarToday, AccessTime, TextSnippet, AttachFile, QueryBuilder, DataObject } from '@mui/icons-material';
 import { bytesToMB } from '../../../../utils/FileUtils';
-import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
+import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
+import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
+import FileContentView from './FileContentView';
 
 const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
-    const classes = useStyles();
 
     if (!item) {
         return <Typography>No file data available.</Typography>;
     }
 
+    const embeddingChunkViewer = item.embedding && item.embedding?.length > 0 ?
+     item.embedding.map((chunk, index) => (
+        <EmbeddingChunkViewer
+            key={chunk._id || `embedding-${index}`}
+            item={chunk}
+            items={null} onChange={()=>null} mode={'view'} handleSave={async()=>{}}
+        />
+    )) : <Typography>No embeddings available</Typography>;
+    
     const listItems = [
         {
             icon: <InsertDriveFile />,
@@ -34,13 +42,23 @@ const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
         {
             icon: <TextSnippet />,
             primary_text: "Transcript",
-            secondary_text: item.transcript ? <CustomMarkdown className={`${classes.messageSmall} ${classes.toolMessage}`}>{item.transcript.content}</CustomMarkdown> : 'N/A'
+            secondary_text: item.transcript ? <AliceMarkdown showCopyButton>{item.transcript.content}</AliceMarkdown> : 'N/A'
         },
         {
             icon: <AttachFile />,
             primary_text: "File Preview",
-            secondary_text: <FileViewer file={item} editable={false} />
-        }
+            secondary_text: <FileContentView item={item} items={null} onChange={()=>null} mode={'view'} handleSave={async()=>{}} />
+        },
+        {
+            icon: <DataObject />,
+            primary_text: "Embedding",
+            secondary_text: embeddingChunkViewer
+        },
+        {
+            icon: <QueryBuilder />,
+            primary_text: "Created at",
+            secondary_text: new Date(item.createdAt || '').toLocaleString()
+        },
     ];
 
     return (

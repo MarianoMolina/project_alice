@@ -1,6 +1,8 @@
-{{ outputs_research_brief_task }}
-{% if research_check_feedback %}
-Retry attempt #{{ retry_count }}. Previous attempt was insufficient:
-{{ research_check_feedback }}
+{{ Research_Brief }}
+{% if Check_Research %}
+Retry attempt. Previous attempt was insufficient. 
+
+Feedback:
+{{ Check_Research }}
 Please refine your queries based on this feedback.
 {% endif %}

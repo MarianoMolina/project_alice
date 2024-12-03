@@ -1,16 +1,17 @@
 import mongoose, { Schema } from 'mongoose';
 import { ApiType, IAPIDocument, IAPIModel } from '../interfaces/api.interface';
+import { getObjectId } from '../utils/utils';
+import mongooseAutopopulate from 'mongoose-autopopulate';
 
 const apiSchema = new Schema<IAPIDocument, IAPIModel>({
   api_type: { type: String, enum: Object.values(ApiType), required: true },
   api_name: { type: String, required: true },
   name: { type: String, required: true },
   is_active: { type: Boolean, default: false },
-  health_status: { type: String, enum: ['healthy', 'unhealthy', 'unknown'], default: 'unknown' },
-  default_model: { type: Schema.Types.ObjectId, ref: 'Model' },
-  api_config: { type: Map, of: String },
-  created_by: { type: Schema.Types.ObjectId, ref: 'User' },
-  updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
+  default_model: { type: Schema.Types.ObjectId, ref: 'Model', autopopulate: true  },
+  api_config: { type:  Schema.Types.ObjectId, ref: 'APIConfig', autopopulate: true  },
+  created_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true  },
+  updated_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true  }
 }, { timestamps: true });
 
 apiSchema.methods.apiRepresentation = function (this: IAPIDocument) {
@@ -20,7 +21,6 @@ apiSchema.methods.apiRepresentation = function (this: IAPIDocument) {
     api_name: this.api_name || null,
     name: this.name || null,
     is_active: this.is_active || false,
-    health_status: this.health_status || 'unknown',
     default_model: this.default_model || null,
     api_config: this.api_config || {},
     created_by: this.created_by || null,
@@ -31,37 +31,26 @@ apiSchema.methods.apiRepresentation = function (this: IAPIDocument) {
 }
 
 function ensureObjectIdForSave(this: IAPIDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {
-  if (this.created_by && (this.created_by as any)._id) {
-    this.created_by = (this.created_by as any)._id;
-  }
-  if (this.updated_by && (this.updated_by as any)._id) {
-    this.updated_by = (this.updated_by as any)._id;
-  }
-  if (this.default_model && (this.default_model as any)._id) {
-    this.default_model = (this.default_model as any)._id;
-  }
+  const context = { model: 'API', field: '' };
+  if (this.api_config) this.api_config = getObjectId(this.api_config, { ...context, field: 'api_config' });
+  if (this.default_model) this.default_model = getObjectId(this.default_model, { ...context, field: 'default_model' });
+  if (this.created_by) this.created_by = getObjectId(this.created_by, { ...context, field: 'created_by' });
+  if (this.updated_by) this.updated_by = getObjectId(this.updated_by, { ...context, field: 'system_message' });
   next();
 }
 function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
   const update = this.getUpdate() as any;
-  if (update.created_by && (update.created_by as any)._id) {
-    update.created_by = (update.created_by as any)._id;
-  }
-  if (update.updated_by && (update.updated_by as any)._id) {
-    update.updated_by = (update.updated_by as any)._id;
-  }
-  if (update.default_model && (update.default_model as any)._id) {
-    update.default_model = (update.default_model as any)._id;
-  }
+  if (!update) return next();
+  const context = { model: 'API', field: '' };
+  if (update.api_config) update.api_config = getObjectId(update.api_config, { ...context, field: 'api_config' });
+  if (update.default_model) update.default_model = getObjectId(update.default_model, { ...context, field: 'default_model' });
+  if (update.created_by) update.created_by = getObjectId(update.created_by, { ...context, field: 'created_by' });
+  if (update.updated_by) update.updated_by = getObjectId(update.updated_by, { ...context, field: 'updated_by' });
   next();
-}
-function autoPopulate(this: mongoose.Query<any, any>) {
-  this.populate('created_by updated_by default_model');
 }
 apiSchema.pre('save', ensureObjectIdForSave);
 apiSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
-apiSchema.pre('find', autoPopulate);
-apiSchema.pre('findOne', autoPopulate);
+apiSchema.plugin(mongooseAutopopulate);
 
 const API = mongoose.model<IAPIDocument, IAPIModel>('API', apiSchema);
 

@@ -12,7 +12,7 @@ import { purgeAndReinitialize } from '../utils/purge.utils';
 const router: Router = express.Router();
 
 const handleErrors = (res: Response, error: any) => {
-  console.error('Error in user route:', error);
+  Logger.error('Error in user route:', error);
   res.status(500).json({ error: 'An error occurred while processing the request' });
 };
 
@@ -48,20 +48,24 @@ router.post('/register', async (req: Request, res: Response) => {
 router.post('/login', async (req: Request, res: Response) => {
   const { email, password } = req.body;
   try {
+    Logger.debug('Logging request with email:', email);
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
+    Logger.debug('User found:', JSON.stringify(user));
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
+    Logger.debug('Password matched for user:', user.email);
     const payload = { userId: user._id, role: user.role };
     const token = jwt.sign(
       payload,
       process.env.JWT_SECRET as string,
       { expiresIn: '30d' }
     );
+    Logger.debug('User logged in:', user.email);
     res.status(200).json({ token, user: user.apiRepresentation() });
   } catch (error) {
     handleErrors(res, error);

@@ -1,6 +1,7 @@
 import React from 'react';
 import { TaskComponentProps, AliceTask } from '../../../../types/TaskTypes';
 import EnhancedTableView, { Column } from '../../common/enhanced_component/TableView';
+import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
 
 const TaskTableView: React.FC<TaskComponentProps> = ({
   items,
@@ -13,7 +14,7 @@ const TaskTableView: React.FC<TaskComponentProps> = ({
   const columns: Column<AliceTask>[] = [
     {
       header: 'Task Name',
-      render: (task: AliceTask) => task.task_name,
+      render: (task: AliceTask) => formatStringWithSpaces(task.task_name),
       sortKey: 'task_name'
     },
     {

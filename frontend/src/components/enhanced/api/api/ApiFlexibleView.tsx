@@ -1,32 +1,18 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import {
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    Switch,
-    TextField,
-    SelectChangeEvent,
-    Typography,
-} from '@mui/material';
-import { ApiComponentProps, API, ApiType, ApiName, getDefaultApiForm, ModelApiType } from '../../../../types/ApiTypes';
-import { API_TYPE_CONFIGS, LLM_PROVIDERS } from '../../../../utils/ApiUtils';
+import { ApiComponentProps, API, ApiType, ApiName, getDefaultApiForm } from '../../../../types/ApiTypes';
+import { API_CAPABILITIES, apiNameIcons, apiTypeIcons, isModelApiType } from '../../../../utils/ApiUtils';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import ModelShortListView from '../../model/model/ModelShortListView';
 import { AliceModel } from '../../../../types/ModelTypes';
+import { APIConfig } from '../../../../types/ApiConfigTypes';
 import { useApi } from '../../../../contexts/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import Logger from '../../../../utils/Logger';
-import useStyles from '../ApiStyles';
-
-const getLlmProviderBaseUrl = (apiName: ApiName): string => {
-    for (const provider of Object.values(LLM_PROVIDERS)) {
-        if (provider.api_name.includes(apiName)) {
-            return provider.baseUrl;
-        }
-    }
-    return '';
-};
+import { formatCamelCaseString } from '../../../../utils/StyleUtils';
+import { TextInput } from '../../common/inputs/TextInput';
+import { BooleanInput } from '../../common/inputs/BooleanInput';
+import { IconSelectInput } from '../../common/inputs/IconSelectInput';
+import APIConfigShortListView from '../../api_config/api_config/APIConfigShortListView';
 
 const ApiFlexibleView: React.FC<ApiComponentProps> = ({
     item,
@@ -36,14 +22,15 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
     handleDelete,
 }) => {
     const { fetchItem } = useApi();
-    const [form, setForm] = useState<Partial<API>>(() => item || getDefaultApiForm());
-    const [availableApiNames, setAvailableApiNames] = useState<ApiName[]>([]);
+    const [availableApiTypes, setAvailableApiTypes] = useState<ApiType[]>([]);
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
-
-    const isEditMode = mode === 'edit' || mode === 'create';
-    const isCreateMode = mode === 'create';
+    const [form, setForm] = useState<Partial<API>>(() => item || getDefaultApiForm());
     const [isSaving, setIsSaving] = useState(false);
-    const classes = useStyles();
+    
+    const isCreateMode = mode === 'create';
+    const isEditMode = mode === 'edit' || mode === 'create';
+    const title = mode === 'create' ? 'Create New API' : mode === 'edit' ? 'Edit API' : 'API Details';
+    const saveButtonText = form._id ? 'Update API' : 'Create API';
 
     useEffect(() => {
         if (isSaving) {
@@ -60,94 +47,8 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
         }
     }, [item, onChange]);
 
-    const updateAvailableApiNames = useCallback((apiType: ApiType | undefined) => {
-        Logger.debug('updateAvailableApiNames', apiType);
-        if (apiType && API_TYPE_CONFIGS[apiType]) {
-            setAvailableApiNames(API_TYPE_CONFIGS[apiType].api_name);
-        } else {
-            setAvailableApiNames([]);
-        }
-    }, []);
-
-    useEffect(() => {
-        if (form.api_type) {
-            updateAvailableApiNames(form.api_type);
-        }
-    }, [form.api_type, updateAvailableApiNames]);
-    
-    function isModelApiType(apiType: ApiType): apiType is ApiType & ModelApiType {
-        return Object.values(ModelApiType).includes(apiType as any);
-    }
-
-    useEffect(() => {
-        if (form.api_name) {
-            const baseUrl = getLlmProviderBaseUrl(form.api_name);
-            if (baseUrl) {
-                setForm(prevForm => ({
-                    ...prevForm,
-                    api_config: {
-                        ...prevForm.api_config,
-                        base_url: baseUrl,
-                    },
-                }));
-            }
-        }
-    }, [form.api_name]);
-
-    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setForm(prevForm => ({ ...prevForm, [name]: value }));
-    }, []);
-
-    const handleApiNameChange = useCallback((newApiName: ApiName) => {
-        setForm(prevForm => ({
-            ...prevForm,
-            api_name: newApiName,
-            api_config: {
-                ...prevForm.api_config,
-                base_url: getLlmProviderBaseUrl(newApiName),
-                api_key: '',
-            },
-        }));
-    }, []);
-
-    const handleApiTypeChange = useCallback((newApiType: ApiType) => {
-        const config = API_TYPE_CONFIGS[newApiType];
-        updateAvailableApiNames(newApiType);
-        setForm(prevForm => ({
-            ...prevForm,
-            api_type: newApiType,
-            api_config: config.apiConfig,
-            api_name: config.api_name[0],
-        }));
-    }, [updateAvailableApiNames]);
-
-    const handleHealthStatusChange = useCallback((event: SelectChangeEvent) => {
-        const value = event.target.value as API['health_status'];
-        setForm(prevForm => ({
-            ...prevForm,
-            health_status: value
-        }));
-    }, []);
-
-    const handleApiConfigChange = useCallback((key: string, value: string) => {
-        setForm(prevForm => ({
-            ...prevForm,
-            api_config: { ...prevForm.api_config, [key]: value }
-        }));
-    }, []);
-
-    const handleDefaultModelChange = useCallback(async (selectedIds: string[]) => {
-        if (selectedIds.length > 0) {
-            const model = await fetchItem('models', selectedIds[0]) as AliceModel;
-            setForm(prevForm => ({ ...prevForm, default_model: model }));
-        } else {
-            setForm(prevForm => ({ ...prevForm, default_model: undefined }));
-        }
-    }, [fetchItem]);
-
-    const handleAccordionToggle = useCallback((accordion: string | null) => {
-        setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
+    const handleFieldChange = useCallback((field: keyof API, value: any) => {
+        setForm(prevForm => ({ ...prevForm, [field]: value }));
     }, []);
 
     const handleLocalSave = useCallback(() => {
@@ -161,8 +62,71 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
         }
     }, [item, handleDelete]);
 
-    const title = mode === 'create' ? 'Create New API' : mode === 'edit' ? 'Edit API' : 'API Details';
-    const saveButtonText = form._id ? 'Update API' : 'Create API';
+    const handleAccordionToggle = useCallback((accordion: string | null) => {
+        setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
+    }, []);
+
+    const updateAvailableApiTypes = useCallback((apiName: ApiName | undefined) => {
+        Logger.debug('updateAvailableApiTypes', apiName);
+        if (apiName && apiName in API_CAPABILITIES) {
+            const capabilities = API_CAPABILITIES[apiName];
+            setAvailableApiTypes(Array.from(capabilities));
+        } else {
+            setAvailableApiTypes([]);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (form.api_name) {
+            updateAvailableApiTypes(form.api_name);
+        }
+    }, [form.api_name, updateAvailableApiTypes]);
+
+    const handleApiNameChange = useCallback((newApiName: ApiName) => {
+        setForm(prevForm => ({
+            ...prevForm,
+            api_name: newApiName,
+            api_type: Array.from(API_CAPABILITIES[newApiName])[0], // Set first available capability as default
+            api_config: undefined // Reset config when API changes
+        }));
+    }, []);
+
+    const handleApiTypeChange = useCallback((newApiType: ApiType) => {
+        setForm(prevForm => ({
+            ...prevForm,
+            api_type: newApiType,
+        }));
+    }, []);
+
+    const handleApiConfigChange = useCallback(async (selectedIds: string[]) => {
+        if (selectedIds.length > 0) {
+            const config = await fetchItem('apiconfigs', selectedIds[0]) as APIConfig;
+            setForm(prevForm => ({ ...prevForm, api_config: config }));
+        } else {
+            setForm(prevForm => ({ ...prevForm, api_config: undefined }));
+        }
+    }, [fetchItem]);
+
+    const handleDefaultModelChange = useCallback(async (selectedIds: string[]) => {
+        if (selectedIds.length > 0) {
+            const model = await fetchItem('models', selectedIds[0]) as AliceModel;
+            setForm(prevForm => ({ ...prevForm, default_model: model }));
+        } else {
+            setForm(prevForm => ({ ...prevForm, default_model: undefined }));
+        }
+    }, [fetchItem]);
+
+    const apiOptions = Object.values(ApiName).map((name) => ({
+        value: name,
+        label: formatCamelCaseString(name),
+        icon: apiNameIcons[name],
+    }));
+
+    const apiTypes = availableApiTypes.map((type) => ({
+        value: type,
+        label: formatCamelCaseString(type),
+        icon: apiTypeIcons[type],
+    }));
 
     return (
         <GenericFlexibleView
@@ -172,106 +136,80 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
-            item={item as API}
+            item={form as API}
             itemType='apis'
         >
             {isCreateMode && (
-                <>
-                    <Typography variant="h6" className={classes.titleText}>API Type</Typography>
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel>API Type</InputLabel>
-                        <Select
-                            value={form.api_type || ''}
-                            onChange={(e) => handleApiTypeChange(e.target.value as ApiType)}
-                        >
-                            {Object.values(ApiType).map((type) => (
-                                <MenuItem key={type} value={type}>{type}</MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </>
-            )}
-            
-            <Typography variant="h6" className={classes.titleText}>Name</Typography>
-            <FormControl fullWidth margin="normal">
-                <InputLabel>API Name</InputLabel>
-                <Select
+                <IconSelectInput
                     value={form.api_name || ''}
-                    onChange={(e) => handleApiNameChange(e.target.value as ApiName)}
-                    disabled={!isEditMode}
-                >
-                    {availableApiNames.map((name) => (
-                        <MenuItem key={name} value={name}>{name}</MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
+                    onChange={(apiName) => handleApiNameChange(apiName as ApiName)}
+                    name="api_name"
+                    label="API Name"
+                    options={apiOptions}
+                    description='Select the name of the API you want to create'
+                />
+            )}
 
-            <Typography variant="h6" className={classes.titleText}>Display Name</Typography>
-            <TextField
-                fullWidth
+            {form.api_name && (
+                <IconSelectInput
+                    value={form.api_type || ''}
+                    onChange={(apiType) => handleApiTypeChange(apiType as ApiType)}
+                    name="api_type"
+                    label="API Type"
+                    options={apiTypes}
+                    disabled={!isEditMode}
+                    description='Select the type of API'
+                />
+            )}
+            <TextInput
                 name="name"
                 label="API Display Name"
                 value={form.name || ''}
-                onChange={handleInputChange}
-                margin="normal"
+                onChange={(value) => handleFieldChange('name', value)}
                 disabled={!isEditMode}
+                description='Enter a description for the API'
             />
-            <Typography variant="h6" className={classes.titleText}>Health Status</Typography>
-            <FormControl fullWidth margin="normal">
-                <InputLabel>Health Status</InputLabel>
-                <Select
-                    value={form.health_status || 'unknown'}
-                    onChange={handleHealthStatusChange}
-                    disabled={!isEditMode}
-                >
-                    <MenuItem value="healthy">Healthy</MenuItem>
-                    <MenuItem value="unhealthy">Unhealthy</MenuItem>
-                    <MenuItem value="unknown">Unknown</MenuItem>
-                </Select>
-            </FormControl>
-            
-            <Typography variant="h6" className={classes.titleText}>Configuration</Typography>
-            {form.api_config && Object.entries(form.api_config).map(([key, value]) => (
-                <TextField
-                    key={key}
-                    fullWidth
-                    label={key}
-                    type="text"
-                    value={value || ''}
-                    onChange={(e) => handleApiConfigChange(key, e.target.value)}
-                    margin="normal"
-                    disabled={!isEditMode}
-                />
-            ))}
 
-            {form.api_type && isModelApiType(form.api_type) && (
-                <>
-                    <Typography variant="h6" className={classes.titleText}>Default Model</Typography>
-                    <EnhancedSelect<AliceModel>
-                        componentType="models"
-                        EnhancedView={ModelShortListView}
-                        selectedItems={form.default_model ? [form.default_model] : []}
-                        onSelect={handleDefaultModelChange}
-                        isInteractable={isEditMode}
-                        label="Select Default Model"
-                        activeAccordion={activeAccordion}
-                        onAccordionToggle={handleAccordionToggle}
-                        accordionEntityName="default-model"
-                        showCreateButton={true}
-                    />
-                </>
+            {form.api_name && (
+                <EnhancedSelect<APIConfig>
+                    componentType="apiconfigs"
+                    EnhancedView={APIConfigShortListView}
+                    selectedItems={form.api_config ? [form.api_config] : []}
+                    onSelect={handleApiConfigChange}
+                    isInteractable={isEditMode}
+                    label="API Configuration"
+                    activeAccordion={activeAccordion}
+                    description='Select the configuration for this API'
+                    onAccordionToggle={handleAccordionToggle}
+                    accordionEntityName="api-config"
+                    showCreateButton={true}
+                    filters={{ api_name: form.api_name }}
+                />
             )}
 
-            <Typography variant="h6" className={classes.titleText}>Active?</Typography>
-            <FormControl fullWidth margin="normal">
-                <InputLabel>Is Active</InputLabel>
-                <Switch
-                    checked={form.is_active || false}
-                    onChange={(e) => onChange({ ...form, is_active: e.target.checked })}
-                    disabled={!isEditMode}
+            {form.api_type && isModelApiType(form.api_type) && (
+                <EnhancedSelect<AliceModel>
+                    componentType="models"
+                    EnhancedView={ModelShortListView}
+                    selectedItems={form.default_model ? [form.default_model] : []}
+                    onSelect={handleDefaultModelChange}
+                    isInteractable={isEditMode}
+                    label="Select Default Model"
+                    activeAccordion={activeAccordion}
+                    description='Select the default model for this API'
+                    onAccordionToggle={handleAccordionToggle}
+                    accordionEntityName="default-model"
+                    showCreateButton={true}
                 />
-            </FormControl>
-
+            )}
+            <BooleanInput
+                name="is_active"
+                label="Is Active"
+                value={form.is_active || false}
+                onChange={(value) => handleFieldChange('is_active', value)}
+                disabled={!isEditMode}
+                description='Is this API active?'
+            />
         </GenericFlexibleView>
     );
 };

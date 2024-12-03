@@ -1,8 +1,8 @@
 import mongoose, { Schema } from 'mongoose';
-import { functionParametersSchema, apiEngineSchema } from '../utils/schemas';
-import { ensureObjectIdForProperties, ensureObjectIdForAPIEngine } from '../utils/utils';
+import { functionParametersSchema } from './functionSchema';
+import { ensureObjectIdForProperties, getObjectId, getObjectIdForMap } from '../utils/utils';
 import { ITaskDocument, ITaskModel, TaskType } from '../interfaces/task.interface';
-import { ensureObjectIdHelper } from '../utils/utils';
+import mongooseAutopopulate from 'mongoose-autopopulate';
 
 const taskSchema = new Schema<ITaskDocument, ITaskModel>({
     task_name: { type: String, required: true },
@@ -15,22 +15,42 @@ const taskSchema = new Schema<ITaskDocument, ITaskModel>({
         default: () => new Map([['0', 'Success'], ['1', 'Failed']])
     },
     recursive: { type: Boolean, default: true },
-    templates: { type: Map, of: Schema.Types.ObjectId, ref: 'Prompt', default: null },
-    tasks: { type: Map, of: Schema.Types.ObjectId, ref: 'Task', default: null },
+    templates: { 
+        type: Map, 
+        of: { type: Schema.Types.ObjectId, ref: 'Prompt', autopopulate: true },
+        default: null 
+    },
+    tasks: { 
+        type: Map, 
+        of: { type: Schema.Types.ObjectId, ref: 'Task', autopopulate: true },
+        default: null 
+    },
     valid_languages: [String],
-    timeout: { type: Number, default: null },
-    prompts_to_add: { type: Map, of: Schema.Types.ObjectId, ref: 'Prompt', default: null },
     exit_code_response_map: { type: Map, of: Number, default: null },
-    start_task: { type: String, default: null },
-    task_selection_method: { type: Schema.Types.Mixed, default: null },
-    tasks_end_code_routing: { type: Map, of: Map, default: null },
-    max_attempts: { type: Number, default: 3 },
+    start_node: { type: String, default: null },
+    node_end_code_routing: { type: Map, of: Map, default: null },
+    max_attempts: { type: Number, default: 1 },
     required_apis: { type: [String], default: null },
-    agent: { type: Schema.Types.ObjectId, ref: 'Agent', default: null },
-    human_input: { type: Boolean, default: false },
-    api_engine: { type: apiEngineSchema, default: null },
-    created_by: { type: Schema.Types.ObjectId, ref: 'User' },
-    updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
+    agent: { 
+        type: Schema.Types.ObjectId, 
+        ref: 'Agent', 
+        default: null,
+        autopopulate: true 
+    },
+    user_checkpoints: { 
+        type: Map, 
+        of: { type: Schema.Types.ObjectId, ref: 'UserCheckpoint', autopopulate: true },
+        default: null 
+    },
+    data_cluster: { 
+        type: Schema.Types.ObjectId, 
+        ref: 'DataCluster', 
+        required: false, 
+        description: "Data cluster for the chat",
+        autopopulate: true 
+    },
+    created_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true },
+    updated_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true }
 }, { timestamps: true });
 
 taskSchema.methods.apiRepresentation = function (this: ITaskDocument) {
@@ -45,18 +65,14 @@ taskSchema.methods.apiRepresentation = function (this: ITaskDocument) {
         templates: this.templates ? Object.fromEntries(this.templates) : null,
         tasks: this.tasks ? Object.fromEntries(this.tasks) : null,
         valid_languages: this.valid_languages || [],
-        timeout: this.timeout || null,
-        prompts_to_add: this.prompts_to_add ? Object.fromEntries(this.prompts_to_add) : null,
         exit_code_response_map: this.exit_code_response_map ? Object.fromEntries(this.exit_code_response_map) : null,
-        start_task: this.start_task || null,
-        task_selection_method: this.task_selection_method || null,
-        tasks_end_code_routing: this.tasks_end_code_routing ? Object.fromEntries(
-            Array.from(this.tasks_end_code_routing.entries()).map(([key, value]) => [key, Object.fromEntries(value)])
+        start_node: this.start_node || null,
+        node_end_code_routing: this.node_end_code_routing ? Object.fromEntries(
+            Array.from(this.node_end_code_routing.entries()).map(([key, value]) => [key, Object.fromEntries(value)])
         ) : null,
-        max_attempts: this.max_attempts || 3,
+        data_cluster: this.data_cluster || null,
+        max_attempts: this.max_attempts || 1,
         agent: this.agent ? (this.agent._id || this.agent) : null,
-        human_input: this.human_input || false,
-        api_engine: this.api_engine || null,
         created_by: this.created_by ? (this.created_by._id || this.created_by) : null,
         updated_by: this.updated_by ? (this.updated_by._id || this.updated_by) : null,
         createdAt: this.createdAt || null,
@@ -65,88 +81,49 @@ taskSchema.methods.apiRepresentation = function (this: ITaskDocument) {
 };
 
 function ensureObjectIdForSave(this: ITaskDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {
-    this.agent = ensureObjectIdHelper(this.agent);
-    this.created_by = ensureObjectIdHelper(this.created_by);
-    this.updated_by = ensureObjectIdHelper(this.updated_by);
-
-    if (this.templates) {
-        for (const [key, value] of this.templates.entries()) {
-            this.templates.set(key, ensureObjectIdHelper(value));
+    try {
+        const context = { model: 'Task', field: '' };
+        if (this.agent) this.agent = getObjectId(this.agent, { ...context, field: 'agent' });
+        if (this.data_cluster) this.data_cluster = getObjectId(this.data_cluster, { ...context, field: 'data_cluster' });
+        if (this.created_by) this.created_by = getObjectId(this.created_by, { ...context, field: 'created_by' });
+        if (this.updated_by) this.updated_by = getObjectId(this.updated_by, { ...context, field: 'updated_by' });
+        if (this.templates) this.templates = getObjectIdForMap(this.templates, { ...context, field: 'templates' });
+        if (this.tasks) this.tasks = getObjectIdForMap(this.tasks, { ...context, field: 'tasks' });
+        if (this.user_checkpoints) this.user_checkpoints = getObjectIdForMap(this.user_checkpoints, { ...context, field: 'user_checkpoints' });
+        if (this.input_variables?.properties) {
+            this.input_variables.properties = ensureObjectIdForProperties(this.input_variables.properties);
         }
+        next();
+    } catch (error) {
+        next(error instanceof Error ? error : new Error(String(error)));
     }
-    if (this.tasks) {
-        for (const [key, value] of this.tasks.entries()) {
-            this.tasks.set(key, ensureObjectIdHelper(value));
-        }
-    }
-    if (this.prompts_to_add) {
-        for (const [key, value] of this.prompts_to_add.entries()) {
-            this.prompts_to_add.set(key, ensureObjectIdHelper(value));
-        }
-    }
-    if (this.input_variables && this.input_variables.properties) {
-        this.input_variables.properties = ensureObjectIdForProperties(this.input_variables.properties);
-    }
-    if (this.api_engine) ensureObjectIdForAPIEngine(this.api_engine);
-    next();
 }
 
 function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
-    const update = this.getUpdate() as any;
+    try {
+        const update = this.getUpdate() as any;
+        if (!update) return next();
+        const context = { model: 'Task', field: '' };
+        if (update.agent) update.agent = getObjectId(update.agent, { ...context, field: 'agent' });
+        if (update.data_cluster) update.data_cluster = getObjectId(update.data_cluster, { ...context, field: 'data_cluster' });
+        if (update.created_by) update.created_by = getObjectId(update.created_by, { ...context, field: 'created_by' });
+        if (update.updated_by) update.updated_by = getObjectId(update.updated_by, { ...context, field: 'updated_by' });
+        if (update.templates) update.templates = getObjectIdForMap(update.templates, { ...context, field: 'templates' });
+        if (update.tasks) update.tasks = getObjectIdForMap(update.tasks, { ...context, field: 'tasks' });
+        if (update.user_checkpoints) update.user_checkpoints = getObjectIdForMap(update.user_checkpoints, { ...context, field: 'user_checkpoints' });
+        if (update.input_variables?.properties) {
+            update.input_variables.properties = ensureObjectIdForProperties(update.input_variables.properties);
+        }
 
-    if (update.templates) {
-        update.templates = Object.fromEntries(
-            Object.entries(update.templates).map(([key, value]) => [key, ensureObjectIdHelper(value)])
-        );
+        next();
+    } catch (error) {
+        next(error instanceof Error ? error : new Error(String(error)));
     }
-    if (update.tasks) {
-        update.tasks = Object.fromEntries(
-            Object.entries(update.tasks).map(([key, value]) => [key, ensureObjectIdHelper(value)])
-        );
-    }
-    if (update.prompts_to_add) {
-        update.prompts_to_add = Object.fromEntries(
-            Object.entries(update.prompts_to_add).map(([key, value]) => [key, ensureObjectIdHelper(value)])
-        );
-    }
-    update.agent = ensureObjectIdHelper(update.agent);
-    update.created_by = ensureObjectIdHelper(update.created_by);
-    update.updated_by = ensureObjectIdHelper(update.updated_by);
-
-    if (update.api_engine) ensureObjectIdForAPIEngine(update.api_engine);
-
-    if (update && update.input_variables && update.input_variables.properties) {
-        update.input_variables.properties = ensureObjectIdForProperties(update.input_variables.properties);
-    }
-    next();
-}
-
-function autoPopulate(this: mongoose.Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
-    this.populate('created_by')
-        .populate('updated_by')
-        .populate('agent')
-
-    this.populate({
-        path: 'templates',
-        options: { strictPopulate: false }
-    });
-    this.populate({
-        path: 'tasks.$*',
-        model: 'Task'
-    });
-    this.populate({
-        path: 'prompts_to_add',
-        options: { strictPopulate: false }
-    });
-    this.populate('input_variables.properties');
-    this.populate('api_engine.input_variables.properties');
-    next();
 }
 
 taskSchema.pre('save', ensureObjectIdForSave);
 taskSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
-taskSchema.pre('find', autoPopulate);
-taskSchema.pre('findOne', autoPopulate);
+taskSchema.plugin(mongooseAutopopulate);
 
 const Task = mongoose.model<ITaskDocument, ITaskModel>('Task', taskSchema);
 

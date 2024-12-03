@@ -4,8 +4,8 @@ from bson import ObjectId
 from typing import Dict, Any, Optional, Literal, Union
 from pydantic import BaseModel, Field, ConfigDict
 from workflow.core.tasks import available_task_types
-from workflow.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, API, User, TaskResponse, MessageDict, FileReference, FileContentReference
-from workflow.util.const import BACKEND_PORT, HOST, ADMIN_TOKEN
+from workflow.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, API, User, MessageDict, FileReference, FileContentReference
+from workflow.util.const import BACKEND_PORT, HOST
 from workflow.core.data_structures import EntityType
 from workflow.util import LOGGER
 
@@ -43,7 +43,10 @@ class BackendAPI(BaseModel):
         >>> prompts = await api.get_prompts()
     """
     base_url: Literal[f"http://{HOST}:{BACKEND_PORT}/api"] = Field(f"http://{HOST}:{BACKEND_PORT}/api", description="The base URL of the backend API", frozen=True)
-    user_token: str = Field(ADMIN_TOKEN, description="The admin token for the backend API")
+    user_data: dict = Field(default={
+        "user_token": None, 
+        "user_obj": None
+    }, description="The user data for the backend API")
     available_task_types: list[AliceTask] = Field(available_task_types, frozen=True, description="The available task types")
     collection_map: Dict[EntityType, str] = Field(default_factory=lambda: {
         "agents": "agents",
@@ -51,15 +54,31 @@ class BackendAPI(BaseModel):
         "users": "users",
         "models": "models",
         "prompts": "prompts",
+        "user_checkpoints": "usercheckpoints",
+        "user_interactions": "userinteractions",
+        "embedding_chunks": "embeddingchunks",
+        "data_clusters": "dataclusters",
         "tasks": "tasks",
         "chats": "chats", 
         "parameters": "parameters",
         "task_responses": "taskresults",
         "files": "files",
         "messages": "messages",
-        "urlreferences": "urlreferences"
+        "entity_references": "entityreferences",
+        "tool_calls": "toolcalls",
+        "code_executions": "codeexecutions",
+        "api_configs": "apiconfigs"
     }, description="Map of entity types to collection names")
     model_config = ConfigDict(protected_namespaces=(), json_encoders = {ObjectId: str}, arbitrary_types_allowed=True)
+    
+    def model_dump(self, *args, **kwargs):
+        # Ensure we exclude model_config from serialization
+        kwargs['exclude'] = {
+            'model_config', 
+            *kwargs.get('exclude', set())
+        }
+        
+        data = super().model_dump(*args, **kwargs)
 
     @property
     def task_types(self) -> Dict[str, AliceTask]:
@@ -69,18 +88,25 @@ class BackendAPI(BaseModel):
     def _get_headers(self):
         return {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.user_token}"
+            "Authorization": f"Bearer {self.user_data.get('user_token')}"
         }
 
     # Function to preprocess the data
     async def preprocess_data(self, data):
         if isinstance(data, dict):
-            return {k: await self.preprocess_data(v) for k, v in data.items() if v or v == 0}
+            # Keep the filtering for dictionary values
+            return {
+                k: await self.preprocess_data(v)
+                for k, v in data.items()
+                if v or v == 0 or v is False
+            }
         elif isinstance(data, list):
-            return [await self.preprocess_data(item) for item in data if item or item == 0]
+            # Do not filter items in lists
+            return [await self.preprocess_data(item) for item in data]
         else:
-            return data if data or data == 0 else None
-        
+            # Keep the existing condition for scalar values
+            return data if data or data == 0 or data is False else None
+
     async def get_prompts(self, prompt_id: Optional[str] = None) -> Dict[str, Prompt]:
         if prompt_id is None:
             url = f"{self.base_url}/prompts"
@@ -230,8 +256,8 @@ class BackendAPI(BaseModel):
                 LOGGER.error(f"Error retrieving APIs: {e}")
                 return {}
             
-    async def update_api_health(self, api_id: str, health_status: str) -> bool:
-        url = f"{self.base_url}/apis/{api_id}"
+    async def update_api_config_health(self, api_config_id: str, health_status: str) -> bool:
+        url = f"{self.base_url}/apiconfigs/{api_config_id}"
         headers = self._get_headers()
         data = {"health_status": health_status}
 
@@ -277,10 +303,10 @@ class BackendAPI(BaseModel):
                     
                     if isinstance(chats, list):
                         chats = [await self.preprocess_data(chat) for chat in chats]
-                        return {chat["_id"]: await self.populate_chat(chat) for chat in chats}
+                        return {chat["_id"]: AliceChat(**chat) for chat in chats}
                     else:
                         chats = await self.preprocess_data(chats)
-                        return {chats['_id']: await self.populate_chat(chats)}
+                        return {chats['_id']: AliceChat(**chats)}
             except aiohttp.ClientError as e:
                 LOGGER.error(f"Error retrieving chats: {e}")
                 return {}
@@ -461,18 +487,17 @@ class BackendAPI(BaseModel):
             return None
         
     def debug_file_reference_serialization(self, file_reference: FileReference):
-        print(f"FileReference object: {file_reference}")
-        print(f"FileReference __dict__: {file_reference.__dict__}")
+        LOGGER(f"FileReference object: {file_reference}")
+        LOGGER(f"FileReference __dict__: {file_reference.__dict__}")
         
         try:
             dumped_data = file_reference.model_dump(by_alias=True)
-            print(f"model_dump() result: {json.dumps(dumped_data, indent=2)}")
+            LOGGER(f"model_dump() result: {json.dumps(dumped_data, indent=2)}")
         except Exception as e:
-            print(f"model_dump() error: {str(e)}")
+            LOGGER(f"model_dump() error: {str(e)}")
 
-            
 def token_validation_middleware(api: BackendAPI):
-    def middleware(request) -> dict[str, bool]:
+    def middleware(request) -> dict[str, Any]:
         token = request.headers.get("Authorization")
         if not token:
             return {"valid": False, "message": "Access denied. No token provided."}
@@ -480,8 +505,16 @@ def token_validation_middleware(api: BackendAPI):
         token = token.split(" ")[1]
         validation_response = api.validate_token(token)
         if not validation_response.get("valid"):
-            return {"valid": False, "message": validation_response.get("message", "Invalid token")}
+            return {
+                "valid": False, 
+                "message": validation_response.get("message", "Invalid token"), 
+                "user": validation_response.get("user", None)
+                }
         LOGGER.error('validation_response', validation_response)
         request.state.user_id = validation_response["user"]["_id"]
-        return {"valid": True}
+        return {
+            "valid": True, 
+            "message": validation_response.get("message", "Valid token"), 
+            "user": validation_response.get("user")
+            }
     return middleware

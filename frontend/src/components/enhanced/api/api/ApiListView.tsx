@@ -1,8 +1,10 @@
 import React from 'react';
-import { Typography, Box } from '@mui/material';
+import { Typography, Box, Tooltip, IconButton } from '@mui/material';
 import { API, ApiComponentProps } from '../../../../types/ApiTypes';
 import EnhancedListView from '../../common/enhanced_component/ListView';
-import { CheckCircle, Cancel, Error, Warning } from '@mui/icons-material';
+import { CheckCircle, Cancel, Api } from '@mui/icons-material';
+import { apiNameIcons, apiTypeIcons } from '../../../../utils/ApiUtils';
+import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
 
 const ApiListView: React.FC<ApiComponentProps> = ({
     items,
@@ -10,10 +12,20 @@ const ApiListView: React.FC<ApiComponentProps> = ({
     onInteraction,
     onView,
 }) => {
-    const getPrimaryText = (api: API) => `${api.name} (${api.api_type})`;
+    const getPrimaryText = (api: API) => api.name || 'N/A';
 
     const getSecondaryText = (api: API) => (
         <Box display="flex" alignItems="center">
+            <Tooltip title={`API name: ${formatStringWithSpaces(api.api_name)}`}>
+                <IconButton size="small">
+                    {apiNameIcons[api.api_name] || <Api />}
+                </IconButton>
+            </Tooltip>
+            <Tooltip title={`API type: ${formatStringWithSpaces(api.api_type)}`}>
+                <IconButton size="small">
+                    {apiTypeIcons[api.api_type] || <Api />}
+                </IconButton>
+            </Tooltip>
             {api.is_active ? (
                 <CheckCircle fontSize="small" color="success" />
             ) : (
@@ -22,25 +34,8 @@ const ApiListView: React.FC<ApiComponentProps> = ({
             <Typography component="span" variant="body2" color="textSecondary" sx={{ ml: 1, mr: 2 }}>
                 {api.is_active ? 'Active' : 'Inactive'}
             </Typography>
-            {getHealthIcon(api.health_status)}
-            <Typography component="span" variant="body2" color="textSecondary" sx={{ ml: 1 }}>
-                {api.health_status}
-            </Typography>
         </Box>
     );
-
-    const getHealthIcon = (health: string) => {
-        switch (health.toLowerCase()) {
-            case 'healthy':
-                return <CheckCircle fontSize="small" color="success" />;
-            case 'warning':
-                return <Warning fontSize="small" color="warning" />;
-            case 'error':
-                return <Error fontSize="small" color="error" />;
-            default:
-                return null;
-        }
-    };
 
     return (
         <EnhancedListView<API>

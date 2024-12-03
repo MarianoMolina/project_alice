@@ -14,7 +14,7 @@ def sample_agent():
         name="TestAgent",
         system_message=Prompt(name="test", content="You are a test assistant"),
         models= {"chat": AliceModel(short_name="TestModel", model_name="test-model", model_format="OpenChat", ctx_size=1000, model_type="chat", deployment="test")},
-        has_functions=True,
+        has_tools=True,
         has_code_exec=False,
         max_consecutive_auto_reply=5
     )

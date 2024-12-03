@@ -61,8 +61,8 @@ def sample_workflow():
         task_name="TestWorkflow",
         task_description="A test workflow",
         tasks={"Task1": task1, "Task2": task2},
-        start_task="Task1",
-        tasks_end_code_routing={
+        start_node="Task1",
+        node_end_code_routing={
             "Task1": {0: ("Task2", False)},
             "Task2": {0: (None, False)}
         },
@@ -86,21 +86,6 @@ async def test_workflow_execution(sample_workflow):
     assert len(result.task_content.content) == 2  # Two tasks executed
 
 @pytest.mark.asyncio
-async def test_workflow_task_selection(sample_workflow):
-    # Override task_selection_method for testing
-    def custom_selection(task_response, outputs):
-        if task_response is None or task_response.task_name == "Task1":
-            return "Task2", False
-        return None, False
-    
-    sample_workflow.task_selection_method = custom_selection
-    
-    result = await sample_workflow.run(workflow_input="test", input1="test1", input2="test2")
-    
-    assert result.status == "complete"
-    assert len(result.task_content.content) == 2
-
-@pytest.mark.asyncio
 async def test_workflow_max_attempts(sample_workflow):
     # Replace Task1 with FailingMockTask
     sample_workflow.tasks["Task1"] = FailingMockTask(
@@ -109,7 +94,7 @@ async def test_workflow_max_attempts(sample_workflow):
         input_variables=sample_workflow.tasks["Task1"].input_variables
     )
     
-    sample_workflow.tasks_end_code_routing["Task1"][1] = ("Task1", True)
+    sample_workflow.node_end_code_routing["Task1"][1] = ("Task1", True)
     sample_workflow.max_attempts = 3
     
     result = await sample_workflow.run(workflow_input="test", input1="test1")
@@ -183,8 +168,8 @@ def debug_workflow():
         task_name="TestWorkflow",
         task_description="A test workflow",
         tasks={"Task1": task1, "Task2": task2},
-        start_task="Task1",
-        tasks_end_code_routing={
+        start_node="Task1",
+        node_end_code_routing={
             "Task1": {0: ("Task2", False)},
             "Task2": {0: (None, False)}
         },

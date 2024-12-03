@@ -1,31 +1,97 @@
-from typing import List, Type
+from typing import List, Type, Dict
 from pydantic import Field, model_validator
-from workflow.core.api import APIManager, APIEngine, WikipediaSearchAPI, GoogleSearchAPI, ExaSearchAPI, ArxivSearchAPI, RedditSearchAPI, GoogleGraphEngine
-from workflow.core.data_structures import TaskResponse, ApiType
+from workflow.core.api import APIEngine
+from workflow.core.api import APIManager
+from workflow.core.api.engines import ApiEngineMap
+from workflow.core.data_structures import ApiType, ApiName
+from workflow.core.data_structures import NodeResponse, References, TasksEndCodeRouting
 from workflow.core.tasks.task import AliceTask
+from workflow.util import get_traceback
 
 class APITask(AliceTask):
     """
-    Represents a task that interacts with a specific API.
+    A specialized AliceTask implementation for direct API interactions with a single, focused purpose.
 
-    This class is designed to handle tasks that require interaction with external APIs.
-    It validates the API configuration and uses the appropriate API engine for execution.
+    APITask provides a streamlined way to interact with external APIs by implementing a simplified
+    node structure with a single 'default' node. This design is ideal for straightforward API
+    operations that don't require complex workflow logic.
+
+    Key Features:
+    -------------
+    * Single API Focus:
+        - Each instance works with exactly one API type
+        - Built-in API validation and configuration
+        - Automatic routing for retry attempts
+
+    * Simplified Node Structure:
+        - Single 'default' node implementation
+        - Automatic retry handling
+        - Standardized error management
+
+    * API Engine Integration:
+        - Direct mapping to API engine classes
+        - Automatic configuration validation
+        - Consistent response formatting
 
     Attributes:
-        required_apis (List[ApiType]): List containing exactly one ApiType, specifying the required API.
-        api_engine (Type[APIEngine]): The class of the API engine to be used.
+    -----------
+    required_apis : List[ApiType]
+        Must contain exactly one ApiType
+        
+    api_engine : Type[APIEngine]
+        The class of the API engine to be used
+        
+    start_node : str
+        Always 'default' for this implementation
+        
+    node_end_code_routing : TasksEndCodeRouting
+        Pre-configured for single node with retry logic:
+        - Exit code 0: Success, end task
+        - Exit code 1: Failure, retry if attempts remain
 
-    Class Methods:
-        validate_api_task: Validates the API task configuration.
+    Example:
+    --------
+    ```python
+    class SearchAPITask(APITask):
+        required_apis = [ApiType.GOOGLE_SEARCH]
+        api_engine = GoogleSearchEngine
+        input_variables = FunctionParameters(
+            properties={
+                "query": ParameterDefinition(
+                    type="string",
+                    description="Search query"
+                )
+            },
+            required=["query"]
+        )
+    ```
 
-    Methods:
-        run: Execute the API task and return a TaskResponse.
+    Notes:
+    ------
+    1. API Validation:
+        - Validates exactly one required API
+        - Ensures API type matches engine capabilities
+        - Verifies input variable compatibility
 
-    Raises:
-        ValueError: If the API configuration is invalid or if required parameters are missing.
+    2. Execution Flow:
+        - Single node execution with automatic retry
+        - Standardized error handling
+        - Consistent response formatting
+
+    3. Implementation:
+        - No need to implement node methods
+        - Can override default behavior if needed
+        - Handles all basic API interaction patterns
     """
     required_apis: List[ApiType] = Field(..., min_length=1, max_length=1)
     api_engine: Type[APIEngine] = Field(None)
+    start_node: str = Field(default='default', description="The name of the starting node")
+    node_end_code_routing: TasksEndCodeRouting = Field(default={
+        'default': {
+            0: (None, False),
+            1: ('default', True),
+        }
+    }, description="A dictionary of tasks/nodes -> exit codes and the task to route to given each exit code")
 
     @model_validator(mode='after')
     def validate_api_task(cls, values):
@@ -57,21 +123,13 @@ class APITask(AliceTask):
         if api_type not in ApiType.__members__.values() or api_type == ApiType.LLM_MODEL:
             raise ValueError(f"{api_type} is not a valid API type for APITask")
 
-        # Map API types to their corresponding engine classes
-        api_engine_map = {
-            ApiType.WIKIPEDIA_SEARCH: WikipediaSearchAPI,
-            ApiType.GOOGLE_SEARCH: GoogleSearchAPI,
-            ApiType.EXA_SEARCH: ExaSearchAPI,
-            ApiType.ARXIV_SEARCH: ArxivSearchAPI,
-            ApiType.REDDIT_SEARCH: RedditSearchAPI,
-            ApiType.GOOGLE_KNOWLEDGE_GRAPH: GoogleGraphEngine
-        }
-
         # Get the correct API engine class
-        api_engine_class = api_engine_map.get(api_type)
-        if api_engine_class is None:
+        api_engines_dict: Dict[ApiName, APIEngine] = ApiEngineMap.get(api_type)
+        if api_engines_dict is None:
             raise ValueError(f"No API engine class found for {api_type}")
 
+        # Retrieve the first ApiName from the API engine map
+        api_engine_class = next(iter(api_engines_dict.values()))
         # Instantiate the API engine to access its input_variables
         api_engine_instance = api_engine_class()
 
@@ -86,50 +144,44 @@ class APITask(AliceTask):
         values.api_engine = api_engine_class
         return values
 
-    async def run(self, api_manager: APIManager, **kwargs) -> TaskResponse:
+    async def execute_default(self, execution_history: List[NodeResponse], node_responses: List[NodeResponse], **kwargs) -> NodeResponse:
         """
-        Execute the API task and return a TaskResponse.
+        Execute the default node, which performs the API interaction.
 
         This method retrieves the necessary API data, instantiates the appropriate
         API engine, and executes the API request. It handles both successful
-        executions and errors, wrapping the result in a TaskResponse.
+        executions and errors, wrapping the result in a NodeResponse.
 
         Args:
-            api_manager (APIManager): The API manager to use for retrieving API data.
-            **kwargs: Additional keyword arguments to pass to the API engine.
+            execution_history (List[NodeResponse]): The full execution history of the task.
+            node_responses (List[NodeResponse]): The responses from previously executed nodes.
+            **kwargs: Additional keyword arguments, including 'api_manager' and task-specific inputs.
 
         Returns:
-            TaskResponse: A response object containing the results of the API task execution.
+            NodeResponse: A response object containing the results of the API task execution.
         """
-        task_inputs = kwargs.copy()
+        api_manager: APIManager = kwargs.get("api_manager")
         try:
             api_data = api_manager.retrieve_api_data(self.required_apis[0])
-            # if not api_data:
-            #     raise ValueError(f"API data not found for {self.required_apis[0]}")
             api_engine = self.api_engine()  # Instantiate the API engine
             references = await api_engine.generate_api_response(api_data=api_data, **kwargs)
-            str_outputs = references.detailed_summary() if references else None
-            return TaskResponse(
-                task_id=self.id if self.id else '',
-                task_name=self.task_name,
-                task_description=self.task_description,
-                status="complete",
-                result_code=0,
-                task_outputs=str_outputs,
+            return NodeResponse(
+                parent_task_id=self.id,
+                node_name="default",
+                execution_order=len(execution_history),
+                exit_code=0,
                 references=references,
-                task_inputs=task_inputs,
-                result_diagnostic="",
-                execution_history=kwargs.get("execution_history", [])
             )
         except Exception as e:
-            import traceback
-            return TaskResponse(
-                task_id=self.id if self.id else '',
-                task_name=self.task_name,
-                task_description=self.task_description,
-                status="failed",
-                task_inputs=task_inputs,
-                result_code=1,
-                result_diagnostic=str(f'Error: {e}\nTraceback: {traceback.format_exc()}'),
-                execution_history=kwargs.get("execution_history", [])
+            error_message = f'Error: {e}\nTraceback: {get_traceback()}'
+            return NodeResponse(
+                parent_task_id=self.id,
+                node_name="default",
+                exit_code=1,
+                references=References(messages=[{
+                    "role": "system",
+                    "content": error_message,
+                    "generated_by": "system"
+                }]),
+                execution_order=len(execution_history)
             )

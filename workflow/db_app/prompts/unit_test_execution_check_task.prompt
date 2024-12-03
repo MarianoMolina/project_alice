@@ -1,21 +1,13 @@
 This is the task:
 
-{{ outputs_plan_workflow }}
+{{ Plan_Workflow }}
 
-This is the code:
+This is the code and execution:
 
-{{ outputs_generate_code }}
+{{ Generate_Code }}
 
-This is the code execution output:
+This is the unit test code and execution:
 
-{{ outputs_execute_code }}
-
-This is the unit test code:
-
-{{ outputs_generate_unit_tests }}
-
-This is the unit text execution output:
-
-{{ outputs_execute_unit_tests }}
+{{ Generate_Unit_Tests }}
 
 From this output, respond only with 'ALL TESTS PASSED', 'TEST FAILED' or 'TEST CODE ERROR' 

@@ -1,81 +1,78 @@
 from workflow.core.data_structures import ApiType, ApiName
+from .embedding_engines import EmbeddingEngine, GeminiEmbeddingsEngine
+from .image_engines import ImageGenerationEngine, GeminiImageGenerationEngine, PixArtImgGenEngine
+from .llm_engines import LLMEngine, LLMAnthropic, GeminiLLMEngine, CohereLLMEngine
+from .search_engines import ArxivSearchAPI, ExaSearchAPI, RedditSearchAPI, GoogleSearchAPI, WikipediaSearchAPI, GoogleGraphEngine, WolframAlphaEngine
+from .stt_engines import SpeechToTextEngine, GeminiSpeechToTextEngine
+from .tts_engines import TextToSpeechEngine, BarkEngine
+from .vision_engines import VisionModelEngine, AnthropicVisionEngine, GeminiVisionEngine
 from .api_engine import APIEngine
-from .search_engine import ArxivSearchAPI, ExaSearchAPI, GoogleSearchAPI, RedditSearchAPI, WikipediaSearchAPI
-from .llm_engine import LLMEngine
-from .anthropic_llm_engine import LLMAnthropic
-from .image_gen_engine import ImageGenerationEngine
-from .vision_model_engine import VisionModelEngine
-from .anthropic_vision_engine import AnthropicVisionEngine
-from .oai_stt_engine import OpenAISpeechToTextEngine
-from .oai_timestamped_stt_engine import OpenAIAdvancedSpeechToTextEngine
-from .text_to_speech_engine import OpenAITextToSpeechEngine
-from .embedding_engine import OpenAIEmbeddingsEngine
-from .gemini_llm_engine import GeminiLLMEngine
-from .cohere_llm_engine import CohereLLMEngine
-from .gemini_vision import GeminiVisionEngine
-from .gemini_embedding import GeminiEmbeddingsEngine
-from .gemini_stt import GeminiSpeechToTextEngine
-from .gemini_img_gen import GeminiImageGenerationEngine
-from .google_knowledge_graph_engine import GoogleGraphEngine
+
 ApiEngineMap = {
     ApiType.LLM_MODEL: {
         ApiName.OPENAI: LLMEngine,
-        ApiName.ANTHROPIC: LLMAnthropic,
         ApiName.LM_STUDIO: LLMEngine,
         ApiName.AZURE: LLMEngine,
-        ApiName.GEMINI: GeminiLLMEngine,
         ApiName.MISTRAL: LLMEngine,
+        ApiName.LLAMA: LLMEngine,
+        ApiName.GROQ: LLMEngine,
+        ApiName.ANTHROPIC: LLMAnthropic,
+        ApiName.GEMINI: GeminiLLMEngine,
         ApiName.COHERE: CohereLLMEngine,
-        ApiName.META: LLMEngine,
-        ApiName.GROQ: LLMEngine
     },
     ApiType.GOOGLE_SEARCH: {
         ApiName.GOOGLE_SEARCH: GoogleSearchAPI,
     },
     ApiType.REDDIT_SEARCH: {
-        ApiName.REDDIT_SEARCH: RedditSearchAPI,
+        ApiName.REDDIT: RedditSearchAPI,
     },
     ApiType.WIKIPEDIA_SEARCH: {
-        ApiName.WIKIPEDIA_SEARCH: WikipediaSearchAPI,
+        ApiName.WIKIPEDIA: WikipediaSearchAPI,
     },
     ApiType.EXA_SEARCH: {
-        ApiName.EXA_SEARCH: ExaSearchAPI,
+        ApiName.EXA: ExaSearchAPI,
     },
     ApiType.ARXIV_SEARCH: {
-        ApiName.ARXIV_SEARCH: ArxivSearchAPI,
+        ApiName.ARXIV: ArxivSearchAPI,
     },
     ApiType.GOOGLE_KNOWLEDGE_GRAPH: {
         ApiName.GOOGLE_KNOWLEDGE_GRAPH: GoogleGraphEngine,
     },
+    ApiType.WOLFRAM_ALPHA: {
+        ApiName.WOLFRAM_ALPHA: WolframAlphaEngine,
+    },
     ApiType.IMG_VISION: {
-        ApiName.OPENAI_VISION: VisionModelEngine,
-        ApiName.ANTHROPIC_VISION: AnthropicVisionEngine,
-        ApiName.LM_STUDIO_VISION: VisionModelEngine,
-        ApiName.META_VISION: VisionModelEngine,
-        ApiName.MISTRAL_VISION: VisionModelEngine,
-        ApiName.GEMINI_VISION: GeminiVisionEngine,
-        ApiName.GROQ_VISION: VisionModelEngine
+        ApiName.OPENAI: VisionModelEngine,
+        ApiName.ANTHROPIC: AnthropicVisionEngine,
+        ApiName.LM_STUDIO: VisionModelEngine,
+        ApiName.LLAMA: VisionModelEngine,
+        ApiName.MISTRAL: VisionModelEngine,
+        ApiName.GEMINI: GeminiVisionEngine,
+        ApiName.GROQ: VisionModelEngine
     },
     ApiType.IMG_GENERATION: {
-        ApiName.OPENAI_IMG_GENERATION: ImageGenerationEngine,
-        ApiName.GEMINI_IMG_GEN: GeminiImageGenerationEngine
+        ApiName.OPENAI: ImageGenerationEngine,
+        ApiName.GEMINI: GeminiImageGenerationEngine,
+        ApiName.PIXART: PixArtImgGenEngine
     },
     ApiType.SPEECH_TO_TEXT: {
-        ApiName.OPENAI_STT: OpenAISpeechToTextEngine,
-        ApiName.OPENAI_ASTT: OpenAIAdvancedSpeechToTextEngine,
-        ApiName.GEMINI_STT: GeminiSpeechToTextEngine
+        ApiName.OPENAI: SpeechToTextEngine,
+        ApiName.GEMINI: GeminiSpeechToTextEngine
     },
     ApiType.TEXT_TO_SPEECH: {
-        ApiName.OPENAI_TTS: OpenAITextToSpeechEngine,
-        ApiName.GROQ_TTS: OpenAITextToSpeechEngine
+        ApiName.OPENAI: TextToSpeechEngine,
+        ApiName.GROQ: TextToSpeechEngine,
+        ApiName.BARK: BarkEngine
     },
     ApiType.EMBEDDINGS: {
-        ApiName.OPENAI_EMBEDDINGS: OpenAIEmbeddingsEngine,
-        ApiName.MISTRAL_EMBEDDINGS: OpenAIEmbeddingsEngine,
-        ApiName.GEMINI_EMBEDDINGS: GeminiEmbeddingsEngine,
+        ApiName.OPENAI: EmbeddingEngine,
+        ApiName.MISTRAL: EmbeddingEngine,
+        ApiName.GEMINI: GeminiEmbeddingsEngine,
+        ApiName.LM_STUDIO: EmbeddingEngine
     },
 }
+
 __all__ = ["ArxivSearchAPI", "ExaSearchAPI", "GoogleSearchAPI", "RedditSearchAPI", "WikipediaSearchAPI", "APIEngine", "GeminiImageGenerationEngine",
            "LLMEngine", "LLMOpenAI", "LLMAnthropic", "ImageGenerationEngine", "CohereLLMEngine", "GeminiVisionEngine", "GeminiEmbeddingsEngine", "GeminiSpeechToTextEngine",
-           "VisionModelEngine", "AnthropicVisionEngine", "OpenAISpeechToTextEngine", "OpenAIAdvancedSpeechToTextEngine",
-           "OpenAITextToSpeechEngine", "OpenAIEmbeddingsEngine", "GeminiLLMEngine", "CohereLLMEngine", "GoogleGraphEngine"]
+           "VisionModelEngine", "AnthropicVisionEngine", "BarkEngine", "WolframAlphaEngine", "PixArtImgGenEngine", 'SpeechToTextEngine', 
+           "TextToSpeechEngine", "EmbeddingEngine", "GeminiLLMEngine", "CohereLLMEngine", "GoogleGraphEngine"]

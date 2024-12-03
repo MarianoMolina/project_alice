@@ -58,9 +58,11 @@ class ModularDBStructure(BaseModel):
 class DBStructure(BaseModel):
     users: List[Dict[str, Any]] = Field(default_factory=list, description="List of users to create")
     models: List[Dict[str, Any]] = Field(default_factory=list, description="List of models to create")
+    api_configs: List[Dict[str, Any]] = Field(default_factory=list, description="List of api configs to create")
     apis: List[Dict[str, Any]] = Field(default_factory=list, description="List of apis to create")
     parameters: List[Dict[str, Any]] = Field(default_factory=list, description="List of parameters to create")
     prompts: List[Dict[str, Any]] = Field(default_factory=list, description="List of prompts to create")
+    user_checkpoints: List[Dict[str, Any]] = Field(default_factory=list, description="List of user checkpoints to create")
     agents: List[Dict[str, Any]] = Field(default_factory=list, description="List of agents to create")
     tasks: List[Dict[str, Any]] = Field(default_factory=list, description="List of tasks to create")
     chats: List[Dict[str, Any]] = Field(default_factory=list, description="List of chats to create")

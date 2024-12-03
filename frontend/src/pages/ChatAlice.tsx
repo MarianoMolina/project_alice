@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { Box, SelectChangeEvent } from '@mui/material';
-import { Add, Chat, Info, Functions, Assignment, AttachFile, Message, Link } from '@mui/icons-material';
+import { Add, Info, } from '@mui/icons-material';
 import { TaskResponse } from '../types/TaskResponseTypes';
 import { AliceTask } from '../types/TaskTypes';
 import { AliceChat } from '../types/ChatTypes';
@@ -9,25 +9,27 @@ import { useChat } from '../contexts/ChatContext';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
 import EnhancedTask from '../components/enhanced/task/task/EnhancedTask';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
-import ChatInput, { ChatInputRef } from '../components/enhanced/common/chat_components/ChatInput';
+import ChatInput, { ChatInputRef } from '../components/enhanced/chat/ChatInput';
 import useStyles from '../styles/ChatAliceStyles';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
 import { useCardDialog } from '../contexts/CardDialogContext';
 import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
 import { FileReference } from '../types/FileTypes';
-import EnhancedURLReference from '../components/enhanced/url_reference/url_reference/EnhancedURLReference';
 import EnhancedMessage from '../components/enhanced/message/message/EnhancedMessage';
 import Logger from '../utils/Logger';
-import ChatFullView from '../components/enhanced/common/chat_components/ChatFullView';
+import ChatMessagesFullView from '../components/enhanced/chat/chat/ChatMessagesFullView';
 import ChatShortListView from '../components/enhanced/chat/chat/ChatShortListView';
 import ChatCardView from '../components/enhanced/chat/chat/ChatCardView';
 import { LlmProvider } from '../types/ApiTypes';
 import FilterSelect from '../components/ui/sidetab_header/FilterSelect';
+import EnhancedEntityReference from '../components/enhanced/entity_reference/entity_reference/EnhancedEntityReference';
+import { collectionElementIcons } from '../utils/CollectionUtils';
+import EnhancedToolCall from '../components/enhanced/tool_calls/tool_calls/EnhancedToolCall';
+import EnhancedCodeExecution from '../components/enhanced/code_execution/code_execution/EnhancedCodeExecution';
 
 const ChatAlice: React.FC = () => {
   const classes = useStyles();
   const {
-    messages,
     pastChats,
     currentChatId,
     handleSelectChat,
@@ -45,6 +47,7 @@ const ChatAlice: React.FC = () => {
 
   const selectChatId = useCallback(async (chat: AliceChat) => {
     Logger.debug('Selected chat:', chat);
+    if (!chat._id) return;
     await handleSelectChat(chat._id);
     setActiveTab('Current Chat');
   }, [handleSelectChat]);
@@ -83,8 +86,8 @@ const ChatAlice: React.FC = () => {
     chatInputRef.current?.addTaskResponse(taskResponse);
   }, []);
 
-  const addURLReference = useCallback((urlReference: any) => {
-    chatInputRef.current?.addURLReference(urlReference);
+  const addEntityReference = useCallback((entityReference: any) => {
+    chatInputRef.current?.addEntityReference(entityReference);
   }, []);
 
   const addMessageReference = useCallback((message: any) => {
@@ -100,13 +103,15 @@ const ChatAlice: React.FC = () => {
   ];
 
   const tabs = [
-    { name: 'Select Chat', icon: Chat, group: 'Chat' },
+    { name: 'Select Chat', icon: collectionElementIcons.Chat, group: 'Chat' },
     { name: 'Current Chat', icon: Info, disabled: !currentChatId, group: 'Info' },
-    { name: 'Add Functions', icon: Functions, disabled: !currentChatId, group: 'Info' },
-    { name: 'Add File Reference', icon: AttachFile, disabled: !currentChatId, group: 'Ref' },
-    { name: 'Add Message Reference', icon: Message, disabled: !currentChatId, group: 'Ref' },
-    { name: 'Add Task Results', icon: Assignment, disabled: !currentChatId, group: 'Ref' },
-    { name: 'Add URL Reference', icon: Link, disabled: !currentChatId, group: 'Ref' },
+    { name: 'Add Tools', icon: collectionElementIcons.Task, disabled: !currentChatId, group: 'Info' },
+    { name: 'Add File Reference', icon: collectionElementIcons.File, disabled: !currentChatId, group: 'Ref' },
+    { name: 'Add Message Reference', icon: collectionElementIcons.Message, disabled: !currentChatId, group: 'Ref' },
+    { name: 'Add Task Results', icon: collectionElementIcons.TaskResponse, disabled: !currentChatId, group: 'Ref' },
+    { name: 'Add Entity Reference', icon: collectionElementIcons.EntityReference, disabled: !currentChatId, group: 'Ref' },
+    { name: 'Add Tool Call', icon: collectionElementIcons.ToolCall, disabled: !currentChatId, group: 'Ref' },
+    { name: 'Add Code Execution', icon: collectionElementIcons.CodeExecution, disabled: !currentChatId, group: 'Ref' },
   ];
 
   const renderSidebarContent = useCallback((tabName: string) => {
@@ -118,7 +123,9 @@ const ChatAlice: React.FC = () => {
       handleParameterClick: (id: string) => selectCardItem('Parameter', id),
       handleAPIClick: (id: string) => selectCardItem('API', id),
       handleMessageClick: (id: string) => selectCardItem('Message', id),
-      handleURLReferenceClick: (id: string) => selectCardItem('URLReference', id),
+      handleEntityReferenceClick: (id: string) => selectCardItem('EntityReference', id),
+      handleToolCallClick: (id: string) => selectCardItem('ToolCall', id),
+      handleCodeExecutionClick: (id: string) => selectCardItem('CodeExecution', id),
     };
 
     return (
@@ -155,7 +162,7 @@ const ChatAlice: React.FC = () => {
                     handleSave={async () => { }}
                   />
                 );
-              case 'Add Functions':
+              case 'Add Tools':
                 return (
                   <EnhancedTask
                     mode={'list'}
@@ -185,13 +192,13 @@ const ChatAlice: React.FC = () => {
                     {...handleProps}
                   />
                 );
-              case 'Add URL Reference':
+              case 'Add Entity Reference':
                 return (
-                  <EnhancedURLReference
+                  <EnhancedEntityReference
                     mode={'list'}
                     fetchAll={true}
-                    onView={(urlReference) => urlReference._id && selectCardItem('URLReference', urlReference._id)}
-                    onInteraction={addURLReference}
+                    onView={(entityReference) => entityReference._id && selectCardItem('EntityReference', entityReference._id)}
+                    onInteraction={addEntityReference}
                     {...handleProps}
                   />
                 );
@@ -205,6 +212,26 @@ const ChatAlice: React.FC = () => {
                     {...handleProps}
                   />
                 );
+              case 'Add Tool Call':
+                return (
+                  <EnhancedToolCall
+                    mode={'list'}
+                    fetchAll={true}
+                    onView={(toolCall) => toolCall._id && selectCardItem('ToolCall', toolCall._id)}
+                    onInteraction={addMessageReference}
+                    {...handleProps}
+                  />
+                )
+              case 'Add Code Execution':
+                return ( 
+                  <EnhancedCodeExecution
+                    mode={'list'}
+                    fetchAll={true}
+                    onView={(codeExecution) => codeExecution._id && selectCardItem('CodeExecution', codeExecution._id)}
+                    onInteraction={addMessageReference}
+                    {...handleProps}
+                  />
+                )
               default:
                 return null;
             }
@@ -212,7 +239,7 @@ const ChatAlice: React.FC = () => {
         </Box>
       </Box>
     )
-  }, [selectChatId, currentChat, checkAndAddTask, addTaskResponse, addFileReference, addURLReference, addMessageReference, selectCardItem, filteredPastChats, classes.activeListContainer, classes.activeListContent, selectedApiProvider, handleApiProviderChange]);
+  }, [selectChatId, currentChat, checkAndAddTask, addTaskResponse, addFileReference, addEntityReference, addMessageReference, selectCardItem, filteredPastChats, classes.activeListContainer, classes.activeListContent, selectedApiProvider, handleApiProviderChange]);
 
   return (
     <Box className={classes.chatAliceContainer}>
@@ -228,7 +255,14 @@ const ChatAlice: React.FC = () => {
       <Box className={classes.chatAliceMain}>
         <Box className={classes.chatAliceMessages}>
           {currentChat ? (
-            <ChatFullView messages={messages} showRegenerate={true} />
+            <ChatMessagesFullView 
+            item={currentChat} 
+            showRegenerate={true} 
+            items={null} 
+            onChange={()=>{}} 
+            mode='view' 
+            handleSave={async () => {}} 
+            />
           ) : (
             <PlaceholderSkeleton
               mode="chat"

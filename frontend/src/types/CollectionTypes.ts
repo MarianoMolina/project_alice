@@ -1,15 +1,18 @@
-import { AliceAgent, convertToAliceAgent } from './AgentTypes';
-import { AliceChat, convertToAliceChat } from './ChatTypes';
-import { AliceModel, convertToAliceModel } from './ModelTypes';
-import { AliceTask, convertToAliceTask } from './TaskTypes';
-import { Prompt, convertToPrompt } from './PromptTypes';
-import { TaskResponse, convertToTaskResponse } from './TaskResponseTypes';
-import { ParameterDefinition, convertToParameterDefinition } from './ParameterTypes';
-import { User, convertToUser } from './UserTypes';
-import { API, convertToAPI } from './ApiTypes';
-import { convertToFileReference, FileReference } from './FileTypes';
-import { convertToMessageType, MessageType } from './MessageTypes';
-import { convertToURLReference, URLReference } from './URLReferenceTypes';
+import { AliceAgent } from './AgentTypes';
+import { AliceChat } from './ChatTypes';
+import { AliceModel } from './ModelTypes';
+import { AliceTask } from './TaskTypes';
+import { Prompt } from './PromptTypes';
+import { TaskResponse } from './TaskResponseTypes';
+import { ParameterDefinition } from './ParameterTypes';
+import { User } from './UserTypes';
+import { API } from './ApiTypes';
+import { FileReference } from './FileTypes';
+import { MessageType } from './MessageTypes';
+import { UserInteraction } from './UserInteractionTypes';
+import { UserCheckpoint } from './UserCheckpointTypes';
+import { EmbeddingChunk } from './EmbeddingChunkTypes';
+import { DataCluster } from './DataClusterTypes';
 import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
 import EnhancedAgent from '../components/enhanced/agent/agent/EnhancedAgent';
 import EnhancedChat from '../components/enhanced/chat/chat/EnhancedChat';
@@ -20,11 +23,22 @@ import EnhancedParameter from '../components/enhanced/parameter/parameter/Enhanc
 import EnhancedPrompt from '../components/enhanced/prompt/prompt/EnhancedPrompt';
 import EnhancedTask from '../components/enhanced/task/task/EnhancedTask';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
-import EnhancedURLReference from '../components/enhanced/url_reference/url_reference/EnhancedURLReference';
+import EnhancedUserInteraction from '../components/enhanced/user_interaction/user_interaction/EnhancedUserInteraction';
+import EnhancedUserCheckpoint from '../components/enhanced/user_checkpoint/user_checkpoint/EnhancedUserCheckpoint';
+import EnhancedDataCluster from '../components/enhanced/data_cluster/data_cluster/EnhancedDataCluster';
+import EnhancedEmbeddingChunk from '../components/enhanced/embedding_chunk/embedding_chunk/EnhancedEmbeddingChunk';
+import { CodeExecution } from './CodeExecutionTypes';
+import { APIConfig } from './ApiConfigTypes';
+import { ToolCall } from './ToolCallTypes';
+import EnhancedToolCall from '../components/enhanced/tool_calls/tool_calls/EnhancedToolCall';
+import EnhancedCodeExecution from '../components/enhanced/code_execution/code_execution/EnhancedCodeExecution';
+import EnhancedAPIConfig from '../components/enhanced/api_config/api_config/EnhancedAPIConfig';
+import { EntityReference } from './EntityReferenceTypes';
+import EnhancedEntityReference from '../components/enhanced/entity_reference/entity_reference/EnhancedEntityReference';
 
-export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' | 'urlreferences';
-export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType | URLReference;
-export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API' | 'User' | 'File' | 'Message' | 'URLReference';
+export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' |  'userinteractions' | 'usercheckpoints' | 'dataclusters' | 'embeddingchunks' | 'toolcalls' | 'codeexecutions' | 'apiconfigs' | 'entityreferences';
+export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType |  UserInteraction | UserCheckpoint | DataCluster | EmbeddingChunk | ToolCall | CodeExecution | APIConfig | EntityReference;
+export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API' | 'User' | 'File' | 'Message' | 'UserInteraction' | 'UserCheckpoint' | 'DataCluster' | 'EmbeddingChunk' | 'ToolCall' | 'CodeExecution' | 'APIConfig' | 'EntityReference';
 
 export type CollectionType = {
     agents: AliceAgent;
@@ -38,7 +52,14 @@ export type CollectionType = {
     apis: API;
     files: FileReference;
     messages: MessageType;
-    urlreferences: URLReference;
+    userinteractions: UserInteraction;
+    usercheckpoints: UserCheckpoint;
+    dataclusters: DataCluster;
+    embeddingchunks: EmbeddingChunk;
+    toolcalls: ToolCall;
+    codeexecutions: CodeExecution;
+    apiconfigs: APIConfig;
+    entityreferences: EntityReference;
 };
 
 export type CollectionTypeString = {
@@ -53,7 +74,14 @@ export type CollectionTypeString = {
     apis: 'API';
     files: 'File';
     messages: 'Message';
-    urlreferences: 'URLReference';
+    userinteractions: 'UserInteraction';
+    usercheckpoints: 'UserCheckpoint';
+    dataclusters: 'DataCluster';
+    embeddingchunks: 'EmbeddingChunk';
+    toolcalls: 'ToolCall';
+    codeexecutions: 'CodeExecution';
+    apiconfigs: 'APIConfig';
+    entityreferences: 'EntityReference';
 };
 
 export const collectionNameToElementString: Record<CollectionName, CollectionElementString> = {
@@ -68,7 +96,14 @@ export const collectionNameToElementString: Record<CollectionName, CollectionEle
     apis: 'API',
     files: 'File',
     messages: 'Message',
-    urlreferences: 'URLReference'
+    userinteractions: 'UserInteraction',
+    usercheckpoints: 'UserCheckpoint',
+    dataclusters: 'DataCluster',
+    embeddingchunks: 'EmbeddingChunk',
+    toolcalls: 'ToolCall',
+    codeexecutions: 'CodeExecution',
+    apiconfigs: 'APIConfig',
+    entityreferences: 'EntityReference',
 };
 
 export const collectionNameToEnhancedComponent: Record<CollectionName, React.ComponentType<any>> = {
@@ -83,7 +118,14 @@ export const collectionNameToEnhancedComponent: Record<CollectionName, React.Com
     apis: EnhancedAPI,
     files: EnhancedFile,
     messages: EnhancedMessage,
-    urlreferences: EnhancedURLReference
+    userinteractions: EnhancedUserInteraction,
+    usercheckpoints: EnhancedUserCheckpoint,
+    dataclusters: EnhancedDataCluster,
+    embeddingchunks: EnhancedEmbeddingChunk,
+    toolcalls: EnhancedToolCall,
+    codeexecutions: EnhancedCodeExecution,
+    apiconfigs: EnhancedAPIConfig,
+    entityreferences: EnhancedEntityReference,
 };
 
 // Create a runtime mapping object
@@ -99,23 +141,14 @@ export const collectionTypeMapping: Record<string, CollectionElementString> = {
     API: 'API',
     FileReference: 'File',
     MessageType: 'Message',
-    URLReference: 'URLReference'
-};
-
-
-export const converters: { [K in CollectionName]: (data: any) => CollectionType[K] } = {
-    agents: convertToAliceAgent,
-    chats: convertToAliceChat,
-    models: convertToAliceModel,
-    tasks: convertToAliceTask,
-    prompts: convertToPrompt,
-    taskresults: convertToTaskResponse,
-    users: convertToUser,
-    parameters: convertToParameterDefinition,
-    apis: convertToAPI,
-    files: convertToFileReference,
-    messages: convertToMessageType,
-    urlreferences: convertToURLReference,
+    UserInteraction: 'UserInteraction',
+    UserCheckpoint: 'UserCheckpoint',
+    DataCluster: 'DataCluster',
+    EmbeddingChunk: 'EmbeddingChunk',
+    ToolCall: 'ToolCall',
+    CodeExecution: 'CodeExecution',
+    APIConfig: 'APIConfig',
+    EntityReference: 'EntityReference',
 };
 
 export type ComponentMode = 'create' | 'edit' | 'view' | 'list' | 'shortList' | 'table';
@@ -130,7 +163,14 @@ export interface HandleClickProps {
     handleTaskResultClick?: (taskResultId: string, item?: TaskResponse) => void;
     handleFileClick?: (fileId: string, item?: FileReference) => void;
     handleMessageClick?: (messageId: string, item?: MessageType) => void;
-    handleURLReferenceClick?: (urlReferenceId: string, item?: URLReference) => void;
+    handleUserInteractionClick?: (userInteractionId: string, item?: UserInteraction) => void;
+    handleUserCheckpointClick?: (userCheckpointId: string, item?: UserCheckpoint) => void;
+    handleDataClusterClick?: (dataClusterId: string, item?: DataCluster) => void;
+    handleEmbeddingChunkClick?: (embeddingChunkId: string, item?: EmbeddingChunk) => void;
+    handleToolCallClick?: (toolCallId: string, item?: ToolCall) => void;
+    handleCodeExecutionClick?: (codeExecutionId: string, item?: CodeExecution) => void;
+    handleAPIConfigClick?: (apiConfigId: string, item?: APIConfig) => void;
+    handleEntityReferenceClick?: (entityReferenceId: string, item?: EntityReference) => void;
 }
 export interface EnhancedComponentProps<T extends CollectionElement> extends HandleClickProps {
     items: T[] | null;
@@ -144,3 +184,36 @@ export interface EnhancedComponentProps<T extends CollectionElement> extends Han
     onInteraction?: (item: T) => void;
     showHeaders?: boolean
 }
+
+export interface BasicDBObj {
+    _id?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+}
+
+export interface BaseDatabaseObject extends BasicDBObj {
+    created_by?: User;
+    updated_by?: User;
+}
+
+export interface Embeddable extends BaseDatabaseObject {
+    embedding?: EmbeddingChunk[];
+}
+
+// Generic converters that work with any type extending the base interfaces
+export const convertToBasicDBObj = <T extends Partial<BasicDBObj>>(data: T): BasicDBObj => ({
+    _id: data._id,
+    createdAt: data.createdAt ? new Date(data.createdAt) : undefined,
+    updatedAt: data.updatedAt ? new Date(data.updatedAt) : undefined,
+});
+
+export const convertToBaseDatabaseObject = <T extends Partial<BaseDatabaseObject>>(data: T): BaseDatabaseObject => ({
+    ...convertToBasicDBObj(data),
+    created_by: data.created_by,
+    updated_by: data.updated_by,
+});
+
+export const convertToEmbeddable = <T extends Partial<Embeddable>>(data: T): Embeddable => ({
+    ...convertToBaseDatabaseObject(data),
+    embedding: data.embedding || [],
+});

@@ -1,5 +1,5 @@
 import traceback, json
-from workflow.util.logging_config import LOGGER
+from workflow.util.logger import LOGGER
 from unittest.mock import patch, AsyncMock
 from typing import Dict, Any, List, Optional
 from workflow.test.component_tests.test_environment import TestModule
@@ -85,7 +85,7 @@ class ChatTests(TestModule):
             return f"Error: {str(e)}"
             
     async def simulate_api_response(api_manager: APIManager, api_type: ApiType, model: Optional[AliceModel] = None, **kwargs):
-        print(f"simulate_api_response called with: api_type={api_type}, model={model}, kwargs={kwargs}")
+        LOGGER(f"simulate_api_response called with: api_type={api_type}, model={model}, kwargs={kwargs}")
         return MessageDict(
             role="assistant",
             content="I'm calling a function to help with your request.",
@@ -183,8 +183,6 @@ class ChatTests(TestModule):
             LOGGER.info(f"Role: {msg.role}, Content: {msg.content[:100]}...")  # Log first 100 chars of content
             if msg.tool_calls:
                 LOGGER.info(f"Tool Calls: {msg.tool_calls}")
-            if msg.function_call:
-                LOGGER.info(f"Function Call: {msg.function_call}")
 
 def get_first_n_chars(obj: Any, n: int = 100) -> str:
     return json.dumps(safe_serialize(obj))[:n]

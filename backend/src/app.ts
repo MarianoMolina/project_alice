@@ -20,7 +20,15 @@ import LmStudioRoute from './routes/lmStudio.route';
 import Logger from './utils/logger';
 import FileRoutes from './routes/file.route';
 import MessageRoutes from './routes/message.route';
-import URLReferenceRoutes from './routes/urlReference.route';
+import EntityReferenceRoutes from './routes/entityReference.route';
+import UserCheckpointRoutes from './routes/userCheckpoint.route';
+import UserInteractionRoutes from './routes/userInteraction.route';
+import EmbeddingChunkRoutes from './routes/embeddingChunk.route';
+import DataClusterRoutes from './routes/dataCluster.route';
+import ToolCallRoutes from './routes/toolCall.route';
+import CodeExecutionRoutes from './routes/codeExecution.route';
+import APIConfigRoutes from './routes/apiConfig.route';
+
 import './models';
 
 dotenv.config();
@@ -51,7 +59,7 @@ app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 // Health route should be registered before other routes
-app.use('/lm-studio', LmStudioRoute);
+app.use('/lm_studio', LmStudioRoute);
 app.use('/api/health', HealthRoutes);
 app.use('/api/apis', APIRoutes);
 app.use('/api/agents', AgentRoutes);
@@ -65,6 +73,12 @@ app.use('/api/users', UserRoutes);
 app.use('/api/parameters', ParametersRoutes);
 app.use('/api/files', FileRoutes);
 app.use('/api/messages', MessageRoutes);
-app.use('/api/urlreferences', URLReferenceRoutes)
-
+app.use('/api/entityreferences', EntityReferenceRoutes)
+app.use('/api/usercheckpoints', UserCheckpointRoutes);
+app.use('/api/userinteractions', UserInteractionRoutes);
+app.use('/api/embeddingchunks', EmbeddingChunkRoutes);
+app.use('/api/dataclusters', DataClusterRoutes);
+app.use('/api/toolcalls', ToolCallRoutes);
+app.use('/api/codeexecutions', CodeExecutionRoutes);
+app.use('/api/apiconfigs', APIConfigRoutes);
 export default app;

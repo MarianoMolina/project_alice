@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import AsyncMock, patch
 from workflow.core.api.engines import LLMAnthropic
-from workflow.core.data_structures import ModelConfig, ToolFunction, FunctionConfig, FunctionParameters, ParameterDefinition
+from workflow.core.data_structures import ModelConfig, ToolFunction, FunctionConfig, FunctionParameters, ParameterDefinition, MessageGenerators
 from anthropic.types import Message, TextBlock, Usage
 
 class TestLLMAnthropic(unittest.IsolatedAsyncioTestCase):
@@ -13,7 +13,7 @@ class TestLLMAnthropic(unittest.IsolatedAsyncioTestCase):
             model="claude-3-opus-20240229"
         )
         self.messages = [
-            {"role": "user", "content": "Tell me a joke."}
+            {"role": MessageGenerators.USER, "content": "Tell me a joke."}
         ]
 
     @patch('workflow.core.api.engines.anthopic_api_engine.AsyncAnthropic')

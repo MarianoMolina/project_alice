@@ -1,12 +1,17 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
+interface DialogButton {
+  text: string;
+  action: () => void;
+  variant?: 'text' | 'outlined' | 'contained';
+  color?: 'inherit' | 'primary' | 'secondary' | 'success' | 'error' | 'info' | 'warning';
+  disabled?: boolean;
+}
+
 interface DialogOptions {
   title: string;
   content: string;
-  confirmText?: string;
-  cancelText?: string;
-  onConfirm: () => void;
-  onCancel?: () => void;
+  buttons: DialogButton[];
 }
 
 interface DialogContextType {

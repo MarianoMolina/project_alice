@@ -7,11 +7,13 @@ import {
     ListItemIcon,
     ListItemText,
 } from '@mui/material';
-import { Category, LibraryBooks, Code, Build, ChatBubbleOutline } from '@mui/icons-material';
-import { AgentComponentProps } from '../../../../types/AgentTypes';
+import { Category, LibraryBooks, Code, ChatBubbleOutline, BadgeOutlined, QueryBuilder } from '@mui/icons-material';
+import { AgentComponentProps, mapCodePermission, mapToolPermission } from '../../../../types/AgentTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { ModelType } from '../../../../types/ModelTypes';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { PermissionIcon } from '../PermissionIcons';
+import { modelTypeIcons } from '../../../../utils/ApiUtils';
+import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 
 const AgentCardView: React.FC<AgentComponentProps> = ({
     item,
@@ -25,10 +27,10 @@ const AgentCardView: React.FC<AgentComponentProps> = ({
         <ListItem key={modelType} disablePadding>
             <ListItemButton onClick={() => model._id && selectCardItem && selectCardItem('Model', model._id, model)}>
                 <ListItemIcon>
-                    <Category />
+                    {modelTypeIcons[model.model_type] || <Code />}
                 </ListItemIcon>
-                <ListItemText 
-                    primary={`${ModelType[modelType as keyof typeof ModelType]} Model`}
+                <ListItemText
+                    primary={`${formatCamelCaseString(model.model_type)} model`}
                     secondary={model.model_name || 'N/A'}
                 />
             </ListItemButton>
@@ -37,19 +39,9 @@ const AgentCardView: React.FC<AgentComponentProps> = ({
 
     const listItems = [
         {
-            icon: <Code />,
-            primary_text: "Can execute code",
-            secondary_text: item.has_code_exec ? 'Yes' : 'No'
-        },
-        {
-            icon: <Build />,
-            primary_text: "Can use tools",
-            secondary_text: item.has_functions ? 'Yes' : 'No'
-        },
-        {
-            icon: <ChatBubbleOutline />,
-            primary_text: "Max consecutive replies",
-            secondary_text: item.max_consecutive_auto_reply?.toString() ?? 'none'
+            icon: <BadgeOutlined />,
+            primary_text: "Name",
+            secondary_text: item.name
         },
         {
             icon: <Category />,
@@ -68,6 +60,34 @@ const AgentCardView: React.FC<AgentComponentProps> = ({
                     {item.system_message?.content || 'N/A'}
                 </ListItemButton>
             )
+        },
+        {
+            icon: <ChatBubbleOutline />,
+            primary_text: "Max consecutive replies",
+            secondary_text: item.max_consecutive_auto_reply?.toString() ?? 'none'
+        },
+        {
+            icon: 
+            <PermissionIcon
+                permission={item.has_tools}
+                type="tool"
+            />,
+            primary_text: "Tool Use",
+            secondary_text: mapToolPermission(item.has_tools)
+        },
+        {
+            icon: 
+            <PermissionIcon
+                permission={item.has_code_exec}
+                type="code"
+            />,
+            primary_text: "Code Execution",
+            secondary_text: mapCodePermission(item.has_code_exec)
+        },
+        {
+            icon: <QueryBuilder />,
+            primary_text: "Created At",
+            secondary_text: new Date(item.createdAt || '').toLocaleString()
         }
     ];
 

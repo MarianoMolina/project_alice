@@ -6,8 +6,8 @@ async def test_llm_engines():
     # LM Studio setup
     lm_studio_engine = LLMEngine()
     lm_studio_config = ModelConfig(
-        api_key="lm-studio",  # LM Studio doesn't require an API key
-        base_url="http://localhost:3000/lm-studio",
+        api_key="lm_studio",  # LM Studio doesn't require an API key
+        base_url="http://localhost:3000/lm_studio",
         model="66a81f4e540cb0193b86bb93" 
     )
 

@@ -9,23 +9,23 @@ Here's the available data for context, but remember to focus on tackling the CUR
 {{ inputs_additional_details }}
 {% endif %}
 {% if outputs %}
-{% if outputs_user_clarifications_task and outputs_cv_clarifications_task %}
+{% if user_clarifications_task and cv_clarifications_task %}
 Based on the provided data we came up with a set of clarifying questions:
-{{ outputs_cv_clarifications_task }}
+{{ cv_clarifications_task }}
 Here is the user input regarding our questions:
-{{ outputs_user_clarifications_task }} 
+{{ user_clarifications_task }} 
 {% endif %}
-{% if outputs_cv_brainstorming_task %}
+{% if cv_brainstorming_task %}
 We spent some time brainstorming how to succeed on this task, and these are the recommendations we came up with:
-{{ outputs_cv_brainstorming_task }}
+{{ cv_brainstorming_task }}
 {% endif %}
-{% if outputs_cover_letter %}
+{% if cover_letter %}
 Here is the approved cover letter we prepared:
-{{ outputs_cover_letter }}
+{{ cover_letter }}
 {% endif %}
-{% if outputs_cv_draft %}
+{% if cv_draft %}
 Here is the approved CV draft we prepared:
-{{ outputs_cv_draft }}
+{{ cv_draft }}
 {% endif %}
 {% endif %}
 {% if task_description %}

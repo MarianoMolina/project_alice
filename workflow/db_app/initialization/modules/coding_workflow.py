@@ -12,29 +12,34 @@ coding_workflow_module = CodingWorkflowModule(
     data={
         "parameters": [
             {
-                "key": "outputs_plan_workflow",
+                "key": "param_plan_workflow",
                 "type": "string",
                 "description": "The task plan that describes the code requirements for the task",
             },
             {
-                "key": "outputs_generate_code",
+                "key": "param_generate_code",
                 "type": "string",
                 "description": "The code that was generated",
             },
             {
-                "key": "outputs_execute_code",
-                "type": "string",
-                "description": "The code execution output that was generated",
-            },
-            {
-                "key": "outputs_generate_unit_tests",
+                "key": "param_generate_unit_tests",
                 "type": "string",
                 "description": "The unit test code that was generated, passed in case of a recursive call",
             },
             {
-                "key": "outputs_execute_unit_tests",
-                "type": "string",
-                "description": "The output of the unit test execution, passed in case of a recursive call",
+                "key": "include_prompt_param",
+                "type": "boolean",
+                "description": "Whether to include the prompt in code execution",
+                "default": True
+            }
+        ],
+        "user_checkpoints": [
+            {   
+                "key": "generate_unit_tests_checkpoint",
+                "user_prompt": "Please approve or reject the code generated before the unit tests are generated. Provide feedback, if any, for the unit test agent to consider.",
+                "task_next_obj": {0: "Generate_Unit_Tests", 1: None},
+                "options_obj": {0: "Approve", 1: "Reject"},
+                "request_feedback": True
             }
         ],
         "prompts": [
@@ -54,46 +59,18 @@ coding_workflow_module = CodingWorkflowModule(
                 "content": get_prompt_file("unit_tester_agent.prompt"),
             },
             {
-                "key": "code_generation_task",
+                "key": "code_generation_task_prompt",
                 "name": "Code Generation Task",
                 "content": get_prompt_file("code_generation_task.prompt"),
                 "is_templated": True,
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "outputs_plan_workflow": "outputs_plan_workflow",
-                        "outputs_generate_code": "outputs_generate_code",
-                        "outputs_execute_code": "outputs_execute_code",
-                        "outputs_generate_unit_tests": "outputs_generate_unit_tests",
+                        "Plan_Workflow": "param_plan_workflow",
+                        "Generate_Code": "param_generate_code",
+                        "Generate_Unit_Tests": "param_generate_unit_tests",
                     },
-                    "required": ["outputs_plan_workflow"]
-                }
-            },
-            {
-                "key": "code_execution_task",
-                "name": "Code Execution Task",
-                "content": "This is the code:\n\n{{ outputs_generate_code }}",
-                "is_templated": True,
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "outputs_generate_code": "outputs_generate_code",
-                    },
-                    "required": ["outputs_generate_code"]
-                }
-            },
-            {
-                "key": "test_execution_task",
-                "name": "Test Code Execution Task",
-                "content": get_prompt_file('unit_test_execution_task.prompt'),
-                "is_templated": True,
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "outputs_generate_code": "outputs_generate_code",
-                        "outputs_generate_unit_tests": "outputs_generate_unit_tests",
-                    },
-                    "required": ["outputs_generate_unit_tests"]
+                    "required": ["Plan_Workflow"]
                 }
             },
             {
@@ -109,80 +86,80 @@ coding_workflow_module = CodingWorkflowModule(
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "outputs_plan_workflow": "outputs_plan_workflow",
-                        "outputs_generate_code": "outputs_generate_code",
-                        "outputs_execute_code": "outputs_execute_code",
-                        "outputs_generate_unit_tests": "outputs_generate_unit_tests",
-                        "outputs_execute_unit_tests": "outputs_execute_unit_tests",
+                        "Plan_Workflow": "param_plan_workflow",
+                        "Generate_Code": "param_generate_code",
+                        "Generate_Unit_Tests": "param_generate_unit_tests",
                     },
-                    "required": ["outputs_generate_unit_tests", "outputs_generate_code", "outputs_execute_unit_tests", "outputs_plan_workflow", "outputs_execute_code"]
+                    "required": ["Generate_Unit_Tests", "Generate_Code", "Plan_Workflow"]
                 }
             }, 
             {
-                "key": "execution_agent_prompt",
-                "name": "Execution Agent Prompt",
-                "content": "This agent executes the code",
+                "key": "coding_workflow_output_prompt",
+                "name": "Coding Workflow Output Template",
+                "content": "Plan: {{ Plan_Workflow }}\n\nCode: {{ Generate_Code }}\n\nUnit Tests: {{ Generate_Unit_Tests }}\n\n",
+                "is_templated": True,
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "Plan_Workflow": "param_plan_workflow",
+                        "Generate_Code": "param_generate_code",
+                        "Generate_Unit_Tests": "param_generate_unit_tests",
+                    },
+                    "required": ["Plan_Workflow"]
+                }
             }
         ],
         "agents": [
             {
                 "key": "coding_planner_agent",
-                "name": "coding_planner_agent",
+                "name": "Coding Planner Agent",
                 "system_message": "planner_agent",
                 "models": {
                     "chat": "GPT4o",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": False,
-                "has_code_exec": False,                
+                "has_tools": 0,
+                "has_code_exec": 0,                
             },
             {
                 "key": "coding_agent",
-                "name": "coding_agent",
+                "name": "Coding Agent",
                 "system_message": "coding_agent",
                 "models": {
                     "chat": "GPT4o",
                 },
-                "max_consecutive_auto_reply": 1,
-                "has_functions": False,
-                "has_code_exec": False,                
+                "max_consecutive_auto_reply": 2,
+                "has_tools": 0,
+                "has_code_exec": 1,                
             },
             {
                 "key": "unit_tester_agent",
-                "name": "unit_tester_agent",
+                "name": "Unit Tester Agent",
                 "system_message": "unit_tester_agent",
                 "models": {
                     "chat": "GPT4o",
                 },
-                "max_consecutive_auto_reply": 1,
-                "has_functions": False,
-                "has_code_exec": False,                
+                "max_consecutive_auto_reply": 2,
+                "has_tools": 0,
+                "has_code_exec": 1,                
             },
             {
                 "key": "unit_test_check_agent",
-                "name": "unit_test_check_agent",
+                "name": "Unit Test Check Agent",
                 "system_message": "unit_test_check_agent",
                 "models": {
                     "chat": "GPT4o",
                 },
                 "max_consecutive_auto_reply": 1,
-                "has_functions": False,
-                "has_code_exec": False,
+                "has_tools": 0,
+                "has_code_exec": 0,
             },
-            {
-                "key": "execution_agent",
-                "name": "execution_agent",
-                "system_message": "execution_agent_prompt",
-                "max_consecutive_auto_reply": 1,
-                "has_functions": False,
-                "has_code_exec": True,
-            }
         ],
         "tasks": [
             {
                 "key": "plan_workflow",
                 "task_type": "PromptAgentTask",
-                "task_name": "plan_workflow",
+                "task_name": "Plan_Workflow",
                 "task_description": "Takes a simple prompt and develops it into a full task prompt",
                 "agent": "coding_planner_agent",
                 "required_apis": ["llm_api"],
@@ -196,164 +173,190 @@ coding_workflow_module = CodingWorkflowModule(
                     },
                     "required": ["prompt"]
                 },
-                "exit_codes": {0: "Success", 1: "Generation failed."}
+                "exit_codes": {0: "Success", 1: "Generation failed."},
+                "node_end_code_routing": {
+                    'llm_generation':{
+                        0: (None, False),
+                        1: ('llm_generation', True),
+                    }, 
+                },
+                "max_attempts": 2,
+                "recursive": True,
             },
             {
                 "key": "generate_code",
                 "task_type": "CodeGenerationLLMTask",
-                "task_name": "generate_code",
+                "task_name": "Generate_Code",
                 "task_description": "Generates code based on the provided plan_workflow output",
                 "agent": "coding_agent",
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "outputs_plan_workflow": "outputs_plan_workflow",
-                        "outputs_generate_code": "outputs_generate_code",
-                        "outputs_execute_code": "outputs_execute_code",
-                        "outputs_generate_unit_tests": "outputs_generate_unit_tests",
+                        "Plan_Workflow": "param_plan_workflow",
+                        "Generate_Code": "param_generate_code",
+                        "Generate_Unit_Tests": "param_generate_unit_tests",
                     },
-                    "required": ["outputs_plan_workflow"]
+                    "required": ["Plan_Workflow"]
                 },
                 "required_apis": ["llm_api"],
                 "templates": {
-                    "task_template": "code_generation_task"
+                    "task_template": "code_generation_task_prompt"
                 },
-                "exit_codes": {0: "Success", 1: "Generation failed.", 2: "No code blocks in response"}
-            },
-            {
-                "key": "execute_code",
-                "task_type": "CodeExecutionLLMTask",
-                "task_name": "execute_code",
-                "task_description": "Executes the code available in a list of message dicts",
-                "agent": "execution_agent",
-                "input_variables": {
-                    "type": "object",
-                    "properties": {
-                        "outputs_generate_code": "outputs_generate_code",
-                    },
-                    "required": ["outputs_generate_code"]
-                },
-                "templates": {
-                    "task_template": "code_execution_task"
-                },
-                "exit_codes": {0: "Success", 1: "Execution failed."}
+                "max_attempts": 2,
+                "recursive": True,
             },
             {
                 "key": "generate_unit_tests",
                 "task_type": "CodeGenerationLLMTask",
-                "task_name": "generate_unit_tests",
+                "task_name": "Generate_Unit_Tests",
                 "task_description": "Generates unit tests for the prompt provided. Ensure the code and task are available in the prompt",
                 "agent": "unit_tester_agent",
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "outputs_plan_workflow": "outputs_plan_workflow",
-                        "outputs_generate_code": "outputs_generate_code",
-                        "outputs_execute_code": "outputs_execute_code",
-                        "outputs_generate_unit_tests": "outputs_generate_unit_tests",
-                        "outputs_execute_unit_tests": "outputs_execute_unit_tests",
+                        "Plan_Workflow": "param_plan_workflow",
+                        "Generate_Code": "param_generate_code",
+                        "Generate_Unit_Tests": "param_generate_unit_tests",
+                        "include_prompt_in_execution": "include_prompt_param"
                     },
-                    "required": ["outputs_generate_code", "outputs_execute_code"]
+                    "required": ["Generate_Code"]
                 },
                 "templates": {
-                    "task_template": "code_generation_task"
+                    "task_template": "code_generation_task_prompt"
                 },
+                "max_attempts": 2,
+                "recursive": True,
                 "exit_codes": {0: "Success", 1: "Generation failed.", 2: "No code blocks in response"}
-            },
-            {
-                "key": "execute_unit_tests",
-                "task_type": "CodeExecutionLLMTask",
-                "task_name": "execute_unit_tests",
-                "task_description": "Executes the code available in a list of message dicts",
-                "agent": "execution_agent",
-                "input_variables": {
-                    "type": "object",
-                    "properties": {
-                        "outputs_generaate_code": "outputs_generate_code",
-                        "outputs_generate_unit_tests": "outputs_generate_unit_tests",
-                    },
-                    "required": ["outputs_generate_unit_tests"]
-                },
-                "templates": {
-                    "task_template": "test_execution_task"
-                },
-                "exit_codes": {0: "Success", 1: "Execution failed."}
             },
             {
                 "key": "check_unit_test_results",
                 "task_type": "CheckTask",
-                "task_name": "check_unit_test_results",
+                "task_name": "Check_Unit_Test_Results",
                 "task_description": "Checks the results of the unit tests",
                 "agent": "unit_test_check_agent",
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "outputs_plan_workflow": "outputs_plan_workflow",
-                        "outputs_generate_code": "outputs_generate_code",
-                        "outputs_execute_code": "outputs_execute_code",
-                        "outputs_generate_unit_tests": "outputs_generate_unit_tests",
-                        "outputs_execute_unit_tests": "outputs_execute_unit_tests",
+                        "Plan_Workflow": "param_plan_workflow",
+                        "Generate_Code": "param_generate_code",
+                        "Generate_Unit_Tests": "param_generate_unit_tests",
                     },
-                    "required": ["outputs_generate_unit_tests", "outputs_generate_code", "outputs_execute_unit_tests"]
+                    "required": ["Generate_Unit_Tests", "Generate_Code"]
+                },
+                "node_end_code_routing": {
+                    'llm_generation': {
+                        0: (None, False),
+                        1: ('llm_generation', True),
+                        2: ('llm_generation', True),
+                        3: (None, True)
+                    }
                 },
                 "exit_code_response_map": {"TEST FAILED": 2, "ALL TESTS PASSED": 0, "TEST CODE ERROR": 3},
                 "exit_codes": {0: "Test Passed", 1: "Response generation failed", 2: "Test Failed", 3: "Test Code Error"},
                 "templates": {
                     "task_template": "unit_test_check_prompt"
-                }
+                },
+                "max_attempts": 2,
+                "recursive": True,
             },
             {
                 "key": "coding_workflow",
                 "task_type": "Workflow",
-                "task_name": "coding_workflow",
-                "task_description": "Executes a coding workflow based on the provided prompt",
+                "task_name": "Coding_Workflow",
+                "task_description": "Workflow for creating code. Provide a prompt detailing the requirements and language for the code.",
                 "tasks": {
-                    "plan_workflow": "plan_workflow",
-                    "generate_code": "generate_code",
-                    "execute_code": "execute_code",
-                    "generate_unit_tests": "generate_unit_tests",
-                    "execute_unit_tests": "execute_unit_tests",
-                    "check_unit_test_results": "check_unit_test_results"
+                    "Plan_Workflow": "plan_workflow",
+                    "Generate_Code": "generate_code",
+                    "Generate_Unit_Tests": "generate_unit_tests",
+                    "Check_Unit_Test_Results": "check_unit_test_results"
                 },
-                "start_task": "plan_workflow",
-                "tasks_end_code_routing": {
-                    "plan_workflow": {
-                        0: ("generate_code", False),
-                        1: ("plan_workflow", True),
+                "start_node": "Plan_Workflow",
+                "node_end_code_routing": {
+                    "Plan_Workflow": {
+                        0: ("Generate_Code", False),
+                        1: ("Plan_Workflow", True),
                     },
-                    "generate_code": {
-                        0: ("execute_code", False),
-                        1: ("generate_code", True),
-                        2: ("generate_code", True)
+                    "Generate_Code": {
+                        0: ("Generate_Unit_Tests", False),
+                        1: ("Generate_Code", True),
+                        2: ("Generate_Unit_Tests", True),
+                        3: (None, True),
                     },
-                    "execute_code": {
-                        0: ("generate_unit_tests", False),
-                        1: ("generate_code", True),
+                    "Generate_Unit_Tests": {
+                        0: ("Check_Unit_Test_Results", False),
+                        1: ("Generate_Unit_Tests", True),
+                        2: ("Generate_Unit_Tests", True),
                     },
-                    "generate_unit_tests": {
-                        0: ("execute_unit_tests", False),
-                        1: ("generate_unit_tests", True),
-                        2: ("generate_unit_tests", True)
-                    },
-                    "execute_unit_tests": {
-                        0: ("check_unit_test_results", False),
-                        1: ("generate_unit_tests", True),
-                    },
-                    "check_unit_test_results": {
+                    "Check_Unit_Test_Results": {
                         0: (None, False),
-                        1: ("check_unit_test_results", True),
-                        2: ("generate_code", True),
-                        3: ("generate_unit_tests", True)
+                        1: ("Check_Unit_Test_Results", True),
+                        2: ("Generate_Code", True),
+                        3: ("Generate_Unit_Tests", True)
                     }
                 },
-                "max_attempts": 3,
-                "recursive": False,
+                "max_attempts": 2,
+                "recursive": True,
                 "input_variables": {
                     "type": "object",
                     "properties": {
                         "prompt": "prompt_parameter",
                     },
                     "required": ["prompt"]
+                },
+                "templates": {
+                    "output_template": "coding_workflow_output_prompt"
+                }
+            },
+            {
+                "key": "coding_workflow_with_checkpoint",
+                "task_type": "Workflow",
+                "task_name": "Coding_Workflow_w/_Checkpoint",
+                "task_description": "Workflow for creating code. Provide a prompt detailing the requirements and language for the code.",
+                "tasks": {
+                    "Plan_Workflow": "plan_workflow",
+                    "Generate_Code": "generate_code",
+                    "Generate_Unit_Tests": "generate_unit_tests",
+                    "Check_Unit_Test_Results": "check_unit_test_results"
+                },
+                "start_node": "Plan_Workflow",
+                "node_end_code_routing": {
+                    "Plan_Workflow": {
+                        0: ("Generate_Code", False),
+                        1: ("Plan_Workflow", True),
+                    },
+                    "Generate_Code": {
+                        0: ("Generate_Unit_Tests", False),
+                        1: ("Generate_Code", True),
+                        2: ("Generate_Unit_Tests", True),
+                        3: (None, True),
+                    },
+                    "Generate_Unit_Tests": {
+                        0: ("Check_Unit_Test_Results", False),
+                        1: ("Generate_Unit_Tests", True),
+                        2: ("Check_Unit_Test_Results", True),
+                        3: (None, True)
+                    },
+                    "Check_Unit_Test_Results": {
+                        0: (None, False),
+                        1: ("Check_Unit_Test_Results", True),
+                        2: ("Generate_Code", True),
+                        3: ("Generate_Unit_Tests", True)
+                    }
+                },
+                "max_attempts": 2,
+                "recursive": True,
+                "input_variables": {
+                    "type": "object",
+                    "properties": {
+                        "prompt": "prompt_parameter",
+                    },
+                    "required": ["prompt"]
+                },
+                "user_checkpoints": {
+                    "Generate_Unit_Tests": "generate_unit_tests_checkpoint"
+                },
+                "templates": {
+                    "output_template": "coding_workflow_output_prompt"
                 }
             }
         ]

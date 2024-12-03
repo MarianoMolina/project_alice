@@ -1,5 +1,5 @@
 import { FileType, IFileReference, IFileReferenceDocument } from '../interfaces/file.interface';
-import { ContentType, IMessageDocument } from '../interfaces/message.interface';
+import { ContentType, IMessageDocument, MessageGenerators, RoleType } from '../interfaces/message.interface';
 import FileReference from '../models/file.model';
 import Message from '../models/message.model';
 import { updateMessage, messagesEqual } from './message.utils';
@@ -8,6 +8,7 @@ import { Types } from 'mongoose';
 import path from 'path';
 import fs from 'fs/promises';
 import { getObjectId } from './utils';
+import { processEmbeddings } from './embeddingChunk.utils';
 
 const UPLOAD_DIR = process.env.SHARED_UPLOAD_DIR || '/app/shared-uploads';
 
@@ -49,7 +50,7 @@ async function ensureUserDirectory(userId: string): Promise<string> {
         await fs.mkdir(userDir, { recursive: true });
         Logger.info(`User directory created: ${userDir}`);
     } catch (error) {
-        console.error(`Error creating user directory: ${userDir}`, error);
+        Logger.error(`Error creating user directory: ${userDir}`, error);
         throw error;
     }
     return userDir;
@@ -113,7 +114,7 @@ export async function retrieveFileById(fileId: string, version?: number): Promis
             return { file, fileReference };
         }
     } catch (error) {
-        console.error('Error retrieving file:', error);
+        Logger.error('Error retrieving file:', error);
         throw error;
     }
 }
@@ -136,14 +137,14 @@ export async function deleteFile(fileId: string, userId: string): Promise<null> 
             const files = await fs.readdir(fileDir);
             await Promise.all(files.map(file => fs.unlink(path.join(fileDir, file))));
         } catch (error) {
-            console.error('Error deleting file versions:', error);
+            Logger.error('Error deleting file versions:', error);
         }
 
         // Delete the file directory
         try {
             await fs.rmdir(fileDir);
         } catch (error) {
-            console.error('Error deleting file directory:', error);
+            Logger.error('Error deleting file directory:', error);
         }
 
         // Delete the file reference from the database
@@ -152,7 +153,7 @@ export async function deleteFile(fileId: string, userId: string): Promise<null> 
         Logger.info(`File deleted successfully: ${fileReference.storage_path}`);
         return null;
     } catch (error) {
-        console.error('Error deleting file:', error);
+        Logger.error('Error deleting file:', error);
         throw error;
     }
 }
@@ -222,8 +223,8 @@ export async function createTranscriptMessage(
     const transcriptData: Partial<IMessageDocument> = {
         ...messageData,
         content: messageData.content || '',
-        role: messageData.role || 'assistant',
-        generated_by: messageData.generated_by || 'tool',
+        role: messageData.role || RoleType.ASSISTANT,
+        generated_by: messageData.generated_by || MessageGenerators.TOOL,
         type: messageData.type || ContentType.TEXT,
         created_by: new Types.ObjectId(userId),
         createdAt: new Date(),
@@ -256,6 +257,10 @@ export async function updateFile(
         Logger.info(`Updating file transcript for file: ${fileId}`);
         await updateFileTranscript(existingFile._id, updateData.transcript, userId);
         transcriptUpdated = true;
+    }
+
+    if (updateData.embedding) {
+        updateData.embedding = await processEmbeddings(updateData, userId);
     }
 
     // Check if file reference needs updating
@@ -320,6 +325,7 @@ export function fileReferencesEqual(
         'type',
         'file_size',
         'storage_path',
+        'embedding'
     ];
 
     for (const key of keys) {
@@ -370,6 +376,9 @@ export async function storeFileReference(
             fileContent.filename,
             0
         );
+        if (fileContent.embedding) {
+            fileContent.embedding = await processEmbeddings(fileContent, userId);
+        }
 
         const fileReferenceData: Partial<IFileReferenceDocument> = {
             _id: new Types.ObjectId(fileId),

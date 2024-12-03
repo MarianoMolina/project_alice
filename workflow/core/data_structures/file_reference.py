@@ -3,17 +3,21 @@ import base64, io, magic, os
 from typing import Union, BinaryIO, Optional
 from pydantic import Field, field_validator
 from PIL import Image
-from workflow.core.data_structures.base_models import BaseDataStructure, FileType
+from workflow.core.data_structures.base_models import FileType, Embeddable
 from workflow.core.data_structures.message import MessageDict
 from workflow.util import LOGGER
 
-class FileReference(BaseDataStructure):
+class FileReference(Embeddable):
     id: Optional[str] = Field(None, description="The unique identifier for the file reference", alias="_id")
     filename: str = Field(..., description="The name of the file reference")
     type: FileType = Field(..., description="The type of the file reference")
     storage_path: str = Field(..., description="The path to the file in the shared volume")
     transcript: Optional[MessageDict] = Field(None, description="The transcript / description of the file content")
 
+    model_config = {
+        "populate_by_name": True,
+    }
+    
     @field_validator('transcript')
     def validate_transcript(cls, v):
         if v is None:
@@ -26,19 +30,14 @@ class FileReference(BaseDataStructure):
     
     def model_dump(self, *args, **kwargs):
         data = super().model_dump(*args, **kwargs)
-        LOGGER.debug(f"Data after super().model_dump: {data}")
         if self.transcript:
             data['transcript'] = self.transcript.model_dump(*args, **kwargs)
-        LOGGER.debug(f"Data after processing transcript: {data}")
         return data
-
-    class Config:
-        populate_by_name = True
         
     def __str__(self) -> str:
         return self.get_content_string()
 
-    def get_content_string(self, max_chars: int = 1000) -> str:
+    def get_content_string(self, max_chars: int = 5000) -> str:
         """
         Retrieves the content of the file as a string, with contextual information.
         
@@ -51,7 +50,7 @@ class FileReference(BaseDataStructure):
         Returns:
             str: A string containing file information and content.
         """
-        file_info = f"\n\nFile: {self.filename}\n\nType: {self.type.value}"
+        file_info = f"\n\nName: {self.filename}\n\nType: {self.type.value}\n\n"
         
         if self.type == FileType.FILE:
             try:
@@ -113,7 +112,7 @@ def generate_file_content_reference(file: Union[BinaryIO, io.BytesIO], filename:
     if file_extension.lower() in extension_mime_map:
         expected_mime = extension_mime_map[file_extension.lower()]
         if not file_mime.startswith(expected_mime):
-            print(f"Warning: File extension '{file_extension}' does not match the detected MIME type '{file_mime}'")
+            LOGGER(f"Warning: File extension '{file_extension}' does not match the detected MIME type '{file_mime}'")
 
     # Read and encode file content
     file_content = file.read()

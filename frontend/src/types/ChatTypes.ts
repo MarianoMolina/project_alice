@@ -1,43 +1,63 @@
-import { BaseDataseObject } from './UserTypes';
 import { AliceTask, convertToAliceTask } from './TaskTypes';
 import { AliceAgent, convertToAliceAgent } from './AgentTypes';
-import { EnhancedComponentProps } from './CollectionTypes';
+import { BaseDatabaseObject, convertToBaseDatabaseObject, EnhancedComponentProps } from './CollectionTypes';
 import { convertToMessageType, MessageType } from './MessageTypes';
+import { convertToUserCheckpoint, UserCheckpoint } from './UserCheckpointTypes';
+import { convertToDataCluster, DataCluster } from './DataClusterTypes';
 
-export interface AliceChat extends BaseDataseObject {
-    _id: string;
+export enum CheckpointType {
+    TOOL_CALL = "tool_call",
+    CODE_EXECUTION = "code_execution",
+}
+
+// Type to enforce required checkpoint keys
+export type RequiredCheckpoints = {
+    [CheckpointType.TOOL_CALL]: UserCheckpoint;
+    [CheckpointType.CODE_EXECUTION]: UserCheckpoint;
+};
+
+export interface AliceChat extends BaseDatabaseObject {
     name: string;
     messages: MessageType[];
     alice_agent: AliceAgent;
-    functions?: AliceTask[];
+    agent_tools?: AliceTask[];
+    retrieval_tools?: AliceTask[];
+    default_user_checkpoints: RequiredCheckpoints;
+    data_cluster?: DataCluster;
 }
 
 export const convertToAliceChat = (data: any): AliceChat => {
+    const defaultCheckpoints: RequiredCheckpoints = {
+        [CheckpointType.TOOL_CALL]: convertToUserCheckpoint(data?.default_user_checkpoints?.[CheckpointType.TOOL_CALL]) || {},
+        [CheckpointType.CODE_EXECUTION]: convertToUserCheckpoint(data?.default_user_checkpoints?.[CheckpointType.CODE_EXECUTION]) || {},
+    };
+
     return {
-        _id: data?._id || '',
+        ...convertToBaseDatabaseObject(data),
         name: data?.name || '',
         messages: (data?.messages || []).map(convertToMessageType),
         alice_agent: convertToAliceAgent(data?.alice_agent),
-        functions: (data?.functions || []).map(convertToAliceTask),
-        created_by: data?.created_by || undefined,
-        updated_by: data?.updated_by || undefined,
-        createdAt: data?.createdAt ? new Date(data.createdAt) : undefined,
-        updatedAt: data?.updatedAt ? new Date(data.updatedAt) : undefined,
+        agent_tools: (data?.agent_tools || []).map(convertToAliceTask),
+        default_user_checkpoints: defaultCheckpoints,
+        data_cluster: data?.data_cluster ? convertToDataCluster(data?.data_cluster) : undefined,
+        retrieval_tools: (data?.retrieval_tools || []).map(convertToAliceTask),
     };
 };
 
 export interface MessageProps {
-    message: MessageType,
-    chatId?: string,
+    message: MessageType;
+    chatId?: string;
 }
 
 export interface ChatComponentProps extends EnhancedComponentProps<AliceChat> {
-    
+    showRegenerate?: boolean;
 }
 
 export const getDefaultChatForm = (): Partial<AliceChat> => ({
     name: '',
     messages: [],
     alice_agent: undefined,
-    functions: [],
+    agent_tools: [],
+    data_cluster: {},
+    retrieval_tools: undefined,
 });

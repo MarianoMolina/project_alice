@@ -1,9 +1,7 @@
-import { BaseDataseObject, convertToUser } from './UserTypes';
 import { FunctionParameters } from './ParameterTypes';
-import { EnhancedComponentProps } from './CollectionTypes';
+import { BaseDatabaseObject, convertToBaseDatabaseObject, EnhancedComponentProps } from './CollectionTypes';
 
-export interface Prompt extends BaseDataseObject {
-    _id?: string;
+export interface Prompt extends BaseDatabaseObject {
     name: string;
     content: string;
     is_templated?: boolean;
@@ -14,17 +12,13 @@ export interface Prompt extends BaseDataseObject {
 
 export const convertToPrompt = (data: any): Prompt => {
     return {
-        _id: data?._id || undefined,
+        ...convertToBaseDatabaseObject(data),
         name: data?.name || '',
         content: data?.content || '',
-        created_by: data?.created_by ? convertToUser(data.created_by) : undefined,
-        updated_by: data?.updated_by ? convertToUser(data.updated_by) : undefined,
         is_templated: data?.is_templated || false,
         parameters: data?.parameters || undefined,
         partial_variables: data?.partial_variables || {},
         version: data?.version || 1,
-        createdAt: data?.createdAt ? new Date(data.createdAt) : undefined,
-        updatedAt: data?.updatedAt ? new Date(data.updatedAt) : undefined,
     };
 };
 

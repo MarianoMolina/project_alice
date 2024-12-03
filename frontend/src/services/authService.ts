@@ -10,7 +10,9 @@ export interface LoginResponse {
 
 export const loginUser = async (email: string, password: string): Promise<LoginResponse> => {
   try {
+    Logger.debug('Logging in with email:', email);
     const response = await dbAxiosInstance.post<LoginResponse>('/users/login', { email, password });
+    Logger.debug('Login response:', response.data);
     return response.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {

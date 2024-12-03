@@ -1,23 +1,19 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-    TextField,
     Typography,
     Box,
     Button,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
 } from '@mui/material';
 import { FileComponentProps, FileContentReference, FileReference, FileType, getDefaultFileForm } from '../../../../types/FileTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import FileViewer from '../FileViewer';
+import FileViewer from './FileViewer';
 import Transcript from '../Transcript';
 import { bytesToMB, createFileContentReference, selectFile } from '../../../../utils/FileUtils';
 import { useApi } from '../../../../contexts/ApiContext';
-import { MessageType } from '../../../../types/MessageTypes';
 import { useNotification } from '../../../../contexts/NotificationContext';
 import Logger from '../../../../utils/Logger';
+import { useDialog } from '../../../../contexts/DialogCustomContext';
+import { TextInput } from '../../common/inputs/TextInput';
 
 const FileFlexibleView: React.FC<FileComponentProps> = ({
     item,
@@ -27,16 +23,40 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
     handleDelete,
 }) => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [form, setForm] = useState<Partial<FileReference | FileContentReference>>(() => item || getDefaultFileForm());
+    const [isSaving, setIsSaving] = useState(false);
     const { uploadFileContentReference } = useApi();
     const { addNotification } = useNotification();
+    const { openDialog } = useDialog();
+
+    const isEditMode = mode === 'edit' || mode === 'create';
+    const title = mode === 'create' ? 'Upload New File' : mode === 'edit' ? 'Edit File' : 'File Details';
+    const saveButtonText = item?._id ? 'Update File' : 'Upload File';
+    const hasTranscriptSlot = item && item._id && item.type !== 'file';
 
     useEffect(() => {
-        if (!item || Object.keys(item).length === 0) {
+        if (isSaving) {
+            handleSave();
+            setIsSaving(false);
+        }
+    }, [isSaving, handleSave]);
+
+    useEffect(() => {
+        if (item) {
+            setForm(item);
+        } else if (!item || Object.keys(item).length === 0) {
             onChange(getDefaultFileForm());
         }
     }, [item, onChange]);
 
+    const handleFieldChange = useCallback((field: keyof FileReference | keyof FileContentReference, value: any) => {
+        setForm(prevForm => ({ ...prevForm, [field]: value }));
+    }, []);
+
+    const handleLocalSave = useCallback(() => {
+        onChange(form);
+        setIsSaving(true);
+    }, [form, onChange]);
 
     const handleLocalDelete = useCallback(() => {
         if (item && Object.keys(item).length > 0 && handleDelete) {
@@ -44,25 +64,40 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
         }
     }, [item, handleDelete]);
 
-    if (!item && mode !== 'create') {
-        return <Typography>No file data available.</Typography>;
+    const handleOpenDialog = () => {
+        openDialog({
+            title: 'Confirm File Upload',
+            content: `Are you sure you want to upload ${selectedFile?.name}?`,
+            buttons: [
+                {
+                    text: 'Cancel',
+                    action: () => addNotification('File upload cancelled', 'info'),
+                    color: 'error',
+                    variant: 'contained',
+                },
+                {
+                    text: 'Upload',
+                    action: handleUploadConfirm,
+                    color: 'primary',
+                    variant: 'contained',
+                }
+            ],
+        });
     }
-    
-    const isEditMode = mode === 'edit' || mode === 'create';
-    const title = mode === 'create' ? 'Upload New File' : mode === 'edit' ? 'Edit File' : 'File Details';
-    const saveButtonText = item?._id ? 'Update File' : 'Upload File';
 
-    const handleFileUpdate = (updatedFile: FileContentReference) => {
-        onChange(updatedFile);
+    const handleFileUpdate = (updatedFile: Partial<FileContentReference> | Partial<FileReference>) => {
+        if (updatedFile) {
+            setForm(updatedFile);
+        }
     };
 
     const handleFileSelect = async () => {
         try {
-            const allowedTypes: FileType[] = [FileType.IMAGE, FileType.AUDIO, FileType.VIDEO];
+            const allowedTypes: FileType[] = [FileType.IMAGE, FileType.AUDIO, FileType.VIDEO, FileType.FILE];
             const file = await selectFile(allowedTypes);
             if (file) {
                 setSelectedFile(file);
-                setIsDialogOpen(true);
+                handleOpenDialog();
             } else {
                 Logger.info('No file selected or file type not allowed');
                 addNotification('No file selected or file type not allowed', 'info');
@@ -73,7 +108,6 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
         }
     };
 
-
     const handleUploadConfirm = async () => {
         if (selectedFile) {
             const fileContentReference = await createFileContentReference(selectedFile);
@@ -83,13 +117,8 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
                 Logger.info('File upload failed or was cancelled');
                 return;
             }
-            onChange(file);
-            setIsDialogOpen(false);
+            setForm(file);
         }
-    };
-
-    const handleTranscriptUpdate = (newTranscript: MessageType) => {
-        onChange({ ...item, transcript: newTranscript } as FileReference);
     };
 
     const renderContent = () => {
@@ -99,34 +128,21 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
                     <Button variant="contained" onClick={handleFileSelect}>
                         Select File to Upload
                     </Button>
-                    <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
-                        <DialogTitle>Confirm File Upload</DialogTitle>
-                        <DialogContent>
-                            <Typography>
-                                Are you sure you want to upload {selectedFile?.name}?
-                            </Typography>
-                        </DialogContent>
-                        <DialogActions>
-                            <Button onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                            <Button onClick={handleUploadConfirm} color="primary">
-                                Upload
-                            </Button>
-                        </DialogActions>
-                    </Dialog>
                 </Box>
             );
         }
 
         return (
-            <>
-                <TextField
-                    fullWidth
-                    label="Filename"
+            <>  
+                <TextInput
+                    name='filename'
+                    label='Filename'
                     value={item?.filename || ''}
-                    onChange={(e) => onChange({ ...item, filename: e.target.value } as FileReference)}
-                    margin="normal"
+                    onChange={(value) => handleFieldChange('filename', value)}
                     disabled={!isEditMode}
+                    description='Enter the filename for the file. It should contain its extension.'
                 />
+                
                 <Typography variant="body1">File Type: {item?.type}</Typography>
                 <Typography variant="body1">{bytesToMB(item?.file_size ?? 0)}</Typography>
                 <Typography variant="body1">
@@ -134,17 +150,18 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
                 </Typography>
                 <Box mt={2}>
                     <FileViewer
-                        file={item as FileReference}
-                        editable={isEditMode}
-                        onUpdate={handleFileUpdate}
+                        item={item as FileReference}
+                        mode={mode}
+                        onChange={handleFileUpdate}
+                        items={null} handleSave={async()=>{}}
                     />
                 </Box>
-                {item && item._id && (
+                {item && item._id && hasTranscriptSlot && (
                     <Box mt={2}>
                         <Transcript
                             fileId={item._id}
                             transcript={item.transcript}
-                            onTranscriptUpdate={handleTranscriptUpdate}
+                            onTranscriptUpdate={(value) => handleFieldChange('transcript', value)}
                         />
                     </Box>
                 )}
@@ -152,15 +169,19 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
         );
     };
 
+    if (!item && mode !== 'create') {
+        return <Typography>No file data available.</Typography>;
+    }
+
     return (
         <GenericFlexibleView
             elementType='File'
             title={title}
-            onSave={handleSave}
+            onSave={handleLocalSave}
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={mode === "create" ? false : isEditMode}
-            item={item as FileReference}
+            item={form as FileReference}
             itemType='files'
         >
             {renderContent()}

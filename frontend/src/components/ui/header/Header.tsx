@@ -1,11 +1,16 @@
 import React from 'react';
 import { AppBar, Toolbar, IconButton, Box, Tooltip, Button, Typography } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { SettingsApplications, Storage, Chat, Task, Home, School } from '@mui/icons-material';
+import { SettingsApplications, Storage, Task, Home, School, DocumentScanner, Forum } from '@mui/icons-material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuth } from '../../../contexts/AuthContext';
 import useStyles from './HeaderStyles';
 import Logger from '../../../utils/Logger';
+
+interface NavGroupProps {
+  groupIndex: 1 | 2 | 3;
+  children: React.ReactNode;
+}
 
 const Header: React.FC = () => {
   const classes = useStyles();
@@ -13,22 +18,28 @@ const Header: React.FC = () => {
   const location = useLocation();
   const { isAuthenticated, user, logout } = useAuth();
 
-  const handleNavigation = (path: string) => {
+  const handleNavigation = (path: string): void => {
     navigate(path);
   };
 
-  const handleLogout = () => {
+  const handleLogout = (): void => {
     Logger.info('Logging out');
     logout();
     navigate('/login');
   };
 
-  const isActive = (path: string) => {
-    if (path === '/knowledgebase') {
+  const isActive = (path: string): boolean => {
+    if (path === '/shared/knowledgebase/') {
       return location.pathname.startsWith(path);
     }
     return location.pathname === path;
   };
+
+  const NavGroup: React.FC<NavGroupProps> = ({ groupIndex, children }) => (
+    <Box className={`${classes.navGroup} ${classes[`group${groupIndex}`]}`}>
+      {children}
+    </Box>
+  );
 
   return (
     <AppBar position="static" className={classes.header}>
@@ -45,46 +56,65 @@ const Header: React.FC = () => {
             </IconButton>
           </Tooltip>
         </Box>
+        
         {isAuthenticated && (
           <Box className={classes.centerSection}>
-            <Tooltip title="Chat with Alice">
-              <IconButton
-                color="inherit"
-                onClick={() => handleNavigation('/chat-alice')}
-                className={isActive('/chat-alice') ? classes.activeButton : ''}
-              >
-                <Chat />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Execute Task">
-              <IconButton
-                color="inherit"
-                onClick={() => handleNavigation('/start-task')}
-                className={isActive('/start-task') ? classes.activeButton : ''}
-              >
-                <Task />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="View Database">
-              <IconButton
-                color="inherit"
-                onClick={() => handleNavigation('/database')}
-                className={isActive('/database') ? classes.activeButton : ''}
-              >
-                <Storage />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Knowledgebase">
-              <IconButton
-                color="inherit"
-                onClick={() => handleNavigation('/knowledgebase')}
-                className={isActive('/knowledgebase') ? classes.activeButton : ''}
-              >
-                <School />
-              </IconButton>
-            </Tooltip>
+            <NavGroup groupIndex={1}>
+              <Tooltip title="Chat with Alice">
+                <IconButton
+                  color="inherit"
+                  onClick={() => handleNavigation('/chat-alice')}
+                  className={isActive('/chat-alice') ? classes.activeButton : ''}
+                >
+                  <Forum />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Execute tasks">
+                <IconButton
+                  color="inherit"
+                  onClick={() => handleNavigation('/start-task')}
+                  className={isActive('/start-task') ? classes.activeButton : ''}
+                >
+                  <Task />
+                </IconButton>
+              </Tooltip>
+            </NavGroup>
+
+            <NavGroup groupIndex={2}>
+              <Tooltip title="Edit structures">
+                <IconButton
+                  color="inherit"
+                  onClick={() => handleNavigation('/structures')}
+                  className={isActive('/structures') ? classes.activeButton : ''}
+                >
+                  <Storage />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="View references">
+                <IconButton
+                  color="inherit"
+                  onClick={() => handleNavigation('/references')}
+                  className={isActive('/references') ? classes.activeButton : ''}
+                >
+                  <DocumentScanner />
+                </IconButton>
+              </Tooltip>
+            </NavGroup>
+
+            <NavGroup groupIndex={3}>
+              <Tooltip title="Learn">
+                <IconButton
+                  color="inherit"
+                  onClick={() => handleNavigation('/shared/knowledgebase/')}
+                  className={isActive('/shared/knowledgebase/') ? classes.activeButton : ''}
+                >
+                  <School />
+                </IconButton>
+              </Tooltip>
+            </NavGroup>
           </Box>
         )}
+
         <Box className={classes.rightSection}>
           {isAuthenticated ? (
             <>
@@ -101,10 +131,7 @@ const Header: React.FC = () => {
                 </IconButton>
               </Tooltip>
               <Tooltip title="Logout">
-                <IconButton
-                  color="inherit"
-                  onClick={handleLogout}
-                >
+                <IconButton color="inherit" onClick={handleLogout}>
                   <LogoutIcon />
                 </IconButton>
               </Tooltip>

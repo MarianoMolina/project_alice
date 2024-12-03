@@ -12,15 +12,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     flexDirection: 'column',
     overflow: 'hidden',
   },
-  messageSmall: {
-    marginBottom: theme.spacing(1),
-    padding: theme.spacing(1),
-    borderRadius: theme.shape.borderRadius,
-    position: 'relative',
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
-  },
   userMessage: {
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.primary.contrastText,
@@ -39,14 +30,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   creator: {
     color: theme.palette.text.secondary,
     fontSize: theme.typography.body2.fontSize,
-  },
-  stepContext: {
-    color: theme.palette.text.secondary,
-    fontSize: theme.typography.caption.fontSize,
-  },
-  markdownText: {
-    fontFamily: theme.typography.fontFamily,
-    fontSize: '0.9em',
   },
   messageHeader: {
     display: 'flex',
@@ -78,43 +61,6 @@ const useStyles = makeStyles((theme: Theme) => ({
       marginBottom: theme.spacing(0.5),
     },
   },
-  fileReferencesContainer: {
-    marginTop: theme.spacing(1),
-  },
-  // New styles for MessageDetail
-  messageDetail: {
-    padding: theme.spacing(2),
-  },
-  chipContainer: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: theme.spacing(1),
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(1),
-  },
-  jsonDisplay: {
-    backgroundColor: theme.palette.background.default,
-    padding: theme.spacing(1),
-    borderRadius: theme.shape.borderRadius,
-    overflowX: 'auto',
-    fontFamily: 'monospace',
-    fontSize: '0.875rem',
-  },
-  buttonContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: theme.spacing(1),
-    marginTop: theme.spacing(2),
-  },
-  chip: {
-    margin: theme.spacing(0.5),
-  },
-  referencesContainer: {
-    marginTop: theme.spacing(1),
-  },
-  titleText: {
-    marginTop: `${theme.spacing(2)} !important`,
-  }
 }));
 
 export default useStyles;

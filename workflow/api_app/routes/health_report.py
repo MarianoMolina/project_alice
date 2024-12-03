@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from workflow.test.component_tests import APITests, TestEnvironment
 from workflow.db_app.initialization import DBStructure
-from workflow.api_app.util.dependencies import get_db_app
+from workflow.api_app.util.dependencies import get_db_app, get_queue_manager
 from workflow.api_app.middleware.auth import auth_middleware
+from workflow.util import LOGGER
 
 router = APIRouter()
 
@@ -16,8 +17,13 @@ async def health_check() -> dict:
     """
     return {"status": "OK", "message": "Workflow service is healthy"}
 
-@router.get("/health/admin")
-async def admin_health_check(request: Request) -> dict:
+@router.get("/health/user")
+async def user_health_check(
+    request: Request,
+    db_app=Depends(get_db_app),
+    queue_manager=Depends(get_queue_manager),
+    enqueue: bool = True
+) -> dict:
     """
     Admin-level health check endpoint.
 
@@ -33,14 +39,29 @@ async def admin_health_check(request: Request) -> dict:
     Raises:
         HTTPException: 403 error if the user doesn't have admin access.
     """
-    if not request.state.user or request.state.user.role != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
-   
-    return {
-        "status": "OK",
-        "message": "Admin health check",
-        "initial_test_results": request.app.state.initial_test_results
-    }
+    if enqueue:
+        LOGGER.info('Enqueuing admin health check')
+        task_data = {
+            "headers": dict(request.headers),
+            "user_data": db_app.user_data.get('user_obj', {})
+        }
+        enqueued_task_id = await queue_manager.enqueue_request(
+            endpoint="/health/admin",
+            data=task_data
+        )
+        return {"task_id": enqueued_task_id}
+    else:
+        # Process the admin health check immediately (called by QueueManager)
+        LOGGER.info('Processing admin health check')
+        if not request.state.user or request.state.user.role != "admin":
+            raise HTTPException(status_code=403, detail="Admin access required")
+
+        return {
+            "status": "OK",
+            "message": "Admin health check",
+            "initial_test_results": request.app.state.initial_test_results
+        }
+
 
 @router.get("/health/user")
 async def user_health_check(request: Request, db_app=Depends(get_db_app)) -> dict:
@@ -79,7 +100,7 @@ async def user_health_check(request: Request, db_app=Depends(get_db_app)) -> dic
 
     # Update API health status in the database
     for api_name, result in user_test_results["APITests"]["test_results"].items():
-        api_id = [api["_id"] for api in user_apis if api["api_name"] == api_name][0]
+        api_id = [api["api_config"]["_id"] for api in user_apis if api["api_name"] == api_name][0]
         if api_id and isinstance(api_id, str):
             await db_app.update_api_health(api_id, "healthy" if result == "Success" else "unhealthy")
 

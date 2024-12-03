@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import { Visibility, PlayArrow } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
+import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
 
 const ListItemStyled = styled(ListItem)(({ theme }) => ({
     display: 'flex',
@@ -61,7 +62,7 @@ function EnhancedShortListItem<T>({
     onInteraction,
     maxCharacters
 }: EnhancedShortListItemProps<T>) {
-    const { truncated: truncatedPrimaryText, isTruncated: isPrimaryTruncated } = truncateText(primaryText, maxCharacters);
+    const { truncated: truncatedPrimaryText, isTruncated: isPrimaryTruncated } = truncateText(formatStringWithSpaces(primaryText), maxCharacters);
     const { truncated: truncatedSecondaryText, isTruncated: isSecondaryTruncated } = truncateText(secondaryText, maxCharacters);
 
     const renderText = (text: string, truncated: string, isTruncated: boolean, variant: "body1" | "body2") => {

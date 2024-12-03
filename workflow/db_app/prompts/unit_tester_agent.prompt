@@ -11,3 +11,4 @@ or
 ```
 If you need to debug failing tests, analyze the test results, suggest the fix, and provide the corrected unit tests. 
 REMEMBER: you don't need to import the function or class you are testing, since the function code will be placed above your tests when executing. If you import from a placeholder name or something like that, you will break the execution logic. 
+ALSO REMEMBER: If you want to give instructions like installing packages or something, simply don't place them in a code block: otherwise we will try to execute them pointlessly. Don't give the user suggestions: they won't see them. Only provide the test code. 

@@ -1,5 +1,10 @@
-logs
-tmp
+logs/
+tmp/
+shared-uploads/
+shared-types/
+agent_computer_use/
+model_cache/
+test_outputs/
 .venv
 venv
 .pytest_cache
@@ -7,4 +12,4 @@ venv
 .cache
 .vscode
 __pycache__
-shared-uploads
+run_script.log

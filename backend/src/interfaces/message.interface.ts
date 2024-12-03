@@ -2,6 +2,7 @@ import { Model, Types, Document } from 'mongoose';
 import { IUserDocument } from "./user.interface";
 import { References } from './references.interface';
 import { FileType } from './file.interface';
+import { Embeddable } from './embeddingChunk.interface';
 
 export enum ContentType {
     TEXT = 'text',
@@ -11,20 +12,28 @@ export enum ContentType {
     FILE = FileType.FILE,
     TASK_RESULT = 'task_result',
     MULTIPLE = 'multiple',
-    URL_REFERENCE = 'url_reference'
+}
+export enum RoleType {
+    USER = 'user',
+    ASSISTANT = 'assistant',
+    SYSTEM = 'system',
+    TOOL = 'tool'
 }
 
-export interface IMessage {
+export enum MessageGenerators {
+    USER = 'user',
+    LLM = 'llm',
+    TOOL = 'tool',
+    SYSTEM = 'system'
+}
+
+export interface IMessage extends Embeddable {
     content?: string;
-    role: 'user' | 'assistant' | 'system' | 'tool';
-    generated_by: 'user' | 'llm' | 'tool' | 'system';
+    role: RoleType;
+    generated_by: MessageGenerators;
     step: string;
     assistant_name?: string;
-    context?: any;
     type: ContentType;
-    tool_calls?: any[];
-    tool_call_id?: string,
-    request_type?: string | null;
     references?: References;
     creation_metadata?: Record<string, any>;
     created_by: Types.ObjectId | IUserDocument;

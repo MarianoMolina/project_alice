@@ -30,13 +30,34 @@ import { ParameterDefinition } from '../../../../types/ParameterTypes';
 import { API } from '../../../../types/ApiTypes';
 import { MessageType } from '../../../../types/MessageTypes';
 import { FileReference } from '../../../../types/FileTypes';
-import { URLReference } from '../../../../types/URLReferenceTypes';
-import URLReferenceCardView from '../../url_reference/url_reference/URLReferenceCardView';
-import EnhancedURLReference from '../../url_reference/url_reference/EnhancedURLReference';
+import { EntityReference } from '../../../../types/EntityReferenceTypes';
+import EntityReferenceCardView from '../../entity_reference/entity_reference/EntityReferenceCardView';
+import EnhancedEntityReference from '../../entity_reference/entity_reference/EnhancedEntityReference';
 import Logger from '../../../../utils/Logger';
+import EnhancedUserCheckpoint from '../../user_checkpoint/user_checkpoint/EnhancedUserCheckpoint';
+import EnhancedUserInteraction from '../../user_interaction/user_interaction/EnhancedUserInteraction';
+import EnhancedEmbeddingChunk from '../../embedding_chunk/embedding_chunk/EnhancedEmbeddingChunk';
+import EnhancedDataCluster from '../../data_cluster/data_cluster/EnhancedDataCluster';
+import UserCheckpointCardView from '../../user_checkpoint/user_checkpoint/UserCheckpointCardView';
+import UserInteractionCardView from '../../user_interaction/user_interaction/UserInteractionCardView';
+import EmbeddingChunkCardView from '../../embedding_chunk/embedding_chunk/EmbeddingChunkCardView';
+import DataClusterCardView from '../../data_cluster/data_cluster/DataClusterCardView';
+import { UserCheckpoint } from '../../../../types/UserCheckpointTypes';
+import { UserInteraction } from '../../../../types/UserInteractionTypes';
+import { EmbeddingChunk } from '../../../../types/EmbeddingChunkTypes';
+import { DataCluster } from '../../../../types/DataClusterTypes';
+import { ToolCall } from '../../../../types/ToolCallTypes';
+import { CodeExecution } from '../../../../types/CodeExecutionTypes';
+import { APIConfig } from '../../../../types/ApiConfigTypes';
+import EnhancedToolCall from '../../tool_calls/tool_calls/EnhancedToolCall';
+import EnhancedCodeExecution from '../../code_execution/code_execution/EnhancedCodeExecution';
+import EnhancedAPIConfig from '../../api_config/api_config/EnhancedAPIConfig';
+import ToolCallCardView from '../../tool_calls/tool_calls/ToolCallCardView';
+import CodeExecutionCardView from '../../code_execution/code_execution/CodeExecutionCardView';
+import APIConfigCardView from '../../api_config/api_config/APIConfigCardView';
 
 const EnhancedCardDialog: React.FC = () => {
-  const { selectedCardItem, selectedCardItemType, handleClose, selectCardItem } = useCardDialog();
+  const { selectedCardItem, selectedCardItemType, closeCardDialog, selectCardItem, isCardDialogOpen } = useCardDialog();
 
   const renderDialogContent = () => {
     if (!selectedCardItem || !selectedCardItemType) return null;
@@ -52,7 +73,14 @@ const EnhancedCardDialog: React.FC = () => {
       handleAPIClick: (id: string, item?: API) => selectCardItem('API', id, item),
       handleFileClick: (id: string, item?: FileReference) => selectCardItem('File', id, item),
       handleMessageClick: (id: string, item?: MessageType) => selectCardItem('Message', id, item),
-      handleURLReferenceClick: (id: string, item?: URLReference) => selectCardItem('URLReference', id, item),
+      handleEntityReferenceClick: (id: string, item?: EntityReference) => selectCardItem('EntityReference', id, item),
+      handleUserCheckpointClick: (id: string, item?: UserCheckpoint) => selectCardItem('UserCheckpoint', id, item),
+      handleUserInteractionClick: (id: string, item?: UserInteraction) => selectCardItem('UserInteraction', id, item),
+      handleEmbeddingChunkClick: (id: string, item?: EmbeddingChunk) => selectCardItem('EmbeddingChunk', id, item),
+      handleDataClusterClick: (id: string, item?: DataCluster) => selectCardItem('DataCluster', id, item),
+      handleToolCallClick: (id: string, item?: ToolCall) => selectCardItem('ToolCall', id, item),
+      handleCodeExecutionClick: (id: string, item?: CodeExecution) => selectCardItem('CodeExecution', id, item),
+      handleAPIConfigClick: (id: string, item?: APIConfig) => selectCardItem('APIConfig', id, item),
     };
 
     const commonProps = {
@@ -92,8 +120,23 @@ const EnhancedCardDialog: React.FC = () => {
           return <EnhancedFile itemId={selectedCardItem._id} {...commonProps} />;
         case 'Message':
           return <EnhancedMessage itemId={selectedCardItem._id} {...commonProps} />;
-        case 'URLReference':
-          return <EnhancedURLReference itemId={selectedCardItem._id} {...commonProps} />;
+        case 'EntityReference':
+          return <EnhancedEntityReference itemId={selectedCardItem._id} {...commonProps} />;
+        case 'UserCheckpoint':
+          return <EnhancedUserCheckpoint itemId={selectedCardItem._id} {...commonProps} />;
+        case 'UserInteraction':
+          return <EnhancedUserInteraction itemId={selectedCardItem._id} {...commonProps} />;
+        case 'EmbeddingChunk':
+          return <EnhancedEmbeddingChunk itemId={selectedCardItem._id} {...commonProps} />;
+        case 'DataCluster':
+          return <EnhancedDataCluster itemId={selectedCardItem._id} {...commonProps} />;
+        case 'ToolCall':
+          return <EnhancedToolCall itemId={selectedCardItem._id} {...commonProps} />;
+        case 'CodeExecution':
+          return <EnhancedCodeExecution itemId={selectedCardItem._id} {...commonProps} />;
+        case 'APIConfig':
+          return <EnhancedAPIConfig itemId={selectedCardItem._id} {...commonProps} />;
+        
         default:
           return null;
       }
@@ -160,10 +203,52 @@ const EnhancedCardDialog: React.FC = () => {
               <MessageCardView item={selectedCardItem as CollectionType['messages']} {...cardViewProps} />
             </Box>
           );
-        case 'URLReference':
+        case 'EntityReference':
           return (
             <Box className="max-w-full">
-              <URLReferenceCardView item={selectedCardItem as CollectionType['urlreferences']} {...cardViewProps} />;
+              <EntityReferenceCardView item={selectedCardItem as CollectionType['entityreferences']} {...cardViewProps} />;
+            </Box>
+          );
+        case 'UserCheckpoint':
+          return (
+            <Box className="max-w-full">
+              <UserCheckpointCardView item={selectedCardItem as CollectionType['usercheckpoints']} {...cardViewProps} />
+            </Box>
+          );
+        case 'UserInteraction':
+          return (
+            <Box className="max-w-full">
+              <UserInteractionCardView item={selectedCardItem as CollectionType['userinteractions']} {...cardViewProps} />
+            </Box>
+          );
+        case 'EmbeddingChunk':
+          return (
+            <Box className="max-w-full">
+              <EmbeddingChunkCardView item={selectedCardItem as CollectionType['embeddingchunks']} {...cardViewProps} />
+            </Box>
+          );
+        case 'DataCluster':
+          return (
+            <Box className="max-w-full">
+              <DataClusterCardView item={selectedCardItem as CollectionType['dataclusters']} {...cardViewProps} />
+            </Box>
+          );
+        case 'ToolCall':
+          return (
+            <Box className="max-w-full">
+              <ToolCallCardView item={selectedCardItem as CollectionType['toolcalls']} {...cardViewProps} />
+            </Box>
+          );
+        case 'CodeExecution':
+          return (
+            <Box className="max-w-full">
+              <CodeExecutionCardView item={selectedCardItem as CollectionType['codeexecutions']} {...cardViewProps} />
+            </Box>
+          );
+        case 'APIConfig':
+          return (
+            <Box className="max-w-full">
+              <APIConfigCardView item={selectedCardItem as CollectionType['apiconfigs']} {...cardViewProps} />
             </Box>
           );
         default:
@@ -173,7 +258,7 @@ const EnhancedCardDialog: React.FC = () => {
   };
 
   return (
-    <Dialog open={!!selectedCardItem} onClose={handleClose} maxWidth='xl'>
+    <Dialog open={isCardDialogOpen} onClose={closeCardDialog} maxWidth='xl'>
       {renderDialogContent()}
     </Dialog>
   );

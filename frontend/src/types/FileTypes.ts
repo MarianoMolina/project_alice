@@ -1,6 +1,5 @@
-import { EnhancedComponentProps } from "./CollectionTypes";
+import { BaseDatabaseObject, convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
 import { MessageType } from "./MessageTypes";
-import { BaseDataseObject } from "./UserTypes";
 
 export enum FileType {
     IMAGE = "image",
@@ -9,8 +8,7 @@ export enum FileType {
     FILE = "file",
 }
 
-export interface FileReference extends BaseDataseObject{
-    _id: string;
+export interface FileReference extends BaseDatabaseObject, Embeddable {
     filename: string;
     type: FileType;
     file_size: number;
@@ -29,16 +27,13 @@ export interface FileContentReference {
 
 export const convertToFileReference = (data: any): FileReference => {
     return {
-        _id: data._id,
+        ...convertToEmbeddable(data),
         filename: data.filename,
         type: data.type,
         file_size: data.file_size,
         transcript: data.transcript ? data.transcript : undefined,
         storage_path: data.storage_path ? data.storage_path.toString() : undefined,
-        created_by: data.created_by ? data.created_by.toString() : undefined,
         last_accessed: data.last_accessed ? new Date(data.last_accessed) : undefined,
-        createdAt: data.createdAt ? new Date(data.createdAt) : undefined,
-        updatedAt: data.updatedAt ? new Date(data.updatedAt) : undefined,
     };
 };
 

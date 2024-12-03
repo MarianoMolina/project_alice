@@ -1,103 +1,41 @@
 import React from 'react';
 import {
     Typography,
-    Box,
 } from '@mui/material';
-import { Person, AccessTime, AttachFile, TextSnippet, Engineering, PersonPin, Functions } from '@mui/icons-material';
+import { Person, AttachFile, TextSnippet, Engineering, PersonPin, DataObject, QueryBuilder } from '@mui/icons-material';
 import { MessageComponentProps } from '../../../../types/MessageTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { References } from '../../../../types/ReferenceTypes';
-import useStyles from '../MessageStyles';
-import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
+import { hasAnyReferences } from '../../../../types/ReferenceTypes';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
-import ReferenceChip from '../../common/references/ReferenceChip';
-
-const hasAnyReferences = (references: References | undefined): boolean => {
-    if (!references) return false;
-    return !!(
-        references.messages?.length ||
-        references.files?.length ||
-        references.task_responses?.length ||
-        references.search_results?.length ||
-        references.string_outputs?.length
-    );
-};
+import AliceMarkdown, { CustomBlockType } from '../../../ui/markdown/alice_markdown/AliceMarkdown';
+import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
+import ReferencesViewer from '../../data_cluster/ReferencesViewer';
 
 const MessageCardView: React.FC<MessageComponentProps> = ({
     item,
 }) => {
-    const classes = useStyles();
     if (!item) {
         return <Typography>No message data available.</Typography>;
     }
-
-    const renderReferences = () => {
-        if (!item.references || !hasAnyReferences(item.references)) return 'No references';
-        return (
-            <Box>
-                <Typography variant="subtitle2">References:</Typography>
-                <Box display="flex" flexWrap="wrap" gap={1}>
-                    {item.references.messages?.map((msg, index) => (
-                        <ReferenceChip 
-                            key={`msg-${index}`} 
-                            reference={msg} 
-                            type="Message" 
-                            view={true}
-                        />
-                    ))}
-                    {item.references.files?.map((file, index) => (
-                        <ReferenceChip 
-                            key={`file-${index}`} 
-                            reference={file} 
-                            type="File" 
-                            view={true}
-                        />
-                    ))}
-                    {item.references.task_responses?.map((task, index) => (
-                        <ReferenceChip 
-                            key={`task-${index}`} 
-                            reference={task} 
-                            type="TaskResponse" 
-                            view={true}
-                        />
-                    ))}
-                    {item.references.search_results?.map((url, index) => (
-                        <ReferenceChip 
-                            key={`url-${index}`} 
-                            reference={url} 
-                            type="URLReference" 
-                            view={true}
-                        />
-                    ))}
-                    {item.references.string_outputs?.map((str, index) => (
-                        <ReferenceChip
-                            key={`str-${index}`} 
-                            reference={str} 
-                            type="string_output" 
-                            view={true}
-                        />
-                    ))}
-                </Box>
-            </Box>
-        );
-    };
-    
-    const getMessageClass = () => {
-        if (item.generated_by === 'tool') return classes.toolMessage;
-        switch (item.role) {
-            case 'user':
-                return classes.userMessage;
-            case 'assistant':
-            default:
-                return classes.assistantMessage;
-        }
-    };
-
+    const embeddingChunkViewer = item.embedding && item.embedding?.length > 0 ?
+     item.embedding.map((chunk, index) => (
+        <EmbeddingChunkViewer
+            key={chunk._id || `embedding-${index}`}
+            item={chunk}
+            items={null} onChange={()=>null} mode={'view'} handleSave={async()=>{}}
+        />
+    )) : <Typography>No embeddings available</Typography>;
     const listItems = [
         {
             icon: <TextSnippet />,
             primary_text: "Content",
-            secondary_text: <CustomMarkdown className={`${classes.messageSmall} ${getMessageClass()}`}>{item.content}</CustomMarkdown>
+            secondary_text:
+                <AliceMarkdown
+                    enabledBlocks={[CustomBlockType.ALICE_DOCUMENT, CustomBlockType.ANALYSIS]}
+                    role={item.role}
+                >
+                    {item.content}
+                </AliceMarkdown>
         },
         {
             icon: <Person />,
@@ -117,12 +55,16 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
         {
             icon: <AttachFile />,
             primary_text: "References",
-            secondary_text: renderReferences()
+            secondary_text: item.references && hasAnyReferences(item.references) ? 
+            <ReferencesViewer
+                references={item.references}
+            /> :
+            <Typography>"N/A"</Typography>,
         },
         {
-            icon: <Functions />,
-            primary_text: "Tool Calls",
-            secondary_text: item.tool_calls ? <CodeBlock language="json" code={JSON.stringify(item.tool_calls, null, 2)} /> : "N/A",
+            icon: <DataObject />,
+            primary_text: "Embedding",
+            secondary_text: embeddingChunkViewer
         },
         {
             icon: <Person />,
@@ -130,10 +72,10 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
             secondary_text: item.creation_metadata ? <CodeBlock language="json" code={JSON.stringify(item.creation_metadata, null, 2)} /> : "N/A",
         },
         {
-            icon: <AccessTime />,
+            icon: <QueryBuilder />,
             primary_text: "Created At",
             secondary_text: new Date(item.createdAt || '').toLocaleString()
-        },
+        }
     ];
 
     return (

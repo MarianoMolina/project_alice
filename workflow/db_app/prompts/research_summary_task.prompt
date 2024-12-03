@@ -1,6 +1,6 @@
 Here's the user prompt:
 {{ prompt }}
 Here's the data collected:
-{{ outputs_data_retrieval_task }}
+{{ Retrieve_Data }}
 
 Remember to use markdown formatting for readability and provide in-text citations using markdown links [Source Name](URL). PLEASE DON'T FORGET TO LINK TO URLS RELATED TO YOUR SUMMARY RETRIEVED DURING THE RESEARCH. 

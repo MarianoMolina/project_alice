@@ -1,13 +1,15 @@
 import { Types } from 'mongoose';
 import { IMessageDocument } from '../interfaces/message.interface';
 import Message from '../models/message.model';
-import { processReferences } from './reference.utils';
+import { compareReferences, processReferences } from './reference.utils';
 import Logger from './logger';
-import { References } from '../interfaces/references.interface';
+import { processEmbeddings } from './embeddingChunk.utils';
+import { InteractionOwnerType } from '../interfaces/userInteraction.interface';
 
 export async function createMessage(
   messageData: Partial<IMessageDocument>,
-  userId: string
+  userId: string,
+  chatId?: string
 ): Promise<IMessageDocument | null> {
   try {
     Logger.debug('messageData received in createMessage:', messageData);
@@ -18,7 +20,18 @@ export async function createMessage(
     }
 
     if (messageData.references) {
-      messageData.references = await processReferences(messageData.references, userId);
+      messageData.references = await processReferences(
+        messageData.references, 
+        userId,
+        chatId ? {
+          id: chatId,
+          type: InteractionOwnerType.CHAT
+        } : undefined
+      );
+    }
+
+    if (messageData.embedding) {
+      messageData.embedding = await processEmbeddings(messageData, userId);
     }
 
     Logger.debug('Processed message data:', JSON.stringify(messageData, null, 2));
@@ -62,7 +75,8 @@ export async function createMessage(
 export async function updateMessage(
   messageId: string,
   messageData: Partial<IMessageDocument>,
-  userId: string
+  userId: string,
+  chatId?: string
 ): Promise<IMessageDocument | null> {
   try {
     const existingMessage = await Message.findById(messageId);
@@ -73,12 +87,27 @@ export async function updateMessage(
     const processedMessageData = { ...messageData };
 
     if (processedMessageData.references) {
-      processedMessageData.references = await processReferences(processedMessageData.references, userId);
+      processedMessageData.references = await processReferences(
+        processedMessageData.references, 
+        userId,
+        chatId ? {
+          id: chatId,
+          type: InteractionOwnerType.CHAT
+        } : undefined
+      );
     }
+
+    if (processedMessageData.embedding) {
+      processedMessageData.embedding = await processEmbeddings(processedMessageData, userId);
+    }
+    Logger.debug('Message object created, data:', JSON.stringify(processedMessageData, null, 2));
 
     const isEqual = messagesEqual(existingMessage, processedMessageData);
 
+    Logger.debug('Messages equal:', isEqual);
+
     if (isEqual) {
+      Logger.debug('No changes detected, returning existing message');
       return existingMessage;
     }
 
@@ -98,44 +127,6 @@ export async function updateMessage(
   }
 }
 
-function compareArrays<T extends Types.ObjectId | { _id: Types.ObjectId } | string>(
-  arr1: T[] | undefined,
-  arr2: T[] | undefined
-): boolean {
-  if (!arr1 && !arr2) return true;
-  if (!arr1 || !arr2) return false;
-  if (arr1.length !== arr2.length) return false;
-
-  return arr1.every((item, index) => {
-    const item1 = item instanceof Types.ObjectId ? item : (item as { _id: Types.ObjectId })._id;
-    const item2 = arr2[index] instanceof Types.ObjectId ? arr2[index] : (arr2[index] as { _id: Types.ObjectId })._id;
-
-    if (item1 instanceof Types.ObjectId && item2 instanceof Types.ObjectId) {
-      return item1.equals(item2);
-    }
-    return item1 === item2;
-  });
-}
-
-function compareReferences(ref1: References | undefined, ref2: References | undefined): boolean {
-  if (!ref1 && !ref2) return true;
-  if (!ref1 || !ref2) return false;
-
-  const keys: (keyof References)[] = ['messages', 'files', 'task_responses', 'search_results', 'string_outputs'];
-
-  for (const key of keys) {
-    if (key === 'string_outputs') {
-      if (!compareArrays(ref1[key], ref2[key])) return false;
-    } else {
-      const arr1 = ref1[key] as (Types.ObjectId | { _id: Types.ObjectId })[] | undefined;
-      const arr2 = ref2[key] as (Types.ObjectId | { _id: Types.ObjectId })[] | undefined;
-      if (!compareArrays(arr1, arr2)) return false;
-    }
-  }
-
-  return true;
-}
-
 export function messagesEqual(
   msg1: IMessageDocument,
   msg2: Partial<IMessageDocument>
@@ -146,16 +137,14 @@ export function messagesEqual(
     'generated_by',
     'step',
     'assistant_name',
-    'context',
     'type',
-    'request_type',
-    'tool_calls',
-    'tool_call_id',
-    'creation_metadata'
+    'creation_metadata',
+    'embedding',
+    'references',
   ];
 
   for (const key of keys) {
-    if (key === 'context' || key === 'tool_calls' || key === 'creation_metadata') {
+    if (key === 'creation_metadata') {
       if (JSON.stringify(msg1[key]) !== JSON.stringify(msg2[key])) {
         return false;
       }

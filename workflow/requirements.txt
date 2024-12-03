@@ -6,20 +6,14 @@ pytest-asyncio
 aiohttp
 
 # API
-uvicorn
+uvicorn[standard]
 fastapi
 fastapi-cors
+redis>=4.2.0
+websockets
 
 # Docker
 docker
-
-# Utilities
-pydantic
-jinja2
-pillow
-python-dotenv
-python-magic
-pymongo # BSON
 
 # Third party APIs
 openai
@@ -32,3 +26,24 @@ wikipedia
 praw
 exa_py
 arxiv
+
+# Utilities
+pydantic
+jinja2
+pillow
+python-dotenv
+python-magic
+pymongo # BSON
+
+# Local generation
+transformers
+diffusers
+--extra-index-url https://download.pytorch.org/whl/cu118
+sentencepiece
+ftfy
+torch>=2.1.0+cu118
+torchvision>=0.16.0+cu118
+scipy
+accelerate>=0.26.0
+bitsandbytes>=0.41.1
+safetensors

@@ -8,14 +8,14 @@ import Logger from '../utils/Logger';
 // const BACKEND_PORT_DOCKER = process.env.BACKEND_PORT_DOCKER || 3000;
 // const WORKFLOW_PORT_DOCKER = process.env.WORKFLOW_PORT_DOCKER || 8000;
 
-const BACKEND_PORT = process.env.BACKEND_PORT || 3000;
-const WORKFLOW_PORT = process.env.WORKFLOW_PORT || 8000;
+export const BACKEND_PORT = process.env.BACKEND_PORT || 3000;
+export const WORKFLOW_PORT = process.env.WORKFLOW_PORT || 8000;
 
 // const DB_API_BASE_URL = `http://${BACKEND_HOST}:${BACKEND_PORT_DOCKER}/api`;
 // const WORKFLOW_API_BASE_URL = `http://${WORKFLOW_HOST}:${WORKFLOW_PORT_DOCKER}`;
 
-const BACKEND_URL = `http://localhost:${BACKEND_PORT}/api`;
-const WORKFLOW_URL = `http://localhost:${WORKFLOW_PORT}`;
+export const BACKEND_URL = `http://localhost:${BACKEND_PORT}/api`;
+export const WORKFLOW_URL = `http://localhost:${WORKFLOW_PORT}`;
 
 // Create axios instance for database API
 const dbAxiosInstance = axios.create({

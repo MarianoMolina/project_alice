@@ -1,27 +1,9 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import {
-    TextField,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    SelectChangeEvent,
-    Typography
-} from '@mui/material';
-import { MessageComponentProps, MessageType, getDefaultMessageForm } from '../../../../types/MessageTypes';
-import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
-import URLReferenceShortListView from '../../url_reference/url_reference/URLReferenceShortListView';
-import FileShortListView from '../../file/file/FileShortListView';
-import TaskResponseShortListView from '../../task_response/task_response/TaskResponseShortListView';
-import MessageShortListView from './MessageShortListView';
-import { useApi } from '../../../../contexts/ApiContext';
+import React, { useState, useCallback, useEffect } from 'react';
+import { ContentType, MessageComponentProps, MessageGenerators, MessageType, RoleType, getDefaultMessageForm } from '../../../../types/MessageTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import { FileReference } from '../../../../types/FileTypes';
-import { TaskResponse } from '../../../../types/TaskResponseTypes';
-import { URLReference } from '../../../../types/URLReferenceTypes';
-import { CollectionName } from '../../../../types/CollectionTypes';
-import { References } from '../../../../types/ReferenceTypes';
-import useStyles from '../MessageStyles';
+import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
+import { TextInput } from '../../common/inputs/TextInput';
+import { SelectInput } from '../../common/inputs/SelectInput';
 
 const MessageFlexibleView: React.FC<MessageComponentProps> = ({
     item,
@@ -30,11 +12,12 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
     handleSave,
     handleDelete
 }) => {
-    const { fetchItem } = useApi();
     const [form, setForm] = useState<Partial<MessageType>>(item || getDefaultMessageForm());
-    const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
-    const classes = useStyles();
+
+    const isEditMode = mode === 'edit' || mode === 'create';
+    const title = mode === 'create' ? 'Create New Message' : mode === 'edit' ? 'Edit Message' : 'Message Details';
+    const saveButtonText = form._id ? 'Update Message' : 'Create Message';
 
     useEffect(() => {
         if (isSaving) {
@@ -42,51 +25,17 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
             setIsSaving(false);
         }
     }, [isSaving, handleSave]);
-    
+
     useEffect(() => {
         if (item) {
             setForm(item);
-        } else if (!item || Object.keys(item).length === 0)  {
+        } else if (!item || Object.keys(item).length === 0) {
             onChange(getDefaultMessageForm());
         }
     }, [item, onChange]);
 
-    const isEditMode = mode === 'edit' || mode === 'create';
-
-    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setForm(prevForm => ({ ...prevForm, [name]: value }));
-    }, []);
-
-    const handleSelectChange = useCallback((e: SelectChangeEvent<string>) => {
-        const { name, value } = e.target;
-        setForm(prevForm => ({ ...prevForm, [name]: value }));
-    }, []);
-
-    const handleReferencesChange = useCallback(async (type: CollectionName, selectedIds: string[]) => {
-        const fetchedItems = await Promise.all(selectedIds.map(id => fetchItem(type, id)));
-        setForm(prevForm => {
-            let updatedReferences: References = { ...prevForm.references };
-            switch (type) {
-                case 'messages':
-                    updatedReferences.messages = fetchedItems as MessageType[];
-                    break;
-                case 'files':
-                    updatedReferences.files = fetchedItems as FileReference[];
-                    break;
-                case 'taskresults':
-                    updatedReferences.task_responses = fetchedItems as TaskResponse[];
-                    break;
-                case 'urlreferences':
-                    updatedReferences.search_results = fetchedItems as URLReference[];
-                    break;
-            }
-            return { ...prevForm, references: updatedReferences };
-        });
-    }, [fetchItem]);
-
-    const handleAccordionToggle = useCallback((accordion: string | null) => {
-        setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
+    const handleFieldChange = useCallback((field: keyof MessageType, value: any) => {
+        setForm(prevForm => ({ ...prevForm, [field]: value }));
     }, []);
 
     const handleLocalSave = useCallback(() => {
@@ -100,73 +49,6 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
         }
     }, [item, handleDelete]);
 
-    const title = mode === 'create' ? 'Create New Message' : mode === 'edit' ? 'Edit Message' : 'Message Details';
-    const saveButtonText = form._id ? 'Update Message' : 'Create Message';
-
-    const memoizedMessageSelect = useMemo(() => (
-        <EnhancedSelect<MessageType>
-            componentType="messages"
-            EnhancedView={MessageShortListView}
-            selectedItems={form.references?.messages || []}
-            onSelect={(ids) => handleReferencesChange('messages', ids)}
-            isInteractable={isEditMode}
-            multiple
-            label="Referenced Messages"
-            activeAccordion={activeAccordion}
-            onAccordionToggle={handleAccordionToggle}
-            accordionEntityName="referenced-messages"
-        />
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    ), [form.references?.messages, handleReferencesChange, isEditMode, activeAccordion, handleAccordionToggle]);
-
-    const memoizedFileSelect = useMemo(() => (
-        <EnhancedSelect<FileReference>
-            componentType="files"
-            EnhancedView={FileShortListView}
-            selectedItems={form.references?.files as FileReference[] || []}
-            onSelect={(ids) => handleReferencesChange('files', ids)}
-            isInteractable={isEditMode}
-            multiple
-            label="File References"
-            activeAccordion={activeAccordion}
-            onAccordionToggle={handleAccordionToggle}
-            accordionEntityName="file-references"
-        />
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    ), [form.references?.files, handleReferencesChange, isEditMode, activeAccordion, handleAccordionToggle]);
-
-    const memoizedTaskResponseSelect = useMemo(() => (
-        <EnhancedSelect<TaskResponse>
-            componentType="taskresults"
-            EnhancedView={TaskResponseShortListView}
-            selectedItems={form.references?.task_responses || []}
-            onSelect={(ids) => handleReferencesChange('taskresults', ids)}
-            isInteractable={isEditMode}
-            multiple
-            label="Task Responses"
-            activeAccordion={activeAccordion}
-            onAccordionToggle={handleAccordionToggle}
-            accordionEntityName="task-responses"
-        />
-    // eslint-disable-next-line react-hooks/exhaustive-deps 
-    ), [form.references?.task_responses, handleReferencesChange, isEditMode, activeAccordion, handleAccordionToggle]);
-
-    const memoizedURLReferenceSelect = useMemo(() => (
-        <EnhancedSelect<URLReference>
-            componentType="urlreferences"
-            EnhancedView={URLReferenceShortListView}
-            selectedItems={form.references?.search_results || []}
-            onSelect={(ids) => handleReferencesChange('urlreferences', ids)}
-            isInteractable={isEditMode}
-            multiple
-            label="Search Results"
-            activeAccordion={activeAccordion}
-            onAccordionToggle={handleAccordionToggle}
-            accordionEntityName="search-results"
-        />
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    ), [form.references?.search_results, handleReferencesChange, isEditMode, activeAccordion, handleAccordionToggle]);
-
     return (
         <GenericFlexibleView
             elementType='Message'
@@ -175,57 +57,91 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
-            item={item as MessageType}
+            item={form as MessageType}
             itemType='messages'
         >
-            <Typography variant="h6" className={classes.titleText}>Role</Typography>
-            <FormControl fullWidth margin="normal">
-                <InputLabel>Role</InputLabel>
-                <Select
-                    name="role"
-                    value={form.role || ''}
-                    onChange={handleSelectChange}
-                    disabled={!isEditMode}
-                >
-                    <MenuItem value="user">User</MenuItem>
-                    <MenuItem value="assistant">Assistant</MenuItem>
-                    <MenuItem value="system">System</MenuItem>
-                    <MenuItem value="tool">Tool</MenuItem>
-                </Select>
-            </FormControl>
-
-            <Typography variant="h6" className={classes.titleText}>Content</Typography>
-            <TextField
-                fullWidth
-                multiline
-                rows={4}
-                name="content"
-                label="Content"
-                value={form.content || ''}
-                onChange={handleInputChange}
-                margin="normal"
+            <SelectInput
+                name='role'
+                label='Role'
+                value={form.role}
+                onChange={(value) => handleFieldChange('role', value)}
+                options={[
+                    { value: RoleType.USER, label: 'User' },
+                    { value: RoleType.ASSISTANT, label: 'Assistant' },
+                    { value: RoleType.SYSTEM, label: 'System' },
+                    { value: RoleType.TOOL, label: 'Tool' }
+                ]}
                 disabled={!isEditMode}
+                description='Role of the message creator'
+                required
             />
-
-            <Typography variant="h6" className={classes.titleText}>Generated By</Typography>
-            <FormControl fullWidth margin="normal">
-                <InputLabel>Generated By</InputLabel>
-                <Select
-                    name="generated_by"
-                    value={form.generated_by || ''}
-                    onChange={handleSelectChange}
-                    disabled={!isEditMode}
-                >
-                    <MenuItem value="user">User</MenuItem>
-                    <MenuItem value="llm">LLM</MenuItem>
-                    <MenuItem value="tool">Tool</MenuItem>
-                </Select>
-            </FormControl>
-            <Typography variant="h6" className={classes.titleText}>References</Typography>
-            {memoizedMessageSelect}
-            {memoizedFileSelect}
-            {memoizedTaskResponseSelect}
-            {memoizedURLReferenceSelect}
+            <TextInput
+                name='content'
+                label='Content'
+                value={form.content || ''}
+                onChange={(value) => handleFieldChange('content', value)}
+                disabled={!isEditMode}
+                description='Enter the content of the message'
+                required
+            />
+            <SelectInput
+                name='generated_by'
+                label='Generated By'
+                value={form.generated_by}
+                onChange={(value) => handleFieldChange('generated_by', value)}
+                options={[
+                    { value: MessageGenerators.USER, label: 'User' },
+                    { value: MessageGenerators.LLM, label: 'LLM' },
+                    { value: MessageGenerators.TOOL, label: 'Tool' },
+                    { value: MessageGenerators.SYSTEM, label: 'System' }
+                ]}
+                disabled={!isEditMode}
+                description='Select the entity that generated the message'
+                required
+            />
+            <TextInput
+                name='assistant_name'
+                label='Assistant Name'
+                value={form.assistant_name || ''}
+                onChange={(value) => handleFieldChange('assistant_name', value)}
+                disabled={!isEditMode}
+                description='Enter the name of the assistant that generated the message'
+            />
+            <TextInput
+                name='step'
+                label='Step'
+                value={form.step || ''}
+                onChange={(value) => handleFieldChange('step', value)}
+                disabled={!isEditMode}
+                description='Enter the name of the "step" that generated the message'
+            />
+            <SelectInput
+                name='type'
+                label='Content Type'
+                value={form.type}
+                onChange={(value) => handleFieldChange('type', value)}
+                options={[
+                    { value: ContentType.TEXT, label: 'Text' },
+                    { value: ContentType.IMAGE, label: 'Image' },
+                    { value: ContentType.VIDEO, label: 'Video' },
+                    { value: ContentType.AUDIO, label: 'Audio' },
+                    { value: ContentType.FILE, label: 'File' },
+                    { value: ContentType.TASK_RESULT, label: 'Task Result' },
+                    { value: ContentType.MULTIPLE, label: 'Multiple' },
+                    { value: ContentType.ENTITY_REFERENCE, label: 'Entity Reference' }
+                ]}
+                disabled={!isEditMode}
+                description='Select the type of content'
+            />
+            <DataClusterManager
+                title='References'
+                dataCluster={form.references}
+                isEditable={true}
+                onDataClusterChange={(dataCluster) => setForm(prevForm => ({ ...prevForm, data_cluster: dataCluster }))}
+                flatten={false}
+                showSelect={false}
+                showCreate={false}
+            />
         </GenericFlexibleView>
     );
 };

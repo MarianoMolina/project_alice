@@ -7,6 +7,7 @@ import ChatShortListView from './ChatShortListView';
 import { AliceChat } from '../../../../types/ChatTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
 import { ChatComponentProps } from '../../../../types/ChatTypes';
+import ChatMessagesFullView from './ChatMessagesFullView';
 
 type BaseChatMode = BaseDbElementProps<AliceChat>['mode'];
 type ExtendedChatMode = 'list' | 'shortList' | 'card' | 'full' | 'table';
@@ -40,6 +41,7 @@ const EnhancedChat: React.FC<EnhancedChatProps> = (props) => {
       onInteraction: props.onInteraction,
       onView: props.onView,
       showHeaders: props.showHeaders,
+      showRegenerate: props.showRegenerate,
     };
 
     switch (props.mode) {
@@ -55,6 +57,8 @@ const EnhancedChat: React.FC<EnhancedChatProps> = (props) => {
         return <ChatTableView {...commonProps} />;
       case 'card':
         return <ChatCardView {...commonProps} />;
+      case 'full':
+        return <ChatMessagesFullView {...commonProps} />;
       default:
         return null;
     }

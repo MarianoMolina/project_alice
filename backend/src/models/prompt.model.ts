@@ -1,13 +1,14 @@
-import mongoose, { Schema, CallbackWithoutResultAndOptionalError, Query } from 'mongoose';
-import { functionParametersSchema, IFunctionParameters } from '../utils/schemas';
-import { ensureObjectIdForProperties, ensureObjectIdHelper } from '../utils/utils';
+import mongoose, { Schema } from 'mongoose';
+import { functionParametersSchema } from './functionSchema';
+import { ensureObjectIdForProperties, getObjectId } from '../utils/utils';
 import { IPromptDocument, IPromptModel } from '../interfaces/prompt.interface';
+import mongooseAutopopulate from 'mongoose-autopopulate';
 
 const promptSchema = new Schema<IPromptDocument, IPromptModel>({
   name: { type: String, required: true },
   content: { type: String, required: true },
-  created_by: { type: Schema.Types.ObjectId, ref: 'User' },
-  updated_by: { type: Schema.Types.ObjectId, ref: 'User' },
+  created_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true },
+  updated_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true },
   is_templated: { type: Boolean, default: false },
   parameters: {
     type: functionParametersSchema,
@@ -35,42 +36,31 @@ promptSchema.methods.apiRepresentation = function (this: IPromptDocument) {
   };
 };
 
-function ensureObjectId(this: IPromptDocument, next: CallbackWithoutResultAndOptionalError) {
-  this.created_by = ensureObjectIdHelper(this.created_by);
-  this.updated_by = ensureObjectIdHelper(this.updated_by);
+function ensureObjectId(this: IPromptDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {
+  const context = { model: 'Prompt', field: '' };
+  if (this.created_by) this.created_by = getObjectId(this.created_by, { ...context, field: 'created_by' });
+  if (this.updated_by) this.updated_by = getObjectId(this.updated_by, { ...context, field: 'updated_by' });
   if (this.is_templated && this.parameters?.properties) {
     this.parameters.properties = ensureObjectIdForProperties(this.parameters.properties);
   }
   next();
 }
 
-
-function ensureObjectIdForUpdate(this: Query<any, any>, next: CallbackWithoutResultAndOptionalError) {
+function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.CallbackWithoutResultAndOptionalError) {
   const update = this.getUpdate() as any;
-
-  if (update.created_by) {
-    update.created_by = ensureObjectIdHelper(update.created_by);
-  }
-  if (update.updated_by) {
-    update.updated_by = ensureObjectIdHelper(update.updated_by);
-  }
-
-  if (update.parameters && update.parameters.properties) {
+  if (!update) return next();
+  const context = { model: 'Prompt', field: '' };
+  if (update.created_by) update.created_by = getObjectId(update.created_by, { ...context, field: 'created_by' });
+  if (update.updated_by) update.updated_by = getObjectId(update.updated_by, { ...context, field: 'updated_by' });
+  if (update.parameters?.properties) {
     update.parameters.properties = ensureObjectIdForProperties(update.parameters.properties);
   }
-  next();
-};
-
-
-function autoPopulate(this: Query<any, any>, next: CallbackWithoutResultAndOptionalError) {
-  this.populate('created_by updated_by parameters.properties');
   next();
 }
 
 promptSchema.pre('save', ensureObjectId);
 promptSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
-promptSchema.pre('find', autoPopulate);
-promptSchema.pre('findOne', autoPopulate);
+promptSchema.plugin(mongooseAutopopulate);
 
 const Prompt = mongoose.model<IPromptDocument, IPromptModel>('Prompt', promptSchema);
 

@@ -5,6 +5,7 @@ import {
     Accordion,
     AccordionSummary,
     AccordionDetails,
+    Box,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
@@ -12,9 +13,10 @@ import { CommandLineLog } from '../../../ui/markdown/CommandLog';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import { styled } from '@mui/material/styles';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { AccessTime, CheckCircle, Error, Warning, Output, Code, BugReport, DataObject, Analytics } from '@mui/icons-material';
-import ReferencesViewer from '../../common/references/ReferencesViewer';
-import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
+import { AccessTime, CheckCircle, Error, Warning, Output, Code, BugReport, DataObject, Analytics, Terminal } from '@mui/icons-material';
+import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
+import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
+import TaskResponseViewer from './TaskResponseViewer';
 
 const ExitCodeChip = styled(Chip)(({ theme }) => ({
     fontWeight: 'bold',
@@ -50,8 +52,8 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
         }
     };
 
-    const AccordionSection = ({ title, content, disabled = false }: { title: string, content: React.ReactNode, disabled?: boolean }) => (
-        <Accordion disabled={disabled}>
+    const AccordionSection = ({ title, content, disabled = false, expanded = false }: { title: string, content: React.ReactNode, disabled?: boolean, expanded?: boolean }) => (
+        <Accordion disabled={disabled} defaultExpanded={expanded}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant="h6">{title}</Typography>
             </AccordionSummary>
@@ -60,6 +62,15 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             </AccordionDetails>
         </Accordion>
     );
+
+    const embeddingChunkViewer = item.embedding && item.embedding?.length > 0 ?
+        item.embedding.map((chunk, index) => (
+            <EmbeddingChunkViewer
+                key={chunk._id || `embedding-${index}`}
+                item={chunk}
+                items={null} onChange={() => null} mode={'view'} handleSave={async () => { }}
+            />
+        )) : <Typography>No embeddings available</Typography>;
 
     const exitCodeProps = getExitCodeProps(item.result_code);
 
@@ -74,6 +85,11 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
                     size="small"
                 />
             )
+        },
+        {
+            icon: exitCodeProps.icon,
+            primary_text: "Status",
+            secondary_text: item.status
         },
         {
             icon: <AccessTime />,
@@ -92,14 +108,29 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             )
         },
         {
+            icon: <DataObject />,
+            primary_text: "Raw Output",
+            secondary_text: (
+                <AccordionSection
+                    title="Raw Output"
+                    content={
+                        <AliceMarkdown showCopyButton>{item.task_outputs as string}</AliceMarkdown>
+                    }
+                    disabled={!item.task_outputs}
+                />
+            )
+        },
+        {
             icon: <Output />,
             primary_text: "Output",
             secondary_text: (
-                item.references ? (
-                    <ReferencesViewer references={item.references} />
-                ) : (
-                    <Typography>No output content available</Typography>
-                )
+                <AccordionSection
+                    title="Node Outputs"
+                    content={
+                        item.node_references ? <TaskResponseViewer item={item} items={null} onChange={() => null} mode={'view'} handleSave={async () => { }} /> : <Typography>No output content available</Typography>
+                    }
+                    disabled={!item.node_references?.length}
+                />
             )
         },
         {
@@ -108,40 +139,63 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             secondary_text: (
                 <AccordionSection
                     title="Diagnostics"
-                    content={<CommandLineLog content={item.result_diagnostic ?? ''} />}
+                    content={
+                        <Box className="bg-gray-50 rounded overflow-hidden">
+                            <Box className="flex items-center gap-2 px-3 py-2 bg-gray-100">
+                                <Terminal fontSize="small" className="text-gray-600" />
+                                <Typography variant="subtitle2" className="text-gray-600">
+                                    Output
+                                </Typography>
+                            </Box>
+                            <Box className="p-3">
+                                <CommandLineLog
+                                    content={item.result_diagnostic ?? ''}
+                                />
+                            </Box>
+                        </Box>}
                     disabled={!item.result_diagnostic}
                 />
             )
         },
         {
             icon: <DataObject />,
-            primary_text: "Raw Output",
+            primary_text: "Execution History",
             secondary_text: (
                 <AccordionSection
-                    title="Raw Output"
-                    content={
-                        <CustomMarkdown>{item.task_outputs as string}</CustomMarkdown>
-                    }
-                    disabled={!item.task_outputs}
+                    title='Execution History'
+                    content={<CodeBlock language="json" code={JSON.stringify(item.execution_history, null, 2)} />}
+                    disabled={!item.execution_history}
+                />
+            )
+        },
+        {
+            icon: <DataObject />,
+            primary_text: "Embedding",
+            secondary_text: (
+                <AccordionSection
+                    title='Embedding'
+                    content={embeddingChunkViewer}
+                    disabled={!item.embedding?.length}
                 />
             )
         },
         {
             icon: <Analytics />,
             primary_text: "Usage Metrics",
-            secondary_text: (
+            secondary_text: item.usage_metrics && Object.keys(item.usage_metrics).length > 0 ? 
+            (
                 <AccordionSection
                     title="Usage Metrics"
                     content={<CodeBlock language="json" code={JSON.stringify(item.usage_metrics, null, 2)} />}
                     disabled={!item.usage_metrics}
                 />
-            )
+            ) : null
         }
     ];
 
     return (
         <CommonCardView
-            elementType='TaskResponse'
+            elementType='Task Response'
             title={item.task_name}
             subtitle={item.task_description}
             id={item._id}

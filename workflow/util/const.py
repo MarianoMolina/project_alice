@@ -1,7 +1,9 @@
 import os
 from dotenv import load_dotenv
-from typing import Literal
 load_dotenv()
+
+CHAR_PER_TOKEN = 3
+EST_TOKENS_PER_TOOL = 100
 
 BACKEND_PORT = os.getenv("BACKEND_PORT", 3000)
 FRONTEND_PORT = os.getenv("FRONTEND_PORT", 4000)

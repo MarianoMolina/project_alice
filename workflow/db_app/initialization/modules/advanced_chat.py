@@ -5,26 +5,12 @@ from workflow.db_app.initialization.modules.init_module import InitializationMod
 class AdvancedChatModule(InitializationModule):
     """This module defines the advanced chat agents and chats."""
     name: str = "advanced_chat"
-    dependencies: List[str] = ["base", "base_tasks", "base_chat", "adv_tasks", "web_scrape_workflow", "coding_workflow", "research_workflow"]
+    dependencies: List[str] = ["base", "base_tasks", "base_chat", "adv_tasks", "coding_workflow", "research_workflow"]
     data: Dict[str, List[Dict[str, Any]]] = Field(default_factory=dict)
 
 advanced_chat_module = AdvancedChatModule(
     data={
         "agents": [
-            {
-                "key": "gemini_alice_adv",
-                "name": "Alice w/ tools (Gemini)",
-                "system_message": "default_system_message",
-                "models": {
-                    "chat": "gemini_1.5_flash",
-                    "img_gen": "Dall-E-3",
-                    "embeddings": "gemini_text_embedding",
-                    "tts": "tts-1",
-                },
-                "has_code_exec": False,
-                "has_functions": True,
-                "max_consecutive_auto_reply": 1,
-            },
             {
                 "key": "claude_alice_adv",
                 "name": "Alice w/ tools (Claude)",
@@ -34,27 +20,46 @@ advanced_chat_module = AdvancedChatModule(
                     "img_gen": "Dall-E-3",
                     "embeddings": "oai_embedding_large",
                     "tts": "tts-1",
+                    "vision": "Claude3.5_v"
                 },
-                "max_consecutive_auto_reply": 1,
-                "has_functions": True,
-                "has_code_exec": False,
+                "has_tools": 1,
+                "has_code_exec": 0,
+                "max_consecutive_auto_reply": 2,
             },
         ],
         "chats": [
             {
                 "key": "advanced_chat",
                 "name": "Advanced Chat (Gemini)",
-                "messages": [],
-                "alice_agent": "gemini_alice_adv", 
-                "functions": [ "web_scrape_workflow", "embedding_task", "tts_task", "research_workflow"], 
+                "alice_agent": "gemini_agent", 
+                "agent_tools": [ "tts_task", "research_workflow"],
+                "retrieval_tools": ["retrieval_task"],
+                "default_user_checkpoints": {
+                    "tool_call": "default_tool_call_checkpoint",
+                    "code_execution": "default_code_exec_checkpoint"
+                }
             },
             {
                 "key": "advanced_chat_claude",
                 "name": "Advanced Chat (Claude)",
-                "messages": [],
                 "alice_agent": "claude_alice_adv",
-                "functions": ["coding_workflow", "image_gen_task", "embedding_task"], 
+                "agent_tools": ["coding_workflow", "image_gen_task", "web_scrape_task"],
+                "default_user_checkpoints": {
+                    "tool_call": "default_tool_call_checkpoint",
+                    "code_execution": "default_code_exec_checkpoint"
+                }
             },
+            {
+                "key": "advanced_chat_oai",
+                "name": "Advanced Chat (OAI)",
+                "alice_agent": "oai_agent",
+                "agent_tools": ["web_scrape_task_2", "image_gen_task", "data_retrieval_task"],
+                "retrieval_tools": ["retrieval_task"],
+                "default_user_checkpoints": {
+                    "tool_call": "default_tool_call_checkpoint",
+                    "code_execution": "default_code_exec_checkpoint"
+                }
+            }
         ]
     }
 )

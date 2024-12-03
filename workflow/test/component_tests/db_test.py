@@ -1,7 +1,7 @@
 import traceback
 from typing import Dict, Any
 from pydantic import ValidationError
-from workflow.util.logging_config import LOGGER
+from workflow.util.logger import LOGGER
 from workflow.db_app import DBStructure, DBInitManager, BackendFunctionalityAPI
 from workflow.test.component_tests.test_environment import TestModule
 

@@ -1,10 +1,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Box, IconButton, Accordion, AccordionSummary, AccordionDetails, Typography, Chip, Divider } from '@mui/material';
-import { Edit, Close, ExpandMore, Add } from '@mui/icons-material';
+import { Box, IconButton, Accordion, AccordionSummary, AccordionDetails, Chip, Tooltip, FormControl, InputLabel } from '@mui/material';
+import { Edit, Close, ExpandMore, Add, Info } from '@mui/icons-material';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import useStyles from './EnhancedSelectStyles';
 import { CollectionName, CollectionType, CollectionElementString, collectionNameToElementString, collectionNameToEnhancedComponent } from '../../../../types/CollectionTypes';
 import Logger from '../../../../utils/Logger';
+import theme from '../../../../Theme';
 
 interface EnhancedSelectProps<T extends CollectionType[CollectionName]> {
   componentType: CollectionName;
@@ -19,6 +20,8 @@ interface EnhancedSelectProps<T extends CollectionType[CollectionName]> {
   onView?: (id: string) => void;
   accordionEntityName: string;
   showCreateButton?: boolean;
+  description?: string;
+  filters?: Record<string, any>;
 }
 
 function EnhancedSelect<T extends CollectionType[CollectionName]>({
@@ -32,24 +35,26 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
   activeAccordion,
   onAccordionToggle,
   accordionEntityName,
-  showCreateButton = false
+  showCreateButton = false,
+  description,
+  filters
 }: EnhancedSelectProps<T>) {
   const classes = useStyles();
   const { selectFlexibleItem, selectCardItem } = useCardDialog();
   const [localExpanded, setLocalExpanded] = useState(false);
-  Logger.debug('EnhancedSelect', { componentType, selectedItems, isInteractable, multiple, label, activeAccordion, accordionEntityName, showCreateButton });
+  Logger.debug('EnhancedSelect', { componentType, selectedItems, isInteractable, multiple, label, activeAccordion, accordionEntityName, showCreateButton, filters });
 
-  const EnhancedComponent = collectionNameToEnhancedComponent[componentType]
+  const EnhancedComponent = collectionNameToEnhancedComponent[componentType];
 
   const accordionName = `select-${accordionEntityName}`;
   const isExpanded = activeAccordion === accordionName || localExpanded;
 
   const handleToggle = () => {
-    if (multiple) {
+    if (onAccordionToggle !== undefined) {
       onAccordionToggle(isExpanded ? null : accordionName);
-    } else {
-      setLocalExpanded(!isExpanded);
     }
+    setLocalExpanded(!isExpanded);
+    return;
   };
 
   const handleDelete = useCallback((itemToDelete: T) => {
@@ -77,7 +82,7 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
       ? [...selectedItems.map(i => i._id!), item._id!]
       : [item._id!];
     onSelect(newSelectedIds);
-    
+
     if (!multiple) {
       setLocalExpanded(false);
     }
@@ -94,8 +99,9 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
       onInteraction={handleInteraction}
       onView={handleView}
       isInteractable={isInteractable}
+      filters={filters} // Pass filters to EnhancedComponent
     />
-  ), [EnhancedComponent, handleInteraction, handleView, isInteractable]);
+  ), [EnhancedComponent, handleInteraction, handleView, isInteractable, filters]); // Add filters to dependencies
 
   const renderSelectedItem = useCallback((item: T) => (
     <Chip
@@ -108,41 +114,54 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
   ), [classes.chip, isInteractable, multiple, selectCardItem, collectionElementString, commonProps, EnhancedView, handleDelete]);
 
   return (
-    <Box className={classes.selectContainer}>
-      <Typography className={classes.label} variant="caption">{label}{multiple ? ' (multiple)' : null}</Typography>
-      <Box className={classes.chipContainer}>
-        {selectedItems?.map(renderSelectedItem)}
-        <Box className={classes.buttonContainer}>
-          <IconButton
-            onClick={handleToggle}
-            disabled={!isInteractable}
-            size="small"
-            className={classes.editButton}
-          >
-            {isExpanded ? <Close /> : <Edit />}
-          </IconButton>
-          {showCreateButton && (
-            <IconButton
-              onClick={handleCreate}
-              disabled={!isInteractable}
-              size="small"
-              className={classes.createButton}
-            >
-              <Add />
-            </IconButton>
-          )}
+    <FormControl fullWidth variant="outlined" sx={{ marginTop: 1, marginBottom: 1 }}>
+      <InputLabel shrink sx={{ backgroundColor: theme.palette.primary.dark }}>{label}{multiple ? ' (multiple)' : null}</InputLabel>
+      <div className="relative p-4 border border-gray-200/60 rounded-lg ml-2 mr-2">
+        <Box className={classes.chipContainer}>
+          {selectedItems?.map(renderSelectedItem)}
+          <Box className={classes.buttonContainer}>
+            {description && (
+              <Tooltip title={description}>
+                <IconButton
+                  size="small"
+                >
+                  <Info />
+                </IconButton>
+              </Tooltip>
+            )}
+            <Tooltip title={isInteractable ? isExpanded ? 'Close' : 'Edit' : ''}>
+              <IconButton
+                onClick={handleToggle}
+                disabled={!isInteractable}
+                size="small"
+                className={classes.editButton}
+              >
+                {isExpanded ? <Close /> : <Edit />}
+              </IconButton>
+            </Tooltip>
+            {showCreateButton && (
+              <Tooltip title={isInteractable ? 'Create' : ''}>
+                <IconButton
+                  onClick={handleCreate}
+                  disabled={!isInteractable}
+                  size="small"
+                  className={classes.createButton}
+                >
+                  <Add />
+                </IconButton>
+              </Tooltip>
+            )}
+          </Box>
         </Box>
-      </Box>
-      <Accordion expanded={isExpanded} onChange={handleToggle}>
-        <AccordionSummary expandIcon={<ExpandMore />}>
-          <Typography>{label}</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          {memoizedEnhancedComponent}
-        </AccordionDetails>
-      </Accordion>
-      <Divider className={classes.divider} />
-    </Box>
+        <Accordion expanded={isExpanded} onChange={handleToggle}>
+          <AccordionSummary expandIcon={<ExpandMore />} sx={{ minHeight: 0 }}>
+          </AccordionSummary>
+          <AccordionDetails>
+            {memoizedEnhancedComponent}
+          </AccordionDetails>
+        </Accordion>
+      </div>
+    </FormControl>
   );
 }
 

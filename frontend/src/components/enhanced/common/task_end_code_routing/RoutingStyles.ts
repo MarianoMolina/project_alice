@@ -49,11 +49,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     saveButton: {
         marginTop: theme.spacing(2),
     },
-    flowChartContainer: {
-        height: '800px',
-        flexGrow: 1,
-        flexBasis: '500px',
-    },  
 }));
 
 export default useStyles;

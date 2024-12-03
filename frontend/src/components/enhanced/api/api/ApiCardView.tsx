@@ -4,11 +4,15 @@ import {
     Switch,
     ListItemSecondaryAction,
     ListItemButton,
+    ListItemText,
 } from '@mui/material';
-import { ApiComponentProps, ApiType, ModelApiType } from '../../../../types/ApiTypes';
+import { ApiComponentProps, ApiName, ApiType, ModelApiType } from '../../../../types/ApiTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { Api, Category, HealthAndSafety, PowerSettingsNew } from '@mui/icons-material';
+import { Api, Category, PowerSettingsNew, QueryBuilder, Settings } from '@mui/icons-material';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { apiNameIcons, apiTypeIcons } from '../../../../utils/ApiUtils';
+import { AIIcon } from '../../../../utils/CustomIcons';
+import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
 
 type ListItemType = {
     icon: React.ReactElement;
@@ -38,14 +42,14 @@ const ApiCardView: React.FC<ApiComponentProps> = ({
 
     const listItems: ListItemType[] = [
         {
-            icon: <Api />,
+            icon: apiTypeIcons[item.api_type] || <Api />,
             primary_text: "API Type",
-            secondary_text: item.api_type
+            secondary_text: formatStringWithSpaces(item.api_type)
         },
         {
-            icon: <HealthAndSafety />,
-            primary_text: "Status",
-            secondary_text: item.health_status
+            icon: apiNameIcons[item.api_name as ApiName] || <Category />,
+            primary_text: "API Name",
+            secondary_text: formatStringWithSpaces(item.api_name)
         },
         {
             icon: <PowerSettingsNew />,
@@ -57,16 +61,31 @@ const ApiCardView: React.FC<ApiComponentProps> = ({
                         checked={item.is_active}
                         onChange={handleToggleActive}
                         color="primary"
+                        disabled
                     />
                 </ListItemSecondaryAction>
             )
+        },
+        {
+            icon: <Settings />,
+            primary_text: "API Config",
+            secondary_text: item.api_config ? (
+                <ListItemButton onClick={() => item._id && selectCardItem && selectCardItem('APIConfig', item._id, item)}>
+                    <ListItemText primary={item.api_config.name} />
+                </ListItemButton>
+            ) : "N/A"
+        },
+        {
+            icon: <QueryBuilder />,
+            primary_text: "Created At",
+            secondary_text: new Date(item.createdAt || '').toLocaleString()
         }
     ];
 
     // Add Default Model section only if item.api_type is ModelApiType
     if (isModelApiType(item.api_type)) {
         listItems.push({
-            icon: <Category />,
+            icon: <AIIcon />,
             primary_text: "Default Model",
             secondary_text: item.default_model ? (
                 <ListItemButton onClick={() => item.default_model?._id && selectCardItem && selectCardItem('Model', item.default_model._id, item.default_model)}>

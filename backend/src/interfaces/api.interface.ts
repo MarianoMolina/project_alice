@@ -1,4 +1,6 @@
 import { Types, Model, Document } from 'mongoose';
+import { IUserDocument } from './user.interface';
+import { IAPIConfigDocument } from './apiConfig.interface';
 
 export enum ApiType {
   LLM_MODEL = 'llm_api',
@@ -8,59 +10,46 @@ export enum ApiType {
   EXA_SEARCH = 'exa_search',
   ARXIV_SEARCH = 'arxiv_search',
   GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph',
+  WOLFRAM_ALPHA = 'wolfram_alpha',
   IMG_VISION = 'img_vision',
   IMG_GENERATION = 'img_generation',
   SPEECH_TO_TEXT = 'speech_to_text',
   TEXT_TO_SPEECH = 'text_to_speech',
   EMBEDDINGS = 'embeddings',
+  REQUESTS = 'requests',
 }
 
 export enum ApiName {
-  OPENAI = 'openai_llm',
-  OPENAI_VISION = 'openai_vision',
-  OPENAI_IMG_GENERATION = 'openai_img_gen',
-  OPENAI_EMBEDDINGS = 'openai_embeddings',
-  OPENAI_TTS = 'openai_tts',
-  OPENAI_STT = 'openai_stt',
-  OPENAI_ASTT = 'openai_adv_stt',
+  OPENAI = 'openai',
   AZURE = 'azure',
-  GEMINI = 'gemini_llm',
-  GEMINI_VISION = 'gemini_vision',
-  MISTRAL = 'mistral_llm',
-  MISTRAL_VISION = 'mistral_vision',
-  MISTRAL_EMBEDDINGS = 'mistral_embeddings',
-  GEMINI_STT = 'gemini_stt',
-  GEMINI_EMBEDDINGS = 'gemini_embeddings',
-  GEMINI_IMG_GEN = 'gemini_img_gen',
-  COHERE = 'cohere_llm',
-  GROQ = 'groq_llm',
-  GROQ_VISION = 'groq_vision',
-  GROQ_TTS = 'groq_tts',
-  META = 'meta_llm',
-  META_VISION = 'meta_vision',
-  ANTHROPIC = 'anthropic_llm',
-  ANTHROPIC_VISION = 'anthropic_vision',
-  LM_STUDIO = 'lm-studio_llm',
-  LM_STUDIO_VISION = 'lm-studio_vision',
+  GEMINI = 'gemini',
+  MISTRAL = 'mistral',
+  COHERE = 'cohere',
+  GROQ = 'groq',
+  LLAMA = 'llama',
+  ANTHROPIC = 'anthropic',
+  LM_STUDIO = 'lm_studio',
   CUSTOM = 'Custom',
+  BARK = 'bark',
+  PIXART_IMG_GEN = 'pixart',
   GOOGLE_SEARCH = 'google_search',
-  REDDIT_SEARCH = 'reddit_search',
-  WIKIPEDIA_SEARCH = 'wikipedia_search',
-  EXA_SEARCH = 'exa_search',
-  ARXIV_SEARCH = 'arxiv_search',
-    GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph'
+  REDDIT_SEARCH = 'reddit',
+  WIKIPEDIA_SEARCH = 'wikipedia',
+  EXA_SEARCH = 'exa',
+  ARXIV_SEARCH = 'arxiv',
+  GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph',
+  WOLFRAM_ALPHA = 'wolfram_alpha',
 }
 
 export interface IAPI {
   api_type: ApiType;
   name: string;
-  api_name: ApiName; 
+  api_name: ApiName;
   is_active: boolean;
-  health_status: 'healthy' | 'unhealthy' | 'unknown';
-  default_model?: Types.ObjectId; 
-  api_config?: Map<string, any>;
-  created_by?: Types.ObjectId;
-  updated_by?: Types.ObjectId;
+  default_model?: Types.ObjectId;
+  api_config?: Types.ObjectId | IAPIConfigDocument;
+  created_by: Types.ObjectId | IUserDocument;
+  updated_by: Types.ObjectId | IUserDocument;
 }
 
 export interface IAPIMethods {

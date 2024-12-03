@@ -140,7 +140,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         }
     };
     const isTaskInChat = (taskId: string): boolean => {
-        return currentChat?.functions?.some(task => task._id === taskId) || false;
+        return currentChat?.agent_tools?.some(task => task._id === taskId) || false;
     };
 
     const addTaskToChat = async (taskId: string) => {
@@ -150,9 +150,9 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             if (!task) return Logger.error('Task not found', taskId);
             if (isTaskInChat(taskId)) return Logger.warn('Task already in chat');
             const updatedFunctions = [
-                ...(currentChat.functions || []), task
+                ...(currentChat.agent_tools || []), task
             ];
-            await updateItem("chats", currentChatId, { functions: updatedFunctions });
+            await updateItem("chats", currentChatId, { agent_tools: updatedFunctions });
             await handleSelectChat(currentChatId);
         } catch (error) {
             Logger.error('Error adding tasks to chat:', error);

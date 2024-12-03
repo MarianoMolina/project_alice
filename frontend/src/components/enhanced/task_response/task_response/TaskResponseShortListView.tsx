@@ -2,7 +2,7 @@ import React from 'react';
 import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
 import { TaskResponse, TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
 
-const TaskResponseShortList: React.FC<TaskResponseComponentProps> = ({
+const TaskResponseShortListView: React.FC<TaskResponseComponentProps> = ({
     items,
     item,
     onInteraction,
@@ -23,4 +23,4 @@ const TaskResponseShortList: React.FC<TaskResponseComponentProps> = ({
     );
 };
 
-export default TaskResponseShortList;
+export default TaskResponseShortListView;

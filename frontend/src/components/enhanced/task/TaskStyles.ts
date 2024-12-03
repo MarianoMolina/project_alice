@@ -42,7 +42,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 
   taskCard: {
-    height: '100%',
     display: 'flex',
     flexDirection: 'column',
   },
@@ -82,7 +81,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   exitCodeChip: {
     margin: theme.spacing(0.5),
-    backgroundColor: theme.palette.grey[200],
   },
   dialogTitleContainer: {
     position: 'relative',
@@ -108,11 +106,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   noResultsText: {
     textAlign: 'center',
     padding: theme.spacing(2),
-  },
-  endCodeRoutingContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    flexWrap: 'wrap',
   },
   titleText: {
     marginTop: `${theme.spacing(2)} !important`,

@@ -1,0 +1,67 @@
+import React from 'react';
+import { Box, Dialog, DialogTitle } from '@mui/material';
+import { CollectionElement } from '../../../../types/CollectionTypes';
+import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
+import { useApi } from '../../../../contexts/ApiContext';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import Logger from '../../../../utils/Logger';
+
+const EnhancedSelectDialog = () => {
+    const { fetchItem } = useApi();
+    const {
+        isSelectDialogOpen,
+        selectedComponentType,
+        selectedEnhancedView,
+        selectedItems,
+        onSelectCallback,
+        selectDialogTitle,
+        selectDialogFilters,
+        selectDialogMultiple,
+        closeSelectDialog
+    } = useCardDialog();
+
+    if (!selectedComponentType || !selectedEnhancedView || !selectDialogTitle || !onSelectCallback) {
+        return null;
+    }
+
+    const handleSelect = async (selectedIds: string[]) => {
+        if (selectedIds.length > 0) {
+            try {
+                Logger.debug('EnhancedSelectDialog - handleSelect', { selectedIds });
+                const selectedItem = await fetchItem(selectedComponentType, selectedIds[0]) as CollectionElement;
+                await onSelectCallback(selectedItem);
+                closeSelectDialog();
+            } catch (error) {
+                Logger.error('EnhancedSelectDialog - Error selecting item:', error);
+            }
+        }
+    };
+
+    return (
+        <Dialog
+            open={isSelectDialogOpen}
+            onClose={closeSelectDialog}
+            maxWidth="md"
+            fullWidth
+        >
+            <DialogTitle>{selectDialogTitle}</DialogTitle>
+            <Box className="p-4">
+                <EnhancedSelect
+                    componentType={selectedComponentType}
+                    EnhancedView={selectedEnhancedView}
+                    selectedItems={selectedItems}
+                    onSelect={handleSelect}
+                    isInteractable={true}
+                    multiple={selectDialogMultiple}
+                    label={selectDialogTitle}
+                    activeAccordion={null}
+                    onAccordionToggle={() => {}}
+                    accordionEntityName={selectedComponentType}
+                    filters={selectDialogFilters}
+                />
+            </Box>
+        </Dialog>
+    );
+};
+
+export default EnhancedSelectDialog;

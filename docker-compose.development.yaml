@@ -15,7 +15,7 @@ services:
       volume-init:
         condition: service_completed_successfully
     volumes:
-      - ./frontend:/app:delegated
+      - ./frontend:/app:consistent
       - /app/node_modules
       - /app/dist
     environment:
@@ -64,6 +64,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - logs:/app/logs
       - shared-uploads:/app/shared-uploads:ro
+      - model_cache:/app/model_cache
     depends_on:
       volume-init:
         condition: service_completed_successfully
@@ -71,9 +72,12 @@ services:
         condition: service_completed_successfully
       bash_image:
         condition: service_completed_successfully
+      redis:
+        condition: service_healthy
     environment:
       - PYTHONPATH=/app
       - HOST=host.docker.internal
+      - REDIS_URL=redis://redis:6379/0
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
@@ -83,26 +87,35 @@ services:
       retries: 5
       start_period: 5s
 
+  redis:
+    image: redis:6.0-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   volume-init:
-    image: busybox
-    attach: false
-    volumes:
-      - ${COMPOSE_PROJECT_DIR}/logs:/logs
-      - ${COMPOSE_PROJECT_DIR}/shared-uploads:/shared-uploads
-    command: |
-      sh -c "
-        echo 'Starting volume initialization' &&
-        ls -la / &&
-        echo 'Creating directories' &&
-        mkdir -p /logs /shared-uploads &&
-        echo 'Setting permissions' &&
-        chmod -R 755 /logs &&
-        chown -R 1000:1000 /logs &&
-        chmod -R 755 /shared-uploads &&
-        chown -R 1000:1000 /shared-uploads &&
-        echo 'Finished volume initialization' &&
-        ls -la /logs /shared-uploads
-      "
+      image: busybox
+      attach: false
+      volumes:
+        - ${COMPOSE_PROJECT_DIR}/logs:/logs
+        - ${COMPOSE_PROJECT_DIR}/shared-uploads:/shared-uploads
+        - ${COMPOSE_PROJECT_DIR}/model_cache:/model_cache
+      command: |
+        sh -c "
+          echo 'Starting volume initialization' &&
+          ls -la / &&
+          echo 'Creating directories' &&
+          mkdir -p /logs /shared-uploads /model_cache &&
+          echo 'Setting permissions' &&
+          chmod -R 755 /logs /shared-uploads /model_cache &&
+          chown -R 1000:1000 /logs /shared-uploads /model_cache &&
+          echo 'Finished volume initialization' &&
+          ls -la /logs /shared-uploads /model_cache
+        "
 
   mongo:
     image: mongo:latest
@@ -115,14 +128,14 @@ services:
   python_image:
     build:
       context: .
-      dockerfile: Dockerfile.python
+      dockerfile: workflow/Dockerfile.python
     image: mypython:latest
     command: ["bash"]
 
   bash_image:
     build:
       context: .
-      dockerfile: Dockerfile.bash
+      dockerfile: workflow/Dockerfile.bash
     image: mybash:latest
     command: ["bash"]
 
@@ -140,3 +153,9 @@ volumes:
       o: bind
       device: ${COMPOSE_PROJECT_DIR}/shared-uploads
   mongo_data:
+  model_cache:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${COMPOSE_PROJECT_DIR}/model_cache
