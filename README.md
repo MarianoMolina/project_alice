@@ -207,7 +207,7 @@ export enum ApiName {
 }
 ``` 
 
-## For more details, check the [ReadMe Index](/shared/knowledgebase/index.md)
+## For more details, check the [ReadMe Index](/frontend/public/shared/knowledgebase/index.md)
 
 ## Contributing
 

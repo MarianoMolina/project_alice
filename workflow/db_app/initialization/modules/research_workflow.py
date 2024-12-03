@@ -153,7 +153,7 @@ research_workflow_module = ResearchWorkflowModule(
                 },
                 "max_consecutive_auto_reply": 1,
                 "has_tools": 0,
-                "has_code_exec": 0,
+                "has_code_exec": 0
             },
         ],
         "tasks": [
@@ -180,6 +180,8 @@ research_workflow_module = ResearchWorkflowModule(
                         1: ('llm_generation', True),
                     }, 
                 },
+                "max_attempts": 2,
+                "recursive": True,
             },
             {
                 "key": "data_retrieval_task",
@@ -218,6 +220,8 @@ research_workflow_module = ResearchWorkflowModule(
                         1: ('tool_call_execution', True),
                     }, 
                 },
+                "max_attempts": 2,
+                "recursive": True,
             },
             {
                 "key": "research_check_task",
@@ -237,7 +241,9 @@ research_workflow_module = ResearchWorkflowModule(
                 },
                 "templates": {
                     "task_template": "research_check_task_prompt"
-                }
+                },
+                "max_attempts": 2,
+                "recursive": True,
             },
             {
                 "key": "research_summary_task",

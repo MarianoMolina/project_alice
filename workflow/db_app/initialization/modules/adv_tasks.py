@@ -210,7 +210,7 @@ adv_tasks_module = AdvTasksModule(
             },
             {
                 "key": "Groq_agent",
-                "name": "Groq Agent",
+                "name": "Alice (Groq)",
                 "system_message": "default_system_message",
                 "models": {
                     "stt": "groq_stt_whisper",

@@ -1,7 +1,7 @@
-import { LMStudioClient, LLMDynamicHandle, OngoingPrediction, LLMChatHistoryMessage, LLMChatResponseOpts, PredictionResult } from "@lmstudio/sdk";
+import { LMStudioClient, LLMDynamicHandle, OngoingPrediction, LLMChatResponseOpts, PredictionResult, LLMChatHistoryMessage } from "@lmstudio/sdk";
 import Model from '../models/model.model';
-import { callLMStudioMethod, ChatCompletionResponse, CompletionParams, CompletionResponse, getToolSystemMessages, mapStopReason, ToolCall } from './lmStudio.utils';
-import { runNetworkTests, testWebSocket } from './lmStudioNetworkTests';
+import { callLMStudioMethod, ChatCompletionResponse, CompletionParams, CompletionResponse, convertToLLMMessage, getToolSystemMessages, mapStopReason, ToolCall } from './lmStudio.utils';
+import { runNetworkTests } from './lmStudioNetworkTests';
 import { ChatCompletionParams } from "./lmStudio.utils";
 import { v4 as uuidv4 } from 'uuid';
 import Logger from "./logger";
@@ -361,18 +361,25 @@ export class LMStudioManager {
 
     async generateChatCompletion(params: ChatCompletionParams): Promise<ChatCompletionResponse | ReadableStream> {
         const model = await this.getOrLoadModel(params.model);
-        const messages: Array<LLMChatHistoryMessage> = params.messages;
-        const toolSystemMessages = getToolSystemMessages(params.tools ?? [], params.tool_choice ?? 'auto');
-        const updatedMessages = [...toolSystemMessages, ...messages];
+
+        // Convert incoming messages to LLM Studio format and ensure they match LLMChatHistoryMessage type
+        const processedMessages = params.messages.map(msg => convertToLLMMessage(msg));
+
+        const toolSystemMessages = getToolSystemMessages(params.tools ?? [], params.tool_choice ?? 'auto')
+            .map(msg => convertToLLMMessage(msg));
+
+        // Combine messages ensuring they're all LLMChatHistoryMessage type
+        const updatedMessages: LLMChatHistoryMessage[] = [...toolSystemMessages, ...processedMessages];
+
         const opts: LLMChatResponseOpts = {
             maxPredictedTokens: params.max_tokens ?? undefined,
             temperature: params.temperature ?? undefined,
             stopStrings: params.stop ? params.stop as string[] : undefined,
         };
-        Logger.info('Model loaded:', params.model);
 
         const prediction: OngoingPrediction = model.respond(updatedMessages, opts);
 
+        // Rest of the method remains the same...
         if (params.stream) {
             return new ReadableStream({
                 async start(controller) {
@@ -401,44 +408,41 @@ export class LMStudioManager {
                     }
                 }
             });
-        } else {
-            let result: PredictionResult;
-            if ('result' in prediction && typeof prediction.result === 'function') {
-                result = await prediction.result();
-            } else if (prediction instanceof Promise) {
-                result = await prediction;
-            } else {
-                throw new Error('Unexpected prediction type');
-            }
-
-            const content = result.content.trim();
-            const toolCalls = this.retrieveToolCalls(content);
-
-            const response: ChatCompletionResponse = {
-                id: `chatcmpl-${Date.now()}`,
-                object: "chat.completion",
-                created: Math.floor(Date.now() / 1000),
-                model: params.model,
-                choices: [{
-                    index: 0,
-                    message: {
-                        role: "assistant",
-                        content: toolCalls ? null : content,
-                        tool_calls: toolCalls || undefined,
-                    },
-                    finish_reason: mapStopReason(result.stats.stopReason),
-                }],
-                usage: {
-                    prompt_tokens: result.stats.promptTokensCount || 0,
-                    completion_tokens: result.stats.predictedTokensCount || 0,
-                    total_tokens: result.stats.totalTokensCount || 0,
-                },
-            };
-
-            return response;
         }
-    }
 
+        let result: PredictionResult;
+        if ('result' in prediction && typeof prediction.result === 'function') {
+            result = await prediction.result();
+        } else if (prediction instanceof Promise) {
+            result = await prediction;
+        } else {
+            throw new Error('Unexpected prediction type');
+        }
+
+        const content = result.content.trim();
+        const toolCalls = this.retrieveToolCalls(content);
+
+        return {
+            id: `chatcmpl-${Date.now()}`,
+            object: "chat.completion",
+            created: Math.floor(Date.now() / 1000),
+            model: params.model,
+            choices: [{
+                index: 0,
+                message: {
+                    role: "assistant",
+                    content: toolCalls ? null : content,
+                    tool_calls: toolCalls || undefined,
+                },
+                finish_reason: mapStopReason(result.stats.stopReason),
+            }],
+            usage: {
+                prompt_tokens: result.stats.promptTokensCount || 0,
+                completion_tokens: result.stats.predictedTokensCount || 0,
+                total_tokens: result.stats.totalTokensCount || 0,
+            },
+        };
+    }
     async listAvailableModels() {
         const dbModels = await Model.find({ api_name: 'lm_studio', api_type: 'llm_api' });
         const downloadedModels = await this.client.system.listDownloadedModels();

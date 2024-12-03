@@ -27,6 +27,16 @@ router.post('/proxy/chat/completions', async (req, res) => {
 });
 
 
+router.post('/v1/embeddings', async (req, res) => {
+    try {
+        const response = await axios.post('http://host.docker.internal:1234/v1/embeddings', req.body);
+        res.json(response.data);
+    } catch (error) {
+        Logger.error('Error with embeddings:', error);
+        res.status(500).json({ error: 'Failed to generate embeddings' });
+    }
+});
+
 router.post('/chat/completions', async (req, res) => {
     const params = req.body as ChatCompletionParams;
     try {

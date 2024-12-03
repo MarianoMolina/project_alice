@@ -12,3 +12,4 @@ venv
 .cache
 .vscode
 __pycache__
+run_script.log

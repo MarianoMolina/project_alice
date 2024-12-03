@@ -19,11 +19,6 @@ COPY . .
 # Set the environment variable for development mode
 ENV NODE_ENV=development
 
-# # Ensure that the node_modules directory is owned by the node user inside the container.
-# USER root
-# RUN chown -R 1000:1000 /app/node_modules
-# USER node
-
 EXPOSE ${FRONTEND_PORT_DOCKER}
 # Start the development server
 CMD ["npm", "start"]

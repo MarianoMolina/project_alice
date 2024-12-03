@@ -272,7 +272,7 @@ HTML Content:
 {sample}
 
 Instructions:
-Analyze the given HTML content and generate a list of CSS selectors that would extract the main content, including titles, paragraphs, and any other relevant information. Avoid selecting navigation menus, footers, or sidebars. Provide your response as a JSON object with a single key 'selectors' whose value is an array of selector strings.
+Analyze the given HTML content and generate a list of CSS selectors that would extract the main content, including titles, paragraphs, and any other relevant debugrmation. Avoid selecting navigation menus, footers, or sidebars. Provide your response as a JSON object with a single key 'selectors' whose value is an array of selector strings.
 
 Example response format:
 {{
@@ -284,25 +284,25 @@ Example response format:
 }}
 """
             message: MessageDict = MessageDict(role=RoleTypes.USER, content=prompt, generated_by=MessageGenerators.TOOL, type=ContentType.TEXT)
-            LOGGER.info(f"Generating selectors for sample {idx}/{len(html_samples)}.")           
+            LOGGER.debug(f"Generating selectors for sample {idx}/{len(html_samples)}.")           
             try:
                 new_message = await self.agent.generate_llm_response(api_manager, [message])
                 instructions = new_message.content if new_message else None
                 if new_message and new_message.creation_metadata:
                     creation_metadata[f"sample_{idx}"] = new_message.creation_metadata
 
-                LOGGER.info(f"LLM instructions: {instructions}")
+                LOGGER.debug(f"LLM instructions: {instructions}")
                 json_str = extract_json(instructions)
                 # Parse the JSON output using Pydantic
                 selector_model = SelectorModel.model_validate(json.loads(json_str))
                 selectors.extend(selector_model.selectors)
-                LOGGER.info(f"Selectors extracted: {selector_model.selectors}")
+                LOGGER.debug(f"Selectors extracted: {selector_model.selectors}")
             except Exception as e:
                 LOGGER.warning(f"Error processing sample {idx}: {e}")
 
         # Remove duplicates and maintain order
         unique_selectors = list(dict.fromkeys(selectors))
-        LOGGER.info(f"Unique selectors collected: {unique_selectors}")
+        LOGGER.debug(f"Unique selectors collected: {unique_selectors}")
         return unique_selectors if unique_selectors else None, creation_metadata if creation_metadata else None
     
     def create_message_list(self, **kwargs) -> List[MessageDict]:
@@ -316,7 +316,7 @@ Example response format:
                 raise ValueError(f"Template {self.task_name} is not a valid prompt configuration: {e}")
         sanitized_inputs = self.update_inputs(**kwargs)
         input_string = template.format_prompt(**sanitized_inputs)
-        LOGGER.info(f"Input string for task {self.task_name}: {input_string}")
+        LOGGER.debug(f"Input string for task {self.task_name}: {input_string}")
         msg_list = [MessageDict(content=input_string, role=RoleTypes.USER, generated_by=MessageGenerators.USER, step=self.task_name)]
         
         # Add messages from history

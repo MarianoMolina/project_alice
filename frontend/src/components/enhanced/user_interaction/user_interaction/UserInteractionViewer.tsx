@@ -21,7 +21,6 @@ import { useDialog } from '../../../../contexts/DialogCustomContext';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import { useApi } from '../../../../contexts/ApiContext';
 import Logger from '../../../../utils/Logger';
-import theme from '../../../../Theme';
 
 const UserInteractionViewer: React.FC<UserInteractionComponentProps> = ({ item }) => {
   const [interaction, setInteraction] = useState(item);

@@ -35,7 +35,7 @@ class QueueManager(BaseModel):
 
     async def initialize(self):
         self.redis_client = aioredis.from_url(self.redis_url)
-        LOGGER.info(f"Connected to Redis at {self.redis_url}")
+        LOGGER.debug(f"Connected to Redis at {self.redis_url}")
 
     async def enqueue_request(self, endpoint: str, data: Dict[str, Any]) -> str:
         task_id = str(uuid4())
@@ -45,7 +45,7 @@ class QueueManager(BaseModel):
             data=data
         )
         await self.redis_client.lpush("request_queue", message.json())
-        LOGGER.info(f"Enqueued task {task_id} for endpoint {endpoint}")
+        LOGGER.debug(f"Enqueued task {task_id} for endpoint {endpoint}")
         return task_id
 
     async def process_requests(self):
@@ -85,7 +85,7 @@ class QueueManager(BaseModel):
                     self.message_buffer[task_id] = []
                 self.message_buffer[task_id].append(result)
                 
-            LOGGER.info(f"Task {task_id} completed successfully")
+            LOGGER.debug(f"Task {task_id} completed successfully")
         except Exception as e:
             import traceback
             error_result = {
@@ -114,17 +114,17 @@ class QueueManager(BaseModel):
         asyncio.create_task(self.listen_to_channel(websocket, pubsub, task_id))
 
     async def listen_to_channel(self, websocket: WebSocket, pubsub: PubSub, task_id: str):
-        LOGGER.info(f"Starting to listen to channel for task {task_id}")
+        LOGGER.debug(f"Starting to listen to channel for task {task_id}")
         try:
             async for message in pubsub.listen():
-                LOGGER.info(f"Received message from Redis for task {task_id}: {message}")
+                LOGGER.debug(f"Received message from Redis for task {task_id}: {message}")
                 if message['type'] == 'message':
                     data = json.loads(message['data'])
-                    LOGGER.info(f"About to send data to WebSocket for task {task_id}: {data}")
+                    LOGGER.debug(f"About to send data to WebSocket for task {task_id}: {data}")
                     await websocket.send_json(data)
-                    LOGGER.info(f"Successfully sent update to WebSocket for task {task_id}")
+                    LOGGER.debug(f"Successfully sent update to WebSocket for task {task_id}")
                     if data.get("status") in ["completed", "failed"]:
-                        LOGGER.info(f"Task {task_id} finished with status {data.get('status')}")
+                        LOGGER.debug(f"Task {task_id} finished with status {data.get('status')}")
                         break
         except Exception as e:
             LOGGER.error(f"Error in listen_to_channel for task {task_id}: {e}\n{get_traceback()}")
@@ -137,7 +137,7 @@ class QueueManager(BaseModel):
     async def cleanup(self):
         if self.redis_client:
             await self.redis_client.close()
-            LOGGER.info("Redis connection closed")
+            LOGGER.debug("Redis connection closed")
 
     # Implementations of the methods
     async def execute_task(self, data: Dict[str, Any]) -> Dict[str, Any]:

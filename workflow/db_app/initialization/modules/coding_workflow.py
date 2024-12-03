@@ -180,6 +180,8 @@ coding_workflow_module = CodingWorkflowModule(
                         1: ('llm_generation', True),
                     }, 
                 },
+                "max_attempts": 2,
+                "recursive": True,
             },
             {
                 "key": "generate_code",
@@ -200,6 +202,8 @@ coding_workflow_module = CodingWorkflowModule(
                 "templates": {
                     "task_template": "code_generation_task_prompt"
                 },
+                "max_attempts": 2,
+                "recursive": True,
             },
             {
                 "key": "generate_unit_tests",
@@ -220,6 +224,8 @@ coding_workflow_module = CodingWorkflowModule(
                 "templates": {
                     "task_template": "code_generation_task_prompt"
                 },
+                "max_attempts": 2,
+                "recursive": True,
                 "exit_codes": {0: "Success", 1: "Generation failed.", 2: "No code blocks in response"}
             },
             {
@@ -249,7 +255,9 @@ coding_workflow_module = CodingWorkflowModule(
                 "exit_codes": {0: "Test Passed", 1: "Response generation failed", 2: "Test Failed", 3: "Test Code Error"},
                 "templates": {
                     "task_template": "unit_test_check_prompt"
-                }
+                },
+                "max_attempts": 2,
+                "recursive": True,
             },
             {
                 "key": "coding_workflow",
@@ -287,7 +295,7 @@ coding_workflow_module = CodingWorkflowModule(
                     }
                 },
                 "max_attempts": 2,
-                "recursive": False,
+                "recursive": True,
                 "input_variables": {
                     "type": "object",
                     "properties": {
@@ -336,7 +344,7 @@ coding_workflow_module = CodingWorkflowModule(
                     }
                 },
                 "max_attempts": 2,
-                "recursive": False,
+                "recursive": True,
                 "input_variables": {
                     "type": "object",
                     "properties": {

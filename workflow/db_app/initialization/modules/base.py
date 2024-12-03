@@ -109,6 +109,16 @@ base_module = BaseModule(
                 "lm_studio_preset": "Llama 3 V3"
             },
             {
+              "key": "nomic-embed-text-v1",
+              "short_name": "Nomic Embed Text",
+                "model_name": "nomic-ai/nomic-embed-text-v1",
+                "model_format": "OpenChat",
+                "ctx_size": 8192,
+                "model_type": "embeddings",
+                "api_name": "lm_studio",
+                "lm_studio_preset": "Llama 3 V3"
+            },
+            {
                 "key": "Whisper_1",
                 "short_name": "Whisper",
                 "model_name": "whisper-1", # need model name here
@@ -643,6 +653,15 @@ base_module = BaseModule(
                 "default_model": "Llama3_8B_Hermes",
             },
             {
+                "key": "local_lm_studio_embeddings",
+                "api_type": "embeddings",
+                "api_name": "lm_studio",
+                "name": "LM Studio API",
+                "api_config": "local_lm_api_config",
+                "is_active": True,
+                "default_model": "nomic-embed-text-v1",
+            },
+            {
                 "key": "img_vision",
                 "api_type": "img_vision",
                 "api_name": "openai",
@@ -686,15 +705,6 @@ base_module = BaseModule(
                 "api_config": "openai_api_config", # Since whisper is open source, do we need a key?
                 "is_active": True,
                 "default_model": "Whisper_1"
-            },
-            {
-                "key": "speech_to_text_openai_advanced",
-                "api_type": "speech_to_text", # TODO: adv speech to text should be a separate type?
-                "api_name": "openai",
-                "name": "OpenAI Advanced Speech to Text",
-                "api_config": "openai_api_config",
-                "is_active": True, 
-                "default_model": "Whisper_1"          
             },
             {
                 "key": "text_to_speech",

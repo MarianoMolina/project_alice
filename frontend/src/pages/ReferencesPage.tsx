@@ -91,7 +91,7 @@ const ReferencesPage: React.FC = () => {
             name: `Create ${activeTab}`,
             icon: Add,
             action: handleCreateNew,
-            disabled: activeTab === 'TaskResponse'
+            disabled: activeTab === 'TaskResponse' || activeTab === 'EmbeddingChunk' || activeTab === 'UserInteraction',
         }
     ];
 
