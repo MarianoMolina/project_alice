@@ -1,7 +1,7 @@
 # Alice: Advanced Language Intelligence and Cognitive Engine
 *Version 0.3 (alpha)*
 
-![Alice LOGO](./frontend/public/logo_alice.ico)
+![Alice LOGO](/frontend/public/logo_alice.ico)
 
 Alice is an agentic workflow framework that integrates task execution and intelligent chat capabilities. It provides a flexible environment for creating, managing, and deploying AI agents for various purposes, leveraging a microservices architecture with MongoDB for data persistence.
 
@@ -35,7 +35,7 @@ The project consists of three main components:
 2. Workflow (Python - Pydantic) -> Handles (most) of the logic, interacts with external APIs, consumes the Database through the Backend, and reads from the file system. Main endpoints are task execution and chat response generation. 
 3. Frontend (React - TS) -> UI that consumes/interacts with the DB and file system through the Backend and calls Workflow's endpoints to trigger executions. 
 
-![Container Flow](./shared/img/diagrams/Container_flow.png)
+![Container Flow](/frontend/public/shared/img/diagrams/Container_flow.png)
 
 ## The Goal
 1. Provide a tool to create, test and deploy agentic solutions
@@ -72,7 +72,7 @@ This will build and launch the containers. Once ready, the frontend will be acce
 
 ## Framework
 
-![Logic Flow](./shared/img/diagrams/basic_logic_flow.png)
+![Logic Flow](/frontend/public/shared/img/diagrams/basic_logic_flow.png)
 
 The framework is based around 4 main components:
 - APIs and their engine
@@ -92,14 +92,14 @@ These components share information in one of 6 main ways, all of which have a st
 
 ### 1. Task Execution
 - Create and execute custom tasks using predefined classes or by creating new ones in the Workflow module
-![Execute Task](./shared/img/frontend_screenshots/exec_task_3.jpg "Execute tasks to test them extensively")
+![Execute Task](/frontend/public/shared/img/frontend_screenshots/exec_task_3.jpg "Execute tasks to test them extensively")
 - Define new parameters, prompts/templates, and agents for task deployment
-![Database](./shared/img/frontend_screenshots/database_1.PNG "View, create and edit all the elements you'll need")
+![Database](/frontend/public/shared/img/frontend_screenshots/database_1.PNG "View, create and edit all the elements you'll need")
 - Execute tasks with custom parameters, and visualize your prompts with the inputs parsed
-![Execute Task](./shared/img/frontend_screenshots/exec_task_4.jpg "Execute tasks to test them extensively")
+![Execute Task](/frontend/public/shared/img/frontend_screenshots/exec_task_4.jpg "Execute tasks to test them extensively")
 - Run tasks directly from the frontend, or programatically with the workflow container's API
 - Visualize the task logic in the flow viewer
-![Visualize Task](./shared/img/frontend_screenshots/task_flow.jpg "Execute tasks to test them extensively")
+![Visualize Task](/frontend/public/shared/img/frontend_screenshots/task_flow.jpg "Execute tasks to test them extensively")
 - Supported task types include:
   - Workflow -> Combine other tasks
   - API tasks: Reddit, Wikipedia, Google, Exa, and Arxiv search -> Retrieve information
@@ -107,16 +107,16 @@ These components share information in one of 6 main ways, all of which have a st
     - Prompt Agent Tasks: Including the base PromptAgentTask, and CheckTask, CodeExecutionLLMTask and CodeGenerationLLMTask
     - Agent Tasks: WebScrapeBeautifulSoupTask, TextToSpeechTask, GenerateImageTask, RetrievalTask and EmbeddingTask
 - View the task results, with the output organized by node, visually explaining the process:
-![Visualize Task Results](./shared/img/frontend_screenshots/task_response_0.jpg "Execute tasks to test them extensively")
-![Visualize Task Results](./shared/img/frontend_screenshots/task_response_1.jpg "Execute tasks to test them extensively")
+![Visualize Task Results](/frontend/public/shared/img/frontend_screenshots/task_response_0.jpg "Execute tasks to test them extensively")
+![Visualize Task Results](/frontend/public/shared/img/frontend_screenshots/task_response_1.jpg "Execute tasks to test them extensively")
 
 ### 2. Intelligent Chat
 - Create and manage chat conversations with AI agents
-![Chat](./shared/img/frontend_screenshots/chat_2.PNG "Chat with your own Alice AI Assistant")
+![Chat](/frontend/public/shared/img/frontend_screenshots/chat_2.PNG "Chat with your own Alice AI Assistant")
 - Add references from other conversations or task executions to enrich the chat context
 - Give your agents the system prompt instructions to use analys and document blocks:
-![Chat](./shared/img/frontend_screenshots/chat_3.jpg "Chat with your own Alice AI Assistant")
-![Chat](./shared/img/frontend_screenshots/chat_4.jpg "Chat with your own Alice AI Assistant")
+![Chat](/frontend/public/shared/img/frontend_screenshots/chat_3.jpg "Chat with your own Alice AI Assistant")
+![Chat](/frontend/public/shared/img/frontend_screenshots/chat_4.jpg "Chat with your own Alice AI Assistant")
 - Integrate new tasks as tools for the active agent during chat
 - Support for various message types (text, image, video, audio, file) -> automatic transcript is created so the agent can interpret
 - Deploy these agents wherever you want, since the workflow API offers an endpoint to create chat completions
@@ -128,7 +128,7 @@ These components share information in one of 6 main ways, all of which have a st
 
 ### 4. User Management
 - User authentication, authorization and configuration
-![User APIs](./shared/img/frontend_screenshots/user.PNG "View your user details and API configs - also you can re-set your database")
+![User APIs](/frontend/public/shared/img/frontend_screenshots/user.PNG "View your user details and API configs - also you can re-set your database")
 - Role-based access control (user and admin roles)
 
 ### 5. Flexible Model Deployment
@@ -148,7 +148,7 @@ In the case of Workflows, these nodes are "inner tasks" instead of specific meth
 
 > Here's an example of both a workflow and a task, and how they pass and use the data produced: [*Note:* These tasks/workflows have been redesigned since then, but the diagram is still relevant]
 
-![Task logic](./shared/img/diagrams/Task_logic.png "Task logic flow")
+![Task logic](/frontend/public/shared/img/diagrams/Task_logic.png "Task logic flow")
 
 ### Types of Tasks
 - `API tasks`: Tasks that use non-model APIs. Examples include the Google, Wikipidia, Arxiv, Exa and Reddit search tasks, and Google's Knowledge graph. Normally have a single 'default' node. 
@@ -165,7 +165,7 @@ In the case of Workflows, these nodes are "inner tasks" instead of specific meth
 - `Workflow`: The simplest and most complex task. Simple because all it does is run other tasks. Complex because the options are endless. Main difference is they use the node_end_code_routing to map the logic path between the inner tasks available, starting from the start_node. 
 
 ### Available APIs
-![APIS](./shared/img/diagrams/APIs.PNG "Available API endpoints")
+![APIS](/frontend/public/shared/img/diagrams/APIs.PNG "Available API endpoints")
 
 ```typescript
 export enum ApiType {
