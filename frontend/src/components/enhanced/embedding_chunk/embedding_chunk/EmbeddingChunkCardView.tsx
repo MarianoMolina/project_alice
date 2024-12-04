@@ -20,7 +20,7 @@ const EmbeddingChunkCardView: React.FC<EmbeddingChunkComponentProps> = ({
         {
             icon: <Toc />,
             primary_text: "Content",
-            secondary_text: <AliceMarkdown children={item.text_content || 'No content available'}/>
+            secondary_text: <AliceMarkdown children={item.text_content || 'No content available'} showCopyButton/>
         },
         {
             icon: <FormatListNumbered />,

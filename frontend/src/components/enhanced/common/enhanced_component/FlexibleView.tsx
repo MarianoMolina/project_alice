@@ -7,9 +7,10 @@ import {
 } from '@mui/material';
 import useStyles from './EnhancedStyles';
 import { CollectionName, CollectionType } from '../../../../types/CollectionTypes';
-import { DownloadEntity } from '../download_entity/DownloadEntity';
-import { DeleteEntity } from '../download_entity/DeleteEntity';
+import { DownloadEntity } from '../entity_menu/DownloadEntity';
+import { DeleteEntity } from '../entity_menu/DeleteEntity';
 import Logger from '../../../../utils/Logger';
+import EntityActionsMenu from '../entity_menu/EntityActionsMenu';
 
 interface GenericFlexibleViewProps <T extends CollectionName> {
     title: string;
@@ -56,8 +57,7 @@ const GenericFlexibleView = <T extends CollectionName>({
                     </Typography>
                     {item && itemType && (
                         <Box className={classes.downloadButton}>
-                            <DownloadEntity item={item} itemType={itemType} />
-                            <DeleteEntity itemType={itemType} handleDelete={deleteItem} />
+                            <EntityActionsMenu item={item} itemType={itemType} onDelete={deleteItem} actions={{edit: false, copy: true, delete: true, download: true}}/>
                         </Box>
                     )}
                 </Box>

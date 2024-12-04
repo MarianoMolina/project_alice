@@ -1,11 +1,11 @@
 import React from 'react';
 import { AppBar, Toolbar, IconButton, Box, Tooltip, Button, Typography } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { SettingsApplications, Storage, Task, Home, School, DocumentScanner, Forum } from '@mui/icons-material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuth } from '../../../contexts/AuthContext';
 import useStyles from './HeaderStyles';
 import Logger from '../../../utils/Logger';
+import { getSectionsByNavGroup, siteSections } from '../../../utils/SectionIcons';
 
 interface NavGroupProps {
   groupIndex: 1 | 2 | 3;
@@ -29,7 +29,7 @@ const Header: React.FC = () => {
   };
 
   const isActive = (path: string): boolean => {
-    if (path === '/shared/knowledgebase/') {
+    if (path.endsWith('/')) {
       return location.pathname.startsWith(path);
     }
     return location.pathname === path;
@@ -41,77 +41,37 @@ const Header: React.FC = () => {
     </Box>
   );
 
+  const renderNavButton = (sectionId: string) => {
+    const section = siteSections[sectionId];
+    return (
+      <Tooltip key={section.id} title={section.title}>
+        <IconButton
+          color="inherit"
+          onClick={() => handleNavigation(section.path)}
+          className={isActive(section.path) ? classes.activeButton : ''}
+        >
+          <section.icon />
+        </IconButton>
+      </Tooltip>
+    );
+  };
+
   return (
     <AppBar position="static" className={classes.header}>
       <Toolbar className={classes.toolbar}>
         <Box className={classes.leftSection}>
-          <Tooltip title="Home">
-            <IconButton
-              edge="start"
-              color="inherit"
-              onClick={() => handleNavigation('/')}
-              className={isActive('/') ? classes.activeButton : ''}
-            >
-              <Home />
-            </IconButton>
-          </Tooltip>
+          {renderNavButton('home')}
         </Box>
         
         {isAuthenticated && (
           <Box className={classes.centerSection}>
-            <NavGroup groupIndex={1}>
-              <Tooltip title="Chat with Alice">
-                <IconButton
-                  color="inherit"
-                  onClick={() => handleNavigation('/chat-alice')}
-                  className={isActive('/chat-alice') ? classes.activeButton : ''}
-                >
-                  <Forum />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Execute tasks">
-                <IconButton
-                  color="inherit"
-                  onClick={() => handleNavigation('/start-task')}
-                  className={isActive('/start-task') ? classes.activeButton : ''}
-                >
-                  <Task />
-                </IconButton>
-              </Tooltip>
-            </NavGroup>
-
-            <NavGroup groupIndex={2}>
-              <Tooltip title="Edit structures">
-                <IconButton
-                  color="inherit"
-                  onClick={() => handleNavigation('/structures')}
-                  className={isActive('/structures') ? classes.activeButton : ''}
-                >
-                  <Storage />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="View references">
-                <IconButton
-                  color="inherit"
-                  onClick={() => handleNavigation('/references')}
-                  className={isActive('/references') ? classes.activeButton : ''}
-                >
-                  <DocumentScanner />
-                </IconButton>
-              </Tooltip>
-            </NavGroup>
-
-            <NavGroup groupIndex={3}>
-              <Tooltip title="Learn">
-                <IconButton
-                  color="inherit"
-                  onClick={() => handleNavigation('/shared/knowledgebase/')}
-                  className={isActive('/shared/knowledgebase/') ? classes.activeButton : ''}
-                >
-                  <School />
-                </IconButton>
-              </Tooltip>
-            </NavGroup>
+            {[1, 2, 3].map((groupIndex) => (
+              <NavGroup key={groupIndex} groupIndex={groupIndex as 1 | 2 | 3}>
+                {getSectionsByNavGroup(groupIndex as 1 | 2 | 3).map(section => 
+                  renderNavButton(section.id)
+                )}
+              </NavGroup>
+            ))}
           </Box>
         )}
 
@@ -121,15 +81,7 @@ const Header: React.FC = () => {
               <Typography variant="body1" className={classes.userEmail}>
                 {user?.email}
               </Typography>
-              <Tooltip title="User Settings">
-                <IconButton
-                  color="inherit"
-                  onClick={() => handleNavigation('/user-settings')}
-                  className={isActive('/user-settings') ? classes.activeButton : ''}
-                >
-                  <SettingsApplications />
-                </IconButton>
-              </Tooltip>
+              {renderNavButton('settings')}
               <Tooltip title="Logout">
                 <IconButton color="inherit" onClick={handleLogout}>
                   <LogoutIcon />

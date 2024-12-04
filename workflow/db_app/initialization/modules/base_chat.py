@@ -77,7 +77,7 @@ base_chat_module = BaseChatModule(
                 "system_message": "default_system_message",
                 "models": {
                     "chat": "Llama3_1_8B",
-                    "embedding": "nomic-embed-text-v1",
+                    "embeddings": "nomic-embed-text-v1",
                     "vision": "hermes_llava_vision",
                 },
                 "max_consecutive_auto_reply": 1,

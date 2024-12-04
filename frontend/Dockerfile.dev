@@ -1,5 +1,5 @@
 # Use the official Node.js image as a base image
-FROM node:16
+FROM node:18-alpine
 
 # Set the working directory
 WORKDIR /app
@@ -7,8 +7,11 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
+RUN echo "fetch-retry-maxtimeout=300000\nfetch-retry-mintimeout=20000\nfetch-retries=5" > .npmrc
+
 # Install dependencies with the --legacy-peer-deps flag
-RUN npm install --legacy-peer-deps
+# Clean install dependencies
+RUN npm ci --legacy-peer-deps
 
 # Add `/app/node_modules/.bin` to $PATH
 ENV PATH /app/node_modules/.bin:$PATH

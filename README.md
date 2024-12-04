@@ -31,7 +31,7 @@ Alice is an agentic workflow framework that integrates task execution and intell
 
 The project consists of three main components:
 
-1. Backend (Node.js with Express - TS) -> Manages the MongoDB, io generations and the file system, including serving files for the frontend. 
+1. Backend (Node.js with Express - TS) -> Manages the MongoDB, LM Studio generations and the file system, including serving files for the frontend. 
 2. Workflow (Python - Pydantic) -> Handles (most) of the logic, interacts with external APIs, consumes the Database through the Backend, and reads from the file system. Main endpoints are task execution and chat response generation. 
 3. Frontend (React - TS) -> UI that consumes/interacts with the DB and file system through the Backend and calls Workflow's endpoints to trigger executions. 
 
@@ -49,7 +49,7 @@ The project consists of three main components:
 
 1. Ensure you have Git and [Docker installed](https://docs.docker.com/engine/install/) on your system. On Windows, once you do, it comes with the docker-compose plugin installed by default, but [check if you have it installed](https://stackoverflow.com/questions/72928891/how-can-i-check-if-docker-compose-plugin-is-installed). Otherwise (if in Linux for example), [install it](https://docs.docker.com/compose/install/linux/). If for whatever reason the starting script doesn't start Docker (can't find it), all you need to do is open your Docker app. 
 
-2. (Optional) [Install io](https://lmstudio.ai/) if you plan to use local models. If you don't, you'll see some errors regarding this, but don't worry, everything else will work normally. 
+2. (Optional) [Install LM Studio](https://lmstudio.ai/) if you plan to use local models. If you don't, you'll see some errors regarding this, but don't worry, everything else will work normally. 
 
 3. Download the repository:
    ```
@@ -132,7 +132,7 @@ These components share information in one of 6 main ways, all of which have a st
 - Role-based access control (user and admin roles)
 
 ### 5. Flexible Model Deployment
-- Deploy local models using io
+- Deploy local models using LM Studio
 - Use any OpenAI-compatible endpoints (Groq, Mistral & Llama) or Anthropic, Gemini, and Cohere models to power your agents and workflows
 
 ### 6. Programatic Access to your Tasks and Chats
@@ -282,7 +282,7 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
    - Task cost estimation based on an algorithm and, when it exists, past data to improve the estimation. 
    - Cost/use tracking by API in a clear UI
 
-11. **Local deployment**: Offer more options for local deployment, especially for smaller models like TTS (even RVC), image generation, etc. (local llm, embeddings and vision can already be used with io) 
+11. **Local deployment**: Offer more options for local deployment, especially for smaller models like TTS (even RVC), image generation, etc. (local llm, embeddings and vision can already be used with LM Studio) 
    - Offer something closer to Automatic111 for img gen. An option I've thought about is having a ComfyUI container with a set of workflows pre-set that work off the box. 
 
 12. **Test Module**: A section in the UI were you can define a test setup for a task (inputs, models, prompts), to help find ideal task setups. 

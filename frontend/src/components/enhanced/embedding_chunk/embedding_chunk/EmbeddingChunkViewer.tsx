@@ -81,7 +81,7 @@ const EmbeddingChunkViewer: React.FC<EmbeddingChunkComponentProps> = ({ item }) 
           </Box>
 
           {/* Content */}
-          <AliceMarkdown>{item.text_content}</AliceMarkdown>
+          <AliceMarkdown showCopyButton>{item.text_content}</AliceMarkdown>
 
           {/* Metadata */}
           {Object.keys(item.creation_metadata).length > 0 && (

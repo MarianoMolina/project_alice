@@ -8,9 +8,9 @@ import {
     ListItem,
     ListItemIcon,
 } from '@mui/material';
-import { DownloadEntity } from '../download_entity/DownloadEntity';
 import { CollectionName, CollectionType } from '../../../../types/CollectionTypes';
 import useStyles from './EnhancedStyles';
+import EntityActionsMenu from '../entity_menu/EntityActionsMenu';
 
 interface ListItemData {
     icon: React.ReactElement;
@@ -56,7 +56,7 @@ const CommonCardView = <T extends CollectionName>({
                         </Typography>
                         {item && itemType && (
                             <Box className={classes.downloadButton}>
-                                <DownloadEntity item={item} itemType={itemType} />
+                                <EntityActionsMenu item={item} itemType={itemType} />
                             </Box>
                         )}
                     </Box>

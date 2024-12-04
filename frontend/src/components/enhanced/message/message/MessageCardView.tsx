@@ -33,6 +33,7 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
                 <AliceMarkdown
                     enabledBlocks={[CustomBlockType.ALICE_DOCUMENT, CustomBlockType.ANALYSIS]}
                     role={item.role}
+                    showCopyButton
                 >
                     {item.content}
                 </AliceMarkdown>

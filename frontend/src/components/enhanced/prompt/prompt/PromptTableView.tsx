@@ -17,7 +17,7 @@ const PromptTableView: React.FC<PromptComponentProps> = ({
     },
     {
       header: 'Templated',
-      render: (prompt: Prompt) => prompt.is_templated || 'N/A',
+      render: (prompt: Prompt) => prompt.is_templated ? "True" : "False",
       sortKey: 'is_templated'
     },
     {

@@ -18,7 +18,7 @@ RUN tsc
 RUN npm run build
 
 # Production stage
-FROM node:16-alpine
+FROM node:18-alpine
 WORKDIR /app
 # Copy the build output to the production image
 COPY --from=build /app/build ./build
