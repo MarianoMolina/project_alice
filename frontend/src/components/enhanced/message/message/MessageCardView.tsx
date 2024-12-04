@@ -45,7 +45,7 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
         },
         {
             icon: <PersonPin />,
-            primary_text: "Assistant",
+            primary_text: "Assistant Name",
             secondary_text: item.assistant_name ?? "N/A"
         },
         {
@@ -59,8 +59,7 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
             secondary_text: item.references && hasAnyReferences(item.references) ? 
             <ReferencesViewer
                 references={item.references}
-            /> :
-            <Typography>"N/A"</Typography>,
+            /> : "N/A"
         },
         {
             icon: <DataObject />,

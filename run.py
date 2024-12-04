@@ -254,7 +254,7 @@ class RunEnvironment:
             format='%(asctime)s - %(message)s',
             handlers=[
                 logging.StreamHandler(sys.stdout),
-                logging.FileHandler('run_script.log')
+                logging.FileHandler('logs/run_script.log')
             ]
         )
         return logging.getLogger(__name__)

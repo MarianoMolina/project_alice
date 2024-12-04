@@ -97,7 +97,7 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
                                 {apiTypeIcons[api] || <Api />}
                             </IconButton>
                         </Tooltip>
-                    ))}\
+                    ))}
                 </Box>
             ) : "No required APIs"
         },
