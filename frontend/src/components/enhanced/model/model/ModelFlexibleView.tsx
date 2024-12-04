@@ -67,6 +67,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
+            mode={mode}
             item={form as AliceModel}
             itemType='models'
         >

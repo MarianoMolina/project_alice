@@ -143,6 +143,7 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
+            mode={mode}
             item={item as AliceAgent}
             itemType='agents'
         >

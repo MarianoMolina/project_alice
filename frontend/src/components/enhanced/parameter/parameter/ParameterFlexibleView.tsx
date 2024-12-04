@@ -56,6 +56,7 @@ const ParameterFlexibleView: React.FC<ParameterComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
+            mode={mode}
             item={form as ParameterDefinition}
             itemType='parameters'
         >

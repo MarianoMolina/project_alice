@@ -136,6 +136,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
+            mode={mode}
             item={form as API}
             itemType='apis'
         >

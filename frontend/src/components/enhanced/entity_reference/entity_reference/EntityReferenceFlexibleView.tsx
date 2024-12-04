@@ -106,6 +106,7 @@ const EntityReferenceFlexibleView: React.FC<EntityReferenceComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
+            mode={mode}
             item={form as EntityReference}
             itemType="entityreferences"
         >

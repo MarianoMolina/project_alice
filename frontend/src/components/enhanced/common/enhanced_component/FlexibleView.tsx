@@ -7,9 +7,6 @@ import {
 } from '@mui/material';
 import useStyles from './EnhancedStyles';
 import { CollectionName, CollectionType } from '../../../../types/CollectionTypes';
-import { DownloadEntity } from '../entity_menu/DownloadEntity';
-import { DeleteEntity } from '../entity_menu/DeleteEntity';
-import Logger from '../../../../utils/Logger';
 import EntityActionsMenu from '../entity_menu/EntityActionsMenu';
 
 interface GenericFlexibleViewProps <T extends CollectionName> {
@@ -20,6 +17,7 @@ interface GenericFlexibleViewProps <T extends CollectionName> {
     onDelete?: () => void;
     saveButtonText?: string;
     isEditMode?: boolean;
+    mode?: 'edit' | 'create' | 'view';
     item?: CollectionType[T];
     itemType?: T;
 }
@@ -32,17 +30,19 @@ const GenericFlexibleView = <T extends CollectionName>({
     onDelete,
     saveButtonText = 'Save',
     isEditMode = false,
+    mode = 'edit',
     item, 
     itemType, 
 }: GenericFlexibleViewProps<T>) => {
     const classes = useStyles();
 
-    const deleteItem = () => {
-        Logger.debug('GenericFlexibleView - deleteItem', { item });
-        if (onDelete) {
-            onDelete();
-        }
-    }
+    const actions = {
+        edit: false,
+        download: true,
+        copy: true,
+        delete: mode !== 'create' ? true : false
+    };
+
     return (
         <Paper className={classes.flexibleViewContainer}>
             <Box className={classes.titleContainer}>
@@ -57,7 +57,7 @@ const GenericFlexibleView = <T extends CollectionName>({
                     </Typography>
                     {item && itemType && (
                         <Box className={classes.downloadButton}>
-                            <EntityActionsMenu item={item} itemType={itemType} onDelete={deleteItem} actions={{edit: false, copy: true, delete: true, download: true}}/>
+                            <EntityActionsMenu item={item} itemType={itemType} onDelete={onDelete} actions={actions}/>
                         </Box>
                     )}
                 </Box>

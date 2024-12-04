@@ -292,6 +292,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
+            mode={mode}
             item={form as AliceChat}
             itemType='chats'
         >

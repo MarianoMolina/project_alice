@@ -60,6 +60,7 @@ const UserCheckpointFlexibleView: React.FC<UserCheckpointComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
+            mode={mode}
             item={form as UserCheckpoint}
             itemType="usercheckpoints"
         >

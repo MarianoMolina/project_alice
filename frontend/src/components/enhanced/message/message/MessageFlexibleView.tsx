@@ -57,6 +57,7 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
+            mode={mode}
             item={form as MessageType}
             itemType='messages'
         >

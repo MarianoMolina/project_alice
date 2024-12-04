@@ -119,6 +119,7 @@ const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
+            mode={mode}
             item={form as CodeExecution}
             itemType='codeexecutions'
         >

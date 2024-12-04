@@ -117,6 +117,7 @@ const ToolCallFlexibleView: React.FC<ToolCallComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
+            mode={mode}
             item={form as ToolCall}
             itemType='toolcalls'
         >

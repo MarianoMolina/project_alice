@@ -68,6 +68,7 @@ const DataClusterFlexibleView: React.FC<DataClusterComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
+            mode={mode}
             item={form as DataCluster}
             itemType="dataclusters"
         >

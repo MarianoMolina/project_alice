@@ -67,7 +67,7 @@ const EntityActionsMenu = <T extends CollectionName>({
           horizontal: 'right',
         }}
       >
-        {actions.edit && itemType != 'taskresults' && itemType != 'userinteractions' && itemType != 'embeddingchunks' && (
+        {actions.edit && itemType !== 'taskresults' && itemType !== 'userinteractions' && itemType !== 'embeddingchunks' && (
           <MenuItem>
             <EditEntity item={item} itemType={itemType} showLabel />
           </MenuItem>

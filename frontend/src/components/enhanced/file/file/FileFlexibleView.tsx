@@ -181,6 +181,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={mode === "create" ? false : isEditMode}
+            mode={mode}
             item={form as FileReference}
             itemType='files'
         >

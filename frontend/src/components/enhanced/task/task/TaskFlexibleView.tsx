@@ -206,6 +206,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             onDelete={handleLocalDelete}
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
+            mode={mode}
             item={form as AliceTask}
             itemType='tasks'
         >
