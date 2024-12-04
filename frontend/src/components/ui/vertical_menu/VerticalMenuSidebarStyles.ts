@@ -58,7 +58,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   expandButton: {
     marginTop: 'auto',
-    marginBottom: theme.spacing(2),
     display: 'flex',
     justifyContent: 'center',
   },

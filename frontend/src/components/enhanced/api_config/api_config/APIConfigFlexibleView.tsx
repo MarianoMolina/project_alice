@@ -164,6 +164,7 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
             case ApiName.LLAMA:
             case ApiName.GROQ:
             case ApiName.AZURE:
+            case ApiName.LM_STUDIO:
             case ApiName.CUSTOM:
                 return (
                     <>

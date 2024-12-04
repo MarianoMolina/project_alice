@@ -216,7 +216,7 @@ class RunEnvironment:
     def __init__(self):
         self.system = platform.system()
         self.logger = self._setup_logging()
-        self.required_dirs = ["shared-uploads", "logs", "shared", "model_cache"]
+        self.required_dirs = ["shared-uploads", "logs", "model_cache"]
         self.lm_studio = LMStudioManager(self.logger)
         self.thp_handler = THPHandler(self.logger)
         

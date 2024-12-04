@@ -441,6 +441,7 @@ base_module = BaseModule(
                 "name": "LM Studio API Config",
                 "api_name": "lm_studio",
                 "data": {
+                    "api_key": "",
                     "base_url": LOCAL_LLM_API_URL
                 },
                 "health_status": "healthy" if LOCAL_LLM_API_URL else "unhealthy",

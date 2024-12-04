@@ -100,11 +100,15 @@ class API(BaseDataStructure):
         
         if not self.api_config:
             raise ValueError("No API configuration provided")
+        
+        api_key = self.api_config.data.get("api_key")
+        if not api_key and self.api_name == ApiName.LM_STUDIO:
+            api_key = 'dummy_string'
             
         return ModelConfig(
             temperature=model.temperature,
             use_cache=model.use_cache,
-            api_key=self.api_config.data.get("api_key"),
+            api_key=api_key,
             base_url=self.api_config.data.get("base_url"),
             model=model.model_name if self.api_name != ApiName.LM_STUDIO else model.id,
             ctx_size=model.ctx_size,

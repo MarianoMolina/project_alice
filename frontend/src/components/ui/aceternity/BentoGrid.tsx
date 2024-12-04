@@ -35,6 +35,7 @@ export const BentoGridItem = ({
   onClick?: () => void;
 }) => {
   return (
+    // Force Tailwind to generate: md:col-span-1 md:col-span-2
     <div
       onClick={onClick}
       className={cn(

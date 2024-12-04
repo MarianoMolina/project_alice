@@ -138,6 +138,7 @@ export class LMStudioManager {
     }
 
     async isModelAvailable(client: LMStudioClient, model_name: string) {
+        Logger.debug('Checking if model is available:', model_name);
         const downloadedModels = await client.system.listDownloadedModels();
         Logger.debug('Downloaded Models:', downloadedModels);
         const isModelAvailable = downloadedModels.some((model: any) => model.path.includes(model_name));

@@ -20,7 +20,7 @@
     "dotenv": "^16.4.5",
     "express": ">=4.20.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.4.1",
+    "mongoose": "8.8.3",
     "mongoose-autopopulate": "^1.1.0",
     "mongoose-schema-jsonschema": "^2.2.0",
     "multer": "^1.4.5-lts.1",
