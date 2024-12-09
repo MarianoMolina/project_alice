@@ -1,147 +1,175 @@
-import express from 'express';
-import { lmStudioManager } from '../utils/lmStudioManager';
-import { Stream } from 'openai/streaming';
-import axios from 'axios';
-import { ChatCompletionParams, CompletionParams } from '../utils/lmStudio.utils';
+import express, { Router, Response } from 'express';
+import auth from '../middleware/auth.middleware';
 import Logger from '../utils/logger';
+import { AuthRequest } from '../interfaces/auth.interface';
+import { ChatCompletionParams, CompletionParams } from '../lmStudioManager/lmStudio.types';
+import { LMStudioRouteManager } from '../lmStudioManager/lmStudioOrchestrator';
+import { CreateEmbeddingParams } from '../lmStudioManager/lmStudio.utils';
 
-const router = express.Router();
-// New proxy endpoint - Just to see what is being sent to the model
-router.post('/proxy/chat/completions', async (req, res) => {
-    Logger.debug('Received request:', {
-        headers: req.headers,
-        body: JSON.stringify(req.body)
+const router: Router = express.Router();
+const lmStudioManager = new LMStudioRouteManager();
+
+// Error handling helper
+const handleErrors = (res: Response, error: any) => {
+  Logger.error('Error in LM Studio route:', error);
+  const message = error.message || 'An error occurred while processing the request';
+  const status = error.status || 500;
+  res.status(status).json({ error: message });
+};
+
+// All routes require authentication
+router.use(auth);
+
+// List all available models
+router.get('/v1/models', async (_req: AuthRequest, res: Response) => {
+  try {
+    const models = await lmStudioManager.listModels();
+    res.json({
+      object: 'list',
+      data: models.map(model => ({
+        id: model.path,
+        object: 'model',
+        created: Date.now(),
+        owned_by: 'local',
+        root: model.path,
+        parent: null,
+        permission: [],
+        type: model.type,
+        is_loaded: model.isLoaded
+      }))
     });
-
-    try {
-        const response = await axios.post('http://host.docker.internal:1234/v1/chat/completions', req.body, {
-            headers: req.headers,
-            responseType: 'stream'
-        });
-
-        response.data.pipe(res);
-    } catch (error) {
-        Logger.error('Error forwarding request:', error);
-        res.status(500).json({ error: 'Failed to forward request' });
-    }
+  } catch (error) {
+    handleErrors(res, error);
+  }
 });
 
+// Chat completions endpoint
+router.post('/v1/chat/completions', async (req: AuthRequest, res: Response) => {
+  try {
+    const params: ChatCompletionParams = req.body;
+    const modelId = req.query.model_id as string;
 
-router.post('/v1/embeddings', async (req, res) => {
-    try {
-        const response = await axios.post('http://host.docker.internal:1234/v1/embeddings', req.body);
-        res.json(response.data);
-    } catch (error) {
-        Logger.error('Error with embeddings:', error);
-        res.status(500).json({ error: 'Failed to generate embeddings' });
+    if (!modelId) {
+      return res.status(400).json({ error: 'model_id query parameter is required' });
     }
-});
 
-router.post('/chat/completions', async (req, res) => {
-    const params = req.body as ChatCompletionParams;
-    try {
-        if (!params) {
-            return res.status(400).json({ error: 'Missing required parameters' });
-        }
-        const completionResult = await lmStudioManager.generateChatCompletion(params);
-        if (params.stream) {
-            res.writeHead(200, {
-                'Content-Type': 'text/event-stream',
-                'Cache-Control': 'no-cache',
-                'Connection': 'keep-alive',
-            });
-            if (completionResult instanceof Stream) {
-                for await (const chunk of completionResult) {
-                    res.write(`data: ${JSON.stringify(chunk)}\n\n`);
-                }
-                res.write('data: [DONE]\n\n');
-            } else {
-                res.write(`data: ${JSON.stringify(completionResult)}\n\n`);
-                res.write('data: [DONE]\n\n');
+    if (!params.messages || params.messages.length === 0) {
+      return res.status(400).json({ error: 'messages are required in the request body' });
+    }
+
+    // Handle streaming response
+    if (params.stream) {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+
+      const stream = await lmStudioManager.generateChatCompletion(modelId, params);
+      
+      if (stream instanceof ReadableStream) {
+        // Handle streaming response
+        const reader = stream.getReader();
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+              res.write('data: [DONE]\n\n');
+              break;
             }
-            res.end();
-        } else {
-            res.json(completionResult);
+            res.write(value);
+          }
+        } finally {
+          reader.releaseLock();
+          res.end();
         }
-    } catch (error) {
-        Logger.error('Error generating chat completion:', error);
-        res.status(500).json({ error: 'Failed to generate chat completion' });
+      }
+    } else {
+      // Handle regular response
+      const response = await lmStudioManager.generateChatCompletion(modelId, params);
+      res.json(response);
     }
+  } catch (error) {
+    handleErrors(res, error);
+  }
 });
 
-router.get('/models/:modelId', async (req, res) => {
-    const { modelId } = req.params;
-    try {
-        const modelInfo = await lmStudioManager.getModelInfo(modelId);
-        res.json(modelInfo);
-    } catch (error) {
-        Logger.error('Error checking model:', error);
-        res.status(500).json({ error: 'Failed to check model' });
-    }
-});
+// Completions endpoint
+router.post('/v1/completions', async (req: AuthRequest, res: Response) => {
+  try {
+    const params: CompletionParams = req.body;
+    const modelId = req.query.model_id as string;
 
-router.get('/models', async (req, res) => {
-    try {
-        const availableModels = await lmStudioManager.listAvailableModels();
-        res.json(availableModels);
-    } catch (error) {
-        Logger.error('Error listing models:', error);
-        res.status(500).json({ error: 'Failed to list models' });
+    if (!modelId) {
+      return res.status(400).json({ error: 'model_id query parameter is required' });
     }
-});
 
-router.post('/models/:modelId/load', async (req, res) => {
-    const { modelId } = req.params;
-    try {
-        await lmStudioManager.getOrLoadModel(modelId);
-        res.json({ message: `Model ${modelId} loaded successfully` });
-    } catch (error) {
-        Logger.error('Error loading model:', error);
-        res.status(500).json({ error: 'Failed to load model' });
+    if (!params.prompt) {
+      return res.status(400).json({ error: 'prompt is required in the request body' });
     }
-});
 
-router.post('/models/:modelId/unload', async (req, res) => {
-    const { modelId } = req.params;
-    try {
-        await lmStudioManager.unloadModel(modelId);
-        res.json({ message: `Model ${modelId} unloaded successfully` });
-    } catch (error) {
-        Logger.error('Error unloading model:', error);
-        res.status(500).json({ error: 'Failed to unload model' });
-    }
-});
+    // Handle streaming response
+    if (params.stream) {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
 
-router.post('/v1/completions', async (req, res) => {
-    const params = req.body as CompletionParams;
-    try {
-        if (!params) {
-            return res.status(400).json({ error: 'Missing required parameters' });
-        }
-        const completionResult = await lmStudioManager.generateCompletion(params);
-        if (params.stream) {
-            res.writeHead(200, {
-                'Content-Type': 'text/event-stream',
-                'Cache-Control': 'no-cache',
-                'Connection': 'keep-alive',
-            });
-            if (completionResult instanceof Stream) {
-                for await (const chunk of completionResult) {
-                    res.write(`data: ${JSON.stringify(chunk)}\n\n`);
-                }
-                res.write('data: [DONE]\n\n');
-            } else {
-                res.write(`data: ${JSON.stringify(completionResult)}\n\n`);
-                res.write('data: [DONE]\n\n');
+      const stream = await lmStudioManager.generateCompletion(modelId, params);
+      
+      if (stream instanceof ReadableStream) {
+        // Handle streaming response
+        const reader = stream.getReader();
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+              res.write('data: [DONE]\n\n');
+              break;
             }
-            res.end();
-        } else {
-            res.json(completionResult);
+            res.write(value);
+          }
+        } finally {
+          reader.releaseLock();
+          res.end();
         }
-    } catch (error) {
-        Logger.error('Error generating completion:', error);
-        res.status(500).json({ error: 'Failed to generate completion' });
+      }
+    } else {
+      // Handle regular response
+      const response = await lmStudioManager.generateCompletion(modelId, params);
+      res.json(response);
     }
+  } catch (error) {
+    handleErrors(res, error);
+  }
+});
+
+// Embeddings endpoint
+router.post('/v1/embeddings', async (req: AuthRequest, res: Response) => {
+  try {
+    const params: CreateEmbeddingParams = req.body;
+    const modelId = req.query.model_id as string;
+
+    if (!modelId) {
+      return res.status(400).json({ error: 'model_id query parameter is required' });
+    }
+
+    if (!params.input) {
+      return res.status(400).json({ error: 'input is required in the request body' });
+    }
+
+    const response = await lmStudioManager.generateEmbedding(modelId, params);
+    res.json(response);
+  } catch (error) {
+    handleErrors(res, error);
+  }
+});
+
+// Cleanup handler for graceful shutdown
+process.on('SIGTERM', async () => {
+  try {
+    await lmStudioManager.shutdown();
+    Logger.info('LM Studio manager shut down successfully');
+  } catch (error) {
+    Logger.error('Error during LM Studio manager shutdown:', error);
+  }
 });
 
 export default router;

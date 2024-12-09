@@ -1,20 +1,49 @@
 import mongoose, { Schema } from 'mongoose';
-import { IModelDocument, IModelModel, ModelType } from '../interfaces/model.interface';
+import { IModelConfig, IModelDocument, IModelModel, ModelType } from '../interfaces/model.interface';
 import { ApiName } from '../interfaces/api.interface';
 import { getObjectId } from '../utils/utils';
 import mongooseAutopopulate from 'mongoose-autopopulate';
 
-const modelSchema = new Schema<IModelDocument, IModelModel>({
-  short_name: { type: String, required: true },
-  model_name: { type: String, required: true },
-  model_format: { type: String, required: true },
+const DEFAULT_MODEL_CONFIG: IModelConfig = {
+  ctx_size: 4096, 
+  temperature: 0.7,
+  seed: null,
+  use_cache: false,
+  prompt_config: {
+    bos: '<|im_start|>',
+    eos: '<|im_end|>',
+    system_role: 'system',
+    user_role: 'user',
+    assistant_role: 'assistant',
+    tool_role: 'tool'
+  }
+};
+
+const modelConfigSchema = new Schema<IModelConfig>({
   ctx_size: { type: Number, required: true },
-  model_type: { type: String, enum: ModelType, required: true },
-  api_name: { type: String, default: ApiName.LM_STUDIO },
   temperature: { type: Number, default: 0.7 },
   seed: { type: Number, default: null },
   use_cache: { type: Boolean, default: false },
-  lm_studio_preset: { type: String, default: 'OpenChat' },
+  prompt_config: {
+    bos: { type: String, required: true, default: '<|im_start|>' },
+    eos: { type: String, required: true, default: '<|im_end|>' },
+    system_role: { type: String, default: 'system' },
+    user_role: { type: String, default: 'user' },
+    assistant_role: { type: String, default: 'assistant' },
+    tool_role: { type: String, default: 'tool' }
+  }
+});
+
+const modelSchema = new Schema<IModelDocument, IModelModel>({
+  short_name: { type: String, required: true },
+  model_name: { type: String, required: true },
+  config_obj: { 
+    type: modelConfigSchema, 
+    required: true, 
+    default: () => ({ ...DEFAULT_MODEL_CONFIG }) 
+  },  
+  model_type: { type: String, enum: ModelType, required: true },
+  api_name: { type: String, default: ApiName.LM_STUDIO },
   created_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true },
   updated_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true }
 }, {
@@ -26,14 +55,9 @@ modelSchema.virtual('apiRepresentation').get(function(this: IModelDocument) {
     id: this._id,
     short_name: this.short_name || null,
     model_name: this.model_name || null,
-    model_format: this.model_format || null,
-    ctx_size: this.ctx_size || null,
+    api_name: this.api_name || null,
     model_type: this.model_type || null,
-    api_name: this.api_name || 'lm_studio',
-    temperature: this.temperature || null,
-    seed: this.seed || null,
-    use_cache: this.use_cache || false,
-    lm_studio_preset: this.lm_studio_preset || 'OpenChat',
+    config_obj: this.config_obj || null,
     created_by: this.created_by || null,
     updated_by: this.updated_by || null,
     createdAt: this.createdAt || null,

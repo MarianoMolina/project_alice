@@ -22,8 +22,7 @@ const ModelCardView: React.FC<ModelComponentProps> = ({ item }) => {
         { icon: <Info />, primary_text: "Model Name", secondary_text: item.model_name || 'N/A' },
         { icon: apiNameIcons[item.api_name] || <Api />, primary_text: "API Name", secondary_text: formatCamelCaseString(item.api_name) },
         { icon: modelTypeIcons[item.model_type] || <Category/>, primary_text: "Model Type", secondary_text: formatCamelCaseString(item.model_type) },
-        { icon: <FormatShapes />, primary_text: "Model Format", secondary_text: item.model_format || 'N/A' },
-        { icon: <Memory />, primary_text: "Context Size", secondary_text: item.ctx_size ? `${item.ctx_size} tokens` : 'N/A' },
+        { icon: <Memory />, primary_text: "Context Size", secondary_text: item.config_obj.ctx_size ? `${item.config_obj.ctx_size} tokens` : 'N/A' },
         {
             icon: <QueryBuilder />,
             primary_text: "Created at",
@@ -43,17 +42,17 @@ const ModelCardView: React.FC<ModelComponentProps> = ({ item }) => {
             <Box className={classes.chipContainer}>
                 <Chip
                     icon={<Thermostat />}
-                    label={`Temperature: ${item.temperature?.toFixed(2) || 'N/A'}`}
+                    label={`Temperature: ${item.config_obj.temperature?.toFixed(2) || 'N/A'}`}
                     className={classes.chip}
                 />
                 <Chip
                     icon={<Cached />}
-                    label={`Use Cache: ${item.use_cache ? 'Yes' : 'No'}`}
+                    label={`Use Cache: ${item.config_obj.use_cache ? 'Yes' : 'No'}`}
                     className={classes.chip}
                 />
-                {item.seed !== undefined && item.seed !== null && (
+                {item.config_obj.seed !== undefined && item.config_obj.seed !== null && (
                     <Chip
-                        label={`Seed: ${item.seed}`}
+                        label={`Seed: ${item.config_obj.seed}`}
                         className={classes.chip}
                     />
                 )}

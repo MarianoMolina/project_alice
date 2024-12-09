@@ -11,17 +11,30 @@ export enum ModelType {
     EMBEDDINGS = 'embeddings',
     IMG_GEN = 'img_gen',
 }
-export interface IModel extends Document {
-    short_name: string;
-    model_name: string;
-    model_format: string;
+export interface ChatTemplateTokens {
+    bos: string;
+    eos: string;
+    // Optional role markers, if undefined will use default
+    system_role?: string;
+    user_role?: string;
+    assistant_role?: string;
+    tool_role?: string;
+}
+
+export interface IModelConfig {
     ctx_size: number;
-    model_type: ModelType;
-    api_name: ApiName;
     temperature: number;
     seed: number | null;
     use_cache: boolean;
-    lm_studio_preset: string;
+    prompt_config: ChatTemplateTokens;
+}
+
+export interface IModel extends Document {
+    short_name: string;
+    model_name: string;
+    api_name: ApiName;
+    model_type: ModelType;
+    config_obj: IModelConfig;
     created_by: Types.ObjectId | IUserDocument;
     updated_by: Types.ObjectId | IUserDocument;
 }

@@ -106,12 +106,12 @@ class API(BaseDataStructure):
             api_key = 'dummy_string'
             
         return ModelConfig(
-            temperature=model.temperature,
-            use_cache=model.use_cache,
+            temperature=model.config_obj.temperature,
+            use_cache=model.config_obj.use_cache,
             api_key=api_key,
             base_url=self.api_config.data.get("base_url"),
             model=model.model_name if self.api_name != ApiName.LM_STUDIO else model.id,
-            ctx_size=model.ctx_size,
+            ctx_size=model.config_obj.ctx_size,
         )
 
     def get_api_data(self, model: Optional[AliceModel] = None) -> Union[Dict[str, Any], ModelConfig]:

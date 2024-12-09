@@ -6,7 +6,7 @@ import sys
 import logging
 from pathlib import Path
 import signal
-import requests
+from typing import Optional, Tuple
 
 class THPHandler:
     def __init__(self, logger):
@@ -54,162 +54,164 @@ class THPHandler:
             self.logger.error(f"Error configuring THP: {e}")
             return False
         
-class LMStudioManager:
-    def __init__(self, logger=None):
+class LMStudioPathFinder:
+    def __init__(self, logger: Optional[logging.Logger] = None):
         self.logger = logger or logging.getLogger(__name__)
-        self.app_path = None
-        self.server_started = False
         self.system = platform.system()
+
+    def get_cli_file_path(self) -> Optional[Path]:
+        """Find the LM Studio CLI executable file"""
+        self.logger.debug("Searching for LM Studio CLI file...")
         
-    def get_bootstrap_path(self):
-        """Get the platform-specific bootstrap path and command"""
         if self.system == "Windows":
-            cache_path = os.path.expandvars(r'%USERPROFILE%\.cache\lm-studio\bin\lms.exe')
-            bootstrap_cmd = ['cmd', '/c', cache_path, 'bootstrap']
+            search_paths = [
+                Path(os.path.expandvars(r"%USERPROFILE%\.cache\lm-studio\bin\lms.exe"))
+            ]
         else:  # macOS or Linux
-            cache_path = os.path.expanduser('~/.cache/lm-studio/bin/lms')
-            bootstrap_cmd = [cache_path, 'bootstrap']
-            
-        return cache_path, bootstrap_cmd
+            search_paths = [
+                Path("/opt/homebrew/bin/lms"),
+                Path("/usr/local/bin/lms"),
+                Path.home() / ".cache/lm-studio/bin/lms"
+            ]
 
-    def try_bootstrap_cli(self):
-        """Attempt to bootstrap the LM Studio CLI tools"""
-        cache_path, bootstrap_cmd = self.get_bootstrap_path()
+        for path in search_paths:
+            self.logger.debug(f"Checking path: {path}")
+            if path.exists() and path.is_file():
+                self.logger.info(f"Found LM Studio CLI file at: {path}")
+                return path
+
+        self.logger.warning("LM Studio CLI file not found in any standard location")
+        return None
+
+    def verify_cli_command(self) -> bool:
+        """Verify if 'lms' is available as a command"""
+        self.logger.debug("Verifying LM Studio CLI command...")
         
-        if os.path.exists(cache_path):
-            self.logger.info("Found LMS CLI tool in cache, attempting bootstrap...")
-            try:
-                result = subprocess.run(bootstrap_cmd, capture_output=True, text=True)
-                if result.returncode == 0:
-                    self.logger.info("Successfully bootstrapped LMS CLI")
-                    return True
-                else:
-                    self.logger.warning(f"Bootstrap failed: {result.stderr}")
-                    return False
-            except Exception as e:
-                self.logger.warning(f"Bootstrap attempt failed: {e}")
-                return False
-        else:
-            self.logger.warning(f"LMS CLI not found in cache: {cache_path}")
-            return False
-
-    def find_lm_studio(self):
-        """Find LM Studio installation and ensure CLI is available"""
-        cli_locations = [
-            "/opt/homebrew/bin/lms",
-            "/usr/local/bin/lms",
-            os.path.expanduser("~/.cache/lm-studio/bin/lms")
-        ] if self.system != "Windows" else [
-            os.path.expandvars(r"%USERPROFILE%\.cache\lm-studio\bin\lms.exe")
-        ]
-        
-        for cli_path in cli_locations:
-            if os.path.exists(cli_path):
-                self.logger.info(f"Found LMS CLI at: {cli_path}")
-                self.app_path = cli_path
-                return True
-
-        gui_locations = [
-            "/Applications/LM Studio.app",
-            str(Path.home() / "Applications/LM Studio.app")
-        ] if self.system == "Darwin" else []
-        
-        gui_found = False
-        for path in gui_locations:
-            if os.path.exists(path):
-                self.logger.info(f"Found LM Studio GUI at: {path}")
-                gui_found = True
-                break
-
-        if gui_found:
-            self.logger.info("Found GUI but no CLI. Attempting to bootstrap CLI tools...")
-            if self.try_bootstrap_cli():
-                for cli_path in cli_locations:
-                    if os.path.exists(cli_path):
-                        self.app_path = cli_path
-                        return True
-        
-        return False
-    def start_server(self):
-        """Start LM Studio server handling interactive prompts"""
-        if not self.find_lm_studio():
-            self.logger.warning("LM Studio not found. Continuing without it...")
-            return False
-
         try:
-            # Check if server is already running
-            try:
-                response = requests.get("http://localhost:1234/v1/models", timeout=2)
-                if response.status_code == 200:
-                    self.logger.info("LM Studio server is already running")
-                    self.server_started = True
-                    return True
-            except:
-                pass
-
-            # Start server with interactive input handling
-            self.logger.info(f"Starting LM Studio server using: {self.app_path}")
-            process = subprocess.Popen(
-                [self.app_path, "server", "start", "--verbose"],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
+            result = subprocess.run(
+                ['lms', 'version'],
+                capture_output=True,
+                text=True,
+                timeout=5
             )
-
-            # Monitor the output and respond to prompts
-            while True:
-                line = process.stdout.readline()
-                if not line:
-                    break
-                    
-                self.logger.debug(f"LM Studio output: {line.strip()}")
+            
+            if result.returncode == 0:
+                self.logger.info(f"LMS CLI confirmed - version:\n{result.stdout.strip()}")
+                return True
+            else:
+                self.logger.warning(f"LMS CLI command check failed: {result.stderr}")
+                return False
                 
-                if "Type \"OK\" to acknowledge:" in line:
-                    self.logger.info("Responding to acknowledgment prompt...")
-                    process.stdin.write("OK\n")
-                    process.stdin.flush()
-                
-                if "Verification succeeded" in line:
-                    self.logger.info("Server started successfully")
-                    self.server_started = True
-                    return True
+        except Exception as e:
+            self.logger.warning(f"LMS CLI command check failed: {str(e)}")
+            return False
 
-            self.server_started = True
+    def bootstrap_cli(self, cli_path: Path) -> bool:
+        """Attempt to bootstrap the LMS CLI"""
+        self.logger.info("Attempting to bootstrap LMS CLI...")
+        try:
+            bootstrap_cmd = ['cmd', '/c', str(cli_path), 'bootstrap'] if self.system == "Windows" else [str(cli_path), 'bootstrap']
+            
+            result = subprocess.run(
+                bootstrap_cmd,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            
+            if result.returncode == 0:
+                self.logger.info("Bootstrap completed successfully")
+                return True
+            else:
+                self.logger.error(f"Bootstrap failed: {result.stderr}")
+                return False
+                
+        except Exception as e:
+            self.logger.error(f"Bootstrap failed: {str(e)}")
+            return False
+
+    def setup_lms_cli(self) -> bool:
+        """Orchestrates the LMS CLI setup process"""
+        # Check for CLI file
+        cli_path = self.get_cli_file_path()
+        if not cli_path:
+            self.logger.error("LMS CLI file not found - cannot proceed")
+            return False
+
+        # Check if CLI already works
+        if self.verify_cli_command():
+            self.logger.info("LMS CLI is already working")
             return True
 
-        except Exception as e:
-            self.logger.warning(f"Failed to start LM Studio: {e}")
+        # Attempt bootstrap
+        if not self.bootstrap_cli(cli_path):
+            self.logger.error("Bootstrap failed - cannot proceed")
             return False
 
-    def verify_server(self, timeout=30, interval=2):
-        """Verify that the LM Studio server is responding"""
-        self.logger.info("Verifying server status...")
-        start_time = time.time()
+        # Verify CLI works after bootstrap
+        if self.verify_cli_command():
+            self.logger.info("LMS CLI successfully set up")
+            return True
         
-        while time.time() - start_time < timeout:
-            try:
-                # First try the greeting endpoint that we saw in the logs
-                try:
-                    response = requests.get("http://127.0.0.1:1234/lmstudio-greeting", timeout=2)
-                    if response.status_code == 200:
-                        self.logger.info("LM Studio server is up and responding!")
-                        return True
-                except:
-                    pass
+        self.logger.error("LMS CLI setup failed")
+        return False
+    
+    def _run_lms_command(self, command: list[str], timeout: int = 5) -> Tuple[bool, str]:
+        """Run an LMS CLI command and return success status and output"""
+        try:
+            result = subprocess.run(
+                command,
+                capture_output=True,
+                encoding='utf-8',
+                errors='replace',
+                timeout=timeout
+            )
+            return result.returncode == 0, result.stdout + result.stderr
+        except Exception as e:
+            self.logger.error(f"Command failed: {' '.join(command)}, error: {str(e)}")
+            return False, str(e)
 
-                # Then try the models endpoint
-                response = requests.get("http://127.0.0.1:1234/v1/models", timeout=2)
-                if response.status_code == 200:
-                    self.logger.info("LM Studio server is up and responding!")
-                    return True
-            except requests.exceptions.ConnectionError:
-                self.logger.debug("Server not ready yet - connection refused")
-            except Exception as e:
-                self.logger.debug(f"Verification attempt failed: {type(e).__name__}")
-            time.sleep(interval)
-        
-        self.logger.warning("LM Studio server verification timed out")
+    def verify_cli_command(self) -> bool:
+        """Verify if 'lms' is available as a command"""
+        success, output = self._run_lms_command(['lms', 'version'])
+        if success:
+            self.logger.info(f"LMS CLI command verified: {output}")
+            return True
+        self.logger.warning("LMS CLI command verification failed")
+        return False
+
+    def check_server_status(self) -> bool:
+        """Check if the LMS server is running"""
+        success, output = self._run_lms_command(['lms', 'status'])
+        return success and "Server:  ON" in output
+
+    def execute_server_start(self) -> bool:
+        """Execute the server start command"""
+        success, output = self._run_lms_command(['lms', 'server', 'start'], timeout=30)
+        if success and "Verification succeeded" in output:
+            self.logger.info("Server start command executed successfully")
+            return True
+        self.logger.error(f"Server start failed: {output}")
+        return False
+
+    def start_lms_server(self) -> bool:
+        """Start the LMS server if it's not already running"""
+        self.logger.info("Checking LMS server status...")
+
+        if self.check_server_status():
+            self.logger.info("LMS server is already running")
+            return True
+
+        self.logger.debug("Server not running, attempting to start")
+        if not self.execute_server_start():
+            return False
+
+        # Verify server started successfully
+        if self.check_server_status():
+            self.logger.info("Server start verified")
+            return True
+
+        self.logger.error("Server start verification failed")
         return False
 
 class RunEnvironment:
@@ -217,7 +219,7 @@ class RunEnvironment:
         self.system = platform.system()
         self.logger = self._setup_logging()
         self.required_dirs = ["shared-uploads", "logs", "model_cache"]
-        self.lm_studio = LMStudioManager(self.logger)
+        self.lm_studio = LMStudioPathFinder(self.logger)
         self.thp_handler = THPHandler(self.logger)
         
     def run(self):
@@ -234,13 +236,12 @@ class RunEnvironment:
                 
             self.start_docker()
             self.wait_for_docker()
-            
-            # LM Studio handling
-            if self.lm_studio.start_server():
-                self.logger.info("Waiting for LM Studio server to start...")
-                if not self.lm_studio.verify_server():
-                    self.logger.warning("LM Studio server not responding, but continuing anyway...")
-            else:
+            if self.lm_studio.setup_lms_cli():
+                self.logger.info("LMS CLI setup succeeded")
+                if self.lm_studio.start_lms_server():
+                    self.logger.info("LMS server started successfully")
+                else:
+                    self.logger.warning("Failed to start LMS server")
                 self.logger.warning("LM Studio server not available, continuing without it...")
             
             self.run_docker_compose()
