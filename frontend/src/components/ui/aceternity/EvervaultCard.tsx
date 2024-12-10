@@ -108,7 +108,7 @@ export const EvervaultCard = ({
   );
 };
 
-function CardPattern({ mouseX, mouseY, randomString }: any) {
+export function CardPattern({ mouseX, mouseY, randomString }: any) {
   let maskImage = useMotionTemplate`radial-gradient(250px at ${mouseX}px ${mouseY}px, white, transparent)`;
   let style = { maskImage, WebkitMaskImage: maskImage };
 
@@ -132,7 +132,7 @@ function CardPattern({ mouseX, mouseY, randomString }: any) {
 }
 
 const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-const generateRandomString = (length: number) => {
+export const generateRandomString = (length: number) => {
   let result = "";
   for (let i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * characters.length));

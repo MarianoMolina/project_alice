@@ -50,9 +50,9 @@ const ModelCardView: React.FC<ModelComponentProps> = ({ item }) => {
                     label={`Use Cache: ${item.config_obj?.use_cache ? 'Yes' : 'No'}`}
                     className={classes.chip}
                 />
-                {item.config_obj?.seed !== undefined && item.config_obj.seed !== null && (
+                {item.config_obj?.seed !== undefined && item.config_obj?.seed !== null && (
                     <Chip
-                        label={`Seed: ${item.config_obj.seed}`}
+                        label={`Seed: ${item.config_obj?.seed}`}
                         className={classes.chip}
                     />
                 )}

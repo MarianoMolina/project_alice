@@ -64,12 +64,30 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     useEffect(() => {
         if (item?.task_type) {
             setTaskType(item.task_type);
+        } else if (!item || Object.keys(item).length === 0) {
+            const defaultForm = getDefaultTaskForm(taskType);
+            setForm(defaultForm);
+            onChange(defaultForm);
         }
-    }, [item?.task_type]);
+    }, [item?.task_type, taskType, onChange]);
 
     const handleFieldChange = useCallback((field: keyof AliceTask, value: any) => {
-        setForm(prevForm => ({ ...prevForm, [field]: value }));
-    }, []);
+        if (field === 'task_type') {
+            // When task type changes, create a new form with defaults for that type
+            const defaultForm = getDefaultTaskForm(value as TaskType);
+            // Preserve the task name and description if they exist
+            const newForm = {
+                ...defaultForm,
+                task_name: form.task_name,
+                task_description: form.task_description,
+            };
+            setTaskType(value as TaskType);
+            setForm(newForm);
+            onChange(newForm);
+        } else {
+            setForm(prevForm => ({ ...prevForm, [field]: value }));
+        }
+    }, [form.task_name, form.task_description, onChange]);
 
     const handleLocalSave = useCallback(async () => {
         onChange(form);

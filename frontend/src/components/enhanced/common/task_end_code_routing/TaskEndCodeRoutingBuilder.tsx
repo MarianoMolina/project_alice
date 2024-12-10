@@ -104,15 +104,12 @@ const TaskEndCodeRoutingBuilder: React.FC<TaskEndCodeRoutingBuilderProps> = ({
   };
 
   const handleNodeRemove = (nodeName: string) => {
-    // Create new routing object without the removed node
     const { [nodeName]: removed, ...newRouting } = routing;
 
-    // If removing the start node, clear it
     if (startNode === nodeName) {
       onChangeStartNode(null);
     }
 
-    // Remove references to this node from other nodes' routes
     Object.entries(newRouting).forEach(([currentNode, routeMap]) => {
       Object.entries(routeMap).forEach(([exitCode, [targetNode, retry]]) => {
         if (targetNode === nodeName) {
@@ -155,34 +152,63 @@ const TaskEndCodeRoutingBuilder: React.FC<TaskEndCodeRoutingBuilderProps> = ({
   ];
 
   return (
-    <FormControl fullWidth variant="outlined" sx={{ marginTop: 1, marginBottom: 1 }}>
-      <InputLabel shrink sx={{ backgroundColor: theme.palette.primary.dark }}>{title}</InputLabel>
-      <div className="relative p-4 border border-gray-200/60 rounded-lg ml-2 mr-2">
-        <Box className={classes.routingContainer}>
-          <SelectInput
-            name="start_node"
-            label="Start Node"
-            value={startNode || ''}
-            onChange={(value) => onChangeStartNode(value as string || null)}
-            disabled={isViewMode}
-            description="Select the node that will be executed first"
-            options={startNodeOptions}
-            required
-          />
+    <Box 
+      sx={{ 
+        mt: 1, 
+        mb: 1,
+        p: 3,
+        border: '1px solid',
+        borderColor: 'divider',
+        borderRadius: 1,
+        position: 'relative'
+      }}
+    >
+      {/* Title */}
+      <Typography
+        variant="h6"
+        sx={{
+          position: 'absolute',
+          top: -12,
+          left: 16,
+          px: 1,
+          backgroundColor: theme.palette.background.paper,
+          color: theme.palette.text.primary
+        }}
+      >
+        {title}
+      </Typography>
 
-          {warnings.length > 0 && (
-            <Alert severity="warning" icon={<WarningIcon />} className={classes.warningAlert}>
-              <Typography variant="body1">Routing Warnings:</Typography>
-              <ul>
-                {warnings.map((warning, index) => (
-                  <li key={index}>{warning}</li>
-                ))}
-              </ul>
-            </Alert>
-          )}
+      {/* Start Node Selection */}
+      <Box sx={{ mt: 2 }}>
+        <SelectInput
+          name="start_node"
+          label="Start Node"
+          value={startNode || ''}
+          onChange={(value) => onChangeStartNode(value as string || null)}
+          disabled={isViewMode}
+          description="Select the node that will be executed first"
+          options={startNodeOptions}
+          required
+        />
+      </Box>
 
-          {Object.entries(routing).map(([nodeName, routeMap]) => (
-            <Box key={nodeName} mt={2} className={classes.taskCard}>
+      {/* Warnings Display */}
+      {warnings.length > 0 && (
+        <Alert severity="warning" icon={<WarningIcon />} className={classes.warningAlert}>
+          <Typography variant="body1">Routing Warnings:</Typography>
+          <ul>
+            {warnings.map((warning, index) => (
+              <li key={index}>{warning}</li>
+            ))}
+          </ul>
+        </Alert>
+      )}
+
+      {/* Routing Nodes */}
+      <Box className={classes.routingContainer}>
+        {Object.entries(routing).map(([nodeName, routeMap]) => (
+          <Box key={nodeName} sx={{ mt: 2 }}>
+            <Box className={classes.taskCard}>
               <Box sx={{
                 display: 'flex',
                 alignItems: 'center',
@@ -217,32 +243,34 @@ const TaskEndCodeRoutingBuilder: React.FC<TaskEndCodeRoutingBuilderProps> = ({
                 isViewMode={isViewMode}
               />
             </Box>
-          ))}
+          </Box>
+        ))}
+      </Box>
 
-          {!isViewMode && unusedNodes.length > 0 && (
-            <Box mt={2}>
-              {/* Wrap the second select in its own FormControl */}
-              <FormControl fullWidth>
-                <Select
-                  value={selectedNode}
-                  onChange={(e) => {
-                    const value = e.target.value as string;
-                    setSelectedNode(value);
-                    handleNodeAdd(value);
-                  }}
-                  displayEmpty
-                >
-                  <MenuItem value="" disabled>Add a {taskType === TaskType.Workflow ? 'task' : 'node'}</MenuItem>
-                  {unusedNodes.map(node => (
-                    <MenuItem key={node} value={node}>{formatCamelCaseString(node)}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-          )}
-        </Box>
-      </div>
-    </FormControl>
+      {/* Add New Node Selection */}
+      {!isViewMode && unusedNodes.length > 0 && (
+        <FormControl fullWidth sx={{ mt: 2 }}>
+          <Select
+            value={selectedNode}
+            onChange={(e) => {
+              const value = e.target.value as string;
+              setSelectedNode(value);
+              handleNodeAdd(value);
+            }}
+            displayEmpty
+          >
+            <MenuItem value="" disabled>
+              Add a {taskType === TaskType.Workflow ? 'task' : 'node'}
+            </MenuItem>
+            {unusedNodes.map(node => (
+              <MenuItem key={node} value={node}>
+                {formatCamelCaseString(node)}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      )}
+    </Box>
   );
 };
 
