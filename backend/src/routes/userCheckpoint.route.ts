@@ -4,9 +4,11 @@ import auth from '../middleware/auth.middleware';
 import { IUserCheckpointDocument } from '../interfaces/userCheckpoint.interface';
 import { Router } from 'express';
 import { createUserCheckpoint, updateUserCheckpoint } from '../utils/userCheckpoint.utils';
+import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 
 const router = Router();
 router.use(auth);
+router.use(rateLimiterMiddleware);
 const generatedRoutes = createRoutes<IUserCheckpointDocument, 'UserCheckpoint'>(UserCheckpoint, 'UserCheckpoint', {
     createItem: async (data, userId) => {
         return await createUserCheckpoint(data, userId);

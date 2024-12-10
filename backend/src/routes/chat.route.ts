@@ -8,6 +8,7 @@ import { AuthRequest } from '../interfaces/auth.interface';
 import { createRoutes } from '../utils/routeGenerator';
 import { createChat, createMessageInChat, updateChat } from '../utils/chat.utils';
 import Logger from '../utils/logger';
+import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 
 // Create a router using routeGenerator for common CRUD routes
 const chatRoutes = createRoutes<IAliceChatDocument, 'AliceChat'>(AliceChat, 'AliceChat', {
@@ -58,7 +59,8 @@ customRouter.patch('/:chatId/add_message', async (req: AuthRequest, res: Respons
 
 // Combine generated and custom routes
 const combinedRouter = Router();
-combinedRouter.use(auth); // Apply auth middleware to all routes
+combinedRouter.use(auth);
+combinedRouter.use(rateLimiterMiddleware);
 combinedRouter.use('/', chatRoutes);
 combinedRouter.use('/', customRouter);
 

@@ -37,7 +37,7 @@ export function retrieveToolCalls(content: string): ToolCall[] | false {
         try {
             // Attempt to unescape the JSON string if it's escaped
             try {
-                rawToolCall = JSON.parse(`"${rawToolCall.replace(/"/g, '\\"')}"`);
+                rawToolCall = JSON.parse(JSON.stringify(rawToolCall));
             } catch (unescapeError) {
                 Logger.debug('Unescaping failed, proceeding with raw string');
             }

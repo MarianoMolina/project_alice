@@ -7,6 +7,7 @@ import { IFileReference, IFileReferenceDocument } from '../interfaces/file.inter
 import { getObjectId } from '../utils/utils';
 import { createRoutes } from '../utils/routeGenerator';
 import Logger from '../utils/logger';
+import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 
 // Create a router using routeGenerator for common CRUD routes
 const generatedRouter = createRoutes<IFileReferenceDocument, 'FileReference'>(FileReference, 'FileReference', {
@@ -44,6 +45,7 @@ customRouter.get('/serve/:id', async (req: AuthRequest, res: Response) => {
 // Combine generated and custom routes
 const combinedRouter = Router();
 combinedRouter.use(auth); // Apply auth middleware to all routes
+combinedRouter.use(rateLimiterMiddleware);
 combinedRouter.use('/', generatedRouter);
 combinedRouter.use('/', customRouter);
 

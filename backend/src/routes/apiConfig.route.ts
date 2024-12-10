@@ -3,9 +3,11 @@ import APIConfig from '../models/apiConfig.model';
 import auth from '../middleware/auth.middleware';
 import { IAPIConfigDocument } from '../interfaces/apiConfig.interface';
 import { Router } from 'express';
+import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 
 const router = Router();
 router.use(auth);
+router.use(rateLimiterMiddleware);
 const generatedRoutes = createRoutes<IAPIConfigDocument, 'APIConfig'>(APIConfig, 'APIConfig');
 router.use('/', generatedRoutes);
 

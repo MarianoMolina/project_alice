@@ -240,11 +240,25 @@ export class LMStudioClientManager {
         modelPath: string,
         config: Partial<LLMLoadModelConfig | EmbeddingLoadModelConfig> = {}
     ): Promise<LLMDynamicHandle | EmbeddingDynamicHandle> {
-        // Check if model is already loaded
-        if (this.loadedModels[modelPath]) {
+        // Validate modelPath
+        if (modelPath === '__proto__' || modelPath === 'constructor' || modelPath === 'prototype') {
+            throw new Error('Invalid model path');
+        }
+    
+        // Check if model is already loaded using safe property access
+        if (Object.prototype.hasOwnProperty.call(this.loadedModels, modelPath)) {
             Logger.info(`Using already loaded model ${modelPath}`);
-            this.loadedModels[modelPath].lastUsed = Date.now();
-            return this.loadedModels[modelPath].model;
+            const modelEntry = this.loadedModels[modelPath];
+            
+            // Safely update lastUsed timestamp
+            Object.defineProperty(modelEntry, 'lastUsed', {
+                value: Date.now(),
+                writable: true,
+                enumerable: true,
+                configurable: true
+            });
+            
+            return modelEntry.model;
         }
 
         // Check availability and model type

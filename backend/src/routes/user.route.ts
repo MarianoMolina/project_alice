@@ -8,6 +8,7 @@ import { AuthRequest } from '../interfaces/auth.interface';
 import axios from 'axios';
 import Logger from '../utils/logger';
 import { purgeAndReinitialize } from '../utils/purge.utils';
+import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 
 const router: Router = express.Router();
 
@@ -26,6 +27,7 @@ const userSelfOrAdmin = (req: AuthRequest, res: Response, next: Function) => {
 };
 
 // Public routes
+router.use(rateLimiterMiddleware);
 
 // Register a new user
 router.post('/register', async (req: Request, res: Response) => {

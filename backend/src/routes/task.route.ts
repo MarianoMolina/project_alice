@@ -3,9 +3,11 @@ import Task from '../models/task.model';
 import auth from '../middleware/auth.middleware';
 import { ITaskDocument } from '../interfaces/task.interface';
 import { Router } from 'express';
+import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 
 const router = Router();
 router.use(auth);
+router.use(rateLimiterMiddleware);
 const generatedRoutes = createRoutes<ITaskDocument, 'Task'>(Task, 'Task');
 router.use('/', generatedRoutes);
 

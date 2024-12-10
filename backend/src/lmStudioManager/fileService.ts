@@ -4,12 +4,57 @@ import { MessageContent } from "./lmStudio.types";
 export class FileProcessingError extends Error {
     constructor(
         message: string,
-        public readonly code: 'FETCH_FAILED' | 'INVALID_URL' | 'UNSUPPORTED_TYPE' | 'UPLOAD_FAILED' | 'INVALID_BASE64'
+        public readonly code: 
+            | 'FETCH_FAILED' 
+            | 'INVALID_URL' 
+            | 'INVALID_PROTOCOL'
+            | 'DOMAIN_NOT_ALLOWED'
+            | 'FILE_TOO_LARGE'
+            | 'INVALID_MIME_TYPE'
+            | 'UNSUPPORTED_TYPE' 
+            | 'UPLOAD_FAILED' 
+            | 'INVALID_BASE64'
+            | 'REDIRECT_ERROR'
+            | 'TIMEOUT_ERROR'
+            | 'NETWORK_ERROR'
     ) {
         super(message);
         this.name = 'FileProcessingError';
+        
+        // Maintain proper stack traces for where our error was thrown
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, FileProcessingError);
+        }
+    }
+
+    public toJSON() {
+        return {
+            name: this.name,
+            message: this.message,
+            code: this.code,
+            stack: this.stack
+        };
     }
 }
+
+// Optional: Add error code constants for better maintainability
+export const FileProcessingErrorCode = {
+    FETCH_FAILED: 'FETCH_FAILED',
+    INVALID_URL: 'INVALID_URL',
+    INVALID_PROTOCOL: 'INVALID_PROTOCOL',
+    DOMAIN_NOT_ALLOWED: 'DOMAIN_NOT_ALLOWED',
+    FILE_TOO_LARGE: 'FILE_TOO_LARGE',
+    INVALID_MIME_TYPE: 'INVALID_MIME_TYPE',
+    UNSUPPORTED_TYPE: 'UNSUPPORTED_TYPE',
+    UPLOAD_FAILED: 'UPLOAD_FAILED',
+    INVALID_BASE64: 'INVALID_BASE64',
+    REDIRECT_ERROR: 'REDIRECT_ERROR',
+    TIMEOUT_ERROR: 'TIMEOUT_ERROR',
+    NETWORK_ERROR: 'NETWORK_ERROR'
+} as const;
+
+// Type for error codes
+export type FileProcessingErrorCode = typeof FileProcessingErrorCode[keyof typeof FileProcessingErrorCode];
 
 export interface FileServiceConfig {
     maxFileSize?: number;
@@ -112,22 +157,95 @@ export class FileService {
         mimeType: string;
         data: Uint8Array;
     }> {
+        // URL validation and sanitization
+        let parsedUrl: URL;
+        try {
+            parsedUrl = new URL(url);
+        } catch {
+            throw new FileProcessingError('Invalid URL format', 'INVALID_URL');
+        }
+    
+        // Whitelist of allowed protocols
+        const allowedProtocols = ['https:', 'http:'];
+        if (!allowedProtocols.includes(parsedUrl.protocol)) {
+            throw new FileProcessingError(
+                'Invalid URL protocol. Only HTTP and HTTPS are allowed',
+                'INVALID_PROTOCOL'
+            );
+        }
+    
+        // Optional: Whitelist of allowed domains
+        const allowedDomains = [
+            'trusted-domain.com',
+            'api.trusted-domain.com'
+            // Add your whitelist of domains
+        ];
+        if (!allowedDomains.includes(parsedUrl.hostname)) {
+            throw new FileProcessingError(
+                'Domain not allowed',
+                'DOMAIN_NOT_ALLOWED'
+            );
+        }
+    
+        // Optional: Size limit for downloads
+        const maxSize = 50 * 1024 * 1024; // 50MB example limit
+    
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), timeoutMs);
-
+        
         try {
-            const response = await fetch(url, { signal: controller.signal });
+            const response = await fetch(parsedUrl.toString(), {
+                signal: controller.signal,
+                headers: {
+                    'Accept': 'application/json, application/octet-stream',
+                    'Accept-Encoding': 'gzip, deflate, br'
+                },
+                // Use redirect option to control redirect behavior
+                redirect: 'follow',
+            });
+    
             if (!response.ok) {
                 throw new FileProcessingError(
                     `Failed to fetch file: ${response.status} ${response.statusText}`,
                     'FETCH_FAILED'
                 );
             }
-
+    
+            // Check content length if available
+            const contentLength = response.headers.get('content-length');
+            if (contentLength && parseInt(contentLength) > maxSize) {
+                throw new FileProcessingError(
+                    'File size exceeds maximum allowed size',
+                    'FILE_TOO_LARGE'
+                );
+            }
+    
             const mimeType = response.headers.get('content-type')?.split(';')[0] || 'application/octet-stream';
+            
+            // Optional: Whitelist of allowed MIME types
+            const allowedMimeTypes = [
+                'application/json',
+                'application/octet-stream',
+                // Add your allowed MIME types
+            ];
+            if (!allowedMimeTypes.includes(mimeType)) {
+                throw new FileProcessingError(
+                    'Unsupported file type',
+                    'INVALID_MIME_TYPE'
+                );
+            }
+    
             const arrayBuffer = await response.arrayBuffer();
             const data = new Uint8Array(arrayBuffer);
-
+    
+            // Double-check actual size after download
+            if (data.length > maxSize) {
+                throw new FileProcessingError(
+                    'File size exceeds maximum allowed size',
+                    'FILE_TOO_LARGE'
+                );
+            }
+    
             return { mimeType, data };
         } catch (error) {
             if (error instanceof FileProcessingError) throw error;

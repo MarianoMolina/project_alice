@@ -5,6 +5,7 @@ import { AuthRequest } from '../interfaces/auth.interface';
 import { ChatCompletionParams, CompletionParams } from '../lmStudioManager/lmStudio.types';
 import { LMStudioRouteManager } from '../lmStudioManager/lmStudioOrchestrator';
 import { CreateEmbeddingParams } from '../lmStudioManager/lmStudio.utils';
+import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 
 const router: Router = express.Router();
 const lmStudioManager = new LMStudioRouteManager();
@@ -28,6 +29,7 @@ const handleErrors = (res: Response, error: any) => {
 
 // All routes require authentication
 router.use(auth);
+router.use(rateLimiterMiddleware);
 
 // List all available models
 router.get('/v1/models', async (_req: AuthRequest, res: Response) => {

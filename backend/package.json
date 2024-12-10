@@ -19,6 +19,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": ">=4.20.0",
+    "express-rate-limit": "^7.4.1",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "8.8.3",
     "mongoose-autopopulate": "^1.1.0",

@@ -4,9 +4,11 @@ import auth from '../middleware/auth.middleware';
 import { IUserInteractionDocument } from '../interfaces/userInteraction.interface';
 import { Router } from 'express';
 import { createUserInteraction, updateUserInteraction } from '../utils/userInteraction.utils';
+import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 
 const router = Router();
 router.use(auth);
+router.use(rateLimiterMiddleware);
 const generatedRoutes = createRoutes<IUserInteractionDocument, 'UserInteraction'>(UserInteraction, 'UserInteraction', {
     createItem: async (data, userId) => {
         return await createUserInteraction(data, userId);
