@@ -6,63 +6,124 @@ import sys
 import logging
 from pathlib import Path
 import signal
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
+
+class DirectoryManager:
+    """Handles creation and permission setting for directories"""
+    def __init__(self, logger: Optional[logging.Logger] = None):
+        self.system = platform.system()
+        self.logger = logger or logging.getLogger(__name__)
+
+    def ensure_directory(self, directory: str | Path) -> bool:
+        """
+        Create a directory and set appropriate permissions.
+        Returns True if successful, False otherwise.
+        """
+        try:
+            Path(directory).mkdir(exist_ok=True)
+            if self.system == "Windows":
+                try:
+                    subprocess.run(
+                        ["icacls", str(directory), "/grant", "Everyone:F", "/T"],
+                        check=True,
+                        capture_output=True
+                    )
+                except subprocess.CalledProcessError as e:
+                    self.logger.error(f"Failed to set permissions for {directory}: {e}")
+                    return False
+            else:
+                try:
+                    os.chmod(str(directory), 0o777)
+                except OSError as e:
+                    self.logger.error(f"Failed to set permissions for {directory}: {e}")
+                    return False
+            return True
+        except Exception as e:
+            self.logger.error(f"Failed to create directory {directory}: {e}")
+            return False
+
+    def ensure_directories(self, directories: List[str | Path]) -> bool:
+        """
+        Create multiple directories and set appropriate permissions.
+        Returns True if all directories were created successfully, False otherwise.
+        """
+        return all(self.ensure_directory(directory) for directory in directories)
 
 class THPHandler:
     def __init__(self, logger):
         self.logger = logger
-        
-    def disable_thp(self):
-        """Attempt to disable Transparent Huge Pages"""
-        if platform.system() != "Linux":
-            self.logger.info("THP handling only necessary on Linux systems")
-            return True
-            
+        self.system = platform.system()
+
+    def _get_current_thp_setting(self):
+        """Check current THP setting to see if changes are needed"""
         try:
-            # Check if we have sudo access
-            result = subprocess.run(
-                ["sudo", "-n", "true"], 
-                capture_output=True, 
-                check=False
-            )
-            has_sudo = result.returncode == 0
+            if self.system == "Linux":
+                result = subprocess.run(
+                    ["cat", "/sys/kernel/mm/transparent_hugepage/enabled"],
+                    capture_output=True,
+                    text=True
+                )
+            elif self.system in ["Windows", "Darwin"]:  # Both use Linux VMs for Docker
+                result = subprocess.run(
+                    ["wsl" if self.system == "Windows" else "docker", "-d", "docker-desktop", "cat", "/sys/kernel/mm/transparent_hugepage/enabled"],
+                    capture_output=True,
+                    text=True
+                )
             
-            if has_sudo:
-                commands = [
-                    "echo madvise | sudo tee /sys/kernel/mm/transparent_hugepage/enabled",
-                    "echo madvise | sudo tee /sys/kernel/mm/transparent_hugepage/defrag"
-                ]
-                
-                for cmd in commands:
-                    result = subprocess.run(
-                        cmd,
-                        shell=True,
-                        capture_output=True,
-                        text=True
-                    )
-                    if result.returncode != 0:
-                        self.logger.error(f"Failed to set THP: {result.stderr}")
-                        return False
-                        
-                self.logger.info("Successfully configured THP settings")
-                return True
+            return result.returncode == 0 and "[madvise]" in result.stdout
+            
+        except Exception as e:
+            self.logger.error(f"Failed to check THP setting: {e}")
+            return False
+
+    def disable_thp(self):
+        """Configure Transparent Huge Pages to use madvise mode"""
+        if self._get_current_thp_setting():
+            self.logger.info("THP already configured correctly")
+            return True
+
+        self.logger.info("Configuring THP settings...")
+        
+        try:
+            if self.system == "Linux":
+                cmd_prefix = []
+            elif self.system == "Windows":
+                cmd_prefix = ["wsl", "-d", "docker-desktop"]
+            elif self.system == "Darwin":
+                cmd_prefix = ["docker", "run", "--privileged", "ubuntu"]
             else:
-                self.logger.warning("No sudo access to configure THP. Redis performance may be affected")
+                self.logger.error(f"Unsupported operating system: {self.system}")
                 return False
-                
+
+            commands = [
+                cmd_prefix + ["sh", "-c", "echo madvise | tee /sys/kernel/mm/transparent_hugepage/enabled"],
+                cmd_prefix + ["sh", "-c", "echo madvise | tee /sys/kernel/mm/transparent_hugepage/defrag"]
+            ]
+
+            for cmd in commands:
+                result = subprocess.run(cmd, capture_output=True, text=True)
+                if result.returncode != 0:
+                    self.logger.error(f"Failed to set THP: {result.stderr}")
+                    return False
+
+            return self._get_current_thp_setting()
+
         except Exception as e:
             self.logger.error(f"Error configuring THP: {e}")
             return False
         
 class LMStudioPathFinder:
+    """
+    Handles LM Studio CLI discovery, setup, and server management.
+    """
     def __init__(self, logger: Optional[logging.Logger] = None):
         self.logger = logger or logging.getLogger(__name__)
         self.system = platform.system()
-
-    def get_cli_file_path(self) -> Optional[Path]:
-        """Find the LM Studio CLI executable file"""
-        self.logger.debug("Searching for LM Studio CLI file...")
+        self.cli_path: Optional[Path] = None
+        self._find_cli()
         
+    def _find_cli(self) -> None:
+        """Initialize by looking for the CLI in standard locations"""
         if self.system == "Windows":
             search_paths = [
                 Path(os.path.expandvars(r"%USERPROFILE%\.cache\lm-studio\bin\lms.exe"))
@@ -77,41 +138,58 @@ class LMStudioPathFinder:
         for path in search_paths:
             self.logger.debug(f"Checking path: {path}")
             if path.exists() and path.is_file():
-                self.logger.info(f"Found LM Studio CLI file at: {path}")
-                return path
+                self.cli_path = path
+                self.logger.debug(f"Found LM Studio CLI at: {path}")
+                break
 
-        self.logger.warning("LM Studio CLI file not found in any standard location")
-        return None
-
-    def verify_cli_command(self) -> bool:
-        """Verify if 'lms' is available as a command"""
-        self.logger.debug("Verifying LM Studio CLI command...")
+    def _run_command(self, args: list[str], timeout: int = 5) -> Tuple[bool, str]:
+        """
+        Run an LMS command and return success status and output.
         
+        Args:
+            args: Command arguments to pass to lms
+            timeout: Command timeout in seconds
+            
+        Returns:
+            Tuple of (success boolean, output/error string)
+        """
         try:
+            command = [str(self.cli_path)] if self.cli_path else ['lms']
+            command.extend(args)
+            
             result = subprocess.run(
-                ['lms', 'version'],
+                command,
                 capture_output=True,
-                text=True,
-                timeout=5
+                encoding='utf-8',
+                errors='replace',
+                timeout=timeout
             )
             
             if result.returncode == 0:
-                self.logger.info(f"LMS CLI confirmed - version:\n{result.stdout.strip()}")
-                return True
-            else:
-                self.logger.warning(f"LMS CLI command check failed: {result.stderr}")
-                return False
+                return True, result.stdout
+            return False, result.stderr
                 
+        except subprocess.TimeoutExpired:
+            return False, f"Command timed out after {timeout} seconds"
         except Exception as e:
-            self.logger.warning(f"LMS CLI command check failed: {str(e)}")
-            return False
+            return False, str(e)
 
-    def bootstrap_cli(self, cli_path: Path) -> bool:
-        """Attempt to bootstrap the LMS CLI"""
-        self.logger.info("Attempting to bootstrap LMS CLI...")
-        try:
-            bootstrap_cmd = ['cmd', '/c', str(cli_path), 'bootstrap'] if self.system == "Windows" else [str(cli_path), 'bootstrap']
+    def bootstrap(self) -> bool:
+        """
+        Bootstrap the LMS CLI if needed.
+        """
+        if not self.cli_path:
+            self.logger.error("Cannot bootstrap - CLI path not found")
+            return False
             
+        self.logger.info("Attempting to bootstrap LMS CLI...")
+        
+        # Windows needs special handling for bootstrap command
+        bootstrap_cmd = ['bootstrap']
+        if self.system == "Windows":
+            bootstrap_cmd = ['cmd', '/c', str(self.cli_path), 'bootstrap']
+            
+        try:
             result = subprocess.run(
                 bootstrap_cmd,
                 capture_output=True,
@@ -122,162 +200,181 @@ class LMStudioPathFinder:
             if result.returncode == 0:
                 self.logger.info("Bootstrap completed successfully")
                 return True
-            else:
-                self.logger.error(f"Bootstrap failed: {result.stderr}")
-                return False
                 
+            self.logger.error(f"Bootstrap failed: {result.stderr}")
+            return False
+            
         except Exception as e:
             self.logger.error(f"Bootstrap failed: {str(e)}")
             return False
 
-    def setup_lms_cli(self) -> bool:
-        """Orchestrates the LMS CLI setup process"""
-        # Check for CLI file
-        cli_path = self.get_cli_file_path()
-        if not cli_path:
-            self.logger.error("LMS CLI file not found - cannot proceed")
-            return False
-
-        # Check if CLI already works
-        if self.verify_cli_command():
-            self.logger.info("LMS CLI is already working")
-            return True
-
-        # Attempt bootstrap
-        if not self.bootstrap_cli(cli_path):
-            self.logger.error("Bootstrap failed - cannot proceed")
-            return False
-
-        # Verify CLI works after bootstrap
-        if self.verify_cli_command():
-            self.logger.info("LMS CLI successfully set up")
-            return True
-        
-        self.logger.error("LMS CLI setup failed")
-        return False
-    
-    def _run_lms_command(self, command: list[str], timeout: int = 5) -> Tuple[bool, str]:
-        """Run an LMS CLI command and return success status and output"""
-        try:
-            result = subprocess.run(
-                command,
-                capture_output=True,
-                encoding='utf-8',
-                errors='replace',
-                timeout=timeout
-            )
-            return result.returncode == 0, result.stdout + result.stderr
-        except Exception as e:
-            self.logger.error(f"Command failed: {' '.join(command)}, error: {str(e)}")
-            return False, str(e)
-
-    def verify_cli_command(self) -> bool:
-        """Verify if 'lms' is available as a command"""
-        success, output = self._run_lms_command(['lms', 'version'])
+    def check_cli(self) -> bool:
+        """
+        Check if the CLI is working by running version command.
+        """
+        success, output = self._run_command(['version'])
         if success:
-            self.logger.info(f"LMS CLI command verified: {output}")
+            self.logger.debug(f"CLI check successful: {output}")
             return True
-        self.logger.warning("LMS CLI command verification failed")
+            
+        self.logger.debug("CLI check failed")
         return False
 
-    def check_server_status(self) -> bool:
-        """Check if the LMS server is running"""
-        success, output = self._run_lms_command(['lms', 'status'])
-        self.logger.debug(f"Server status check: {success} - {output}")
-        return success and "Server:  ON" in output
+    def check_server(self) -> bool:
+        """
+        Check if the LMS server is running.
+        """
+        success, output = self._run_command(['status'])
+        is_running = success and "Server:  ON" in output
+        
+        self.logger.debug(f"Server status check: {'running' if is_running else 'not running'}")
+        return is_running
 
-    def execute_server_start(self) -> bool:
-        """Execute the server start command"""
-        success, output = self._run_lms_command(['lms', 'server', 'start'], timeout=30)
-        if success and "Verification succeeded" in output:
-            self.logger.info("Server start command executed successfully")
+    def start_server(self) -> bool:
+        """
+        Attempt to start the LMS server.
+        """
+        if self.check_server():
+            self.logger.info("Server is already running")
             return True
-        self.logger.error(f"Server start failed: {output}")
-        return False
-
-    def start_lms_server(self) -> bool:
-        """Start the LMS server if it's not already running"""
-        self.logger.info("Checking LMS server status...")
-
-        if self.check_server_status():
-            self.logger.info("LMS server is already running")
-            return True
-
-        self.logger.debug("Server not running, attempting to start")
-        if not self.execute_server_start():
+            
+        self.logger.info("Starting LMS server...")
+        success, output = self._run_command(['server', 'start'], timeout=30)
+        
+        if not success:
+            self.logger.error(f"Failed to start server: {output}")
             return False
-
-        # Verify server started successfully
-        if self.check_server_status():
-            self.logger.info("Server start verified")
+            
+        # Verify server actually started
+        if self.check_server():
+            self.logger.info("Server started successfully")
             return True
-
-        self.logger.error("Server start verification failed")
+            
+        self.logger.error("Server start command succeeded but server is not running")
         return False
+
+    def setup(self) -> bool:
+        """
+        Complete setup process for LM Studio CLI and server.
+        
+        Returns:
+            bool: True if setup successful and server is running
+        """
+        # First verify CLI works
+        if not self.check_cli():
+            self.logger.info("CLI not working, attempting bootstrap...")
+            if not self.bootstrap() or not self.check_cli():
+                self.logger.error("Failed to setup CLI")
+                return False
+                
+        # Then handle server
+        if not self.start_server():
+            self.logger.error("Failed to start server")
+            return False
+            
+        return True
 
 class RunEnvironment:
     def __init__(self):
         self.system = platform.system()
-        self.logger = self._setup_logging()
         self.required_dirs = ["shared-uploads", "logs", "model_cache"]
+        
+        # Set up the logger first without any handlers
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.INFO)
+        
+        # Start with basic console logging
+        self._setup_basic_logging()
+        
+        # Initialize directory manager with our logger
+        self.dir_manager = DirectoryManager(self.logger)
+        
+        # Ensure logs directory exists and set up full logging
+        if self.dir_manager.ensure_directory("logs"):
+            self._setup_full_logging()
+        else:
+            self.logger.error("Failed to create logs directory. Continuing with basic logging.")
+            
+        # Initialize other components
         self.lm_studio = LMStudioPathFinder(self.logger)
         self.thp_handler = THPHandler(self.logger)
         
     def run(self):
         """Main execution flow."""
+        self.logger.info("=== Starting Project Alice ===")
+        self.logger.info("System detected: " + self.system)
         signal.signal(signal.SIGINT, self.cleanup)
         signal.signal(signal.SIGTERM, self.cleanup)
-
+        
         try:
+            # Setup directories first
+            self.logger.info("[Step 1/5] Setting up required directories...")
             self.setup_directories()
+            self.logger.info("[Step 1/5] [OK] Directories ready")
             
-            # Handle THP before starting Docker
-            if self.system == "Linux":
-                self.thp_handler.disable_thp()
-                
+            # Start Docker before THP configuration
+            self.logger.info("[Step 2/5] Initializing Docker...")
             self.start_docker()
             self.wait_for_docker()
-            if self.lm_studio.setup_lms_cli():
-                self.logger.info("LMS CLI setup succeeded")
-                if self.lm_studio.start_lms_server():
-                    self.logger.info("LMS server started successfully")
-                else:
-                    self.logger.warning("Failed to start LMS server")
-                self.logger.warning("LM Studio server not available, continuing without it...")
+            self.logger.info("[Step 2/5] [OK] Docker initialized")
             
+            # Configure THP after Docker is running
+            self.logger.info("[Step 3/5] Configuring Transparent Huge Pages...")
+            if not self.thp_handler.disable_thp():
+                self.logger.warning("[Step 3/5] [WARN] THP configuration failed - Redis performance may be affected")
+            else:
+                self.logger.info("[Step 3/5] [OK] THP configured")
+            
+            self.logger.info("[Step 4/5] Initializing LM Studio...")
+            if self.lm_studio.setup():
+                self.logger.info("[Step 4/5] [OK] LM Studio ready")
+            else:
+                self.logger.warning("[Step 4/5] [WARN] LM Studio unavailable - continuing without it")
+            
+            self.logger.info("[Step 5/5] Starting Docker project...")
             self.run_docker_compose()
+            
         except Exception as e:
-            self.logger.error(f"Run failed: {e}")
+            self.logger.error(f"[ERROR] Fatal error: {e}")
             self.cleanup(None, None)
-                    
-    def _setup_logging(self):
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(message)s',
-            handlers=[
-                logging.StreamHandler(sys.stdout),
-                logging.FileHandler('logs/run_script.log')
-            ]
-        )
-        return logging.getLogger(__name__)
+            
+        self.logger.info("=== Project Alice Running ===")
+
+    def _setup_basic_logging(self):
+        """Set up basic console logging for initial operations"""
+        # Clear any existing handlers
+        self.logger.handlers.clear()
+        
+        # Add console handler
+        console_handler = logging.StreamHandler(sys.stdout)
+        formatter = logging.Formatter('%(asctime)s - %(message)s')
+        console_handler.setFormatter(formatter)
+        self.logger.addHandler(console_handler)
+        
+    def _setup_full_logging(self):
+        """Set up full logging with both console and file handlers"""
+        # Clear existing handlers
+        self.logger.handlers.clear()
+            
+        # Configure new handlers
+        console_handler = logging.StreamHandler(sys.stdout)
+        file_handler = logging.FileHandler('logs/run_script.log')
+        
+        # Set format for both handlers
+        formatter = logging.Formatter('%(asctime)s - %(message)s')
+        console_handler.setFormatter(formatter)
+        file_handler.setFormatter(formatter)
+        
+        # Add handlers to logger
+        self.logger.addHandler(console_handler)
+        self.logger.addHandler(file_handler)        
 
     def setup_directories(self):
-        """Create and set permissions for required directories."""
-        self.logger.info("Setting up directories...")
-        for directory in self.required_dirs:
-            Path(directory).mkdir(exist_ok=True)
-            if self.system == "Windows":
-                try:
-                    subprocess.run(["icacls", directory, "/grant", "Everyone:F", "/T"], 
-                                 check=True, capture_output=True)
-                except subprocess.CalledProcessError as e:
-                    self.logger.error(f"Failed to set permissions for {directory}: {e}")
-            else:
-                try:
-                    os.chmod(directory, 0o777)
-                except OSError as e:
-                    self.logger.error(f"Failed to set permissions for {directory}: {e}")
-
+        """Create and set permissions for all required directories."""
+        if not self.dir_manager.ensure_directories(self.required_dirs):
+            self.logger.error("Failed to set up one or more required directories")
+            sys.exit(1)
+    
     def is_docker_running(self):
         """Check if Docker daemon is running."""
         try:
@@ -291,7 +388,6 @@ class RunEnvironment:
 
     def start_docker(self):
         """Start Docker based on platform."""
-        self.logger.info("Starting Docker...")
         try:
             if self.system == "Windows":
                 subprocess.Popen([r"C:\Program Files\Docker\Docker\Docker Desktop.exe"])
@@ -328,11 +424,13 @@ class RunEnvironment:
 
     def cleanup(self, signum, frame):
         """Cleanup handler for graceful shutdown."""
-        self.logger.info("Cleaning up...")
+        self.logger.info("=== Starting Cleanup ===")
         try:
             subprocess.run(["docker-compose", "down"], check=True)
+            self.logger.info("Successfully shut down all services")
         except subprocess.CalledProcessError as e:
             self.logger.error(f"Cleanup failed: {e}")
+        self.logger.info("=== Cleanup Complete ===")
         sys.exit(0)
 
 if __name__ == "__main__":
