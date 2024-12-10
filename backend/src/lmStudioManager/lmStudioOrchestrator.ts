@@ -27,7 +27,7 @@ export class LMStudioRouteManager {
 
     private async getModelConfig(modelId: string): Promise<{
         modelPath: string;
-        modelConfig: IModelConfig;
+        modelConfig: Partial<IModelConfig>;
         modelType: ModelType;
     }> {
         const modelInfo = await Model.findById(modelId);
@@ -37,14 +37,14 @@ export class LMStudioRouteManager {
 
         return {
             modelPath: modelInfo.model_name,
-            modelConfig: modelInfo.config_obj,
+            modelConfig: modelInfo.config_obj || {},
             modelType: modelInfo.model_type
         };
     }
 
-    private createModelConfig(config: IModelConfig, modelType: ModelType): LLMLoadModelConfig | EmbeddingLoadModelConfig {
+    private createModelConfig(config: Partial<IModelConfig>, modelType: ModelType): LLMLoadModelConfig | EmbeddingLoadModelConfig {
         const baseConfig = {
-            contextLength: config.ctx_size,
+            contextLength: config.ctx_size || 4096,
             seed: config.seed ?? undefined,
             gpuOffload: {
                 ratio: "max",
@@ -112,7 +112,7 @@ export class LMStudioRouteManager {
 
                 return await this.lmStudioManager.generateChatCompletion(
                     updatedParams,
-                    modelConfig.prompt_config,
+                    modelConfig?.prompt_config,
                     this.createModelConfig(modelConfig, modelType)
                 );
             } catch (error) {

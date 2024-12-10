@@ -88,10 +88,6 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
             handleDelete(item);
         }
     }, [item, handleDelete]);
-
-    // Get default values from the default form
-    const defaultForm = getDefaultModelForm();
-
     return (
         <GenericFlexibleView
             elementType='Model'

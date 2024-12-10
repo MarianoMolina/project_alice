@@ -8,6 +8,7 @@ import { AliceChat } from '../../../../types/ChatTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
 import { ChatComponentProps } from '../../../../types/ChatTypes';
 import ChatMessagesFullView from './ChatMessagesFullView';
+import Logger from '../../../../utils/Logger';
 
 type BaseChatMode = BaseDbElementProps<AliceChat>['mode'];
 type ExtendedChatMode = 'list' | 'shortList' | 'card' | 'full' | 'table';
@@ -15,6 +16,7 @@ type EnhancedChatMode = BaseChatMode | ExtendedChatMode;
 
 interface EnhancedChatProps extends Omit<ChatComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode' | 'handleDelete'> {
   mode: EnhancedChatMode;
+  item?: Partial<AliceChat> | null;
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: AliceChat) => Promise<void>;
@@ -43,6 +45,7 @@ const EnhancedChat: React.FC<EnhancedChatProps> = (props) => {
       showHeaders: props.showHeaders,
       showRegenerate: props.showRegenerate,
     };
+    Logger.debug('EnhancedChat', commonProps);
 
     switch (props.mode) {
       case 'create':
@@ -72,6 +75,7 @@ const EnhancedChat: React.FC<EnhancedChatProps> = (props) => {
     <BaseDbElement<AliceChat>
       collectionName="chats"
       itemId={props.itemId}
+      partialItem={props.item || undefined}
       mode={baseDbMode}
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}

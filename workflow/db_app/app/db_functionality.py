@@ -114,4 +114,7 @@ class BackendFunctionalityAPI(BackendAPI):
         apis = await self.get_apis()
         for api in apis.values():
             api_manager.add_api(api)
+        user_token = self.user_data.get('user_token')
+        if user_token:
+            api_manager.update_lmstudio_token(user_token)
         return api_manager

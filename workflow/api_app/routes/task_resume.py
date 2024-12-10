@@ -1,10 +1,8 @@
-# task_resume.py
-
 from fastapi import APIRouter, Depends, HTTPException
 from workflow.api_app.util.dependencies import get_db_app, get_queue_manager
 from workflow.api_app.util.utils import TaskResumeRequest
 from workflow.util import LOGGER
-from workflow.core import AliceTask, TaskResponse
+from workflow.core import AliceTask, TaskResponse, APIManager
 
 router = APIRouter()
 
@@ -60,8 +58,8 @@ async def resume_task_endpoint(
             task: AliceTask = task[task_id]
 
             # Get API manager
-            api_manager = await db_app.api_setter()
-
+            api_manager: APIManager = await db_app.api_setter()
+        
             # Combine original inputs with any additional inputs
             inputs = original_response.task_inputs or {}
             # TODO: Add option to pass additional inputs on restart on the frontend

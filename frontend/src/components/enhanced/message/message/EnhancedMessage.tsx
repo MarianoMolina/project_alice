@@ -15,6 +15,7 @@ type EnhancedMessageMode = BaseMessageMode | ExtendedMessageMode;
 
 interface EnhancedMessageProps extends Omit<MessageComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
   mode: EnhancedMessageMode;
+  item?: Partial<MessageType> | null;
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: MessageType) => void;
@@ -72,6 +73,7 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = (props) => {
       collectionName="messages"
       itemId={props.itemId}
       mode={baseDbMode}
+      partialItem={props.item || undefined}
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}
       onSave={props.onSave}

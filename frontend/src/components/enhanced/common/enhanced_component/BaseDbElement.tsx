@@ -99,6 +99,7 @@ export interface BaseDbElementProps<T extends CollectionType[CollectionName]> {
 export interface BaseDbElementProps<T extends CollectionType[CollectionName]> {
   collectionName: CollectionName;
   itemId?: string;
+  partialItem?: Partial<T>;
   mode: 'create' | 'view' | 'edit';
   fetchAll: boolean;
   isInteractable?: boolean;
@@ -118,6 +119,7 @@ export interface BaseDbElementProps<T extends CollectionType[CollectionName]> {
 function BaseDbElement<T extends CollectionType[CollectionName]>({
   collectionName,
   itemId,
+  partialItem,
   mode,
   fetchAll,
   isInteractable = false,
@@ -142,7 +144,7 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
         const data = await fetchItem(collectionName, itemId);
         setItem(data as T);
       } else if (mode === 'create') {
-        setItem({} as T);
+        setItem(partialItem as T || {} as T);
       }
       setError(null);
     } catch (err) {
@@ -151,7 +153,7 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
     } finally {
       setLoading(false);
     }
-  }, [collectionName, itemId, mode, fetchAll, fetchItem]);
+  }, [collectionName, itemId, mode, fetchAll, fetchItem, partialItem]);
 
   useEffect(() => {
     fetchData();
@@ -191,24 +193,6 @@ function BaseDbElement<T extends CollectionType[CollectionName]>({
       });
     };
   }, [collectionName, itemId, fetchAll, fetchData]);
-
-  useEffect(() => {
-    if (mode !== 'view') Logger.debug('[BaseDbElement] Effect triggered', {
-      collectionName,
-      itemId,
-      mode,
-      fetchAll
-    });
-    
-    return () => {
-      if (mode !== 'view') Logger.debug('[BaseDbElement] Effect cleanup', {
-        collectionName,
-        itemId,
-        mode,
-        fetchAll
-      });
-    };
-  }, [collectionName, itemId, mode, fetchAll]);
   
   // Memoize handlers to prevent unnecessary re-renders
   const handleChange = useCallback(

@@ -14,6 +14,7 @@ type EnhancedParameterMode = BaseParameterMode | ExtendedParameterMode;
 
 interface EnhancedParameterProps extends Omit<ParameterComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
   mode: EnhancedParameterMode;
+  item?: Partial<ParameterDefinition> | null;
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: ParameterDefinition) => void;
@@ -69,6 +70,7 @@ const EnhancedParameter: React.FC<EnhancedParameterProps> = (props) => {
       collectionName="parameters"
       itemId={props.itemId}
       mode={baseDbMode}
+      partialItem={props.item || undefined}
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}
       onSave={props.onSave}

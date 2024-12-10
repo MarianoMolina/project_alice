@@ -47,7 +47,7 @@ router.get('/v1/models', async (_req: AuthRequest, res: Response) => {
 router.post('/v1/chat/completions', async (req: AuthRequest, res: Response) => {
   try {
     const params: ChatCompletionParams = req.body;
-    const modelId = req.query.model_id as string;
+    const modelId = params.model as string;
 
     if (!modelId) {
       return res.status(400).json({ error: 'model_id query parameter is required' });
@@ -96,7 +96,7 @@ router.post('/v1/chat/completions', async (req: AuthRequest, res: Response) => {
 router.post('/v1/completions', async (req: AuthRequest, res: Response) => {
   try {
     const params: CompletionParams = req.body;
-    const modelId = req.query.model_id as string;
+    const modelId = params.model as string;
 
     if (!modelId) {
       return res.status(400).json({ error: 'model_id query parameter is required' });
@@ -145,7 +145,7 @@ router.post('/v1/completions', async (req: AuthRequest, res: Response) => {
 router.post('/v1/embeddings', async (req: AuthRequest, res: Response) => {
   try {
     const params: CreateEmbeddingParams = req.body;
-    const modelId = req.query.model_id as string;
+    const modelId = params.model as string;
 
     if (!modelId) {
       return res.status(400).json({ error: 'model_id query parameter is required' });

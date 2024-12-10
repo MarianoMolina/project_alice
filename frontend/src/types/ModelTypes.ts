@@ -32,7 +32,7 @@ export interface AliceModel extends BaseDatabaseObject {
     model_name: string;
     model_type: ModelType;
     api_name: ApiName;
-    config_obj: ModelConfig;
+    config_obj?: ModelConfig;
 }
 
 export const convertToAliceModel = (data: any): AliceModel => {
@@ -42,20 +42,7 @@ export const convertToAliceModel = (data: any): AliceModel => {
         model_name: data?.model_name || '',
         model_type: data?.model_type || 'chat',
         api_name: data?.api_name || 'lm_studio',
-        config_obj: data?.config_obj || {
-            ctx_size: 4096,
-            temperature: 0.7,
-            seed: null,
-            use_cache: true,
-            prompt_config: {
-                bos: '<|im_start|>',
-                eos: '<|im_end|>',
-                system_role: 'system',
-                user_role: 'user',
-                assistant_role: 'assistant',
-                tool_role: 'tool'
-            }
-        },
+        config_obj: data?.config_obj || {},
     };
 };
 

@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
 from workflow.api_app.util.utils import deep_api_check, ChatResponseRequest
 from workflow.api_app.util.dependencies import get_db_app, get_queue_manager
 from workflow.util import LOGGER

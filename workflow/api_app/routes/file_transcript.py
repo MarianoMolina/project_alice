@@ -1,10 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
-from typing import Optional
 from workflow.api_app.util.dependencies import get_db_app, get_queue_manager
 from workflow.api_app.util.utils import FileTranscriptRequest
 from workflow.util import LOGGER
 from workflow.core import FileReference, AliceAgent
-from workflow.core.data_structures import FileType
 
 router = APIRouter()
 

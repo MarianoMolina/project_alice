@@ -65,10 +65,19 @@ const ChatAlice: React.FC = () => {
   }, []);
 
   const filteredPastChats = useMemo(() => {
-    if (!selectedApiProvider) return pastChats;
-    return pastChats.filter(chat => {
-      const chatModel = chat.alice_agent.models?.chat;
-      return chatModel && chatModel.api_name === selectedApiProvider;
+    // First filter the chats based on API provider
+    const filtered = !selectedApiProvider 
+      ? pastChats 
+      : pastChats.filter(chat => {
+          const chatModel = chat.alice_agent.models?.chat;
+          return chatModel && chatModel.api_name === selectedApiProvider;
+        });
+    
+    // Then sort by updatedAt in descending order
+    return filtered.sort((a, b) => {
+      const dateA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+      const dateB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+      return dateB - dateA;
     });
   }, [pastChats, selectedApiProvider]);
 

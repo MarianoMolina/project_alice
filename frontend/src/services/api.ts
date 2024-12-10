@@ -1,4 +1,4 @@
-import { dbAxiosInstance, taskAxiosInstance } from './axiosInstance';
+import { dbAxiosInstance, dbAxiosInstanceLMS, taskAxiosInstance } from './axiosInstance';
 import { AliceChat, convertToAliceChat } from '../types/ChatTypes';
 import { getDefaultMessageForm, MessageType } from '../types/MessageTypes';
 import { TaskResponse, convertToTaskResponse } from '../types/TaskResponseTypes';
@@ -10,6 +10,62 @@ import { converters } from '../utils/Converters';
 import { InteractionOwnerType, UserInteraction } from '../types/UserInteractionTypes';
 import { setupWebSocketConnection } from '../utils/WebSocketUtils';
 
+export interface LMStudioModel {
+  id: string;
+  object: 'model';
+  created: number;
+  owned_by: string;
+  root: string;
+  parent: null;
+  permission: string[];
+  type: string;
+  is_loaded: boolean;
+}
+function isValidLMStudioModel(model: any): model is LMStudioModel {
+  return (
+    typeof model === 'object' &&
+    model !== null &&
+    typeof model.id === 'string' &&
+    typeof model.type === 'string' &&
+    typeof model.is_loaded === 'boolean'
+  );
+}
+/**
+ * Fetches available models from LM Studio backend
+ * @returns Promise<LMStudioModel[]> Array of available models
+ */
+export const fetchLMStudioModels = async (): Promise<LMStudioModel[]> => {
+  try {
+    Logger.debug('Fetching LM Studio models');
+    const response = await dbAxiosInstanceLMS.get('/lm_studio/v1/models');
+
+    // Handle the nested data structure
+    const modelList = response.data.data;
+    if (!Array.isArray(modelList)) {
+      Logger.debug('Invalid response format:', response.data);
+      throw new Error('Invalid response format: expected array of models in data field');
+    }
+
+    // We're getting the models directly from the response now
+    const models: LMStudioModel[] = modelList.map(model => ({
+      id: model.id,
+      object: model.object,
+      created: model.created,
+      owned_by: 'local',
+      root: model.id,
+      parent: null,
+      permission: [],
+      type: model.object || 'unknown',
+      is_loaded: true // Since we got it in the list, we'll assume it's loaded
+    }));
+
+    Logger.debug('Fetched LM Studio models:', models);
+    return models;
+  } catch (error) {
+    Logger.error('Error fetching LM Studio models:', error);
+    throw error;
+  }
+};
 export const fetchItem = async <T extends CollectionName>(
   collectionName: T,
   itemId: string | null = null

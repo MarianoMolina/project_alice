@@ -14,6 +14,7 @@ type EnhancedApiMode = BaseApiMode | ExtendedApiMode;
 
 interface EnhancedApiProps extends Omit<ApiComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
   mode: EnhancedApiMode;
+  item?: Partial<API> | null;
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: API) => void;
@@ -68,6 +69,7 @@ const EnhancedAPI: React.FC<EnhancedApiProps> = (props: EnhancedApiProps) => {
     <BaseDbElement<API>
       collectionName="apis"
       itemId={props.itemId}
+      partialItem={props.item || undefined}
       mode={baseDbMode}
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}

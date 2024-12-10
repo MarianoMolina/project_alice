@@ -15,6 +15,7 @@ type EnhancedAPIConfigMode = BaseAPIConfigMode | ExtendedAPIConfigMode;
 interface EnhancedAPIConfigProps extends Omit<APIConfigComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
   mode: EnhancedAPIConfigMode;
   itemId?: string;
+  item?: Partial<APIConfig> | null;
   fetchAll: boolean;
   onSave?: (savedItem: APIConfig) => void;
   onDelete?: (deletedItem: APIConfig) => Promise<void>;
@@ -70,6 +71,7 @@ const EnhancedAPIConfig: React.FC<EnhancedAPIConfigProps> = (props) => {
     <BaseDbElement<APIConfig>
       collectionName="apiconfigs"
       itemId={props.itemId}
+      partialItem={props.item || undefined}
       mode={baseDbMode}
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}

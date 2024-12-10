@@ -14,20 +14,33 @@ export const WORKFLOW_PORT = process.env.WORKFLOW_PORT || 8000;
 // const DB_API_BASE_URL = `http://${BACKEND_HOST}:${BACKEND_PORT_DOCKER}/api`;
 // const WORKFLOW_API_BASE_URL = `http://${WORKFLOW_HOST}:${WORKFLOW_PORT_DOCKER}`;
 
-export const BACKEND_URL = `http://localhost:${BACKEND_PORT}/api`;
+export const BACKEND_URL = `http://localhost:${BACKEND_PORT}`;
+export const BACKEND_API_URL = `http://localhost:${BACKEND_PORT}/api`;
 export const WORKFLOW_URL = `http://localhost:${WORKFLOW_PORT}`;
-
 // Create axios instance for database API
-const dbAxiosInstance = axios.create({
+const dbAxiosInstanceLMS = axios.create({
   baseURL: BACKEND_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Create axios instance for task API
-const taskAxiosInstance = axios.create({
-  baseURL: WORKFLOW_URL,
+// Add a request interceptor to dbAxiosInstance
+dbAxiosInstanceLMS.interceptors.request.use(
+  (config) => {
+    const token = getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+
+// Create axios instance for database API
+const dbAxiosInstance = axios.create({
+  baseURL: BACKEND_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -45,6 +58,14 @@ dbAxiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Create axios instance for task API
+const taskAxiosInstance = axios.create({
+  baseURL: WORKFLOW_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
 // Add a request interceptor to taskAxiosInstance
 taskAxiosInstance.interceptors.request.use(
   (config) => {
@@ -59,4 +80,4 @@ taskAxiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-export { dbAxiosInstance, taskAxiosInstance };
+export { dbAxiosInstance, taskAxiosInstance, dbAxiosInstanceLMS };

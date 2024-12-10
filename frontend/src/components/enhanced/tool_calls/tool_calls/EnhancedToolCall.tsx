@@ -13,6 +13,7 @@ type EnhancedToolCallMode = BaseToolCallMode | ExtendedToolCallMode;
 
 interface EnhancedToolCallProps extends Omit<ToolCallComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
   mode: EnhancedToolCallMode;
+  item?: Partial<ToolCall> | null;
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: ToolCall) => void;
@@ -67,6 +68,7 @@ const EnhancedToolCall: React.FC<EnhancedToolCallProps> = (props) => {
     <BaseDbElement<ToolCall>
       collectionName="toolcalls"
       itemId={props.itemId}
+      partialItem={props.item || undefined}
       mode={baseDbMode}
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}

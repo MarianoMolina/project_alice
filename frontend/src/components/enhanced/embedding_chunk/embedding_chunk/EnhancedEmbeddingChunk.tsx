@@ -12,6 +12,7 @@ type EnhancedEmbeddingChunkMode = BaseEmbeddingChunkMode | ExtendedEmbeddingChun
 
 interface EnhancedEmbeddingChunkProps extends Omit<EmbeddingChunkComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
   mode: EnhancedEmbeddingChunkMode;
+  item?: Partial<EmbeddingChunk> | null;
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: EmbeddingChunk) => void;
@@ -65,6 +66,7 @@ const EnhancedEmbeddingChunk: React.FC<EnhancedEmbeddingChunkProps> = (props) =>
     <BaseDbElement<EmbeddingChunk>
       collectionName="embeddingchunks"
       itemId={props.itemId}
+      partialItem={props.item || undefined}
       mode={baseDbMode}
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}

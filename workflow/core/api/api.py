@@ -102,8 +102,6 @@ class API(BaseDataStructure):
             raise ValueError("No API configuration provided")
         
         api_key = self.api_config.data.get("api_key")
-        if not api_key and self.api_name == ApiName.LM_STUDIO:
-            api_key = 'dummy_string'
             
         return ModelConfig(
             temperature=model.config_obj.temperature,

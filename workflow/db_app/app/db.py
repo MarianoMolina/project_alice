@@ -310,35 +310,6 @@ class BackendAPI(BaseModel):
             except aiohttp.ClientError as e:
                 LOGGER.error(f"Error retrieving chats: {e}")
                 return {}
-        
-    async def populate_chat(self, chat: dict) -> AliceChat:
-        if 'functions' in chat and chat['functions']:
-            processed_functions = []
-            for function in chat['functions']:
-                try:
-                    task = await self.task_initializer(function)
-                    if not isinstance(task, AliceTask):
-                        LOGGER.warning(f"Warning: task_initializer returned non-AliceTask object for function {function.get('task_name', 'Unknown')}")
-                        continue
-                    processed_functions.append(task)
-                except Exception as e:
-                    LOGGER.error(f"Error processing function {function.get('task_name', 'Unknown')}: {str(e)}")
-    
-            chat['functions'] = processed_functions
-
-        # Ensure all required fields are present in messages
-        for message in chat.get('messages', []):
-            if 'task_responses' not in message:
-                message['task_responses'] = []
-            if 'references' not in message:
-                message['references'] = []
-        
-        try:
-            return AliceChat(**chat)
-        except Exception as e:
-            LOGGER.error(f"Error creating AliceChat object: {str(e)}")
-            # Might want to add more detailed error handling here
-            raise
     
     async def store_chat_message(self, chat_id: str, message: MessageDict) -> AliceChat:
         url = f"{self.base_url}/chats/{chat_id}/add_message"
@@ -471,7 +442,6 @@ class BackendAPI(BaseModel):
                 return {}
             
     async def update_file_reference(self, file_reference: Union[FileReference, FileContentReference]): 
-        # self.debug_file_reference_serialization(file_reference)
         url = f"{self.base_url}/files/{file_reference.id}"
         headers = self._get_headers()
         data = file_reference.model_dump(by_alias=True)
@@ -485,16 +455,6 @@ class BackendAPI(BaseModel):
         except aiohttp.ClientError as e:
             LOGGER.error(f"Error storing messages: {e}")
             return None
-        
-    def debug_file_reference_serialization(self, file_reference: FileReference):
-        LOGGER(f"FileReference object: {file_reference}")
-        LOGGER(f"FileReference __dict__: {file_reference.__dict__}")
-        
-        try:
-            dumped_data = file_reference.model_dump(by_alias=True)
-            LOGGER(f"model_dump() result: {json.dumps(dumped_data, indent=2)}")
-        except Exception as e:
-            LOGGER(f"model_dump() error: {str(e)}")
 
 def token_validation_middleware(api: BackendAPI):
     def middleware(request) -> dict[str, Any]:

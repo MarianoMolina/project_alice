@@ -36,8 +36,8 @@ import EnhancedAPIConfig from '../components/enhanced/api_config/api_config/Enha
 import { EntityReference } from './EntityReferenceTypes';
 import EnhancedEntityReference from '../components/enhanced/entity_reference/entity_reference/EnhancedEntityReference';
 
-export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' |  'userinteractions' | 'usercheckpoints' | 'dataclusters' | 'embeddingchunks' | 'toolcalls' | 'codeexecutions' | 'apiconfigs' | 'entityreferences';
-export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType |  UserInteraction | UserCheckpoint | DataCluster | EmbeddingChunk | ToolCall | CodeExecution | APIConfig | EntityReference;
+export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' | 'userinteractions' | 'usercheckpoints' | 'dataclusters' | 'embeddingchunks' | 'toolcalls' | 'codeexecutions' | 'apiconfigs' | 'entityreferences';
+export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType | UserInteraction | UserCheckpoint | DataCluster | EmbeddingChunk | ToolCall | CodeExecution | APIConfig | EntityReference;
 export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API' | 'User' | 'File' | 'Message' | 'UserInteraction' | 'UserCheckpoint' | 'DataCluster' | 'EmbeddingChunk' | 'ToolCall' | 'CodeExecution' | 'APIConfig' | 'EntityReference';
 
 export type CollectionType = {
@@ -61,6 +61,27 @@ export type CollectionType = {
     apiconfigs: APIConfig;
     entityreferences: EntityReference;
 };
+export type ElementTypeMap = {
+    Agent: AliceAgent;
+    Model: AliceModel;
+    Parameter: ParameterDefinition;
+    Prompt: Prompt;
+    Task: AliceTask;
+    TaskResponse: TaskResponse;
+    Chat: AliceChat;
+    API: API;
+    User: User;
+    File: FileReference;
+    Message: MessageType;
+    UserInteraction: UserInteraction;
+    UserCheckpoint: UserCheckpoint;
+    DataCluster: DataCluster;
+    EmbeddingChunk: EmbeddingChunk;
+    ToolCall: ToolCall;
+    CodeExecution: CodeExecution;
+    APIConfig: APIConfig;
+    EntityReference: EntityReference;
+}
 
 export type CollectionTypeString = {
     agents: 'Agent';

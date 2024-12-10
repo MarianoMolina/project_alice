@@ -19,7 +19,7 @@ BACKEND_HOST = os.getenv("BACKEND_HOST")
 BACKEND_PORT = os.getenv("BACKEND_PORT")
 GOOGLE_KNOWLEDGE_GRAPH_API_KEY = os.getenv("GOOGLE_KNOWLEDGE_GRAPH_API_KEY")
 WOLFRAM_ALPHA_APP_ID = os.getenv("WOLFRAM_ALPHA_APP_ID")
-LOCAL_LLM_API_URL = f"http://{BACKEND_HOST}:{BACKEND_PORT}/lm_studio"
+LOCAL_LLM_API_URL = f"http://{BACKEND_HOST}:{BACKEND_PORT}/lm_studio/v1"
 
 class BaseModule(InitializationModule):
     """This module defines the base models and apis for the system, as well as the default parameter and prompt."""
@@ -33,115 +33,114 @@ base_module = BaseModule(
             {
                 "key": "GPT4o",
                 "short_name": "GPT4o",
-                "model_format": "OpenChat",
                 "model_name": "chatgpt-4o-latest",
-                "ctx_size": 128000,
                 "model_type": "chat",
-                "temperature": 0.7,
                 "api_name": "openai",
+                "config_obj": {
+                    "ctx_size": 128000,
+                },
             },
             {
                 "key": "GPT4-turbo",
                 "short_name": "GPT4-turbo",
-                "model_format": "OpenChat",
                 "model_name": "gpt-4-turbo",
-                "ctx_size": 128000,
                 "model_type": "chat",
-                "temperature": 0.7,
                 "api_name": "openai",
+                "config_obj": {
+                    "ctx_size": 128000,
+                },
             },
             {
                 "key": "gpt-4o-mini",
                 "short_name": "GPT4o-mini",
-                "model_format": "OpenChat",
                 "model_name": "gpt-4o-mini",
-                "ctx_size": 128000,
                 "model_type": "chat",
-                "temperature": 0.7,
                 "api_name": "openai",
+                "config_obj": {
+                    "ctx_size": 128000,
+                },
             },
             {
                 "key": "Claude3.5",
                 "short_name": "Claude3.5",
-                "model_format": "OpenChat",
                 "model_name": "claude-3-5-sonnet-20240620",
-                "ctx_size": 200000,
-                "model_type": "chat",
                 "api_name": "anthropic",
+                "model_type": "chat",
+                "config_obj": {
+                    "ctx_size": 200000,
+                },
             },
             {
                 "key": "Claude3.5_v",
                 "short_name": "Claude3.5",
-                "model_format": "OpenChat",
                 "model_name": "claude-3-5-sonnet-20240620",
-                "ctx_size": 200000,
                 "model_type": "vision",
                 "api_name": "anthropic",
+                "config_obj": {
+                    "ctx_size": 200000,
+                },
             },
             {
-                "key": "Llama3_8B_Hermes",
-                "short_name": "Llama3_8B_Hermes",
-                "model_format": "Llama3",
-                "model_name": "NousResearch/Hermes-2-Theta-Llama-3-8B-GGUF",
-                "ctx_size": 32768,
+                "key": "Yi_Coder_9B",
+                "short_name": "Yi Coder 9B Chat",
+                "model_name": "lmstudio-community/Yi-Coder-9B-Chat-GGUF/Yi-Coder-9B-Chat-Q6_K.gguf",
+                "api_name": "lm_studio",
                 "model_type": "chat",
-                "api_name": "lm_studio",
-                "lm_studio_preset": "Llama 3 V3"
+                "config_obj": {
+                    "ctx_size": 128000,
+                },
             },
             {
-                "key": "Llama3_1_8B",
-                "short_name": "Llama3_1_8B",
-                "model_format": "Llama3",
-                "model_name": "lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF",
-                "ctx_size": 131072,
-                "model_type": "instruct",
+                "key": "nomic-embed-text-v1",
+                "short_name": "Nomic Embed Text",
+                "model_name": "nomic-ai/nomic-embed-text-v1.5-GGUF/nomic-embed-text-v1.5.Q8_0.gguf",
                 "api_name": "lm_studio",
-                "lm_studio_preset": "Llama 3 V3"
-            },
-            {
-                "key": "stella_en_1_5",
-                "short_name": "Stella 1.5",
-                "model_name": "abhishekbhakat/stella_en_1.5B_v5_GGUF",
-                "model_format": "OpenChat",
-                "ctx_size": 8192, ## Max tokens is actually 131072 -> 8192 are the dimensions, but for testing purposes we are using 8192
                 "model_type": "embeddings",
-                "api_name": "lm_studio",
-                "lm_studio_preset": "Llama 3 V3"
+                "config_obj": {
+                    "ctx_size": 2048,
+                },
             },
             {
-              "key": "nomic-embed-text-v1",
-              "short_name": "Nomic Embed Text",
-                "model_name": "nomic-ai/nomic-embed-text-v1",
-                "model_format": "OpenChat",
-                "ctx_size": 8192,
-                "model_type": "embeddings",
+                "key": "llava_vision", 
+                "short_name": "Llava 1.5 7B Vision",
+                "model_name": "second-state/Llava-v1.5-7B-GGUF/llava-v1.5-7b-mmproj-model-f16.gguf",
+                "model_type": "vision",
                 "api_name": "lm_studio",
-                "lm_studio_preset": "Llama 3 V3"
+                "config_obj": {
+                    "ctx_size": 4096,
+                    "prompt_config": {
+                        "bos": "<s>",
+                        "eos": "</s>",
+                    }
+                },
             },
             {
                 "key": "Whisper_1",
                 "short_name": "Whisper",
-                "model_name": "whisper-1", # need model name here
-                "model_format": "Base", # random value
-                "ctx_size": 2048, # random value
+                "model_name": "whisper-1",
                 "model_type": "stt",
                 "api_name": "openai",
+                "config_obj": {
+                    "ctx_size": 2048,
+                },
             },
             {
                 "key": "Dall-E-3",
-                "short_name": "dall-e-3",
+                "short_name": "DALL-E 3",
                 "model_name": "dall-e-3",
-                "model_format": "Base", # random value
-                "ctx_size": 2048, # random value
                 "model_type": "img_gen",
                 "api_name": "openai",
+                "config_obj": {
+                    "ctx_size": 4096,
+                },
             },
             {
                 "key": "tts-1",
                 "short_name": "tts-1",
                 "model_name": "tts-1",
-                "model_format": "Base", # random value
-                "ctx_size": 4096,
+                "config_obj": {
+                    "ctx_size": 4096,
+                },
                 "model_type": "tts",
                 "api_name": "openai",
             },
@@ -149,8 +148,9 @@ base_module = BaseModule(
                 "key": "tts-1-hd",
                 "short_name": "tts-1-hd",
                 "model_name": "tts-1-hd",
-                "model_format": "Base", # random value
-                "ctx_size": 4096, 
+                "config_obj": {
+                    "ctx_size": 4096,
+                },
                 "model_type": "tts",
                 "api_name": "openai",
             },
@@ -158,26 +158,19 @@ base_module = BaseModule(
                 "key": "oai_embedding_large",
                 "short_name": "text-embedding-3-large",
                 "model_name": "text-embedding-3-large",
-                "model_format": "Base", # random value
-                "ctx_size": 8192, ## This is dimensions, ctx_size is larger
                 "model_type": "embeddings",
                 "api_name": "openai",
-            },
-            {
-                "key": "hermes_llava_vision", 
-                "short_name": "Hermes-2-vision",
-                "model_name": "billborkowski/llava-NousResearch_Nous-Hermes-2-Vision-GGUF",
-                "model_format": "Obsidian_Vision",
-                "ctx_size": 4096,
-                "model_type": "vision",
-                "api_name": "lm_studio"
+                "config_obj": {
+                    "ctx_size": 8191,
+                },
             },
             {
                 "key": "o1_openai",
                 "short_name": "O1",
                 "model_name": "o1-preview", 
-                "model_format": "OpenChat", 
-                "ctx_size": 128000,
+                "config_obj": {
+                    "ctx_size": 128000,
+                },
                 "model_type": "chat",
                 "api_name": "openai"
             },
@@ -185,8 +178,9 @@ base_module = BaseModule(
                 "key": "mistral_small",
                 "short_name": "Mistral Small",
                 "model_name": "mistral-small-latest",
-                "model_format": "OpenChat",
-                "ctx_size": 32000,
+                "config_obj": {
+                    "ctx_size": 32000,
+                },
                 "model_type": "chat",
                 "api_name": "mistral",
             },
@@ -194,8 +188,9 @@ base_module = BaseModule(
                 "key": "gemini_1.5_flash",
                 "short_name": "Gemini 1.5 Flash",
                 "model_name": "gemini-1.5-flash",
-                "model_format": "OpenChat",
-                "ctx_size": 1048576,
+                "config_obj": {
+                    "ctx_size": 1048576,
+                },
                 "model_type": "chat",
                 "api_name": "gemini",
             },
@@ -203,8 +198,9 @@ base_module = BaseModule(
                 "key": "gemini_1.5_flash_v",
                 "short_name": "Gemini 1.5 Flash Vision",
                 "model_name": "gemini-1.5-flash",
-                "model_format": "OpenChat",
-                "ctx_size": 1048576,
+                "config_obj": {
+                    "ctx_size": 1048576,
+                },
                 "model_type": "vision",
                 "api_name": "gemini",
             },
@@ -212,8 +208,9 @@ base_module = BaseModule(
                 "key": "gemini_1.5_flash_stt",
                 "short_name": "Gemini 1.5 Flash STT",
                 "model_name": "gemini-1.5-flash",
-                "model_format": "OpenChat",
-                "ctx_size": 1048576,
+                "config_obj": {
+                    "ctx_size": 1048576,
+                },
                 "model_type": "stt",
                 "api_name": "gemini",
             },
@@ -221,8 +218,9 @@ base_module = BaseModule(
                 "key": "gemini_text_embedding",
                 "short_name": "Gemini Text Embedding",
                 "model_name": "text-embedding-004",
-                "model_format": "OpenChat",
-                "ctx_size": 2048,
+                "config_obj": {
+                    "ctx_size": 2048,
+                },
                 "model_type": "embeddings",
                 "api_name": "gemini",
             },
@@ -231,7 +229,9 @@ base_module = BaseModule(
                 "short_name": "Gemini Imagen 3",
                 "model_name": "imagen-3.0-generate-001",
                 "model_format": "OpenChat",
-                "ctx_size": 2048,
+                "config_obj": {
+                    "ctx_size": 2048,
+                },
                 "model_type": "img_gen",
                 "api_name": "gemini",
             },
@@ -239,8 +239,9 @@ base_module = BaseModule(
                 "key": "llama3.2_90b",
                 "short_name": "Llama3.2 90B",
                 "model_name": "llama3.2-90b-vision",
-                "model_format": "Llama3",
-                "ctx_size": 128000,
+                "config_obj": {
+                    "ctx_size": 128000,
+                },
                 "model_type": "chat",
                 "api_name": "llama",
             },
@@ -248,8 +249,9 @@ base_module = BaseModule(
                 "key": "pixtral12b",
                 "short_name": "Pixtral 12B",
                 "model_name": "pixtral-12b",
-                "model_format": "OpenChat",
-                "ctx_size": 128000,
+                "config_obj": {
+                    "ctx_size": 128000,
+                },
                 "model_type": "vision",
                 "api_name": "mistral",
             },
@@ -257,8 +259,9 @@ base_module = BaseModule(
                 "key": "mistral-embed",
                 "short_name": "Mistral Embed",
                 "model_name": "mistral-embed",
-                "model_format": "OpenChat",
-                "ctx_size": 8000,
+                "config_obj": {
+                    "ctx_size": 8000,
+                },
                 "model_type": "embeddings",
                 "api_name": "mistral",
             },
@@ -266,8 +269,9 @@ base_module = BaseModule(
                 "key": "command-r-plus",
                 "short_name": "Command R Plus",
                 "model_name": "command-r-plus-08-2024",
-                "model_format": "OpenChat",
-                "ctx_size": 128000,
+                "config_obj": {
+                    "ctx_size": 128000,
+                },
                 "model_type": "chat",
                 "api_name": "cohere",
             },
@@ -275,8 +279,9 @@ base_module = BaseModule(
                 "key": "llama-3.1-70b-versatile",
                 "short_name": "Llama 3.1 70b",
                 "model_name": "llama-3.1-70b-versatile",
-                "model_format": "Llama3",
-                "ctx_size": 128000,
+                "config_obj": {
+                    "ctx_size": 128000,
+                },
                 "model_type": "chat",
                 "api_name": "groq",
             },
@@ -285,7 +290,9 @@ base_module = BaseModule(
                 "short_name": "Groq Whisper",
                 "model_name": "whisper-large-v3",
                 "model_format": "Base",
-                "ctx_size": 2048,
+                "config_obj": {
+                    "ctx_size": 2048,
+                },
                 "model_type": "stt",
                 "api_name": "groq",
             },
@@ -294,7 +301,9 @@ base_module = BaseModule(
                 "short_name": "Llama 3.2 11b Vision",
                 "model_name": "llama-3.2-11b-vision-preview",
                 "model_format": "Llama3",
-                "ctx_size": 8000,
+                "config_obj": {
+                    "ctx_size": 8000,
+                },
                 "model_type": "vision",
                 "api_name": "groq",
             },
@@ -302,8 +311,9 @@ base_module = BaseModule(
                 "key": "bark_large",
                 "short_name": "Bark Large",
                 "model_name": "suno/bark",
-                "model_format": "OpenChat", # random value
-                "ctx_size": 256,
+                "config_obj": {
+                    "ctx_size": 256,
+                },
                 "model_type": "tts",
                 "api_name": "bark",
             }, 
@@ -311,8 +321,9 @@ base_module = BaseModule(
                 "key": "pixart_sigma_model",
                 "short_name": "Pixart Sigma",
                 "model_name": "PixArt-alpha/PixArt-Sigma-XL-2-1024-MS",
-                "model_format": "OpenChat", # random value
-                "ctx_size": 1024, # random value
+                "config_obj": {
+                    "ctx_size": 256,
+                },
                 "model_type": "img_gen",
                 "api_name": "pixart",
             }
@@ -441,7 +452,7 @@ base_module = BaseModule(
                 "name": "LM Studio API Config",
                 "api_name": "lm_studio",
                 "data": {
-                    "api_key": "",
+                    "api_key": "dummy_key",
                     "base_url": LOCAL_LLM_API_URL
                 },
                 "health_status": "healthy" if LOCAL_LLM_API_URL else "unhealthy",
@@ -651,7 +662,7 @@ base_module = BaseModule(
                 "name": "LM Studio API",
                 "api_config": "local_lm_api_config",
                 "is_active": True,
-                "default_model": "Llama3_8B_Hermes",
+                "default_model": "Yi_Coder_9B",
             },
             {
                 "key": "local_lm_studio_embeddings",
@@ -678,7 +689,7 @@ base_module = BaseModule(
                 "name": "LM Studio Image Vision",
                 "api_config": "local_lm_api_config",
                 "is_active": True,
-                "default_model": "hermes_llava_vision"
+                "default_model": "llava_vision"
             },
             {
                 "key": "img_vision_anthropic",

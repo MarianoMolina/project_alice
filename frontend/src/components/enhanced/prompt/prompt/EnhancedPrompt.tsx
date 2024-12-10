@@ -15,6 +15,7 @@ type EnhancedPromptMode = BasePromptMode | ExtendedPromptMode;
 
 interface EnhancedPromptProps extends Omit<PromptComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
   mode: EnhancedPromptMode;
+  item?: Partial<Prompt> | null;
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: Prompt) => void;
@@ -70,6 +71,7 @@ const EnhancedPrompt: React.FC<EnhancedPromptProps> = (props) => {
     <BaseDbElement<Prompt>
       collectionName="prompts"
       itemId={props.itemId}
+      partialItem={props.item || undefined}
       mode={baseDbMode}
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}

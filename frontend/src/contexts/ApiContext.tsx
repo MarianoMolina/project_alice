@@ -14,6 +14,7 @@ import {
     updateMessageInChat as apiUpdateMessageInChat,
     deleteItem as apiDeleteItem,
     resumeTask as apiResumeTask,
+    fetchLMStudioModels as apiFetchLMStudioModels, 
     resumeChat as apiResumeChat,
 } from '../services/api';
 import { useNotification } from './NotificationContext';
@@ -44,6 +45,7 @@ interface ApiContextType {
     updateMessageInChat: typeof apiUpdateMessageInChat;
     resumeTask: typeof apiResumeTask;
     resumeChat: typeof apiResumeChat;
+    fetchLMStudioModels: typeof apiFetchLMStudioModels;
     updateUserInteraction: (
         interactionId: string,
         itemData: Partial<UserInteraction>
@@ -70,6 +72,15 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const emitEvent = (eventType: string, collectionName: CollectionName, item: any) => {
         globalEventEmitter.emit(`${eventType}:${collectionName}`, item);
     };
+
+    const fetchLMStudioModels = useCallback(async () => {
+        try {
+            return await apiFetchLMStudioModels();
+        } catch (error) {
+            addNotification('Error fetching LM Studio models', 'error');
+            throw error;
+        }
+    }, [addNotification]);
 
     const createItem = useCallback(async <T extends CollectionName>(
         collectionName: T,
@@ -399,7 +410,8 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         resumeTask,
         updateUserInteraction,
         updateMessageInChat,
-        resumeChat
+        resumeChat,
+        fetchLMStudioModels,
     };
 
     return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>;

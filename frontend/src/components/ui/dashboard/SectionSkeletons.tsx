@@ -1,5 +1,5 @@
 import { motion, Variants } from 'framer-motion';
-import { Edit, PlayArrow, SvgIconComponent } from '@mui/icons-material';
+import { PlayArrow, SvgIconComponent } from '@mui/icons-material';
 import { siteSections } from '../../../utils/SectionIcons';
 import { collectionElementIcons } from '../../../utils/CollectionUtils';
 

@@ -142,7 +142,7 @@ export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
   }, []);
 
   const selectCardItem = useCallback((itemType: CollectionElementString, itemId?: string, item?: CollectionElement) => {
-    Logger.debug('CardDialogContext', { itemType, itemId, item });
+    Logger.debug('CardDialogContext selectCardItem', { itemType, itemId, item });
     setSelectedCardItemType(itemType);
     if (item) {
       setSelectedCardItem(item);
@@ -171,7 +171,12 @@ export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
         throw new Error('Item or itemId must be provided for edit mode');
       }
     } else {
-      setSelectedFlexibleItem(null);
+      if (item) {
+        Logger.debug('CardDialogContext selectFlexibleItem', { itemType, item });
+        setSelectedFlexibleItem(item);
+      } else {
+        setSelectedFlexibleItem(null);
+      }
     }
     setIsFlexibleDialogOpen(true);
   }, []);

@@ -183,6 +183,7 @@ class LMStudioPathFinder:
     def check_server_status(self) -> bool:
         """Check if the LMS server is running"""
         success, output = self._run_lms_command(['lms', 'status'])
+        self.logger.debug(f"Server status check: {success} - {output}")
         return success and "Server:  ON" in output
 
     def execute_server_start(self) -> bool:

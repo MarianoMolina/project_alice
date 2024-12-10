@@ -14,6 +14,7 @@ type EnhancedCodeExecutionMode = BaseCodeExecutionMode | ExtendedCodeExecutionMo
 
 interface EnhancedCodeExecutionProps extends Omit<CodeExecutionComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
   mode: EnhancedCodeExecutionMode;
+  item?: Partial<CodeExecution> | null;
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: CodeExecution) => void;
@@ -68,6 +69,7 @@ const EnhancedCodeExecution: React.FC<EnhancedCodeExecutionProps> = (props) => {
     <BaseDbElement<CodeExecution>
       collectionName="codeexecutions"
       itemId={props.itemId}
+      partialItem={props.item || undefined}
       mode={baseDbMode}
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}

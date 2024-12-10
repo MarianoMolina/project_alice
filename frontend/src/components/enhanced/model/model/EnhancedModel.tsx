@@ -14,6 +14,7 @@ type EnhancedModelMode = BaseModelMode | ExtendedModelMode;
 
 interface EnhancedModelProps extends Omit<ModelComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
   mode: EnhancedModelMode;
+  item?: Partial<AliceModel> | null;
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: AliceModel) => void;
@@ -68,6 +69,7 @@ const EnhancedModel: React.FC<EnhancedModelProps> = (props: EnhancedModelProps) 
     <BaseDbElement<AliceModel>
       collectionName="models"
       itemId={props.itemId}
+      partialItem={props.item || undefined}
       mode={baseDbMode}
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}

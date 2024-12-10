@@ -6,6 +6,7 @@ import { EditEntity } from './EditEntity';
 import { DownloadEntity } from './DownloadEntity';
 import { CopyButton } from '../../../ui/markdown/CopyButton';
 import { DeleteEntity } from './DeleteEntity';
+import { DuplicateEntity } from './DuplicateEntity';
 
 interface EntityActionsMenuProps<T extends CollectionName> {
   item: CollectionType[T];
@@ -16,26 +17,28 @@ interface EntityActionsMenuProps<T extends CollectionName> {
     download?: boolean;
     copy?: boolean;
     delete?: boolean;
+    duplicate?: boolean;
   };
 }
 
-const EntityActionsMenu = <T extends CollectionName>({ 
-  item, 
+const EntityActionsMenu = <T extends CollectionName>({
+  item,
   itemType,
   onDelete,
   actions = {
     edit: true,
     download: true,
     copy: true,
-    delete: true
+    delete: true,
+    duplicate: true
   }
 }: EntityActionsMenuProps<T>) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  
+
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
-  
+
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -85,6 +88,11 @@ const EntityActionsMenu = <T extends CollectionName>({
         {actions.delete && onDelete && (
           <MenuItem>
             <DeleteEntity itemType={itemType} handleDelete={onDelete} showLabel />
+          </MenuItem>
+        )}
+        {actions.duplicate && itemType !== 'taskresults' && itemType !== 'userinteractions' && itemType !== 'embeddingchunks' && (
+          <MenuItem>
+            <DuplicateEntity item={item} itemType={itemType} showLabel />
           </MenuItem>
         )}
       </Menu>

@@ -39,7 +39,7 @@ const modelSchema = new Schema<IModelDocument, IModelModel>({
   model_name: { type: String, required: true },
   config_obj: { 
     type: modelConfigSchema, 
-    required: true, 
+    required: false, 
     default: () => ({ ...DEFAULT_MODEL_CONFIG }) 
   },  
   model_type: { type: String, enum: ModelType, required: true },

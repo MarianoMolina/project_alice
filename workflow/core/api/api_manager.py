@@ -177,3 +177,41 @@ class APIManager(BaseModel):
         for required_input in api_engine.input_variables.required:
             if required_input not in kwargs:
                 raise ValueError(f"Missing required input: {required_input}")
+
+
+    def update_lmstudio_token(self, token: str) -> None:
+        """
+        Updates the API key for all LM Studio APIs with the provided token.
+        
+        Args:
+            token (str): The new token to use as the API key
+            
+        Returns:
+            None
+            
+        Logs:
+            - Debug message when updating each API
+            - Warning if no LM Studio APIs are found
+        """
+        lmstudio_apis = [
+            api for api in self.apis.values()
+            if ApiName(api.api_name) == ApiName.LM_STUDIO and api.is_active
+        ]
+        
+        if not lmstudio_apis:
+            LOGGER.warning("No active LM Studio APIs found to update")
+            return
+            
+        for api in lmstudio_apis:
+            LOGGER.debug(f"Updating API key for LM Studio API: {api.id}")
+            if not api.api_config:
+                LOGGER.warning(f"No API configuration found for {api.id}")
+                continue
+            if isinstance(api.api_config.data, dict) and 'api_key' in api.api_config.data:
+                api.api_config.data['api_key'] = token
+                LOGGER.debug(f"Successfully updated API key for {api.id}")
+            elif hasattr(api.api_config.data, 'api_key'):
+                api.api_config.data.api_key = token  # For custom config objects
+                LOGGER.debug(f"Successfully updated API key in custom obj for {api.id}")
+            else:
+                LOGGER.warning(f"Invalid API data format for {api.id} - {api.api_config.data}")

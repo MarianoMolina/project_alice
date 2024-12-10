@@ -12,7 +12,9 @@ import ApiConfigurations from '../components/ui/user_settings/ApiConfigurations'
 import UserToken from '../components/ui/user_settings/UserToken';
 import DangerZone from '../components/ui/user_settings/DangerZone';
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
-import { Api, Key, Person, Warning } from '@mui/icons-material';
+import { Api, Key, Person, SvgIconComponent, Warning } from '@mui/icons-material';
+import { LMStudioIcon } from '../utils/CustomIcons';
+import LMStudioStatus from '../components/ui/user_settings/LMStudioStatus';
 
 interface UserSettingsProps {
     setHasUnsavedChanges: (value: boolean) => void;
@@ -34,6 +36,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
         { name: 'APIs', icon: Api },
         { name: 'User Token', icon: Key },
         { name: 'Danger Zone', icon: Warning },
+        { name: 'LM Studio Status', icon: LMStudioIcon as SvgIconComponent},
     ];
 
     useEffect(() => {
@@ -71,6 +74,8 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
                 return <UserToken />;
             case 'Danger Zone':
                 return <DangerZone />;
+            case 'LM Studio Status':
+                return <LMStudioStatus />;
             default:
                 return null;
         }

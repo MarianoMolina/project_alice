@@ -14,6 +14,7 @@ type EnhancedUserCheckpointMode = BaseUserCheckpointMode | ExtendedUserCheckpoin
 
 interface EnhancedUserCheckpointProps extends Omit<UserCheckpointComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
   mode: EnhancedUserCheckpointMode;
+  item?: Partial<UserCheckpoint> | null;
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: UserCheckpoint) => void;
@@ -68,6 +69,7 @@ const EnhancedUserCheckpoint: React.FC<EnhancedUserCheckpointProps> = (props) =>
     <BaseDbElement<UserCheckpoint>
       collectionName="usercheckpoints"
       itemId={props.itemId}
+      partialItem={props.item || undefined}
       mode={baseDbMode}
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}

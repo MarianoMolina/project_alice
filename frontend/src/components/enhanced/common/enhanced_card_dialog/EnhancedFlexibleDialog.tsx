@@ -12,7 +12,7 @@ import EnhancedFile from '../../file/file/EnhancedFile';
 import EnhancedMessage from '../../message/message/EnhancedMessage';
 import EnhancedEntityReference from '../../entity_reference/entity_reference/EnhancedEntityReference';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
-import { ComponentMode } from '../../../../types/CollectionTypes';
+import { ComponentMode, ElementTypeMap } from '../../../../types/CollectionTypes';
 import Logger from '../../../../utils/Logger';
 import EnhancedUserCheckpoint from '../../user_checkpoint/user_checkpoint/EnhancedUserCheckpoint';
 import EnhancedUserInteraction from '../../user_interaction/user_interaction/EnhancedUserInteraction';
@@ -21,6 +21,22 @@ import EnhancedDataCluster from '../../data_cluster/data_cluster/EnhancedDataClu
 import EnhancedToolCall from '../../tool_calls/tool_calls/EnhancedToolCall';
 import EnhancedCodeExecution from '../../code_execution/code_execution/EnhancedCodeExecution';
 import EnhancedAPIConfig from '../../api_config/api_config/EnhancedAPIConfig';
+import { AliceAgent } from '../../../../types/AgentTypes';
+import { AliceTask } from '../../../../types/TaskTypes';
+import { AliceModel } from '../../../../types/ModelTypes';
+import { Prompt } from '../../../../types/PromptTypes';
+import { ParameterDefinition } from '../../../../types/ParameterTypes';
+import { API } from '../../../../types/ApiTypes';
+import { FileReference } from '../../../../types/FileTypes';
+import { MessageType } from '../../../../types/MessageTypes';
+import { EntityReference } from '../../../../types/EntityReferenceTypes';
+import { UserCheckpoint } from '../../../../types/UserCheckpointTypes';
+import { UserInteraction } from '../../../../types/UserInteractionTypes';
+import { EmbeddingChunk } from '../../../../types/EmbeddingChunkTypes';
+import { DataCluster } from '../../../../types/DataClusterTypes';
+import { ToolCall } from '../../../../types/ToolCallTypes';
+import { CodeExecution } from '../../../../types/CodeExecutionTypes';
+import { APIConfig } from '../../../../types/ApiConfigTypes';
 
 const EnhancedFlexibleDialog: React.FC = () => {
   const { 
@@ -34,25 +50,25 @@ const EnhancedFlexibleDialog: React.FC = () => {
 
   const renderDialogContent = () => {
     if (!selectedFlexibleItemType || !flexibleDialogMode || !isFlexibleDialogOpen) return null;
-    Logger.debug('renderDialogContent', selectedFlexibleItemType, flexibleDialogMode);
-
+    Logger.debug('renderDialogContent', selectedFlexibleItemType, flexibleDialogMode, selectedFlexibleItem);
+    
     const handleProps = {
-      handleAgentClick: (id: string) => selectCardItem('Agent', id),
-      handleTaskClick: (id: string) => selectCardItem('Task', id),
-      handleModelClick: (id: string) => selectCardItem('Model', id),
-      handlePromptClick: (id: string) => selectCardItem('Prompt', id),
-      handleParameterClick: (id: string) => selectCardItem('Parameter', id),
-      handleAPIClick: (id: string) => selectCardItem('API', id),
-      handleFileClick: (id: string) => selectCardItem('File', id),
-      handleMessageClick: (id: string) => selectCardItem('Message', id),
-      handleEntityReferenceClick: (id: string) => selectCardItem('EntityReference', id),
-      handleUserCheckpointClick: (id: string) => selectCardItem('UserCheckpoint', id),
-      handleUserInteractionClick: (id: string) => selectCardItem('UserInteraction', id),
-      handleEmbeddingChunkClick: (id: string) => selectCardItem('EmbeddingChunk', id),
-      handleDataClusterClick: (id: string) => selectCardItem('DataCluster', id),
-      handleToolCallClick: (id: string) => selectCardItem('ToolCall', id),
-      handleCodeExecutionClick: (id: string) => selectCardItem('CodeExecution', id),
-      handleAPIConfigClick: (id: string) => selectCardItem('APIConfig', id),
+      handleAgentClick: (id: string, item?: AliceAgent) => selectCardItem('Agent', id, item),
+      handleTaskClick: (id: string, item?: AliceTask) => selectCardItem('Task', id, item),
+      handleModelClick: (id: string, item?: AliceModel) => selectCardItem('Model', id, item),
+      handlePromptClick: (id: string, item?: Prompt) => selectCardItem('Prompt', id, item),
+      handleParameterClick: (id: string, item?: ParameterDefinition) => selectCardItem('Parameter', id, item),
+      handleAPIClick: (id: string, item?: API) => selectCardItem('API', id, item),
+      handleFileClick: (id: string, item?: FileReference) => selectCardItem('File', id, item),
+      handleMessageClick: (id: string, item?: MessageType) => selectCardItem('Message', id, item),
+      handleEntityReferenceClick: (id: string, item?: EntityReference) => selectCardItem('EntityReference', id, item),
+      handleUserCheckpointClick: (id: string, item?: UserCheckpoint) => selectCardItem('UserCheckpoint', id, item),
+      handleUserInteractionClick: (id: string, item?: UserInteraction) => selectCardItem('UserInteraction', id, item),
+      handleEmbeddingChunkClick: (id: string, item?: EmbeddingChunk) => selectCardItem('EmbeddingChunk', id, item),
+      handleDataClusterClick: (id: string, item?: DataCluster) => selectCardItem('DataCluster', id, item),
+      handleToolCallClick: (id: string, item?: ToolCall) => selectCardItem('ToolCall', id, item),
+      handleCodeExecutionClick: (id: string, item?: CodeExecution) => selectCardItem('CodeExecution', id, item),
+      handleAPIConfigClick: (id: string, item?: APIConfig) => selectCardItem('APIConfig', id, item),
     };
 
     const commonProps = {
@@ -110,37 +126,37 @@ const EnhancedFlexibleDialog: React.FC = () => {
     } else if (flexibleDialogMode === 'create') {
       switch (selectedFlexibleItemType) {
         case 'Agent':
-          return <EnhancedAgent {...commonProps} />;
+          return <EnhancedAgent {...commonProps} item={selectedFlexibleItem as ElementTypeMap['Agent']} />;
         case 'Task':
-          return <EnhancedTask {...commonProps} />;
+          return <EnhancedTask {...commonProps} item={selectedFlexibleItem as ElementTypeMap['Task']} />;
         case 'TaskResponse':
           return <EnhancedTaskResponse {...commonProps} />;
         case 'Chat':
-          return <EnhancedChat {...commonProps} />;
+          return <EnhancedChat {...commonProps} item={selectedFlexibleItem as ElementTypeMap['Chat']} />;
         case 'Prompt':
-          return <EnhancedPrompt {...commonProps} />;
+          return <EnhancedPrompt {...commonProps} item={selectedFlexibleItem as ElementTypeMap['Prompt']} />;
         case 'Model':
-          return <EnhancedModel {...commonProps} />;
+          return <EnhancedModel {...commonProps} item={selectedFlexibleItem as ElementTypeMap['Model']} />;
         case 'Parameter':
-          return <EnhancedParameter {...commonProps} />;
+          return <EnhancedParameter {...commonProps} item={selectedFlexibleItem as ElementTypeMap['Parameter']} />;
         case 'API':
-          return <EnhancedAPI {...commonProps} />;
+          return <EnhancedAPI {...commonProps} item={selectedFlexibleItem as ElementTypeMap['API']} />;
         case 'File':
-          return <EnhancedFile {...commonProps} />;
+          return <EnhancedFile {...commonProps} item={selectedFlexibleItem as ElementTypeMap['File']} />;
         case 'Message':
-          return <EnhancedMessage {...commonProps} />;
+          return <EnhancedMessage {...commonProps} item={selectedFlexibleItem as ElementTypeMap['Message']} />;
         case 'EntityReference':
-          return <EnhancedEntityReference {...commonProps} />;
+          return <EnhancedEntityReference {...commonProps} item={selectedFlexibleItem as ElementTypeMap['EntityReference']} />;
         case 'UserCheckpoint':
-          return <EnhancedUserCheckpoint {...commonProps} />;
+          return <EnhancedUserCheckpoint {...commonProps} item={selectedFlexibleItem as ElementTypeMap['UserCheckpoint']} />;
         case 'UserInteraction':
           return <EnhancedUserInteraction {...commonProps} />;
         case 'EmbeddingChunk':
-          return <EnhancedEmbeddingChunk {...commonProps} />;
+          return <EnhancedEmbeddingChunk {...commonProps} item={selectedFlexibleItem as ElementTypeMap['EmbeddingChunk']} />;
         case 'DataCluster':
-          return <EnhancedDataCluster {...commonProps} />;
+          return <EnhancedDataCluster {...commonProps} item={selectedFlexibleItem as ElementTypeMap['DataCluster']} />;
         case 'APIConfig':
-          return <EnhancedAPIConfig {...commonProps} />;
+          return <EnhancedAPIConfig {...commonProps} item={selectedFlexibleItem as ElementTypeMap['APIConfig']} />;
         default:
           return null;
       }

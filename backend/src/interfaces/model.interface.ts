@@ -34,7 +34,7 @@ export interface IModel extends Document {
     model_name: string;
     api_name: ApiName;
     model_type: ModelType;
-    config_obj: IModelConfig;
+    config_obj?: IModelConfig;
     created_by: Types.ObjectId | IUserDocument;
     updated_by: Types.ObjectId | IUserDocument;
 }

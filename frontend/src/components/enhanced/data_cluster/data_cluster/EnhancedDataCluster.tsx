@@ -13,6 +13,7 @@ type EnhancedDataClusterMode = BaseDataClusterMode | ExtendedDataClusterMode;
 
 interface EnhancedDataClusterProps extends Omit<DataClusterComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
   mode: EnhancedDataClusterMode;
+  item?: Partial<DataCluster> | null;
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: DataCluster) => void;
@@ -67,6 +68,7 @@ const EnhancedDataCluster: React.FC<EnhancedDataClusterProps> = (props) => {
     <BaseDbElement<DataCluster>
       collectionName="dataclusters"
       itemId={props.itemId}
+      partialItem={props.item || undefined}
       mode={baseDbMode}
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}

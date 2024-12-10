@@ -76,9 +76,9 @@ base_chat_module = BaseChatModule(
                 "name": "Alice (LM Studio)",
                 "system_message": "default_system_message",
                 "models": {
-                    "chat": "Llama3_1_8B",
+                    "chat": "Yi_Coder_9B",
                     "embeddings": "nomic-embed-text-v1",
-                    "vision": "hermes_llava_vision",
+                    "vision": "llava_vision",
                 },
                 "max_consecutive_auto_reply": 1,
                 "has_tools": 1,

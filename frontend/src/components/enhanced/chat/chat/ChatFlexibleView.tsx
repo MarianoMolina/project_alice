@@ -40,7 +40,41 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     const title = mode === 'create' ? 'Create New Chat' : mode === 'edit' ? 'Edit Chat' : 'Chat Details';
     const saveButtonText = form._id ? 'Update Chat' : 'Create Chat';
 
+    Logger.debug('ChatFlexibleView', { item, mode });
+
     useEffect(() => {
+
+        const populateConfig = async () => {
+            if (mode === 'create' && user?.default_chat_config && !item) {
+                const config = user.default_chat_config;
+                const [agent, agentTools, retrievalTools, toolCallCheckpoint, codeExecCheckpoint, dataCluster] = await Promise.all([
+                    config.alice_agent ? fetchItem('agents', config.alice_agent) : undefined,
+                    Promise.all((config.agent_tools || []).map(id => fetchItem('tasks', id))),
+                    Promise.all((config.retrieval_tools || []).map(id => fetchItem('tasks', id))),
+                    config.default_user_checkpoints[CheckpointType.TOOL_CALL] ?
+                        fetchItem('usercheckpoints', config.default_user_checkpoints[CheckpointType.TOOL_CALL]) : undefined,
+                    config.default_user_checkpoints[CheckpointType.CODE_EXECUTION] ?
+                        fetchItem('usercheckpoints', config.default_user_checkpoints[CheckpointType.CODE_EXECUTION]) : undefined,
+                    config.data_cluster ? fetchItem('dataclusters', config.data_cluster) : undefined
+                ]);
+    
+                setForm(prevForm => ({
+                    ...prevForm,
+                    alice_agent: agent as AliceAgent,
+                    agent_tools: agentTools as AliceTask[],
+                    retrieval_tools: retrievalTools as AliceTask[],
+                    default_user_checkpoints: {
+                        [CheckpointType.TOOL_CALL]: toolCallCheckpoint as UserCheckpoint,
+                        [CheckpointType.CODE_EXECUTION]: codeExecCheckpoint as UserCheckpoint
+                    },
+                    data_cluster: dataCluster as DataCluster,
+                }));
+            } else if (item) {
+                setForm(item);
+            } else if (!item || Object.keys(item).length === 0) {
+                onChange(getDefaultChatForm());
+            }
+        };
         populateConfig();
     }, [item, onChange, user, mode, fetchItem]);
 
@@ -166,38 +200,6 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             });
         }
     }, [fetchItem]);
-
-    const populateConfig = async () => {
-        if (mode === 'create' && user?.default_chat_config && !item) {
-            const config = user.default_chat_config;
-            const [agent, agentTools, retrievalTools, toolCallCheckpoint, codeExecCheckpoint, dataCluster] = await Promise.all([
-                config.alice_agent ? fetchItem('agents', config.alice_agent) : undefined,
-                Promise.all((config.agent_tools || []).map(id => fetchItem('tasks', id))),
-                Promise.all((config.retrieval_tools || []).map(id => fetchItem('tasks', id))),
-                config.default_user_checkpoints[CheckpointType.TOOL_CALL] ?
-                    fetchItem('usercheckpoints', config.default_user_checkpoints[CheckpointType.TOOL_CALL]) : undefined,
-                config.default_user_checkpoints[CheckpointType.CODE_EXECUTION] ?
-                    fetchItem('usercheckpoints', config.default_user_checkpoints[CheckpointType.CODE_EXECUTION]) : undefined,
-                config.data_cluster ? fetchItem('dataclusters', config.data_cluster) : undefined
-            ]);
-
-            setForm(prevForm => ({
-                ...prevForm,
-                alice_agent: agent as AliceAgent,
-                agent_tools: agentTools as AliceTask[],
-                retrieval_tools: retrievalTools as AliceTask[],
-                default_user_checkpoints: {
-                    [CheckpointType.TOOL_CALL]: toolCallCheckpoint as UserCheckpoint,
-                    [CheckpointType.CODE_EXECUTION]: codeExecCheckpoint as UserCheckpoint
-                },
-                data_cluster: dataCluster as DataCluster,
-            }));
-        } else if (item) {
-            setForm(item);
-        } else if (!item || Object.keys(item).length === 0) {
-            onChange(getDefaultChatForm());
-        }
-    };
 
     const memoizedAgentSelect = useMemo(() => (
         <EnhancedSelect<AliceAgent>

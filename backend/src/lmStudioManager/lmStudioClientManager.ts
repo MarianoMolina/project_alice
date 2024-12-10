@@ -13,7 +13,7 @@ import {
     ChatCompletionParams, ChatCompletionResponse, 
     ChatTemplateTokens, 
     CompletionParams, CompletionResponse, 
-    DEFAULT_MODEL_CONFIG, DEFAULT_PROMPT_TEMPLATE, DEFAULT_TOKENS,
+    DEFAULT_MODEL_CONFIG, DEFAULT_TOKENS,
     LM_STUDIO_URL, LoadedModel
 } from "./lmStudio.types";
 

@@ -14,6 +14,7 @@ type EnhancedEntityReferenceMode = BaseEntityReferenceMode | ExtendedEntityRefer
 
 interface EnhancedEntityReferenceProps extends Omit<EntityReferenceComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
   mode: EnhancedEntityReferenceMode;
+  item?: Partial<EntityReference> | null;
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: EntityReference) => void;
@@ -68,6 +69,7 @@ const EnhancedEntityReference: React.FC<EnhancedEntityReferenceProps> = (props) 
     <BaseDbElement<EntityReference>
       collectionName="entityreferences"
       itemId={props.itemId}
+      partialItem={props.item || undefined}
       mode={baseDbMode}
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}

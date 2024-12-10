@@ -14,6 +14,7 @@ type EnhancedFileMode = BaseFileMode | ExtendedFileMode;
 
 interface EnhancedFileProps extends Omit<FileComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
   mode: EnhancedFileMode;
+  item?: Partial<FileReference> | null;
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: FileReference) => void;
@@ -68,6 +69,7 @@ const EnhancedFile: React.FC<EnhancedFileProps> = (props) => {
     <BaseDbElement<FileReference>
       collectionName="files"
       itemId={props.itemId}
+      partialItem={props.item || undefined}
       mode={baseDbMode}
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}
