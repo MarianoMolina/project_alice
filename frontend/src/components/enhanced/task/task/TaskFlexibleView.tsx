@@ -69,6 +69,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             setForm(defaultForm);
             onChange(defaultForm);
         }
+        // eslint-disable-next-line
     }, [item?.task_type, taskType, onChange]);
 
     const handleFieldChange = useCallback((field: keyof AliceTask, value: any) => {
@@ -210,6 +211,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
         start_node: form.start_node,
         node_end_code_routing: form.node_end_code_routing,
         tasks: form.tasks
+        // eslint-disable-next-line
     }), [form.node_end_code_routing, form.tasks, form.start_node]);
 
     if (!form || Object.keys(form).length === 0) {

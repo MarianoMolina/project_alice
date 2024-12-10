@@ -15,13 +15,13 @@ interface PromptParsedViewProps {
   onSystemChange?: (inputs: Record<string, any>) => void;
 }
 
-const PromptParsedView = ({ 
-  prompt, 
-  systemPrompt, 
-  initialInputs = {}, 
+const PromptParsedView = ({
+  prompt,
+  systemPrompt,
+  initialInputs = {},
   initialSystemInputs = {},
   onChange,
-  onSystemChange 
+  onSystemChange
 }: PromptParsedViewProps) => {
   const [inputs, setInputs] = useState<Record<string, any>>(initialInputs);
   const [systemInputs, setSystemInputs] = useState<Record<string, any>>(initialSystemInputs);
@@ -58,29 +58,28 @@ const PromptParsedView = ({
     }
   };
 
-  const updateRenderedContent = () => {
-    try {
-      const rendered = renderTemplate(prompt.content, inputs, prompt.parameters);
-      setRenderedContent(rendered);
-      setError(null);
-      onChange?.(inputs);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error rendering template');
-    }
-
-    if (systemPrompt?.content) {
-      try {
-        const renderedSystem = renderTemplate(systemPrompt.content, systemInputs, systemPrompt.parameters);
-        setRenderedSystemContent(renderedSystem);
-        setSystemError(null);
-        onSystemChange?.(systemInputs);
-      } catch (err) {
-        setSystemError(err instanceof Error ? err.message : 'Error rendering system template');
-      }
-    }
-  };
-
   useEffect(() => {
+    const updateRenderedContent = () => {
+      try {
+        const rendered = renderTemplate(prompt.content, inputs, prompt.parameters);
+        setRenderedContent(rendered);
+        setError(null);
+        onChange?.(inputs);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Error rendering template');
+      }
+
+      if (systemPrompt?.content) {
+        try {
+          const renderedSystem = renderTemplate(systemPrompt.content, systemInputs, systemPrompt.parameters);
+          setRenderedSystemContent(renderedSystem);
+          setSystemError(null);
+          onSystemChange?.(systemInputs);
+        } catch (err) {
+          setSystemError(err instanceof Error ? err.message : 'Error rendering system template');
+        }
+      }
+    };
     if (prompt.content) {
       updateRenderedContent();
     }
@@ -153,9 +152,9 @@ const PromptParsedView = ({
             <Card variant="outlined" className="p-4 bg-gray-50">
               {systemPrompt && renderedSystemContent && (
                 <Box className="mb-1">
-                <AliceMarkdown role={RoleType.SYSTEM}>
-                  {renderedSystemContent}
-                </AliceMarkdown>
+                  <AliceMarkdown role={RoleType.SYSTEM}>
+                    {renderedSystemContent}
+                  </AliceMarkdown>
                 </Box>
               )}
               <AliceMarkdown role={RoleType.USER}>
@@ -180,7 +179,7 @@ const PromptParsedView = ({
               </AccordionDetails>
             </Accordion>
           )}
-          
+
           <Accordion>
             <AccordionSummary
               expandIcon={<ExpandMore />}

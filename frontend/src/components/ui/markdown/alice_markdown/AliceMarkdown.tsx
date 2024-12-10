@@ -132,6 +132,13 @@ const AliceMarkdown: FC<AliceMarkdownProps> = ({
 
     return (
         <Box className={clsx("relative", getRoleClassName())}>
+            <div className={clsx(
+                className,
+                showCopyButton && "pr-5" // Add padding-right when copy button is shown
+            )}>
+                {blocks.map(renderBlock)}
+            </div>
+            
             {showCopyButton && (
                 <Box className="absolute top-2 right-2 z-10">
                     <Tooltip title="Copy content">
@@ -145,10 +152,6 @@ const AliceMarkdown: FC<AliceMarkdownProps> = ({
                     </Tooltip>
                 </Box>
             )}
-            
-            <div className={className}>
-                {blocks.map(renderBlock)}
-            </div>
         </Box>
     );
 };

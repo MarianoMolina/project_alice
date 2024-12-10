@@ -38,11 +38,6 @@ export class LMStudioClientManager {
 
         const fileNamespace = this.client.files;
         this.messageBuilder = new MessageBuilder(new FileService(fileNamespace));
-
-        // Set up the interval for inactive model unloading
-        setInterval(() => this.unloadInactiveModels(), 180 * 1000);
-
-        Logger.info('LMStudioClient initialized');
     }
 
     private async handlePrediction<T extends ChatCompletionResponse | CompletionResponse>(
@@ -294,12 +289,14 @@ export class LMStudioClientManager {
         if (modelType === 'llm') {
             model = await this.client.llm.load(modelPath, {
                 config: finalConfig as LLMLoadModelConfig,
-                verbose: true
+                verbose: true,
+                identifier: modelPath
             });
         } else {
             model = await this.client.embedding.load(modelPath, {
                 config: finalConfig as EmbeddingLoadModelConfig,
-                verbose: true
+                verbose: true,
+                identifier: modelPath
             });
         }
 
@@ -312,7 +309,7 @@ export class LMStudioClientManager {
         return model;
     }
 
-    private async unloadInactiveModels() {
+    public async unloadInactiveModels() {
         try {
             const now = Date.now();
 

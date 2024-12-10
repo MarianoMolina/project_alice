@@ -5,7 +5,7 @@ import Logger from "../utils/logger";
 import { ChatCompletionParams, CompletionParams } from "./lmStudio.types";
 import { CreateEmbeddingParams } from "./lmStudio.utils";
 import { IModelConfig, ModelType } from "../interfaces/model.interface";
-import Model from "../models/model.model";
+import { Model } from "mongoose";
 
 interface ExtendedDownloadedModel extends DownloadedModel {
     isLoaded: boolean;
@@ -14,15 +14,118 @@ interface ExtendedDownloadedModel extends DownloadedModel {
 export class LMStudioRouteManager {
     private lmStudioManager: LMStudioClientManager;
     private requestQueue: Queue;
+    private cleanupInterval: NodeJS.Timeout | null;
+    private isInitialized: boolean;
+    private readonly CLEANUP_INTERVAL = 3 * 60 * 1000; // 3 minutes
+    private readonly INACTIVITY_THRESHOLD = 10 * 60 * 1000; // 10 minutes
 
     constructor() {
-        this.lmStudioManager = new LMStudioClientManager();
+        this.lmStudioManager = new LMStudioClientManager(this.INACTIVITY_THRESHOLD);
         this.requestQueue = new Queue({
             maxQueueSize: 100,
             operationTimeout: 300000, // 5 minutes
             retryCount: 2,
             retryDelay: 2000
         });
+        this.cleanupInterval = null;
+        this.isInitialized = false;
+    }
+
+    /**
+     * Initialize the LMStudioRouteManager
+     * Queues initial cleanup and sets up periodic cleanup
+     */
+    async initialize(): Promise<void> {
+        if (this.isInitialized) {
+            Logger.warn('LMStudioRouteManager is already initialized');
+            return;
+        }
+
+        try {
+            Logger.info('Initializing LMStudioRouteManager');
+            
+            // Queue initial cleanup
+            await this.requestQueue.enqueue(
+                async () => {
+                    Logger.info('Performing initial cleanup');
+                    await this.lmStudioManager.unloadAllModels();
+                },
+                'initialize-cleanup'
+            );
+            
+            // Set up periodic cleanup
+            this.cleanupInterval = setInterval(() => {
+                // Queue periodic cleanup
+                this.requestQueue.enqueue(
+                    async () => {
+                        Logger.info('Performing periodic inactive model cleanup');
+                        await this.lmStudioManager.unloadInactiveModels();
+                    },
+                    'periodic-cleanup'
+                ).catch(error => Logger.error('Error in periodic cleanup:', error));
+            }, this.CLEANUP_INTERVAL);
+
+            // Set up shutdown handlers
+            this.setupShutdownHandlers();
+            
+            this.isInitialized = true;
+            Logger.info('LMStudioRouteManager initialized successfully');
+        } catch (error) {
+            Logger.error('Error initializing LMStudioRouteManager:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Set up handlers for various shutdown signals
+     */
+    private setupShutdownHandlers(): void {
+        const signals = ['SIGTERM', 'SIGINT', 'SIGUSR2'];
+        
+        signals.forEach(signal => {
+            process.on(signal, async () => {
+                Logger.info(`Received ${signal}, initiating graceful shutdown`);
+                await this.shutdown();
+                process.exit(0);
+            });
+        });
+
+        // Handle nodemon restarts
+        process.on('beforeExit', async () => {
+            Logger.info('Process beforeExit, initiating cleanup');
+            await this.shutdown();
+        });
+    }
+
+    /**
+     * Gracefully shutdown the manager
+     * Queues final cleanup operations
+     */
+    async shutdown(): Promise<void> {
+        Logger.info('Starting LMStudioRouteManager shutdown');
+        
+        try {
+            // Clear cleanup interval
+            if (this.cleanupInterval) {
+                clearInterval(this.cleanupInterval);
+                this.cleanupInterval = null;
+            }
+
+            // Queue final cleanup
+            await this.requestQueue.enqueue(
+                async () => {
+                    Logger.info('Performing final cleanup');
+                    await this.lmStudioManager.unloadAllModels();
+                },
+                'shutdown-cleanup'
+            );
+            
+            this.isInitialized = false;
+            Logger.info('LMStudioRouteManager shutdown completed');
+        } catch (error) {
+            Logger.error('Error during LMStudioRouteManager shutdown:', error);
+            throw error;
+        }
     }
 
     private async getModelConfig(modelId: string): Promise<{
@@ -54,14 +157,12 @@ export class LMStudioRouteManager {
             keepModelInMemory: true
         };
 
-        // Return appropriate config based on model type
         if (modelType === ModelType.EMBEDDINGS) {
             return baseConfig as EmbeddingLoadModelConfig;
         }
 
         return {
             ...baseConfig,
-            // Add any LLM-specific configurations here
         } as LLMLoadModelConfig;
     }
 
@@ -70,20 +171,15 @@ export class LMStudioRouteManager {
             try {
                 Logger.debug('Fetching models list');
                 
-                // Get all downloaded models
                 const downloadedModels = await this.lmStudioManager.listModels();
-                
-                // Get currently loaded models for comparison
                 const loadedLLMs = await this.lmStudioManager.client.llm.listLoaded();
                 const loadedEmbeddings = await this.lmStudioManager.client.embedding.listLoaded();
                 
-                // Combine loaded model lists for easier checking
                 const loadedModels = new Set([
                     ...loadedLLMs.map(m => m.path),
                     ...loadedEmbeddings.map(m => m.path)
                 ]);
 
-                // Map downloaded models to extended interface with loaded status
                 return downloadedModels.map(model => ({
                     ...model,
                     isLoaded: loadedModels.has(model.path)
@@ -101,7 +197,11 @@ export class LMStudioRouteManager {
                 const { modelPath, modelConfig, modelType } = await this.getModelConfig(modelId);
                 
                 if (![ModelType.CHAT, ModelType.VISION].includes(modelType)) {
-                    throw new Error(`Model type ${modelType} is not supported for chat completion`);
+                    if (modelType !== ModelType.INSTRUCT) {
+                        throw new Error(`Model type ${modelType} is not supported for chat completion`);
+                    } else {
+                        Logger.warn(`Model ${modelId} is not of type CHAT OR VISION, but INSTRUCT - using it anyway`);
+                    }
                 }
 
                 // Update params with the model path
@@ -112,7 +212,7 @@ export class LMStudioRouteManager {
 
                 return await this.lmStudioManager.generateChatCompletion(
                     updatedParams,
-                    modelConfig?.prompt_config,
+                    modelConfig.prompt_config,
                     this.createModelConfig(modelConfig, modelType)
                 );
             } catch (error) {
@@ -128,7 +228,11 @@ export class LMStudioRouteManager {
                 const { modelPath, modelConfig, modelType } = await this.getModelConfig(modelId);
                 
                 if (modelType !== ModelType.INSTRUCT) {
-                    throw new Error(`Model type ${modelType} is not supported for text completion`);
+                    if (modelType === ModelType.CHAT) {
+                        Logger.warn(`Model ${modelId} is not of type INSTRUCT, but ${modelType} - using it anyway`);
+                    } else {
+                        throw new Error(`Model type ${modelType} is not supported for text completion`);
+                    }
                 }
 
                 const updatedParams = {
@@ -171,15 +275,5 @@ export class LMStudioRouteManager {
                 throw error;
             }
         }, `embedding-${modelId}`);
-    }
-
-    // Additional utility methods
-    async shutdown() {
-        try {
-            await this.lmStudioManager.unloadAllModels();
-        } catch (error) {
-            Logger.error('Error during shutdown:', error);
-            throw error;
-        }
     }
 }

@@ -21,15 +21,7 @@ export interface LMStudioModel {
   type: string;
   is_loaded: boolean;
 }
-function isValidLMStudioModel(model: any): model is LMStudioModel {
-  return (
-    typeof model === 'object' &&
-    model !== null &&
-    typeof model.id === 'string' &&
-    typeof model.type === 'string' &&
-    typeof model.is_loaded === 'boolean'
-  );
-}
+
 /**
  * Fetches available models from LM Studio backend
  * @returns Promise<LMStudioModel[]> Array of available models
@@ -55,8 +47,8 @@ export const fetchLMStudioModels = async (): Promise<LMStudioModel[]> => {
       root: model.id,
       parent: null,
       permission: [],
-      type: model.object || 'unknown',
-      is_loaded: true // Since we got it in the list, we'll assume it's loaded
+      type: model.type || 'unknown',
+      is_loaded: model.is_loaded
     }));
 
     Logger.debug('Fetched LM Studio models:', models);

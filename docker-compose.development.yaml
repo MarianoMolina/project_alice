@@ -12,8 +12,6 @@ services:
         condition: service_healthy
       workflow:
         condition: service_healthy
-      volume-init:
-        condition: service_completed_successfully
     volumes:
       - ./frontend:/app:consistent
       - /app/node_modules

@@ -21,7 +21,7 @@ const LMStudioStatus = () => {
         try {
             const modelList = await fetchLMStudioModels();
             setModels(modelList);
-            Logger.debug('LM Studio models fetched:', modelList);
+            Logger.debug('LM Studio models fetched:', JSON.stringify(modelList));
         } catch (err) {
             Logger.error('Error fetching LM Studio status:', err);
             setError('Failed to connect to LM Studio');
@@ -29,11 +29,12 @@ const LMStudioStatus = () => {
         } finally {
             setIsLoading(false);
         }
-    }, []); 
+    }, [fetchLMStudioModels]); 
 
     // Initial fetch on mount only
     useEffect(() => {
         checkStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -86,7 +87,7 @@ const LMStudioStatus = () => {
                                             <Box className="flex items-center justify-between">
                                                 <div>
                                                     <Typography variant="subtitle2" className="font-medium">
-                                                        {model.id.split('/').pop()}
+                                                        {model.id}
                                                     </Typography>
                                                     <Typography variant="body2" color="textSecondary">
                                                         Type: {model.type}

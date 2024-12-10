@@ -8,6 +8,15 @@ import { CreateEmbeddingParams } from '../lmStudioManager/lmStudio.utils';
 
 const router: Router = express.Router();
 const lmStudioManager = new LMStudioRouteManager();
+// Initialize LMStudioRouteManager
+(async () => {
+  try {
+      await lmStudioManager.initialize();
+  } catch (error) {
+      Logger.error('Failed to initialize LMStudioRouteManager:', error);
+      process.exit(1);
+  }
+})();
 
 // Error handling helper
 const handleErrors = (res: Response, error: any) => {

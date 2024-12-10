@@ -83,6 +83,7 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
         };
         Logger.debug(`Populating items for user ${JSON.stringify(userObject, null, 2)}`);
         populateItems();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userObject.default_chat_config, fetchItem]);
 
     const handleAgentChange = useCallback(async (selectedIds: string[]) => {
