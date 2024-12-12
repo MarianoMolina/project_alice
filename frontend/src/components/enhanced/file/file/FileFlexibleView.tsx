@@ -3,17 +3,24 @@ import {
     Typography,
     Box,
     Button,
+    Paper,
+    Stack,
+    Chip,
 } from '@mui/material';
+import { 
+    InsertDriveFile as FileIcon,
+    AccessTime as TimeIcon 
+} from '@mui/icons-material';
 import { FileComponentProps, FileContentReference, FileReference, FileType, getDefaultFileForm } from '../../../../types/FileTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import FileViewer from './FileViewer';
 import Transcript from '../Transcript';
-import { bytesToMB, createFileContentReference, selectFile } from '../../../../utils/FileUtils';
+import {  createFileContentReference, getFileSize, selectFile } from '../../../../utils/FileUtils';
 import { useApi } from '../../../../contexts/ApiContext';
 import { useNotification } from '../../../../contexts/NotificationContext';
 import Logger from '../../../../utils/Logger';
 import { useDialog } from '../../../../contexts/DialogCustomContext';
 import { TextInput } from '../../common/inputs/TextInput';
+import FileContentView from './FileContentView';
 
 const FileFlexibleView: React.FC<FileComponentProps> = ({
     item,
@@ -121,56 +128,104 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
         }
     };
 
-    const renderContent = () => {
-        if (mode === 'create') {
-            return (
-                <Box>
-                    <Button variant="contained" onClick={handleFileSelect}>
-                        Select File to Upload
-                    </Button>
-                </Box>
-            );
-        }
-
+    const renderFileDetails = () => {
+        if (!item) return null;
+        
         return (
-            <>  
-                <TextInput
-                    name='filename'
-                    label='Filename'
-                    value={item?.filename || ''}
-                    onChange={(value) => handleFieldChange('filename', value)}
-                    disabled={!isEditMode}
-                    description='Enter the filename for the file. It should contain its extension.'
-                />
-                
-                <Typography variant="body1">File Type: {item?.type}</Typography>
-                <Typography variant="body1">{bytesToMB(item?.file_size ?? 0)}</Typography>
-                <Typography variant="body1">
-                    Last Accessed: {item?.last_accessed ? new Date(item.last_accessed).toLocaleString() : 'Never'}
-                </Typography>
-                <Box mt={2}>
-                    <FileViewer
-                        item={item as FileReference}
-                        mode={mode}
-                        onChange={handleFileUpdate}
-                        items={null} handleSave={async()=>{}}
-                    />
-                </Box>
-                {item && item._id && hasTranscriptSlot && (
-                    <Box mt={2}>
-                        <Transcript
-                            fileId={item._id}
-                            transcript={item.transcript}
-                            onTranscriptUpdate={(value) => handleFieldChange('transcript', value)}
+            <Paper className="p-4">
+                <Stack spacing={3}>
+                    <Box>
+                        <TextInput
+                            name='filename'
+                            label='Filename'
+                            value={item.filename || ''}
+                            onChange={(value) => handleFieldChange('filename', value)}
+                            disabled={!isEditMode}
+                            description='Enter the filename for the file. It should contain its extension.'
                         />
                     </Box>
-                )}
-            </>
+
+                    <Stack direction="row" spacing={2}>
+                        <Chip
+                            icon={<FileIcon className="text-gray-600" />}
+                            label={item.type.toUpperCase()}
+                            size="small"
+                            className="bg-gray-100"
+                        />
+                        <Chip
+                            icon={<TimeIcon className="text-gray-600" />}
+                            label={getFileSize(item.file_size).formatted}
+                            size="small"
+                            className="bg-gray-100"
+                        />
+                    </Stack>
+
+                    <Box>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                            Last Accessed
+                        </Typography>
+                        <Typography variant="body1">
+                            {item.last_accessed ? new Date(item.last_accessed).toLocaleString() : 'Never'}
+                        </Typography>
+                    </Box>
+
+                    <Box className="mt-4">
+                        <FileContentView
+                            item={item as FileReference}
+                            mode={mode}
+                            onChange={handleFileUpdate}
+                            items={null}
+                            handleSave={async()=>{}}
+                        />
+                    </Box>
+
+                    {hasTranscriptSlot && (
+                        <Box className="mt-4">
+                            <Transcript
+                                fileId={item._id ?? ''}
+                                transcript={item.transcript}
+                                onTranscriptUpdate={(value) => handleFieldChange('transcript', value)}
+                            />
+                        </Box>
+                    )}
+                </Stack>
+            </Paper>
         );
     };
 
+    const renderUploadSection = () => (
+        <Paper className="p-8 text-center">
+            <Stack spacing={2} alignItems="center">
+                <FileIcon sx={{ fontSize: 48 }} color="action" />
+                <Typography variant="h6" color="text.secondary">
+                    Select a file to upload
+                </Typography>
+                <Button
+                    variant="contained"
+                    onClick={handleFileSelect}
+                    size="large"
+                >
+                    Select File
+                </Button>
+            </Stack>
+        </Paper>
+    );
+
+    const renderContent = () => {
+        if (mode === 'create') {
+            return renderUploadSection();
+        }
+        return renderFileDetails();
+    };
+
     if (!item && mode !== 'create') {
-        return <Typography>No file data available.</Typography>;
+        return (
+            <Paper className="p-4">
+                <Typography color="text.secondary" align="center">
+                    No file data available.
+                </Typography>
+            </Paper>
+        );
     }
 
     return (

@@ -24,6 +24,7 @@ import { BooleanInput } from '../../common/inputs/BooleanInput';
 import { SelectInput } from '../../common/inputs/SelectInput';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 import { useApi } from '../../../../contexts/ApiContext';
+import TitleBox from '../../common/inputs/TitleBox';
 
 const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     item,
@@ -230,65 +231,62 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             item={form as AliceTask}
             itemType='tasks'
         >
-            <SelectInput
-                name="task_type"
-                label="Task Type"
-                value={taskType}
-                onChange={(value) => handleFieldChange('task_type', value)}
-                disabled={!isEditMode}
-                description={taskType && taskDescriptions[taskType]}
-                options={Object.values(TaskType).map((type) => ({ value: type, label: formatCamelCaseString(type) }))}
-            />
-            <TextInput
-                name="task_name"
-                label="Task Name"
-                value={form.task_name}
-                onChange={(value) => handleFieldChange('task_name', value)}
-                disabled={!isEditMode}
-                required
-                description="The display name of the task."
-                fullWidth
-            />
-            <TextInput
-                name="task_description"
-                label="Task Description"
-                value={form.task_description}
-                onChange={(value) => handleFieldChange('task_description', value)}
-                disabled={!isEditMode}
-                required
-                description="A description of the task. This info is provided to the agent."
-                fullWidth
-                rows={3}
-                multiline
-            />
-            {memoizedAgentSelect}
-            {memoizedTaskSelect}
-            {memoizedPromptSelect}
-            {memoizedOutputPromptSelect}
-            <SelectInput
-                name="required_apis"
-                label="Required API Types"
-                value={form.required_apis || []}
-                onChange={(value) => handleFieldChange('required_apis', value)}
-                disabled={!isEditMode}
-                description='The API types that are required for this task to execute'
-                options={Object.values(ApiType).map((apiType) => ({ value: apiType, label: formatCamelCaseString(apiType) }))}
-                multiple
-            />
+            <TitleBox title="Task Details" >
+                <SelectInput
+                    name="task_type"
+                    label="Task Type"
+                    value={taskType}
+                    onChange={(value) => handleFieldChange('task_type', value)}
+                    disabled={!isEditMode}
+                    description={taskType && taskDescriptions[taskType]}
+                    options={Object.values(TaskType).map((type) => ({ value: type, label: formatCamelCaseString(type) }))}
+                />
+                <TextInput
+                    name="task_name"
+                    label="Task Name"
+                    value={form.task_name}
+                    onChange={(value) => handleFieldChange('task_name', value)}
+                    disabled={!isEditMode}
+                    required
+                    description="The display name of the task."
+                    fullWidth
+                />
+                <TextInput
+                    name="task_description"
+                    label="Task Description"
+                    value={form.task_description}
+                    onChange={(value) => handleFieldChange('task_description', value)}
+                    disabled={!isEditMode}
+                    required
+                    description="A description of the task. This info is provided to the agent."
+                    fullWidth
+                    rows={3}
+                    multiline
+                />
+                <SelectInput
+                    name="required_apis"
+                    label="Required API Types"
+                    value={form.required_apis || []}
+                    onChange={(value) => handleFieldChange('required_apis', value)}
+                    disabled={!isEditMode}
+                    description='The API types that are required for this task to execute'
+                    options={Object.values(ApiType).map((apiType) => ({ value: apiType, label: formatCamelCaseString(apiType) }))}
+                    multiple
+                />
+            </TitleBox>
             <FunctionDefinitionBuilder
                 title="Input Variables"
                 initialParameters={form.input_variables || undefined}
                 onChange={(newDefinition) => handleFieldChange('input_variables', newDefinition)}
                 isViewOnly={!isEditMode}
             />
-            <ExitCodeManager
-                title="Exit Codes"
-                exitCodes={form.exit_codes || {}}
-                onChange={(value) => handleFieldChange('exit_codes', value)}
-                isEditMode={isEditMode}
-            />
+
+            {memoizedAgentSelect}
+            {memoizedTaskSelect}
+            {memoizedPromptSelect}
+            {memoizedOutputPromptSelect}
             <TaskEndCodeRoutingBuilder
-                title="Node End Code Routing"
+                title="Inner Nodes End Code Routing"
                 startNode={form.start_node}
                 onChangeStartNode={(value) => handleFieldChange('start_node', value)}
                 tasks={taskType === TaskType.Workflow ? Object.values(form.tasks ?? {}) : []}
@@ -300,26 +298,34 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             {memoizedFlowchartTask && form.node_end_code_routing && (
                 <TaskFlowchart title="Task Flowchart" task={memoizedFlowchartTask} height={800} miniMap />
             )}
-            <NumericInput
-                name="max_attempts"
-                label="Max Attempts"
-                value={form.max_attempts}
-                onChange={(value) => handleFieldChange('max_attempts', value)}
-                disabled={!isEditMode}
-                required
-                isInteger
-                description='The maximum number of node failures this task will perform before it fails.'
-                min={0}
-                fullWidth
-            />
-            <BooleanInput
-                name="recursive"
-                label="Recursive"
-                value={form.recursive}
-                onChange={(value) => handleFieldChange('recursive', value)}
-                disabled={!isEditMode}
-                description="Normally, if a task being executed is present in the execution history of a task, it will be rejected, unless it is recursive. Workflows and tasks used in Workflows usually should have recursion enabled."
-            />
+            <TitleBox title="Task Settings">
+                <ExitCodeManager
+                    title="Exit Codes"
+                    exitCodes={form.exit_codes || {}}
+                    onChange={(value) => handleFieldChange('exit_codes', value)}
+                    isEditMode={isEditMode}
+                />
+                <NumericInput
+                    name="max_attempts"
+                    label="Max Attempts"
+                    value={form.max_attempts}
+                    onChange={(value) => handleFieldChange('max_attempts', value)}
+                    disabled={!isEditMode}
+                    required
+                    isInteger
+                    description='The maximum number of node failures this task will perform before it fails.'
+                    min={0}
+                    fullWidth
+                />
+                <BooleanInput
+                    name="recursive"
+                    label="Recursive"
+                    value={form.recursive}
+                    onChange={(value) => handleFieldChange('recursive', value)}
+                    disabled={!isEditMode}
+                    description="Normally, if a task being executed is present in the execution history of a task, it will be rejected, unless it is recursive. Workflows and tasks used in Workflows usually should have recursion enabled."
+                />
+            </TitleBox>
 
             <DataClusterManager
                 dataCluster={form.data_cluster}

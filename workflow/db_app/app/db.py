@@ -31,7 +31,7 @@ class BackendAPI(BaseModel):
         get_models(model_id: Optional[str] = None) -> Dict[str, AliceModel]: Retrieves models.
         get_apis(api_id: Optional[str] = None) -> Dict[str, API]: Retrieves APIs.
         update_api_health(api_id: str, health_status: str) -> bool: Updates API health status.
-        get_chats(chat_id: Optional[str] = None) -> Dict[str, AliceChat]: Retrieves chats.
+        get_chat(chat_id: str) -> AliceChat: Retrieves chat.
         store_chat_message(chat_id: str, message: MessageDict) -> AliceChat: Stores a chat message.
         store_task_response(task_response: TaskResponse) -> TaskResponse: Stores a task response.
         validate_token(token: str) -> dict: Validates an authentication token.
@@ -107,82 +107,6 @@ class BackendAPI(BaseModel):
             # Keep the existing condition for scalar values
             return data if data or data == 0 or data is False else None
 
-    async def get_prompts(self, prompt_id: Optional[str] = None) -> Dict[str, Prompt]:
-        if prompt_id is None:
-            url = f"{self.base_url}/prompts"
-        else:
-            url = f"{self.base_url}/prompts/{prompt_id}"
-        headers = self._get_headers()
-
-        async with aiohttp.ClientSession() as session:
-            try:
-                async with session.get(url, headers=headers) as response:
-                    if response is None:
-                        raise ValueError(f"Failed to get a response from {url}")
-                    response.raise_for_status()
-                    prompts = await response.json()
-
-                    if isinstance(prompts, list):
-                        prompts = [await self.preprocess_data(prompt) for prompt in prompts]
-                        return {prompt["_id"]: Prompt(**prompt) for prompt in prompts}
-                    else:
-                        prompts = await self.preprocess_data(prompts)
-                        return {prompts["_id"]: Prompt(**prompts)}
-            except aiohttp.ClientError as e:
-                LOGGER.error(f"Error retrieving prompts: {e}")
-                return {}
-            except Exception as e:
-                LOGGER.error(f"Unexpected error retrieving prompts: {e}")
-                return {}
-            
-    async def get_users(self, user_id: Optional[str] = None) -> Dict[str, User]:
-        if user_id is None:
-            url = f"{self.base_url}/users"
-        else:
-            url = f"{self.base_url}/users/{user_id}"
-        headers = self._get_headers()
-        
-        async with aiohttp.ClientSession() as session:
-            try:
-                async with session.get(url, headers=headers) as response:
-                    response.raise_for_status()
-                    users = await response.json()
-                    
-                    if isinstance(users, list):
-                        users = [await self.preprocess_data(user) for user in users]
-                        return {user["_id"]: User(**user) for user in users}
-                    else:
-                        users = await self.preprocess_data(users)
-                        return {users["_id"]: User(**users)}
-            except aiohttp.ClientError as e:
-                LOGGER.error(f"Error retrieving users: {e}")
-                return {}
-
-    async def get_agents(self, agent: Optional[str] = None) -> Dict[str, AliceAgent]:
-        if agent is None:
-            url = f"{self.base_url}/agents"
-        else:
-            url = f"{self.base_url}/agents/{agent}"
-        headers = self._get_headers()
-        
-        async with aiohttp.ClientSession() as session:
-            try:
-                async with session.get(url, headers=headers) as response:
-                    if response is None:
-                        raise ValueError(f"Failed to get a response from {url}")
-                    response.raise_for_status()
-                    agents = await response.json()
-                    
-                    if isinstance(agents, list):
-                        preprocessed_agents = [await self.preprocess_data(agent) for agent in agents]
-                        return {agent["_id"]: AliceAgent(**agent) for agent in preprocessed_agents}
-                    else:
-                        preprocessed_agent = await self.preprocess_data(agents)
-                        return {agents["_id"]: AliceAgent(**preprocessed_agent)}
-            except aiohttp.ClientError as e:
-                LOGGER.error(f"Error retrieving agents: {e}")
-                return {}
-
     async def get_tasks(self, task_id: Optional[str] = None) -> Dict[str, AliceTask]:
         if task_id is None:
             url = f"{self.base_url}/tasks"
@@ -208,31 +132,6 @@ class BackendAPI(BaseModel):
                 LOGGER.error(f"Error retrieving tasks: {e}")
                 return {}
 
-    async def get_models(self, model_id: Optional[str] = None) -> Dict[str, AliceModel]:
-        if model_id is None:
-            url = f"{self.base_url}/models"
-        else:
-            url = f"{self.base_url}/models/{model_id}"
-        headers = self._get_headers()
-        
-        async with aiohttp.ClientSession() as session:
-            try:
-                async with session.get(url, headers=headers) as response:
-                    if response is None:
-                        raise ValueError(f"Failed to get a response from {url}")
-                    response.raise_for_status()
-                    models = await response.json()
-                    
-                    if isinstance(models, list):
-                        models = [await self.preprocess_data(model) for model in models]
-                        return {model['_id']: AliceModel(**model) for model in models}
-                    else:
-                        models = await self.preprocess_data(models)
-                        return {models['_id']: AliceModel(**models)}
-            except aiohttp.ClientError as e:
-                LOGGER.error(f"Error retrieving models: {e}")
-                return {}
-            
     async def get_apis(self, api_id: Optional[str] = None) -> Dict[str, API]:
         if api_id is None:
             url = f"{self.base_url}/apis"
@@ -288,25 +187,18 @@ class BackendAPI(BaseModel):
         # Assuming the task_types constructors are not async
         return self.task_types[task["task_type"]](**task)
     
-    async def get_chats(self, chat_id: Optional[str] = None) -> Dict[str, AliceChat]:
-        if chat_id is None:
-            url = f"{self.base_url}/chats"
-        else:
-            url = f"{self.base_url}/chats/{chat_id}"
+    async def get_chat(self, chat_id: str) -> AliceChat:
+        url = f"{self.base_url}/chats/{chat_id}/populated"
         headers = self._get_headers()
         
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.get(url, headers=headers) as response:
                     response.raise_for_status()
-                    chats = await response.json()
-                    
-                    if isinstance(chats, list):
-                        chats = [await self.preprocess_data(chat) for chat in chats]
-                        return {chat["_id"]: AliceChat(**chat) for chat in chats}
-                    else:
-                        chats = await self.preprocess_data(chats)
-                        return {chats['_id']: AliceChat(**chats)}
+                    chat = await response.json()
+
+                    chat = await self.preprocess_data(chat)
+                    return AliceChat(**chat)
             except aiohttp.ClientError as e:
                 LOGGER.error(f"Error retrieving chats: {e}")
                 return {}

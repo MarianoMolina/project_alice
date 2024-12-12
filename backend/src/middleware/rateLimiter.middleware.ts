@@ -2,7 +2,7 @@ import rateLimit from 'express-rate-limit';
 import { RateLimitRequestHandler } from 'express-rate-limit';
 
 export const createRateLimiter = (
-  maxRequests: number = 100,
+  maxRequests: number = 1000,
   windowMinutes: number = 15
 ): RateLimitRequestHandler => {
   return rateLimit({

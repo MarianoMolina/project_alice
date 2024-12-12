@@ -18,12 +18,15 @@ export type RequiredCheckpoints = {
 
 export interface AliceChat extends BaseDatabaseObject {
     name: string;
-    messages: MessageType[];
+    messages: string[];
     alice_agent: AliceAgent;
     agent_tools?: AliceTask[];
     retrieval_tools?: AliceTask[];
     default_user_checkpoints: RequiredCheckpoints;
     data_cluster?: DataCluster;
+}
+export interface PopulatedAliceChat extends Omit<AliceChat, 'messages'> {
+    messages: MessageType[];
 }
 
 export const convertToAliceChat = (data: any): AliceChat => {
@@ -35,6 +38,23 @@ export const convertToAliceChat = (data: any): AliceChat => {
     return {
         ...convertToBaseDatabaseObject(data),
         name: data?.name || '',
+        messages: data?.messages || [],
+        alice_agent: convertToAliceAgent(data?.alice_agent),
+        agent_tools: (data?.agent_tools || []).map(convertToAliceTask),
+        default_user_checkpoints: defaultCheckpoints,
+        data_cluster: data?.data_cluster ? convertToDataCluster(data?.data_cluster) : undefined,
+        retrieval_tools: (data?.retrieval_tools || []).map(convertToAliceTask),
+    };
+};
+export const convertToPopulatedAliceChat = (data: any): PopulatedAliceChat => {
+    const defaultCheckpoints: RequiredCheckpoints = {
+        [CheckpointType.TOOL_CALL]: convertToUserCheckpoint(data?.default_user_checkpoints?.[CheckpointType.TOOL_CALL]) || {},
+        [CheckpointType.CODE_EXECUTION]: convertToUserCheckpoint(data?.default_user_checkpoints?.[CheckpointType.CODE_EXECUTION]) || {},
+    };
+    
+    return {
+        ...convertToBaseDatabaseObject(data),
+        name: data?.name || '',
         messages: (data?.messages || []).map(convertToMessageType),
         alice_agent: convertToAliceAgent(data?.alice_agent),
         agent_tools: (data?.agent_tools || []).map(convertToAliceTask),
@@ -43,14 +63,14 @@ export const convertToAliceChat = (data: any): AliceChat => {
         retrieval_tools: (data?.retrieval_tools || []).map(convertToAliceTask),
     };
 };
-
-export interface MessageProps {
-    message: MessageType;
-    chatId?: string;
-}
+export const convertPopulatedToAliceChat = (populatedChat: PopulatedAliceChat): AliceChat => {
+    return {
+        ...populatedChat,
+        messages: populatedChat.messages.map(message => message._id || '')
+    };
+};
 
 export interface ChatComponentProps extends EnhancedComponentProps<AliceChat> {
-    showRegenerate?: boolean;
 }
 
 export const getDefaultChatForm = (): Partial<AliceChat> => ({

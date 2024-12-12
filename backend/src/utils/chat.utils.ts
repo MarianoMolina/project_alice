@@ -197,12 +197,12 @@ export async function createMessageInChat(
     userId: string
 ): Promise<IAliceChatDocument | null> {
     try {
-        Logger.info(`createMessageInChat called for chat ${chatId}`);
+        Logger.debug(`createMessageInChat called for chat ${chatId}`);
 
         let messageDoc: IMessageDocument | null;
 
         if (messageData._id) {
-            Logger.info(`Updating existing message with ID: ${messageData._id}`);
+            Logger.debug(`Updating existing message with ID: ${messageData._id}`);
             messageDoc = await updateMessage(
                 messageData._id.toString(), 
                 messageData, 
@@ -210,7 +210,7 @@ export async function createMessageInChat(
                 chatId
             );
         } else {
-            Logger.info('Creating new message');
+            Logger.debug('Creating new message');
             messageDoc = await createMessage(messageData, userId, chatId);
         }
 
@@ -232,7 +232,7 @@ export async function createMessageInChat(
             throw new Error('Chat not found or failed to update');
         }
 
-        Logger.info(`Message ${messageDoc._id} added to chat ${chatId}`);
+        Logger.debug(`Message ${messageDoc._id} added to chat ${chatId}`);
 
         return updatedChat;
     } catch (error) {

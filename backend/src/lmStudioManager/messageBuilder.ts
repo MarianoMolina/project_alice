@@ -1,7 +1,7 @@
 import { FileService } from './fileService';
 import {
     LLMPromptTemplate, LLMJinjaPromptTemplate, ChatMessagePartTextData, ChatMessagePartFileData, ChatHistory, ChatMessageData,
-    ChatMessagePartData, ChatMessagePartToolCallResultData, ChatMessagePartToolCallRequestData
+    ChatMessagePartToolCallResultData, ChatMessagePartToolCallRequestData
 } from '@lmstudio/sdk';
 import Logger from '../utils/logger';
 import { ChatCompletionMessage, ChatCompletionParams, ChatTemplateTokens, CompletionParams, DEFAULT_TOKENS, MessageContent, ToolCall } from './lmStudio.types';

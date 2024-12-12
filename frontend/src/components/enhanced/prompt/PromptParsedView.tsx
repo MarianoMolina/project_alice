@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, Typography, Box, AccordionSummary, Accordion, AccordionDetails, Divider } from '@mui/material';
 import nunjucks from 'nunjucks';
+import { ExpandMore } from '@mui/icons-material';
+import { Card, CardContent, Typography, Box, AccordionSummary, Accordion, AccordionDetails, Divider } from '@mui/material';
 import { Prompt } from '../../../types/PromptTypes';
 import AliceMarkdown, { RoleType } from '../../ui/markdown/alice_markdown/AliceMarkdown';
-import { ExpandMore } from '@mui/icons-material';
 import ParameterInputFields from '../parameter/ParameterInputFields';
 
 interface PromptParsedViewProps {
@@ -44,21 +44,20 @@ const PromptParsedView = ({
     return value;
   };
 
-  const renderTemplate = (content: string, contextInputs: Record<string, any>, params: any) => {
-    try {
-      const parsedInputs = Object.entries(contextInputs).reduce((acc, [key, value]) => {
-        const paramType = params?.properties[key]?.type || 'string';
-        acc[key] = parseInputValue(value, paramType);
-        return acc;
-      }, {} as Record<string, any>);
-
-      return nunjucks.renderString(content, parsedInputs);
-    } catch (err) {
-      throw new Error(err instanceof Error ? err.message : 'Error rendering template');
-    }
-  };
-
   useEffect(() => {
+    const renderTemplate = (content: string, contextInputs: Record<string, any>, params: any) => {
+      try {
+        const parsedInputs = Object.entries(contextInputs).reduce((acc, [key, value]) => {
+          const paramType = params?.properties[key]?.type || 'string';
+          acc[key] = parseInputValue(value, paramType);
+          return acc;
+        }, {} as Record<string, any>);
+
+        return nunjucks.renderString(content, parsedInputs);
+      } catch (err) {
+        throw new Error(err instanceof Error ? err.message : 'Error rendering template');
+      }
+    };
     const updateRenderedContent = () => {
       try {
         const rendered = renderTemplate(prompt.content, inputs, prompt.parameters);
@@ -83,7 +82,7 @@ const PromptParsedView = ({
     if (prompt.content) {
       updateRenderedContent();
     }
-  }, [prompt.content, systemPrompt?.content, inputs, systemInputs]);
+  }, [prompt.content, systemPrompt?.content, inputs, systemInputs, prompt.parameters, systemPrompt?.parameters, onChange, onSystemChange]);
 
   const handleInputChange = (key: string, value: string | boolean | number, isSystem: boolean = false) => {
     if (isSystem) {

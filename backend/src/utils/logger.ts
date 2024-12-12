@@ -32,10 +32,10 @@ class LoggerClass {
     this.maxBytes = config?.maxBytes ?? 10 * 1024 * 1024;
     this.backupCount = config?.backupCount ?? 5;
     this.currentSize = 0;
-    
+   
     this.initializeLogDirectory();
     this.initializeCurrentSize();
-    this.info('LOG_LEVEL:', this.level);
+    this.info('LOG_LEVEL:', LogLevel[this.level]);
   }
 
   public static getInstance(
@@ -190,7 +190,6 @@ class LoggerClass {
   }
 }
 
-// Export the rest of the types and functions as before...
 export interface ErrorDetails {
   receivedValue: string;
   receivedType: string;
@@ -235,7 +234,6 @@ export function logError(
   });
 }
 
-// Create logger instance with custom config
 const Logger = LoggerClass.getInstance('backend', {
   maxBytes: 10 * 1024 * 1024, // 10MB
   backupCount: 10

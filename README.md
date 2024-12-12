@@ -19,6 +19,11 @@ Alice is an agentic workflow framework that integrates task execution and intell
 > - REDIS QUEUE: Implemented a queue system for the Workflow module to handle incoming requests. 
 > - **NOTE**: If you update to this version, you'll need to reinitialize your database (User settings -> Danger Zone). This update required a lot of changes to the framework, and making it backwards compatible is inefficient at this stage. Keep in mind Project ALice is still in Alpha, and changes should be expected
 
+> v0.3.1:
+> - LM STUDIO: Refactored the manager, but now requires you use a specific build (0.3.5 9-H is functional). Added a status section to the User Settings. 
+> - FRONTEND: Optimized chat interface to reduce memory hog
+> - 
+
 > What's next? Planned developments for v0.4 (find detailed info below):
 > - Agent using computer
 > - Communication APIs -> Gmail, potentially messaging
@@ -40,7 +45,7 @@ The project consists of three main components:
 ## The Goal
 1. Provide a tool to create, test and deploy agentic solutions
 2. A `human-language` framework where text is the primary input and the output of most operations, with the goal of making this tool easy to engage with by both users and agents
-3. Produce a model-agnostic/brand-agnostic framwork, allowing the user to set and deploy their solutions however they want
+3. Produce a model-agnostic/brand-agnostic framework, allowing the user to set and deploy their solutions however they want
 4. Offer an open-source option that helps put the control in the users hand 
 
 ## Setup and Installation
@@ -49,7 +54,7 @@ The project consists of three main components:
 
 1. Ensure you have Git and [Docker installed](https://docs.docker.com/engine/install/) on your system. On Windows, once you do, it comes with the docker-compose plugin installed by default, but [check if you have it installed](https://stackoverflow.com/questions/72928891/how-can-i-check-if-docker-compose-plugin-is-installed). Otherwise (if in Linux for example), [install it](https://docs.docker.com/compose/install/linux/). If for whatever reason the starting script doesn't start Docker (can't find it), all you need to do is open your Docker app. 
 
-2. (Optional) [Install LM Studio](https://lmstudio.ai/) if you plan to use local models. If you don't, you'll see some errors regarding this, but don't worry, everything else will work normally. NOTE: There's a protocol issues with some versions of LM Studio, recommend using -> 0.3.5 (build 9)
+2. (Optional) [Install LM Studio](https://lmstudio.ai/) if you plan to use local models. If you don't, you'll see some errors regarding this, but don't worry, everything else will work normally. NOTE: There's a protocol issues with some versions of LM Studio, recommend using -> 0.3.5 (build 9-H)
 
 3. Download the repository:
    ```

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { FileReference, FileComponentProps } from '../../../../types/FileTypes';
 import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
-import { bytesToMB } from '../../../../utils/FileUtils';
+import { getFileSize } from '../../../../utils/FileUtils';
 import { getStringLength, LengthUnit, OutputFormat } from '../../../../utils/CharacterLengthUtil';
 import { getFileStringContent } from '../../../../utils/FileUtils';
 import { retrieveFile } from '../../../../services/api';
@@ -41,7 +41,7 @@ const FileShortListView: React.FC<FileComponentProps> = ({
     
     const getSecondaryText = (file: FileReference) => {
         const content = file._id ? fileContents[file._id] || '' : '';
-        return `${file.type} - ${bytesToMB(file.file_size)} - ${getStringLength(content, {
+        return `${file.type} - ${getFileSize(file.file_size).formatted} - ${getStringLength(content, {
             unit: LengthUnit.CHARACTERS,
             format: OutputFormat.STRING
         })} chars`;

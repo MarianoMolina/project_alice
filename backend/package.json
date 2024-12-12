@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@express-rate-limit/tsconfig": "^1.0.2",
     "@lmstudio/sdk": "^0.4.2",
     "axios": ">=1.7.4",
     "bcryptjs": "^2.4.3",

@@ -2,24 +2,20 @@ import { dbAxiosInstance, dbAxiosInstanceLMS, taskAxiosInstance } from './axiosI
 import { AliceChat, convertToAliceChat } from '../types/ChatTypes';
 import { getDefaultMessageForm, MessageType } from '../types/MessageTypes';
 import { TaskResponse, convertToTaskResponse } from '../types/TaskResponseTypes';
-import { CollectionName, CollectionType } from '../types/CollectionTypes';
+import { CollectionName, CollectionPopulatedType, CollectionType } from '../types/CollectionTypes';
 import { FileReference, FileContentReference } from '../types/FileTypes';
 import { createFileContentReference } from '../utils/FileUtils';
 import Logger from '../utils/Logger';
-import { converters } from '../utils/Converters';
+import { converters, populatedConverters } from '../utils/Converters';
 import { InteractionOwnerType, UserInteraction } from '../types/UserInteractionTypes';
 import { setupWebSocketConnection } from '../utils/WebSocketUtils';
 
 export interface LMStudioModel {
   id: string;
-  object: 'model';
-  created: number;
-  owned_by: string;
-  root: string;
-  parent: null;
-  permission: string[];
   type: string;
   is_loaded: boolean;
+  architecture: string;
+  size: number;
 }
 
 /**
@@ -41,14 +37,10 @@ export const fetchLMStudioModels = async (): Promise<LMStudioModel[]> => {
     // We're getting the models directly from the response now
     const models: LMStudioModel[] = modelList.map(model => ({
       id: model.id,
-      object: model.object,
-      created: model.created,
-      owned_by: 'local',
-      root: model.id,
-      parent: null,
-      permission: [],
       type: model.type || 'unknown',
-      is_loaded: model.is_loaded
+      is_loaded: model.is_loaded,
+      architecture: model.architecture || 'unknown',
+      size: model.size || 0,
     }));
 
     Logger.debug('Fetched LM Studio models:', models);
@@ -58,6 +50,23 @@ export const fetchLMStudioModels = async (): Promise<LMStudioModel[]> => {
     throw error;
   }
 };
+
+/**
+ * Unloads a specific model from LM Studio
+ * @param model The LMStudioModel to unload
+ * @returns Promise<void>
+ */
+export const unloadLMStudioModel = async (model: LMStudioModel): Promise<void> => {
+  try {
+    Logger.debug('Unloading LM Studio model:', model.id);
+    await dbAxiosInstanceLMS.post(`/lm_studio/v1/models/unload/${model.id}`);
+    Logger.debug('Successfully queued model unload for:', model.id);
+  } catch (error) {
+    Logger.error('Error unloading LM Studio model:', error);
+    throw error;
+  }
+};
+
 export const fetchItem = async <T extends CollectionName>(
   collectionName: T,
   itemId: string | null = null
@@ -79,7 +88,34 @@ export const fetchItem = async <T extends CollectionName>(
     throw error;
   }
 };
+export const fetchPopulatedItem = async <T extends CollectionName>(
+  collectionName: T,
+  itemId: string | null = null
+): Promise<CollectionPopulatedType[T] | CollectionPopulatedType[T][]> => {
+  collectionName = collectionName.toLowerCase() as T;
+  Logger.debug("fetchPopulatedItem", collectionName, itemId);
+  try {
+    // For chats, use the populated endpoint, otherwise use regular endpoint
+    const url = (collectionName === 'chats' && itemId) 
+      ? `/${collectionName}/${itemId}/populated`
+      : itemId 
+        ? `/${collectionName}/${itemId}` 
+        : `/${collectionName}`;
 
+    const response = await dbAxiosInstance.get(url);
+    const converter = populatedConverters[collectionName];
+    Logger.debug("fetchPopulatedItem response", response.data);
+    
+    if (Array.isArray(response.data)) {
+      return response.data.map(item => converter(item)) as CollectionPopulatedType[T][];
+    } else {
+      return converter(response.data) as CollectionPopulatedType[T];
+    }
+  } catch (error) {
+    Logger.error(`Error fetching populated items from ${collectionName}:`, error, itemId);
+    throw error;
+  }
+};
 export const createItem = async <T extends CollectionName>(
   collectionName: T,
   itemData: Partial<CollectionType[T]>
@@ -98,7 +134,7 @@ export const createItem = async <T extends CollectionName>(
 export const updateItem = async <T extends CollectionName>(
   collectionName: T,
   itemId: string,
-  itemData: Partial<CollectionType[T]>
+  itemData: Partial<CollectionType[T] | CollectionPopulatedType[T]>
 ): Promise<CollectionType[T]> => {
   try {
     const url = `/${collectionName}/${itemId}`;

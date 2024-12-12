@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from workflow.api_app.util.dependencies import get_db_app, get_queue_manager
 from workflow.api_app.util.utils import FileTranscriptRequest
-from workflow.util import LOGGER
+from workflow.util import LOGGER, get_traceback
 from workflow.core import FileReference, AliceAgent
 
 router = APIRouter()
@@ -26,9 +26,8 @@ async def generate_file_transcript(
         )
         return {"task_id": enqueued_task_id}
     else:
-        # Process the file transcript generation immediately (called by QueueManager)
+        # Process the file transcript generation immediately
         LOGGER.info(f'Processing file transcript for file_id: {request.file_id}')
-        # Existing logic here
         # Retrieve the file reference
         file_ref_dict = await db_app.get_file_reference(request.file_id)
         if not file_ref_dict or not file_ref_dict.get(request.file_id):
@@ -42,9 +41,15 @@ async def generate_file_transcript(
         if file_ref.transcript:
             LOGGER.info(f"File already has a transcript: {file_ref.transcript}")
 
+        # TODO: Retrieve the user agent to use as default
         # Get or create an agent
-        if request.file_id:
-            agent = await db_app.get_agent(request.file_id)
+        if request.agent_id:
+            agent_obj = await db_app.get_entity_from_db("agents", request.agent_id)
+            try:
+                agent = AliceAgent(**agent_obj)
+            except Exception as e:
+                LOGGER.error(f"Error creating agent from database: {str(e)}{get_traceback()}")
+                agent = None
             if not agent:
                 raise HTTPException(status_code=404, detail="Agent not found")
         elif request.chat_id:

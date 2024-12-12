@@ -3,7 +3,7 @@ import { Typography } from '@mui/material';
 import { FileComponentProps } from '../../../../types/FileTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { InsertDriveFile, CalendarToday, AccessTime, TextSnippet, AttachFile, QueryBuilder, DataObject } from '@mui/icons-material';
-import { bytesToMB } from '../../../../utils/FileUtils';
+import { getFileSize } from '../../../../utils/FileUtils';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
 import FileContentView from './FileContentView';
@@ -32,7 +32,7 @@ const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
         {
             icon: <AccessTime />,
             primary_text: "File Size",
-            secondary_text: bytesToMB(item.file_size)
+            secondary_text: getFileSize(item.file_size).formatted
         },
         {
             icon: <CalendarToday />,

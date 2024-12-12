@@ -148,7 +148,7 @@ web_scrape_workflow_module = WebScrapeWorkflowModule(
             {
                 "key": "web_scrape_task_2",
                 "task_type": "WebScrapeBeautifulSoupTask",
-                "task_name": "Full web scrape task",
+                "task_name": "Full_web_scrape_task",
                 "task_description": "Scrapes a webpage using BeautifulSoup and an LLM agent to both parse and summarize the content",
                 "agent": "web_scrape_selector_agent",
                 "required_apis": ["llm_api"],

@@ -130,9 +130,18 @@ class QueueManager(BaseModel):
             LOGGER.error(f"Error in listen_to_channel for task {task_id}: {e}\n{get_traceback()}")
 
     async def disconnect(self, task_id: str):
-        websocket = self.connections.pop(task_id, None)
-        if websocket:
-            await websocket.close()
+        try:
+            websocket = self.connections.pop(task_id, None)
+            if websocket:
+                try:
+                    await websocket.close()
+                except RuntimeError as e:
+                    # Handle case where websocket is already closed
+                    LOGGER.debug(f"WebSocket for task {task_id} was already closed: {e}")
+                except Exception as e:
+                    LOGGER.error(f"Error closing websocket for task {task_id}: {e}")
+        except Exception as e:
+            LOGGER.error(f"Error during websocket disconnect for task {task_id}: {e}")
 
     async def cleanup(self):
         if self.redis_client:

@@ -115,9 +115,13 @@ async def websocket_endpoint(websocket: WebSocket, task_id: str):
             try:
                 await websocket.receive_text()
             except WebSocketDisconnect:
+                LOGGER.debug(f"WebSocket disconnected for task {task_id}")
                 break
+    except Exception as e:
+        LOGGER.error(f"Error in websocket handling for task {task_id}: {e}")
     finally:
-        await WORKFLOW_APP.state.queue_manager.disconnect(task_id)
+        if task_id in WORKFLOW_APP.state.queue_manager.connections:
+            await WORKFLOW_APP.state.queue_manager.disconnect(task_id)
 
 # Include routes
 WORKFLOW_APP.include_router(health_route)

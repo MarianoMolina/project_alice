@@ -3,7 +3,7 @@ from pydantic import Field, model_validator, BaseModel
 from typing import List, Optional, Dict, Any, Callable, Union
 from workflow.util import LOGGER, get_traceback
 from workflow.core.data_structures import (
-    MessageDict, ContentType, References, ToolFunction,
+    MessageDict, ContentType, ToolFunction,
     UserInteraction, UserCheckpoint, Prompt, User, 
     BaseDataStructure, DataCluster, InteractionOwner,
     InteractionOwnerType, MessageGenerators, RoleTypes,
@@ -325,49 +325,59 @@ class AliceChat(BaseDataStructure):
 
     async def _execute_single_turn(self, api_manager: APIManager, previous_messages: List[MessageDict], user_data: Optional[User] = None) -> MessageDict:
         """Execute a single turn of the conversation (LLM -> tools -> code)."""
-        turn_message: MessageDict = None
-        
         try:
-            # Generate LLM response
+            # Generate LLM response first
             llm_message = await self._generate_llm_response(
                 api_manager,
                 self.messages + previous_messages,
                 self._get_available_tool_functions(api_manager),
                 user_data=user_data
             )
-            turn_message = llm_message
+            
+            # If LLM generation failed, raise the exception
+            if not llm_message:
+                raise ValueError("Failed to generate LLM response")
+                
+            try:
+                # Handle tool calls
+                can_tool_call = self._can_tool_call(llm_message)
+                if can_tool_call and not isinstance(can_tool_call, UserInteraction):
+                    tool_responses: List[TaskResponse] = await self._handle_tool_calls(
+                        api_manager,
+                        llm_message.references.tool_calls
+                    )
+                    if tool_responses:
+                        llm_message.references.task_responses.extend(tool_responses)
+                elif can_tool_call and isinstance(can_tool_call, UserInteraction):
+                    if not llm_message.references.user_interactions:
+                        llm_message.references.user_interactions = []
+                    llm_message.references.user_interactions.append(can_tool_call)
 
-            # Handle tool calls
-            can_tool_call = self._can_tool_call(llm_message)
-            if can_tool_call and not isinstance(can_tool_call, UserInteraction):
-                tool_responses: List[TaskResponse] = await self._handle_tool_calls(
-                    api_manager,
-                    llm_message.references.tool_calls,
-                    llm_message
-                )
-                if tool_responses:
-                    turn_message.references.task_responses.extend(tool_responses)
-            elif can_tool_call and isinstance(can_tool_call, UserInteraction):
-                if not turn_message.references.user_interactions:
-                    turn_message.references.user_interactions = []
-                turn_message.references.user_interactions.append(can_tool_call)
-
-            # Handle code execution
-            can_execute_code = self._can_execute_code(llm_message)
-            if can_execute_code and not isinstance(can_execute_code, UserInteraction):
-                code_executions: List[CodeExecution]  = await self._handle_code_execution([llm_message], False)
-                if code_executions:
-                    turn_message.references.code_executions.extend(code_executions)
-            elif can_execute_code and isinstance(can_execute_code, UserInteraction):
-                if not turn_message.references.user_interactions:
-                    turn_message.references.user_interactions = []
-                turn_message.references.user_interactions.append(can_execute_code)
-            return turn_message
+                # Handle code execution
+                can_execute_code = self._can_execute_code(llm_message)
+                if can_execute_code and not isinstance(can_execute_code, UserInteraction):
+                    code_executions: List[CodeExecution] = await self._handle_code_execution([llm_message], False)
+                    if code_executions:
+                        llm_message.references.code_executions.extend(code_executions)
+                elif can_execute_code and isinstance(can_execute_code, UserInteraction):
+                    if not llm_message.references.user_interactions:
+                        llm_message.references.user_interactions = []
+                    llm_message.references.user_interactions.append(can_execute_code)
+                    
+                return llm_message
+                
+            except Exception as e:
+                # If an error occurs after LLM message generation, append error to message
+                error_msg = f"\n\nError during execution: {str(e)}\n{get_traceback()}"
+                llm_message.content += error_msg
+                LOGGER.error(f"Error in turn execution: {error_msg}")
+                return llm_message
 
         except Exception as e:
+            # If no LLM message was generated, raise the exception
             error_msg = f"Error in turn execution: {str(e)}\n{get_traceback()}"
             LOGGER.error(error_msg)
-            return self._create_error_message(error_msg)
+            raise
         
     def _can_tool_call(self, message: MessageDict) -> Union[bool, UserInteraction]:
         """Check if tool calls are allowed and return a pending interaction if needed."""

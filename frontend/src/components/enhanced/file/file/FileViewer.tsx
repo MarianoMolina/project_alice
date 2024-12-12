@@ -19,7 +19,7 @@ import {
   Download
 } from '@mui/icons-material';
 import { FileType, FileComponentProps } from '../../../../types/FileTypes';
-import { bytesToMB } from '../../../../utils/FileUtils';
+import { getFileSize } from '../../../../utils/FileUtils';
 import Logger from '../../../../utils/Logger';
 import { retrieveFile } from '../../../../services/api';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
@@ -168,7 +168,7 @@ const FileViewer: React.FC<FileComponentProps> = ({ item }) => {
                 />
                 <Chip
                   icon={<TimeIcon className="text-gray-600" />}
-                  label={bytesToMB(item.file_size)}
+                  label={getFileSize(item.file_size).formatted}
                   size="small"
                   className="bg-gray-100"
                 />

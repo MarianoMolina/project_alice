@@ -18,6 +18,7 @@ import DataClusterManager from '../../enhanced/data_cluster/data_cluster_manager
 import { DataCluster } from '../../../types/DataClusterTypes';
 import { useAuth } from '../../../contexts/AuthContext';
 import { TextInput } from '../../enhanced/common/inputs/TextInput';
+import TitleBox from '../../enhanced/common/inputs/TitleBox';
 
 interface PersonalInformationProps {
     userObject: User;
@@ -249,82 +250,82 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
                     disabled={false}
                     description='Enter your email'
                 />
-                <Typography variant="h6" className={classes.titleText}>Default Chat Configuration</Typography>
-                <EnhancedSelect<AliceAgent>
-                    componentType="agents"
-                    EnhancedView={AgentShortListView}
-                    selectedItems={populatedItems?.agent ? [populatedItems.agent] : []}
-                    onSelect={handleAgentChange}
-                    label="Select Default Agent"
-                    activeAccordion={activeAccordion}
-                    description='The agent that will be used for chat sessions.'
-                    onAccordionToggle={handleAccordionToggle}
-                    accordionEntityName="agent"
-                    showCreateButton={true}
-                    isInteractable={true}
-                />
-                <EnhancedSelect<AliceTask>
-                    componentType="tasks"
-                    EnhancedView={TaskShortListView}
-                    selectedItems={populatedItems.agentTools}
-                    onSelect={handleAgentToolsChange}
-                    multiple
-                    label="Select Default Agent Tools"
-                    activeAccordion={activeAccordion}
-                    description='The tools that the chat agent will have access to.'
-                    onAccordionToggle={handleAccordionToggle}
-                    accordionEntityName="agent_tools"
-                    showCreateButton={true}
-                    isInteractable={true}
-                />
-                <EnhancedSelect<AliceTask>
-                    componentType="tasks"
-                    EnhancedView={TaskShortListView}
-                    selectedItems={populatedItems.retrievalTools}
-                    onSelect={handleRetrievalToolsChange}
-                    multiple
-                    label="Select Default Retrieval Tools"
-                    description='The tools that the chat agent will use to retrieve information from the data cluster.'
-                    activeAccordion={activeAccordion}
-                    onAccordionToggle={handleAccordionToggle}
-                    accordionEntityName="retrieval_tools"
-                    showCreateButton={true}
-                    isInteractable={true}
-                />
-                <EnhancedSelect<UserCheckpoint>
-                    componentType="usercheckpoints"
-                    EnhancedView={UserCheckpointShortListView}
-                    selectedItems={populatedItems?.toolCallCheckpoint ?
-                        [populatedItems.toolCallCheckpoint] : []}
-                    onSelect={handleToolCallCheckpointChange}
-                    label="Select Default Tool Call Checkpoint"
-                    description='The checkpoint that will be used when a tool is called if the agent needs to ask for permission.'
-                    activeAccordion={activeAccordion}
-                    onAccordionToggle={handleAccordionToggle}
-                    accordionEntityName="tool_call_checkpoint"
-                    showCreateButton={true}
-                    isInteractable={true}
-                />
-                <EnhancedSelect<UserCheckpoint>
-                    componentType="usercheckpoints"
-                    EnhancedView={UserCheckpointShortListView}
-                    selectedItems={populatedItems.codeExecCheckpoint ?
-                        [populatedItems.codeExecCheckpoint] : []}
-                    onSelect={handleCodeExecCheckpointChange}
-                    label="Select Code Execution Checkpoint"
-                    activeAccordion={activeAccordion}
-                    onAccordionToggle={handleAccordionToggle}
-                    accordionEntityName="code_exec_checkpoint"
-                    showCreateButton={true}
-                    isInteractable={true}
-                />
-                <Typography variant="subtitle1">Default Chat Data Cluster</Typography>
-                <DataClusterManager
-                    dataCluster={populatedItems.dataCluster}
-                    isEditable={true}
-                    onDataClusterChange={handleDataClusterChange}
-                    flatten={false}
-                />
+                <TitleBox title="Default Chat Configuration" >
+                    <EnhancedSelect<AliceAgent>
+                        componentType="agents"
+                        EnhancedView={AgentShortListView}
+                        selectedItems={populatedItems?.agent ? [populatedItems.agent] : []}
+                        onSelect={handleAgentChange}
+                        label="Select Default Agent"
+                        activeAccordion={activeAccordion}
+                        description='The agent that will be used for chat sessions.'
+                        onAccordionToggle={handleAccordionToggle}
+                        accordionEntityName="agent"
+                        showCreateButton={true}
+                        isInteractable={true}
+                    />
+                    <EnhancedSelect<AliceTask>
+                        componentType="tasks"
+                        EnhancedView={TaskShortListView}
+                        selectedItems={populatedItems.agentTools}
+                        onSelect={handleAgentToolsChange}
+                        multiple
+                        label="Select Default Agent Tools"
+                        activeAccordion={activeAccordion}
+                        description='The tools that the chat agent will have access to.'
+                        onAccordionToggle={handleAccordionToggle}
+                        accordionEntityName="agent_tools"
+                        showCreateButton={true}
+                        isInteractable={true}
+                    />
+                    <EnhancedSelect<AliceTask>
+                        componentType="tasks"
+                        EnhancedView={TaskShortListView}
+                        selectedItems={populatedItems.retrievalTools}
+                        onSelect={handleRetrievalToolsChange}
+                        multiple
+                        label="Select Default Retrieval Tools"
+                        description='The tools that the chat agent will use to retrieve information from the data cluster.'
+                        activeAccordion={activeAccordion}
+                        onAccordionToggle={handleAccordionToggle}
+                        accordionEntityName="retrieval_tools"
+                        showCreateButton={true}
+                        isInteractable={true}
+                    />
+                    <EnhancedSelect<UserCheckpoint>
+                        componentType="usercheckpoints"
+                        EnhancedView={UserCheckpointShortListView}
+                        selectedItems={populatedItems?.toolCallCheckpoint ?
+                            [populatedItems.toolCallCheckpoint] : []}
+                        onSelect={handleToolCallCheckpointChange}
+                        label="Select Default Tool Call Checkpoint"
+                        description='The checkpoint that will be used when a tool is called if the agent needs to ask for permission.'
+                        activeAccordion={activeAccordion}
+                        onAccordionToggle={handleAccordionToggle}
+                        accordionEntityName="tool_call_checkpoint"
+                        showCreateButton={true}
+                        isInteractable={true}
+                    />
+                    <EnhancedSelect<UserCheckpoint>
+                        componentType="usercheckpoints"
+                        EnhancedView={UserCheckpointShortListView}
+                        selectedItems={populatedItems.codeExecCheckpoint ?
+                            [populatedItems.codeExecCheckpoint] : []}
+                        onSelect={handleCodeExecCheckpointChange}
+                        label="Select Code Execution Checkpoint"
+                        activeAccordion={activeAccordion}
+                        onAccordionToggle={handleAccordionToggle}
+                        accordionEntityName="code_exec_checkpoint"
+                        showCreateButton={true}
+                        isInteractable={true}
+                    />
+                    <DataClusterManager
+                        dataCluster={populatedItems.dataCluster}
+                        isEditable={true}
+                        onDataClusterChange={handleDataClusterChange}
+                        flatten={false}
+                    />
+                </TitleBox>
                 <Button
                     variant="contained"
                     color="primary"

@@ -1,15 +1,11 @@
-import { DownloadedModel, EmbeddingLoadModelConfig, LLMLoadModelConfig } from "@lmstudio/sdk";
-import { LMStudioClientManager } from "./lmStudioClientManager";
+import { EmbeddingLoadModelConfig, LLMLoadModelConfig } from "@lmstudio/sdk";
+import { ExtendedDownloadedModel, LMStudioClientManager } from "./lmStudioClientManager";
 import { Queue } from "./queueManager";
-import Logger from "../utils/logger";
 import { ChatCompletionParams, CompletionParams } from "./lmStudio.types";
 import { CreateEmbeddingParams } from "./lmStudio.utils";
 import { IModelConfig, ModelType } from "../interfaces/model.interface";
-import { Model } from "mongoose";
-
-interface ExtendedDownloadedModel extends DownloadedModel {
-    isLoaded: boolean;
-}
+import Logger from "../utils/logger";
+import Model from "../models/model.model";
 
 export class LMStudioRouteManager {
     private lmStudioManager: LMStudioClientManager;
@@ -23,7 +19,7 @@ export class LMStudioRouteManager {
         this.lmStudioManager = new LMStudioClientManager(this.INACTIVITY_THRESHOLD);
         this.requestQueue = new Queue({
             maxQueueSize: 100,
-            operationTimeout: 300000, // 5 minutes
+            operationTimeout: 150000, // 2.5 minutes
             retryCount: 2,
             retryDelay: 2000
         });
@@ -170,25 +166,24 @@ export class LMStudioRouteManager {
         return this.requestQueue.enqueue(async () => {
             try {
                 Logger.debug('Fetching models list');
-                
-                const downloadedModels = await this.lmStudioManager.listModels();
-                const loadedLLMs = await this.lmStudioManager.client.llm.listLoaded();
-                const loadedEmbeddings = await this.lmStudioManager.client.embedding.listLoaded();
-                
-                const loadedModels = new Set([
-                    ...loadedLLMs.map(m => m.path),
-                    ...loadedEmbeddings.map(m => m.path)
-                ]);
-
-                return downloadedModels.map(model => ({
-                    ...model,
-                    isLoaded: loadedModels.has(model.path)
-                }));
+                const models = await this.lmStudioManager.listModels();
+                return models
             } catch (error) {
                 Logger.error('Error in listModels:', error);
                 throw error;
             }
         }, 'listModels');
+    }
+    async unloadModel(modelId: string) {
+        return this.requestQueue.enqueue(async () => {
+            try {
+                Logger.debug('Unloading model:', modelId);
+                await this.lmStudioManager.unloadModel(modelId);
+            } catch (error) {
+                Logger.error('Error in unloadModel:', error);
+                throw error;
+            }
+        }, `unloadModel-${modelId}`);
     }
 
     async generateChatCompletion(modelId: string, params: ChatCompletionParams) {

@@ -15,11 +15,13 @@ import {
     deleteItem as apiDeleteItem,
     resumeTask as apiResumeTask,
     fetchLMStudioModels as apiFetchLMStudioModels, 
+    unloadLMStudioModel as apiUnloadLMStudioModel,
     resumeChat as apiResumeChat,
+    LMStudioModel,
 } from '../services/api';
 import { useNotification } from './NotificationContext';
 import { useCardDialog } from './CardDialogContext';
-import { CollectionName, CollectionType, CollectionElementString, collectionNameToElementString } from '../types/CollectionTypes';
+import { CollectionName, CollectionType, CollectionElementString, collectionNameToElementString, CollectionPopulatedType } from '../types/CollectionTypes';
 import { AliceChat } from '../types/ChatTypes';
 import { MessageType } from '../types/MessageTypes';
 import { TaskResponse } from '../types/TaskResponseTypes';
@@ -46,6 +48,7 @@ interface ApiContextType {
     resumeTask: typeof apiResumeTask;
     resumeChat: typeof apiResumeChat;
     fetchLMStudioModels: typeof apiFetchLMStudioModels;
+    unloadLMStudioModel: typeof apiUnloadLMStudioModel;
     updateUserInteraction: (
         interactionId: string,
         itemData: Partial<UserInteraction>
@@ -82,6 +85,15 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     }, [addNotification]);
 
+    const unloadLMStudioModel = useCallback(async (model: LMStudioModel) => {
+        try {
+            return await apiUnloadLMStudioModel(model);
+        } catch (error) {
+            addNotification('Error unloading LM Studio model', 'error');
+            throw error;
+        }
+    }, [addNotification]);
+
     const createItem = useCallback(async <T extends CollectionName>(
         collectionName: T,
         itemData: Partial<CollectionType[T]>
@@ -109,7 +121,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const updateItem = useCallback(async <T extends CollectionName>(
         collectionName: T,
         itemId: string,
-        itemData: Partial<CollectionType[T]>
+        itemData: Partial<CollectionType[T] | CollectionPopulatedType[T]>
     ): Promise<CollectionType[T]> => {
         try {
             const updatedItem = await apiUpdateItem(collectionName, itemId, itemData);
@@ -412,6 +424,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         updateMessageInChat,
         resumeChat,
         fetchLMStudioModels,
+        unloadLMStudioModel,
     };
 
     return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>;

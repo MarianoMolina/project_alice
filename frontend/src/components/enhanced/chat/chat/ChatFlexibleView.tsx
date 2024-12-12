@@ -4,22 +4,23 @@ import {
     Alert,
 } from '@mui/material';
 import { ChatComponentProps, AliceChat, getDefaultChatForm, CheckpointType } from '../../../../types/ChatTypes';
-import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
-import AgentShortListView from '../../agent/agent/AgentShortListView';
-import TaskShortListView from '../../task/task/TaskShortListView';
+import { DataCluster } from '../../../../types/DataClusterTypes';
 import { AliceAgent } from '../../../../types/AgentTypes';
 import { AliceTask } from '../../../../types/TaskTypes';
-import { useApi } from '../../../../contexts/ApiContext';
+import { UserCheckpoint } from '../../../../types/UserCheckpointTypes';
+import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
+import EnhancedMessage from '../../message/message/EnhancedMessage';
+import AgentShortListView from '../../agent/agent/AgentShortListView';
+import TaskShortListView from '../../task/task/TaskShortListView';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import MessageListView from '../../message/message/MessageListView';
+import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
+import UserCheckpointShortListView from '../../user_checkpoint/user_checkpoint/UserCheckpointShortListView';
+import TitleBox from '../../common/inputs/TitleBox';
+import { TextInput } from '../../common/inputs/TextInput';
+import { useAuth } from '../../../../contexts/AuthContext';
+import { useApi } from '../../../../contexts/ApiContext';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import Logger from '../../../../utils/Logger';
-import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
-import { UserCheckpoint } from '../../../../types/UserCheckpointTypes';
-import UserCheckpointShortListView from '../../user_checkpoint/user_checkpoint/UserCheckpointShortListView';
-import { useAuth } from '../../../../contexts/AuthContext';
-import { DataCluster } from '../../../../types/DataClusterTypes';
-import { TextInput } from '../../common/inputs/TextInput';
 
 const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     item,
@@ -57,7 +58,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                         fetchItem('usercheckpoints', config.default_user_checkpoints[CheckpointType.CODE_EXECUTION]) : undefined,
                     config.data_cluster ? fetchItem('dataclusters', config.data_cluster) : undefined
                 ]);
-    
+
                 setForm(prevForm => ({
                     ...prevForm,
                     alice_agent: agent as AliceAgent,
@@ -88,7 +89,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     const handleFieldChange = useCallback((field: keyof AliceAgent, value: any) => {
         setForm(prevForm => ({ ...prevForm, [field]: value }));
     }, []);
-    
+
     const validateForm = useCallback(() => {
         if (!form.name) {
             setValidationError('Chat name is required');
@@ -111,7 +112,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
         setValidationError(null);
         return true;
     }, [form.default_user_checkpoints, form.name]);
-    
+
     const handleLocalSave = useCallback(() => {
         if (validateForm()) {
             onChange(form);
@@ -125,7 +126,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             handleDelete(item);
         }
     }, [item, handleDelete]);
-    
+
     const handleAccordionToggle = useCallback((accordion: string | null) => {
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
     }, []);
@@ -315,30 +316,35 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                 fullWidth
             />
             {memoizedAgentSelect}
-            {memoizedTaskSelect}
-            {memoizedRetrievalTaskSelect}
-            {form.messages && form.messages.length > 0 && (
-                <>
-                    <Box mt={2}>
-                        <MessageListView
-                            items={form.messages || []}
-                            item={null}
-                            onChange={() => { }}
-                            mode={'view'}
-                            handleSave={async () => { }}
-                            onView={(message) => selectCardItem && selectCardItem('Message', message._id ?? '', message)}
-                        />
-                    </Box>
-                </>
-            )}
-            {memoizedToolCallCheckpointSelect}
-            {memoizedCodeExecCheckpointSelect}
+            <TitleBox title="Agent Tools" >
+                {memoizedTaskSelect}
+                {memoizedRetrievalTaskSelect}
+            </TitleBox>
+            <TitleBox title="User Checkpoints" >
+                {memoizedToolCallCheckpointSelect}
+                {memoizedCodeExecCheckpointSelect}
+            </TitleBox>
             <DataClusterManager
                 dataCluster={form.data_cluster}
                 isEditable={true}
                 onDataClusterChange={(dataCluster) => setForm(prevForm => ({ ...prevForm, data_cluster: dataCluster }))}
                 flatten={false}
             />
+            {form.messages && form.messages.length > 0 && (
+                <TitleBox title="Messages" >
+                    <Box mt={2}>
+                        {form.messages.map((message, index) => (
+                            <EnhancedMessage
+                                key={`message-${index}${message}`}
+                                itemId={message}
+                                mode={'list'}
+                                fetchAll={false}
+                                onView={(message) => selectCardItem && selectCardItem('Message', message._id ?? '', message)}
+                            />
+                        ))}
+                    </Box>
+                </TitleBox>
+            )}
 
         </GenericFlexibleView>
     );

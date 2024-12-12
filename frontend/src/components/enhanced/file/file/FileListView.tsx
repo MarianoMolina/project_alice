@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FileReference, FileComponentProps } from '../../../../types/FileTypes';
 import { Typography } from '@mui/material';
 import EnhancedListView from '../../common/enhanced_component/ListView';
-import { bytesToMB } from '../../../../utils/FileUtils';
+import { getFileSize } from '../../../../utils/FileUtils';
 import { getStringLength, LengthUnit, OutputFormat } from '../../../../utils/CharacterLengthUtil';
 import { getFileStringContent } from '../../../../utils/FileUtils';
 import { retrieveFile } from '../../../../services/api';
@@ -49,7 +49,7 @@ const FileListView: React.FC<FileComponentProps> = ({
         const content = file._id ? fileContents[file._id] || '' : '';
         return (
             <Typography component="span" variant="body2" color="textSecondary">
-                Type: {file.type}, Size: {bytesToMB(file.file_size)}, 
+                Type: {file.type}, Size: {getFileSize(file.file_size).formatted}, 
                 Length: {getStringLength(content, {
                     unit: LengthUnit.CHARACTERS,
                     format: OutputFormat.STRING

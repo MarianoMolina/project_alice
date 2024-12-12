@@ -68,7 +68,7 @@ async def chat_resume(
         chat_id = user_interaction.owner.id
 
         # Get chat data
-        chat_data = await db_app.get_chats(chat_id)
+        chat_data = await db_app.get_chat(chat_id)
         if not chat_data:
             raise HTTPException(status_code=404, detail="Chat not found")
 
@@ -79,7 +79,7 @@ async def chat_resume(
 
         try:
             # Generate new messages from the interaction
-            new_message = await chat_data[chat_id].continue_user_interaction(
+            new_message = await chat_data.continue_user_interaction(
                 api_manager,
                 user_interaction
             )

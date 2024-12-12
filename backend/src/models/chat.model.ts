@@ -28,7 +28,7 @@ changeHistorySchema.methods.apiRepresentation = function (this: IChangeHistoryDo
 // AliceChat schema
 const aliceChatSchema = new Schema<IAliceChatDocument, IAliceChatModel>({
   name: { type: String, default: "New Chat", description: "Name of the chat" },
-  messages: [{ type: Schema.Types.ObjectId, ref: 'Message', autopopulate: true }],
+  messages: [{ type: Schema.Types.ObjectId, ref: 'Message' }],
   changeHistory: [{ type: changeHistorySchema, default: [], description: "List of changes in the chat conversation" }],
   alice_agent: { type: Schema.Types.ObjectId, ref: 'Agent', required: true, description: "The Alice agent object", autopopulate: true },
   agent_tools: [{

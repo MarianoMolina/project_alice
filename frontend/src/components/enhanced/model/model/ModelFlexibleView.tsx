@@ -2,14 +2,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Slider, Typography } from '@mui/material';
 import { AliceModel, getDefaultModelForm, ModelComponentProps, ModelType, ModelConfig, ChatTemplateTokens } from '../../../../types/ModelTypes';
 import { ApiName } from '../../../../types/ApiTypes';
-import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import useStyles from '../ModelStyles';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
+import { apiNameIcons, modelTypeIcons } from '../../../../utils/ApiUtils';
+import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
+import BorderedBox from '../../common/inputs/TitleBox';
 import { TextInput } from '../../common/inputs/TextInput';
 import { NumericInput } from '../../common/inputs/NumericInput';
 import { BooleanInput } from '../../common/inputs/BooleanInput';
 import { IconSelectInput } from '../../common/inputs/IconSelectInput';
-import { apiNameIcons, modelTypeIcons } from '../../../../utils/ApiUtils';
 
 const ModelFlexibleView: React.FC<ModelComponentProps> = ({
     item,
@@ -20,7 +20,6 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
 }) => {
     const [form, setForm] = useState<Partial<AliceModel>>(() => item || getDefaultModelForm());
     const [isSaving, setIsSaving] = useState(false);
-    const classes = useStyles();
 
     const isEditMode = mode === 'edit' || mode === 'create';
     const title = mode === 'create' ? 'Create New Model' : mode === 'edit' ? 'Edit Model' : 'Model Details';
@@ -134,88 +133,90 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                 disabled={!isEditMode}
             />
 
-            <Typography variant="h6" className={classes.titleText}>Model Configuration</Typography>
+            <BorderedBox title="Model Configuration">
+                <NumericInput
+                    name='ctx_size'
+                    label="Context Size"
+                    value={form.config_obj?.ctx_size ?? 4096}
+                    description='The context size of the model. Really important to avoid errors, or loss of context that might be handled quietly by the API.'
+                    onChange={(value) => handleConfigChange('ctx_size', value ?? 4096)}
+                    disabled={!isEditMode}
+                />
 
-            <NumericInput
-                name='ctx_size'
-                label="Context Size"
-                value={form.config_obj?.ctx_size ?? 4096}
-                description='The context size of the model. Really important to avoid errors, or loss of context that might be handled quietly by the API.'
-                onChange={(value) => handleConfigChange('ctx_size', value ?? 4096)}
-                disabled={!isEditMode}
-            />
+                <Typography variant="subtitle1">Temperature</Typography>
+                <Slider
+                    value={form.config_obj?.temperature ?? 0.7}
+                    onChange={(_, newValue) => handleConfigChange('temperature', newValue as number)}
+                    min={0}
+                    max={1}
+                    step={0.1}
+                    valueLabelDisplay="auto"
+                    disabled={!isEditMode}
+                    sx={{ margin: 1 }}
+                />
 
-            <Typography variant="subtitle1">Temperature</Typography>
-            <Slider
-                value={form.config_obj?.temperature ?? 0.7}
-                onChange={(_, newValue) => handleConfigChange('temperature', newValue as number)}
-                min={0}
-                max={1}
-                step={0.1}
-                valueLabelDisplay="auto"
-                disabled={!isEditMode}
-                sx={{ margin: 1 }}
-            />
+                <NumericInput
+                    name='seed'
+                    label="Seed"
+                    value={form.config_obj?.seed ?? undefined}
+                    onChange={(value) => handleConfigChange('seed', value ?? null)}
+                    disabled={!isEditMode}
+                />
 
-            <NumericInput
-                name='seed'
-                label="Seed"
-                value={form.config_obj?.seed ?? undefined}
-                onChange={(value) => handleConfigChange('seed', value ?? null)}
-                disabled={!isEditMode}
-            />
+                <BooleanInput
+                    name='use_cache'
+                    label="Use Cache"
+                    value={form.config_obj?.use_cache ?? true}
+                    onChange={(value) => handleConfigChange('use_cache', value ?? false)}
+                    disabled={!isEditMode}
+                />
+                <BorderedBox title="Prompt Configuration">
+                    <TextInput
+                        name='bos'
+                        label="Begin of Sequence Token"
+                        value={form.config_obj?.prompt_config?.bos ?? '<|im_start|>'}
+                        onChange={(value) => handlePromptConfigChange('bos', value ?? '<|im_start|>')}
+                        disabled={!isEditMode}
+                    />
+                    <TextInput
+                        name='eos'
+                        label="End of Sequence Token"
+                        value={form.config_obj?.prompt_config?.eos ?? '<|im_end|>'}
+                        onChange={(value) => handlePromptConfigChange('eos', value ?? '<|im_end|>')}
+                        disabled={!isEditMode}
+                    />
+                    <TextInput
+                        name='system_role'
+                        label="System Role Token"
+                        value={form.config_obj?.prompt_config?.system_role ?? 'system'}
+                        onChange={(value) => handlePromptConfigChange('system_role', value ?? 'system')}
+                        disabled={!isEditMode}
+                    />
+                    <TextInput
+                        name='user_role'
+                        label="User Role Token"
+                        value={form.config_obj?.prompt_config?.user_role ?? 'user'}
+                        onChange={(value) => handlePromptConfigChange('user_role', value ?? 'user')}
+                        disabled={!isEditMode}
+                    />
+                    <TextInput
+                        name='assistant_role'
+                        label="Assistant Role Token"
+                        value={form.config_obj?.prompt_config?.assistant_role ?? 'assistant'}
+                        onChange={(value) => handlePromptConfigChange('assistant_role', value ?? 'assistant')}
+                        disabled={!isEditMode}
+                    />
+                    <TextInput
+                        name='tool_role'
+                        label="Tool Role Token"
+                        value={form.config_obj?.prompt_config?.tool_role ?? 'tool'}
+                        onChange={(value) => handlePromptConfigChange('tool_role', value ?? 'tool')}
+                        disabled={!isEditMode}
+                    />
+                </BorderedBox>
 
-            <BooleanInput
-                name='use_cache'
-                label="Use Cache"
-                value={form.config_obj?.use_cache ?? true}
-                onChange={(value) => handleConfigChange('use_cache', value ?? false)}
-                disabled={!isEditMode}
-            />
+            </BorderedBox>
 
-            <Typography variant="h6" className={classes.titleText}>Prompt Configuration</Typography>
-            <TextInput
-                name='bos'
-                label="Begin of Sequence Token"
-                value={form.config_obj?.prompt_config?.bos ?? '<|im_start|>'}
-                onChange={(value) => handlePromptConfigChange('bos', value ?? '<|im_start|>')}
-                disabled={!isEditMode}
-            />
-            <TextInput
-                name='eos'
-                label="End of Sequence Token"
-                value={form.config_obj?.prompt_config?.eos ?? '<|im_end|>'}
-                onChange={(value) => handlePromptConfigChange('eos', value ?? '<|im_end|>')}
-                disabled={!isEditMode}
-            />
-            <TextInput
-                name='system_role'
-                label="System Role Token"
-                value={form.config_obj?.prompt_config?.system_role ?? 'system'}
-                onChange={(value) => handlePromptConfigChange('system_role', value ?? 'system')}
-                disabled={!isEditMode}
-            />
-            <TextInput
-                name='user_role'
-                label="User Role Token"
-                value={form.config_obj?.prompt_config?.user_role ?? 'user'}
-                onChange={(value) => handlePromptConfigChange('user_role', value ?? 'user')}
-                disabled={!isEditMode}
-            />
-            <TextInput
-                name='assistant_role'
-                label="Assistant Role Token"
-                value={form.config_obj?.prompt_config?.assistant_role ?? 'assistant'}
-                onChange={(value) => handlePromptConfigChange('assistant_role', value ?? 'assistant')}
-                disabled={!isEditMode}
-            />
-            <TextInput
-                name='tool_role'
-                label="Tool Role Token"
-                value={form.config_obj?.prompt_config?.tool_role ?? 'tool'}
-                onChange={(value) => handlePromptConfigChange('tool_role', value ?? 'tool')}
-                disabled={!isEditMode}
-            />
         </GenericFlexibleView>
     );
 };

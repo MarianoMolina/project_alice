@@ -1,43 +1,86 @@
 import {
-    LMStudioClient, LLMDynamicHandle, OngoingPrediction, DownloadedModel, 
+    LMStudioClient, LLMDynamicHandle, OngoingPrediction, DownloadedModel,
     LLMLoadModelConfig, EmbeddingLoadModelConfig, LLMPredictionOpts, EmbeddingDynamicHandle
 } from "@lmstudio/sdk";
 import {
     CreateEmbeddingParams, CreateEmbeddingResponse,
     mapStopReason, retrieveToolCalls
 } from './lmStudio.utils';
-import Logger from "../utils/logger"
-import { MessageBuilder } from "./messageBuilder";
-import { FileService } from "./fileService";
 import {
-    ChatCompletionParams, ChatCompletionResponse, 
-    ChatTemplateTokens, 
-    CompletionParams, CompletionResponse, 
+    ChatCompletionParams, ChatCompletionResponse,
+    ChatTemplateTokens,
+    CompletionParams, CompletionResponse,
     DEFAULT_MODEL_CONFIG, DEFAULT_TOKENS,
     LM_STUDIO_URL, LoadedModel
 } from "./lmStudio.types";
+import { MessageBuilder } from "./messageBuilder";
+import { FileService } from "./fileService";
+import Logger from "../utils/logger"
+
+
+export interface ExtendedDownloadedModel extends DownloadedModel {
+    isLoaded: boolean;
+}
 
 export class LMStudioClientManager {
-    public client: LMStudioClient;
+    private client: LMStudioClient | null = null;
     private loadedModels: { [key: string]: LoadedModel } = {};
-    private messageBuilder: MessageBuilder;
+    private messageBuilder: MessageBuilder | null = null;
     private inactivityThreshold: number;
 
     constructor(inactivityThreshold: number = 10 * 60 * 1000) {
         this.inactivityThreshold = inactivityThreshold;
-        this.client = new LMStudioClient({
-            baseUrl: `ws://${LM_STUDIO_URL}`,
-            verboseErrorMessages: true,
-            logger: {
-                info: (...args) => Logger.info('LMStudioClient Info:', ...args),
-                error: (...args) => Logger.error('LMStudioClient Error:', ...args),
-                warn: (...args) => Logger.warn('LMStudioClient Warning:', ...args),
-                debug: (...args) => Logger.debug('LMStudioClient Debug:', ...args),
-            },
-        });
+        
+        // Handle the WebSocket initialization error that's crashing the app
+        const errorHandler = (error: Error) => {
+            Logger.error('WebSocket initialization error:', error);
+            this.client = null;
+            this.messageBuilder = null;
+        };
 
-        const fileNamespace = this.client.files;
-        this.messageBuilder = new MessageBuilder(new FileService(fileNamespace));
+        process.once('uncaughtException', errorHandler);
+
+        try {
+            this.client = new LMStudioClient({
+                baseUrl: `ws://${LM_STUDIO_URL}`,
+                verboseErrorMessages: true,
+                logger: {
+                    info: (...args) => Logger.info('LMStudioClient Info:', ...args),
+                    error: (...args) => Logger.error('LMStudioClient Error:', ...args),
+                    warn: (...args) => Logger.warn('LMStudioClient Warning:', ...args),
+                    debug: (...args) => Logger.debug('LMStudioClient Debug:', ...args),
+                },
+            });
+            const fileNamespace = this.client.files;
+            this.messageBuilder = new MessageBuilder(new FileService(fileNamespace));
+            Logger.info('LM Studio client initialized successfully');
+        } catch (error) {
+            Logger.error('Failed to initialize LM Studio client:', error);
+            this.client = null;
+            this.messageBuilder = null;
+        }
+
+        // Remove the error handler after a short delay
+        setTimeout(() => {
+            process.removeListener('uncaughtException', errorHandler);
+        }, 1000);
+    }
+
+    // Helper method to ensure client is available
+    private ensureClient(): void {
+        if (!this.client || !this.messageBuilder) {
+            throw new Error('LM Studio client is not available. Please ensure the LM Studio server is running and accessible.');
+        }
+    }
+    // Helper methods to safely access client and messageBuilder after ensuring they exist
+    private getClient(): LMStudioClient {
+        this.ensureClient();
+        return this.client!;
+    }
+
+    private getMessageBuilder(): MessageBuilder {
+        this.ensureClient();
+        return this.messageBuilder!;
     }
 
     private async handlePrediction<T extends ChatCompletionResponse | CompletionResponse>(
@@ -55,13 +98,13 @@ export class LMStudioClientManager {
                                 chunk.content :
                                 typeof chunk === 'string' ?
                                     chunk : '';
-    
+
                             const baseResponse = {
                                 id: `${type === 'chat' ? 'chatcmpl' : 'cmpl'}-${Date.now()}`,
                                 created: Math.floor(Date.now() / 1000),
                                 model: modelId,
                             };
-    
+
                             if (type === 'chat') {
                                 const chunkResponse = {
                                     ...baseResponse,
@@ -98,7 +141,7 @@ export class LMStudioClientManager {
                 }
             });
         }
-    
+
         try {
             const result = await prediction;
             const content = result.content.trim();
@@ -112,7 +155,7 @@ export class LMStudioClientManager {
                     total_tokens: result.stats.totalTokensCount || 0,
                 },
             };
-    
+
             if (type === 'chat') {
                 const toolCalls = retrieveToolCalls(content);
                 return {
@@ -129,7 +172,7 @@ export class LMStudioClientManager {
                     }],
                 } as T;
             }
-    
+
             return {
                 ...baseResponse,
                 object: "text_completion" as const,
@@ -145,12 +188,12 @@ export class LMStudioClientManager {
             throw error;
         }
     }
-    
+
     // Then update the completion methods to use the generic properly:
     async generateCompletion(params: CompletionParams, opts: ChatTemplateTokens = DEFAULT_TOKENS, model_opts: LLMLoadModelConfig = DEFAULT_MODEL_CONFIG): Promise<CompletionResponse | ReadableStream> {
         try {
             const model = await this.getOrLoadModel(params.model, model_opts) as LLMDynamicHandle;
-            const promptTemplate = this.messageBuilder.createPromptTemplate(opts, params);
+            const promptTemplate = this.getMessageBuilder().createPromptTemplate(opts, params);
             const config: LLMPredictionOpts = {
                 maxPredictedTokens: params.max_tokens ?? undefined,
                 temperature: params.temperature ?? undefined,
@@ -159,9 +202,9 @@ export class LMStudioClientManager {
             };
             const prediction = model.complete(params.prompt, config);
             return this.handlePrediction<CompletionResponse>(
-                prediction, 
-                params.model, 
-                'completion', 
+                prediction,
+                params.model,
+                'completion',
                 params.stream ?? false
             );
         } catch (error) {
@@ -169,13 +212,14 @@ export class LMStudioClientManager {
             throw error;
         }
     }
-    
+
     async generateChatCompletion(params: ChatCompletionParams, opts: ChatTemplateTokens = DEFAULT_TOKENS, model_opts: LLMLoadModelConfig = DEFAULT_MODEL_CONFIG): Promise<ChatCompletionResponse | ReadableStream> {
+        this.ensureClient();
         try {
             const model = await this.getOrLoadModel(params.model, model_opts) as LLMDynamicHandle;
             Logger.debug('Model loaded. Chat completion params:', params);
-            const { history, promptTemplate } = await this.messageBuilder.buildChatHistory(params, opts);
-    
+            const { history, promptTemplate } = await this.getMessageBuilder().buildChatHistory(params, opts);
+
             const config: LLMPredictionOpts = {
                 maxPredictedTokens: params.max_tokens ?? undefined,
                 temperature: params.temperature ?? undefined,
@@ -186,9 +230,9 @@ export class LMStudioClientManager {
             Logger.debug('Chat completion history:', history);
             const prediction = model.respond(history, config);
             return this.handlePrediction<ChatCompletionResponse>(
-                prediction, 
-                params.model, 
-                'chat', 
+                prediction,
+                params.model,
+                'chat',
                 params.stream ?? false
             );
         } catch (error) {
@@ -200,7 +244,7 @@ export class LMStudioClientManager {
     async createEmbedding(params: CreateEmbeddingParams, model_opts: EmbeddingLoadModelConfig = DEFAULT_MODEL_CONFIG): Promise<CreateEmbeddingResponse> {
         try {
             const inputs = Array.isArray(params.input) ? params.input : [params.input];
-            
+
             const model = await this.getOrLoadModel(params.model, model_opts) as EmbeddingDynamicHandle;
             if (this.loadedModels[params.model]?.type !== 'embedding') {
                 throw new Error(`Model ${params.model} is not an embedding model`);
@@ -244,12 +288,12 @@ export class LMStudioClientManager {
         if (modelPath === '__proto__' || modelPath === 'constructor' || modelPath === 'prototype') {
             throw new Error('Invalid model path');
         }
-    
+
         // Check if model is already loaded using safe property access
         if (Object.prototype.hasOwnProperty.call(this.loadedModels, modelPath)) {
             Logger.info(`Using already loaded model ${modelPath}`);
             const modelEntry = this.loadedModels[modelPath];
-            
+
             // Safely update lastUsed timestamp
             Object.defineProperty(modelEntry, 'lastUsed', {
                 value: Date.now(),
@@ -257,12 +301,12 @@ export class LMStudioClientManager {
                 enumerable: true,
                 configurable: true
             });
-            
+
             return modelEntry.model;
         }
 
         // Check availability and model type
-        const availableModels = await this.client.system.listDownloadedModels();
+        const availableModels = await this.getClient().system.listDownloadedModels();
         const modelInfo = availableModels.find(model => model.path.includes(modelPath));
 
         if (!modelInfo) {
@@ -272,7 +316,7 @@ export class LMStudioClientManager {
         // Determine model type and create appropriate config
         const modelType = modelInfo.type;
         let defaultConfig: LLMLoadModelConfig | EmbeddingLoadModelConfig;
-        
+
         if (modelType === 'llm') {
             defaultConfig = {
                 ...DEFAULT_MODEL_CONFIG,
@@ -301,23 +345,23 @@ export class LMStudioClientManager {
         let model: LLMDynamicHandle | EmbeddingDynamicHandle;
 
         if (modelType === 'llm') {
-            model = await this.client.llm.load(modelPath, {
+            model = await this.getClient().llm.load(modelPath, {
                 config: finalConfig as LLMLoadModelConfig,
                 verbose: true,
                 identifier: modelPath
             });
         } else {
-            model = await this.client.embedding.load(modelPath, {
+            model = await this.getClient().embedding.load(modelPath, {
                 config: finalConfig as EmbeddingLoadModelConfig,
                 verbose: true,
                 identifier: modelPath
             });
         }
 
-        this.loadedModels[modelPath] = { 
-            model, 
+        this.loadedModels[modelPath] = {
+            model,
             lastUsed: Date.now(),
-            type: modelType 
+            type: modelType
         };
 
         return model;
@@ -330,8 +374,8 @@ export class LMStudioClientManager {
             for (const [modelId, { model, lastUsed, type }] of Object.entries(this.loadedModels)) {
                 if (now - lastUsed > this.inactivityThreshold) {
                     Logger.info(`Unloading inactive ${type} model: ${modelId}`);
-                    const namespace = type === 'llm' ? this.client.llm : this.client.embedding;
-                    
+                    const namespace = type === 'llm' ? this.getClient().llm : this.getClient().embedding;
+
                     try {
                         await namespace.unload(modelId);
                         delete this.loadedModels[modelId];
@@ -351,7 +395,7 @@ export class LMStudioClientManager {
         if (loadedModel) {
             try {
                 Logger.debug(`Starting unload for ${loadedModel.type} model: ${modelId}`);
-                const namespace = loadedModel.type === 'llm' ? this.client.llm : this.client.embedding;
+                const namespace = loadedModel.type === 'llm' ? this.getClient().llm : this.getClient().embedding;
                 await namespace.unload(modelId);
                 delete this.loadedModels[modelId];
                 Logger.info(`Successfully unloaded ${loadedModel.type} model: ${modelId}`);
@@ -363,22 +407,31 @@ export class LMStudioClientManager {
             Logger.info(`Model ${modelId} is not loaded - no action needed`);
         }
     }
-    async listModels(): Promise<DownloadedModel[]> {
+
+    async listModels(): Promise<ExtendedDownloadedModel[]> {
         try {
-            Logger.debug('Fetching downloaded models...');
-            const models = await this.client.system.listDownloadedModels();
-            Logger.debug('Downloaded Models len:', models.length);
-            return models;
+            const downloadedModels = await this.getClient().system.listDownloadedModels();
+            const loadedLLMs = await this.getClient().llm.listLoaded();
+            const loadedEmbeddings = await this.getClient().embedding.listLoaded();
+
+            const loadedModels = new Set([
+                ...loadedLLMs.map(m => m.path),
+                ...loadedEmbeddings.map(m => m.path)
+            ]);
+
+            return downloadedModels.map(model => ({
+                ...model,
+                isLoaded: loadedModels.has(model.path)
+            }));
         } catch (error) {
-            Logger.error('Error listing models:', error);
+            Logger.error('Error in listModels:', error);
             throw error;
         }
     }
-    
     async checkModelAvailability(modelPath: string): Promise<boolean> {
         try {
             Logger.debug('Checking model availability:', modelPath);
-            const downloadedModels = await this.client.system.listDownloadedModels();
+            const downloadedModels = await this.getClient().system.listDownloadedModels();
             const isAvailable = downloadedModels.some(model => model.path.includes(modelPath));
             Logger.debug(`Model ${modelPath} availability:`, isAvailable);
             return isAvailable;
@@ -387,41 +440,41 @@ export class LMStudioClientManager {
             throw error;
         }
     }
-    
+
     async unloadAllModels() {
         Logger.info('Unloading all models...');
         try {
             // Get lists of both types of loaded models
-            const loadedLLMList = await this.client.llm.listLoaded();
-            const loadedEmbeddingList = await this.client.embedding.listLoaded();
-            
+            const loadedLLMList = await this.getClient().llm.listLoaded();
+            const loadedEmbeddingList = await this.getClient().embedding.listLoaded();
+
             Logger.debug(`Found ${loadedLLMList.length} LLM models and ${loadedEmbeddingList.length} embedding models`);
-    
+
             if (loadedLLMList.length === 0 && loadedEmbeddingList.length === 0) {
                 Logger.info('No models to unload');
                 return;
             }
-    
+
             // Unload all LLM models
             for (const model of loadedLLMList) {
                 try {
-                    await this.client.llm.unload(model.identifier);
+                    await this.getClient().llm.unload(model.identifier);
                     Logger.debug(`Successfully unloaded LLM model: ${model.identifier}`);
                 } catch (error) {
                     Logger.error(`Failed to unload LLM model ${model.identifier}:`, error);
                 }
             }
-    
+
             // Unload all embedding models
             for (const model of loadedEmbeddingList) {
                 try {
-                    await this.client.embedding.unload(model.identifier);
+                    await this.getClient().embedding.unload(model.identifier);
                     Logger.debug(`Successfully unloaded embedding model: ${model.identifier}`);
                 } catch (error) {
                     Logger.error(`Failed to unload embedding model ${model.identifier}:`, error);
                 }
             }
-    
+
             // Clear our loaded models tracking
             this.loadedModels = {};
             Logger.info('Successfully unloaded all models');

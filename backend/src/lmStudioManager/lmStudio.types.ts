@@ -8,7 +8,6 @@ import {
 import dotenv from 'dotenv';
 dotenv.config();
 
-
 // Updated interfaces to match OpenAI's structure
 export interface ImageUrlContent {
     type: 'image_url';

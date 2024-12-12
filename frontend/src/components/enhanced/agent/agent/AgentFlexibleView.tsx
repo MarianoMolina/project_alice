@@ -17,6 +17,7 @@ import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import { TextInput } from '../../common/inputs/TextInput';
 import { SelectInput } from '../../common/inputs/SelectInput';
 import { NumericInput } from '../../common/inputs/NumericInput';
+import TitleBox from '../../common/inputs/TitleBox';
 
 // Helper to convert enum to selection options
 const enumToOptions = (enumObj: Record<string, string | number>) =>
@@ -159,40 +160,42 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             />
             {memoizedPromptSelect}
             {memoizedModelSelect}
-            <NumericInput
-                name="max_consecutive_auto_reply"
-                label="Max Consecutive Auto Reply"
-                value={form.max_consecutive_auto_reply}
-                onChange={(value) => handleFieldChange('max_consecutive_auto_reply', value)}
-                disabled={!isEditMode}
-                required
-                isInteger
-                description='The maximum number of consecutive auto replies the agent can send. If > 1, if the agent produces tool calls or code executions, it will continue responding until the max is reached.'
-                min={0}
-                fullWidth
-            />
-            <SelectInput
-                name="has_tools"
-                label="Tool Permission"
-                value={form.has_tools?.toString()}
-                onChange={(value) => handleFieldChange('has_tools', Number(value))}
-                options={toolPermissionOptions}
-                disabled={!isEditMode}
-                description='The permission level for tool execution. 0: Disabled, 1: Normal, 2: With Permission, 3: Dry Run'
-                fullWidth
-                required
-            />
-            <SelectInput
-                name="has_code_exec"
-                label="Code Permission"
-                value={form.has_code_exec?.toString()}
-                onChange={(value) => handleFieldChange('has_code_exec', Number(value))}
-                options={codePermissionOptions}
-                disabled={!isEditMode}
-                description='The permission level for code execution. 0: Disabled, 1: Normal, 2: With Permission, 3: Tagged Only'
-                fullWidth
-                required
-            />
+            <TitleBox title="Agent Configuration" >
+                <NumericInput
+                    name="max_consecutive_auto_reply"
+                    label="Max Consecutive Auto Reply"
+                    value={form.max_consecutive_auto_reply}
+                    onChange={(value) => handleFieldChange('max_consecutive_auto_reply', value)}
+                    disabled={!isEditMode}
+                    required
+                    isInteger
+                    description='The maximum number of consecutive auto replies the agent can send. If > 1, if the agent produces tool calls or code executions, it will continue responding until the max is reached.'
+                    min={0}
+                    fullWidth
+                />
+                <SelectInput
+                    name="has_tools"
+                    label="Tool Permission"
+                    value={form.has_tools?.toString()}
+                    onChange={(value) => handleFieldChange('has_tools', Number(value))}
+                    options={toolPermissionOptions}
+                    disabled={!isEditMode}
+                    description='The permission level for tool execution. 0: Disabled, 1: Normal, 2: With Permission, 3: Dry Run'
+                    fullWidth
+                    required
+                />
+                <SelectInput
+                    name="has_code_exec"
+                    label="Code Permission"
+                    value={form.has_code_exec?.toString()}
+                    onChange={(value) => handleFieldChange('has_code_exec', Number(value))}
+                    options={codePermissionOptions}
+                    disabled={!isEditMode}
+                    description='The permission level for code execution. 0: Disabled, 1: Normal, 2: With Permission, 3: Tagged Only'
+                    fullWidth
+                    required
+                />
+            </TitleBox>
         </GenericFlexibleView>
     );
 };

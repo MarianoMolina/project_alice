@@ -40,7 +40,6 @@ export function cleanForDuplication<T extends BaseDatabaseObject>(item: T, itemT
   // Handle special cases
   if (itemType === 'chats') {
     delete (cleanedItem as any).messages;
-    delete (cleanedItem as any).default_user_checkpoints;
   }
 
   return cleanedItem;

@@ -42,7 +42,7 @@ export async function updateCodeExecution(
     userId: string
 ): Promise<ICodeExecutionDocument | null> {
     try {
-        Logger.info('codeExecutionData received in updateCodeExecution:', codeExecutionData);
+        Logger.debug('codeExecutionData received in updateCodeExecution:', codeExecutionData);
         const existingCodeExecution = await CodeExecution.findById(codeExecutionId);
         if (!existingCodeExecution) {
             throw new Error('Code execution not found');

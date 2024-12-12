@@ -45,7 +45,7 @@ async def chat_response(
     else:
         # Process the chat response immediately (called by QueueManager)
         LOGGER.info(f'Processing chat response for chat_id: {request.chat_id}')
-        chat_data = await db_app.get_chats(request.chat_id)
+        chat_data = await db_app.get_chat(request.chat_id)
         if not chat_data:
             raise HTTPException(status_code=404, detail="Chat not found")
 
@@ -55,13 +55,13 @@ async def chat_response(
         api_manager = await db_app.api_setter()
 
         # Perform deep API availability check
-        api_check_result = await deep_api_check(chat_data[request.chat_id], api_manager)
-        LOGGER.info(f'API Check Result: {api_check_result}')
+        api_check_result = await deep_api_check(chat_data, api_manager)
+        LOGGER.debug(f'API Check Result: {api_check_result}')
 
         if api_check_result["status"] == "warning":
             LOGGER.warning(f'API Warning: {api_check_result["warnings"]}')
 
-        responses = await chat_data[request.chat_id].generate_response(api_manager, user_data=db_app.user_data.get('user_obj'))
+        responses = await chat_data.generate_response(api_manager, user_data=db_app.user_data.get('user_obj'))
 
         LOGGER.debug(f'Responses: {responses}')
 

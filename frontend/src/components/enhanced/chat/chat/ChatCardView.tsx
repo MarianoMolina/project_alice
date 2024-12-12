@@ -8,12 +8,12 @@ import {
 } from '@mui/material';
 import { Person, Functions, Message as MessageIcon, AttachFile, QueryBuilder } from '@mui/icons-material';
 import { ChatComponentProps } from '../../../../types/ChatTypes';
-import CommonCardView from '../../common/enhanced_component/CardView';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
-import MessageShortListView from '../../message/message/MessageShortListView';
 import { hasAnyReferences } from '../../../../types/ReferenceTypes';
+import CommonCardView from '../../common/enhanced_component/CardView';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
+import EnhancedMessage from '../../message/message/EnhancedMessage';
 import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
 
 const ChatCardView: React.FC<ChatComponentProps> = ({
   item,
@@ -74,14 +74,15 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
       secondary_text: (
         <Box>
           <Typography variant="body2">Total: {item.messages.length}</Typography>
-          <MessageShortListView
-            items={item.messages || []}
-            item={null}
-            onChange={() => { }}
-            mode={'view'}
-            handleSave={async () => { }}
-            onView={(message) => selectCardItem && selectCardItem('Message', message._id ?? '', message)}
-          />
+          {item.messages.map((message, index) => (
+            <EnhancedMessage
+              key={`message-${index}${message}`}
+              itemId={message}
+              mode={'shortList'}
+              fetchAll={false}
+              onView={(message) => selectCardItem && selectCardItem('Message', message._id ?? '', message)}
+            />
+          ))}
         </Box>
       )
     },
@@ -94,7 +95,7 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
       icon: <QueryBuilder />,
       primary_text: "Created At",
       secondary_text: new Date(item.createdAt || '').toLocaleString()
-  }
+    }
   ];
 
   return (

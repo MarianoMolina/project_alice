@@ -1,19 +1,17 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import {
-    Typography,
-    Box,
     Alert,
 } from '@mui/material';
 import { APIConfigComponentProps, APIConfig, getDefaultAPIConfigForm, HealthStatus } from '../../../../types/ApiConfigTypes';
 import { ApiName } from '../../../../types/ApiTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import useStyles from '../APIConfigStyles';
 import { API_BASE_URLS, apiNameIcons } from '../../../../utils/ApiUtils';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 import { TextInput } from '../../common/inputs/TextInput';
 import { SelectInput } from '../../common/inputs/SelectInput';
 import { IconSelectInput } from '../../common/inputs/IconSelectInput';
 import Logger from '../../../../utils/Logger';
+import TitleBox from '../../common/inputs/TitleBox';
 
 const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
     item,
@@ -25,7 +23,6 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
     const [form, setForm] = useState<Partial<APIConfig>>((item || getDefaultAPIConfigForm()));
     const [isSaving, setIsSaving] = useState(false);
     const [validationError, setValidationError] = useState<string | null>(null);
-    const classes = useStyles();
 
     const isCreateMode = mode === 'create';
     const isEditMode = mode === 'edit' || mode === 'create';
@@ -44,7 +41,7 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
             onChange(getDefaultAPIConfigForm());
         }
     }, [item, onChange]);
-    
+
     const handleFieldChange = useCallback((field: keyof APIConfig, value: any) => {
         setForm(prevForm => ({ ...prevForm, [field]: value }));
     }, []);
@@ -114,7 +111,7 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
         setValidationError(null);
         return true;
     }, [form]);
-    
+
     const handleLocalSave = useCallback(() => {
         if (validateForm()) {
             onChange(form);
@@ -211,7 +208,7 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
                 );
             case ApiName.REDDIT:
                 return (
-                    <>  
+                    <>
                         <TextInput
                             name='client_id'
                             label='Client ID'
@@ -311,12 +308,9 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
             />
 
             {form.api_name && (
-                <>
-                    <Typography variant="h6" className={classes.titleText}>Configuration</Typography>
-                    <Box mb={2}>
-                        {renderConfigFields()}
-                    </Box>
-                </>
+                <TitleBox title='API Configuration'>
+                    {renderConfigFields()}
+                </TitleBox>
             )}
 
         </GenericFlexibleView>

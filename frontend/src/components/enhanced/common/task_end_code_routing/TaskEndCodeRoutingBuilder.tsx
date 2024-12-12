@@ -8,7 +8,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { SelectInput } from '../../common/inputs/SelectInput';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 import { NODE_CONFIGS } from '../task_flowchart/nodes/shared_nodes/TaskTypeNodeDefinitions';
-import theme from '../../../../Theme';
+import TitleBox from '../inputs/TitleBox';
 
 interface TaskEndCodeRoutingBuilderProps {
   title?: string | undefined;
@@ -152,31 +152,7 @@ const TaskEndCodeRoutingBuilder: React.FC<TaskEndCodeRoutingBuilderProps> = ({
   ];
 
   return (
-    <Box 
-      sx={{ 
-        mt: 1, 
-        mb: 1,
-        p: 3,
-        border: '1px solid',
-        borderColor: 'divider',
-        borderRadius: 1,
-        position: 'relative'
-      }}
-    >
-      {/* Title */}
-      <Typography
-        variant="h6"
-        sx={{
-          position: 'absolute',
-          top: -12,
-          left: 16,
-          px: 1,
-          backgroundColor: theme.palette.background.paper,
-          color: theme.palette.text.primary
-        }}
-      >
-        {title}
-      </Typography>
+    <TitleBox title={title}>
 
       {/* Start Node Selection */}
       <Box sx={{ mt: 2 }}>
@@ -270,7 +246,7 @@ const TaskEndCodeRoutingBuilder: React.FC<TaskEndCodeRoutingBuilderProps> = ({
           </Select>
         </FormControl>
       )}
-    </Box>
+    </TitleBox>
   );
 };
 

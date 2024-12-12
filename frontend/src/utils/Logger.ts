@@ -11,6 +11,7 @@ enum LogLevel {
   
     private constructor() {
       this.level = this.getLogLevelFromEnv();
+      this.info('LOG_LEVEL:', LogLevel[this.level]);
     }
   
     public static getInstance(): LoggerClass {

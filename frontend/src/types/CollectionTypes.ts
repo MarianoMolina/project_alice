@@ -1,5 +1,5 @@
 import { AliceAgent } from './AgentTypes';
-import { AliceChat } from './ChatTypes';
+import { AliceChat, PopulatedAliceChat } from './ChatTypes';
 import { AliceModel } from './ModelTypes';
 import { AliceTask } from './TaskTypes';
 import { Prompt } from './PromptTypes';
@@ -43,6 +43,27 @@ export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt'
 export type CollectionType = {
     agents: AliceAgent;
     chats: AliceChat;
+    models: AliceModel;
+    tasks: AliceTask;
+    prompts: Prompt;
+    taskresults: TaskResponse;
+    users: User;
+    parameters: ParameterDefinition;
+    apis: API;
+    files: FileReference;
+    messages: MessageType;
+    userinteractions: UserInteraction;
+    usercheckpoints: UserCheckpoint;
+    dataclusters: DataCluster;
+    embeddingchunks: EmbeddingChunk;
+    toolcalls: ToolCall;
+    codeexecutions: CodeExecution;
+    apiconfigs: APIConfig;
+    entityreferences: EntityReference;
+};
+export type CollectionPopulatedType = {
+    agents: AliceAgent;
+    chats: PopulatedAliceChat;
     models: AliceModel;
     tasks: AliceTask;
     prompts: Prompt;

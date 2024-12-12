@@ -257,7 +257,7 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "web_summarizer_agent",
                 "name": "web_summarizer",
-                "system_message": "web_summarizer_prompt", # TODO: Currently, the scrape task is using this prompt, but it is embedded in the task, 
+                "system_message": "web_summarizer_prompt", # TODO: Currently, the scrape task is using this same prompt, but it is embedded in the task, 
                 "models": {                                # because it uses the selector agent. I need to either allow tasks to have multiple agents, 
                     "chat": "GPT4o",                       # allow agents to have multiple system prompts, allow tasks to swap them, or some other solution. 
                 },
@@ -415,7 +415,7 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "web_scrape_task_2",
                 "task_type": "WebScrapeBeautifulSoupTask",
-                "task_name": "Scrape and Summarize URL",
+                "task_name": "Scrape_and_Summarize_URL",
                 "task_description": "Scrapes a webpage using BeautifulSoup and an LLM agent to both parse and summarize the content",
                 "agent": "web_scrape_selector_agent",
                 "required_apis": ["llm_api"],
@@ -449,7 +449,7 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "web_scrape_task",
                 "task_type": "WebScrapeBeautifulSoupTask",
-                "task_name": "Scrape URL",
+                "task_name": "Scrape_URL",
                 "task_description": "Scrapes a webpage using BeautifulSoup and an LLM agent to parse the content",
                 "agent": "web_scrape_selector_agent",
                 "required_apis": ["llm_api"],

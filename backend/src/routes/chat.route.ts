@@ -56,7 +56,27 @@ customRouter.patch('/:chatId/add_message', async (req: AuthRequest, res: Respons
     res.status(500).json({ message: (error as Error).message, stack: (error as Error).stack });
   }
 });
+customRouter.get('/:id/populated', async (req: AuthRequest, res: Response) => {
+  try {
+    const chat = await AliceChat.findOne({ 
+      _id: req.params.id, 
+      created_by: req.user?.userId 
+    }).populate('messages');
 
+    if (!chat) {
+      Logger.error(`Populated chat not found: ${req.params.id}`);
+      return res.status(404).json({ error: 'Chat not found' });
+    }
+
+    res.status(200).json(chat);
+  } catch (error) {
+    Logger.error('Error in get populated chat route:', {
+      error: (error as Error).message,
+      stack: (error as Error).stack
+    });
+    res.status(500).json({ error: 'An error occurred while retrieving the populated chat' });
+  }
+});
 // Combine generated and custom routes
 const combinedRouter = Router();
 combinedRouter.use(auth);

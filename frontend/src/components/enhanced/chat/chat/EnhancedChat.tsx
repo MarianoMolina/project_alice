@@ -1,13 +1,11 @@
 import React from 'react';
+import { AliceChat, ChatComponentProps } from '../../../../types/ChatTypes';
 import ChatFlexibleView from './ChatFlexibleView';
 import ChatListView from './ChatListView';
 import ChatTableView from './ChatTableView';
 import ChatCardView from './ChatCardView';
 import ChatShortListView from './ChatShortListView';
-import { AliceChat } from '../../../../types/ChatTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
-import { ChatComponentProps } from '../../../../types/ChatTypes';
-import ChatMessagesFullView from './ChatMessagesFullView';
 import Logger from '../../../../utils/Logger';
 
 type BaseChatMode = BaseDbElementProps<AliceChat>['mode'];
@@ -43,7 +41,6 @@ const EnhancedChat: React.FC<EnhancedChatProps> = (props) => {
       onInteraction: props.onInteraction,
       onView: props.onView,
       showHeaders: props.showHeaders,
-      showRegenerate: props.showRegenerate,
     };
     Logger.debug('EnhancedChat', commonProps);
 
@@ -60,8 +57,6 @@ const EnhancedChat: React.FC<EnhancedChatProps> = (props) => {
         return <ChatTableView {...commonProps} />;
       case 'card':
         return <ChatCardView {...commonProps} />;
-      case 'full':
-        return <ChatMessagesFullView {...commonProps} />;
       default:
         return null;
     }

@@ -1,7 +1,6 @@
 from typing import List
 from pydantic import Field
 import google.generativeai as genai
-from workflow.core.api.engines.image_engines.gemini.gemini_utils import ImageGenerationModel
 from workflow.core.data_structures import (
     ModelConfig, ApiType, FileContentReference, MessageDict, ContentType, FileType, References, FunctionParameters, ParameterDefinition
     )
@@ -37,7 +36,7 @@ class GeminiImageGenerationEngine(ImageGenerationEngine):
         Generates images using Google's Gemini model.
         """
         genai.configure(api_key=api_data.api_key)
-        imagen = ImageGenerationModel(api_data.model)
+        imagen = genai.ImageGenerationModel(api_data.model)
 
         # Map size to aspect ratio (this is an approximation, adjust as needed)
         size_to_aspect_ratio = {

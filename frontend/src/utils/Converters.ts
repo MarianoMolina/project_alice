@@ -1,7 +1,7 @@
-import { CollectionName, CollectionType } from "../types/CollectionTypes";
+import { CollectionName, CollectionPopulatedType, CollectionType } from "../types/CollectionTypes";
 import { convertToAliceAgent } from "../types/AgentTypes";
 import { convertToAPI } from "../types/ApiTypes";
-import { convertToAliceChat } from "../types/ChatTypes";
+import { convertToAliceChat, convertToPopulatedAliceChat } from "../types/ChatTypes";
 import { convertToDataCluster } from "../types/DataClusterTypes";
 import { convertToEmbeddingChunk } from "../types/EmbeddingChunkTypes";
 import { convertToFileReference } from "../types/FileTypes";
@@ -39,4 +39,28 @@ export const converters: { [K in CollectionName]: (data: any) => CollectionType[
     toolcalls: convertToToolCall,
     codeexecutions: convertToCodeExecution,
     apiconfigs: convertToAPIConfig,
+};
+export const populatedConverters: { [K in CollectionName]: (data: any) => CollectionPopulatedType[K] } = {
+    // Use populated chat converter
+    chats: convertToPopulatedAliceChat,
+    
+    // Reuse existing converters for all other types
+    agents: converters.agents,
+    models: converters.models,
+    tasks: converters.tasks,
+    prompts: converters.prompts,
+    taskresults: converters.taskresults,
+    users: converters.users,
+    parameters: converters.parameters,
+    apis: converters.apis,
+    files: converters.files,
+    messages: converters.messages,
+    entityreferences: converters.entityreferences,
+    userinteractions: converters.userinteractions,
+    usercheckpoints: converters.usercheckpoints,
+    dataclusters: converters.dataclusters,
+    embeddingchunks: converters.embeddingchunks,
+    toolcalls: converters.toolcalls,
+    codeexecutions: converters.codeexecutions,
+    apiconfigs: converters.apiconfigs,
 };

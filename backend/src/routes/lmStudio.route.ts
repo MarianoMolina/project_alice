@@ -39,12 +39,8 @@ router.get('/v1/models', async (_req: AuthRequest, res: Response) => {
       object: 'list',
       data: models.map(model => ({
         id: model.path,
-        object: 'model',
-        created: Date.now(),
-        owned_by: 'local',
-        root: model.path,
-        parent: null,
-        permission: [],
+        architecture: model.architecture,
+        size: model.sizeBytes,
         type: model.type,
         is_loaded: model.isLoaded
       }))
@@ -54,6 +50,33 @@ router.get('/v1/models', async (_req: AuthRequest, res: Response) => {
   }
 });
 
+// Helper to encode/decode model IDs
+const encodeModelPath = (modelPath: string): string => {
+  return encodeURIComponent(modelPath);
+};
+
+// Helper function to construct the URL for unloading a model
+export const getUnloadModelUrl = (modelPath: string): string => {
+  const encodedPath = encodeModelPath(modelPath);
+  return `/v1/models/unload/${encodedPath}`;
+};
+
+router.post('/v1/models/unload/**', async (req: AuthRequest, res: Response) => {
+  try {
+    const modelId = req.params[0];
+    if (!modelId) {
+      return res.status(400).json({ error: 'model_id parameter is required' });
+    }
+
+    await lmStudioManager.unloadModel(modelId);
+    res.json({
+      success: true,
+      message: `Model ${modelId} has been queued for unloading`
+    });
+  } catch (error) {
+    handleErrors(res, error);
+  }
+});
 // Chat completions endpoint
 router.post('/v1/chat/completions', async (req: AuthRequest, res: Response) => {
   try {
@@ -61,7 +84,7 @@ router.post('/v1/chat/completions', async (req: AuthRequest, res: Response) => {
     const modelId = params.model as string;
 
     if (!modelId) {
-      return res.status(400).json({ error: 'model_id query parameter is required' });
+      return res.status(400).json({ error: 'model parameter is required' });
     }
 
     if (!params.messages || params.messages.length === 0) {

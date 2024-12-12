@@ -68,7 +68,7 @@ async def execute_task_endpoint(
 
             # Perform deep API availability check
             api_check_result = await deep_api_check(task, api_manager)
-            LOGGER.info(f'API Check Result: {api_check_result}')
+            LOGGER.debug(f'API Check Result: {api_check_result}')
 
             if api_check_result["status"] == "warning":
                 LOGGER.warning(f'API Warning: {api_check_result["warnings"]}')

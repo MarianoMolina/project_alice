@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { AliceTask } from '../types/TaskTypes';
-import { AliceChat } from '../types/ChatTypes';
+import { AliceChat, PopulatedAliceChat } from '../types/ChatTypes';
 import { MessageType } from '../types/MessageTypes';
 import { useAuth } from './AuthContext';
 import { useApi } from './ApiContext';
 import Logger from '../utils/Logger';
 import { globalEventEmitter } from '../utils/EventEmitter';
+import { fetchPopulatedItem } from '../services/api';
 
 interface ChatContextType {
     messages: MessageType[];
@@ -21,7 +22,7 @@ interface ChatContextType {
     generateResponse: () => Promise<void>;
     handleRegenerateResponse: () => Promise<void>;
     fetchChats: () => Promise<void>;
-    currentChat: AliceChat | null;
+    currentChat: PopulatedAliceChat | null;
     addTaskToChat: (taskId: string) => Promise<void>;
     isTaskInChat: (taskId: string) => boolean;
 }
@@ -38,7 +39,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     const [pastChats, setPastChats] = useState<AliceChat[]>([]);
     const [currentChatId, setCurrentChatId] = useState<string | null>(null);
     const [isGenerating, setIsGenerating] = useState<boolean>(false);
-    const [currentChat, setCurrentChat] = useState<AliceChat | null>(null);
+    const [currentChat, setCurrentChat] = useState<PopulatedAliceChat | null>(null);
     const { user } = useAuth();
 
     const fetchChats = useCallback(async () => {
@@ -56,15 +57,15 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         }
     }, [user, fetchChats]);
 
-    const fetchChatById = useCallback(async (chatId: string): Promise<AliceChat> => {
+    const fetchChatById = useCallback(async (chatId: string): Promise<PopulatedAliceChat> => {
         try {
-            const chatData = await fetchItem('chats', chatId) as AliceChat;
+            const chatData = await fetchPopulatedItem('chats', chatId) as PopulatedAliceChat;
             return chatData;
         } catch (error) {
             Logger.error('Error fetching chat by id:', error);
             throw error;
         }
-    }, [fetchItem]);
+    }, []);
 
     const fetchCurrentChat = useCallback(async () => {
         if (!currentChatId) return;

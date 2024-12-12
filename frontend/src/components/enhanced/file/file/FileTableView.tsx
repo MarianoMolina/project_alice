@@ -1,7 +1,7 @@
 import React from 'react';
 import { FileReference, FileComponentProps } from '../../../../types/FileTypes';
 import EnhancedTableView from '../../common/enhanced_component/TableView';
-import { bytesToMB } from '../../../../utils/FileUtils';
+import {  getFileSize } from '../../../../utils/FileUtils';
 
 const FileTableView: React.FC<FileComponentProps> = ({
   items,
@@ -23,7 +23,7 @@ const FileTableView: React.FC<FileComponentProps> = ({
     },
     {
       header: 'Size',
-      render: (file: FileReference) => bytesToMB(file.file_size),
+      render: (file: FileReference) => getFileSize(file.file_size).formatted,
       sortKey: 'file_size'
     },
     {

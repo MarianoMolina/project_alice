@@ -18,7 +18,7 @@ docker
 # Third party APIs
 openai
 google-api-python-client
-google-generativeai
+git+https://github.com/google-gemini/generative-ai-python@imagen  # For Imagen support # google-generativeai
 groq
 cohere
 anthropic

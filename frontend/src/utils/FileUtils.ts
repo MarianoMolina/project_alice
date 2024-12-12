@@ -148,10 +148,6 @@ export const selectFile = async (
         input.click();
     });
 };
-export const bytesToMB = (bytes: number): string => {
-    const mb = bytes / (1024 * 1024);
-    return mb.toPrecision(3) + ' MB';
-};
 
 export async function getFileStringContent(
     file: FileReference, 
@@ -224,6 +220,41 @@ export function getTextFromBase64(base64Content: string): string {
 }
 
 export function getFileDescription(file: FileReference): string {
-    const sizeInMB = (file.file_size / (1024 * 1024)).toFixed(2);
-    return `${file.filename} (${sizeInMB} MB)`;
+    const sizeInMB = getFileSize(file.file_size)
+    return `${file.filename} (${sizeInMB.formatted})`;
+}
+
+interface FileSizeInfo {
+    value: number;        // The converted size value
+    unit: string;        // The unit (B, KB, MB, etc.)
+    bytes: number;       // Original size in bytes
+    raw: number;         // Original number provided
+    formatted: string;   // Pre-formatted string (e.g., "1.21 MB")
+}
+
+export const bytesToMB = (bytes: number): string => {
+    const mb = bytes / (1024 * 1024);
+    return mb.toPrecision(3) + ' MB';
+};
+
+export function getFileSize(bytes: number): FileSizeInfo {
+    const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+    let size = Math.abs(bytes);
+    let unitIndex = 0;
+    
+    while (size >= 1024 && unitIndex < units.length - 1) {
+        size /= 1024;
+        unitIndex++;
+    }
+    
+    // For bytes, show no decimal places
+    const value = unitIndex === 0 ? Math.round(size) : Number(size.toFixed(2));
+    
+    return {
+        value,
+        unit: units[unitIndex],
+        bytes: Math.abs(bytes),
+        raw: bytes,
+        formatted: `${value} ${units[unitIndex]}`
+    };
 }
