@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import { Api, Factory, Key, Person, SvgIconComponent, Warning } from '@mui/icons-material';
 import { Box } from '@mui/material';
 import { SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
-import { useApi } from '../contexts/ApiContext';
-import { useAuth } from '../contexts/AuthContext';
 import { User } from '../types/UserTypes';
-import useStyles from '../styles/UserSettingsStyles';
+import { LMStudioIcon } from '../utils/CustomIcons';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
-import Logger from '../utils/Logger';
 import PersonalInformation from '../components/ui/user_settings/PersonalInformation';
 import ApiConfigurations from '../components/ui/user_settings/ApiConfigurations';
 import UserToken from '../components/ui/user_settings/UserToken';
 import DangerZone from '../components/ui/user_settings/DangerZone';
-import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
-import { Api, Key, Person, SvgIconComponent, Warning } from '@mui/icons-material';
-import { LMStudioIcon } from '../utils/CustomIcons';
 import LMStudioStatus from '../components/ui/user_settings/LMStudioStatus';
+import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
+import { useApi } from '../contexts/ApiContext';
+import { useAuth } from '../contexts/AuthContext';
+import useStyles from '../styles/UserSettingsStyles';
+import Logger from '../utils/Logger';
+import WorkflowHealthStatus from '../components/ui/user_settings/WorkflowStatus';
 
 interface UserSettingsProps {
     setHasUnsavedChanges: (value: boolean) => void;
@@ -37,6 +38,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
         { name: 'User Token', icon: Key },
         { name: 'Danger Zone', icon: Warning },
         { name: 'LM Studio Status', icon: LMStudioIcon as SvgIconComponent},
+        { name: 'Workflow Module Status', icon: Factory },
     ];
 
     useEffect(() => {
@@ -76,6 +78,8 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
                 return <DangerZone />;
             case 'LM Studio Status':
                 return <LMStudioStatus />;
+            case 'Workflow Module Status':
+                return <WorkflowHealthStatus />;
             default:
                 return null;
         }

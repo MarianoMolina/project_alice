@@ -91,7 +91,8 @@ def sample_html(html: str, max_length: int = 4000, num_samples: int = 4) -> List
 
 def apply_parsing_strategy(html: str, selectors: List[str]) -> Optional[str]:
     """
-    Apply the CSS selectors to extract content using Beautiful Soup.
+    Apply CSS selectors intelligently by handling specificity and avoiding duplicate content.
+    More specific selectors take precedence over general ones.
 
     Args:
         html (str): The cleaned HTML content.
@@ -102,18 +103,50 @@ def apply_parsing_strategy(html: str, selectors: List[str]) -> Optional[str]:
     """
     LOGGER.info("Applying parsing strategy with generated selectors.")
     soup = BeautifulSoup(html, 'html.parser')
+    
+    # Sort selectors by specificity (more specific selectors first)
+    # Specificity is roughly determined by number of parts and presence of IDs/classes
+    def get_selector_specificity(selector: str) -> int:
+        # Higher number = more specific
+        score = 0
+        score += selector.count('#') * 100  # ID selectors
+        score += selector.count('.') * 10   # Class selectors
+        score += len(selector.split())      # Descendant selectors
+        return score
+
+    sorted_selectors = sorted(selectors, key=get_selector_specificity, reverse=True)
+    LOGGER.debug(f"Sorted selectors by specificity: {sorted_selectors}")
+
+    # Keep track of which elements we've matched
+    matched_elements = set()
     content_elements = []
-    for selector in selectors:
+    
+    for selector in sorted_selectors:
+        # Find all elements matching this selector
         elements = soup.select(selector)
-        LOGGER.debug(f"Applying selector '{selector}' found {len(elements)} elements.")
-        content_elements.extend(elements)
-    # Get text content from the selected elements
-    text_content = ' '.join([elem.get_text(separator=' ', strip=True) for elem in content_elements])
+        
+        for element in elements:
+            # Skip if we've already matched this element with a more specific selector
+            if element in matched_elements:
+                continue
+                
+            matched_elements.add(element)
+            content_elements.append(element)
+    
+    # Sort elements by their position in document to maintain reading order
+    content_elements.sort(key=lambda x: x.sourceline or 0)
+    
+    # Extract text from matched elements
+    text_content = ' '.join(
+        elem.get_text(separator=' ', strip=True) 
+        for elem in content_elements
+    )
+    
     if text_content.strip():
-        LOGGER.info("Content extracted successfully using selectors.")
+        LOGGER.info(f"Successfully extracted content using {len(matched_elements)} unique elements")
         return text_content
     else:
-        LOGGER.warning("No content extracted using the agent-generated selectors.")
+        LOGGER.warning("No content extracted using the selectors")
         return None
 
 def fallback_parsing_strategy(html: str, selectors: List[str] = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']) -> Optional[str]:

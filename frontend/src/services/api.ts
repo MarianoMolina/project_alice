@@ -437,3 +437,49 @@ export const executeTask = async (taskId: string, inputs: any): Promise<TaskResp
     throw error;
   }
 };
+
+export const checkWorkflowHealth = async (): Promise<{ status: string; message: string }> => {
+  try {
+    Logger.debug('Checking workflow basic health status');
+    const response = await taskAxiosInstance.get('/health');
+    return response.data;
+  } catch (error) {
+    Logger.error('Error checking workflow health:', error);
+    throw error;
+  }
+};
+
+export const checkWorkflowUserHealth = async (): Promise<{
+  status: string;
+  message: string;
+  api_health: string;
+}> => {
+  try {
+    Logger.debug('Checking workflow user-level health status');
+    const response = await taskAxiosInstance.get('/health/api');
+    
+    // If we received a task_id, we need to wait for the WebSocket response
+    if (response.data.task_id) {
+      const taskId = response.data.task_id;
+      
+      // Set up WebSocket connection to receive updates
+      const healthStatus = await new Promise((resolve, reject) => {
+        setupWebSocketConnection(taskId, (message: any) => {
+          if (message.status === 'completed') {
+            resolve(message.result);
+          } else if (message.status === 'failed') {
+            reject(new Error(`Health check failed: ${message.error}`));
+          }
+        });
+      });
+      
+      return healthStatus as any;
+    }
+    
+    // If no task_id, return the direct response
+    return response.data;
+  } catch (error) {
+    Logger.error('Error checking workflow user health:', error);
+    throw error;
+  }
+};

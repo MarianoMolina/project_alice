@@ -21,7 +21,7 @@ interface ListItemData {
 interface CommonCardViewProps<T extends CollectionName> {
     title: string;
     elementType?: string;
-    subtitle?: string;
+    subtitle?: string | React.ReactNode;
     id?: string;
     listItems?: ListItemData[];
     children?: React.ReactNode;

@@ -11,9 +11,6 @@ import {
 } from '@mui/material';
 import {
   InsertDriveFile as FileIcon,
-  Image as ImageIcon,
-  AudioFile as AudioIcon,
-  VideoFile as VideoIcon,
   Visibility as VisibilityIcon,
   AccessTime as TimeIcon,
   Download
@@ -23,25 +20,13 @@ import { getFileSize } from '../../../../utils/FileUtils';
 import Logger from '../../../../utils/Logger';
 import { retrieveFile } from '../../../../services/api';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { getFileIcon } from '../../../../utils/MessageUtils';
 
 const FileViewer: React.FC<FileComponentProps> = ({ item }) => {
   const [content, setContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { selectCardItem } = useCardDialog();
-
-  const getFileIcon = (type: FileType) => {
-    switch (type) {
-      case FileType.IMAGE:
-        return <ImageIcon />;
-      case FileType.AUDIO:
-        return <AudioIcon />;
-      case FileType.VIDEO:
-        return <VideoIcon />;
-      default:
-        return <FileIcon />;
-    }
-  };
 
   const handleDownload = async () => {
     try {

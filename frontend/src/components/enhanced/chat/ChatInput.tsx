@@ -1,5 +1,5 @@
 import { ChangeEvent, KeyboardEvent, useState, forwardRef, useImperativeHandle, useCallback } from 'react';
-import { Box, Button, TextField, Chip, Tooltip } from '@mui/material';
+import { Box, Button, TextField, Chip, Tooltip, Typography } from '@mui/material';
 import { ContentType, getDefaultMessageForm, MessageType } from '../../../types/MessageTypes';
 import { FileReference, FileType } from '../../../types/FileTypes';
 import { createFileContentReference, selectFile } from '../../../utils/FileUtils';
@@ -15,6 +15,8 @@ interface ChatInputProps {
   sendMessage: (chatId: string, message: MessageType) => Promise<void>;
   currentChatId: string | null;
   chatSelected: boolean;
+  chatContextCharacterCount: number;
+  maxContext: number;
 }
 
 export interface ChatInputRef {
@@ -28,10 +30,17 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
   sendMessage,
   currentChatId,
   chatSelected,
+  chatContextCharacterCount,
+  maxContext
 }, ref) => {
   const { addNotification } = useNotification();
   const { uploadFileContentReference } = useApi();
   const [newMessage, setNewMessage] = useState<MessageType>(getDefaultMessageForm());
+
+  const tokenEst = Math.floor(chatContextCharacterCount / 3)
+  const tokenRatio = tokenEst / maxContext
+  const percentageToken = (Math.floor(tokenRatio * 10000) / 100).toString() + '%'
+  const contextWarning = tokenRatio > 0.8 ? true : false
 
   const updateMessageType = useCallback((references: References): ContentType => {
     const types = new Set<ContentType>();
@@ -155,7 +164,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
       <Box sx={{ display: 'flex' }}>
         <Tooltip title="Upload an image, video, sound or text file to give your assistant access to it">
           <span style={{ paddingRight: '5px' }}>
-            <Button variant="outlined" onClick={handleAddFile} disabled={!chatSelected} sx={{width: '100%', height: '100%'}}>
+            <Button variant="outlined" onClick={handleAddFile} disabled={!chatSelected} sx={{ width: '100%', height: '100%' }}>
               <AttachFile />
             </Button>
           </span>
@@ -181,21 +190,31 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
             style: { whiteSpace: 'pre-wrap' },
           }}
         />
-        <Button
-          variant="contained"
-          sx={{ ml: 1, mt: 'auto', mb: 'auto', alignSelf: 'flex-end' }}
-          onClick={handleSend}
-          disabled={!chatSelected || (!newMessage.content.trim() && !hasReferences(newMessage.references))}
-        >
-          Send
-        </Button>
+        <Box className="flex items-center gap-2" sx={{ alignSelf: 'flex-end', ml: 1, mt: 'auto', mb: 'auto' }}>
+          <Button
+            variant="contained"
+            onClick={handleSend}
+            disabled={!chatSelected || (!newMessage.content.trim() && !hasReferences(newMessage.references))}
+          >
+            Send
+          </Button>
+
+          <Tooltip title={`Est. context used: ${tokenEst} / ${maxContext}`}>
+            <Typography
+              variant="caption"
+              color={contextWarning ? "error" : "textSecondary"}
+            >
+              {percentageToken}
+            </Typography>
+          </Tooltip>
+        </Box>
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, my: 1 }}>
           {renderReferenceChips()}
         </Box>
       </Box>
-    </Box>
+    </Box >
   );
 });
 

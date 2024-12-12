@@ -18,6 +18,8 @@ import {
     unloadLMStudioModel as apiUnloadLMStudioModel,
     resumeChat as apiResumeChat,
     LMStudioModel,
+    checkWorkflowHealth as apiCheckWorkflowHealth,
+    checkWorkflowUserHealth as apiCheckWorkflowUserHealth,
 } from '../services/api';
 import { useNotification } from './NotificationContext';
 import { useCardDialog } from './CardDialogContext';
@@ -49,6 +51,8 @@ interface ApiContextType {
     resumeChat: typeof apiResumeChat;
     fetchLMStudioModels: typeof apiFetchLMStudioModels;
     unloadLMStudioModel: typeof apiUnloadLMStudioModel;
+    checkWorkflowHealth: typeof apiCheckWorkflowHealth;
+    checkWorkflowUserHealth: typeof apiCheckWorkflowUserHealth;
     updateUserInteraction: (
         interactionId: string,
         itemData: Partial<UserInteraction>
@@ -90,6 +94,24 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             return await apiUnloadLMStudioModel(model);
         } catch (error) {
             addNotification('Error unloading LM Studio model', 'error');
+            throw error;
+        }
+    }, [addNotification]);
+
+    const checkWorkflowHealth = useCallback(async () => {
+        try {
+            return await apiCheckWorkflowHealth();
+        } catch (error) {
+            addNotification('Error checking workflow health', 'error');
+            throw error;
+        }
+    }, [addNotification]);
+
+    const checkWorkflowUserHealth = useCallback(async () => {
+        try {
+            return await apiCheckWorkflowUserHealth();
+        } catch (error) {
+            addNotification('Error checking workflow user health', 'error');
             throw error;
         }
     }, [addNotification]);
@@ -425,6 +447,8 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         resumeChat,
         fetchLMStudioModels,
         unloadLMStudioModel,
+        checkWorkflowHealth,
+        checkWorkflowUserHealth,
     };
 
     return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>;

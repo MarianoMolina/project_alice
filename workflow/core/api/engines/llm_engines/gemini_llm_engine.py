@@ -45,7 +45,7 @@ class GeminiLLMEngine(LLMEngine):
                 max_total_size=api_data.ctx_size * CHAR_PER_TOKEN,
                 score_config=ScoreConfig(),
                 )
-            messages = pruner.prune(messages, self, api_data)
+            messages = await pruner.prune(messages, self, api_data)
             estimated_tokens = est_messages_token_count(messages, tools) + est_token_count(system)
             LOGGER.debug(f"Pruned message len: {estimated_tokens}")
         elif estimated_tokens > 0.8 * api_data.ctx_size:

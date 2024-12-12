@@ -10,8 +10,8 @@ import {
 } from '@mui/material';
 import {
   ContentCopy as CopyIcon,
-  Timer as TokenIcon,
-  TextFields as TextIcon,
+  Timer,
+  TextFields,
   Visibility
 } from '@mui/icons-material';
 import { EmbeddingChunkComponentProps } from '../../../../types/EmbeddingChunkTypes';
@@ -39,18 +39,18 @@ const EmbeddingChunkViewer: React.FC<EmbeddingChunkComponentProps> = ({ item }) 
           <Box className="flex items-start justify-between">
             <Stack spacing={1}>
               <Typography variant="h6" className="font-semibold flex items-center gap-2">
-                <TextIcon className="text-gray-600" />
+                <TextFields className="text-gray-600" />
                 Embedding Chunk #{item.index}
               </Typography>
               <Box className="flex items-center gap-2">
                 <Chip
-                  icon={<TokenIcon className="text-gray-600" />}
+                  icon={<Timer className="text-gray-600" />}
                   label={`~${tokenCount} tokens`}
                   size="small"
                   className="bg-gray-100"
                 />
                 <Chip
-                  icon={<TextIcon className="text-gray-600" />}
+                  icon={<TextFields className="text-gray-600" />}
                   label={`${charCount} characters`}
                   size="small"
                   className="bg-gray-100"

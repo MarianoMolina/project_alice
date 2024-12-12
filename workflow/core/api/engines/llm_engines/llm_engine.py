@@ -143,7 +143,7 @@ class LLMEngine(APIEngine):
                 score_config=ScoreConfig(),
                 )
             LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning. ")
-            messages = pruner.prune(messages, self, api_data)
+            messages = await pruner.prune(messages, self, api_data)
             estimated_tokens = est_messages_token_count(messages, tools) + est_token_count(system)
             LOGGER.debug(f"Pruned message len: {estimated_tokens}")
         elif estimated_tokens > 0.8 * api_data.ctx_size:

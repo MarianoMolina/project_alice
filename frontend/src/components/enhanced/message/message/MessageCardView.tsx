@@ -1,8 +1,12 @@
 import React from 'react';
 import {
+    Box,
+    Chip,
+    IconButton,
+    Tooltip,
     Typography,
 } from '@mui/material';
-import { Person, AttachFile, TextSnippet, Engineering, PersonPin, DataObject, QueryBuilder } from '@mui/icons-material';
+import { Person, AttachFile, TextSnippet, Engineering, PersonPin, DataObject, QueryBuilder, TextFields, Timer } from '@mui/icons-material';
 import { MessageComponentProps } from '../../../../types/MessageTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { hasAnyReferences } from '../../../../types/ReferenceTypes';
@@ -10,6 +14,7 @@ import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import AliceMarkdown, { CustomBlockType } from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
 import ReferencesViewer from '../../data_cluster/ReferencesViewer';
+import { getMessageTypeIcon } from '../../../../utils/MessageUtils';
 
 const MessageCardView: React.FC<MessageComponentProps> = ({
     item,
@@ -18,13 +23,35 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
         return <Typography>No message data available.</Typography>;
     }
     const embeddingChunkViewer = item.embedding && item.embedding?.length > 0 ?
-     item.embedding.map((chunk, index) => (
-        <EmbeddingChunkViewer
-            key={chunk._id || `embedding-${index}`}
-            item={chunk}
-            items={null} onChange={()=>null} mode={'view'} handleSave={async()=>{}}
-        />
-    )) : <Typography>No embeddings available</Typography>;
+        item.embedding.map((chunk, index) => (
+            <EmbeddingChunkViewer
+                key={chunk._id || `embedding-${index}`}
+                item={chunk}
+                items={null} onChange={() => null} mode={'view'} handleSave={async () => { }}
+            />
+        )) : <Typography>No embeddings available</Typography>;
+
+    const charCount = item.content.length;
+    const tokenCount = Math.round(charCount / 3);
+    const subTitle = (
+        <Box className="flex items-center gap-2">
+            <Tooltip title={`Type: ${item.type}`} arrow>
+                <IconButton size="small">{getMessageTypeIcon(item.type)}</IconButton>
+            </Tooltip>
+            <Chip
+                icon={<Timer className="text-gray-600" />}
+                label={`~${tokenCount} tokens`}
+                size="small"
+                className="bg-gray-100"
+            />
+            <Chip
+                icon={<TextFields className="text-gray-600" />}
+                label={`${charCount} characters`}
+                size="small"
+                className="bg-gray-100"
+            />
+        </Box>
+    )
     const listItems = [
         {
             icon: <TextSnippet />,
@@ -56,10 +83,10 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
         {
             icon: <AttachFile />,
             primary_text: "References",
-            secondary_text: item.references && hasAnyReferences(item.references) ? 
-            <ReferencesViewer
-                references={item.references}
-            /> : "N/A"
+            secondary_text: item.references && hasAnyReferences(item.references) ?
+                <ReferencesViewer
+                    references={item.references}
+                /> : "N/A"
         },
         {
             icon: <DataObject />,
@@ -82,7 +109,7 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
         <CommonCardView
             elementType='Message'
             title={item.role}
-            subtitle={`Type: ${item.type}`}
+            subtitle={subTitle}
             id={item._id}
             listItems={listItems}
             item={item}

@@ -7,14 +7,16 @@ import {
     Stack,
     Chip,
 } from '@mui/material';
-import { 
+import {
     InsertDriveFile as FileIcon,
-    AccessTime as TimeIcon 
+    TextFields,
+    AccessTime as TimeIcon,
+    Timer
 } from '@mui/icons-material';
 import { FileComponentProps, FileContentReference, FileReference, FileType, getDefaultFileForm } from '../../../../types/FileTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import Transcript from '../Transcript';
-import {  createFileContentReference, getFileSize, selectFile } from '../../../../utils/FileUtils';
+import { createFileContentReference, getFileSize, selectFile } from '../../../../utils/FileUtils';
 import { useApi } from '../../../../contexts/ApiContext';
 import { useNotification } from '../../../../contexts/NotificationContext';
 import Logger from '../../../../utils/Logger';
@@ -40,6 +42,8 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
     const title = mode === 'create' ? 'Upload New File' : mode === 'edit' ? 'Edit File' : 'File Details';
     const saveButtonText = item?._id ? 'Update File' : 'Upload File';
     const hasTranscriptSlot = item && item._id && item.type !== 'file';
+    const charCount = item?.transcript?.content.length || 0;
+    const tokenCount = Math.round(charCount / 3);
 
     useEffect(() => {
         if (isSaving) {
@@ -128,9 +132,10 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
         }
     };
 
+
     const renderFileDetails = () => {
         if (!item) return null;
-        
+
         return (
             <Paper className="p-4">
                 <Stack spacing={3}>
@@ -145,7 +150,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
                         />
                     </Box>
 
-                    <Stack direction="row" spacing={2}>
+                    <Box className="flex items-center gap-2">
                         <Chip
                             icon={<FileIcon className="text-gray-600" />}
                             label={item.type.toUpperCase()}
@@ -158,7 +163,23 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
                             size="small"
                             className="bg-gray-100"
                         />
-                    </Stack>
+                        {hasTranscriptSlot && (
+                            <>
+                                <Chip
+                                    icon={<Timer className="text-gray-600" />}
+                                    label={`~${tokenCount} tokens`}
+                                    size="small"
+                                    className="bg-gray-100"
+                                />
+                                <Chip
+                                    icon={<TextFields className="text-gray-600" />}
+                                    label={`${charCount} characters`}
+                                    size="small"
+                                    className="bg-gray-100"
+                                />
+                            </>
+                        )}
+                    </Box>
 
                     <Box>
                         <Typography variant="body2" color="text.secondary" gutterBottom>
@@ -175,7 +196,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
                             mode={mode}
                             onChange={handleFileUpdate}
                             items={null}
-                            handleSave={async()=>{}}
+                            handleSave={async () => { }}
                         />
                     </Box>
 

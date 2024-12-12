@@ -29,3 +29,7 @@ class TaskResumeRequest(BaseModel):
     """Request model for resuming a task from a previous response."""
     task_response_id: str
     additional_inputs: dict = {}
+
+class HealthAPIRequest(BaseModel):
+    headers: Dict[str, str]
+    user_data: Dict[str, Any]

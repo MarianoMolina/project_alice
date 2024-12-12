@@ -405,13 +405,24 @@ class RunEnvironment:
         """Wait for Docker to be ready with timeout."""
         self.logger.info("Waiting for Docker to start...")
         start_time = time.time()
+        iteration = 1
+        check_interval = 2  # seconds between checks
+        max_iterations = timeout // check_interval
+
         while not self.is_docker_running():
             if time.time() - start_time > timeout:
                 self.logger.error("Docker failed to start within timeout period")
                 sys.exit(1)
-            self.logger.info("Docker is not ready yet. Waiting...")
-            time.sleep(2)
+                
+            # Clear the previous line and write the new status
+            print(f"\rDocker is not ready yet. Waiting... [{iteration}/{max_iterations}]", end='', flush=True)
+            iteration += 1
+            time.sleep(check_interval)
+        
+        # Clear the waiting message and show ready message on new line
+        print("\r" + " " * 70 + "\r", end='')  # Clear the line
         self.logger.info("Docker is ready!")
+
 
     def run_docker_compose(self):
         """Run docker-compose up with proper error handling."""

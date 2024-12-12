@@ -15,7 +15,8 @@ from workflow.api_app.routes.task_resume import resume_task_endpoint
 from workflow.api_app.routes.chat_resume import chat_resume
 from workflow.api_app.routes.chat_response import chat_response
 from workflow.api_app.routes.file_transcript import generate_file_transcript
-from workflow.api_app.util.utils import TaskResumeRequest, TaskExecutionRequest, ChatResumeRequest, ChatResponseRequest, FileTranscriptRequest
+from workflow.api_app.routes.health_report import api_health_check
+from workflow.api_app.util.utils import TaskResumeRequest, TaskExecutionRequest, ChatResumeRequest, ChatResponseRequest, FileTranscriptRequest, HealthAPIRequest
 
 class QueueMessage(BaseModel):
     """Pydantic model for queue messages."""
@@ -72,6 +73,8 @@ class QueueManager(BaseModel):
                 result = await self.chat_response(data)
             elif endpoint == "/file_transcript":
                 result = await self.generate_file_transcript(data)
+            elif endpoint == "/health/api":
+                result = await self.health_api_check(data)
             else:
                 raise ValueError(f"Unknown endpoint: {endpoint}")
 
@@ -96,7 +99,7 @@ class QueueManager(BaseModel):
             }
             # Publish the error to the Redis channel
             await self.redis_client.publish(f"updates:{task_id}", json.dumps(error_result))
-            LOGGER.error(f"Task {task_id} failed with error: {e}")
+            LOGGER.error(f"Task {task_id} failed with error: {e}\n{get_traceback()}")
 
     async def connect(self, websocket: WebSocket, task_id: str):
         await websocket.accept()
@@ -182,6 +185,16 @@ class QueueManager(BaseModel):
     async def chat_response(self, data: Dict[str, Any]) -> Dict[str, Any]:
         request_model = ChatResponseRequest(**data)
         result = await chat_response(
+            request=request_model,
+            db_app=self.db_app,
+            queue_manager=self,
+            enqueue=False
+        )
+        return result
+        
+    async def health_api_check(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        request_model = HealthAPIRequest(**data)
+        result = await api_health_check(
             request=request_model,
             db_app=self.db_app,
             queue_manager=self,
