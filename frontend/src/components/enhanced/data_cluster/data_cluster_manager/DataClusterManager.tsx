@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Box, FormControl, InputLabel } from '@mui/material';
-import { DataCluster } from '../../../../types/DataClusterTypes';
+import { PopulatedDataCluster } from '../../../../types/DataClusterTypes';
 import { References } from '../../../../types/ReferenceTypes';
 import DataClusterHeader from './DataClusterHeader';
 import FlatReferenceView from './DataClusterFlatView';
@@ -22,7 +22,7 @@ const DataClusterManager: React.FC<DataClusterManagerProps> = ({
     title = 'Data Cluster'
 }) => {
     const [inEditMode, setInEditMode] = useState(false);
-    const [editedCluster, setEditedCluster] = useState<DataCluster | undefined>(dataCluster);
+    const [editedCluster, setEditedCluster] = useState<PopulatedDataCluster | undefined>(dataCluster);
     const [viewType, setViewType] = useState<ViewType>(flatten ? 'flat' : 'categorized');
 
     Logger.debug('[DataClusterManager]', 'dataCluster', dataCluster);
@@ -33,12 +33,12 @@ const DataClusterManager: React.FC<DataClusterManagerProps> = ({
         }
     }, [dataCluster]);
 
-    const handleClusterChange = useCallback((newCluster: DataCluster) => {
+    const handleClusterChange = useCallback((newCluster: PopulatedDataCluster) => {
         setEditedCluster(newCluster);
         onDataClusterChange && onDataClusterChange(newCluster);
     }, [onDataClusterChange]);
 
-    const localOnDataClusterChange = useCallback((newCluster: DataCluster | undefined) => {
+    const localOnDataClusterChange = useCallback((newCluster: PopulatedDataCluster | undefined) => {
         handleClusterChange(newCluster || {});
     }, [handleClusterChange]);
 

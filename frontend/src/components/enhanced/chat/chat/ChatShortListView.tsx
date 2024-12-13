@@ -13,8 +13,8 @@ const ChatShortListView: React.FC<ChatComponentProps> = ({
 
     return (
         <EnhancedShortListView<AliceChat>
-            items={items}
-            item={item}
+            items={items as AliceChat[]}
+            item={item as AliceChat}
             getPrimaryText={getPrimaryText}
             getSecondaryText={getSecondaryText}
             onView={onView}

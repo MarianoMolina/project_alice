@@ -20,12 +20,13 @@ import {
     LMStudioModel,
     checkWorkflowHealth as apiCheckWorkflowHealth,
     checkWorkflowUserHealth as apiCheckWorkflowUserHealth,
+    fetchPopulatedItem as apiFetchPopulatedItem,
 } from '../services/api';
 import { useNotification } from './NotificationContext';
 import { useCardDialog } from './CardDialogContext';
 import { CollectionName, CollectionType, CollectionElementString, collectionNameToElementString, CollectionPopulatedType } from '../types/CollectionTypes';
 import { AliceChat } from '../types/ChatTypes';
-import { MessageType } from '../types/MessageTypes';
+import { MessageType, PopulatedMessage } from '../types/MessageTypes';
 import { TaskResponse } from '../types/TaskResponseTypes';
 import { FileReference, FileContentReference } from '../types/FileTypes';
 import { useDialog } from './DialogCustomContext';
@@ -53,6 +54,7 @@ interface ApiContextType {
     unloadLMStudioModel: typeof apiUnloadLMStudioModel;
     checkWorkflowHealth: typeof apiCheckWorkflowHealth;
     checkWorkflowUserHealth: typeof apiCheckWorkflowUserHealth;
+    fetchPopulatedItem: typeof apiFetchPopulatedItem;
     updateUserInteraction: (
         interactionId: string,
         itemData: Partial<UserInteraction>
@@ -233,7 +235,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     }, [addNotification]);
 
-    const sendMessage = useCallback(async (chatId: string, message: MessageType): Promise<AliceChat> => {
+    const sendMessage = useCallback(async (chatId: string, message: PopulatedMessage): Promise<AliceChat> => {
         try {
             const result = await apiSendMessage(chatId, message);
             addNotification('Message sent successfully', 'success');
@@ -313,10 +315,10 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     }, [addNotification, selectCardItem]);
 
-    const requestFileTranscript = useCallback(async (fileId: string, agentId?: string, chatId?: string): Promise<MessageType> => {
+    const requestFileTranscript = useCallback(async (fileId: string, agentId?: string, chatId?: string): Promise<PopulatedMessage> => {
         try {
             Logger.info(`Requesting transcript for file: ${fileId}`);
-            const fileData = await apiFetchItem('files', fileId) as FileReference;
+            const fileData = await apiFetchPopulatedItem('files', fileId) as FileReference;
 
             if (fileData.transcript) {
                 return new Promise((resolve, reject) => {
@@ -328,7 +330,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                                 text: 'Use Existing',
                                 action: () => {
                                     addNotification('Using existing transcript', 'info');
-                                    resolve(fileData.transcript as MessageType);
+                                    resolve(fileData.transcript as PopulatedMessage);
                                 },
                                 color: 'primary',
                             },
@@ -449,6 +451,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         unloadLMStudioModel,
         checkWorkflowHealth,
         checkWorkflowUserHealth,
+        fetchPopulatedItem: apiFetchPopulatedItem,
     };
 
     return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>;

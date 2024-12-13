@@ -35,22 +35,19 @@ const aliceChatSchema = new Schema<IAliceChatDocument, IAliceChatModel>({
     type: Schema.Types.ObjectId,
     ref: 'Task',
     default: [],
-    description: "List of tools to be registered with the agent",
-    autopopulate: true
+    description: "List of tools to be registered with the agent"
   }],
   retrieval_tools: [{ 
     type: Schema.Types.ObjectId, 
     ref: 'Task', 
     default: [], 
-    description: "List of tools with access to the data cluster", 
-    autopopulate: true 
+    description: "List of tools with access to the data cluster"
   }],
   data_cluster: { 
     type: Schema.Types.ObjectId, 
     ref: 'DataCluster', 
     required: false, 
-    description: "Data cluster for the chat", 
-    autopopulate: true 
+    description: "Data cluster for the chat",
   },
   default_user_checkpoints: {
     type: Map,

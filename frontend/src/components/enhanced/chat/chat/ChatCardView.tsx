@@ -7,13 +7,14 @@ import {
   Box,
 } from '@mui/material';
 import { Person, Functions, Message as MessageIcon, AttachFile, QueryBuilder } from '@mui/icons-material';
-import { ChatComponentProps } from '../../../../types/ChatTypes';
-import { hasAnyReferences } from '../../../../types/ReferenceTypes';
+import { ChatComponentProps, PopulatedAliceChat } from '../../../../types/ChatTypes';
+import { hasAnyReferences, References } from '../../../../types/ReferenceTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
-import EnhancedMessage from '../../message/message/EnhancedMessage';
 import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { MessageType } from '../../../../types/MessageTypes';
+import MessageShortListView from '../../message/message/MessageShortListView';
 
 const ChatCardView: React.FC<ChatComponentProps> = ({
   item,
@@ -24,13 +25,15 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
     return <Typography>No chat data available.</Typography>;
   }
 
+  const populatedItem = item as PopulatedAliceChat
+
   const listItems = [
     {
       icon: <Person />,
       primary_text: "Alice Agent",
       secondary_text: (
-        <ListItemButton onClick={() => item.alice_agent?._id && selectCardItem && selectCardItem('Agent', item.alice_agent._id, item.alice_agent)}>
-          {item.alice_agent?.name || 'N/A'}
+        <ListItemButton onClick={() => populatedItem.alice_agent?._id && selectCardItem && selectCardItem('Agent', populatedItem.alice_agent._id, populatedItem.alice_agent)}>
+          {populatedItem.alice_agent?.name || 'N/A'}
         </ListItemButton>
       )
     },
@@ -39,8 +42,8 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
       primary_text: "Agent Tools",
       secondary_text: (
         <List>
-          {item.agent_tools && item.agent_tools.length > 0 ? (
-            item.agent_tools.map((func, index) => (
+          {populatedItem.agent_tools && populatedItem.agent_tools.length > 0 ? (
+            populatedItem.agent_tools.map((func, index) => (
               <ListItemButton key={index} onClick={() => func._id && selectCardItem && selectCardItem('Task', func._id, func)}>
                 <ListItemText primary={formatStringWithSpaces(func.task_name)} />
               </ListItemButton>
@@ -56,8 +59,8 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
       primary_text: "Retrieval tools",
       secondary_text: (
         <List>
-          {item.retrieval_tools && item.retrieval_tools.length > 0 ? (
-            item.retrieval_tools.map((func, index) => (
+          {populatedItem.retrieval_tools && populatedItem.retrieval_tools.length > 0 ? (
+            populatedItem.retrieval_tools.map((func, index) => (
               <ListItemButton key={index} onClick={() => func._id && selectCardItem && selectCardItem('Task', func._id, func)}>
                 <ListItemText primary={formatStringWithSpaces(func.task_name)} />
               </ListItemButton>
@@ -73,14 +76,16 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
       primary_text: "Messages",
       secondary_text: (
         <Box>
-          <Typography variant="body2">Total: {item.messages.length}</Typography>
-          {item.messages.map((message, index) => (
-            <EnhancedMessage
+          <Typography variant="body2">Total: {populatedItem.messages.length}</Typography>
+          {populatedItem.messages.map((message, index) => (
+            <MessageShortListView
               key={`message-${index}${message}`}
-              itemId={message}
-              mode={'shortList'}
-              fetchAll={false}
+              item={message as MessageType}
+              mode={'view'}
               onView={(message) => selectCardItem && selectCardItem('Message', message._id ?? '', message)}
+              handleSave={async () => { }}
+              items={null}
+              onChange={() => { }}
             />
           ))}
         </Box>
@@ -89,12 +94,12 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
     {
       icon: <AttachFile />,
       primary_text: "Data Cluster",
-      secondary_text: item.data_cluster && hasAnyReferences(item.data_cluster) ? <DataClusterManager dataCluster={item.data_cluster} isEditable={false} /> : 'No data cluster'
+      secondary_text: populatedItem.data_cluster && hasAnyReferences(populatedItem.data_cluster as References) ? <DataClusterManager dataCluster={populatedItem.data_cluster} isEditable={false} /> : 'No data cluster'
     },
     {
       icon: <QueryBuilder />,
       primary_text: "Created At",
-      secondary_text: new Date(item.createdAt || '').toLocaleString()
+      secondary_text: new Date(populatedItem.createdAt || '').toLocaleString()
     }
   ];
 
@@ -102,10 +107,10 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
     <>
       <CommonCardView
         elementType='Chat'
-        title={item.name}
-        id={item._id}
+        title={populatedItem.name}
+        id={populatedItem._id}
         listItems={listItems}
-        item={item}
+        item={item as PopulatedAliceChat}
         itemType='chats'
       />
     </>

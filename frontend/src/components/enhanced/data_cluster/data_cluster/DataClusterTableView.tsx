@@ -24,8 +24,8 @@ const DataClusterTableView: React.FC<DataClusterComponentProps> = ({
 
   return (
     <EnhancedTableView<DataCluster>
-      items={items}
-      item={item}
+      items={items as DataCluster[]}
+      item={item as DataCluster}
       columns={columns}
       onView={onView}
       onInteraction={onInteraction}

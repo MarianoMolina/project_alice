@@ -5,23 +5,23 @@ import {
     ViewModule as ViewModuleIcon,
     Description as DescriptionIcon
 } from '@mui/icons-material';
-import { DataCluster } from '../../../../types/DataClusterTypes';
-import { hasAnyReferences } from '../../../../types/ReferenceTypes';
+import { PopulatedDataCluster } from '../../../../types/DataClusterTypes';
+import { hasAnyReferences, References } from '../../../../types/ReferenceTypes';
 import { ACTION_BUTTON_CONFIG } from './DataClusterManagerTypes';
 import DataClusterShortListView from '../data_cluster/DataClusterShortListView';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import { ViewType } from './DataClusterManagerTypes';
 
 interface DataClusterHeaderProps {
-    editedCluster: DataCluster | undefined;
+    editedCluster: PopulatedDataCluster | undefined;
     viewType: ViewType;
     setViewType: (value: ViewType) => void;
     isEditable: boolean;
     showEdit: boolean;
     showSelect: boolean;
     onEdit?: () => void;
-    dataCluster: DataCluster | undefined;
-    onDataClusterChange?: (dataCluster: DataCluster | undefined) => void;
+    dataCluster: PopulatedDataCluster | undefined;
+    onDataClusterChange?: (dataCluster: PopulatedDataCluster | undefined) => void;
     inEditMode: boolean;
 }
 
@@ -39,7 +39,7 @@ const DataClusterHeader = memo(({
 }: DataClusterHeaderProps) => {
     const { selectDialog } = useCardDialog();
 
-    const handleSelect = async (selectedCluster: DataCluster) => {
+    const handleSelect = async (selectedCluster: PopulatedDataCluster) => {
         if (isEditable && onDataClusterChange) {
             onDataClusterChange(selectedCluster);
         }
@@ -47,7 +47,7 @@ const DataClusterHeader = memo(({
 
     const handleAction = (key: string) => {
         if (key === 'select') {
-            selectDialog<DataCluster>(
+            selectDialog<PopulatedDataCluster>(
                 'dataclusters',
                 DataClusterShortListView,
                 'Select Data Cluster',
@@ -61,7 +61,7 @@ const DataClusterHeader = memo(({
 
     const renderViewToggle = () => {
         // Only show view toggle when not in edit mode and there are references
-        if (inEditMode || !editedCluster || !hasAnyReferences(editedCluster)) return null;
+        if (inEditMode || !editedCluster || !hasAnyReferences(editedCluster as References)) return null;
 
         return (
             <Box className="absolute top-0 right-0">

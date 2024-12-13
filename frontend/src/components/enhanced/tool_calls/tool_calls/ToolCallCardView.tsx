@@ -1,7 +1,7 @@
 import React from 'react';
 import { Typography } from '@mui/material';
 import { Category, TypeSpecimen, Description, DataObject } from '@mui/icons-material';
-import { ToolCallComponentProps } from '../../../../types/ToolCallTypes';
+import { PopulatedToolCall, ToolCallComponentProps } from '../../../../types/ToolCallTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
@@ -12,9 +12,10 @@ const ToolCallCardView: React.FC<ToolCallComponentProps> = ({ item }) => {
     if (!item) {
         return <Typography>No ToolCall data available.</Typography>;
     }
+    const populatedItem = item as PopulatedToolCall;
 
-    const embeddingChunkViewer = item.embedding && item.embedding?.length > 0 ?
-     item.embedding.map((chunk, index) => (
+    const embeddingChunkViewer = populatedItem.embedding && populatedItem.embedding?.length > 0 ?
+     populatedItem.embedding.map((chunk, index) => (
         <EmbeddingChunkViewer
             key={chunk._id || `embedding-${index}`}
             item={chunk}
@@ -25,12 +26,12 @@ const ToolCallCardView: React.FC<ToolCallComponentProps> = ({ item }) => {
         {
             icon: <Description />,
             primary_text: "Tool called",
-            secondary_text: formatCamelCaseString(item.function?.name)
+            secondary_text: formatCamelCaseString(populatedItem.function?.name)
         },
         {
             icon: <TypeSpecimen />,
             primary_text: "Args",
-            secondary_text: <CodeBlock language='json' code={JSON.stringify(item.function?.arguments, null, 2)} />
+            secondary_text: <CodeBlock language='json' code={JSON.stringify(populatedItem.function?.arguments, null, 2)} />
         },
         {
             icon: <DataObject />,
@@ -40,19 +41,19 @@ const ToolCallCardView: React.FC<ToolCallComponentProps> = ({ item }) => {
         {
             icon: <Category />,
             primary_text: "Created at",
-            secondary_text: new Date(item.createdAt || '').toDateString()
+            secondary_text: new Date(populatedItem.createdAt || '').toDateString()
         }
     ];
-    const function_name = item.function?.name;
+    const function_name = populatedItem.function?.name;
     const title = function_name ? `Tool Call: ${function_name}` : 'Tool Call';
     
     return (
         <CommonCardView
             elementType='Tool Call'
             title={title}
-            id={item._id}
+            id={populatedItem._id}
             listItems={listItems}
-            item={item}
+            item={populatedItem}
             itemType='toolcalls'
         />
     );

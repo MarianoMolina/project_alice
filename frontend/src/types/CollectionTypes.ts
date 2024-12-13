@@ -1,18 +1,18 @@
 import { AliceAgent } from './AgentTypes';
 import { AliceChat, PopulatedAliceChat } from './ChatTypes';
 import { AliceModel } from './ModelTypes';
-import { AliceTask } from './TaskTypes';
+import { AliceTask, PopulatedTask } from './TaskTypes';
 import { Prompt } from './PromptTypes';
-import { TaskResponse } from './TaskResponseTypes';
+import { PopulatedTaskResponse, TaskResponse } from './TaskResponseTypes';
 import { ParameterDefinition } from './ParameterTypes';
 import { User } from './UserTypes';
 import { API } from './ApiTypes';
-import { FileReference } from './FileTypes';
-import { MessageType } from './MessageTypes';
-import { UserInteraction } from './UserInteractionTypes';
+import { FileReference, PopulatedFileReference } from './FileTypes';
+import { MessageType, PopulatedMessage } from './MessageTypes';
+import { PopulatedUserInteraction, UserInteraction } from './UserInteractionTypes';
 import { UserCheckpoint } from './UserCheckpointTypes';
-import { EmbeddingChunk } from './EmbeddingChunkTypes';
-import { DataCluster } from './DataClusterTypes';
+import { convertToEmbeddingChunk, EmbeddingChunk } from './EmbeddingChunkTypes';
+import { DataCluster, PopulatedDataCluster } from './DataClusterTypes';
 import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
 import EnhancedAgent from '../components/enhanced/agent/agent/EnhancedAgent';
 import EnhancedChat from '../components/enhanced/chat/chat/EnhancedChat';
@@ -27,17 +27,18 @@ import EnhancedUserInteraction from '../components/enhanced/user_interaction/use
 import EnhancedUserCheckpoint from '../components/enhanced/user_checkpoint/user_checkpoint/EnhancedUserCheckpoint';
 import EnhancedDataCluster from '../components/enhanced/data_cluster/data_cluster/EnhancedDataCluster';
 import EnhancedEmbeddingChunk from '../components/enhanced/embedding_chunk/embedding_chunk/EnhancedEmbeddingChunk';
-import { CodeExecution } from './CodeExecutionTypes';
+import { CodeExecution, PopulatedCodeExecution } from './CodeExecutionTypes';
 import { APIConfig } from './ApiConfigTypes';
-import { ToolCall } from './ToolCallTypes';
+import { PopulatedToolCall, ToolCall } from './ToolCallTypes';
 import EnhancedToolCall from '../components/enhanced/tool_calls/tool_calls/EnhancedToolCall';
 import EnhancedCodeExecution from '../components/enhanced/code_execution/code_execution/EnhancedCodeExecution';
 import EnhancedAPIConfig from '../components/enhanced/api_config/api_config/EnhancedAPIConfig';
-import { EntityReference } from './EntityReferenceTypes';
+import { EntityReference, PopulatedEntityReference } from './EntityReferenceTypes';
 import EnhancedEntityReference from '../components/enhanced/entity_reference/entity_reference/EnhancedEntityReference';
 
 export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' | 'userinteractions' | 'usercheckpoints' | 'dataclusters' | 'embeddingchunks' | 'toolcalls' | 'codeexecutions' | 'apiconfigs' | 'entityreferences';
 export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType | UserInteraction | UserCheckpoint | DataCluster | EmbeddingChunk | ToolCall | CodeExecution | APIConfig | EntityReference;
+export type CollectionPopulatedElement = AliceAgent | PopulatedAliceChat | AliceModel | PopulatedTask | Prompt | PopulatedTaskResponse | User | ParameterDefinition | API | User | PopulatedFileReference | PopulatedMessage | PopulatedUserInteraction | UserCheckpoint | PopulatedDataCluster | EmbeddingChunk | PopulatedToolCall | PopulatedCodeExecution | APIConfig | PopulatedEntityReference;
 export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API' | 'User' | 'File' | 'Message' | 'UserInteraction' | 'UserCheckpoint' | 'DataCluster' | 'EmbeddingChunk' | 'ToolCall' | 'CodeExecution' | 'APIConfig' | 'EntityReference';
 
 export type CollectionType = {
@@ -65,22 +66,22 @@ export type CollectionPopulatedType = {
     agents: AliceAgent;
     chats: PopulatedAliceChat;
     models: AliceModel;
-    tasks: AliceTask;
+    tasks: PopulatedTask;
     prompts: Prompt;
-    taskresults: TaskResponse;
+    taskresults: PopulatedTaskResponse;
     users: User;
     parameters: ParameterDefinition;
     apis: API;
-    files: FileReference;
-    messages: MessageType;
-    userinteractions: UserInteraction;
+    files: PopulatedFileReference;
+    messages: PopulatedMessage;
+    userinteractions: PopulatedUserInteraction;
     usercheckpoints: UserCheckpoint;
-    dataclusters: DataCluster;
+    dataclusters: PopulatedDataCluster;
     embeddingchunks: EmbeddingChunk;
-    toolcalls: ToolCall;
-    codeexecutions: CodeExecution;
+    toolcalls: PopulatedToolCall;
+    codeexecutions: PopulatedCodeExecution;
     apiconfigs: APIConfig;
-    entityreferences: EntityReference;
+    entityreferences: PopulatedEntityReference;
 };
 export type ElementTypeMap = {
     Agent: AliceAgent;
@@ -192,29 +193,39 @@ export const collectionTypeMapping: Record<string, CollectionElementString> = {
     APIConfig: 'APIConfig',
     EntityReference: 'EntityReference',
 };
-
+export function getCollectionNameFromElement(elementString: CollectionElementString): CollectionName {
+    const entry = Object.entries(collectionNameToElementString).find(
+        ([_, value]) => value === elementString
+    );
+    
+    if (!entry) {
+        throw new Error(`No collection name found for element string: ${elementString}`);
+    }
+    
+    return entry[0] as CollectionName;
+}
 export type ComponentMode = 'create' | 'edit' | 'view' | 'list' | 'shortList' | 'table';
 
 export interface HandleClickProps {
     handleModelClick?: (modelId: string, item?: AliceModel) => void;
     handleAgentClick?: (agentId: string, item?: AliceAgent) => void;
-    handleTaskClick?: (taskId: string, item?: AliceTask) => void;
+    handleTaskClick?: (taskId: string, item?: PopulatedTask) => void;
     handlePromptClick?: (promptId: string, item?: Prompt) => void;
     handleParameterClick?: (paramId: string, item?: ParameterDefinition) => void;
     handleApiClick?: (apiId: string, item?: API) => void;
-    handleTaskResultClick?: (taskResultId: string, item?: TaskResponse) => void;
-    handleFileClick?: (fileId: string, item?: FileReference) => void;
-    handleMessageClick?: (messageId: string, item?: MessageType) => void;
-    handleUserInteractionClick?: (userInteractionId: string, item?: UserInteraction) => void;
+    handleTaskResultClick?: (taskResultId: string, item?: PopulatedTaskResponse) => void;
+    handleFileClick?: (fileId: string, item?: PopulatedFileReference) => void;
+    handleMessageClick?: (messageId: string, item?: PopulatedMessage) => void;
+    handleUserInteractionClick?: (userInteractionId: string, item?: PopulatedUserInteraction) => void;
     handleUserCheckpointClick?: (userCheckpointId: string, item?: UserCheckpoint) => void;
-    handleDataClusterClick?: (dataClusterId: string, item?: DataCluster) => void;
+    handleDataClusterClick?: (dataClusterId: string, item?: PopulatedDataCluster) => void;
     handleEmbeddingChunkClick?: (embeddingChunkId: string, item?: EmbeddingChunk) => void;
-    handleToolCallClick?: (toolCallId: string, item?: ToolCall) => void;
-    handleCodeExecutionClick?: (codeExecutionId: string, item?: CodeExecution) => void;
+    handleToolCallClick?: (toolCallId: string, item?: PopulatedToolCall) => void;
+    handleCodeExecutionClick?: (codeExecutionId: string, item?: PopulatedCodeExecution) => void;
     handleAPIConfigClick?: (apiConfigId: string, item?: APIConfig) => void;
-    handleEntityReferenceClick?: (entityReferenceId: string, item?: EntityReference) => void;
+    handleEntityReferenceClick?: (entityReferenceId: string, item?: PopulatedEntityReference) => void;
 }
-export interface EnhancedComponentProps<T extends CollectionElement> extends HandleClickProps {
+export interface EnhancedComponentProps<T extends CollectionElement | CollectionPopulatedElement> extends HandleClickProps {
     items: T[] | null;
     item: T | null;
     onChange: (newItem: Partial<T>) => void;
@@ -237,10 +248,17 @@ export interface BaseDatabaseObject extends BasicDBObj {
     created_by?: User;
     updated_by?: User;
 }
-
 export interface Embeddable extends BaseDatabaseObject {
+    embedding?: string[];
+}
+
+// Define the populated type
+type PopulatedFields = {
     embedding?: EmbeddingChunk[];
 }
+
+// Create the populated interface
+export interface PopulatedEmbeddable extends Omit<Embeddable, keyof PopulatedFields>, PopulatedFields {}
 
 // Generic converters that work with any type extending the base interfaces
 export const convertToBasicDBObj = <T extends Partial<BasicDBObj>>(data: T): BasicDBObj => ({
@@ -258,4 +276,9 @@ export const convertToBaseDatabaseObject = <T extends Partial<BaseDatabaseObject
 export const convertToEmbeddable = <T extends Partial<Embeddable>>(data: T): Embeddable => ({
     ...convertToBaseDatabaseObject(data),
     embedding: data.embedding || [],
+});
+
+export const convertToPopulatedEmbeddable = <T extends Partial<PopulatedEmbeddable>>(data: T): PopulatedEmbeddable => ({
+    ...convertToBaseDatabaseObject(data),
+    embedding: data.embedding ? data.embedding.map(convertToEmbeddingChunk) : [],
 });

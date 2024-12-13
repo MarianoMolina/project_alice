@@ -8,7 +8,7 @@ import {
     ListItem,
     ListItemIcon,
 } from '@mui/material';
-import { CollectionName, CollectionType } from '../../../../types/CollectionTypes';
+import { CollectionName, CollectionPopulatedType } from '../../../../types/CollectionTypes';
 import useStyles from './EnhancedStyles';
 import EntityActionsMenu from '../entity_menu/EntityActionsMenu';
 
@@ -25,7 +25,7 @@ interface CommonCardViewProps<T extends CollectionName> {
     id?: string;
     listItems?: ListItemData[];
     children?: React.ReactNode;
-    item?: CollectionType[T];
+    item?: CollectionPopulatedType[T];
     itemType?: T;
 }
 

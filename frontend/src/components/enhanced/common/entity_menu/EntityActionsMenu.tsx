@@ -1,7 +1,7 @@
 import React from 'react';
 import { IconButton, Menu, MenuItem } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { CollectionName, CollectionType } from '../../../../types/CollectionTypes';
+import { CollectionName, CollectionPopulatedType } from '../../../../types/CollectionTypes';
 import { EditEntity } from './EditEntity';
 import { DownloadEntity } from './DownloadEntity';
 import { CopyButton } from '../../../ui/markdown/CopyButton';
@@ -9,7 +9,7 @@ import { DeleteEntity } from './DeleteEntity';
 import { DuplicateEntity } from './DuplicateEntity';
 
 interface EntityActionsMenuProps<T extends CollectionName> {
-  item: CollectionType[T];
+  item: CollectionPopulatedType[T];
   itemType: T;
   onDelete?: () => void;
   actions?: {

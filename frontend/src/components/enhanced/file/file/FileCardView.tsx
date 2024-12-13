@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Chip, Stack, Typography } from '@mui/material';
-import { FileComponentProps } from '../../../../types/FileTypes';
+import { FileComponentProps, PopulatedFileReference } from '../../../../types/FileTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { CalendarToday, AccessTime, TextSnippet, AttachFile, QueryBuilder, DataObject, Timer, TextFields } from '@mui/icons-material';
 import { getFileSize } from '../../../../utils/FileUtils';
@@ -15,8 +15,10 @@ const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
         return <Typography>No file data available.</Typography>;
     }
 
-    const embeddingChunkViewer = item.embedding && item.embedding?.length > 0 ?
-        item.embedding.map((chunk, index) => (
+    const populatedItem = item as PopulatedFileReference
+
+    const embeddingChunkViewer = populatedItem.embedding && populatedItem.embedding?.length > 0 ?
+        populatedItem.embedding.map((chunk, index) => (
             <EmbeddingChunkViewer
                 key={chunk._id || `embedding-${index}`}
                 item={chunk}
@@ -27,7 +29,7 @@ const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
     const charCount = item?.transcript?.content.length || 0;
     const tokenCount = Math.round(charCount / 3);
 
-    const transcript = item.transcript ? (
+    const transcript = populatedItem.transcript ? (
         <Stack direction="column" spacing={1}>
             <Box className="flex items-center gap-2">
                 <Chip
@@ -43,7 +45,7 @@ const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
                     className="bg-gray-100"
                 />
             </Box>
-            <AliceMarkdown showCopyButton>{item.transcript.content}</AliceMarkdown>
+            <AliceMarkdown showCopyButton>{populatedItem.transcript.content}</AliceMarkdown>
         </Stack>
     ) : 'N/A';
 
@@ -54,9 +56,9 @@ const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
             secondary_text: <FileContentView item={item} items={null} onChange={() => null} mode={'view'} handleSave={async () => { }} />
         },
         {
-            icon: getFileIcon(item.type),
+            icon: getFileIcon(populatedItem.type),
             primary_text: "File Type",
-            secondary_text: item.type
+            secondary_text: populatedItem.type
         },
         {
             icon: <TextSnippet />,
@@ -66,7 +68,7 @@ const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
         {
             icon: <AccessTime />,
             primary_text: "File Size",
-            secondary_text: getFileSize(item.file_size).formatted
+            secondary_text: getFileSize(populatedItem.file_size).formatted
         },
         {
             icon: <DataObject />,
@@ -76,22 +78,22 @@ const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
         {
             icon: <CalendarToday />,
             primary_text: "Last Accessed",
-            secondary_text: item.last_accessed ? new Date(item.last_accessed).toLocaleString() : 'Never'
+            secondary_text: populatedItem.last_accessed ? new Date(populatedItem.last_accessed).toLocaleString() : 'Never'
         },
         {
             icon: <QueryBuilder />,
             primary_text: "Created at",
-            secondary_text: new Date(item.createdAt || '').toLocaleString()
+            secondary_text: new Date(populatedItem.createdAt || '').toLocaleString()
         },
     ];
 
     return (
         <CommonCardView
             elementType='File'
-            title={item.filename}
-            id={item._id}
+            title={populatedItem.filename}
+            id={populatedItem._id}
             listItems={listItems}
-            item={item}
+            item={populatedItem}
             itemType='files'
         >
         </CommonCardView>

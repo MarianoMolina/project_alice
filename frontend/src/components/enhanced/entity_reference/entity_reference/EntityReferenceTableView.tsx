@@ -30,8 +30,8 @@ const EntityReferenceTableView: React.FC<EntityReferenceComponentProps> = ({
 
   return (
     <EnhancedTableView<EntityReference>
-      items={items}
-      item={item}
+      items={items as EntityReference[]}
+      item={item as EntityReference}
       columns={columns}
       onView={onView}
       onInteraction={onInteraction}

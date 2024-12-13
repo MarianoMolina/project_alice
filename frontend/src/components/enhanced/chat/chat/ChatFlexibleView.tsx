@@ -3,13 +3,12 @@ import {
     Box,
     Alert,
 } from '@mui/material';
-import { ChatComponentProps, AliceChat, getDefaultChatForm, CheckpointType } from '../../../../types/ChatTypes';
-import { DataCluster } from '../../../../types/DataClusterTypes';
+import { ChatComponentProps, getDefaultChatForm, CheckpointType, PopulatedAliceChat } from '../../../../types/ChatTypes';
+import { PopulatedDataCluster } from '../../../../types/DataClusterTypes';
 import { AliceAgent } from '../../../../types/AgentTypes';
-import { AliceTask } from '../../../../types/TaskTypes';
+import { PopulatedTask } from '../../../../types/TaskTypes';
 import { UserCheckpoint } from '../../../../types/UserCheckpointTypes';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
-import EnhancedMessage from '../../message/message/EnhancedMessage';
 import AgentShortListView from '../../agent/agent/AgentShortListView';
 import TaskShortListView from '../../task/task/TaskShortListView';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
@@ -18,9 +17,11 @@ import UserCheckpointShortListView from '../../user_checkpoint/user_checkpoint/U
 import TitleBox from '../../common/inputs/TitleBox';
 import { TextInput } from '../../common/inputs/TextInput';
 import { useAuth } from '../../../../contexts/AuthContext';
-import { useApi } from '../../../../contexts/ApiContext';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import Logger from '../../../../utils/Logger';
+import MessageListView from '../../message/message/MessageListView';
+import { MessageType } from '../../../../types/MessageTypes';
+import { useApi } from '../../../../contexts/ApiContext';
 
 const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     item,
@@ -29,10 +30,10 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     handleSave,
     handleDelete,
 }) => {
-    const { fetchItem } = useApi();
     const { selectCardItem } = useCardDialog();
     const { user } = useAuth();
-    const [form, setForm] = useState<Partial<AliceChat>>(item || getDefaultChatForm());
+    const { fetchPopulatedItem } = useApi();
+    const [form, setForm] = useState<Partial<PopulatedAliceChat>>(item as PopulatedAliceChat || getDefaultChatForm());
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [validationError, setValidationError] = useState<string | null>(null);
@@ -49,35 +50,35 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             if (mode === 'create' && user?.default_chat_config && !item) {
                 const config = user.default_chat_config;
                 const [agent, agentTools, retrievalTools, toolCallCheckpoint, codeExecCheckpoint, dataCluster] = await Promise.all([
-                    config.alice_agent ? fetchItem('agents', config.alice_agent) : undefined,
-                    Promise.all((config.agent_tools || []).map(id => fetchItem('tasks', id))),
-                    Promise.all((config.retrieval_tools || []).map(id => fetchItem('tasks', id))),
+                    config.alice_agent ? fetchPopulatedItem('agents', config.alice_agent) : undefined,
+                    Promise.all((config.agent_tools || []).map(id => fetchPopulatedItem('tasks', id))),
+                    Promise.all((config.retrieval_tools || []).map(id => fetchPopulatedItem('tasks', id))),
                     config.default_user_checkpoints[CheckpointType.TOOL_CALL] ?
-                        fetchItem('usercheckpoints', config.default_user_checkpoints[CheckpointType.TOOL_CALL]) : undefined,
+                        fetchPopulatedItem('usercheckpoints', config.default_user_checkpoints[CheckpointType.TOOL_CALL]) : undefined,
                     config.default_user_checkpoints[CheckpointType.CODE_EXECUTION] ?
-                        fetchItem('usercheckpoints', config.default_user_checkpoints[CheckpointType.CODE_EXECUTION]) : undefined,
-                    config.data_cluster ? fetchItem('dataclusters', config.data_cluster) : undefined
+                        fetchPopulatedItem('usercheckpoints', config.default_user_checkpoints[CheckpointType.CODE_EXECUTION]) : undefined,
+                    config.data_cluster ? fetchPopulatedItem('dataclusters', config.data_cluster) : undefined
                 ]);
 
                 setForm(prevForm => ({
                     ...prevForm,
                     alice_agent: agent as AliceAgent,
-                    agent_tools: agentTools as AliceTask[],
-                    retrieval_tools: retrievalTools as AliceTask[],
+                    agent_tools: agentTools as PopulatedTask[],
+                    retrieval_tools: retrievalTools as PopulatedTask[],
                     default_user_checkpoints: {
                         [CheckpointType.TOOL_CALL]: toolCallCheckpoint as UserCheckpoint,
                         [CheckpointType.CODE_EXECUTION]: codeExecCheckpoint as UserCheckpoint
                     },
-                    data_cluster: dataCluster as DataCluster,
+                    data_cluster: dataCluster as PopulatedDataCluster,
                 }));
             } else if (item) {
-                setForm(item);
+                setForm(item as PopulatedAliceChat);
             } else if (!item || Object.keys(item).length === 0) {
                 onChange(getDefaultChatForm());
             }
         };
         populateConfig();
-    }, [item, onChange, user, mode, fetchItem]);
+    }, [item, onChange, user, mode, fetchPopulatedItem]);
 
     useEffect(() => {
         if (isSaving) {
@@ -133,26 +134,26 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
 
     const handleAgentChange = useCallback(async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {
-            const agent = await fetchItem('agents', selectedIds[0]) as AliceAgent;
+            const agent = await fetchPopulatedItem('agents', selectedIds[0]) as AliceAgent;
             setForm(prevForm => ({ ...prevForm, alice_agent: agent }));
         } else {
             setForm(prevForm => ({ ...prevForm, alice_agent: undefined }));
         }
-    }, [fetchItem]);
+    }, [fetchPopulatedItem]);
 
     const handleFunctionsChange = useCallback(async (selectedIds: string[]) => {
-        const functions = await Promise.all(selectedIds.map(id => fetchItem('tasks', id) as Promise<AliceTask>));
+        const functions = await Promise.all(selectedIds.map(id => fetchPopulatedItem('tasks', id) as Promise<PopulatedTask>));
         setForm(prevForm => ({ ...prevForm, agent_tools: functions }));
-    }, [fetchItem]);
+    }, [fetchPopulatedItem]);
 
     const handleRetrievalFunctionsChange = useCallback(async (selectedIds: string[]) => {
-        const functions = await Promise.all(selectedIds.map(id => fetchItem('tasks', id) as Promise<AliceTask>));
+        const functions = await Promise.all(selectedIds.map(id => fetchPopulatedItem('tasks', id) as Promise<PopulatedTask>));
         setForm(prevForm => ({ ...prevForm, retrieval_tools: functions }));
-    }, [fetchItem]);
+    }, [fetchPopulatedItem]);
 
     const handleToolCallCheckpointChange = useCallback(async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {
-            const checkpoint = await fetchItem('usercheckpoints', selectedIds[0]) as UserCheckpoint;
+            const checkpoint = await fetchPopulatedItem('usercheckpoints', selectedIds[0]) as UserCheckpoint;
             setForm(prevForm => {
                 // Initialize default checkpoints if they don't exist
                 const currentCheckpoints = prevForm.default_user_checkpoints ?? {
@@ -174,11 +175,11 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                 };
             });
         }
-    }, [fetchItem]);
+    }, [fetchPopulatedItem]);
 
     const handleCodeExecCheckpointChange = useCallback(async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {
-            const checkpoint = await fetchItem('usercheckpoints', selectedIds[0]) as UserCheckpoint;
+            const checkpoint = await fetchPopulatedItem('usercheckpoints', selectedIds[0]) as UserCheckpoint;
             setForm(prevForm => {
                 // Initialize default checkpoints if they don't exist
                 const currentCheckpoints = prevForm.default_user_checkpoints ?? {
@@ -200,7 +201,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                 };
             });
         }
-    }, [fetchItem]);
+    }, [fetchPopulatedItem]);
 
     const memoizedAgentSelect = useMemo(() => (
         <EnhancedSelect<AliceAgent>
@@ -220,7 +221,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     ), [form.alice_agent, handleAgentChange, isEditMode, activeAccordion, handleAccordionToggle]);
 
     const memoizedTaskSelect = useMemo(() => (
-        <EnhancedSelect<AliceTask>
+        <EnhancedSelect<PopulatedTask>
             componentType="tasks"
             EnhancedView={TaskShortListView}
             selectedItems={form.agent_tools || []}
@@ -238,7 +239,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     ), [form.agent_tools, handleFunctionsChange, isEditMode, activeAccordion, handleAccordionToggle]);
 
     const memoizedRetrievalTaskSelect = useMemo(() => (
-        <EnhancedSelect<AliceTask>
+        <EnhancedSelect<PopulatedTask>
             componentType="tasks"
             EnhancedView={TaskShortListView}
             selectedItems={form.retrieval_tools || []}
@@ -296,7 +297,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
             mode={mode}
-            item={form as AliceChat}
+            item={form as PopulatedAliceChat}
             itemType='chats'
         >
             {validationError && (
@@ -334,12 +335,14 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                 <TitleBox title="Messages" >
                     <Box mt={2}>
                         {form.messages.map((message, index) => (
-                            <EnhancedMessage
+                            <MessageListView
                                 key={`message-${index}${message}`}
-                                itemId={message}
-                                mode={'list'}
-                                fetchAll={false}
+                                item={message as MessageType}
+                                mode={'view'}
                                 onView={(message) => selectCardItem && selectCardItem('Message', message._id ?? '', message)}
+                                handleSave={async () =>{}}
+                                items={null}
+                                onChange={() =>{}}
                             />
                         ))}
                     </Box>

@@ -18,8 +18,8 @@ const ToolCallListView: React.FC<ToolCallComponentProps> = ({
 
     return (
         <EnhancedListView<ToolCall>
-            items={items}
-            item={item}
+            items={items as ToolCall[]}
+            item={item as ToolCall}
             getPrimaryText={getPrimaryText}
             getSecondaryText={getSecondaryText}
             onView={onView}

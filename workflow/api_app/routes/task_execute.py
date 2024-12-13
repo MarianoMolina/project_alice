@@ -58,10 +58,9 @@ async def execute_task_endpoint(
         task = None
         try:
             inputs_copy.update({'user_data': db_app.user_data.get('user_obj', {})})
-            task = await db_app.get_tasks(taskId)
-            if not task or not task.get(taskId):
+            task: AliceTask = await db_app.get_task(taskId)
+            if not task:
                 raise ValueError(f"Task with ID {taskId} not found")
-            task: AliceTask = task[taskId]
 
             # Retrieve API manager
             api_manager = await db_app.api_setter()

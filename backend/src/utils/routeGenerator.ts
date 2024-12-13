@@ -4,6 +4,7 @@ import { AuthRequest } from '../interfaces/auth.interface';
 import adminOnly from '../middleware/admin.middleware';
 import Logger from './logger';
 import { ModelName } from './collection.utils';
+import { PopulationService } from './population.utils';
 
 type RouteHandler = (req: AuthRequest, res: Response) => Promise<void>;
 
@@ -11,12 +12,17 @@ interface RouteOptions<T extends Document> {
   createItem?: (data: Partial<T>, userId: string) => Promise<T | null>;
   updateItem?: (id: string, data: Partial<T>, userId: string) => Promise<T | null>;
   deleteItem?: (id: string, userId: string) => Promise<T | null>;
+  getItem?: (id: string, userId: string) => Promise<T | null>;
+  getPopulatedItem?: (id: string, userId: string) => Promise<T | null>;
+  getAllItems?: (userId: string) => Promise<T[]>;
+  getAllPopulatedItems?: (userId: string) => Promise<T[]>;
 }
 
 export function createRoutes<T extends Document, K extends ModelName>(
   model: Model<T>,
   modelName: K,
-  options: RouteOptions<T> = {}
+  options: RouteOptions<T> = {},
+  populationService: PopulationService = new PopulationService()
 ) {
   const router = Router();
 
@@ -35,10 +41,6 @@ export function createRoutes<T extends Document, K extends ModelName>(
         }
         saved_item = await options.createItem(req.body, req.user?.userId);
       } else {
-        if (modelName == 'Agent') {
-          Logger.debug("Incoming agent data:", req.body);
-          Logger.debug("has_code_exec value:", req.body.has_code_exec, "type:", typeof req.body.has_code_exec);
-        }
         const item = new model({
           ...req.body,
           created_by: req.user?.userId,
@@ -104,7 +106,54 @@ export function createRoutes<T extends Document, K extends ModelName>(
 
   const getAll: RouteHandler = async (req, res) => {
     try {
-      const items = await model.find({ created_by: req.user?.userId });
+      let items: T[];
+      if (options.getAllItems) {
+        if (!req.user?.userId) {
+          res.status(401).json({ error: 'Unauthorized' });
+          return;
+        }
+        items = await options.getAllItems(req.user?.userId);
+      } else {
+        items = await model.find({ created_by: req.user?.userId });
+      }
+      res.status(200).json(items);
+    } catch (error) {
+      handleErrors(res, error);
+    }
+  };
+
+  const getAllPopulated: RouteHandler = async (req, res) => {
+    try {
+      let items: T[];
+      if (options.getAllPopulatedItems) {
+        if (!req.user?.userId) {
+          res.status(401).json({ error: 'Unauthorized' });
+          return;
+        }
+        items = await options.getAllPopulatedItems(req.user?.userId);
+      } else {
+        if (!req.user?.userId) {
+          res.status(401).json({ error: 'Unauthorized' });
+          return;
+        }
+
+        // First get all items for this user
+        const unpopulatedItems = await model.find({ created_by: req.user?.userId }) as (T & { _id: Types.ObjectId })[];
+
+        // Then populate each item using the PopulationService
+        const populatedItems = await Promise.all(
+          unpopulatedItems.map(item =>
+            populationService.findAndPopulate(
+              model,
+              item._id,
+              req.user!.userId
+            )
+          )
+        ) as T[];
+
+        // Now we know these are definitely of type T[]
+        items = populatedItems.filter((item): item is NonNullable<T> => item !== null);
+      }
       res.status(200).json(items);
     } catch (error) {
       handleErrors(res, error);
@@ -122,11 +171,49 @@ export function createRoutes<T extends Document, K extends ModelName>(
 
   const getOne: RouteHandler = async (req, res) => {
     try {
-      const item = await model.findOne({ _id: req.params.id, created_by: req.user?.userId });
+      let item: T | null;
+      if (options.getItem) {
+        if (!req.user?.userId) {
+          res.status(401).json({ error: 'Unauthorized' });
+          return;
+        }
+        item = await options.getItem(req.params.id, req.user?.userId);
+      } else {
+        item = await model.findOne({ _id: req.params.id, created_by: req.user?.userId });
+      }
       if (!item) {
         res.status(404).json({ error: `${modelName} not found` });
         return;
       }
+      res.status(200).json(item);
+    } catch (error) {
+      handleErrors(res, error);
+    }
+  };
+
+  const getOnePopulated: RouteHandler = async (req, res) => {
+    try {
+      let item: T | null;
+
+      if (!req.user?.userId) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
+      if (options.getPopulatedItem) {
+        item = await options.getPopulatedItem(req.params.id, req.user?.userId);
+      } else {
+        item = await populationService.findAndPopulate(
+          model,
+          req.params.id,
+          req.user.userId
+        );
+      }
+
+      if (!item) {
+        res.status(404).json({ error: `${modelName} not found` });
+        return;
+      }
+
       res.status(200).json(item);
     } catch (error) {
       handleErrors(res, error);
@@ -144,8 +231,10 @@ export function createRoutes<T extends Document, K extends ModelName>(
 
   router.post('/', createOne);
   router.get('/', getAll);
+  router.get('/populated', getAllPopulated);
   router.get('/all', adminOnly, getAllAdmin);
   router.get('/:id', getOne);
+  router.get('/:id/populated', getOnePopulated);
   router.patch('/:id', updateOne);
   router.delete('/:id', deleteOne);
   router.get('/schema', getSchema);

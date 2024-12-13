@@ -8,7 +8,7 @@ import {
     Box,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
+import { PopulatedTaskResponse, TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
 import { CommandLineLog } from '../../../ui/markdown/CommandLog';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import { styled } from '@mui/material/styles';
@@ -41,6 +41,8 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
         return <Typography>No task response data available.</Typography>;
     }
 
+    const populatedItem = item as PopulatedTaskResponse
+
     const getExitCodeProps = (exitCode: number) => {
         switch (exitCode) {
             case 0:
@@ -63,8 +65,8 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
         </Accordion>
     );
 
-    const embeddingChunkViewer = item.embedding && item.embedding?.length > 0 ?
-        item.embedding.map((chunk, index) => (
+    const embeddingChunkViewer = populatedItem.embedding && populatedItem.embedding?.length > 0 ?
+        populatedItem.embedding.map((chunk, index) => (
             <EmbeddingChunkViewer
                 key={chunk._id || `embedding-${index}`}
                 item={chunk}
@@ -72,7 +74,7 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             />
         )) : <Typography>No embeddings available</Typography>;
 
-    const exitCodeProps = getExitCodeProps(item.result_code);
+    const exitCodeProps = getExitCodeProps(populatedItem.result_code);
 
     const listItems = [
         {
@@ -89,12 +91,12 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
         {
             icon: exitCodeProps.icon,
             primary_text: "Status",
-            secondary_text: item.status
+            secondary_text: populatedItem.status
         },
         {
             icon: <AccessTime />,
             primary_text: "Execution Time",
-            secondary_text: item.createdAt ? new Date(item.createdAt).toLocaleString() : 'N/A'
+            secondary_text: populatedItem.createdAt ? new Date(populatedItem.createdAt).toLocaleString() : 'N/A'
         },
         {
             icon: <Code />,
@@ -102,8 +104,8 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             secondary_text: (
                 <AccordionSection
                     title="Inputs"
-                    content={<CodeBlock language="json" code={JSON.stringify(item.task_inputs, null, 2)} />}
-                    disabled={!item.task_inputs}
+                    content={<CodeBlock language="json" code={JSON.stringify(populatedItem.task_inputs, null, 2)} />}
+                    disabled={!populatedItem.task_inputs}
                 />
             )
         },
@@ -114,9 +116,9 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
                 <AccordionSection
                     title="Raw Output"
                     content={
-                        <AliceMarkdown showCopyButton>{item.task_outputs as string}</AliceMarkdown>
+                        <AliceMarkdown showCopyButton>{populatedItem.task_outputs as string}</AliceMarkdown>
                     }
-                    disabled={!item.task_outputs}
+                    disabled={!populatedItem.task_outputs}
                 />
             )
         },
@@ -127,9 +129,9 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
                 <AccordionSection
                     title="Node Outputs"
                     content={
-                        item.node_references ? <TaskResponseViewer item={item} items={null} onChange={() => null} mode={'view'} handleSave={async () => { }} /> : <Typography>No output content available</Typography>
+                        populatedItem.node_references ? <TaskResponseViewer item={item} items={null} onChange={() => null} mode={'view'} handleSave={async () => { }} /> : <Typography>No output content available</Typography>
                     }
-                    disabled={!item.node_references?.length}
+                    disabled={!populatedItem.node_references?.length}
                 />
             )
         },
@@ -149,11 +151,11 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
                             </Box>
                             <Box className="p-3">
                                 <CommandLineLog
-                                    content={item.result_diagnostic ?? ''}
+                                    content={populatedItem.result_diagnostic ?? ''}
                                 />
                             </Box>
                         </Box>}
-                    disabled={!item.result_diagnostic}
+                    disabled={!populatedItem.result_diagnostic}
                 />
             )
         },
@@ -163,8 +165,8 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             secondary_text: (
                 <AccordionSection
                     title='Execution History'
-                    content={<CodeBlock language="json" code={JSON.stringify(item.execution_history, null, 2)} />}
-                    disabled={!item.execution_history}
+                    content={<CodeBlock language="json" code={JSON.stringify(populatedItem.execution_history, null, 2)} />}
+                    disabled={!populatedItem.execution_history}
                 />
             )
         },
@@ -175,19 +177,19 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
                 <AccordionSection
                     title='Embedding'
                     content={embeddingChunkViewer}
-                    disabled={!item.embedding?.length}
+                    disabled={!populatedItem.embedding?.length}
                 />
             )
         },
         {
             icon: <Analytics />,
             primary_text: "Usage Metrics",
-            secondary_text: item.usage_metrics && Object.keys(item.usage_metrics).length > 0 ? 
+            secondary_text: populatedItem.usage_metrics && Object.keys(populatedItem.usage_metrics).length > 0 ? 
             (
                 <AccordionSection
                     title="Usage Metrics"
-                    content={<CodeBlock language="json" code={JSON.stringify(item.usage_metrics, null, 2)} />}
-                    disabled={!item.usage_metrics}
+                    content={<CodeBlock language="json" code={JSON.stringify(populatedItem.usage_metrics, null, 2)} />}
+                    disabled={!populatedItem.usage_metrics}
                 />
             ) : null
         }
@@ -196,11 +198,11 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
     return (
         <CommonCardView
             elementType='Task Response'
-            title={item.task_name}
-            subtitle={item.task_description}
+            title={populatedItem.task_name}
+            subtitle={populatedItem.task_description}
             id={item._id}
             listItems={listItems}
-            item={item}
+            item={populatedItem}
             itemType='taskresults'
         />
     );

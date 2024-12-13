@@ -4,7 +4,7 @@ import CodeExecutionListView from './CodeExecutionListView';
 import CodeExecutionTableView from './CodeExecutionTableView';
 import CodeExecutionCardView from './CodeExecutionCardView';
 import CodeExecutionShortListView from './CodeExecutionShortListView';
-import { CodeExecution } from '../../../../types/CodeExecutionTypes';
+import { CodeExecution, PopulatedCodeExecution } from '../../../../types/CodeExecutionTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
 import { CodeExecutionComponentProps } from '../../../../types/CodeExecutionTypes';
 
@@ -14,21 +14,21 @@ type EnhancedCodeExecutionMode = BaseCodeExecutionMode | ExtendedCodeExecutionMo
 
 interface EnhancedCodeExecutionProps extends Omit<CodeExecutionComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
   mode: EnhancedCodeExecutionMode;
-  item?: Partial<CodeExecution> | null;
+  item?: Partial<CodeExecution | PopulatedCodeExecution> | null;
   itemId?: string;
   fetchAll: boolean;
-  onSave?: (savedItem: CodeExecution) => void;
-  onDelete?: (deletedItem: CodeExecution) => Promise<void>;
+  onSave?: (savedItem: CodeExecution | PopulatedCodeExecution) => void;
+  onDelete?: (deletedItem: CodeExecution | PopulatedCodeExecution) => Promise<void>;
 }
 
 const EnhancedCodeExecution: React.FC<EnhancedCodeExecutionProps> = (props) => {
   const renderContent = (
-    items: CodeExecution[] | null,
-    item: CodeExecution | null,
-    onChange: (newItem: Partial<CodeExecution>) => void,
+    items: (CodeExecution | PopulatedCodeExecution)[] | null,
+    item: CodeExecution | PopulatedCodeExecution | null,
+    onChange: (newItem: Partial<CodeExecution | PopulatedCodeExecution>) => void,
     mode: BaseCodeExecutionMode,
     handleSave: () => Promise<void>,
-    onDelete: (deletedItem: CodeExecution) => Promise<void>,
+    onDelete: (deletedItem: CodeExecution | PopulatedCodeExecution) => Promise<void>,
   ) => {
     const commonProps: CodeExecutionComponentProps = {
       items,
@@ -66,10 +66,10 @@ const EnhancedCodeExecution: React.FC<EnhancedCodeExecutionProps> = (props) => {
     props.mode === 'edit' ? 'edit' : 'view';
 
   return (
-    <BaseDbElement<CodeExecution>
+    <BaseDbElement<CodeExecution | PopulatedCodeExecution>
       collectionName="codeexecutions"
       itemId={props.itemId}
-      partialItem={props.item || undefined}
+      partialItem={props.item as any || undefined}
       mode={baseDbMode}
       isInteractable={props.isInteractable}
       onInteraction={props.onInteraction}

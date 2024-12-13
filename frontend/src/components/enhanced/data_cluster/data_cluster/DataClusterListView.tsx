@@ -19,8 +19,8 @@ const DataClusterListView: React.FC<DataClusterComponentProps> = ({
 
     return (
         <EnhancedListView<DataCluster>
-            items={items}
-            item={item}
+            items={items as DataCluster[]}
+            item={item as DataCluster}
             getPrimaryText={getPrimaryText}
             getSecondaryText={getSecondaryText}
             onView={onView}

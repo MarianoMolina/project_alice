@@ -46,8 +46,7 @@ const taskSchema = new Schema<ITaskDocument, ITaskModel>({
         type: Schema.Types.ObjectId, 
         ref: 'DataCluster', 
         required: false, 
-        description: "Data cluster for the chat",
-        autopopulate: true 
+        description: "Data cluster for the chat"
     },
     created_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true },
     updated_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true }

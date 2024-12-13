@@ -1,30 +1,33 @@
 import { BaseDatabaseObject, convertToBaseDatabaseObject, EnhancedComponentProps } from "./CollectionTypes";
-import { References } from "./ReferenceTypes";
+import { convertToPopulatedReferences, convertToReferences, PopulatedReferences, References } from "./ReferenceTypes";
 
 
 export interface DataCluster extends References, BaseDatabaseObject {
     
 }
 
+export interface PopulatedDataCluster extends PopulatedReferences, BaseDatabaseObject {
+}
+
 export const convertToDataCluster = (data: any): DataCluster => {
     return {
         ...convertToBaseDatabaseObject(data),
-        task_responses: data?.task_responses || [],
-        messages: data?.messages || [],
-        files: data?.files || [],
-        entity_references: data?.entity_references || [],
-        user_interactions: data?.user_interactions || [],
-        embeddings: data?.embeddings || [],
-        tool_calls: data?.tool_calls || [],
-        code_executions: data?.code_executions || []
+        ...convertToReferences(data)
     };
 };
 
-export interface DataClusterComponentProps extends EnhancedComponentProps<DataCluster> {
+export const convertToPopulatedDataCluster = (data: any): PopulatedDataCluster => {
+    return {
+        ...convertToBaseDatabaseObject(data),
+        ...convertToPopulatedReferences(data)
+    };
+}
+
+export interface DataClusterComponentProps extends EnhancedComponentProps<DataCluster | PopulatedDataCluster> {
     
 }
 
-export const getDefaultDataClusterForm = (): Partial<DataCluster> => ({
+export const getDefaultDataClusterForm = (): Partial<PopulatedDataCluster> => ({
     task_responses: [],
     messages: [],
     files: [],

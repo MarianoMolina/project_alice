@@ -1,4 +1,4 @@
-import { convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
+import { convertToEmbeddable, convertToPopulatedEmbeddable, Embeddable, EnhancedComponentProps, PopulatedEmbeddable } from "./CollectionTypes";
 import { UserCheckpoint } from "./UserCheckpointTypes";
 
 export enum InteractionOwnerType {
@@ -22,6 +22,10 @@ export interface UserInteraction extends Embeddable {
     user_response?: UserResponse;
 }
 
+export interface PopulatedUserInteraction extends Omit<UserInteraction, keyof PopulatedEmbeddable>, PopulatedEmbeddable {
+
+}
+
 export const convertToUserInteraction = (data: any): UserInteraction => {
     return {
         ...convertToEmbeddable(data),
@@ -34,11 +38,25 @@ export const convertToUserInteraction = (data: any): UserInteraction => {
     };
 };
 
-export interface UserInteractionComponentProps extends EnhancedComponentProps<UserInteraction> {
-   // Add any additional component-specific props here
+export const convertToPopulatedUserInteraction = (data: any): PopulatedUserInteraction => {
+    return {
+        ...convertToPopulatedEmbeddable(data),
+        owner: {
+            type: data?.owner?.type || InteractionOwnerType.TASK_RESPONSE,
+            id: data?.owner?.id || undefined
+        },
+        user_checkpoint_id: data?.user_checkpoint_id || undefined,
+        user_response: data?.user_response || undefined,
+    };
 }
 
-export const getDefaultUserInteractionForm = (): Partial<UserInteraction> => ({
+export interface UserInteractionComponentProps extends EnhancedComponentProps<UserInteraction | PopulatedUserInteraction> {
+}
+
+export interface PopulatedUserInteractionComponentProps extends EnhancedComponentProps<PopulatedUserInteraction> {
+}
+
+export const getDefaultUserInteractionForm = (): Partial<PopulatedUserInteraction> => ({
     owner: {
         type: InteractionOwnerType.TASK_RESPONSE,
         id: ''

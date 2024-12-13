@@ -7,7 +7,7 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-RUN echo "fetch-retry-maxtimeout=300000\nfetch-retry-mintimeout=20000\nfetch-retries=5" > .npmrc
+RUN printf "fetch-retry-maxtimeout=300000\nfetch-retry-mintimeout=20000\nfetch-retries=5\n" > .npmrc
 
 # Install dependencies with the --legacy-peer-deps flag
 # Clean install dependencies

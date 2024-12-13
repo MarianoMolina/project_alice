@@ -29,8 +29,8 @@ const EntityReferenceListView: React.FC<EntityReferenceComponentProps> = ({
 
     return (
         <EnhancedListView<EntityReference>
-            items={items}
-            item={item}
+            items={items as EntityReference[]}
+            item={item as EntityReference}
             getPrimaryText={getPrimaryText}
             getSecondaryText={getSecondaryText}
             onView={onView}

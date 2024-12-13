@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { CollectionElementString, CollectionElement, CollectionName } from '../types/CollectionTypes';
+import { CollectionElementString, CollectionElement, CollectionName, CollectionPopulatedElement } from '../types/CollectionTypes';
 import { Prompt } from '../types/PromptTypes';
 import Logger from '../utils/Logger';
 import { ApiProvider } from './ApiContext';
@@ -7,19 +7,19 @@ import EnhancedCardDialog from '../components/enhanced/common/enhanced_card_dial
 import EnhancedFlexibleDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedFlexibleDialog';
 import PromptParsedDialog from '../components/enhanced/common/enhanced_card_dialog/PromptParsedDialog';
 import EnhancedSelectDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedSelectDialog';
-import { AliceTask } from '../types/TaskTypes';
+import { PopulatedTask } from '../types/TaskTypes';
 
 interface DialogContextType {
   // Card Dialog
-  selectCardItem: (itemType: CollectionElementString, itemId?: string, item?: CollectionElement) => void;
-  selectedCardItem: CollectionElement | null;
+  selectCardItem: (itemType: CollectionElementString, itemId?: string, item?: CollectionPopulatedElement) => void;
+  selectedCardItem: CollectionPopulatedElement | null;
   selectedCardItemType: CollectionElementString | null;
   isCardDialogOpen: boolean;
   closeCardDialog: () => void;
 
   // Flexible Dialog
-  selectFlexibleItem: (itemType: CollectionElementString, mode: 'create' | 'edit', itemId?: string, item?: CollectionElement) => void;
-  selectedFlexibleItem: CollectionElement | null;
+  selectFlexibleItem: (itemType: CollectionElementString, mode: 'create' | 'edit', itemId?: string, item?: CollectionPopulatedElement) => void;
+  selectedFlexibleItem: CollectionPopulatedElement | null;
   selectedFlexibleItemType: CollectionElementString | null;
   flexibleDialogMode: 'create' | 'edit' | null;
   isFlexibleDialogOpen: boolean;
@@ -44,7 +44,7 @@ interface DialogContextType {
   closePromptDialog: () => void;
 
   // Select Dialog
-  selectDialog: <T extends CollectionElement>(
+  selectDialog: <T extends CollectionElement | CollectionPopulatedElement>(
     componentType: CollectionName,
     EnhancedView: React.ComponentType<any>,
     title: string,
@@ -55,8 +55,8 @@ interface DialogContextType {
   ) => void;
   selectedComponentType: CollectionName | undefined;
   selectedEnhancedView: React.ComponentType<any> | undefined;
-  selectedItems: CollectionElement[];
-  onSelectCallback?: (item: CollectionElement) => void | Promise<void>;
+  selectedItems: CollectionElement[] | CollectionPopulatedElement[];
+  onSelectCallback?: (item: CollectionElement | CollectionPopulatedElement) => void | Promise<void>;
   selectDialogTitle: string | undefined;
   selectDialogFilters: Record<string, any> | undefined;
   selectDialogMultiple: boolean;
@@ -65,7 +65,7 @@ interface DialogContextType {
 
   // Flowchart Dialog
   selectTaskFlowchartItem: (itemId: string) => void;
-  selectedTaskFlowchartItem: AliceTask | null;
+  selectedTaskFlowchartItem: PopulatedTask | null;
   isTaskFlowchartDialogOpen: boolean;
   closeTaskFlowchartDialog: () => void;
 }
@@ -74,12 +74,12 @@ const CardDialogContext = createContext<DialogContextType | undefined>(undefined
 
 export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   // Card Dialog State
-  const [selectedCardItem, setSelectedCardItem] = useState<CollectionElement | null>(null);
+  const [selectedCardItem, setSelectedCardItem] = useState<CollectionPopulatedElement | null>(null);
   const [selectedCardItemType, setSelectedCardItemType] = useState<CollectionElementString | null>(null);
   const [isCardDialogOpen, setIsCardDialogOpen] = useState(false);
 
   // Flexible Dialog State
-  const [selectedFlexibleItem, setSelectedFlexibleItem] = useState<CollectionElement | null>(null);
+  const [selectedFlexibleItem, setSelectedFlexibleItem] = useState<CollectionPopulatedElement | null>(null);
   const [selectedFlexibleItemType, setSelectedFlexibleItemType] = useState<CollectionElementString | null>(null);
   const [flexibleDialogMode, setFlexibleDialogMode] = useState<'create' | 'edit' | null>(null);
   const [isFlexibleDialogOpen, setIsFlexibleDialogOpen] = useState(false);
@@ -96,15 +96,15 @@ export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
   // Select Dialog State
   const [selectedComponentType, setSelectedComponentType] = useState<CollectionName | undefined>(undefined);
   const [selectedEnhancedView, setSelectedEnhancedView] = useState<React.ComponentType<any> | undefined>(undefined);
-  const [selectedItems, setSelectedItems] = useState<CollectionElement[]>([]);
-  const [onSelectCallback, setOnSelectCallback] = useState<((item: CollectionElement) => void | Promise<void>) | undefined>();
+  const [selectedItems, setSelectedItems] = useState<CollectionElement[] | CollectionPopulatedElement[]>([]);
+  const [onSelectCallback, setOnSelectCallback] = useState<((item: CollectionElement | CollectionPopulatedElement) => void | Promise<void>) | undefined>();
   const [selectDialogTitle, setSelectDialogTitle] = useState<string | undefined>(undefined);
   const [selectDialogFilters, setSelectDialogFilters] = useState<Record<string, any> | undefined>(undefined);
   const [selectDialogMultiple, setSelectDialogMultiple] = useState<boolean>(false);
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
 
   // Flowchart Dialog State
-  const [selectedTaskFlowchartItem, setSelectedTaskFlowchartItem] = useState<AliceTask | null>(null);
+  const [selectedTaskFlowchartItem, setSelectedTaskFlowchartItem] = useState<PopulatedTask | null>(null);
   const [isTaskFlowchartDialogOpen, setIsTaskFlowchartDialogOpen] = useState(false);
 
   const closeCardDialog = useCallback(() => {
@@ -141,13 +141,13 @@ export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
     setIsSelectDialogOpen(false);
   }, []);
 
-  const selectCardItem = useCallback((itemType: CollectionElementString, itemId?: string, item?: CollectionElement) => {
+  const selectCardItem = useCallback((itemType: CollectionElementString, itemId?: string, item?: CollectionPopulatedElement) => {
     Logger.debug('CardDialogContext selectCardItem', { itemType, itemId, item });
     setSelectedCardItemType(itemType);
     if (item) {
       setSelectedCardItem(item);
     } else if (itemId) {
-      setSelectedCardItem({ _id: itemId } as CollectionElement);
+      setSelectedCardItem({ _id: itemId } as CollectionPopulatedElement);
     } else {
       setSelectedCardItem(null);
     }
@@ -158,7 +158,7 @@ export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
     itemType: CollectionElementString,
     mode: 'create' | 'edit',
     itemId?: string,
-    item?: CollectionElement
+    item?: CollectionPopulatedElement
   ) => {
     setSelectedFlexibleItemType(itemType);
     setFlexibleDialogMode(mode);
@@ -166,7 +166,7 @@ export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
       if (item) {
         setSelectedFlexibleItem(item);
       } else if (itemId) {
-        setSelectedFlexibleItem({ _id: itemId } as CollectionElement);
+        setSelectedFlexibleItem({ _id: itemId } as CollectionPopulatedElement);
       } else {
         throw new Error('Item or itemId must be provided for edit mode');
       }
@@ -198,7 +198,7 @@ export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
     setIsPromptDialogOpen(true);
   }, []);
 
-  const selectDialog = useCallback(<T extends CollectionElement>(
+  const selectDialog = useCallback(<T extends CollectionElement | CollectionPopulatedElement>(
     componentType: CollectionName,
     EnhancedView: React.ComponentType<any>,
     title: string,
@@ -210,7 +210,7 @@ export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
     setSelectedComponentType(componentType);
     setSelectedEnhancedView(() => EnhancedView);
     setSelectDialogTitle(title);
-    setOnSelectCallback(() => onSelect as (item: CollectionElement) => void | Promise<void>);
+    setOnSelectCallback(() => onSelect as (item: CollectionElement | CollectionPopulatedElement) => void | Promise<void>);
     setSelectedItems(selectedItems as CollectionElement[]);
     setSelectDialogMultiple(multiple);
     setSelectDialogFilters(filters);

@@ -8,7 +8,7 @@ import {
     TASK_SIDEBAR_WIDTH_TABLE, TASK_SIDEBAR_WIDTH_COMPACT
 } from '../utils/Constants';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
-import { ComponentMode, CollectionElement, CollectionElementString } from '../types/CollectionTypes';
+import { ComponentMode, CollectionElement, CollectionElementString, CollectionPopulatedElement } from '../types/CollectionTypes';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
 import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
 import EnhancedMessage from '../components/enhanced/message/message/EnhancedMessage';
@@ -24,10 +24,12 @@ import Logger from '../utils/Logger';
 import ToggleBox from '../components/ui/sidetab_header/ToggleBox';
 import EnhancedEntityReference from '../components/enhanced/entity_reference/entity_reference/EnhancedEntityReference';
 import { collectionElementIcons } from '../utils/CollectionUtils';
+import { fetchPopulatedItem } from '../services/api';
+import { PopulatedTask } from '../types/TaskTypes';
 
 const ReferencesPage: React.FC = () => {
     const classes = useStyles();
-    const [selectedItem, setSelectedItem] = useState<CollectionElement | null>(null);
+    const [selectedItem, setSelectedItem] = useState<CollectionPopulatedElement | null>(null);
     const { selectCardItem } = useCardDialog();
     const [activeTab, setActiveTab] = useState<CollectionElementString>('Message');
     const [showActiveComponent, setShowActiveComponent] = useState(false);
@@ -63,14 +65,16 @@ const ReferencesPage: React.FC = () => {
         setShowActiveComponent(true);
     }, []);
 
-    const handleItemSelect = useCallback((item: CollectionElement | null) => {
+    const handleItemSelect = useCallback(async (item: CollectionElement | CollectionPopulatedElement | null) => {
         Logger.debug('References - Item selected:', item);
-        setSelectedItem(item);
+        if (!item) return;
+        const task = await fetchPopulatedItem('tasks', item._id) as PopulatedTask;
+        setSelectedItem(task);
         setIsCreating(false);
         setShowActiveComponent(true);
     }, []);
 
-    const handleSave = useCallback(async (item: CollectionElement | null) => {
+    const handleSave = useCallback(async (item: CollectionElement | CollectionPopulatedElement | null) => {
         Logger.debug('References - Saving item:', item);
         setSelectedItem(null);
         setIsCreating(false);

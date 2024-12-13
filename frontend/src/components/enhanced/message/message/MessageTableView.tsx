@@ -34,8 +34,8 @@ const MessageTableView: React.FC<MessageComponentProps> = ({
 
   return (
     <EnhancedTableView<MessageType>
-      items={items}
-      item={item}
+      items={items as MessageType[]}
+      item={item as MessageType}
       columns={columns}
       onView={onView}
       onInteraction={onInteraction}

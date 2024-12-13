@@ -19,7 +19,7 @@ const taskResultRoutes = createRoutes<ITaskResultDocument, 'TaskResult'>(TaskRes
   },
   updateItem: async (id, data, userId) => {
     return await updateTaskResult(id, data, userId);
-  }
+  },
 });
 
 // Use the generated routes

@@ -1,18 +1,18 @@
 import { ChangeEvent, KeyboardEvent, useState, forwardRef, useImperativeHandle, useCallback } from 'react';
 import { Box, Button, TextField, Chip, Tooltip, Typography } from '@mui/material';
-import { ContentType, getDefaultMessageForm, MessageType } from '../../../types/MessageTypes';
-import { FileReference, FileType } from '../../../types/FileTypes';
+import { ContentType, getDefaultMessageForm, MessageType, PopulatedMessage } from '../../../types/MessageTypes';
+import { FileReference, FileType, PopulatedFileReference } from '../../../types/FileTypes';
 import { createFileContentReference, selectFile } from '../../../utils/FileUtils';
 import { useApi } from '../../../contexts/ApiContext';
 import { useNotification } from '../../../contexts/NotificationContext';
-import { TaskResponse } from '../../../types/TaskResponseTypes';
-import { References } from '../../../types/ReferenceTypes';
+import { PopulatedTaskResponse, TaskResponse } from '../../../types/TaskResponseTypes';
+import { PopulatedReferences, References } from '../../../types/ReferenceTypes';
 import { AttachFile } from '@mui/icons-material';
 import Logger from '../../../utils/Logger';
-import { EntityReference } from '../../../types/EntityReferenceTypes';
+import { EntityReference, PopulatedEntityReference } from '../../../types/EntityReferenceTypes';
 
 interface ChatInputProps {
-  sendMessage: (chatId: string, message: MessageType) => Promise<void>;
+  sendMessage: (chatId: string, message: PopulatedMessage) => Promise<void>;
   currentChatId: string | null;
   chatSelected: boolean;
   chatContextCharacterCount: number;
@@ -20,10 +20,10 @@ interface ChatInputProps {
 }
 
 export interface ChatInputRef {
-  addFileReference: (file: FileReference) => void;
-  addTaskResponse: (taskResponse: TaskResponse) => void;
-  addEntityReference: (entityReference: EntityReference) => void;
-  addMessageReference: (message: MessageType) => void;
+  addFileReference: (file: PopulatedFileReference | FileReference) => void;
+  addTaskResponse: (taskResponse: PopulatedTaskResponse | TaskResponse) => void;
+  addEntityReference: (entityReference: PopulatedEntityReference | EntityReference) => void;
+  addMessageReference: (message: PopulatedMessage | MessageType) => void;
 }
 
 const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
@@ -35,14 +35,14 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
 }, ref) => {
   const { addNotification } = useNotification();
   const { uploadFileContentReference } = useApi();
-  const [newMessage, setNewMessage] = useState<MessageType>(getDefaultMessageForm());
+  const [newMessage, setNewMessage] = useState<PopulatedMessage>(getDefaultMessageForm());
 
   const tokenEst = Math.floor(chatContextCharacterCount / 3)
   const tokenRatio = tokenEst / maxContext
   const percentageToken = (Math.floor(tokenRatio * 10000) / 100).toString() + '%'
   const contextWarning = tokenRatio > 0.8 ? true : false
 
-  const updateMessageType = useCallback((references: References): ContentType => {
+  const updateMessageType = useCallback((references: PopulatedReferences): ContentType => {
     const types = new Set<ContentType>();
     if (references.files?.length) {
       references.files.forEach(file => types.add(file.type as unknown as ContentType));
@@ -83,10 +83,10 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
   }, [updateMessageType, addNotification]);
 
   useImperativeHandle(ref, () => ({
-    addFileReference: (file: FileReference) => addReference('files', file),
-    addTaskResponse: (taskResponse: TaskResponse) => addReference('task_responses', taskResponse),
-    addEntityReference: (entityReference: EntityReference) => addReference('entity_references', entityReference),
-    addMessageReference: (message: MessageType) => addReference('messages', message),
+    addFileReference: (file: PopulatedFileReference | FileReference) => addReference('files', file),
+    addTaskResponse: (taskResponse: PopulatedTaskResponse | TaskResponse) => addReference('task_responses', taskResponse),
+    addEntityReference: (entityReference: PopulatedEntityReference | EntityReference) => addReference('entity_references', entityReference),
+    addMessageReference: (message: PopulatedMessage | MessageType) => addReference('messages', message),
   }));
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -115,7 +115,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
   };
 
   const handleSend = () => {
-    if (currentChatId && (newMessage.content.trim() || hasReferences(newMessage.references))) {
+    if (currentChatId && (newMessage.content.trim() || hasReferences(newMessage.references as References))) {
       Logger.debug('Sending message content:', newMessage.content);
       sendMessage(currentChatId, newMessage);
       setNewMessage(getDefaultMessageForm());
@@ -134,16 +134,16 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
         let label = '';
         switch (type as keyof References) {
           case 'files':
-            label = (ref as FileReference).filename;
+            label = (ref as PopulatedFileReference).filename;
             break;
           case 'task_responses':
-            label = `Task: ${(ref as TaskResponse).task_name}`;
+            label = `Task: ${(ref as PopulatedTaskResponse).task_name}`;
             break;
           case 'entity_references':
-            label = `Search: ${(ref as EntityReference).name}`;
+            label = `Search: ${(ref as PopulatedEntityReference).name}`;
             break;
           case 'messages':
-            label = `Message: ${(ref as MessageType).content.substring(0, 20)}...`;
+            label = `Message: ${(ref as PopulatedMessage).content.substring(0, 20)}...`;
             break;
         }
         chips.push(
@@ -194,7 +194,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
           <Button
             variant="contained"
             onClick={handleSend}
-            disabled={!chatSelected || (!newMessage.content.trim() && !hasReferences(newMessage.references))}
+            disabled={!chatSelected || (!newMessage.content.trim() && !hasReferences(newMessage.references as References))}
           >
             Send
           </Button>

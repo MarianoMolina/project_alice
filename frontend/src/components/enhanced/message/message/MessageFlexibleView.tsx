@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { ContentType, MessageComponentProps, MessageGenerators, MessageType, RoleType, getDefaultMessageForm } from '../../../../types/MessageTypes';
+import { ContentType, MessageComponentProps, MessageGenerators, MessageType, PopulatedMessage, RoleType, getDefaultMessageForm } from '../../../../types/MessageTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 import { TextInput } from '../../common/inputs/TextInput';
@@ -12,7 +12,7 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
     handleSave,
     handleDelete
 }) => {
-    const [form, setForm] = useState<Partial<MessageType>>(item || getDefaultMessageForm());
+    const [form, setForm] = useState<Partial<PopulatedMessage>>(item as PopulatedMessage|| getDefaultMessageForm());
     const [isSaving, setIsSaving] = useState(false);
 
     const isEditMode = mode === 'edit' || mode === 'create';
@@ -28,7 +28,7 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
 
     useEffect(() => {
         if (item) {
-            setForm(item);
+            setForm(item as PopulatedMessage);
         } else if (!item || Object.keys(item).length === 0) {
             onChange(getDefaultMessageForm());
         }
@@ -58,7 +58,7 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
             mode={mode}
-            item={form as MessageType}
+            item={form as PopulatedMessage}
             itemType='messages'
         >
             <SelectInput

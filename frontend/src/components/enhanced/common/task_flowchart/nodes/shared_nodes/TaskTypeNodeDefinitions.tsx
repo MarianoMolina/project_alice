@@ -5,12 +5,12 @@ import { ApiType } from '../../../../../../types/ApiTypes';
 import { FunctionParameters, ParameterTypes } from '../../../../../../types/ParameterTypes';
 import { TaskType } from '../../../../../../types/TaskTypes';
 import theme from '../../../../../../Theme';
-import { CollectionElement, CollectionElementString } from '../../../../../../types/CollectionTypes';
+import { CollectionElementString, CollectionPopulatedElement } from '../../../../../../types/CollectionTypes';
 import { OutputType } from '../../../../../../types/ReferenceTypes';
 // Node type mappings
 export interface NodeConfig {
   getInputs?: (data: BaseTaskData) => FunctionParameters | null;
-  getContent?: (data: BaseTaskData, selectCardItem: (type: CollectionElementString, id?: string, data?: CollectionElement) => void) => React.ReactNode;
+  getContent?: (data: BaseTaskData, selectCardItem: (type: CollectionElementString, id?: string, data?: CollectionPopulatedElement) => void) => React.ReactNode;
   getOutputType: () => OutputType;
   requiredApis: ApiType[];
 }
@@ -18,7 +18,7 @@ export interface NodeConfig {
 // Define a type for our node definitions to handle the readonly arrays
 export type NodeDefinition = {
   getInputs?: (data: BaseTaskData) => FunctionParameters | null;
-  getContent?: (data: BaseTaskData, selectCardItem: (type: CollectionElementString, id?: string, data?: CollectionElement) => void) => React.ReactNode;
+  getContent?: (data: BaseTaskData, selectCardItem: (type: CollectionElementString, id?: string, data?: CollectionPopulatedElement) => void) => React.ReactNode;
   getOutputType: () => OutputType;
   requiredApis: ApiType[];
 };
@@ -27,7 +27,7 @@ export type NodeDefinition = {
 const NODE_DEFINITIONS: { [key: string]: NodeDefinition } = {
   llm_generation: {
     getInputs: (data: BaseTaskData) => data.templates?.['task_template']?.parameters || null,
-    getContent: (data: BaseTaskData, selectCardItem: (type: CollectionElementString, id?: string, data?: CollectionElement) => void) => (
+    getContent: (data: BaseTaskData, selectCardItem: (type: CollectionElementString, id?: string, data?: CollectionPopulatedElement) => void) => (
       <Stack spacing={1}>
         {['agent_system_message', 'task_template', 'output_template'].map(templateName => {
           const template = templateName === 'agent_system_message' ? data.agent?.system_message : data.templates?.[templateName];

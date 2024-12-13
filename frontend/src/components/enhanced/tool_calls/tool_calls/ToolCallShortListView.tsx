@@ -13,8 +13,8 @@ const ToolCallShortListView: React.FC<ToolCallComponentProps> = ({
 
     return (
         <EnhancedShortListView<ToolCall>
-            items={items}
-            item={item}
+            items={items as ToolCall[]}
+            item={item as ToolCall}
             getPrimaryText={getPrimaryText}
             getSecondaryText={getSecondaryText}
             onView={onView}

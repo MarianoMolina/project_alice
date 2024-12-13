@@ -1,5 +1,5 @@
-import { BaseDatabaseObject, convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
-import { MessageType } from "./MessageTypes";
+import { BaseDatabaseObject, convertToEmbeddable, convertToPopulatedEmbeddable, Embeddable, EnhancedComponentProps, PopulatedEmbeddable } from "./CollectionTypes";
+import { convertToPopulatedMessage, MessageType, PopulatedMessage } from "./MessageTypes";
 
 export enum FileType {
     IMAGE = "image",
@@ -24,6 +24,9 @@ export interface FileContentReference {
     content: string; // base64 encoded content
     file_size: number;
 }
+export interface PopulatedFileReference extends Omit<FileReference, 'embedding' | 'transcript'>, PopulatedEmbeddable {
+    transcript?: PopulatedMessage;
+}
 
 export const convertToFileReference = (data: any): FileReference => {
     return {
@@ -37,11 +40,22 @@ export const convertToFileReference = (data: any): FileReference => {
     };
 };
 
-export interface FileComponentProps extends EnhancedComponentProps<FileReference> {
+export const convertToPopulatedFileReference = (data: any): PopulatedFileReference => {
+    return {
+        ...convertToPopulatedEmbeddable(data),
+        filename: data.filename,
+        type: data.type,
+        file_size: data.file_size,
+        transcript: data.transcript ? convertToPopulatedMessage(data.transcript) : undefined,
+        storage_path: data.storage_path ? data.storage_path.toString() : undefined,
+    };
+}   
+
+export interface FileComponentProps extends EnhancedComponentProps<FileReference | PopulatedFileReference> {
     
 }
 
-export const getDefaultFileForm = (): Partial<FileReference> => ({
+export const getDefaultFileForm = (): Partial<PopulatedFileReference> => ({
     filename: '',
     type: FileType.FILE,
     file_size: 0,

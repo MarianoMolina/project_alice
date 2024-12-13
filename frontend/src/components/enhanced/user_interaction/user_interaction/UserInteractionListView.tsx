@@ -18,8 +18,8 @@ const UserInteractionListView: React.FC<UserInteractionComponentProps> = ({
 
     return (
         <EnhancedListView<UserInteraction>
-            items={items}
-            item={item}
+            items={items as UserInteraction[]}
+            item={item as UserInteraction}
             getPrimaryText={getPrimaryText}
             getSecondaryText={getSecondaryText}
             onView={onView}

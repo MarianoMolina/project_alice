@@ -1,6 +1,5 @@
-import { convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
-import { convertToDataCluster, DataCluster } from "./DataClusterTypes";
-import { FileType } from "./FileTypes";
+import { convertToEmbeddable, convertToPopulatedEmbeddable, Embeddable, EnhancedComponentProps, PopulatedEmbeddable } from "./CollectionTypes";
+import { convertToPopulatedReferences, PopulatedReferences, References } from "./ReferenceTypes";
 
 export enum RoleType {
     USER = 'user',
@@ -11,10 +10,10 @@ export enum RoleType {
 
 export enum ContentType {
     TEXT = 'text',
-    IMAGE = FileType.IMAGE,
-    VIDEO = FileType.VIDEO,
-    AUDIO = FileType.AUDIO,
-    FILE = FileType.FILE,
+    IMAGE = "image",
+    VIDEO = "video",
+    AUDIO = "audio",
+    FILE = "file",
     TASK_RESULT = 'task_result',
     MULTIPLE = 'multiple',
     ENTITY_REFERENCE = 'entity_reference',
@@ -35,7 +34,18 @@ export interface MessageType extends Embeddable {
     assistant_name?: string;
     type?: ContentType;
     creation_metadata?: Record<string, any>;
-    references?: DataCluster;
+    references?: References;
+}
+
+type MessagePopulatedFields = {
+    references?: PopulatedReferences;
+}
+
+// Create the populated message type
+export interface PopulatedMessage extends 
+    Omit<MessageType, keyof PopulatedEmbeddable | keyof MessagePopulatedFields>,
+    PopulatedEmbeddable,
+    MessagePopulatedFields {
 }
 
 export const convertToMessageType = (data: any): MessageType => {
@@ -47,15 +57,29 @@ export const convertToMessageType = (data: any): MessageType => {
         step: data?.step || undefined,
         assistant_name: data?.assistant_name || undefined,
         type: data?.type || 'text',
-        references: data?.references ? convertToDataCluster(data.references) : undefined,
         creation_metadata: data?.creation_metadata || {},
+        references: data?.references || undefined,
     };
 };
 
-export interface MessageComponentProps extends EnhancedComponentProps<MessageType> {
+export const convertToPopulatedMessage = (data: any): PopulatedMessage => {
+    return {
+        ...convertToPopulatedEmbeddable(data),
+        role: data?.role || 'user',
+        content: data?.content || '',
+        generated_by: data?.generated_by || MessageGenerators.USER,
+        step: data?.step || undefined,
+        assistant_name: data?.assistant_name || undefined,
+        type: data?.type || 'text',
+        creation_metadata: data?.creation_metadata || {},
+        references: data?.references ? convertToPopulatedReferences(data.references) : undefined,
+    };
 }
 
-export const getDefaultMessageForm = (): MessageType => ({
+export interface MessageComponentProps extends EnhancedComponentProps<MessageType | PopulatedMessage> {
+}
+
+export const getDefaultMessageForm = (): PopulatedMessage => ({
     role: RoleType.USER,
     content: '',
     generated_by: MessageGenerators.USER,

@@ -31,8 +31,8 @@ const TaskTableView: React.FC<TaskComponentProps> = ({
 
   return (
     <EnhancedTableView<AliceTask>
-      items={items}
-      item={item}
+      items={items as AliceTask[]}
+      item={item as AliceTask}
       columns={columns}
       onView={onView}
       onInteraction={onInteraction}

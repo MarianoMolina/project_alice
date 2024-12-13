@@ -1,6 +1,6 @@
 import { Document, Types, Model } from 'mongoose';
 import { IUserDocument } from './user.interface';
-import { References } from './references.interface';
+import { ReferenceHolder, References } from './references.interface';
 import { Embeddable } from './embeddingChunk.interface';
 
 export interface ExecutionHistoryItem {
@@ -10,8 +10,7 @@ export interface ExecutionHistoryItem {
     exit_code?: number;
 }
 
-export interface NodeResponse extends ExecutionHistoryItem {
-    references?: References;
+export interface NodeResponse extends ExecutionHistoryItem, ReferenceHolder {
 }
 
 export interface ITaskResult extends Embeddable {

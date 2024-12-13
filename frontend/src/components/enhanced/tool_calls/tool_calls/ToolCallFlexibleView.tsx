@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
     Alert,
 } from '@mui/material';
-import { ToolCallComponentProps, ToolCall, getDefaultToolCallForm, ToolCallConfig } from '../../../../types/ToolCallTypes';
+import { ToolCallComponentProps, ToolCall, getDefaultToolCallForm, ToolCallConfig, PopulatedToolCall } from '../../../../types/ToolCallTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import useStyles from '../ToolCallStyles';
 import { TextInput } from '../../common/inputs/TextInput';
@@ -17,7 +17,7 @@ const ToolCallFlexibleView: React.FC<ToolCallComponentProps> = ({
 }) => {
     const { addNotification } = useNotification();
     const classes = useStyles();
-    const [form, setForm] = useState<Partial<ToolCall>>(item || getDefaultToolCallForm());
+    const [form, setForm] = useState<Partial<PopulatedToolCall>>(item as PopulatedToolCall || getDefaultToolCallForm());
     const [isSaving, setIsSaving] = useState(false);
 
     const [localArguments, setLocalArguments] = useState<string>('');
@@ -36,7 +36,7 @@ const ToolCallFlexibleView: React.FC<ToolCallComponentProps> = ({
 
     useEffect(() => {
         if (item && Object.keys(item).length > 0) {
-            setForm(item);
+            setForm(item as PopulatedToolCall);
             if (item?.function?.arguments) {
                 const argsString = typeof item.function.arguments === 'string'
                     ? item.function.arguments
@@ -118,7 +118,7 @@ const ToolCallFlexibleView: React.FC<ToolCallComponentProps> = ({
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
             mode={mode}
-            item={form as ToolCall}
+            item={form as PopulatedToolCall}
             itemType='toolcalls'
         >
             <TextInput

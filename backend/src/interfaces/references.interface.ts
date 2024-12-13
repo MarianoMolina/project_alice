@@ -20,6 +20,10 @@ export interface References {
     code_executions?: Types.ObjectId[] | ICodeExecutionDocument[];
 }
 
+export interface ReferenceHolder {
+    references?: References;
+}
+
 export interface ReferencesMethods {
     apiRepresentation(): any;
 }
@@ -30,6 +34,10 @@ export interface IDataClusterDocument extends References, Document, ReferencesMe
     updated_by: Types.ObjectId | IUserDocument;
     createdAt: Date;
     updatedAt: Date;
+}
+
+export interface DataClusterHolder {
+    data_cluster?: Types.ObjectId | IDataClusterDocument;
 }
 
 export interface IDataClusterModel extends Model<IDataClusterDocument> {

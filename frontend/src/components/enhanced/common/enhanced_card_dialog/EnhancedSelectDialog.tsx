@@ -49,7 +49,7 @@ const EnhancedSelectDialog = () => {
                 <EnhancedSelect
                     componentType={selectedComponentType}
                     EnhancedView={selectedEnhancedView}
-                    selectedItems={selectedItems}
+                    selectedItems={selectedItems as CollectionElement[]}
                     onSelect={handleSelect}
                     isInteractable={true}
                     multiple={selectDialogMultiple}

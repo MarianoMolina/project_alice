@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import {
     Typography,
 } from '@mui/material';
-import { DataClusterComponentProps, DataCluster, getDefaultDataClusterForm } from '../../../../types/DataClusterTypes';
+import { DataClusterComponentProps, getDefaultDataClusterForm, PopulatedDataCluster } from '../../../../types/DataClusterTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import Logger from '../../../../utils/Logger';
 import DataClusterManager from '../data_cluster_manager/DataClusterManager';
@@ -14,7 +14,7 @@ const DataClusterFlexibleView: React.FC<DataClusterComponentProps> = ({
     handleSave,
     handleDelete
 }) => {
-    const [form, setForm] = useState<Partial<DataCluster>>(item || getDefaultDataClusterForm());
+    const [form, setForm] = useState<Partial<PopulatedDataCluster>>(item as PopulatedDataCluster || getDefaultDataClusterForm());
     const [isSaving, setIsSaving] = useState(false);
 
     const isEditMode = mode === 'edit' || mode === 'create';
@@ -32,7 +32,7 @@ const DataClusterFlexibleView: React.FC<DataClusterComponentProps> = ({
     
     useEffect(() => {
         if (item) {
-            setForm(item);
+            setForm(item as PopulatedDataCluster);
         } else {
             onChange(getDefaultDataClusterForm());
         }
@@ -49,11 +49,11 @@ const DataClusterFlexibleView: React.FC<DataClusterComponentProps> = ({
         }
     }, [item, handleDelete]);
 
-    const handleDataClusterUpdate = useCallback((dataCluster: DataCluster | undefined) => {
+    const handleDataClusterUpdate = useCallback((dataCluster: PopulatedDataCluster | undefined) => {
         if (!dataCluster || Object.keys(dataCluster).length === 0) {
             return
         }
-        setForm(dataCluster);
+        setForm(dataCluster as PopulatedDataCluster);
     }, []);
 
     if (!form) {
@@ -69,7 +69,7 @@ const DataClusterFlexibleView: React.FC<DataClusterComponentProps> = ({
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
             mode={mode}
-            item={form as DataCluster}
+            item={form as PopulatedDataCluster}
             itemType="dataclusters"
         >
             <DataClusterManager

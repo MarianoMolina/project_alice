@@ -5,7 +5,7 @@ import MessageTableView from './MessageTableView';
 import MessageCardView from './MessageCardView';
 import MessageFullView from './MessageFullView';
 import MessageShortListView from './MessageShortListView';
-import { MessageType } from '../../../../types/MessageTypes';
+import { MessageType, PopulatedMessage } from '../../../../types/MessageTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
 import { MessageComponentProps } from '../../../../types/MessageTypes';
 
@@ -15,21 +15,21 @@ type EnhancedMessageMode = BaseMessageMode | ExtendedMessageMode;
 
 interface EnhancedMessageProps extends Omit<MessageComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
   mode: EnhancedMessageMode;
-  item?: Partial<MessageType> | null;
+  item?: Partial<MessageType | PopulatedMessage> | null;
   itemId?: string;
   fetchAll: boolean;
-  onSave?: (savedItem: MessageType) => void;
-  onDelete?: (deletedItem: MessageType) => Promise<void>;
+  onSave?: (savedItem: MessageType | PopulatedMessage) => void;
+  onDelete?: (deletedItem: MessageType | PopulatedMessage) => Promise<void>;
 }
 
 const EnhancedMessage: React.FC<EnhancedMessageProps> = (props) => {
   const renderContent = (
-    items: MessageType[] | null,
-    item: MessageType | null,
-    onChange: (newItem: Partial<MessageType>) => void,
+    items: (MessageType | PopulatedMessage)[] | null,
+    item: MessageType | PopulatedMessage | null,
+    onChange: (newItem: Partial<MessageType | PopulatedMessage>) => void,
     mode: BaseMessageMode,
     handleSave: () => Promise<void>,
-    onDelete: (deletedItem: MessageType) => Promise<void>,
+    onDelete: (deletedItem: MessageType | PopulatedMessage) => Promise<void>,
   ) => {
     const commonProps: MessageComponentProps = {
       items,
@@ -69,7 +69,7 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = (props) => {
     props.mode === 'edit' ? 'edit' : 'view';
 
   return (
-    <BaseDbElement<MessageType>
+    <BaseDbElement<MessageType | PopulatedMessage>
       collectionName="messages"
       itemId={props.itemId}
       mode={baseDbMode}

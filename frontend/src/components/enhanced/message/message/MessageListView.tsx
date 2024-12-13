@@ -21,8 +21,8 @@ const MessageListView: React.FC<MessageComponentProps> = ({
 
     return (
         <EnhancedListView<MessageType>
-            items={items}
-            item={item}
+            items={items as MessageType[]}
+            item={item as MessageType}
             getPrimaryText={getPrimaryText}
             getSecondaryText={getSecondaryText}
             onView={onView}

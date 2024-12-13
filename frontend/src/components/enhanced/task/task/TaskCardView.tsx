@@ -8,16 +8,17 @@ import {
     IconButton,
 } from '@mui/material';
 import { Category, Description, Functions, Person, ApiRounded, Settings, Logout, ExitToApp, AttachFile, Api } from '@mui/icons-material';
-import { TaskComponentProps, taskDescriptions } from '../../../../types/TaskTypes';
+import { PopulatedTask, TaskComponentProps, taskDescriptions } from '../../../../types/TaskTypes';
 import useStyles from '../TaskStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import TaskFlowchart from '../../common/task_flowchart/FlowChart';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
-import { hasAnyReferences } from '../../../../types/ReferenceTypes';
+import { hasAnyReferences, References } from '../../../../types/ReferenceTypes';
 import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
 import { apiTypeIcons } from '../../../../utils/ApiUtils';
 import { ApiType } from '../../../../types/ApiTypes';
+import { PopulatedDataCluster } from '../../../../types/DataClusterTypes';
 
 interface ChipItem {
     _id?: string;
@@ -146,13 +147,16 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
         {
             icon: <AttachFile />,
             primary_text: "References",
-            secondary_text: item.data_cluster && hasAnyReferences(item.data_cluster) ? <DataClusterManager dataCluster={item.data_cluster} /> : <Typography>"N/A"</Typography>,
+            secondary_text: item.data_cluster && 
+                hasAnyReferences(item.data_cluster as References) ? 
+                    <DataClusterManager dataCluster={item.data_cluster as PopulatedDataCluster} /> :
+                        <Typography>"N/A"</Typography>,
         },
         {
             icon: <ExitToApp />,
             primary_text: "Task flow",
             secondary_text: (item.node_end_code_routing && Object.keys(item.node_end_code_routing).length > 0) ?
-                <TaskFlowchart task={item} height={500} minWidth={500} />
+                <TaskFlowchart task={item as PopulatedTask} height={500} minWidth={500} />
                 : "No exit code routing defined"
         },
     ];
@@ -164,7 +168,7 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
             subtitle={item.task_description}
             id={item._id}
             listItems={listItems}
-            item={item}
+            item={item as PopulatedTask}
             itemType='tasks'
         />
     );

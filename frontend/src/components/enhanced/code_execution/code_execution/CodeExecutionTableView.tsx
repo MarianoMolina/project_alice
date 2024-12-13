@@ -24,8 +24,8 @@ const CodeExecutionTableView: React.FC<CodeExecutionComponentProps> = ({
 
   return (
     <EnhancedTableView<CodeExecution>
-      items={items}
-      item={item}
+      items={items as CodeExecution[]}
+      item={item as CodeExecution}
       columns={columns}
       onView={onView}
       onInteraction={onInteraction}

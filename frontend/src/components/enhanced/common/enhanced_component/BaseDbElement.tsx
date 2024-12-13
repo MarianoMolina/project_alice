@@ -30,11 +30,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { CircularProgress, Box } from '@mui/material';
 import { useApi } from '../../../../contexts/ApiContext';
-import { CollectionName, CollectionType } from '../../../../types/CollectionTypes';
+import { CollectionName, CollectionPopulatedType, CollectionType } from '../../../../types/CollectionTypes';
 import Logger from '../../../../utils/Logger';
 import { globalEventEmitter } from '../../../../utils/EventEmitter';
 
-export interface BaseDbElementProps<T extends CollectionType[CollectionName]> {
+export interface BaseDbElementProps<T extends CollectionType[CollectionName] | CollectionPopulatedType[CollectionName]> {
   /**
    * The name of the collection in the database
    */
@@ -44,6 +44,7 @@ export interface BaseDbElementProps<T extends CollectionType[CollectionName]> {
    * The ID of the item to fetch (if in view or edit mode)
    */
   itemId?: string;
+  partialItem?: Partial<T>;
 
   /**
    * The mode of operation: 'create', 'view', or 'edit'
@@ -96,27 +97,7 @@ export interface BaseDbElementProps<T extends CollectionType[CollectionName]> {
   ) => React.ReactNode;
 }
 
-export interface BaseDbElementProps<T extends CollectionType[CollectionName]> {
-  collectionName: CollectionName;
-  itemId?: string;
-  partialItem?: Partial<T>;
-  mode: 'create' | 'view' | 'edit';
-  fetchAll: boolean;
-  isInteractable?: boolean;
-  onInteraction?: (item: T) => void;
-  onSave?: (savedItem: T) => void;
-  onDelete?: (deletedItem: T) => Promise<void>;
-  render: (
-    items: T[] | null,
-    item: T | null,
-    onChange: (newItem: Partial<T>) => void,
-    mode: 'create' | 'view' | 'edit',
-    handleSave: () => Promise<void>,
-    onDelete: (deletedItem: T) => Promise<void>,
-  ) => React.ReactNode;
-}
-
-function BaseDbElement<T extends CollectionType[CollectionName]>({
+function BaseDbElement<T extends CollectionType[CollectionName] | CollectionPopulatedType[CollectionName]>({
   collectionName,
   itemId,
   partialItem,

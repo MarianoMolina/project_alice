@@ -1,9 +1,9 @@
 import { dbAxiosInstance, dbAxiosInstanceLMS, taskAxiosInstance } from './axiosInstance';
 import { AliceChat, convertToAliceChat } from '../types/ChatTypes';
-import { getDefaultMessageForm, MessageType } from '../types/MessageTypes';
+import { getDefaultMessageForm, MessageType, PopulatedMessage } from '../types/MessageTypes';
 import { TaskResponse, convertToTaskResponse } from '../types/TaskResponseTypes';
 import { CollectionName, CollectionPopulatedType, CollectionType } from '../types/CollectionTypes';
-import { FileReference, FileContentReference } from '../types/FileTypes';
+import { FileReference, FileContentReference, PopulatedFileReference } from '../types/FileTypes';
 import { createFileContentReference } from '../utils/FileUtils';
 import Logger from '../utils/Logger';
 import { converters, populatedConverters } from '../utils/Converters';
@@ -303,7 +303,7 @@ export const resumeChat = async (interaction: UserInteraction): Promise<AliceCha
   }
 };
 
-export const sendMessage = async (chatId: string, message: MessageType): Promise<AliceChat> => {
+export const sendMessage = async (chatId: string, message: PopulatedMessage): Promise<AliceChat> => {
   try {
     Logger.debug('Sending message to chatId:', chatId);
 
@@ -339,12 +339,12 @@ export const requestFileTranscript = async (
   fileId: string,
   agentId?: string,
   chatId?: string
-): Promise<MessageType> => {
+): Promise<PopulatedMessage> => {
   try {
     Logger.debug(`Requesting transcript for file: ${fileId}`);
 
     // First, check if the file already has a transcript
-    const fileData = await fetchItem('files', fileId) as FileReference;
+    const fileData = await fetchPopulatedItem('files', fileId) as PopulatedFileReference;
     if (fileData.transcript) {
       Logger.warn('File already has a transcript');
       return fileData.transcript;
@@ -362,10 +362,10 @@ export const requestFileTranscript = async (
     const taskId: string = response.data.task_id;
 
     // Set up WebSocket connection to receive updates
-    const transcriptMessage = await new Promise<MessageType>((resolve, reject) => {
+    const transcriptMessage = await new Promise<PopulatedMessage>((resolve, reject) => {
       setupWebSocketConnection(taskId, async (message: any) => {
         if (message.status === 'completed') {
-          const updatedFileData = await fetchItem('files', fileId) as FileReference;
+          const updatedFileData = await fetchPopulatedItem('files', fileId) as PopulatedFileReference;
           if (updatedFileData.transcript) {
             resolve(updatedFileData.transcript);
           } else {

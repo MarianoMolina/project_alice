@@ -4,7 +4,7 @@ import {
     Typography, Alert, Box, Button, Dialog, DialogContent, Tooltip,
 } from '@mui/material';
 import { DataObject, Visibility, History } from '@mui/icons-material';
-import { AliceTask, TaskComponentProps } from '../../../../types/TaskTypes';
+import { PopulatedTask, TaskComponentProps } from '../../../../types/TaskTypes';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 import TaskResponseList from '../../task_response/task_response/TaskResponseListView';
 import ParameterInputFields from '../../parameter/ParameterInputFields';
@@ -174,7 +174,7 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
 
     const executeTask = useCallback(async (inputs: any) => {
         if (!item || !onExecute) return;
-        setSelectedTask(item as AliceTask);
+        setSelectedTask(item as PopulatedTask);
         setInputValues(inputs);
         await onExecute();
     }, [item, onExecute, setSelectedTask, setInputValues]);

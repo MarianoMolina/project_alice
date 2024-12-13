@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Typography, IconButton } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
-import { DataCluster } from '../../../../types/DataClusterTypes';
+import { PopulatedDataCluster } from '../../../../types/DataClusterTypes';
 import { References } from '../../../../types/ReferenceTypes';
 import { CollectionType } from '../../../../types/CollectionTypes';
 import ReferenceChip from '../ReferenceChip';
@@ -10,8 +10,8 @@ import { useApi } from '../../../../contexts/ApiContext';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 
 interface DataClusterEditingViewProps {
-    editedCluster: DataCluster;
-    onClusterChange: (newCluster: DataCluster) => void;
+    editedCluster: PopulatedDataCluster;
+    onClusterChange: (newCluster: PopulatedDataCluster) => void;
 }
 
 const DataClusterEditingView: React.FC<DataClusterEditingViewProps> = ({

@@ -60,8 +60,8 @@ const FileListView: React.FC<FileComponentProps> = ({
     
     return (
         <EnhancedListView<FileReference>
-            items={items}
-            item={item}
+            items={items as FileReference[]}
+            item={item as FileReference}
             getPrimaryText={getPrimaryText}
             getSecondaryText={getSecondaryText}
             onView={onView}

@@ -1,4 +1,4 @@
-import { convertToBaseDatabaseObject, convertToEmbeddable, Embeddable, EnhancedComponentProps } from './CollectionTypes';
+import { convertToBaseDatabaseObject, convertToEmbeddable, convertToPopulatedEmbeddable, Embeddable, EnhancedComponentProps, PopulatedEmbeddable } from './CollectionTypes';
 export interface CodeBlock {
     code: string;
     language: string;
@@ -14,6 +14,12 @@ export interface CodeExecution extends Embeddable {
     code_output: CodeOutput;
 }
 
+
+// Fixed PopulatedCodeExecution
+export interface PopulatedCodeExecution extends Omit<CodeExecution, keyof PopulatedEmbeddable>, PopulatedEmbeddable {
+
+}
+
 export const convertToCodeExecution = (data: any): CodeExecution => {
     return {
         ...convertToBaseDatabaseObject(data),
@@ -23,10 +29,19 @@ export const convertToCodeExecution = (data: any): CodeExecution => {
     };
 };
 
-export interface CodeExecutionComponentProps extends EnhancedComponentProps<CodeExecution> {
+export const convertToPopulatedCodeExecution = (data: any): PopulatedCodeExecution => {
+    return {
+        ...convertToBaseDatabaseObject(data),
+        ...convertToPopulatedEmbeddable(data),
+        code_block: data?.code_block || {},
+        code_output: data?.code_output || {},
+    };
+}
+
+export interface CodeExecutionComponentProps extends EnhancedComponentProps<CodeExecution | PopulatedCodeExecution> {
     
 }
-export const getDefaultCodeExecutionForm = (): Partial<CodeExecution> => ({
+export const getDefaultCodeExecutionForm = (): Partial<PopulatedCodeExecution> => ({
     code_block: {
         code: '',
         language: ''

@@ -1,7 +1,7 @@
 import { Document, Types, Model } from 'mongoose';
 import { IFunctionParameters } from '../models/functionSchema';
 import { IUserCheckpoint } from './userCheckpoint.interface';
-import { IDataClusterDocument, References } from './references.interface';
+import { DataClusterHolder, IDataClusterDocument, References } from './references.interface';
 import { IUserDocument } from './user.interface';
 
 export enum TaskType {
@@ -18,7 +18,7 @@ export enum TaskType {
   WebScrapeBeautifulSoupTask = "WebScrapeBeautifulSoupTask"
 }
 
-export interface ITask {
+export interface ITask extends DataClusterHolder {
   task_name: string;
   task_description: string;
   task_type: TaskType;
@@ -27,7 +27,6 @@ export interface ITask {
   tasks: Map<string, Types.ObjectId> | null;
   templates: Map<string, Types.ObjectId> | null;
   user_checkpoints: Map<string, IUserCheckpoint | Types.ObjectId> | null;
-  data_cluster?: Types.ObjectId | IDataClusterDocument;
   required_apis: Array<string> | null;
   max_attempts: number;
   recursive: boolean;

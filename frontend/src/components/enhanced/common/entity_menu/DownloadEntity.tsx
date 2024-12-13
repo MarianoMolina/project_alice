@@ -1,11 +1,11 @@
 import { IconButton, Tooltip, Box, Typography } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import { styled } from '@mui/system';
-import { CollectionName, collectionNameToElementString, CollectionType } from '../../../../types/CollectionTypes';
+import { CollectionName, collectionNameToElementString, CollectionPopulatedType } from '../../../../types/CollectionTypes';
 import { removeCreatedUpdatedBy } from '../../../../utils/AuthUtils';
 
 interface DownloadEntityProps<T extends CollectionName> {
-  item: CollectionType[T];
+  item: CollectionPopulatedType[T];
   itemType: T;
   tooltipText?: string;
   showLabel?: boolean;

@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { Box, Typography, Select, MenuItem, Alert, IconButton, Tooltip, FormControl } from '@mui/material';
-import { AliceTask, RouteMap, TasksEndCodeRouting, TaskType } from '../../../../types/TaskTypes';
+import { PopulatedTask, RouteMap, TasksEndCodeRouting, TaskType } from '../../../../types/TaskTypes';
 import RouteMapView from './RouteMapView';
 import useStyles from './RoutingStyles';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -12,7 +12,7 @@ import TitleBox from '../inputs/TitleBox';
 
 interface TaskEndCodeRoutingBuilderProps {
   title?: string | undefined;
-  tasks?: AliceTask[];
+  tasks?: PopulatedTask[];
   routing: TasksEndCodeRouting;
   onChange: (routing: TasksEndCodeRouting) => void;
   onChangeStartNode: (nodeName: string | null) => void;

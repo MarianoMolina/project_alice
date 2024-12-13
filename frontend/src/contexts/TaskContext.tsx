@@ -1,9 +1,10 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback } from 'react';
 import { TaskResponse } from '../types/TaskResponseTypes';
 import { useApi } from './ApiContext';
-import { AliceTask } from '../types/TaskTypes';
+import { AliceTask, PopulatedTask } from '../types/TaskTypes';
 import { useNotification } from './NotificationContext';
 import Logger from '../utils/Logger';
+import { fetchPopulatedItem } from '../services/api';
 
 export interface RecentExecution {
   taskId: string;
@@ -13,21 +14,19 @@ export interface RecentExecution {
 }
 
 interface TaskContextType {
-  tasks: AliceTask[];
-  selectedTask: AliceTask | null;
+  tasks: AliceTask[] | PopulatedTask[];
+  selectedTask: PopulatedTask | null;
   taskResults: TaskResponse[];
-  selectedResult: TaskResponse | null;
   inputValues: { [key: string]: any };
   executionStatus: 'idle' | 'progress' | 'success';
   recentExecutions: RecentExecution[];
   fetchTasks: () => Promise<void>;
   fetchTaskResults: () => Promise<void>;
-  handleSelectTask: (task: AliceTask) => void;
+  handleSelectTask: (task: AliceTask | PopulatedTask) => void;
   handleInputChange: (key: string, value: any) => void;
   setInputValues: (values: { [key: string]: any }) => void;
   handleExecuteTask: () => Promise<void>;
-  setSelectedResult: (result: TaskResponse | null) => void;
-  setSelectedTask: (task: AliceTask | null) => void;
+  setSelectedTask: (task: PopulatedTask | null) => void;
   resetRecentExecutions: () => void;
   setTaskById: (taskId: string) => void;
   getTaskResultsById: (taskId: string) => TaskResponse[];
@@ -39,9 +38,8 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const { addNotification } = useNotification();
   const { fetchItem, executeTask } = useApi();
   const [tasks, setTasks] = useState<AliceTask[]>([]);
-  const [selectedTask, setSelectedTask] = useState<AliceTask | null>(null);
+  const [selectedTask, setSelectedTask] = useState<PopulatedTask | null>(null);
   const [taskResults, setTaskResults] = useState<TaskResponse[]>([]);
-  const [selectedResult, setSelectedResult] = useState<TaskResponse | null>(null);
   const [inputValues, setInputValues] = useState<{ [key: string]: any }>({});
   const [executionStatus, setExecutionStatus] = useState<'idle' | 'progress' | 'success'>('idle');
   const [recentExecutions, setRecentExecutions] = useState<RecentExecution[]>([]);
@@ -55,11 +53,29 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [fetchItem]);
 
+  const updateRecentExecutions = useCallback(async () => {
+    // Initialize recentExecutions with the latest 10 task results
+    const sortedResults = (taskResults as TaskResponse[])
+      .sort((a, b) => {
+        const dateA = new Date(a.createdAt || 0).getTime();
+        const dateB = new Date(b.createdAt || 0).getTime();
+        return dateB - dateA;
+      });
+
+    const latestExecutions = sortedResults.slice(0, 10).map(result => ({
+      taskId: result.task_id,
+      inputs: result.task_inputs || {},
+      result: result,
+      timestamp: new Date(result.createdAt || new Date())
+    }));
+    setRecentExecutions(latestExecutions);
+  }, [taskResults]);
+
   const fetchTaskResults = useCallback(async () => {
     try {
       const fetchedResults = await fetchItem('taskresults');
       setTaskResults(fetchedResults as TaskResponse[]);
-     
+
       // Initialize recentExecutions with the latest 10 task results
       const sortedResults = (fetchedResults as TaskResponse[])
         .sort((a, b) => {
@@ -67,7 +83,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           const dateB = new Date(b.createdAt || 0).getTime();
           return dateB - dateA;
         });
-  
+
       const latestExecutions = sortedResults.slice(0, 10).map(result => ({
         taskId: result.task_id,
         inputs: result.task_inputs || {},
@@ -85,15 +101,16 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     fetchTaskResults();
   }, [fetchTasks, fetchTaskResults]);
 
-  const setTaskById = (taskId: string) => {
-    const task = tasks.find(task => task._id === taskId);
+  const setTaskById = async (taskId: string) => {
+    const task = await fetchPopulatedItem('tasks', taskId);
     if (task) {
-      setSelectedTask(task);
+      setSelectedTask(task as PopulatedTask);
     }
   };
 
-  const handleSelectTask = (task: AliceTask) => {
-    setSelectedTask(task);
+  const handleSelectTask = async (task: AliceTask | PopulatedTask) => {
+    if (!task._id) return;
+    await setTaskById(task._id);
     setInputValues({});
     setExecutionStatus('idle');
   };
@@ -108,9 +125,9 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       Logger.debug('Executing task:', selectedTask._id, inputValues);
       setExecutionStatus('progress');
       const result = await executeTask(selectedTask._id, inputValues);
-      await fetchTaskResults(); 
+      setTaskResults([...taskResults, result]);
+      await updateRecentExecutions();
       addNotification('Task executed successfully', 'success');
-      setSelectedResult(result);
       setExecutionStatus('success');
     } catch (error) {
       Logger.error('Error executing task:', error);
@@ -131,7 +148,6 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     tasks,
     selectedTask,
     taskResults,
-    selectedResult,
     inputValues,
     executionStatus,
     recentExecutions,
@@ -141,7 +157,6 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     handleInputChange,
     setInputValues,
     handleExecuteTask,
-    setSelectedResult, 
     setSelectedTask,
     resetRecentExecutions,
     setTaskById,

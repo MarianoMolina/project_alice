@@ -13,8 +13,8 @@ const CodeExecutionShortListView: React.FC<CodeExecutionComponentProps> = ({
 
     return (
         <EnhancedShortListView<CodeExecution>
-            items={items}
-            item={item}
+            items={items as CodeExecution[]}
+            item={item as CodeExecution}
             getPrimaryText={getPrimaryText}
             getSecondaryText={getSecondaryText}
             onView={onView}

@@ -13,8 +13,8 @@ const MessageShortListView: React.FC<MessageComponentProps> = ({
 
     return (
         <EnhancedShortListView<MessageType>
-            items={items}
-            item={item}
+            items={items as MessageType[]}
+            item={item as MessageType}
             getPrimaryText={getPrimaryText}
             getSecondaryText={getSecondaryText}
             onView={onView}

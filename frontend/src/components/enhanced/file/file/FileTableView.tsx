@@ -35,8 +35,8 @@ const FileTableView: React.FC<FileComponentProps> = ({
 
   return (
     <EnhancedTableView<FileReference>
-      items={items}
-      item={item}
+      items={items as FileReference[]}
+      item={item as FileReference}
       columns={columns}
       onView={onView}
       onInteraction={onInteraction}

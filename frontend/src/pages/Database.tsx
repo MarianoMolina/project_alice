@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import { Add, Person, Category, Settings, Description, Functions, Assignment, Api, AttachFile, Message, QuestionAnswer, Link, Feedback, LiveHelp, Diversity2 } from '@mui/icons-material';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH, TASK_SIDEBAR_WIDTH_TABLE, TASK_SIDEBAR_WIDTH_COMPACT } from '../utils/Constants';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
-import { ComponentMode, CollectionElement, CollectionElementString } from '../types/CollectionTypes';
+import { ComponentMode, CollectionElement, CollectionElementString, CollectionPopulatedElement, collectionNameToElementString, getCollectionNameFromElement } from '../types/CollectionTypes';
 import EnhancedAgent from '../components/enhanced/agent/agent/EnhancedAgent';
 import EnhancedPrompt from '../components/enhanced/prompt/prompt/EnhancedPrompt';
 import EnhancedModel from '../components/enhanced/model/model/EnhancedModel';
@@ -27,10 +27,11 @@ import EnhancedEntityReference from '../components/enhanced/entity_reference/ent
 import EnhancedAPIConfig from '../components/enhanced/api_config/api_config/EnhancedAPIConfig';
 import EnhancedCodeExecution from '../components/enhanced/code_execution/code_execution/EnhancedCodeExecution';
 import EnhancedToolCall from '../components/enhanced/tool_calls/tool_calls/EnhancedToolCall';
+import { fetchPopulatedItem } from '../services/api';
 
 const Database: React.FC = () => {
     const classes = useStyles();
-    const [selectedItem, setSelectedItem] = useState<CollectionElement | null>(null);
+    const [selectedItem, setSelectedItem] = useState<CollectionPopulatedElement | null>(null);
     const { selectCardItem } = useCardDialog();
     const [activeTab, setActiveTab] = useState<CollectionElementString>('Agent');
     const [showActiveComponent, setShowActiveComponent] = useState(false);
@@ -45,14 +46,17 @@ const Database: React.FC = () => {
         setShowActiveComponent(true);
     }, [setSelectedItem]);
 
-    const handleItemSelect = useCallback((item: CollectionElement | null) => {
+    const handleItemSelect = useCallback((item: CollectionElement | CollectionPopulatedElement | null) => {
         Logger.debug('Database - Item selected:', item);
-        setSelectedItem(item);
+        // Use collectionNameToElementString to get the correct string
+        const collectionName = getCollectionNameFromElement(activeTab);
+        const popItem = fetchPopulatedItem(collectionName, item?._id);
+        setSelectedItem(popItem as CollectionPopulatedElement);
         setIsCreating(false);
         setShowActiveComponent(true);
     }, [setSelectedItem]);
 
-    const handleSave = useCallback(async (item: CollectionElement | null) => {
+    const handleSave = useCallback(async (item: CollectionElement | CollectionPopulatedElement | null) => {
         Logger.debug('Database - Saving item:', item);
         setSelectedItem(null);
         setIsCreating(false);

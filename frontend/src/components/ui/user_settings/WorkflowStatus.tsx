@@ -41,6 +41,7 @@ const WorkflowHealthStatus = () => {
     // Initial fetch on mount
     useEffect(() => {
         checkStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

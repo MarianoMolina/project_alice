@@ -6,7 +6,7 @@ import {
     Search as SearchIcon,
     Close,
 } from '@mui/icons-material';
-import { DataCluster } from '../../../../types/DataClusterTypes';
+import { PopulatedDataCluster } from '../../../../types/DataClusterTypes';
 import { References } from '../../../../types/ReferenceTypes';
 import MessageShortListView from '../../message/message/MessageShortListView';
 import FileShortListView from '../../file/file/FileShortListView';
@@ -20,9 +20,9 @@ import UserInteractionShortListView from '../../user_interaction/user_interactio
 export type ViewType = 'flat' | 'categorized' | 'reference';
 
 export interface DataClusterManagerProps {
-    dataCluster: DataCluster | undefined;
+    dataCluster: PopulatedDataCluster | undefined;
     isEditable?: boolean;
-    onDataClusterChange?: (dataCluster: DataCluster | undefined) => void;
+    onDataClusterChange?: (dataCluster: PopulatedDataCluster | undefined) => void;
     showCreate?: boolean;
     showEdit?: boolean;
     showSelect?: boolean;

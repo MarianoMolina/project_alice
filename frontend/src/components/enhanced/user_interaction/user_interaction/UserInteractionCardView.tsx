@@ -4,7 +4,7 @@ import {
     Button,
 } from '@mui/material';
 import { Language, QueryBuilder, DataObject, Functions, QuestionAnswer } from '@mui/icons-material';
-import { UserInteractionComponentProps } from '../../../../types/UserInteractionTypes';
+import { PopulatedUserInteraction, UserInteractionComponentProps } from '../../../../types/UserInteractionTypes';
 import { useDialog } from '../../../../contexts/DialogCustomContext';
 import { useApi } from '../../../../contexts/ApiContext';
 import CommonCardView from '../../common/enhanced_component/CardView';
@@ -16,7 +16,7 @@ import { useCardDialog } from '../../../../contexts/CardDialogContext';
 const UserInteractionCardView: React.FC<UserInteractionComponentProps> = ({
     item: initialItem
 }) => {
-    const [item, setItem] = useState(initialItem);
+    const [item, setItem] = useState(initialItem as PopulatedUserInteraction);
     const { openDialog } = useDialog();
     const { selectCardItem } = useCardDialog();
     const { updateUserInteraction } = useApi();
@@ -24,6 +24,7 @@ const UserInteractionCardView: React.FC<UserInteractionComponentProps> = ({
     if (!item) {
         return <Typography>No User Interaction data available.</Typography>;
     }
+
     const handleViewOwner = () => {
         if (item.owner && item.owner.type === 'task_response') {
             selectCardItem('TaskResponse', item.owner.id as string);
@@ -49,7 +50,7 @@ const UserInteractionCardView: React.FC<UserInteractionComponentProps> = ({
                             }
                         );
                         Logger.debug('User interaction updated:', updatedInteraction);
-                        setItem(updatedInteraction);
+                        setItem(updatedInteraction as PopulatedUserInteraction);
                     } catch (error) {
                         Logger.error('Error handling user response:', error);
                     }

@@ -2,7 +2,7 @@ import React from 'react';
 import TaskResponseListView from './TaskResponseListView';
 import TaskResponseTableView from './TaskResponseTableView';
 import TaskResponseCardView from './TaskResponseCardView';
-import { TaskResponse } from '../../../../types/TaskResponseTypes';
+import { PopulatedTaskResponse, TaskResponse } from '../../../../types/TaskResponseTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
 import { TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
 import TaskResponseShortListView from './TaskResponseShortListView';
@@ -15,20 +15,20 @@ interface EnhancedTaskResponseProps extends Omit<TaskResponseComponentProps, 'it
   mode: EnhancedTaskResponseMode;
   itemId?: string;
   fetchAll: boolean;
-  onSave?: (savedItem: TaskResponse) => void;
-  onDelete?: (deletedItem: TaskResponse) => Promise<void>;
-  onInteraction?: (selectedItem: TaskResponse) => void;
-  onView?: (viewItem: TaskResponse) => void;
+  onSave?: (savedItem: TaskResponse | PopulatedTaskResponse) => void;
+  onDelete?: (deletedItem: TaskResponse | PopulatedTaskResponse) => Promise<void>;
+  onInteraction?: (selectedItem: TaskResponse | PopulatedTaskResponse) => void;
+  onView?: (viewItem: TaskResponse | PopulatedTaskResponse) => void;
 }
 
 const EnhancedTaskResponse: React.FC<EnhancedTaskResponseProps> = (props) => {
   const renderContent = (
-    items: TaskResponse[] | null,
-    item: TaskResponse | null,
-    onChange: (newItem: Partial<TaskResponse>) => void,
+    items: (TaskResponse | PopulatedTaskResponse)[] | null,
+    item: TaskResponse | PopulatedTaskResponse | null,
+    onChange: (newItem: Partial<TaskResponse | PopulatedTaskResponse>) => void,
     mode: BaseTaskResponseMode,
     handleSave: () => Promise<void>,
-    onDelete: (deletedItem: TaskResponse) => Promise<void>,
+    onDelete: (deletedItem: TaskResponse | PopulatedTaskResponse) => Promise<void>,
   ) => {
     const commonProps: TaskResponseComponentProps = {
       items,
@@ -65,7 +65,7 @@ const EnhancedTaskResponse: React.FC<EnhancedTaskResponseProps> = (props) => {
       props.mode === 'edit' ? 'edit' : 'view';
 
   return (
-    <BaseDbElement<TaskResponse>
+    <BaseDbElement<TaskResponse | PopulatedTaskResponse>
       collectionName="taskresults"
       itemId={props.itemId}
       mode={baseDbMode}

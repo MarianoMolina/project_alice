@@ -13,8 +13,8 @@ const TaskResponseShortListView: React.FC<TaskResponseComponentProps> = ({
 
     return (
         <EnhancedShortListView<TaskResponse>
-            items={items}
-            item={item}
+            items={items as TaskResponse[]}
+            item={item as TaskResponse}
             getPrimaryText={getPrimaryText}
             getSecondaryText={getSecondaryText}
             onView={onView}

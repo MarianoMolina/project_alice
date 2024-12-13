@@ -5,10 +5,11 @@ import {
     Stack
 } from '@mui/material';
 import { Language, DataObject, QueryBuilder } from '@mui/icons-material';
-import { DataClusterComponentProps } from '../../../../types/DataClusterTypes';
+import { DataClusterComponentProps, PopulatedDataCluster } from '../../../../types/DataClusterTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import ReferenceChip from '../ReferenceChip';
 import ReferencesViewer from '../ReferencesViewer';
+import { PopulatedReferences } from '../../../../types/ReferenceTypes';
 
 const DataClusterCardView: React.FC<DataClusterComponentProps> = ({
     item
@@ -17,14 +18,16 @@ const DataClusterCardView: React.FC<DataClusterComponentProps> = ({
         return <Typography>No Data Cluster data available.</Typography>;
     }
 
+    const populatedItem = item as PopulatedDataCluster;
+
     const renderEmbeddingChips = () => {
-        if (!item.embeddings || item.embeddings.length === 0) {
+        if (!populatedItem.embeddings || populatedItem.embeddings.length === 0) {
             return <Typography color="text.secondary">No embedding chunks</Typography>;
         }
 
         return (
             <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
-                {item.embeddings.map((chunk, index) => (
+                {populatedItem.embeddings.map((chunk, index) => (
                     <ReferenceChip
                         key={chunk._id}
                         reference={chunk}
@@ -48,14 +51,14 @@ const DataClusterCardView: React.FC<DataClusterComponentProps> = ({
             primary_text: "References",
             secondary_text: (
                 <ReferencesViewer
-                    references={item}
+                    references={item as PopulatedReferences}
                 />
             )
         },
         {
             icon: <QueryBuilder />,
             primary_text: "Created At",
-            secondary_text: new Date(item.createdAt || '').toLocaleString()
+            secondary_text: new Date(populatedItem.createdAt || '').toLocaleString()
         }
     ];
 
@@ -63,9 +66,9 @@ const DataClusterCardView: React.FC<DataClusterComponentProps> = ({
         <CommonCardView
             elementType='Data Cluster'
             title={'Data Cluster Details'}
-            id={item._id}
+            id={populatedItem._id}
             listItems={listItems}
-            item={item}
+            item={populatedItem}
             itemType='dataclusters'
         />
     );

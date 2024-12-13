@@ -29,8 +29,8 @@ const ToolCallTableView: React.FC<ToolCallComponentProps> = ({
 
   return (
     <EnhancedTableView<ToolCall>
-      items={items}
-      item={item}
+      items={items as ToolCall[]}
+      item={item as ToolCall}
       columns={columns}
       onView={onView}
       onInteraction={onInteraction}

@@ -17,6 +17,7 @@ export const convertToEmbeddingChunk = (data: any): EmbeddingChunk => {
     };
 };
 
+
 export interface EmbeddingChunkComponentProps extends EnhancedComponentProps<EmbeddingChunk> {
 
 }

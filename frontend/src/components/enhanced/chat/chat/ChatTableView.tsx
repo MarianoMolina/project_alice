@@ -30,8 +30,8 @@ const ChatTableView: React.FC<ChatComponentProps> = ({
 
   return (
     <EnhancedTableView<AliceChat>
-      items={items}
-      item={item}
+      items={items as AliceChat[]}
+      item={item as AliceChat}
       columns={columns}
       onView={onView}
       onInteraction={onInteraction}

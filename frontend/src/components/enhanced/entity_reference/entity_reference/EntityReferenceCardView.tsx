@@ -17,7 +17,7 @@ import {
     Image,
     Cable,
 } from '@mui/icons-material';
-import { EntityReferenceComponentProps } from '../../../../types/EntityReferenceTypes';
+import { EntityReferenceComponentProps, PopulatedEntityReference } from '../../../../types/EntityReferenceTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
@@ -32,9 +32,11 @@ const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
         return <Typography>No Entity Reference data available.</Typography>;
     }
 
+    const populatedItem = item as PopulatedEntityReference;
+
     const renderCategories = () => (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {item.categories?.map((category) => {
+            {populatedItem.categories?.map((category) => {
                 const Icon = referenceCategoryToIcon[category];
                 return (
                     <Chip
@@ -50,7 +52,7 @@ const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
 
     const renderImages = () => (
         <Stack spacing={1}>
-            {item.images.map((image, index) => (
+            {populatedItem.images.map((image, index) => (
                 <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <Avatar src={image.url} alt={image.alt}>
                         <Image />
@@ -72,7 +74,7 @@ const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
 
     const renderConnections = () => (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {item.connections.map((connection) => (
+            {populatedItem.connections.map((connection) => (
                 <Chip
                     key={connection.entity_id}
                     label={`${connection.entity_id} (${connection.similarity_score.toFixed(2)})`}
@@ -82,8 +84,8 @@ const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
         </Box>
     );
 
-    const embeddingChunkViewer = item.embedding && item.embedding?.length > 0 ?
-     item.embedding.map((chunk, index) => (
+    const embeddingChunkViewer = populatedItem.embedding && populatedItem.embedding?.length > 0 ?
+     populatedItem.embedding.map((chunk, index) => (
         <EmbeddingChunkViewer
             key={chunk._id || `embedding-${index}`}
             item={chunk}
@@ -95,15 +97,15 @@ const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
         {
             icon: <Source />,
             primary_text: "Source ID",
-            secondary_text: item.source_id
+            secondary_text: populatedItem.source_id
         },
         {
-            icon: item.source ? apiTypeIcons[item.source] : <Source />,
+            icon: populatedItem.source ? apiTypeIcons[populatedItem.source] : <Source />,
             primary_text: "Source",
-            secondary_text: item.source && (
+            secondary_text: populatedItem.source && (
                 <Chip
-                    icon={apiTypeIcons[item.source]}
-                    label={item.source}
+                    icon={apiTypeIcons[populatedItem.source]}
+                    label={populatedItem.source}
                     size="small"
                 />
             )
@@ -117,20 +119,20 @@ const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
             icon: <Language />,
             primary_text: "URL",
             secondary_text: (
-                <Link href={item.url} target="_blank" rel="noopener noreferrer">
-                    {item.url}
+                <Link href={populatedItem.url} target="_blank" rel="noopener noreferrer">
+                    {populatedItem.url}
                 </Link>
             )
         },
         {
             icon: <DataObject />,
             primary_text: "Description",
-            secondary_text: <AliceMarkdown showCopyButton children={item.description ?? ''} />
+            secondary_text: <AliceMarkdown showCopyButton children={populatedItem.description ?? ''} />
         },
         {
             icon: <Description />,
             primary_text: "Content",
-            secondary_text: <AliceMarkdown showCopyButton children={item.content ?? ''} />
+            secondary_text: <AliceMarkdown showCopyButton children={populatedItem.content ?? ''} />
         },
         {
             icon: <Image />,
@@ -150,22 +152,22 @@ const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
         {
             icon: <DataObject />,
             primary_text: "Metadata",
-            secondary_text: <CodeBlock language="json" code={JSON.stringify(item.metadata, null, 2)} />
+            secondary_text: <CodeBlock language="json" code={JSON.stringify(populatedItem.metadata, null, 2)} />
         },
         {
             icon: <QueryBuilder />,
             primary_text: "Created at",
-            secondary_text: new Date(item.createdAt || '').toLocaleString()
+            secondary_text: new Date(populatedItem.createdAt || '').toLocaleString()
         }
     ].filter(item => item.secondary_text); // Only show items with content
 
     return (
         <CommonCardView
             elementType='Entity Reference'
-            title={item.name ?? ''}
-            id={item._id}
+            title={populatedItem.name ?? ''}
+            id={populatedItem._id}
             listItems={listItems}
-            item={item}
+            item={item as PopulatedEntityReference}
             itemType='entityreferences'
         />
     );

@@ -1,6 +1,6 @@
 import React from 'react';
 import { AliceChat } from '../../../../types/ChatTypes';
-import { AliceTask, TaskComponentProps } from '../../../../types/TaskTypes';
+import { AliceTask, PopulatedTask, TaskComponentProps } from '../../../../types/TaskTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
 import TaskCardView from './TaskCardView';
 import TaskListView from './TaskListView';
@@ -16,21 +16,21 @@ type EnhancedTaskMode = BaseTaskMode | ExtendedTaskMode;
 interface EnhancedTaskProps extends Omit<TaskComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
     mode: EnhancedTaskMode;
     itemId?: string;
-    item?: Partial<AliceTask> | null;
+    item?: Partial<AliceTask | PopulatedTask> | null;
     fetchAll: boolean;
-    onSave?: (savedItem: AliceTask) => void;
-    onDelete?: (deletedItem: AliceTask) => Promise<void>;
+    onSave?: (savedItem: AliceTask | PopulatedTask) => void;
+    onDelete?: (deletedItem: AliceTask | PopulatedTask) => Promise<void>;
     onExecute?: () => Promise<any>;
 }
 
 const EnhancedTask: React.FC<EnhancedTaskProps> = (props) => {
     const renderContent = (
-        items: AliceTask[] | null,
-        item: AliceTask | null,
-        onChange: (newItem: Partial<AliceTask>) => void,
+        items: (AliceTask | PopulatedTask)[] | null,
+        item: AliceTask | PopulatedTask | null,
+        onChange: (newItem: Partial<AliceTask | PopulatedTask>) => void,
         mode: BaseTaskMode,
         handleSave: () => Promise<void>,
-        onDelete: (deletedItem: AliceTask) => Promise<void>,
+        onDelete: (deletedItem: AliceTask | PopulatedTask) => Promise<void>,
     ) => {
         const commonProps: TaskComponentProps = {
             items,
@@ -69,7 +69,7 @@ const EnhancedTask: React.FC<EnhancedTaskProps> = (props) => {
             props.mode === 'edit' ? 'edit' : 'view';
 
     return (
-        <BaseDbElement<AliceTask>
+        <BaseDbElement<AliceTask | PopulatedTask>
             collectionName="tasks"
             itemId={props.itemId}
             partialItem={props.item || undefined}

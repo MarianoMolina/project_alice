@@ -27,8 +27,8 @@ const TaskListView: React.FC<TaskComponentProps> = ({
 
     return (
         <EnhancedListView<AliceTask>
-            items={items}
-            item={item}
+            items={items as AliceTask[]}
+            item={item as AliceTask}
             getPrimaryText={getPrimaryText}
             getSecondaryText={getSecondaryText}
             onView={onView}

@@ -7,8 +7,7 @@ import { BaseDatabaseObject, convertToBaseDatabaseObject, EnhancedComponentProps
 import { API } from './ApiTypes';
 import Logger from "../utils/Logger";
 import { UserCheckpoint } from "./UserCheckpointTypes";
-import { References } from "./ReferenceTypes";
-import { convertToDataCluster } from "./DataClusterTypes";
+import { convertToPopulatedDataCluster, PopulatedDataCluster } from "./DataClusterTypes";
 
 export enum TaskType {
   APITask = "APITask",
@@ -35,16 +34,21 @@ export interface AliceTask extends BaseDatabaseObject {
   input_variables: FunctionParameters | null;
   exit_codes: { [key: string]: string };
   templates: { [key: string]: Prompt | null };
-  tasks: { [key: string]: AliceTask };
+  tasks: { [key: string]: string };
   valid_languages: string[];
   exit_code_response_map: { [key: string]: number } | null;
   start_node?: string | null;
   required_apis?: ApiType[] | null;
   node_end_code_routing?: TasksEndCodeRouting | null;
   user_checkpoints?: { [key: string]: UserCheckpoint };
-  data_cluster?: References;
+  data_cluster?: string;
   recursive: boolean;
   max_attempts?: number;
+}
+
+export interface PopulatedTask extends Omit<AliceTask, 'data_cluster' | 'tasks'> {
+  data_cluster?: PopulatedDataCluster;
+  tasks: { [key: string]: PopulatedTask };
 }
 
 export const convertToAliceTask = (data: any): AliceTask => {
@@ -57,9 +61,7 @@ export const convertToAliceTask = (data: any): AliceTask => {
     exit_codes: data?.exit_codes || {},
     recursive: data?.recursive || false,
     templates: data?.templates || {},
-    tasks: typeof data?.tasks === 'object' && data?.tasks !== null
-      ? Object.fromEntries(Object.entries(data.tasks).map(([key, value]: [string, any]) => [key, value || value]))
-      : {},
+    tasks: typeof data?.tasks === 'object' && data?.tasks !== null ? data.tasks : {},
     valid_languages: data?.valid_languages || [],
     exit_code_response_map: data?.exit_code_response_map || null,
     start_node: data?.start_node || null,
@@ -68,13 +70,36 @@ export const convertToAliceTask = (data: any): AliceTask => {
     max_attempts: data?.max_attempts || undefined,
     agent: data?.agent || null,
     user_checkpoints: data?.user_checkpoints || {},
-    data_cluster: data?.data_cluster ? convertToDataCluster(data.data_cluster) : undefined,
+    data_cluster: data?.data_cluster || undefined,
   };
 };
 
+export const convertToPopulatedTask = (data: any): PopulatedTask => {
+  return {
+    ...convertToBaseDatabaseObject(data),
+    task_name: data?.task_name || '',
+    task_description: data?.task_description || '',
+    task_type: data?.task_type || '',
+    input_variables: data?.input_variables || null,
+    exit_codes: data?.exit_codes || {},
+    recursive: data?.recursive || false,
+    templates: data?.templates || {},
+    tasks: typeof data?.tasks === 'object' && data?.tasks !== null ? data.tasks : {},
+    valid_languages: data?.valid_languages || [],
+    exit_code_response_map: data?.exit_code_response_map || null,
+    start_node: data?.start_node || null,
+    required_apis: data?.required_apis || null,
+    node_end_code_routing: data?.node_end_code_routing || null,
+    max_attempts: data?.max_attempts || undefined,
+    agent: data?.agent || null,
+    user_checkpoints: data?.user_checkpoints || {},
+    data_cluster: data?.data_cluster ? convertToPopulatedDataCluster(data.data_cluster) : undefined,
+  };
+}
+
 export const DefaultAliceTask: AliceTask = convertToAliceTask({});
 
-export interface TaskComponentProps extends EnhancedComponentProps<AliceTask> {
+export interface TaskComponentProps extends EnhancedComponentProps<AliceTask | PopulatedTask> {
   onExecute?: () => Promise<any>;
 }
 
@@ -84,8 +109,8 @@ export interface TaskFormsProps extends TaskComponentProps {
   apis: API[];
 }
 
-export const getDefaultTaskForm = (taskType: TaskType): AliceTask => {
-  const baseForm: AliceTask = {
+export const getDefaultTaskForm = (taskType: TaskType): PopulatedTask => {
+  const baseForm: PopulatedTask = {
     task_name: '',
     task_description: '',
     task_type: taskType,

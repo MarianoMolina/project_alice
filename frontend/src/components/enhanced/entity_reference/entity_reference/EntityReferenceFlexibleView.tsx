@@ -7,7 +7,7 @@ import {
     IconButton,
 } from '@mui/material';
 import { Close, Add } from '@mui/icons-material';
-import { getDefaultEntityReferenceForm, EntityReference, EntityReferenceComponentProps, ReferenceCategoryType, ImageReference } from '../../../../types/EntityReferenceTypes';
+import { getDefaultEntityReferenceForm, EntityReferenceComponentProps, ReferenceCategoryType, ImageReference, PopulatedEntityReference } from '../../../../types/EntityReferenceTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import useStyles from '../EntityReferenceStyles';
 import { referenceCategoryToIcon } from '../../../../utils/EntityReferenceUtils';
@@ -24,7 +24,7 @@ const EntityReferenceFlexibleView: React.FC<EntityReferenceComponentProps> = ({
     handleSave,
     handleDelete
 }) => {
-    const [form, setForm] = useState<Partial<EntityReference>>(item || getDefaultEntityReferenceForm());
+    const [form, setForm] = useState<Partial<PopulatedEntityReference>>(item as PopulatedEntityReference || getDefaultEntityReferenceForm());
     const [isSaving, setIsSaving] = useState(false);
     const classes = useStyles();
 
@@ -43,7 +43,7 @@ const EntityReferenceFlexibleView: React.FC<EntityReferenceComponentProps> = ({
         if (!item || Object.keys(item).length === 0) {
             setForm(getDefaultEntityReferenceForm());
         } else {
-            setForm(item);
+            setForm(item as PopulatedEntityReference);
         }
     }, [item]);
 
@@ -58,7 +58,7 @@ const EntityReferenceFlexibleView: React.FC<EntityReferenceComponentProps> = ({
         }
     }, [item, handleDelete]);
 
-    const updateForm = useCallback((updates: Partial<EntityReference>) => {
+    const updateForm = useCallback((updates: Partial<PopulatedEntityReference>) => {
         setForm(prev => ({ ...prev, ...updates }));
     }, []);
 
@@ -107,7 +107,7 @@ const EntityReferenceFlexibleView: React.FC<EntityReferenceComponentProps> = ({
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
             mode={mode}
-            item={form as EntityReference}
+            item={form as PopulatedEntityReference}
             itemType="entityreferences"
         >
             <TextInput

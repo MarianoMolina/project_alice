@@ -1,5 +1,5 @@
 import { ApiType } from "./ApiTypes";
-import { convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
+import { convertToEmbeddable, convertToPopulatedEmbeddable, Embeddable, EnhancedComponentProps, PopulatedEmbeddable } from "./CollectionTypes";
 
 export interface ImageReference {
     url: string;
@@ -64,6 +64,10 @@ export interface EntityReference extends Embeddable {
     connections: EntityConnection[];
     metadata?: Record<string, any>;
 }
+export interface PopulatedEntityReference extends Omit<EntityReference, keyof PopulatedEmbeddable>, PopulatedEmbeddable {
+
+}
+
 export const convertToEntityReference = (data: any): EntityReference => {
     return {
         ...convertToEmbeddable(data),
@@ -80,11 +84,27 @@ export const convertToEntityReference = (data: any): EntityReference => {
     };
 };
 
-export interface EntityReferenceComponentProps extends EnhancedComponentProps<EntityReference> {
+export const convertToPopulatedEntityReference = (data: any): PopulatedEntityReference => {
+    return {
+        ...convertToPopulatedEmbeddable(data),
+        source_id: data?.source_id || '',
+        name: data?.name || '',
+        description: data?.description || '',
+        content: data?.content || '',
+        url: data?.url || '',
+        images: data?.images || [],
+        categories: data?.categories || [],
+        source: data?.source || undefined,
+        connections: data?.connections || [],
+        metadata: data?.metadata || {},
+    };
+}
+
+export interface EntityReferenceComponentProps extends EnhancedComponentProps<EntityReference | PopulatedEntityReference> {
     
 }
 
-export const getDefaultEntityReferenceForm = (): Partial<EntityReference> => ({
+export const getDefaultEntityReferenceForm = (): Partial<PopulatedEntityReference> => ({
     source_id: '',
     name: '',
     description: '',

@@ -8,7 +8,7 @@ import {
   TASK_SIDEBAR_WIDTH_TABLE, TASK_SIDEBAR_WIDTH_COMPACT 
 } from '../utils/Constants';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
-import { ComponentMode, CollectionElement, CollectionElementString } from '../types/CollectionTypes';
+import { ComponentMode, CollectionElement, CollectionElementString, CollectionPopulatedElement } from '../types/CollectionTypes';
 import EnhancedAgent from '../components/enhanced/agent/agent/EnhancedAgent';
 import EnhancedPrompt from '../components/enhanced/prompt/prompt/EnhancedPrompt';
 import EnhancedModel from '../components/enhanced/model/model/EnhancedModel';
@@ -27,7 +27,7 @@ import { collectionElementIcons } from '../utils/CollectionUtils';
 
 const StructuresPage: React.FC = () => {
     const classes = useStyles();
-    const [selectedItem, setSelectedItem] = useState<CollectionElement | null>(null);
+    const [selectedItem, setSelectedItem] = useState<CollectionPopulatedElement | null>(null);
     const { selectCardItem } = useCardDialog();
     const [activeTab, setActiveTab] = useState<CollectionElementString>('Agent');
     const [showActiveComponent, setShowActiveComponent] = useState(false);
@@ -60,14 +60,14 @@ const StructuresPage: React.FC = () => {
         setShowActiveComponent(true);
     }, []);
 
-    const handleItemSelect = useCallback((item: CollectionElement | null) => {
+    const handleItemSelect = useCallback((item: CollectionPopulatedElement | CollectionElement | null) => {
         Logger.debug('Structures - Item selected:', item);
-        setSelectedItem(item);
+        setSelectedItem(item as CollectionPopulatedElement);
         setIsCreating(false);
         setShowActiveComponent(true);
     }, []);
 
-    const handleSave = useCallback(async (item: CollectionElement | null) => {
+    const handleSave = useCallback(async (item: CollectionPopulatedElement | CollectionElement | null) => {
         Logger.debug('Structures - Saving item:', item);
         setSelectedItem(null);
         setIsCreating(false);

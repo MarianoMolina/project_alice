@@ -1,9 +1,9 @@
-import { AliceTask, convertToAliceTask } from './TaskTypes';
+import { convertToPopulatedTask, PopulatedTask } from './TaskTypes';
 import { AliceAgent, convertToAliceAgent } from './AgentTypes';
 import { BaseDatabaseObject, convertToBaseDatabaseObject, EnhancedComponentProps } from './CollectionTypes';
-import { convertToMessageType, MessageType } from './MessageTypes';
+import { convertToPopulatedMessage, PopulatedMessage } from './MessageTypes';
 import { convertToUserCheckpoint, UserCheckpoint } from './UserCheckpointTypes';
-import { convertToDataCluster, DataCluster } from './DataClusterTypes';
+import { convertToPopulatedDataCluster, PopulatedDataCluster } from './DataClusterTypes';
 
 export enum CheckpointType {
     TOOL_CALL = "tool_call",
@@ -20,14 +20,22 @@ export interface AliceChat extends BaseDatabaseObject {
     name: string;
     messages: string[];
     alice_agent: AliceAgent;
-    agent_tools?: AliceTask[];
-    retrieval_tools?: AliceTask[];
+    agent_tools?: string[];
+    retrieval_tools?: string[];
     default_user_checkpoints: RequiredCheckpoints;
-    data_cluster?: DataCluster;
+    data_cluster?: string;
 }
-export interface PopulatedAliceChat extends Omit<AliceChat, 'messages'> {
-    messages: MessageType[];
+
+// Create a type for all fields that need different types in PopulatedAliceChat
+type PopulatedFields = {
+    messages: PopulatedMessage[];
+    agent_tools?: PopulatedTask[];
+    retrieval_tools?: PopulatedTask[];
+    data_cluster?: PopulatedDataCluster;
 }
+
+// Populated interface that extends base and overrides specific fields
+export interface PopulatedAliceChat extends Omit<AliceChat, keyof PopulatedFields>, PopulatedFields {}
 
 export const convertToAliceChat = (data: any): AliceChat => {
     const defaultCheckpoints: RequiredCheckpoints = {
@@ -40,10 +48,10 @@ export const convertToAliceChat = (data: any): AliceChat => {
         name: data?.name || '',
         messages: data?.messages || [],
         alice_agent: convertToAliceAgent(data?.alice_agent),
-        agent_tools: (data?.agent_tools || []).map(convertToAliceTask),
+        agent_tools: data?.agent_tools || [],
+        retrieval_tools: data?.retrieval_tools || [],
         default_user_checkpoints: defaultCheckpoints,
-        data_cluster: data?.data_cluster ? convertToDataCluster(data?.data_cluster) : undefined,
-        retrieval_tools: (data?.retrieval_tools || []).map(convertToAliceTask),
+        data_cluster: data?.data_cluster || undefined,
     };
 };
 export const convertToPopulatedAliceChat = (data: any): PopulatedAliceChat => {
@@ -55,29 +63,32 @@ export const convertToPopulatedAliceChat = (data: any): PopulatedAliceChat => {
     return {
         ...convertToBaseDatabaseObject(data),
         name: data?.name || '',
-        messages: (data?.messages || []).map(convertToMessageType),
+        messages: (data?.messages || []).map(convertToPopulatedMessage),
         alice_agent: convertToAliceAgent(data?.alice_agent),
-        agent_tools: (data?.agent_tools || []).map(convertToAliceTask),
+        agent_tools: (data?.agent_tools || []).map(convertToPopulatedTask),
         default_user_checkpoints: defaultCheckpoints,
-        data_cluster: data?.data_cluster ? convertToDataCluster(data?.data_cluster) : undefined,
-        retrieval_tools: (data?.retrieval_tools || []).map(convertToAliceTask),
+        data_cluster: data?.data_cluster ? convertToPopulatedDataCluster(data?.data_cluster) : undefined,
+        retrieval_tools: (data?.retrieval_tools || []).map(convertToPopulatedTask),
     };
 };
 export const convertPopulatedToAliceChat = (populatedChat: PopulatedAliceChat): AliceChat => {
     return {
         ...populatedChat,
-        messages: populatedChat.messages.map(message => message._id || '')
+        messages: populatedChat.messages.map(message => message._id || ''),
+        agent_tools: populatedChat.agent_tools?.map(task => task._id || ''),
+        retrieval_tools: populatedChat.retrieval_tools?.map(task => task._id || ''),
+        data_cluster: populatedChat.data_cluster?._id || '',
     };
 };
 
-export interface ChatComponentProps extends EnhancedComponentProps<AliceChat> {
+export interface ChatComponentProps extends EnhancedComponentProps<AliceChat | PopulatedAliceChat> {
 }
 
-export const getDefaultChatForm = (): Partial<AliceChat> => ({
+export const getDefaultChatForm = (): Partial<PopulatedAliceChat> => ({
     name: '',
     messages: [],
     alice_agent: undefined,
     agent_tools: [],
-    data_cluster: {},
-    retrieval_tools: undefined,
+    retrieval_tools: [],
+    data_cluster: undefined,
 });

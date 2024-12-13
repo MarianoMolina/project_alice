@@ -1,18 +1,18 @@
-import mongoose, { CallbackWithoutResultAndOptionalError, Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import { IDataClusterDocument, IDataClusterModel, References } from "../interfaces/references.interface";
 import mongooseAutopopulate from 'mongoose-autopopulate';
 import { getObjectId, getObjectIdForList } from '../utils/utils';
 
 // Base references schema that can be embedded in other models
 export const referencesSchema = new Schema<References>({
-    messages: [{ type: Schema.Types.ObjectId, ref: 'Message', autopopulate: true }],
-    files: [{ type: Schema.Types.ObjectId, ref: 'FileReference', autopopulate: true }],
-    task_responses: [{ type: Schema.Types.ObjectId, ref: 'TaskResult', autopopulate: true }],
-    entity_references: [{ type: Schema.Types.ObjectId, ref: 'EntityReference', autopopulate: true }],
-    user_interactions: [{ type: Schema.Types.ObjectId, ref: 'UserInteraction', autopopulate: true }],
-    embeddings: [{ type: Schema.Types.ObjectId, ref: 'EmbeddingChunk', autopopulate: true }],
-    tool_calls: [{ type: Schema.Types.ObjectId, ref: 'ToolCall', autopopulate: true }],
-    code_executions: [{ type: Schema.Types.ObjectId, ref: 'CodeExecution', autopopulate: true }],
+    messages: [{ type: Schema.Types.ObjectId, ref: 'Message' }],
+    files: [{ type: Schema.Types.ObjectId, ref: 'FileReference' }],
+    task_responses: [{ type: Schema.Types.ObjectId, ref: 'TaskResult' }],
+    entity_references: [{ type: Schema.Types.ObjectId, ref: 'EntityReference' }],
+    user_interactions: [{ type: Schema.Types.ObjectId, ref: 'UserInteraction' }],
+    embeddings: [{ type: Schema.Types.ObjectId, ref: 'EmbeddingChunk' }],
+    tool_calls: [{ type: Schema.Types.ObjectId, ref: 'ToolCall' }],
+    code_executions: [{ type: Schema.Types.ObjectId, ref: 'CodeExecution' }],
 });
 
 // Extended schema for DataCluster that includes document properties
@@ -90,7 +90,7 @@ function ensureObjectIdForUpdate(
 }
 
 // Apply plugins and middleware
-referencesSchema.plugin(mongooseAutopopulate);
+// referencesSchema.plugin(mongooseAutopopulate);
 referencesSchema.pre('save', ensureObjectIdForSave);
 referencesSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
 

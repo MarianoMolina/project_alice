@@ -4,7 +4,7 @@ import { ITaskDocument } from './task.interface';
 import { IAgentDocument } from './agent.interface';
 import { IUserDocument } from './user.interface';
 import { IUserCheckpointDocument } from './userCheckpoint.interface';
-import { IDataClusterDocument } from './references.interface';
+import { DataClusterHolder, IDataClusterDocument } from './references.interface';
 
 // ChangeHistory interfaces
 export interface IChangeHistory {
@@ -21,7 +21,7 @@ export interface IChangeHistoryDocument extends IChangeHistory, Document {
 }
 
 // AliceChat interfaces
-export interface IAliceChat {
+export interface IAliceChat extends DataClusterHolder {
     name: string;
     messages: Types.ObjectId[] | IMessageDocument[];
     changeHistory: IChangeHistoryDocument[];

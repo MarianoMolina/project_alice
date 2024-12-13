@@ -13,7 +13,7 @@ import {
     AccessTime as TimeIcon,
     Timer
 } from '@mui/icons-material';
-import { FileComponentProps, FileContentReference, FileReference, FileType, getDefaultFileForm } from '../../../../types/FileTypes';
+import { FileComponentProps, FileContentReference, FileReference, FileType, getDefaultFileForm, PopulatedFileReference } from '../../../../types/FileTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import Transcript from '../Transcript';
 import { createFileContentReference, getFileSize, selectFile } from '../../../../utils/FileUtils';
@@ -32,7 +32,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
     handleDelete,
 }) => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [form, setForm] = useState<Partial<FileReference | FileContentReference>>(() => item || getDefaultFileForm());
+    const [form, setForm] = useState<Partial<PopulatedFileReference>>(() => item as PopulatedFileReference || getDefaultFileForm());
     const [isSaving, setIsSaving] = useState(false);
     const { uploadFileContentReference } = useApi();
     const { addNotification } = useNotification();
@@ -54,7 +54,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
 
     useEffect(() => {
         if (item) {
-            setForm(item);
+            setForm(item as PopulatedFileReference);
         } else if (!item || Object.keys(item).length === 0) {
             onChange(getDefaultFileForm());
         }
@@ -98,7 +98,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
 
     const handleFileUpdate = (updatedFile: Partial<FileContentReference> | Partial<FileReference>) => {
         if (updatedFile) {
-            setForm(updatedFile);
+            setForm(updatedFile as PopulatedFileReference);
         }
     };
 
@@ -128,13 +128,13 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
                 Logger.info('File upload failed or was cancelled');
                 return;
             }
-            setForm(file);
+            setForm(file as PopulatedFileReference);
         }
     };
 
 
     const renderFileDetails = () => {
-        if (!item) return null;
+        if (!form) return null;
 
         return (
             <Paper className="p-4">
@@ -143,7 +143,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
                         <TextInput
                             name='filename'
                             label='Filename'
-                            value={item.filename || ''}
+                            value={form.filename || ''}
                             onChange={(value) => handleFieldChange('filename', value)}
                             disabled={!isEditMode}
                             description='Enter the filename for the file. It should contain its extension.'
@@ -153,13 +153,13 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
                     <Box className="flex items-center gap-2">
                         <Chip
                             icon={<FileIcon className="text-gray-600" />}
-                            label={item.type.toUpperCase()}
+                            label={form.type?.toUpperCase()}
                             size="small"
                             className="bg-gray-100"
                         />
                         <Chip
                             icon={<TimeIcon className="text-gray-600" />}
-                            label={getFileSize(item.file_size).formatted}
+                            label={form.file_size && getFileSize(form.file_size).formatted}
                             size="small"
                             className="bg-gray-100"
                         />
@@ -186,7 +186,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
                             Last Accessed
                         </Typography>
                         <Typography variant="body1">
-                            {item.last_accessed ? new Date(item.last_accessed).toLocaleString() : 'Never'}
+                            {form.last_accessed ? new Date(form.last_accessed).toLocaleString() : 'Never'}
                         </Typography>
                     </Box>
 
@@ -203,8 +203,8 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
                     {hasTranscriptSlot && (
                         <Box className="mt-4">
                             <Transcript
-                                fileId={item._id ?? ''}
-                                transcript={item.transcript}
+                                fileId={form._id ?? ''}
+                                transcript={form.transcript}
                                 onTranscriptUpdate={(value) => handleFieldChange('transcript', value)}
                             />
                         </Box>
@@ -258,7 +258,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
             saveButtonText={saveButtonText}
             isEditMode={mode === "create" ? false : isEditMode}
             mode={mode}
-            item={form as FileReference}
+            item={form as PopulatedFileReference}
             itemType='files'
         >
             {renderContent()}

@@ -49,13 +49,12 @@ async def resume_task_endpoint(
 
             # Get the original task
             task_id = original_response.task_id
-            task = await db_app.get_tasks(task_id)
-            if not task or not task.get(task_id):
+            task: AliceTask = await db_app.get_task(task_id)
+            if not task:
                 raise HTTPException(
                     status_code=404,
                     detail=f"Original task with ID {task_id} not found"
                 )
-            task: AliceTask = task[task_id]
 
             # Get API manager
             api_manager: APIManager = await db_app.api_setter()

@@ -1,5 +1,5 @@
-import { BaseDatabaseObject, convertToEmbeddable, Embeddable, EnhancedComponentProps } from "./CollectionTypes";
-import { DataCluster, convertToDataCluster } from "./DataClusterTypes";
+import { BaseDatabaseObject, convertToEmbeddable, convertToPopulatedEmbeddable, Embeddable, EnhancedComponentProps, PopulatedEmbeddable } from "./CollectionTypes";
+import { DataCluster, PopulatedDataCluster, convertToDataCluster } from "./DataClusterTypes";
 
 export interface ExecutionHistoryItem {
     parent_task_id?: string;
@@ -10,6 +10,10 @@ export interface ExecutionHistoryItem {
 
 export interface NodeResponse extends ExecutionHistoryItem {
     references: DataCluster;
+}
+
+export interface PopulatedNodeResponse extends Omit<NodeResponse, 'references'> {
+    references: PopulatedDataCluster;
 }
 
 export interface TaskResponse extends BaseDatabaseObject, Embeddable {
@@ -26,9 +30,30 @@ export interface TaskResponse extends BaseDatabaseObject, Embeddable {
     node_references?: NodeResponse[];
 }
 
+export interface PopulatedTaskResponse extends Omit<TaskResponse, keyof Embeddable | 'node_references'>, PopulatedEmbeddable {
+    node_references?: PopulatedNodeResponse[];
+}
+
 export const convertToTaskResponse = (data: any): TaskResponse => {
     return {
         ...convertToEmbeddable(data),
+        task_name: data?.task_name || '',
+        task_description: data?.task_description || '',
+        task_id: data?.task_id || '',
+        status: data?.status || 'pending',
+        result_code: data?.result_code || 0,
+        task_outputs: data?.task_outputs || {},
+        task_inputs: data?.task_inputs || {},
+        result_diagnostic: data?.result_diagnostic || '',
+        usage_metrics: data?.usage_metrics || {},
+        execution_history: data?.execution_history || [],
+        node_references: data?.node_references || [],
+    };
+};
+
+export const convertToPopulatedTaskResponse = (data: any): PopulatedTaskResponse => {
+    return {
+        ...convertToPopulatedEmbeddable(data),
         task_name: data?.task_name || '',
         task_description: data?.task_description || '',
         task_id: data?.task_id || '',
@@ -45,8 +70,8 @@ export const convertToTaskResponse = (data: any): TaskResponse => {
             })
         ) : [],
     };
-};
+}
 
-export interface TaskResponseComponentProps extends EnhancedComponentProps<TaskResponse> {
+export interface TaskResponseComponentProps extends EnhancedComponentProps<TaskResponse | PopulatedTaskResponse> {
 
 }

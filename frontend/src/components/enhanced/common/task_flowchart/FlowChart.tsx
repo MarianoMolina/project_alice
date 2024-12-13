@@ -15,13 +15,13 @@ import SimpleTaskNode from './nodes/SimpleTaskNode';
 import { useEnhancedFlowState } from './hooks/useStableFlowState';
 import { createNodes } from './utils/createNodes';
 import EndNode from './nodes/EndNode';
-import { AliceTask } from '../../../../types/TaskTypes';
+import { PopulatedTask } from '../../../../types/TaskTypes';
 import 'reactflow/dist/style.css';
 import { DistributedDefaultEdge, DistributedDoubleBackEdge, DistributedSelfLoopEdge } from './edges/Edges';
 import theme from '../../../../Theme';
 
 interface FlowchartProps {
-  task: Partial<AliceTask>;
+  task: Partial<PopulatedTask>;
   title?: string;
   height?: string | number;
   width?: string | number;

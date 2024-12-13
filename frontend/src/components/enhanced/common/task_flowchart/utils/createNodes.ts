@@ -1,6 +1,6 @@
 import { Node, Edge, MarkerType } from 'reactflow';
 import { getNodeData, isFullTask } from './FlowChartUtils';
-import { AliceTask } from '../../../../../types/TaskTypes';
+import { PopulatedTask } from '../../../../../types/TaskTypes';
 import Logger from '../../../../../utils/Logger';
 
 function generateSimpleHash(obj: any): string {
@@ -16,7 +16,7 @@ function generateSimpleHash(obj: any): string {
 
 function generateNodeId(
   taskName: string, 
-  parentTask: Partial<AliceTask>,
+  parentTask: Partial<PopulatedTask>,
   routingContext: string
 ): string {
   const nodeContext = {
@@ -29,7 +29,7 @@ function generateNodeId(
 }
 
 export function createNodes(
-  task: Partial<AliceTask>,
+  task: Partial<PopulatedTask>,
   onSizeChange: (id: string, width: number, height: number) => void
 ) {
   const nodes: Node[] = [];

@@ -18,8 +18,8 @@ const CodeExecutionListView: React.FC<CodeExecutionComponentProps> = ({
 
     return (
         <EnhancedListView<CodeExecution>
-            items={items}
-            item={item}
+            items={items as CodeExecution[]}
+            item={item as CodeExecution}
             getPrimaryText={getPrimaryText}
             getSecondaryText={getSecondaryText}
             onView={onView}

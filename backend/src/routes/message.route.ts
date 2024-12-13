@@ -15,7 +15,7 @@ const MessageRoutes = createRoutes<IMessageDocument, 'Message'>(Message, 'Messag
   },
   updateItem: async (id, data, userId) => {
     return await updateMessage(id, data, userId);
-  }
+  },
 });
 
 router.use('/', MessageRoutes);

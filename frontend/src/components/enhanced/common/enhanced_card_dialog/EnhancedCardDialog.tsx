@@ -10,7 +10,7 @@ import EnhancedAPI from '../../api/api/EnhancedApi';
 import EnhancedAgent from '../../agent/agent/EnhancedAgent';
 import EnhancedFile from '../../file/file/EnhancedFile';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
-import { CollectionType } from '../../../../types/CollectionTypes';
+import { CollectionPopulatedType } from '../../../../types/CollectionTypes';
 import AgentCardView from '../../agent/agent/AgentCardView';
 import TaskCardView from '../../task/task/TaskCardView';
 import TaskResponseCardView from '../../task_response/task_response/TaskResponseCardView';
@@ -23,14 +23,14 @@ import ApiCardView from '../../api/api/ApiCardView';
 import EnhancedMessage from '../../message/message/EnhancedMessage';
 import MessageCardView from '../../message/message/MessageCardView';
 import { AliceAgent } from '../../../../types/AgentTypes';
-import { AliceTask } from '../../../../types/TaskTypes';
+import { PopulatedTask } from '../../../../types/TaskTypes';
 import { AliceModel } from '../../../../types/ModelTypes';
 import { Prompt } from '../../../../types/PromptTypes';
 import { ParameterDefinition } from '../../../../types/ParameterTypes';
 import { API } from '../../../../types/ApiTypes';
-import { MessageType } from '../../../../types/MessageTypes';
-import { FileReference } from '../../../../types/FileTypes';
-import { EntityReference } from '../../../../types/EntityReferenceTypes';
+import {  PopulatedMessage } from '../../../../types/MessageTypes';
+import {  PopulatedFileReference } from '../../../../types/FileTypes';
+import { PopulatedEntityReference } from '../../../../types/EntityReferenceTypes';
 import EntityReferenceCardView from '../../entity_reference/entity_reference/EntityReferenceCardView';
 import EnhancedEntityReference from '../../entity_reference/entity_reference/EnhancedEntityReference';
 import Logger from '../../../../utils/Logger';
@@ -43,11 +43,11 @@ import UserInteractionCardView from '../../user_interaction/user_interaction/Use
 import EmbeddingChunkCardView from '../../embedding_chunk/embedding_chunk/EmbeddingChunkCardView';
 import DataClusterCardView from '../../data_cluster/data_cluster/DataClusterCardView';
 import { UserCheckpoint } from '../../../../types/UserCheckpointTypes';
-import { UserInteraction } from '../../../../types/UserInteractionTypes';
+import { PopulatedUserInteraction } from '../../../../types/UserInteractionTypes';
 import { EmbeddingChunk } from '../../../../types/EmbeddingChunkTypes';
-import { DataCluster } from '../../../../types/DataClusterTypes';
-import { ToolCall } from '../../../../types/ToolCallTypes';
-import { CodeExecution } from '../../../../types/CodeExecutionTypes';
+import { PopulatedDataCluster } from '../../../../types/DataClusterTypes';
+import { PopulatedToolCall } from '../../../../types/ToolCallTypes';
+import { PopulatedCodeExecution } from '../../../../types/CodeExecutionTypes';
 import { APIConfig } from '../../../../types/ApiConfigTypes';
 import EnhancedToolCall from '../../tool_calls/tool_calls/EnhancedToolCall';
 import EnhancedCodeExecution from '../../code_execution/code_execution/EnhancedCodeExecution';
@@ -66,20 +66,20 @@ const EnhancedCardDialog: React.FC = () => {
 
     const handleProps = {
       handleAgentClick: (id: string, item?: AliceAgent) => selectCardItem('Agent', id, item),
-      handleTaskClick: (id: string, item?: AliceTask) => selectCardItem('Task', id, item),
+      handleTaskClick: (id: string, item?: PopulatedTask) => selectCardItem('Task', id, item),
       handleModelClick: (id: string, item?: AliceModel) => selectCardItem('Model', id, item),
       handlePromptClick: (id: string, item?: Prompt) => selectCardItem('Prompt', id, item),
       handleParameterClick: (id: string, item?: ParameterDefinition) => selectCardItem('Parameter', id, item),
       handleAPIClick: (id: string, item?: API) => selectCardItem('API', id, item),
-      handleFileClick: (id: string, item?: FileReference) => selectCardItem('File', id, item),
-      handleMessageClick: (id: string, item?: MessageType) => selectCardItem('Message', id, item),
-      handleEntityReferenceClick: (id: string, item?: EntityReference) => selectCardItem('EntityReference', id, item),
+      handleFileClick: (id: string, item?: PopulatedFileReference) => selectCardItem('File', id, item),
+      handleMessageClick: (id: string, item?: PopulatedMessage) => selectCardItem('Message', id, item),
+      handleEntityReferenceClick: (id: string, item?: PopulatedEntityReference) => selectCardItem('EntityReference', id, item),
       handleUserCheckpointClick: (id: string, item?: UserCheckpoint) => selectCardItem('UserCheckpoint', id, item),
-      handleUserInteractionClick: (id: string, item?: UserInteraction) => selectCardItem('UserInteraction', id, item),
+      handleUserInteractionClick: (id: string, item?: PopulatedUserInteraction) => selectCardItem('UserInteraction', id, item),
       handleEmbeddingChunkClick: (id: string, item?: EmbeddingChunk) => selectCardItem('EmbeddingChunk', id, item),
-      handleDataClusterClick: (id: string, item?: DataCluster) => selectCardItem('DataCluster', id, item),
-      handleToolCallClick: (id: string, item?: ToolCall) => selectCardItem('ToolCall', id, item),
-      handleCodeExecutionClick: (id: string, item?: CodeExecution) => selectCardItem('CodeExecution', id, item),
+      handleDataClusterClick: (id: string, item?: PopulatedDataCluster) => selectCardItem('DataCluster', id, item),
+      handleToolCallClick: (id: string, item?: PopulatedToolCall) => selectCardItem('ToolCall', id, item),
+      handleCodeExecutionClick: (id: string, item?: PopulatedCodeExecution) => selectCardItem('CodeExecution', id, item),
       handleAPIConfigClick: (id: string, item?: APIConfig) => selectCardItem('APIConfig', id, item),
     };
 
@@ -146,109 +146,109 @@ const EnhancedCardDialog: React.FC = () => {
         case 'Agent':
           return (
             <Box className="max-w-full">
-              <AgentCardView item={selectedCardItem as CollectionType['agents']} {...cardViewProps} />
+              <AgentCardView item={selectedCardItem as CollectionPopulatedType['agents']} {...cardViewProps} />
             </Box>
           );
         case 'Task':
           return (
             <Box className="max-w-full">
-              <TaskCardView item={selectedCardItem as CollectionType['tasks']} {...cardViewProps} />
+              <TaskCardView item={selectedCardItem as CollectionPopulatedType['tasks']} {...cardViewProps} />
             </Box>
           );
         case 'TaskResponse':
           return (
             <Box className="max-w-full">
-              <TaskResponseCardView item={selectedCardItem as CollectionType['taskresults']} {...cardViewProps} />
+              <TaskResponseCardView item={selectedCardItem as CollectionPopulatedType['taskresults']} {...cardViewProps} />
             </Box>
           );
         case 'Chat':
           return (
             <Box className="max-w-full"> 
-              <ChatCardView item={selectedCardItem as CollectionType['chats']} {...cardViewProps} />
+              <ChatCardView item={selectedCardItem as CollectionPopulatedType['chats']} {...cardViewProps} />
             </Box>
           );
         case 'Prompt':
           return (
             <Box className="max-w-full">
-              <PromptCardView item={selectedCardItem as CollectionType['prompts']} {...cardViewProps} />
+              <PromptCardView item={selectedCardItem as CollectionPopulatedType['prompts']} {...cardViewProps} />
             </Box>
           );
         case 'Model':
           return (
             <Box className="max-w-full">
-              <ModelCardView item={selectedCardItem as CollectionType['models']} {...cardViewProps} />
+              <ModelCardView item={selectedCardItem as CollectionPopulatedType['models']} {...cardViewProps} />
             </Box>
           );
         case 'Parameter':
           return (
             <Box className="max-w-full">
-              <ParameterCardView item={selectedCardItem as CollectionType['parameters']} {...cardViewProps} />
+              <ParameterCardView item={selectedCardItem as CollectionPopulatedType['parameters']} {...cardViewProps} />
             </Box>
           );
         case 'API':
           return (
             <Box className="max-w-full">
-              <ApiCardView item={selectedCardItem as CollectionType['apis']} {...cardViewProps} />
+              <ApiCardView item={selectedCardItem as CollectionPopulatedType['apis']} {...cardViewProps} />
             </Box>
           );
         case 'File':
           return (
             <Box className="max-w-full">
-              <FileCardView item={selectedCardItem as CollectionType['files']} {...cardViewProps} />
+              <FileCardView item={selectedCardItem as CollectionPopulatedType['files']} {...cardViewProps} />
             </Box>
           );
         case 'Message':
           return (
             <Box className="max-w-full">
-              <MessageCardView item={selectedCardItem as CollectionType['messages']} {...cardViewProps} />
+              <MessageCardView item={selectedCardItem as CollectionPopulatedType['messages']} {...cardViewProps} />
             </Box>
           );
         case 'EntityReference':
           return (
             <Box className="max-w-full">
-              <EntityReferenceCardView item={selectedCardItem as CollectionType['entityreferences']} {...cardViewProps} />;
+              <EntityReferenceCardView item={selectedCardItem as CollectionPopulatedType['entityreferences']} {...cardViewProps} />;
             </Box>
           );
         case 'UserCheckpoint':
           return (
             <Box className="max-w-full">
-              <UserCheckpointCardView item={selectedCardItem as CollectionType['usercheckpoints']} {...cardViewProps} />
+              <UserCheckpointCardView item={selectedCardItem as CollectionPopulatedType['usercheckpoints']} {...cardViewProps} />
             </Box>
           );
         case 'UserInteraction':
           return (
             <Box className="max-w-full">
-              <UserInteractionCardView item={selectedCardItem as CollectionType['userinteractions']} {...cardViewProps} />
+              <UserInteractionCardView item={selectedCardItem as CollectionPopulatedType['userinteractions']} {...cardViewProps} />
             </Box>
           );
         case 'EmbeddingChunk':
           return (
             <Box className="max-w-full">
-              <EmbeddingChunkCardView item={selectedCardItem as CollectionType['embeddingchunks']} {...cardViewProps} />
+              <EmbeddingChunkCardView item={selectedCardItem as CollectionPopulatedType['embeddingchunks']} {...cardViewProps} />
             </Box>
           );
         case 'DataCluster':
           return (
             <Box className="max-w-full">
-              <DataClusterCardView item={selectedCardItem as CollectionType['dataclusters']} {...cardViewProps} />
+              <DataClusterCardView item={selectedCardItem as CollectionPopulatedType['dataclusters']} {...cardViewProps} />
             </Box>
           );
         case 'ToolCall':
           return (
             <Box className="max-w-full">
-              <ToolCallCardView item={selectedCardItem as CollectionType['toolcalls']} {...cardViewProps} />
+              <ToolCallCardView item={selectedCardItem as CollectionPopulatedType['toolcalls']} {...cardViewProps} />
             </Box>
           );
         case 'CodeExecution':
           return (
             <Box className="max-w-full">
-              <CodeExecutionCardView item={selectedCardItem as CollectionType['codeexecutions']} {...cardViewProps} />
+              <CodeExecutionCardView item={selectedCardItem as CollectionPopulatedType['codeexecutions']} {...cardViewProps} />
             </Box>
           );
         case 'APIConfig':
           return (
             <Box className="max-w-full">
-              <APIConfigCardView item={selectedCardItem as CollectionType['apiconfigs']} {...cardViewProps} />
+              <APIConfigCardView item={selectedCardItem as CollectionPopulatedType['apiconfigs']} {...cardViewProps} />
             </Box>
           );
         default:

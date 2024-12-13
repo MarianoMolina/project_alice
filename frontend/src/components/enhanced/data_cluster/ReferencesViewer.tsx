@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import { References } from '../../../types/ReferenceTypes';
+import { PopulatedReferences } from '../../../types/ReferenceTypes';
 import FileViewer from '../file/file/FileViewer';
 import EntityReferenceViewer from '../entity_reference/entity_reference/EntityReferenceViewer';
 import EnhancedMessage from '../message/message/EnhancedMessage';
@@ -12,7 +12,7 @@ import CodeExecutionViewer from '../code_execution/code_execution/CodeExecutionV
 import ToolCallViewer from '../tool_calls/tool_calls/ToolCallViewer';
 
 interface ReferencesViewerProps {
-  references: References;
+  references: PopulatedReferences;
 }
 
 const ReferencesViewer: React.FC<ReferencesViewerProps> = ({ references }) => {

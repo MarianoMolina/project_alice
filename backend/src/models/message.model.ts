@@ -32,7 +32,7 @@ const messageSchema = new Schema<IMessageDocument, IMessageModel>({
     default: {},
     description: "Metadata about the creation of the message",
   },
-  embedding: [{ type: Schema.Types.ObjectId, ref: 'EmbeddingChunk', autopopulate: true }],
+  embedding: [{ type: Schema.Types.ObjectId, ref: 'EmbeddingChunk' }],
   created_by: {
     type: Schema.Types.ObjectId,
     ref: 'User',

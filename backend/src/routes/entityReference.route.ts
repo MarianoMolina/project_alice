@@ -10,10 +10,7 @@ const router = Router();
 router.use(auth);
 router.use(rateLimiterMiddleware);
 
-const generatedRoutes = createRoutes<IEntityReferenceDocument, 'EntityReference'>(
-  EntityReference,
-  'EntityReference',
-  {
+const generatedRoutes = createRoutes<IEntityReferenceDocument, 'EntityReference'>(EntityReference, 'EntityReference', {
     createItem: async (data, userId) => {
       return await createEntityReference(data, userId);
     },

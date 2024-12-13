@@ -6,7 +6,7 @@ import {
     Paper,
 } from '@mui/material';
 import useStyles from './EnhancedStyles';
-import { CollectionName, CollectionType } from '../../../../types/CollectionTypes';
+import { CollectionName, CollectionPopulatedType } from '../../../../types/CollectionTypes';
 import EntityActionsMenu from '../entity_menu/EntityActionsMenu';
 
 interface GenericFlexibleViewProps <T extends CollectionName> {
@@ -18,7 +18,7 @@ interface GenericFlexibleViewProps <T extends CollectionName> {
     saveButtonText?: string;
     isEditMode?: boolean;
     mode?: 'edit' | 'create' | 'view';
-    item?: CollectionType[T];
+    item?: CollectionPopulatedType[T];
     itemType?: T;
 }
 

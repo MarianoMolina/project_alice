@@ -1,12 +1,11 @@
-import React from 'react';
 import { IconButton, Tooltip, Box, Typography } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { styled } from '@mui/system';
-import { CollectionName, CollectionType, collectionNameToElementString } from '../../../../types/CollectionTypes';
+import { CollectionName, CollectionPopulatedType, collectionNameToElementString } from '../../../../types/CollectionTypes';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 
 interface EditEntityProps<T extends CollectionName> {
-  item: CollectionType[T];
+  item: CollectionPopulatedType[T];
   itemType: T;
   tooltipText?: string;
   showLabel?: boolean;

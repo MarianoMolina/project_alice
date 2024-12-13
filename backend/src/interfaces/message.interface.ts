@@ -1,6 +1,6 @@
 import { Model, Types, Document } from 'mongoose';
 import { IUserDocument } from "./user.interface";
-import { References } from './references.interface';
+import { ReferenceHolder, References } from './references.interface';
 import { FileType } from './file.interface';
 import { Embeddable } from './embeddingChunk.interface';
 
@@ -27,14 +27,13 @@ export enum MessageGenerators {
     SYSTEM = 'system'
 }
 
-export interface IMessage extends Embeddable {
+export interface IMessage extends Embeddable, ReferenceHolder {
     content?: string;
     role: RoleType;
     generated_by: MessageGenerators;
     step: string;
     assistant_name?: string;
     type: ContentType;
-    references?: References;
     creation_metadata?: Record<string, any>;
     created_by: Types.ObjectId | IUserDocument;
     updated_by: Types.ObjectId | IUserDocument;

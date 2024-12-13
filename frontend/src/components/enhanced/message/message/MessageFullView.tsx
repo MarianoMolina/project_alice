@@ -9,8 +9,9 @@ import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import { useNotification } from '../../../../contexts/NotificationContext';
 import AliceMarkdown, { CustomBlockType } from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
-import { hasAnyReferences } from '../../../../types/ReferenceTypes';
+import { hasAnyReferences, References } from '../../../../types/ReferenceTypes';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
+import { PopulatedDataCluster } from '../../../../types/DataClusterTypes';
 
 const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => {
     const classes = useStyles();
@@ -88,8 +89,8 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => 
                     </Box>
                 </Box>
                 <AliceMarkdown role={message.role} enabledBlocks={[CustomBlockType.ALICE_DOCUMENT, CustomBlockType.ANALYSIS]}>{message.content}</AliceMarkdown>
-                {message.references && hasAnyReferences(message.references) &&
-                    <DataClusterManager dataCluster={message.references} isEditable={false} />
+                {message.references && hasAnyReferences(message.references as References) &&
+                    <DataClusterManager dataCluster={message.references as PopulatedDataCluster} isEditable={false} />
                 }
                 <Box className={classes.metadataContainer}>
                     {message.step && (

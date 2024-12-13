@@ -29,8 +29,8 @@ const TaskResponseTableView: React.FC<TaskResponseComponentProps> = ({
 
   return (
     <EnhancedTableView<TaskResponse>
-      items={items}
-      item={item}
+      items={items as TaskResponse[]}
+      item={item as TaskResponse}
       columns={columns}
       onView={onView}
       onInteraction={onInteraction}

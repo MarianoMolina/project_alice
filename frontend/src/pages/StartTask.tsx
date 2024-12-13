@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState, memo } from 'react';
 import { Box, Typography, List, Accordion, AccordionSummary, AccordionDetails, SelectChangeEvent } from '@mui/material';
 import { Add, Functions, Assignment, ExpandMore } from '@mui/icons-material';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
-import { AliceTask, TaskType } from '../types/TaskTypes';
+import { AliceTask, PopulatedTask, TaskType } from '../types/TaskTypes';
 import { APIConfig } from '../types/ApiConfigTypes';
 import { CollectionElementString } from '../types/CollectionTypes';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
@@ -64,13 +64,13 @@ interface FilterSelectProps {
 }
 
 interface TaskListProps {
-    items: AliceTask[];
-    onView: (task: AliceTask) => void;
-    onInteraction: (task: AliceTask) => void;
+    items: AliceTask[] | PopulatedTask[];
+    onView: (task: AliceTask | PopulatedTask) => void;
+    onInteraction: (task: AliceTask | PopulatedTask) => void;
 }
 
 interface TaskExecuteProps {
-    item: AliceTask;
+    item: AliceTask | PopulatedTask;
     onExecute: () => Promise<void>;
 }
 
@@ -82,7 +82,7 @@ interface TaskResponseProps {
 
 interface RecentExecutionsSectionProps {
     recentExecutions: RecentExecution[];
-    selectedTask: AliceTask | null;
+    selectedTask: PopulatedTask | null;
     onExecutionView: (execution: RecentExecution) => void;
     onExecutionInteraction: (execution: RecentExecution) => void;
 }
@@ -253,7 +253,7 @@ const StartTask: React.FC = () => {
         }
     }, []);
 
-    const handleTabWhenTaskSelect = useCallback((task: AliceTask) => {
+    const handleTabWhenTaskSelect = useCallback((task: AliceTask | PopulatedTask) => {
         if (task) {
             handleSelectTask(task);
         }
@@ -265,7 +265,7 @@ const StartTask: React.FC = () => {
         }
     }, [selectCardItem]);
 
-    const handleTaskView = useCallback((task: AliceTask) => {
+    const handleTaskView = useCallback((task: AliceTask | PopulatedTask) => {
         if (task._id) {
             selectCardItem('Task', task._id);
         }
@@ -297,7 +297,7 @@ const StartTask: React.FC = () => {
                             case 'Task':
                                 return (
                                     <MemoizedTaskShortListView
-                                        items={filteredTasks}
+                                        items={filteredTasks as AliceTask[] | PopulatedTask[]}
                                         onView={handleTaskView}
                                         onInteraction={handleTabWhenTaskSelect}
                                     />

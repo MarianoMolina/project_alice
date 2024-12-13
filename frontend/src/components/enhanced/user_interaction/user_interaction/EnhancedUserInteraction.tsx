@@ -3,7 +3,7 @@ import UserInteractionListView from './UserInteractionListView';
 import UserInteractionTableView from './UserInteractionTableView';
 import UserInteractionCardView from './UserInteractionCardView';
 import UserInteractionShortListView from './UserInteractionShortListView';
-import { UserInteraction } from '../../../../types/UserInteractionTypes';
+import { PopulatedUserInteraction, UserInteraction } from '../../../../types/UserInteractionTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
 import { UserInteractionComponentProps } from '../../../../types/UserInteractionTypes';
 
@@ -15,18 +15,18 @@ interface EnhancedUserInteractionProps extends Omit<UserInteractionComponentProp
   mode: EnhancedUserInteractionMode;
   itemId?: string;
   fetchAll: boolean;
-  onSave?: (savedItem: UserInteraction) => void;
-  onDelete?: (deletedItem: UserInteraction) => Promise<void>;
+  onSave?: (savedItem: UserInteraction | PopulatedUserInteraction) => void;
+  onDelete?: (deletedItem: UserInteraction | PopulatedUserInteraction) => Promise<void>;
 }
 
 const EnhancedUserInteraction: React.FC<EnhancedUserInteractionProps> = (props) => {
   const renderContent = (
-    items: UserInteraction[] | null,
-    item: UserInteraction | null,
-    onChange: (newItem: Partial<UserInteraction>) => void,
+    items: (UserInteraction | PopulatedUserInteraction)[] | null,
+    item: UserInteraction | PopulatedUserInteraction | null,
+    onChange: (newItem: Partial<UserInteraction | PopulatedUserInteraction>) => void,
     mode: BaseUserInteractionMode,
     handleSave: () => Promise<void>,
-    onDelete: (deletedItem: UserInteraction) => Promise<void>,
+    onDelete: (deletedItem: UserInteraction | PopulatedUserInteraction) => Promise<void>,
   ) => {
     const commonProps: UserInteractionComponentProps = {
       items,
@@ -63,7 +63,7 @@ const EnhancedUserInteraction: React.FC<EnhancedUserInteractionProps> = (props) 
     props.mode === 'edit' ? 'edit' : 'view';
 
   return (
-    <BaseDbElement<UserInteraction>
+    <BaseDbElement<UserInteraction | PopulatedUserInteraction>
       collectionName="userinteractions"
       itemId={props.itemId}
       mode={baseDbMode}

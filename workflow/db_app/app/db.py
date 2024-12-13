@@ -107,11 +107,8 @@ class BackendAPI(BaseModel):
             # Keep the existing condition for scalar values
             return data if data or data == 0 or data is False else None
 
-    async def get_tasks(self, task_id: Optional[str] = None) -> Dict[str, AliceTask]:
-        if task_id is None:
-            url = f"{self.base_url}/tasks"
-        else:
-            url = f"{self.base_url}/tasks/{task_id}"
+    async def get_task(self, task_id: str) -> AliceTask:
+        url = f"{self.base_url}/tasks/{task_id}/populated"
         headers = self._get_headers()
         
         async with aiohttp.ClientSession() as session:
@@ -120,14 +117,10 @@ class BackendAPI(BaseModel):
                     if response is None:
                         raise ValueError(f"Failed to get a response from {url}")
                     response.raise_for_status()
-                    tasks = await response.json()
-                    
-                    if isinstance(tasks, list):
-                        tasks = [await self.preprocess_data(task) for task in tasks]
-                        return {task["_id"]: await self.task_initializer(task) for task in tasks}
-                    else:
-                        tasks = await self.preprocess_data(tasks)
-                        return {tasks["_id"]: await self.task_initializer(tasks)}
+                    task = await response.json()
+
+                    task = await self.preprocess_data(task)
+                    return await self.task_initializer(task)
             except aiohttp.ClientError as e:
                 LOGGER.error(f"Error retrieving tasks: {e}")
                 return {}
@@ -184,7 +177,7 @@ class BackendAPI(BaseModel):
                 for subtask, initialized_subtask in zip(task["tasks"].values(), subtasks)
             }
     
-        # Assuming the task_types constructors are not async
+        # Assuming the task_types constructors are async
         return self.task_types[task["task_type"]](**task)
     
     async def get_chat(self, chat_id: str) -> AliceChat:
@@ -232,7 +225,7 @@ class BackendAPI(BaseModel):
         
     async def get_entity_from_db(self, entity_type: EntityType, entity_id: str) -> Dict[str, Any]:
         collection_name = self.collection_map[entity_type]
-        url = f"{self.base_url}/{collection_name}/{entity_id}"
+        url = f"{self.base_url}/{collection_name}/{entity_id}/populated"
         headers = self._get_headers()
         
         async with aiohttp.ClientSession() as session:

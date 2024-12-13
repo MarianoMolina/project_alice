@@ -1,13 +1,13 @@
 import { memo } from 'react';
 import { Box } from '@mui/material';
-import { DataCluster } from '../../../../types/DataClusterTypes';
-import { hasAnyReferences, References } from '../../../../types/ReferenceTypes';
+import { PopulatedDataCluster } from '../../../../types/DataClusterTypes';
+import { hasAnyReferences, PopulatedReferences, References } from '../../../../types/ReferenceTypes';
 import { CollectionElementString } from '../../../../types/CollectionTypes';
 import ReferenceChip from '../ReferenceChip';
 import { REFERENCE_CONFIG } from './DataClusterManagerTypes';
 
 interface FlatReferenceViewProps {
-    editedCluster: DataCluster | undefined;
+    editedCluster: PopulatedDataCluster | undefined;
     onDelete: (type: keyof References, index: number) => void;
     isEditable: boolean;
 }
@@ -15,10 +15,9 @@ interface FlatReferenceViewProps {
 const FlatReferenceView = memo(({
     editedCluster,
     onDelete,
-    isEditable
 }: FlatReferenceViewProps) => {
     const renderReferenceChip = (
-        reference: NonNullable<References[keyof References]>[number], 
+        reference: NonNullable<PopulatedReferences[keyof References]>[number], 
         index: number, 
         type: keyof References, 
         chipType: CollectionElementString
@@ -36,7 +35,7 @@ const FlatReferenceView = memo(({
         );
     };
 
-    if (!editedCluster || !hasAnyReferences(editedCluster)) {
+    if (!editedCluster || !hasAnyReferences(editedCluster as References)) {
         return <div className="text-gray-500 italic">No references available</div>;
     }
 

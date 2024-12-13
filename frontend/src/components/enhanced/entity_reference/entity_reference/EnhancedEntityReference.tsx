@@ -4,7 +4,7 @@ import EntityReferenceListView from './EntityReferenceListView';
 import EntityReferenceTableView from './EntityReferenceTableView';
 import EntityReferenceCardView from './EntityReferenceCardView';
 import EntityReferenceShortListView from './EntityReferenceShortListView';
-import { EntityReference } from '../../../../types/EntityReferenceTypes';
+import { EntityReference, PopulatedEntityReference } from '../../../../types/EntityReferenceTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
 import { EntityReferenceComponentProps } from '../../../../types/EntityReferenceTypes';
 
@@ -14,21 +14,21 @@ type EnhancedEntityReferenceMode = BaseEntityReferenceMode | ExtendedEntityRefer
 
 interface EnhancedEntityReferenceProps extends Omit<EntityReferenceComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
   mode: EnhancedEntityReferenceMode;
-  item?: Partial<EntityReference> | null;
+  item?: Partial<EntityReference | PopulatedEntityReference> | null;
   itemId?: string;
   fetchAll: boolean;
-  onSave?: (savedItem: EntityReference) => void;
-  onDelete?: (deletedItem: EntityReference) => Promise<void>;
+  onSave?: (savedItem: EntityReference | PopulatedEntityReference) => void;
+  onDelete?: (deletedItem: EntityReference | PopulatedEntityReference) => Promise<void>;
 }
 
 const EnhancedEntityReference: React.FC<EnhancedEntityReferenceProps> = (props) => {
   const renderContent = (
-    items: EntityReference[] | null,
-    item: EntityReference | null,
-    onChange: (newItem: Partial<EntityReference>) => void,
+    items: (EntityReference | PopulatedEntityReference)[] | null,
+    item: EntityReference | PopulatedEntityReference | null,
+    onChange: (newItem: Partial<EntityReference | PopulatedEntityReference>) => void,
     mode: BaseEntityReferenceMode,
     handleSave: () => Promise<void>,
-    onDelete: (deletedItem: EntityReference) => Promise<void>,
+    onDelete: (deletedItem: EntityReference | PopulatedEntityReference) => Promise<void>,
   ) => {
     const commonProps: EntityReferenceComponentProps = {
       items,
@@ -66,7 +66,7 @@ const EnhancedEntityReference: React.FC<EnhancedEntityReferenceProps> = (props) 
     props.mode === 'edit' ? 'edit' : 'view';
 
   return (
-    <BaseDbElement<EntityReference>
+    <BaseDbElement<EntityReference | PopulatedEntityReference>
       collectionName="entityreferences"
       itemId={props.itemId}
       partialItem={props.item || undefined}

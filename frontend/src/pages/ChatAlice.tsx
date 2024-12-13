@@ -1,9 +1,8 @@
 import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { Box, SelectChangeEvent } from '@mui/material';
 import { Add, Info, } from '@mui/icons-material';
-import { TaskResponse } from '../types/TaskResponseTypes';
-import { AliceTask } from '../types/TaskTypes';
-import { AliceChat, convertPopulatedToAliceChat } from '../types/ChatTypes';
+import { AliceTask, PopulatedTask } from '../types/TaskTypes';
+import { AliceChat, convertPopulatedToAliceChat, PopulatedAliceChat } from '../types/ChatTypes';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
 import { useChat } from '../contexts/ChatContext';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
@@ -14,7 +13,6 @@ import useStyles from '../styles/ChatAliceStyles';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
 import { useCardDialog } from '../contexts/CardDialogContext';
 import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
-import { FileReference } from '../types/FileTypes';
 import EnhancedMessage from '../components/enhanced/message/message/EnhancedMessage';
 import Logger from '../utils/Logger';
 import ChatMessagesFullView from '../components/enhanced/chat/chat/ChatMessagesFullView';
@@ -47,7 +45,7 @@ const ChatAlice: React.FC = () => {
 
   const chatInputRef = useRef<ChatInputRef>(null);
 
-  const selectChatId = useCallback(async (chat: AliceChat) => {
+  const selectChatId = useCallback(async (chat: AliceChat | PopulatedAliceChat) => {
     Logger.debug('Selected chat:', chat);
     if (!chat._id) return;
     await handleSelectChat(chat._id);
@@ -83,23 +81,13 @@ const ChatAlice: React.FC = () => {
     });
   }, [pastChats, selectedApiProvider]);
 
-  const checkAndAddTask = useCallback((task: AliceTask) => {
+  const checkAndAddTask = useCallback((task: AliceTask | PopulatedTask) => {
     if (task._id && !isTaskInChat(task._id)) {
       addTaskToChat(task._id);
     }
   }, [isTaskInChat, addTaskToChat]);
 
-  const addFileReference = useCallback((file: FileReference) => {
-    chatInputRef.current?.addFileReference(file);
-  }, []);
 
-  const addTaskResponse = useCallback((taskResponse: TaskResponse) => {
-    chatInputRef.current?.addTaskResponse(taskResponse);
-  }, []);
-
-  const addEntityReference = useCallback((entityReference: any) => {
-    chatInputRef.current?.addEntityReference(entityReference);
-  }, []);
 
   const addMessageReference = useCallback((message: any) => {
     chatInputRef.current?.addMessageReference(message);
@@ -156,7 +144,7 @@ const ChatAlice: React.FC = () => {
                 return (
                   <ChatShortListView
                     items={filteredPastChats}
-                    onView={(chat) => selectCardItem('Chat', chat?._id, chat)}
+                    onView={(chat) => selectCardItem('Chat', chat?._id)}
                     onInteraction={selectChatId}
                     item={null} mode={'view'}
                     onChange={() => null}
@@ -189,7 +177,7 @@ const ChatAlice: React.FC = () => {
                     mode={'list'}
                     fetchAll={true}
                     onView={(taskResult) => taskResult._id && selectCardItem('TaskResponse', taskResult._id)}
-                    onInteraction={addTaskResponse}
+                    onInteraction={addMessageReference}
                     {...handleProps}
                   />
                 );
@@ -199,7 +187,7 @@ const ChatAlice: React.FC = () => {
                     mode={'list'}
                     fetchAll={true}
                     onView={(file) => file._id && selectCardItem('File', file._id)}
-                    onInteraction={addFileReference}
+                    onInteraction={addMessageReference}
                     {...handleProps}
                   />
                 );
@@ -209,7 +197,7 @@ const ChatAlice: React.FC = () => {
                     mode={'list'}
                     fetchAll={true}
                     onView={(entityReference) => entityReference._id && selectCardItem('EntityReference', entityReference._id)}
-                    onInteraction={addEntityReference}
+                    onInteraction={addMessageReference}
                     {...handleProps}
                   />
                 );
@@ -250,7 +238,7 @@ const ChatAlice: React.FC = () => {
         </Box>
       </Box>
     )
-  }, [selectChatId, currentChat, checkAndAddTask, addTaskResponse, addFileReference, addEntityReference, addMessageReference, selectCardItem, filteredPastChats, classes.activeListContainer, classes.activeListContent, selectedApiProvider, handleApiProviderChange]);
+  }, [selectChatId, currentChat, checkAndAddTask, addMessageReference, selectCardItem, filteredPastChats, classes.activeListContainer, classes.activeListContent, selectedApiProvider, handleApiProviderChange]);
 
   return (
     <Box className={classes.chatAliceContainer}>

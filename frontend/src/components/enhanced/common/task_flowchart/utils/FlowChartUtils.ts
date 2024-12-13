@@ -2,7 +2,7 @@ import { AliceAgent } from "../../../../../types/AgentTypes";
 import { ApiType } from "../../../../../types/ApiTypes";
 import { FunctionParameters } from "../../../../../types/ParameterTypes";
 import { Prompt } from "../../../../../types/PromptTypes";
-import { AliceTask, RouteMap, TaskType } from "../../../../../types/TaskTypes";
+import { AliceTask, PopulatedTask, RouteMap, TaskType } from "../../../../../types/TaskTypes";
 
 export interface BaseTaskData {
   task_name: string;
@@ -15,18 +15,18 @@ export interface BaseTaskData {
   onSizeChange: (id: string, width: number, height: number) => void;
 }
 
-export interface TaskNodeData extends AliceTask, BaseTaskData {
+export interface TaskNodeData extends PopulatedTask, BaseTaskData {
 }
 
 export const getTaskByName = (
-  parentTask: Partial<AliceTask>,
+  parentTask: Partial<PopulatedTask>,
   taskName: string
-): AliceTask | null => {
+): PopulatedTask | null => {
   return parentTask.tasks?.[taskName] || null;
 };
 
 export const getTaskRouteMap = (
-  parentTask: Partial<AliceTask>,
+  parentTask: Partial<PopulatedTask>,
   taskName: string
 ): RouteMap | null => {
   return parentTask.node_end_code_routing?.[taskName] || null;
@@ -36,9 +36,9 @@ export const getTaskRouteMap = (
 type SimpleTaskDataWithoutCallback = Omit<BaseTaskData, 'onSizeChange'>;
 
 export const getNodeData = (
-  parentTask: Partial<AliceTask>,
+  parentTask: Partial<PopulatedTask>,
   taskName: string
-): AliceTask | SimpleTaskDataWithoutCallback | null => {
+): PopulatedTask | SimpleTaskDataWithoutCallback | null => {
   // First try to get the actual task object
   const taskData = getTaskByName(parentTask, taskName);
   if (taskData) {

@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
     Box,
 } from '@mui/material';
-import { AliceTask, getDefaultTaskForm, TaskComponentProps, TaskType } from '../../../../types/TaskTypes';
+import { AliceTask, getDefaultTaskForm, PopulatedTask, TaskComponentProps, TaskType } from '../../../../types/TaskTypes';
 import { ApiType } from '../../../../types/ApiTypes';
 import { Prompt } from '../../../../types/PromptTypes';
 import { AliceAgent } from '../../../../types/AgentTypes';
@@ -33,9 +33,9 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     handleSave,
     handleDelete,
 }) => {
-    const { fetchItem } = useApi();
+    const { fetchPopulatedItem } = useApi();
     const [taskType, setTaskType] = useState<TaskType>(item?.task_type || TaskType.PromptAgentTask);
-    const [form, setForm] = useState<Partial<AliceTask>>(item || getDefaultTaskForm(taskType));
+    const [form, setForm] = useState<Partial<PopulatedTask>>(item as PopulatedTask || getDefaultTaskForm(taskType));
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -52,7 +52,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
 
     useEffect(() => {
         if (item && Object.keys(item).length !== 0) {
-            setForm(item);
+            setForm(item as PopulatedTask);
         }
     }, [item]);
 
@@ -108,39 +108,39 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
 
     const handlePromptSelect = useCallback(async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {
-            const prompt = await fetchItem('prompts', selectedIds[0]) as Prompt;
+            const prompt = await fetchPopulatedItem('prompts', selectedIds[0]) as Prompt;
             setForm(prevForm => ({ ...prevForm, templates: { ...form.templates, task_template: prompt } }));
         } else {
             setForm(prevForm => ({ ...prevForm, templates: { ...form.templates, task_template: null } }));
         }
-    }, [fetchItem, form.templates]);
+    }, [fetchPopulatedItem, form.templates]);
 
     const handleOutputPromptSelect = useCallback(async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {
-            const prompt = await fetchItem('prompts', selectedIds[0]) as Prompt;
+            const prompt = await fetchPopulatedItem('prompts', selectedIds[0]) as Prompt;
             setForm(prevForm => ({ ...prevForm, templates: { ...prevForm.templates, output_template: prompt } }));
         } else {
             setForm(prevForm => ({ ...prevForm, templates: { ...prevForm.templates, output_template: null } }));
         }
-    }, [fetchItem]);
+    }, [fetchPopulatedItem]);
 
     const handleAgentSelect = useCallback(async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {
-            const agent = await fetchItem('agents', selectedIds[0]) as AliceAgent;
+            const agent = await fetchPopulatedItem('agents', selectedIds[0]) as AliceAgent;
             setForm(prevForm => ({ ...prevForm, agent }));
         } else {
             setForm(prevForm => ({ ...prevForm, agent: null }));
         }
-    }, [fetchItem]);
+    }, [fetchPopulatedItem]);
 
     const handleTaskSelect = useCallback(async (selectedIds: string[]) => {
-        const tasks = await Promise.all(selectedIds.map(id => fetchItem('tasks', id) as Promise<AliceTask>));
+        const tasks = await Promise.all(selectedIds.map(id => fetchPopulatedItem('tasks', id) as Promise<PopulatedTask>));
         const tasksObject = tasks.reduce((acc, task) => {
             acc[task.task_name] = task;
             return acc;
-        }, {} as Record<string, AliceTask>);
+        }, {} as Record<string, PopulatedTask>);
         setForm(prevForm => ({ ...prevForm, tasks: tasksObject }));
-    }, [fetchItem]);
+    }, [fetchPopulatedItem]);
 
     const memoizedPromptSelect = useMemo(() => (
         <EnhancedSelect<Prompt>
@@ -191,7 +191,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     ), [form?.agent, isEditMode, activeAccordion, handleAccordionToggle, handleAgentSelect]);
 
     const memoizedTaskSelect = useMemo(() => (
-        <EnhancedSelect<AliceTask>
+        <EnhancedSelect<PopulatedTask>
             componentType="tasks"
             EnhancedView={TaskShortListView}
             selectedItems={Object.values(form?.tasks || {})}
@@ -228,7 +228,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
             mode={mode}
-            item={form as AliceTask}
+            item={form as PopulatedTask}
             itemType='tasks'
         >
             <TitleBox title="Task Details" >

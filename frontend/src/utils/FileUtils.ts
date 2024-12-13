@@ -1,4 +1,4 @@
-import { FileContentReference, FileReference, FileType } from '../types/FileTypes';
+import { FileContentReference, FileReference, FileType, PopulatedFileReference } from '../types/FileTypes';
 import Logger from './Logger';
 
 export const FileTypeExtensionsMap: Record<FileType, string[]> = {
@@ -150,7 +150,7 @@ export const selectFile = async (
 };
 
 export async function getFileStringContent(
-    file: FileReference, 
+    file: FileReference | PopulatedFileReference, 
     fileContent?: string | Blob
 ): Promise<string> {
     // Handle media files with transcripts

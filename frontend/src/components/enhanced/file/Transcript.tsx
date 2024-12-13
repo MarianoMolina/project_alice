@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Button, Typography } from '@mui/material';
-import { MessageType } from '../../../types/MessageTypes';
+import { MessageType, PopulatedMessage } from '../../../types/MessageTypes';
 import { useApi } from '../../../contexts/ApiContext';
 import EnhancedMessage from '../message/message/EnhancedMessage';
 import Logger from '../../../utils/Logger';
@@ -8,8 +8,8 @@ import { useDialog } from '../../../contexts/DialogCustomContext';
 
 interface TranscriptProps {
   fileId: string;
-  transcript?: MessageType;
-  onTranscriptUpdate: (newTranscript: MessageType) => void;
+  transcript?: PopulatedMessage | MessageType;
+  onTranscriptUpdate: (newTranscript: MessageType | PopulatedMessage) => void;
 }
 
 const Transcript: React.FC<TranscriptProps> = ({ fileId, transcript, onTranscriptUpdate }) => {

@@ -4,7 +4,7 @@ import { Person } from '@mui/icons-material';
 import { useApi } from '../../../contexts/ApiContext';
 import { User, UserDefaultChatConfig } from '../../../types/UserTypes';
 import { AliceAgent } from '../../../types/AgentTypes';
-import { AliceTask } from '../../../types/TaskTypes';
+import { PopulatedTask } from '../../../types/TaskTypes';
 import { UserCheckpoint } from '../../../types/UserCheckpointTypes';
 import { CheckpointType } from '../../../types/ChatTypes';
 import useStyles from '../../../styles/UserSettingsStyles';
@@ -15,7 +15,7 @@ import AgentShortListView from '../../enhanced/agent/agent/AgentShortListView';
 import TaskShortListView from '../../enhanced/task/task/TaskShortListView';
 import UserCheckpointShortListView from '../../enhanced/user_checkpoint/user_checkpoint/UserCheckpointShortListView';
 import DataClusterManager from '../../enhanced/data_cluster/data_cluster_manager/DataClusterManager';
-import { DataCluster } from '../../../types/DataClusterTypes';
+import { PopulatedDataCluster } from '../../../types/DataClusterTypes';
 import { useAuth } from '../../../contexts/AuthContext';
 import { TextInput } from '../../enhanced/common/inputs/TextInput';
 import TitleBox from '../../enhanced/common/inputs/TitleBox';
@@ -30,18 +30,18 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
     setUserObject,
 }) => {
     const classes = useStyles();
-    const { fetchItem } = useApi();
+    const { fetchItem, fetchPopulatedItem } = useApi();
     const { updateUser } = useAuth();
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [populatedItems, setPopulatedItems] = useState<{
         agent?: AliceAgent,
-        agentTools: AliceTask[],
-        retrievalTools: AliceTask[],
+        agentTools: PopulatedTask[],
+        retrievalTools: PopulatedTask[],
         toolCallCheckpoint?: UserCheckpoint,
         codeExecCheckpoint?: UserCheckpoint,
-        dataCluster?: DataCluster
+        dataCluster?: PopulatedDataCluster
     }>({
         agentTools: [],
         retrievalTools: []
@@ -59,27 +59,27 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
                 dataCluster
             ] = await Promise.all([
                 userObject.default_chat_config?.alice_agent ?
-                    fetchItem('agents', userObject.default_chat_config.alice_agent) : undefined,
+                    fetchPopulatedItem('agents', userObject.default_chat_config.alice_agent) : undefined,
                 Promise.all((userObject.default_chat_config?.agent_tools || [])
-                    .map(id => fetchItem('tasks', id))),
+                    .map(id => fetchPopulatedItem('tasks', id))),
                 Promise.all((userObject.default_chat_config?.retrieval_tools || [])
-                    .map(id => fetchItem('tasks', id))),
+                    .map(id => fetchPopulatedItem('tasks', id))),
                 userObject.default_chat_config?.default_user_checkpoints?.[CheckpointType.TOOL_CALL] ?
-                    fetchItem('usercheckpoints', userObject.default_chat_config.default_user_checkpoints[CheckpointType.TOOL_CALL]) : undefined,
+                    fetchPopulatedItem('usercheckpoints', userObject.default_chat_config.default_user_checkpoints[CheckpointType.TOOL_CALL]) : undefined,
                 userObject.default_chat_config?.default_user_checkpoints?.[CheckpointType.CODE_EXECUTION] ?
-                    fetchItem('usercheckpoints', userObject.default_chat_config.default_user_checkpoints[CheckpointType.CODE_EXECUTION]) : undefined,
+                    fetchPopulatedItem('usercheckpoints', userObject.default_chat_config.default_user_checkpoints[CheckpointType.CODE_EXECUTION]) : undefined,
                 userObject.default_chat_config?.data_cluster ?
                     (typeof userObject.default_chat_config.data_cluster === 'string' ?
-                        fetchItem('dataclusters', userObject.default_chat_config.data_cluster) : undefined)
+                        fetchPopulatedItem('dataclusters', userObject.default_chat_config.data_cluster) : undefined)
                     : undefined]);
 
             setPopulatedItems({
                 agent: agent as AliceAgent,
-                agentTools: agentTools as AliceTask[],
-                retrievalTools: retrievalTools as AliceTask[],
+                agentTools: agentTools as PopulatedTask[],
+                retrievalTools: retrievalTools as PopulatedTask[],
                 toolCallCheckpoint: toolCallCheckpoint as UserCheckpoint,
                 codeExecCheckpoint: codeExecCheckpoint as UserCheckpoint,
-                dataCluster: dataCluster as DataCluster
+                dataCluster: dataCluster as PopulatedDataCluster
             });
         };
         Logger.debug(`Populating items for user ${JSON.stringify(userObject, null, 2)}`);
@@ -169,7 +169,7 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
         }
     }, [fetchItem, setUserObject]);
 
-    const handleDataClusterChange = useCallback((dataCluster: DataCluster | undefined) => {
+    const handleDataClusterChange = useCallback((dataCluster: PopulatedDataCluster | undefined) => {
         setUserObject(prevUser => {
             if (!prevUser) return null;
             return {
@@ -264,7 +264,7 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
                         showCreateButton={true}
                         isInteractable={true}
                     />
-                    <EnhancedSelect<AliceTask>
+                    <EnhancedSelect<PopulatedTask>
                         componentType="tasks"
                         EnhancedView={TaskShortListView}
                         selectedItems={populatedItems.agentTools}
@@ -278,7 +278,7 @@ const PersonalInformation: React.FC<PersonalInformationProps> = ({
                         showCreateButton={true}
                         isInteractable={true}
                     />
-                    <EnhancedSelect<AliceTask>
+                    <EnhancedSelect<PopulatedTask>
                         componentType="tasks"
                         EnhancedView={TaskShortListView}
                         selectedItems={populatedItems.retrievalTools}

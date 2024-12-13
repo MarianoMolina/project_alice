@@ -14,8 +14,8 @@ const DataClusterShortListView: React.FC<DataClusterComponentProps> = ({
 
     return (
         <EnhancedShortListView<DataCluster>
-            items={items}
-            item={item}
+            items={items as DataCluster[]}
+            item={item as DataCluster}
             getPrimaryText={getPrimaryText}
             getSecondaryText={getSecondaryText}
             onView={onView}

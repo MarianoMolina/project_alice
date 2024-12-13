@@ -4,7 +4,7 @@ import FileListView from './FileListView';
 import FileTableView from './FileTableView';
 import FileCardView from './FileCardView';
 import FileShortListView from './FileShortListView';
-import { FileReference } from '../../../../types/FileTypes';
+import { FileReference, PopulatedFileReference } from '../../../../types/FileTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
 import { FileComponentProps } from '../../../../types/FileTypes';
 
@@ -14,21 +14,21 @@ type EnhancedFileMode = BaseFileMode | ExtendedFileMode;
 
 interface EnhancedFileProps extends Omit<FileComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
   mode: EnhancedFileMode;
-  item?: Partial<FileReference> | null;
+  item?: Partial<FileReference | PopulatedFileReference> | null;
   itemId?: string;
   fetchAll: boolean;
-  onSave?: (savedItem: FileReference) => void;
-  onDelete?: (deletedItem: FileReference) => Promise<void>;
+  onSave?: (savedItem: FileReference | PopulatedFileReference) => void;
+  onDelete?: (deletedItem: FileReference | PopulatedFileReference) => Promise<void>;
 }
 
 const EnhancedFile: React.FC<EnhancedFileProps> = (props) => {
   const renderContent = (
-    items: FileReference[] | null,
-    item: FileReference | null,
-    onChange: (newItem: Partial<FileReference>) => void,
+    items: (FileReference | PopulatedFileReference)[] | null,
+    item: FileReference | PopulatedFileReference | null,
+    onChange: (newItem: Partial<FileReference | PopulatedFileReference>) => void,
     mode: BaseFileMode,
     handleSave: () => Promise<void>,
-    onDelete: (deletedItem: FileReference) => Promise<void>,
+    onDelete: (deletedItem: FileReference | PopulatedFileReference) => Promise<void>,
   ) => {
     const commonProps: FileComponentProps = {
       items,
@@ -66,7 +66,7 @@ const EnhancedFile: React.FC<EnhancedFileProps> = (props) => {
     props.mode === 'edit' ? 'edit' : 'view';
 
   return (
-    <BaseDbElement<FileReference>
+    <BaseDbElement<FileReference | PopulatedFileReference>
       collectionName="files"
       itemId={props.itemId}
       partialItem={props.item || undefined}

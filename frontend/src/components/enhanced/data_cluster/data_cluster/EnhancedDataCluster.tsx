@@ -3,7 +3,7 @@ import DataClusterListView from './DataClusterListView';
 import DataClusterTableView from './DataClusterTableView';
 import DataClusterCardView from './DataClusterCardView';
 import DataClusterShortListView from './DataClusterShortListView';
-import { DataCluster, DataClusterComponentProps } from '../../../../types/DataClusterTypes';
+import { DataCluster, DataClusterComponentProps, PopulatedDataCluster } from '../../../../types/DataClusterTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
 import DataClusterFlexibleView from './DataClusterFlexibleView';
 
@@ -13,21 +13,21 @@ type EnhancedDataClusterMode = BaseDataClusterMode | ExtendedDataClusterMode;
 
 interface EnhancedDataClusterProps extends Omit<DataClusterComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
   mode: EnhancedDataClusterMode;
-  item?: Partial<DataCluster> | null;
+  item?: Partial<DataCluster | PopulatedDataCluster> | null;
   itemId?: string;
   fetchAll: boolean;
-  onSave?: (savedItem: DataCluster) => void;
-  onDelete?: (deletedItem: DataCluster) => Promise<void>;
+  onSave?: (savedItem: DataCluster | PopulatedDataCluster) => void;
+  onDelete?: (deletedItem: DataCluster | PopulatedDataCluster) => Promise<void>;
 }
 
 const EnhancedDataCluster: React.FC<EnhancedDataClusterProps> = (props) => {
   const renderContent = (
-    items: DataCluster[] | null,
-    item: DataCluster | null,
-    onChange: (newItem: Partial<DataCluster>) => void,
+    items: (DataCluster | PopulatedDataCluster)[] | null,
+    item: DataCluster | PopulatedDataCluster | null,
+    onChange: (newItem: Partial<DataCluster | PopulatedDataCluster>) => void,
     mode: BaseDataClusterMode,
     handleSave: () => Promise<void>,
-    onDelete: (deletedItem: DataCluster) => Promise<void>,
+    onDelete: (deletedItem: DataCluster | PopulatedDataCluster) => Promise<void>,
   ) => {
     const commonProps: DataClusterComponentProps = {
       items,
@@ -65,7 +65,7 @@ const EnhancedDataCluster: React.FC<EnhancedDataClusterProps> = (props) => {
     props.mode === 'edit' ? 'edit' : 'view';
 
   return (
-    <BaseDbElement<DataCluster>
+    <BaseDbElement<DataCluster | PopulatedDataCluster>
       collectionName="dataclusters"
       itemId={props.itemId}
       partialItem={props.item || undefined}

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { CodeExecutionComponentProps, CodeExecution, getDefaultCodeExecutionForm, LANGUAGES, CodeBlock, CodeOutput } from '../../../../types/CodeExecutionTypes';
+import { CodeExecutionComponentProps, CodeExecution, getDefaultCodeExecutionForm, LANGUAGES, CodeBlock, CodeOutput, PopulatedCodeExecution } from '../../../../types/CodeExecutionTypes';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import { SelectInput } from '../../common/inputs/SelectInput';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
@@ -14,7 +14,7 @@ const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
     handleDelete
 }) => {
     const isEditMode = mode === 'edit' || mode === 'create';
-    const [form, setForm] = useState<Partial<CodeExecution>>(item || getDefaultCodeExecutionForm());
+    const [form, setForm] = useState<Partial<PopulatedCodeExecution>>(item as PopulatedCodeExecution || getDefaultCodeExecutionForm());
     const [isSaving, setIsSaving] = useState(false);
     
     const title = mode === 'create' ? 'Create New Code Execution' : mode === 'edit' ? 'Edit Code Execution' : 'Code Execution Details';
@@ -29,7 +29,7 @@ const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
 
     useEffect(() => {
         if (item && Object.keys(item).length !== 0) {
-            setForm(item);
+            setForm(item as PopulatedCodeExecution);
         } else {
             onChange(getDefaultCodeExecutionForm());
         }
@@ -120,7 +120,7 @@ const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
             saveButtonText={saveButtonText}
             isEditMode={isEditMode}
             mode={mode}
-            item={form as CodeExecution}
+            item={form as PopulatedCodeExecution}
             itemType='codeexecutions'
         >
             <SelectInput
