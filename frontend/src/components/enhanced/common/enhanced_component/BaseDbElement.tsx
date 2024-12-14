@@ -114,7 +114,7 @@ function BaseDbElement<T extends CollectionType[CollectionName] | CollectionPopu
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { fetchItem, createItem, updateItem, deleteItem } = useApi();
+  const { fetchItem, createItem, updateItem, deleteItem, fetchPopulatedItem } = useApi();
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -122,7 +122,7 @@ function BaseDbElement<T extends CollectionType[CollectionName] | CollectionPopu
         const data = await fetchItem(collectionName);
         setItems(data as T[]);
       } else if (itemId && mode !== 'create') {
-        const data = await fetchItem(collectionName, itemId);
+        const data = await fetchPopulatedItem(collectionName, itemId);
         setItem(data as T);
       } else if (mode === 'create') {
         setItem(partialItem as T || {} as T);
@@ -134,7 +134,7 @@ function BaseDbElement<T extends CollectionType[CollectionName] | CollectionPopu
     } finally {
       setLoading(false);
     }
-  }, [collectionName, itemId, mode, fetchAll, fetchItem, partialItem]);
+  }, [collectionName, itemId, mode, fetchAll, fetchItem, partialItem, fetchPopulatedItem]);
 
   useEffect(() => {
     fetchData();

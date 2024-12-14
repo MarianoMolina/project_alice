@@ -18,7 +18,7 @@ const DataClusterEditingView: React.FC<DataClusterEditingViewProps> = ({
     editedCluster,
     onClusterChange
 }) => {
-    const { fetchItem } = useApi();
+    const { fetchPopulatedItem } = useApi();
     const { selectDialog } = useCardDialog();
     const [selectedIds, setSelectedIds] = useState<{ [K in keyof References]?: string[] }>({});
 
@@ -79,7 +79,7 @@ const DataClusterEditingView: React.FC<DataClusterEditingViewProps> = ({
         setSelectedIds(prev => ({ ...prev, [type]: ids }));
 
         const newRefs = await Promise.all(
-            ids.map(id => fetchItem(config.collectionName!, id))
+            ids.map(id => fetchPopulatedItem(config.collectionName!, id))
         );
 
         onClusterChange({

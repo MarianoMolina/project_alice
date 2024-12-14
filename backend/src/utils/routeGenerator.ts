@@ -157,6 +157,8 @@ export function createRoutes<T extends Document, K extends ModelName>(
       res.status(200).json(items);
     } catch (error) {
       handleErrors(res, error);
+    } finally {
+      populationService.clearCache();
     }
   };
 
@@ -217,6 +219,8 @@ export function createRoutes<T extends Document, K extends ModelName>(
       res.status(200).json(item);
     } catch (error) {
       handleErrors(res, error);
+    } finally {
+      populationService.clearCache();
     }
   };
 

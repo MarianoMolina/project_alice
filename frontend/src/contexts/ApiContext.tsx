@@ -25,7 +25,7 @@ import {
 import { useNotification } from './NotificationContext';
 import { useCardDialog } from './CardDialogContext';
 import { CollectionName, CollectionType, CollectionElementString, collectionNameToElementString, CollectionPopulatedType } from '../types/CollectionTypes';
-import { AliceChat } from '../types/ChatTypes';
+import { AliceChat, PopulatedAliceChat } from '../types/ChatTypes';
 import { MessageType, PopulatedMessage } from '../types/MessageTypes';
 import { TaskResponse } from '../types/TaskResponseTypes';
 import { FileReference, FileContentReference } from '../types/FileTypes';
@@ -225,7 +225,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             const result = await apiGenerateChatResponse(chatId);
             addNotification('Chat response generated successfully', 'success');
             if (result) {
-                const updatedChat = await apiFetchItem('chats', chatId) as AliceChat;
+                const updatedChat = await apiFetchPopulatedItem('chats', chatId) as PopulatedAliceChat;
                 emitEvent('updated', 'chats', updatedChat);
             }
             return result;
@@ -235,7 +235,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     }, [addNotification]);
 
-    const sendMessage = useCallback(async (chatId: string, message: PopulatedMessage): Promise<AliceChat> => {
+    const sendMessage = useCallback(async (chatId: string, message: PopulatedMessage): Promise<PopulatedAliceChat> => {
         try {
             const result = await apiSendMessage(chatId, message);
             addNotification('Message sent successfully', 'success');

@@ -189,7 +189,7 @@ class BackendAPI(BaseModel):
                 async with session.get(url, headers=headers) as response:
                     response.raise_for_status()
                     chat = await response.json()
-
+                    LOGGER.info(f"Chat data: {chat}")
                     chat = await self.preprocess_data(chat)
                     return AliceChat(**chat)
             except aiohttp.ClientError as e:

@@ -11,7 +11,7 @@ import { InteractionOwnerType } from '../interfaces/userInteraction.interface';
 class ReferenceProcessor {
   private processedIds: Set<string> = new Set();
   private processingDepth: number = 0;
-  private readonly MAX_DEPTH = 10; // Maximum nesting depth to prevent infinite recursion
+  private readonly MAX_DEPTH = 20; // Maximum nesting depth to prevent infinite recursion
 
   constructor() {
     this.processedIds = new Set();

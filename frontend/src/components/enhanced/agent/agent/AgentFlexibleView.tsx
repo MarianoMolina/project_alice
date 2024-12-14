@@ -35,7 +35,7 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     handleSave,
     handleDelete,
 }) => {
-    const { fetchItem } = useApi();
+    const { fetchPopulatedItem } = useApi();
     const { selectCardItem } = useCardDialog();
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [form, setForm] = useState<Partial<AliceAgent>>(item || getDefaultAgentForm());
@@ -78,21 +78,21 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     const handleModelChange = useCallback(async (selectedIds: string[]) => {
         const updatedModels: { [key in ModelType]?: AliceModel } = {};
         for (const id of selectedIds) {
-            const model = await fetchItem('models', id) as AliceModel;
+            const model = await fetchPopulatedItem('models', id) as AliceModel;
             if (model && model.model_type) {
                 updatedModels[model.model_type] = model;
             }
         }
         setForm(prevForm => ({ ...prevForm, models: updatedModels }));
-    }, [fetchItem]);
+    }, [fetchPopulatedItem]);
 
     const handlePromptChange = useCallback(async (selectedIds: string[]) => {
         let updatedSystemMessage: Prompt | undefined;
         if (selectedIds.length > 0) {
-            updatedSystemMessage = await fetchItem('prompts', selectedIds[0]) as Prompt;
+            updatedSystemMessage = await fetchPopulatedItem('prompts', selectedIds[0]) as Prompt;
         }
         setForm(prevForm => ({ ...prevForm, system_message: updatedSystemMessage }));
-    }, [fetchItem]);
+    }, [fetchPopulatedItem]);
 
     const handleAccordionToggle = useCallback((accordion: string | null) => {
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);

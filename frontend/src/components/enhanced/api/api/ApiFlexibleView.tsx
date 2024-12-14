@@ -21,7 +21,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
     handleSave,
     handleDelete,
 }) => {
-    const { fetchItem } = useApi();
+    const { fetchPopulatedItem } = useApi();
     const [availableApiTypes, setAvailableApiTypes] = useState<ApiType[]>([]);
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [form, setForm] = useState<Partial<API>>(() => item || getDefaultApiForm());
@@ -100,21 +100,21 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
 
     const handleApiConfigChange = useCallback(async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {
-            const config = await fetchItem('apiconfigs', selectedIds[0]) as APIConfig;
+            const config = await fetchPopulatedItem('apiconfigs', selectedIds[0]) as APIConfig;
             setForm(prevForm => ({ ...prevForm, api_config: config }));
         } else {
             setForm(prevForm => ({ ...prevForm, api_config: undefined }));
         }
-    }, [fetchItem]);
+    }, [fetchPopulatedItem]);
 
     const handleDefaultModelChange = useCallback(async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {
-            const model = await fetchItem('models', selectedIds[0]) as AliceModel;
+            const model = await fetchPopulatedItem('models', selectedIds[0]) as AliceModel;
             setForm(prevForm => ({ ...prevForm, default_model: model }));
         } else {
             setForm(prevForm => ({ ...prevForm, default_model: undefined }));
         }
-    }, [fetchItem]);
+    }, [fetchPopulatedItem]);
 
     const apiOptions = Object.values(ApiName).map((name) => ({
         value: name,

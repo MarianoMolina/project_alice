@@ -62,7 +62,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     }, [messages])
 
     const chatContextCharacterCount = useMemo(() => {
-        const sysPropmtSize = currentChat?.alice_agent.system_message.content.length || 0;
+        if (!currentChat?.alice_agent) return chatMessageCharacterCount;
+        const sysPropmtSize = currentChat?.alice_agent?.system_message?.content?.length || 0;
         const size = chatMessageCharacterCount + sysPropmtSize;
         return size
     }, [chatMessageCharacterCount, currentChat?.alice_agent])
@@ -80,6 +81,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     const fetchChatById = useCallback(async (chatId: string): Promise<PopulatedAliceChat> => {
         try {
             const chatData = await fetchPopulatedItem('chats', chatId) as PopulatedAliceChat;
+            Logger.debug('Fetched chat by id:', chatData);
             return chatData;
         } catch (error) {
             Logger.error('Error fetching chat by id:', error);

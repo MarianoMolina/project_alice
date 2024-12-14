@@ -7,6 +7,9 @@ import Logger from './logger';
 import { IMessageDocument } from '../interfaces/message.interface';
 import { createDataCluster, updateDataCluster } from './data_cluster';
 import { DataCluster } from '../models/reference.model';
+import { PopulationService } from './population.utils';
+
+const popService = new PopulationService()
 
 export async function createChat(
     chatData: Partial<IAliceChatDocument>,
@@ -80,17 +83,17 @@ export async function createChat(
                         messageIds.push(new Types.ObjectId(msg));
                         continue;
                     }
-                    
+
                     if (msg._id) {
                         messageDoc = await updateMessage(
-                            msg._id.toString(), 
-                            msg, 
+                            msg._id.toString(),
+                            msg,
                             userId,
                             chat._id.toString()
                         );
                     } else {
                         messageDoc = await createMessage(
-                            msg, 
+                            msg,
                             userId,
                             chat._id.toString()
                         );
@@ -151,8 +154,8 @@ export async function updateChat(
                     messageIds.push(new Types.ObjectId(msg));
                 } else if (msg._id) {
                     const updatedMessage = await updateMessage(
-                        msg._id.toString(), 
-                        msg, 
+                        msg._id.toString(),
+                        msg,
                         userId,
                         chatId
                     );
@@ -204,8 +207,8 @@ export async function createMessageInChat(
         if (messageData._id) {
             Logger.debug(`Updating existing message with ID: ${messageData._id}`);
             messageDoc = await updateMessage(
-                messageData._id.toString(), 
-                messageData, 
+                messageData._id.toString(),
+                messageData,
                 userId,
                 chatId
             );
@@ -231,13 +234,16 @@ export async function createMessageInChat(
         if (!updatedChat) {
             throw new Error('Chat not found or failed to update');
         }
+        const populatedChat = await popService.findAndPopulate(AliceChat, chatId, userId);
 
         Logger.debug(`Message ${messageDoc._id} added to chat ${chatId}`);
 
-        return updatedChat;
+        return populatedChat;
     } catch (error) {
         Logger.error('Error in createMessageInChat:', error);
         return null;
+    } finally {
+        popService.clearCache();
     }
 }
 

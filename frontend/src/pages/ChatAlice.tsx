@@ -155,7 +155,7 @@ const ChatAlice: React.FC = () => {
                 return (
                   <ChatCardView
                     items={null}
-                    item={currentChat && convertPopulatedToAliceChat(currentChat)}
+                    item={currentChat}
                     mode={'view'}
                     onChange={() => null}
                     handleSave={async () => { }}

@@ -27,6 +27,7 @@ const EnhancedSelectDialog = () => {
     const handleSelect = async (selectedIds: string[]) => {
         if (selectedIds.length > 0) {
             try {
+                // TODO: This should be able to select multiple items no?
                 Logger.debug('EnhancedSelectDialog - handleSelect', { selectedIds });
                 const selectedItem = await fetchItem(selectedComponentType, selectedIds[0]) as CollectionElement;
                 await onSelectCallback(selectedItem);

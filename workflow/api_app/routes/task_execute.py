@@ -88,7 +88,7 @@ async def execute_task_endpoint(
 
             updated_ref = await db_app.get_entity_from_db('task_responses', db_result['_id'])
 
-            LOGGER.debug(f'db_result: {db_result}')
+            LOGGER.debug(f'db_result: {updated_ref}')
             return TaskResponse(**updated_ref).model_dump()
         except Exception as e:
             import traceback

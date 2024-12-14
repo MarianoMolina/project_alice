@@ -1,23 +1,23 @@
 import Logger from "../utils/Logger";
-import { CodeExecution, convertToPopulatedCodeExecution } from "./CodeExecutionTypes";
+import { CodeExecution, convertToPopulatedCodeExecution, PopulatedCodeExecution } from "./CodeExecutionTypes";
 import { convertToEmbeddingChunk, EmbeddingChunk } from "./EmbeddingChunkTypes";
-import { convertToPopulatedEntityReference, EntityReference } from "./EntityReferenceTypes";
-import { convertToPopulatedFileReference, FileContentReference, FileReference } from "./FileTypes";
-import { convertToPopulatedMessage, MessageType } from "./MessageTypes";
-import { convertToPopulatedTaskResponse, TaskResponse } from "./TaskResponseTypes";
-import { convertToPopulatedToolCall, ToolCall } from "./ToolCallTypes";
-import { convertToPopulatedUserInteraction, UserInteraction } from "./UserInteractionTypes";
+import { convertToPopulatedEntityReference, EntityReference, PopulatedEntityReference } from "./EntityReferenceTypes";
+import { convertToPopulatedFileReference, FileContentReference, FileReference, PopulatedFileReference } from "./FileTypes";
+import { convertToPopulatedMessage, MessageType, PopulatedMessage } from "./MessageTypes";
+import { convertToPopulatedTaskResponse, PopulatedTaskResponse, TaskResponse } from "./TaskResponseTypes";
+import { convertToPopulatedToolCall, PopulatedToolCall, ToolCall } from "./ToolCallTypes";
+import { convertToPopulatedUserInteraction, PopulatedUserInteraction, UserInteraction } from "./UserInteractionTypes";
 
 export type ReferenceType =
-  | MessageType
-  | FileReference
+  | MessageType | PopulatedMessage
+  | FileReference | PopulatedFileReference
   | FileContentReference
-  | TaskResponse
-  | EntityReference
-  | UserInteraction
+  | TaskResponse | PopulatedTaskResponse
+  | EntityReference | PopulatedEntityReference
+  | UserInteraction | PopulatedUserInteraction
   | EmbeddingChunk
-  | CodeExecution
-  | ToolCall
+  | CodeExecution | PopulatedCodeExecution
+  | ToolCall | PopulatedToolCall
   | string;
 
 export enum OutputType {
@@ -44,14 +44,14 @@ export interface References {
 
 // Define the populated types
 type PopulatedFields = {
-  messages?: MessageType[];
-  files?: (FileReference | FileContentReference)[];
-  task_responses?: TaskResponse[];
-  user_interactions?: UserInteraction[];
+  messages?: PopulatedMessage[];
+  files?: PopulatedFileReference[];
+  task_responses?: PopulatedTaskResponse[];
+  user_interactions?: PopulatedUserInteraction[];
   embeddings?: EmbeddingChunk[];
-  entity_references?: EntityReference[];
-  code_executions?: CodeExecution[];
-  tool_calls?: ToolCall[];
+  entity_references?: PopulatedEntityReference[];
+  code_executions?: PopulatedCodeExecution[];
+  tool_calls?: PopulatedToolCall[];
 }
 
 // Create the populated interface
