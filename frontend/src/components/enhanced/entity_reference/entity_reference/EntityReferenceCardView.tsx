@@ -127,12 +127,12 @@ const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
         {
             icon: <DataObject />,
             primary_text: "Description",
-            secondary_text: <AliceMarkdown showCopyButton children={populatedItem.description ?? ''} />
+            secondary_text: populatedItem.description ? <AliceMarkdown showCopyButton children={populatedItem.description} /> : 'N/A'
         },
         {
             icon: <Description />,
             primary_text: "Content",
-            secondary_text: <AliceMarkdown showCopyButton children={populatedItem.content ?? ''} />
+            secondary_text: populatedItem.content ? <AliceMarkdown showCopyButton children={populatedItem.content} /> : 'N/A'
         },
         {
             icon: <Image />,

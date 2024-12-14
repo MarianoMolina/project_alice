@@ -17,14 +17,14 @@ export const referencesSchema = new Schema<References>({
 
 // Extended schema for DataCluster that includes document properties
 const dataClusterSchema = new Schema<IDataClusterDocument, IDataClusterModel>({
-    messages: [{ type: Schema.Types.ObjectId, ref: 'Message', autopopulate: true }],
-    files: [{ type: Schema.Types.ObjectId, ref: 'FileReference', autopopulate: true }],
-    task_responses: [{ type: Schema.Types.ObjectId, ref: 'TaskResult', autopopulate: true }],
-    entity_references: [{ type: Schema.Types.ObjectId, ref: 'EntityReference', autopopulate: true }],
-    user_interactions: [{ type: Schema.Types.ObjectId, ref: 'UserInteraction', autopopulate: true }],
-    embeddings: [{ type: Schema.Types.ObjectId, ref: 'EmbeddingChunk', autopopulate: true }],
-    tool_calls: [{ type: Schema.Types.ObjectId, ref: 'ToolCall', autopopulate: true }],
-    code_executions: [{ type: Schema.Types.ObjectId, ref: 'CodeExecution', autopopulate: true }],
+    messages: [{ type: Schema.Types.ObjectId, ref: 'Message' }],
+    files: [{ type: Schema.Types.ObjectId, ref: 'FileReference' }],
+    task_responses: [{ type: Schema.Types.ObjectId, ref: 'TaskResult' }],
+    entity_references: [{ type: Schema.Types.ObjectId, ref: 'EntityReference' }],
+    user_interactions: [{ type: Schema.Types.ObjectId, ref: 'UserInteraction' }],
+    embeddings: [{ type: Schema.Types.ObjectId, ref: 'EmbeddingChunk' }],
+    tool_calls: [{ type: Schema.Types.ObjectId, ref: 'ToolCall' }],
+    code_executions: [{ type: Schema.Types.ObjectId, ref: 'CodeExecution' }],
     created_by: { type: Schema.Types.ObjectId, ref: 'User', required: true, autopopulate: true },
     updated_by: { type: Schema.Types.ObjectId, ref: 'User', required: true, autopopulate: true }
 }, { timestamps: true });

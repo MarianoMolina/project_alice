@@ -207,7 +207,7 @@ class APIManager(BaseModel):
             if not api.api_config:
                 LOGGER.warning(f"No API configuration found for {api.id}")
                 continue
-            if isinstance(api.api_config.data, dict) and 'api_key' in api.api_config.data:
+            if isinstance(api.api_config.data, dict):
                 api.api_config.data['api_key'] = token
                 LOGGER.debug(f"Successfully updated API key for {api.id}")
             elif hasattr(api.api_config.data, 'api_key'):

@@ -22,7 +22,7 @@ const auth = (req: AuthRequest, res: Response, next: NextFunction): void => {
 
       next();
     } catch (jwtError) {
-      Logger.error('JWT verification failed:', jwtError);
+      Logger.error('JWT verification failed:', jwtError, token);
       throw new Error('Invalid token');
     }
   } catch (error) {

@@ -146,23 +146,25 @@ class LoggerClass {
     if (level <= this.level) {
       const timestamp = new Date().toISOString();
       const formattedArgs = this.formatArgs(args);
-      const logMessage = `[${timestamp}] ${LogLevel[level]}: ${message} ${formattedArgs}\n`;
-
-      // Console output with color coding
-      const consoleMessage = this.getColoredLogLevel(level) + logMessage + '\x1b[0m';
-      console.log(consoleMessage.trim()); // Remove trailing newline for console
-
+      
+      // Console output (without newline)
+      const consoleMessage = `[${timestamp}] ${LogLevel[level]}: ${message} ${formattedArgs}`;
+      console.log(this.getColoredLogLevel(level) + consoleMessage + '\x1b[0m');
+  
+      // File output (with newline)
+      const fileMessage = consoleMessage + '\n';
+      
       // Check if we need to rotate files
-      if (this.currentSize + Buffer.byteLength(logMessage) > this.maxBytes) {
+      if (this.currentSize + Buffer.byteLength(fileMessage) > this.maxBytes) {
         this.rotateFiles();
       }
-
+  
       // File output
-      fs.appendFileSync(this.logFile, logMessage);
-      this.currentSize += Buffer.byteLength(logMessage);
+      fs.appendFileSync(this.logFile, fileMessage);
+      this.currentSize += Buffer.byteLength(fileMessage);
     }
   }
-
+  
   private getColoredLogLevel(level: LogLevel): string {
     switch (level) {
       case LogLevel.ERROR: return '\x1b[31m';

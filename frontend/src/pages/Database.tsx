@@ -46,15 +46,15 @@ const Database: React.FC = () => {
         setShowActiveComponent(true);
     }, [setSelectedItem]);
 
-    const handleItemSelect = useCallback((item: CollectionElement | CollectionPopulatedElement | null) => {
+    const handleItemSelect = useCallback(async (item: CollectionElement | CollectionPopulatedElement | null) => {
         Logger.debug('Database - Item selected:', item);
         // Use collectionNameToElementString to get the correct string
         const collectionName = getCollectionNameFromElement(activeTab);
-        const popItem = fetchPopulatedItem(collectionName, item?._id);
+        const popItem = await fetchPopulatedItem(collectionName, item?._id); 
         setSelectedItem(popItem as CollectionPopulatedElement);
         setIsCreating(false);
         setShowActiveComponent(true);
-    }, [setSelectedItem]);
+    }, [setSelectedItem, activeTab]);
 
     const handleSave = useCallback(async (item: CollectionElement | CollectionPopulatedElement | null) => {
         Logger.debug('Database - Saving item:', item);

@@ -448,7 +448,7 @@ export class LMStudioClientManager {
             const loadedLLMList = await this.getClient().llm.listLoaded();
             const loadedEmbeddingList = await this.getClient().embedding.listLoaded();
 
-            Logger.debug(`Found ${loadedLLMList.length} LLM models and ${loadedEmbeddingList.length} embedding models`);
+            Logger.debug(`Loaded Models: Found ${loadedLLMList.length} LLM models and ${loadedEmbeddingList.length} embedding models`);
 
             if (loadedLLMList.length === 0 && loadedEmbeddingList.length === 0) {
                 Logger.info('No models to unload');

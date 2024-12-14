@@ -357,4 +357,4 @@ const StartTask: React.FC = () => {
     );
 };
 
-export default memo(StartTask);
+export default StartTask;

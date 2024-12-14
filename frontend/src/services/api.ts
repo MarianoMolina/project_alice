@@ -1,7 +1,7 @@
 import { dbAxiosInstance, dbAxiosInstanceLMS, taskAxiosInstance } from './axiosInstance';
 import { AliceChat, convertToAliceChat, convertToPopulatedAliceChat, PopulatedAliceChat } from '../types/ChatTypes';
 import { getDefaultMessageForm, MessageType, PopulatedMessage } from '../types/MessageTypes';
-import { TaskResponse, convertToTaskResponse } from '../types/TaskResponseTypes';
+import { PopulatedTaskResponse, TaskResponse, convertToPopulatedTaskResponse, convertToTaskResponse } from '../types/TaskResponseTypes';
 import { CollectionName, CollectionPopulatedType, CollectionType } from '../types/CollectionTypes';
 import { FileReference, FileContentReference, PopulatedFileReference } from '../types/FileTypes';
 import { createFileContentReference } from '../utils/FileUtils';
@@ -409,7 +409,7 @@ export const generateChatResponse = async (chatId: string): Promise<boolean> => 
   }
 };
 
-export const executeTask = async (taskId: string, inputs: any): Promise<TaskResponse> => {
+export const executeTask = async (taskId: string, inputs: any): Promise<PopulatedTaskResponse> => {
   try {
     // First make the task execution request and get the queue task ID
     const response = await taskAxiosInstance.post('/execute_task', { taskId, inputs });
@@ -417,10 +417,11 @@ export const executeTask = async (taskId: string, inputs: any): Promise<TaskResp
     const queueTaskId = response.data.task_id;
 
     // Now that we have the queue task ID, set up WebSocket connection
-    const taskResponsePromise = new Promise<TaskResponse>((resolve, reject) => {
+    const taskResponsePromise = new Promise<PopulatedTaskResponse>((resolve, reject) => {
       setupWebSocketConnection(queueTaskId, (message: any) => {
         if (message.status === 'completed') {
-          const result = convertToTaskResponse(message.result);
+          Logger.debug('Task execution completed:', message.result);
+          const result = convertToPopulatedTaskResponse(message.result);
           resolve(result);
         } else if (message.status === 'failed') {
           reject(new Error(`Task execution failed: ${message.error}`));

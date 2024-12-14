@@ -57,21 +57,30 @@ class THPHandler:
     def _get_current_thp_setting(self):
         """Check current THP setting to see if changes are needed"""
         try:
-            if self.system == "Linux":
+            if self.system == "Darwin":
+                result = subprocess.run(
+                    ["docker", "run", "--rm", "--privileged", "ubuntu:latest", 
+                     "cat", "/sys/kernel/mm/transparent_hugepage/enabled"],
+                    capture_output=True,
+                    text=True
+                )
+                self.logger.debug(f"THP check output: {result.stdout}")
+                return result.returncode == 0 and "[madvise]" in result.stdout
+            elif self.system == "Linux":
                 result = subprocess.run(
                     ["cat", "/sys/kernel/mm/transparent_hugepage/enabled"],
                     capture_output=True,
                     text=True
                 )
-            elif self.system in ["Windows", "Darwin"]:  # Both use Linux VMs for Docker
+                return result.returncode == 0 and "[madvise]" in result.stdout
+            elif self.system == "Windows":
                 result = subprocess.run(
-                    ["wsl" if self.system == "Windows" else "docker", "-d", "docker-desktop", "cat", "/sys/kernel/mm/transparent_hugepage/enabled"],
+                    ["wsl", "cat", "/sys/kernel/mm/transparent_hugepage/enabled"],
                     capture_output=True,
                     text=True
                 )
-            
-            return result.returncode == 0 and "[madvise]" in result.stdout
-            
+                return result.returncode == 0 and "[madvise]" in result.stdout
+                
         except Exception as e:
             self.logger.error(f"Failed to check THP setting: {e}")
             return False
@@ -85,33 +94,64 @@ class THPHandler:
         self.logger.info("Configuring THP settings...")
         
         try:
-            if self.system == "Linux":
-                cmd_prefix = []
+            if self.system == "Darwin":
+                # Create a persistent container to modify THP settings
+                container_name = "thp-config"
+                
+                # Remove existing container if it exists
+                subprocess.run(["docker", "rm", "-f", container_name], 
+                             capture_output=True)
+                
+                # Run configuration in a persistent privileged container
+                commands = [
+                    ["docker", "run", "-d", "--name", container_name, 
+                     "--privileged", "ubuntu:latest", "sleep", "infinity"],
+                    ["docker", "exec", container_name, "sh", "-c", 
+                     "echo madvise > /sys/kernel/mm/transparent_hugepage/enabled"],
+                    ["docker", "exec", container_name, "sh", "-c", 
+                     "echo madvise > /sys/kernel/mm/transparent_hugepage/defrag"],
+                ]
+                
+                for cmd in commands:
+                    self.logger.debug(f"Running command: {cmd}")
+                    result = subprocess.run(cmd, capture_output=True, text=True)
+                    if result.returncode != 0:
+                        self.logger.error(f"Command failed: {result.stderr}")
+                        return False
+                
+                # Clean up the container
+                subprocess.run(["docker", "rm", "-f", container_name], 
+                             capture_output=True)
+                
+                # Verify the settings took effect
+                return self._get_current_thp_setting()
+            elif self.system == "Linux":
+                commands = [
+                    ["sh", "-c", "echo madvise | tee /sys/kernel/mm/transparent_hugepage/enabled"],
+                    ["sh", "-c", "echo madvise | tee /sys/kernel/mm/transparent_hugepage/defrag"]
+                ]
             elif self.system == "Windows":
-                cmd_prefix = ["wsl", "-d", "docker-desktop"]
-            elif self.system == "Darwin":
-                cmd_prefix = ["docker", "run", "--privileged", "ubuntu"]
+                commands = [
+                    ["wsl", "sh", "-c", "echo madvise | tee /sys/kernel/mm/transparent_hugepage/enabled"],
+                    ["wsl", "sh", "-c", "echo madvise | tee /sys/kernel/mm/transparent_hugepage/defrag"]
+                ]
             else:
                 self.logger.error(f"Unsupported operating system: {self.system}")
                 return False
 
-            commands = [
-                cmd_prefix + ["sh", "-c", "echo madvise | tee /sys/kernel/mm/transparent_hugepage/enabled"],
-                cmd_prefix + ["sh", "-c", "echo madvise | tee /sys/kernel/mm/transparent_hugepage/defrag"]
-            ]
-
-            for cmd in commands:
-                result = subprocess.run(cmd, capture_output=True, text=True)
-                if result.returncode != 0:
-                    self.logger.error(f"Failed to set THP: {result.stderr}")
-                    return False
-
-            return self._get_current_thp_setting()
+            if self.system in ["Linux", "Windows"]:
+                for cmd in commands:
+                    self.logger.debug(f"Running command: {cmd}")
+                    result = subprocess.run(cmd, capture_output=True, text=True)
+                    if result.returncode != 0:
+                        self.logger.error(f"Command failed: {result.stderr}")
+                        return False
+                return self._get_current_thp_setting()
 
         except Exception as e:
             self.logger.error(f"Error configuring THP: {e}")
             return False
-        
+                
 class LMStudioPathFinder:
     """
     Handles LM Studio CLI discovery, setup, and server management.

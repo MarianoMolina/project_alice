@@ -18,6 +18,7 @@ export interface PopulationConfig {
     embeddable: boolean;
     hasDataCluster: boolean;
     hasReferences: boolean;
+    isDataCluster: boolean;
     hasTasks: boolean;
     hasMessages: boolean;
     referencePath?: string[];
@@ -27,6 +28,7 @@ export interface PopulationConfig {
 export const defaultPopulationConfig: PopulationConfig = {
     embeddable: false,
     hasDataCluster: false,
+    isDataCluster: false,
     hasReferences: false,
     hasTasks: false,
     hasMessages: false,
@@ -60,10 +62,13 @@ export const ModelPopulationMap: Record<string, PopulationConfig> = {
     'AliceChat': {
         ...defaultPopulationConfig,
         hasDataCluster: true,
-        hasReferences: true,
         hasTasks: true,
         taskPath: ['agent_tools', 'retrieval_tools'],
         hasMessages: true,
+    },
+    'DataCluster': {
+        ...defaultPopulationConfig,
+        isDataCluster: true,
     }
 };
 
@@ -80,6 +85,16 @@ export class PopulationService {
         userId: string | Types.ObjectId,
     ): Promise<T | null> {
         const memoKey = `${model.modelName}-${id}`;
+        Logger.debug('Starting findAndPopulate:', {
+            modelName: model.modelName,
+            id,
+            memoKey: `${model.modelName}-${id}`
+        });
+        const config = ModelPopulationMap[model.modelName];
+        Logger.debug('Population config:', {
+            modelName: model.modelName,
+            config
+        });
         if (this.populatedReferences.has(memoKey)) {
             return this.populatedReferences.get(memoKey) as T;
         }
@@ -88,7 +103,13 @@ export class PopulationService {
             created_by: userId
         });
         if (!doc) return null;
-        const config = ModelPopulationMap[model.modelName];
+        Logger.debug('Document found:', {
+            modelName: model.modelName,
+            id,
+            hasDoc: !!doc,
+            hasReferences: config?.hasReferences,
+            hasRefPath: !!config?.referencePath
+        });
         if (!config) {
             return doc;
         }
@@ -100,7 +121,12 @@ export class PopulationService {
             populatedObj = await this.populateEmbeddable(populatedObj, userId);
         }
         if (config.hasReferences && this.hasReferences(doc, config)) {
+            Logger.info('Populating references for:', populatedObj);
             populatedObj = await this.populateReferences(populatedObj, config, userId);
+            Logger.info('Populated references:', populatedObj);
+        }
+        if (config.isDataCluster && this.isReferencesObject(doc)) {
+            populatedObj = await this.populateReferencesObject(populatedObj as References, userId) as mongoose.FlattenMaps<mongoose.Require_id<T>>;
         }
         if (config.hasDataCluster && this.hasDataCluster(doc)) {
             populatedObj = await this.populateDataCluster(populatedObj, userId);
@@ -109,9 +135,22 @@ export class PopulationService {
             populatedObj = await this.populateTasks(populatedObj, config, userId);
         }
         if (config.hasMessages && this.hasMessages(doc)) {
+            Logger.debug('Will populate references:', {
+                modelName: model.modelName,
+                id,
+                refPath: config.referencePath,
+                // Check for references safely
+                hasDirectRefs: doc.toJSON().hasOwnProperty('references')
+            });
             populatedObj = await this.populateMessages(populatedObj, userId);
+            Logger.debug('After reference population:', {
+                modelName: model.modelName,
+                id,
+                populatedKeys: Object.keys(populatedObj)
+            });
         }
         this.populatedReferences.set(memoKey, populatedObj as T);
+
         return populatedObj as T;
     }
 
@@ -122,8 +161,8 @@ export class PopulationService {
     }
 
     private hasMessages(doc: Document): boolean {
-        Logger.debug('Checking for messages in doc:', doc);
-        Logger.debug('Messages:', 'messages' in doc, 'messages' in doc && Array.isArray(doc.messages));
+        Logger.info('Checking for messages in doc:', doc);
+        Logger.info('Messages:', 'messages' in doc, 'messages' in doc && Array.isArray(doc.messages));
         return (
             'messages' in doc &&
             Array.isArray(doc.messages)
@@ -137,22 +176,91 @@ export class PopulationService {
         );
     }
 
+    private isReferencesObject(obj: any): obj is References {
+        if (!obj || typeof obj !== 'object') return false;
+        
+        // Check if the object has any of the reference type keys
+        const referenceKeys = Object.keys(ReferenceTypeModelMap);
+        return referenceKeys.some(key => key in obj);
+    }
+
     private hasReferences(doc: Document, config: PopulationConfig): boolean {
+        Logger.debug('hasReferences check starting for doc:', {
+            id: doc._id,
+            hasDirectRefs: 'references' in doc,
+            configPath: config.referencePath
+        });
+
+        if (this.isReferencesObject(doc)) {
+            Logger.debug('Document is a References object, skipping population');
+            return true;
+        }
+
         // Check if doc has 'references' field
         if ('references' in doc && doc.references) {
+            Logger.debug('Found direct references in doc');
             return true;
         }
 
         // Check custom reference paths
         if (config.referencePath) {
-            return config.referencePath.some(path => {
-                const value = path.split('.').reduce((obj: any, key) => obj && obj[key], doc);
-                return value !== undefined && value !== null;
+            const hasRefs = config.referencePath.some(path => {
+                Logger.debug('Checking reference path:', path);
+                const parts = path.split('.');
+                let current: any = doc;
+
+                for (const part of parts) {
+                    Logger.debug('Checking path part:', {
+                        part,
+                        currentType: Array.isArray(current) ? 'array' : typeof current,
+                        hasPartProperty: current && part in current,
+                        value: current && current[part]
+                    });
+
+                    if (!current) {
+                        Logger.debug('Current object is null/undefined, path check failed');
+                        return false;
+                    }
+
+                    if (Array.isArray(current)) {
+                        const arrayHasRefs = current.some(item => {
+                            let subCurrent = item;
+                            Logger.debug('Checking array item:', {
+                                itemId: item._id,
+                                remainingPath: parts.slice(parts.indexOf(part) + 1)
+                            });
+
+                            for (const remainingPart of parts.slice(parts.indexOf(part) + 1)) {
+                                if (!subCurrent || !subCurrent[remainingPart]) {
+                                    Logger.debug('Array item missing required path:', remainingPart);
+                                    return false;
+                                }
+                                subCurrent = subCurrent[remainingPart];
+                            }
+                            Logger.debug('Found valid references in array item');
+                            return true;
+                        });
+
+                        Logger.debug('Array check result:', { arrayHasRefs });
+                        return arrayHasRefs;
+                    }
+
+                    current = current[part];
+                }
+
+                const pathHasRefs = current !== undefined && current !== null;
+                Logger.debug('Path check result:', { path, hasRefs: pathHasRefs });
+                return pathHasRefs;
             });
+
+            Logger.debug('Final reference check result:', { hasRefs });
+            return hasRefs;
         }
 
+        Logger.debug('No references found');
         return false;
     }
+
 
     private hasTasks(doc: Document, config: PopulationConfig): boolean {
         // Check default "tasks" field
@@ -219,24 +327,13 @@ export class PopulationService {
     ): Promise<any> {
         if (!obj.data_cluster) return obj;
 
-        const references: References = {
-            messages: obj.data_cluster.messages || [],
-            files: obj.data_cluster.files || [],
-            task_responses: obj.data_cluster.task_responses || [],
-            entity_references: obj.data_cluster.entity_references || [],
-            user_interactions: obj.data_cluster.user_interactions || [],
-            embeddings: obj.data_cluster.embeddings || [],
-            tool_calls: obj.data_cluster.tool_calls || [],
-            code_executions: obj.data_cluster.code_executions || []
-        };
-
-        const populatedReferences = await this.populateReferencesObject(references, userId);
+        const references = await this.populateReferences(obj, defaultPopulationConfig, userId);
 
         return {
             ...obj,
             data_cluster: {
                 ...obj.data_cluster,
-                ...populatedReferences
+                ...references
             }
         };
     }
@@ -249,30 +346,26 @@ export class PopulationService {
         if ('references' in obj && obj.references) {
             obj.references = await this.populateReferencesObject(obj.references, userId);
         }
-
         if (config.referencePath) {
             for (const path of config.referencePath) {
                 const pathParts = path.split('.');
                 let current = obj;
+                let parent = null;
+                let lastPart = '';
 
+                // Track the parent as we traverse
                 for (let i = 0; i < pathParts.length; i++) {
                     const part = pathParts[i];
-                    if (!current[part]) break;
 
-                    if (Array.isArray(current[part])) {
-                        current[part] = await Promise.all(
-                            current[part].map(async (item: any) => {
-                                if (i === pathParts.length - 1) {
-                                    return await this.populateReferencesObject(item, userId);
-                                }
-                                const remainingPath = pathParts.slice(i + 1);
-                                let target = item;
-                                for (const nextPart of remainingPath) {
-                                    if (!target[nextPart]) break;
-                                    if (i === pathParts.length - 2 && nextPart === pathParts[pathParts.length - 1]) {
-                                        target[nextPart] = await this.populateReferencesObject(target[nextPart], userId);
-                                    }
-                                    target = target[nextPart];
+                    if (Array.isArray(current) && i === pathParts.length - 1) {
+                        // Update the parent's reference to the array
+                        parent[lastPart] = await Promise.all(
+                            current.map(async (item) => {
+                                if (item[part]) {
+                                    return {
+                                        ...item,
+                                        [part]: await this.populateReferencesObject(item[part], userId)
+                                    };
                                 }
                                 return item;
                             })
@@ -280,18 +373,26 @@ export class PopulationService {
                         break;
                     }
 
-                    if (i === pathParts.length - 1 && typeof current[part] === 'object') {
-                        current[part] = await this.populateReferencesObject(current[part], userId);
-                    }
+                    if (!current || !current[part]) break;
 
-                    current = current[part];
+                    if (i === pathParts.length - 1) {
+                        // Update the parent's reference
+                        parent[lastPart] = await this.populateReferencesObject(current[part], userId);
+                    } else {
+                        // Track parent before moving deeper
+                        parent = current;
+                        lastPart = part;
+                        current = current[part];
+                    }
                 }
             }
+        }
+        if (this.isReferencesObject(obj)) {
+            obj = await this.populateReferencesObject(obj, userId);
         }
 
         return obj;
     }
-
     private async populateTasks(
         obj: any,
         config: PopulationConfig,
@@ -331,12 +432,17 @@ export class PopulationService {
         model: Model<any>,
         userId: string | Types.ObjectId
     ): Promise<any> {
+        Logger.debug('Starting populateReferenceStructure:', {
+            isArray: Array.isArray(reference),
+            modelName: model.modelName,
+            referenceType: typeof reference
+        });
         if (Array.isArray(reference)) {
             return Promise.all(
                 reference.map(ref => this.findAndPopulate(model, ref, userId))
             );
         }
-    
+
         if (typeof reference === 'object' && reference !== null) {
             const result: Record<string, any> = {};
             for (const [key, value] of Object.entries(reference as Record<string, any>)) {
@@ -345,8 +451,9 @@ export class PopulationService {
             }
             return result;
         }
-    
-        return this.findAndPopulate(model, reference, userId);
+
+        const result = this.findAndPopulate(model, reference, userId);
+        return result
     }
 
     private async populateReferencesObject(references: References, userId: string | Types.ObjectId): Promise<References> {

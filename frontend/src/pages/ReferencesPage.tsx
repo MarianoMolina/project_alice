@@ -8,7 +8,7 @@ import {
     TASK_SIDEBAR_WIDTH_TABLE, TASK_SIDEBAR_WIDTH_COMPACT
 } from '../utils/Constants';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
-import { ComponentMode, CollectionElement, CollectionElementString, CollectionPopulatedElement } from '../types/CollectionTypes';
+import { ComponentMode, CollectionElement, CollectionElementString, CollectionPopulatedElement, getCollectionNameFromElement } from '../types/CollectionTypes';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
 import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
 import EnhancedMessage from '../components/enhanced/message/message/EnhancedMessage';
@@ -24,11 +24,11 @@ import Logger from '../utils/Logger';
 import ToggleBox from '../components/ui/sidetab_header/ToggleBox';
 import EnhancedEntityReference from '../components/enhanced/entity_reference/entity_reference/EnhancedEntityReference';
 import { collectionElementIcons } from '../utils/CollectionUtils';
-import { fetchPopulatedItem } from '../services/api';
-import { PopulatedTask } from '../types/TaskTypes';
+import { useApi } from '../contexts/ApiContext';
 
 const ReferencesPage: React.FC = () => {
     const classes = useStyles();
+    const { fetchPopulatedItem } = useApi();
     const [selectedItem, setSelectedItem] = useState<CollectionPopulatedElement | null>(null);
     const { selectCardItem } = useCardDialog();
     const [activeTab, setActiveTab] = useState<CollectionElementString>('Message');
@@ -66,13 +66,14 @@ const ReferencesPage: React.FC = () => {
     }, []);
 
     const handleItemSelect = useCallback(async (item: CollectionElement | CollectionPopulatedElement | null) => {
-        Logger.debug('References - Item selected:', item);
+        Logger.debug('References - Item selected:', activeTab, item);
         if (!item) return;
-        const task = await fetchPopulatedItem('tasks', item._id) as PopulatedTask;
-        setSelectedItem(task);
-        setIsCreating(false);
+        const collectionName = getCollectionNameFromElement(activeTab);
+        const popItem = await fetchPopulatedItem(collectionName, item._id);
+        setSelectedItem(popItem as CollectionPopulatedElement);
+        setIsCreating(false); 
         setShowActiveComponent(true);
-    }, []);
+    }, [activeTab, fetchPopulatedItem]);
 
     const handleSave = useCallback(async (item: CollectionElement | CollectionPopulatedElement | null) => {
         Logger.debug('References - Saving item:', item);
@@ -194,6 +195,7 @@ const ReferencesPage: React.FC = () => {
                 tabs={tabs}
                 activeTab={activeTab}
                 onTabChange={useCallback((tab: CollectionElementString) => {
+                    Logger.debug('References - Tab changed:', tab);
                     setActiveTab(tab);
                     setSelectedItem(null);
                     setIsCreating(false);
