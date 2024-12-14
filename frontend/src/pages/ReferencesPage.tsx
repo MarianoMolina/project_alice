@@ -70,6 +70,7 @@ const ReferencesPage: React.FC = () => {
         if (!item) return;
         const collectionName = getCollectionNameFromElement(activeTab);
         const popItem = await fetchPopulatedItem(collectionName, item._id);
+        Logger.debug('References - Populated item:', popItem);
         setSelectedItem(popItem as CollectionPopulatedElement);
         setIsCreating(false); 
         setShowActiveComponent(true);

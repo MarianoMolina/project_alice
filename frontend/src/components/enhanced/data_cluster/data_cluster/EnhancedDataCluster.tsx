@@ -6,6 +6,7 @@ import DataClusterShortListView from './DataClusterShortListView';
 import { DataCluster, DataClusterComponentProps, PopulatedDataCluster } from '../../../../types/DataClusterTypes';
 import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
 import DataClusterFlexibleView from './DataClusterFlexibleView';
+import Logger from '../../../../utils/Logger';
 
 type BaseDataClusterMode = BaseDbElementProps<DataCluster>['mode'];
 type ExtendedDataClusterMode = 'list' | 'shortList' | 'card' | 'table';
@@ -21,6 +22,7 @@ interface EnhancedDataClusterProps extends Omit<DataClusterComponentProps, 'item
 }
 
 const EnhancedDataCluster: React.FC<EnhancedDataClusterProps> = (props) => {
+  Logger.debug('EnhancedDataCluster', 'props', props);
   const renderContent = (
     items: (DataCluster | PopulatedDataCluster)[] | null,
     item: DataCluster | PopulatedDataCluster | null,
@@ -29,6 +31,7 @@ const EnhancedDataCluster: React.FC<EnhancedDataClusterProps> = (props) => {
     handleSave: () => Promise<void>,
     onDelete: (deletedItem: DataCluster | PopulatedDataCluster) => Promise<void>,
   ) => {
+    Logger.debug('EnhancedDataCluster', 'renderContent', { items, item, mode });
     const commonProps: DataClusterComponentProps = {
       items,
       item,

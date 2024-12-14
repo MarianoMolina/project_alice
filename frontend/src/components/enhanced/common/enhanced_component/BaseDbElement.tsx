@@ -124,6 +124,7 @@ function BaseDbElement<T extends CollectionType[CollectionName] | CollectionPopu
       } else if (itemId && mode !== 'create') {
         const data = await fetchPopulatedItem(collectionName, itemId);
         setItem(data as T);
+        Logger.debug('BaseDbElement fetchData', { data });
       } else if (mode === 'create') {
         setItem(partialItem as T || {} as T);
       }

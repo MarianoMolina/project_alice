@@ -103,11 +103,14 @@ export const fetchPopulatedItem = async <T extends CollectionName>(
     const response = await dbAxiosInstance.get(url);
     const converter = populatedConverters[collectionName];
     Logger.debug("fetchPopulatedItem response", response.data);
+    Logger.debug("fetchPopulatedItem converter", converter);
     
     if (Array.isArray(response.data)) {
       return response.data.map(item => converter(item)) as CollectionPopulatedType[T][];
     } else {
-      return converter(response.data) as CollectionPopulatedType[T];
+      const convert = converter(response.data) as CollectionPopulatedType[T];
+      Logger.debug("fetchPopulatedItem convert", convert);
+      return convert
     }
   } catch (error) {
     Logger.error(`Error fetching populated items from ${collectionName}:`, error, itemId);

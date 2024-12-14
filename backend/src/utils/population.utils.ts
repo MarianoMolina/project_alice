@@ -126,7 +126,11 @@ export class PopulationService {
             Logger.info('Populated references:', populatedObj);
         }
         if (config.isDataCluster && this.isReferencesObject(doc)) {
-            populatedObj = await this.populateReferencesObject(populatedObj as References, userId) as mongoose.FlattenMaps<mongoose.Require_id<T>>;
+            const referencesObj = await this.populateReferencesObject(populatedObj as References, userId) as mongoose.FlattenMaps<mongoose.Require_id<T>>;
+            populatedObj = {
+                ...populatedObj,
+                ...referencesObj
+            }
         }
         if (config.hasDataCluster && this.hasDataCluster(doc)) {
             populatedObj = await this.populateDataCluster(populatedObj, userId);
