@@ -17,6 +17,7 @@ from workflow.api_app.routes.chat_response import chat_response
 from workflow.api_app.routes.file_transcript import generate_file_transcript
 from workflow.api_app.routes.health_report import api_health_check
 from workflow.api_app.util.utils import TaskResumeRequest, TaskExecutionRequest, ChatResumeRequest, ChatResponseRequest, FileTranscriptRequest, HealthAPIRequest
+from workflow.api_app.routes.validate_apis import validate_chat_apis, validate_task_apis, ValidationRequest
 
 class QueueMessage(BaseModel):
     """Pydantic model for queue messages."""
@@ -75,8 +76,12 @@ class QueueManager(BaseModel):
                 result = await self.generate_file_transcript(data)
             elif endpoint == "/health/api":
                 result = await self.health_api_check(data)
+            elif endpoint == "/validate_chat_apis":
+                result = await self.validate_chat_apis_handler(data)
+            elif endpoint == "/validate_task_apis":
+                result = await self.validate_task_apis_handler(data)
             else:
-                raise ValueError(f"Unknown endpoint: {endpoint}")
+                raise ValueError(f"Unknown endpoint: {endpoint} - Maybe forgot to add it to the Queue manager?")
 
             # Publish the result to a Redis channel
             result = {"status": "completed", "result": result}
@@ -219,3 +224,41 @@ class QueueManager(BaseModel):
     async def get_task_result(self, task_id: str) -> Optional[dict]:
         result = await self.redis_client.get(f"result:{task_id}")
         return json.loads(result) if result else None
+    
+    async def validate_chat_apis_handler(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Handle chat API validation requests in the queue.
+        
+        Args:
+            data (Dict[str, Any]): The validation request data containing the chat ID
+            
+        Returns:
+            Dict[str, Any]: The validation results
+        """
+        request_model = ValidationRequest(**data)
+        result = await validate_chat_apis(
+            request=request_model,
+            db_app=self.db_app,
+            queue_manager=self,
+            enqueue=False
+        )
+        return result
+
+    async def validate_task_apis_handler(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Handle task API validation requests in the queue.
+        
+        Args:
+            data (Dict[str, Any]): The validation request data containing the task ID
+            
+        Returns:
+            Dict[str, Any]: The validation results
+        """
+        request_model = ValidationRequest(**data)
+        result = await validate_task_apis(
+            request=request_model,
+            db_app=self.db_app,
+            queue_manager=self,
+            enqueue=False
+        )
+        return result

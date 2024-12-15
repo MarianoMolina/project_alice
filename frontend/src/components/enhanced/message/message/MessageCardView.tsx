@@ -1,12 +1,10 @@
 import React from 'react';
 import {
-    Box,
-    Chip,
     IconButton,
     Tooltip,
     Typography,
 } from '@mui/material';
-import { Person, AttachFile, TextSnippet, Engineering, PersonPin, DataObject, QueryBuilder, TextFields, Timer } from '@mui/icons-material';
+import { Person, AttachFile, TextSnippet, Engineering, PersonPin, DataObject, QueryBuilder } from '@mui/icons-material';
 import { MessageComponentProps, PopulatedMessage } from '../../../../types/MessageTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { hasAnyReferences, References } from '../../../../types/ReferenceTypes';

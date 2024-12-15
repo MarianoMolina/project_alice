@@ -13,3 +13,5 @@ venv
 .vscode
 __pycache__
 run_script.log
+.DS_Store
+**/.DS_Store

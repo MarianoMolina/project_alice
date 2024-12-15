@@ -9,6 +9,7 @@ import Logger from '../utils/Logger';
 import { converters, populatedConverters } from '../utils/Converters';
 import { InteractionOwnerType, UserInteraction } from '../types/UserInteractionTypes';
 import { setupWebSocketConnection } from '../utils/WebSocketUtils';
+import { ChatValidationResult, TaskValidationResult } from '../utils/ApiUtils';
 
 export interface LMStudioModel {
   id: string;
@@ -484,4 +485,75 @@ export const checkWorkflowUserHealth = async (): Promise<{
     Logger.error('Error checking workflow user health:', error);
     throw error;
   }
+};
+interface ValidationResponse {
+    task_id: string;
+}
+
+/**
+ * Validates the API requirements for a specific chat
+ * @param chatId The ID of the chat to validate
+ * @returns Promise containing the validation results
+ */
+export const validateChatApis = async (chatId: string): Promise<ChatValidationResult> => {
+    try {
+        Logger.debug('Validating APIs for chat:', chatId);
+        const response = await taskAxiosInstance.post<ValidationResponse>('/validate_chat_apis', {
+            id: chatId
+        });
+
+        // Get the task ID from the response
+        const taskId = response.data.task_id;
+
+        // Set up WebSocket connection to receive validation results
+        const validationResult = await new Promise<ChatValidationResult>((resolve, reject) => {
+            setupWebSocketConnection(taskId, (message: any) => {
+                if (message.status === 'completed') {
+                    resolve(message.result as ChatValidationResult);
+                } else if (message.status === 'failed') {
+                    reject(new Error(`Chat API validation failed: ${message.error}`));
+                }
+            });
+        });
+
+        Logger.debug('Chat API validation result:', validationResult);
+        return validationResult;
+    } catch (error) {
+        Logger.error('Error validating chat APIs:', error);
+        throw error;
+    }
+};
+
+/**
+ * Validates the API requirements for a specific task
+ * @param taskId The ID of the task to validate
+ * @returns Promise containing the validation results
+ */
+export const validateTaskApis = async (taskId: string): Promise<TaskValidationResult> => {
+    try {
+        Logger.debug('Validating APIs for task:', taskId);
+        const response = await taskAxiosInstance.post<ValidationResponse>('/validate_task_apis', {
+            id: taskId
+        });
+
+        // Get the task ID from the response
+        const queueTaskId = response.data.task_id;
+
+        // Set up WebSocket connection to receive validation results
+        const validationResult = await new Promise<TaskValidationResult>((resolve, reject) => {
+            setupWebSocketConnection(queueTaskId, (message: any) => {
+                if (message.status === 'completed') {
+                    resolve(message.result as TaskValidationResult);
+                } else if (message.status === 'failed') {
+                    reject(new Error(`Task API validation failed: ${message.error}`));
+                }
+            });
+        });
+
+        Logger.debug('Task API validation result:', validationResult);
+        return validationResult;
+    } catch (error) {
+        Logger.error('Error validating task APIs:', error);
+        throw error;
+    }
 };

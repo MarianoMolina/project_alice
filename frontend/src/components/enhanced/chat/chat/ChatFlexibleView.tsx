@@ -22,6 +22,7 @@ import Logger from '../../../../utils/Logger';
 import MessageListView from '../../message/message/MessageListView';
 import { MessageType } from '../../../../types/MessageTypes';
 import { useApi } from '../../../../contexts/ApiContext';
+import ApiValidationManager from '../../api/ApiValidationManager';
 
 const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     item,
@@ -348,7 +349,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                     </Box>
                 </TitleBox>
             )}
-
+            {form._id && <ApiValidationManager chatId={form._id} />}
         </GenericFlexibleView>
     );
 };

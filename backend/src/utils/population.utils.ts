@@ -121,9 +121,9 @@ export class PopulationService {
             populatedObj = await this.populateEmbeddable(populatedObj, userId);
         }
         if (config.hasReferences && this.hasReferences(doc, config)) {
-            Logger.info('Populating references for:', populatedObj);
+            Logger.debug('Populating references for:', populatedObj);
             populatedObj = await this.populateReferences(populatedObj, config, userId);
-            Logger.info('Populated references:', populatedObj);
+            Logger.debug('Populated references:', populatedObj);
         }
         if (config.isDataCluster && this.isReferencesObject(doc)) {
             const referencesObj = await this.populateReferencesObject(populatedObj as References, userId) as mongoose.FlattenMaps<mongoose.Require_id<T>>;
@@ -165,8 +165,8 @@ export class PopulationService {
     }
 
     private hasMessages(doc: Document): boolean {
-        Logger.info('Checking for messages in doc:', doc);
-        Logger.info('Messages:', 'messages' in doc, 'messages' in doc && Array.isArray(doc.messages));
+        Logger.debug('Checking for messages in doc:', doc);
+        Logger.debug('Messages:', 'messages' in doc, 'messages' in doc && Array.isArray(doc.messages));
         return (
             'messages' in doc &&
             Array.isArray(doc.messages)

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
+from workflow.api_app.util.utils import deep_api_check
 from workflow.api_app.util.dependencies import get_db_app, get_queue_manager
 from workflow.util import LOGGER
 from workflow.core.data_structures import UserInteraction, InteractionOwnerType
@@ -76,7 +77,11 @@ async def chat_resume(
 
         # Get API manager
         api_manager = await db_app.api_setter()
+        api_check_result = await deep_api_check(chat_data, api_manager)
+        LOGGER.debug(f'API Check Result: {api_check_result}')
 
+        if api_check_result["status"] == "warning":
+            LOGGER.warning(f'API Warning: {api_check_result["warnings"]}')
         try:
             # Generate new messages from the interaction
             new_message = await chat_data.continue_user_interaction(

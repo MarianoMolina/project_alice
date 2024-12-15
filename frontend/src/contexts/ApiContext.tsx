@@ -21,13 +21,15 @@ import {
     checkWorkflowHealth as apiCheckWorkflowHealth,
     checkWorkflowUserHealth as apiCheckWorkflowUserHealth,
     fetchPopulatedItem as apiFetchPopulatedItem,
+    validateChatApis as apiValidateChatApis,
+    validateTaskApis as apiValidateTaskApis,
 } from '../services/api';
 import { useNotification } from './NotificationContext';
 import { useCardDialog } from './CardDialogContext';
 import { CollectionName, CollectionType, CollectionElementString, collectionNameToElementString, CollectionPopulatedType } from '../types/CollectionTypes';
 import { AliceChat, PopulatedAliceChat } from '../types/ChatTypes';
 import { MessageType, PopulatedMessage } from '../types/MessageTypes';
-import { PopulatedTaskResponse, TaskResponse } from '../types/TaskResponseTypes';
+import { TaskResponse } from '../types/TaskResponseTypes';
 import { FileReference, FileContentReference } from '../types/FileTypes';
 import { useDialog } from './DialogCustomContext';
 import Logger from '../utils/Logger';
@@ -55,6 +57,8 @@ interface ApiContextType {
     checkWorkflowHealth: typeof apiCheckWorkflowHealth;
     checkWorkflowUserHealth: typeof apiCheckWorkflowUserHealth;
     fetchPopulatedItem: typeof apiFetchPopulatedItem;
+    validateChatApis: typeof apiValidateChatApis;
+    validateTaskApis: typeof apiValidateTaskApis;
     updateUserInteraction: (
         interactionId: string,
         itemData: Partial<UserInteraction>
@@ -452,6 +456,8 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         checkWorkflowHealth,
         checkWorkflowUserHealth,
         fetchPopulatedItem: apiFetchPopulatedItem,
+        validateChatApis: apiValidateChatApis,
+        validateTaskApis: apiValidateTaskApis,
     };
 
     return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>;

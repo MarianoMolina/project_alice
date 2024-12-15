@@ -25,6 +25,7 @@ import { SelectInput } from '../../common/inputs/SelectInput';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 import { useApi } from '../../../../contexts/ApiContext';
 import TitleBox from '../../common/inputs/TitleBox';
+import ApiValidationManager from '../../api/ApiValidationManager';
 
 const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     item,
@@ -347,6 +348,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                     multiple
                 />
             )}
+            {form._id && <ApiValidationManager taskId={form._id} />}
         </GenericFlexibleView>
     );
 };

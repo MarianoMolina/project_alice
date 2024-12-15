@@ -12,6 +12,7 @@ import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import { useTask } from '../../../../contexts/TaskContext';
 import { useAuth } from '../../../../contexts/AuthContext';
 import useStyles from '../TaskStyles';
+import ApiValidationManager from '../../api/ApiValidationManager';
 
 // Props interfaces for memoized components
 interface TaskHeaderProps {
@@ -226,16 +227,21 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
                     />
                 )}
 
-                <Box className={classes.buttonContainer}>
-                    <Button
-                        color="primary"
-                        onClick={() => executeTask(inputValues)}
-                        disabled={executionStatus === 'progress'}
-                        size="large"
-                    >
-                        {executionStatus === 'progress' ? <CircularProgress size={24} /> : 'Execute'}
-                    </Button>
+                <Box className="flex items-center gap-2 mb-1 mt-1">
+                    <Typography variant="body2" textAlign={'right'}>API Validation</Typography>
+                    <ApiValidationManager taskId={item._id} />
+                    <Box className={classes.buttonContainer}>
+                        <Button
+                            color="primary"
+                            onClick={() => executeTask(inputValues)}
+                            disabled={executionStatus === 'progress'}
+                            size="large"
+                        >
+                            {executionStatus === 'progress' ? <CircularProgress size={24} /> : 'Execute'}
+                        </Button>
+                    </Box>
                 </Box>
+
 
                 <div className={classes.progressContainer}>
                     {executionStatus === 'success' && (

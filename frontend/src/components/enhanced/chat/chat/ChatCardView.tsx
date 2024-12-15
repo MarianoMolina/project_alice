@@ -15,6 +15,7 @@ import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import { MessageType } from '../../../../types/MessageTypes';
 import MessageShortListView from '../../message/message/MessageShortListView';
+import ApiValidationManager from '../../api/ApiValidationManager';
 
 const ChatCardView: React.FC<ChatComponentProps> = ({
   item,
@@ -95,6 +96,11 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
       icon: <AttachFile />,
       primary_text: "Data Cluster",
       secondary_text: populatedItem.data_cluster && hasAnyReferences(populatedItem.data_cluster as References) ? <DataClusterManager dataCluster={populatedItem.data_cluster} isEditable={false} /> : 'No data cluster'
+    },
+    {
+      icon: <QueryBuilder />,
+      primary_text: "API validation",
+      secondary_text: <ApiValidationManager chatId={item._id} />
     },
     {
       icon: <QueryBuilder />,

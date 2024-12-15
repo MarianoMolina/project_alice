@@ -23,6 +23,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   buttonContainer: {
     marginTop: theme.spacing(2),
+    width: '100%',
     display: 'flex',
     justifyContent: 'flex-end',
     '& > *': {

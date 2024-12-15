@@ -19,6 +19,8 @@ import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
 import { apiTypeIcons } from '../../../../utils/ApiUtils';
 import { ApiType } from '../../../../types/ApiTypes';
 import { PopulatedDataCluster } from '../../../../types/DataClusterTypes';
+import { APIConfigIcon } from '../../../../utils/CustomIcons';
+import ApiValidationManager from '../../api/ApiValidationManager';
 
 interface ChipItem {
     _id?: string;
@@ -159,6 +161,11 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
                 <TaskFlowchart task={item as PopulatedTask} height={500} minWidth={500} />
                 : "No exit code routing defined"
         },
+        {
+            icon: <APIConfigIcon />,
+            primary_text: "API Validation",
+            secondary_text: item._id && <ApiValidationManager taskId={item._id} />
+        }
     ];
 
     return (

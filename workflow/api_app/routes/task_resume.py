@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from workflow.api_app.util.dependencies import get_db_app, get_queue_manager
-from workflow.api_app.util.utils import TaskResumeRequest
+from workflow.api_app.util.utils import TaskResumeRequest, deep_api_check
 from workflow.util import LOGGER
 from workflow.core import AliceTask, TaskResponse, APIManager
 
@@ -58,7 +58,12 @@ async def resume_task_endpoint(
 
             # Get API manager
             api_manager: APIManager = await db_app.api_setter()
-        
+            api_check_result = await deep_api_check(task, api_manager)
+            LOGGER.debug(f'API Check Result: {api_check_result}')
+
+            if api_check_result["status"] == "warning":
+                LOGGER.warning(f'API Warning: {api_check_result["warnings"]}')
+                LOGGER.warning(f'Api_check_result: {api_check_result}')
             # Combine original inputs with any additional inputs
             inputs = original_response.task_inputs or {}
             # TODO: Add option to pass additional inputs on restart on the frontend

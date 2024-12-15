@@ -7,7 +7,7 @@ from workflow.db_app import ContainerAPI, DB_STRUCTURE, token_validation_middlew
 from workflow.api_app.middleware import add_cors_middleware, auth_middleware
 from workflow.api_app.routes import (
     health_route, task_execute, chat_response, db_init, file_transcript,
-    task_resume, chat_resume
+    task_resume, chat_resume, validate_apis
 )
 from workflow.util import LOGGER
 from workflow.test.component_tests import TestEnvironment, DBTests
@@ -131,3 +131,4 @@ WORKFLOW_APP.include_router(db_init)
 WORKFLOW_APP.include_router(file_transcript)
 WORKFLOW_APP.include_router(task_resume)
 WORKFLOW_APP.include_router(chat_resume)
+WORKFLOW_APP.include_router(validate_apis)

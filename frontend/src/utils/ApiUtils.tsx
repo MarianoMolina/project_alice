@@ -207,3 +207,46 @@ export const modelTypeIcons: Record<ModelType, React.ReactElement> = {
 export function isModelApiType(apiType: ApiType): apiType is ApiType & ModelApiType {
   return Object.values(ModelApiType).includes(apiType as any);
 }
+
+// Type definitions for validation responses
+type ValidationStatus = "valid" | "warning";
+type LLMApiStatus = "valid" | "not_found" | "invalid";
+
+export interface TaskValidationResult {
+    task_name: string;
+    status: ValidationStatus;
+    warnings: string[];
+    child_tasks: TaskValidationResult[];
+}
+
+export interface ChatValidationResult {
+    chat_name: string;
+    status: ValidationStatus;
+    warnings: string[];
+    llm_api: LLMApiStatus;
+    agent_tools: TaskValidationResult[];
+    retrieval_tools: TaskValidationResult[];
+}
+
+/**
+ * Helper function to check if a validation result contains any warnings
+ * @param result The validation result to check
+ * @returns true if there are any warnings, false otherwise
+ */
+export const hasValidationWarnings = (
+  result: ChatValidationResult | TaskValidationResult
+): boolean => {
+  if ('llm_api' in result) {
+      // This is a ChatValidationResult
+      return result.status === 'warning' || 
+             result.llm_api !== 'valid' ||
+             result.warnings.length > 0 ||
+             result.agent_tools.some(hasValidationWarnings) ||
+             result.retrieval_tools.some(hasValidationWarnings);
+  } else {
+      // This is a TaskValidationResult
+      return result.status === 'warning' ||
+             result.warnings.length > 0 ||
+             result.child_tasks.some(hasValidationWarnings);
+  }
+};
