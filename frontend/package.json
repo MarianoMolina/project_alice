@@ -47,7 +47,10 @@
     "tailwind-merge": "^2.4.0",
     "typescript": "^5.5.4",
     "web-vitals": "^2.1.4",
-    "winston": "^3.13.1"
+    "winston": "^3.13.1",
+    "nth-check": ">=2.0.1",
+    "postcss": ">=8.4.6",
+    "path-to-regexp": ">=0.1.12"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.16.7",
