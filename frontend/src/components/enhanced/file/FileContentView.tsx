@@ -19,6 +19,7 @@ import AliceMarkdown from '../../ui/markdown/alice_markdown/AliceMarkdown';
 import PDFViewer from './PDFViewer';
 import { CodeFileExtensions } from '../../../utils/FileUtils';
 import { CodeBlock } from '../../ui/markdown/CodeBlock';
+import ContentStats from '../../ui/markdown/ContentStats';
 
 const isPDF = (filename: string): boolean => {
   return filename.toLowerCase().endsWith('.pdf');
@@ -90,8 +91,7 @@ const FileContentView: React.FC<FileComponentProps> = ({ item }) => {
       </Box>
     );
   }
-  const charCount = content.length || 0;
-  const tokenCount = Math.round(charCount / 3);
+  
   return (
     <Box className="relative">
       {/* Download button */}
@@ -136,20 +136,7 @@ const FileContentView: React.FC<FileComponentProps> = ({ item }) => {
       )}
       {item?.type === FileType.FILE && isCode(item.filename) && (
         <>
-          <Box className="flex items-center gap-2 mb-1 mt-1">
-            <Chip
-              icon={<Timer className="text-gray-600" />}
-              label={`~${tokenCount} tokens`}
-              size="small"
-              className="bg-gray-100"
-            />
-            <Chip
-              icon={<TextFields className="text-gray-600" />}
-              label={`${charCount} characters`}
-              size="small"
-              className="bg-gray-100"
-            />
-          </Box>
+          <ContentStats content={content} />
           <CodeBlock language={item.filename.split('.').pop() || ''} code=
             {content && content.startsWith('data:')
               ? atob(content.split(',')[1])
@@ -158,20 +145,7 @@ const FileContentView: React.FC<FileComponentProps> = ({ item }) => {
       )}
       {item?.type === FileType.FILE && !isPDF(item.filename) && !isCode(item.filename) && (
         <>
-          <Box className="flex items-center gap-2 mb-1 mt-1">
-            <Chip
-              icon={<Timer className="text-gray-600" />}
-              label={`~${tokenCount} tokens`}
-              size="small"
-              className="bg-gray-100"
-            />
-            <Chip
-              icon={<TextFields className="text-gray-600" />}
-              label={`${charCount} characters`}
-              size="small"
-              className="bg-gray-100"
-            />
-          </Box>
+          <ContentStats content={content} />
           <AliceMarkdown>
             {content && content.startsWith('data:')
               ? atob(content.split(',')[1])

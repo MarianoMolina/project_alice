@@ -15,6 +15,7 @@ import AliceMarkdown, { CustomBlockType } from '../../../ui/markdown/alice_markd
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
 import ReferencesViewer from '../../data_cluster/ReferencesViewer';
 import { getMessageTypeIcon } from '../../../../utils/MessageUtils';
+import ContentStats from '../../../ui/markdown/ContentStats';
 
 const MessageCardView: React.FC<MessageComponentProps> = ({
     item,
@@ -33,26 +34,13 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
             />
         )) : <Typography>No embeddings available</Typography>;
 
-    const charCount = populatedItem.content.length;
-    const tokenCount = Math.round(charCount / 3);
+
     const subTitle = (
-        <Box className="flex items-center gap-2">
+        <ContentStats content={populatedItem.content} >
             <Tooltip title={`Type: ${populatedItem.type}`} arrow>
                 <IconButton size="small">{getMessageTypeIcon(populatedItem.type)}</IconButton>
             </Tooltip>
-            <Chip
-                icon={<Timer className="text-gray-600" />}
-                label={`~${tokenCount} tokens`}
-                size="small"
-                className="bg-gray-100"
-            />
-            <Chip
-                icon={<TextFields className="text-gray-600" />}
-                label={`${charCount} characters`}
-                size="small"
-                className="bg-gray-100"
-            />
-        </Box>
+        </ContentStats>
     )
     const listItems = [
         {

@@ -17,6 +17,7 @@ import {
 import { EmbeddingChunkComponentProps } from '../../../../types/EmbeddingChunkTypes';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import ContentStats from '../../../ui/markdown/ContentStats';
 
 const EmbeddingChunkViewer: React.FC<EmbeddingChunkComponentProps> = ({ item }) => {
   const { selectCardItem } = useCardDialog();
@@ -27,9 +28,6 @@ const EmbeddingChunkViewer: React.FC<EmbeddingChunkComponentProps> = ({ item }) 
   const handleCopyVector = () => {
     navigator.clipboard.writeText(JSON.stringify(item.vector));
   };
-
-  const charCount = item.text_content.length;
-  const tokenCount = Math.round(charCount / 3);
 
   return (
     <Paper className="relative overflow-hidden">
@@ -42,20 +40,7 @@ const EmbeddingChunkViewer: React.FC<EmbeddingChunkComponentProps> = ({ item }) 
                 <TextFields className="text-gray-600" />
                 Embedding Chunk #{item.index}
               </Typography>
-              <Box className="flex items-center gap-2">
-                <Chip
-                  icon={<Timer className="text-gray-600" />}
-                  label={`~${tokenCount} tokens`}
-                  size="small"
-                  className="bg-gray-100"
-                />
-                <Chip
-                  icon={<TextFields className="text-gray-600" />}
-                  label={`${charCount} characters`}
-                  size="small"
-                  className="bg-gray-100"
-                />
-              </Box>
+              <ContentStats content={item.text_content} />
             </Stack>
             <Box className="flex items-center gap-2">
 

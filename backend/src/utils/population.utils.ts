@@ -331,15 +331,47 @@ export class PopulationService {
     ): Promise<any> {
         if (!obj.data_cluster) return obj;
 
-        const references = await this.populateReferences(obj, defaultPopulationConfig, userId);
-
-        return {
-            ...obj,
-            data_cluster: {
-                ...obj.data_cluster,
-                ...references
+        // If data_cluster is a string or ObjectId, it's a reference we need to resolve
+        if (typeof obj.data_cluster === 'string' || obj.data_cluster instanceof Types.ObjectId) {
+            const DataClusterModel = mongoose.model('DataCluster');
+            const dataCluster = await this.findAndPopulate(
+                DataClusterModel,
+                obj.data_cluster,
+                userId
+            );
+            
+            if (!dataCluster) {
+                Logger.warn('Data cluster not found:', {
+                    dataClusterId: obj.data_cluster,
+                    parentId: obj._id
+                });
+                return obj;
             }
-        };
+
+            return {
+                ...obj,
+                data_cluster: dataCluster
+            };
+        }
+
+        // If it's an embedded data cluster (object), populate its references
+        if (typeof obj.data_cluster === 'object' && obj.data_cluster !== null) {
+            const references = await this.populateReferences(obj.data_cluster, defaultPopulationConfig, userId);
+            return {
+                ...obj,
+                data_cluster: {
+                    ...obj.data_cluster,
+                    ...references
+                }
+            };
+        }
+
+        // If we don't recognize the format, log a warning and return unchanged
+        Logger.warn('Unrecognized data cluster format:', {
+            type: typeof obj.data_cluster,
+            parentId: obj._id
+        });
+        return obj;
     }
 
     private async populateReferences(

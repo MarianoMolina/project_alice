@@ -8,6 +8,7 @@ import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
 import FileContentView from '../FileContentView';
 import { getFileIcon } from '../../../../utils/MessageUtils';
+import ContentStats from '../../../ui/markdown/ContentStats';
 
 const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
 
@@ -25,26 +26,9 @@ const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
                 items={null} onChange={() => null} mode={'view'} handleSave={async () => { }}
             />
         )) : <Typography>No embeddings available</Typography>;
-
-    const charCount = item?.transcript?.content.length || 0;
-    const tokenCount = Math.round(charCount / 3);
-
     const transcript = populatedItem.transcript ? (
         <Stack direction="column" spacing={1}>
-            <Box className="flex items-center gap-2">
-                <Chip
-                    icon={<Timer className="text-gray-600" />}
-                    label={`~${tokenCount} tokens`}
-                    size="small"
-                    className="bg-gray-100"
-                />
-                <Chip
-                    icon={<TextFields className="text-gray-600" />}
-                    label={`${charCount} characters`}
-                    size="small"
-                    className="bg-gray-100"
-                />
-            </Box>
+            <ContentStats content={populatedItem.transcript.content} />
             <AliceMarkdown showCopyButton>{populatedItem.transcript.content}</AliceMarkdown>
         </Stack>
     ) : 'N/A';

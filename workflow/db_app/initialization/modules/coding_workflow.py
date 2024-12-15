@@ -22,6 +22,11 @@ coding_workflow_module = CodingWorkflowModule(
                 "description": "The code that was generated",
             },
             {
+              "key": "code_execution_param",
+                "type": "string",
+                "description": "The code execution output", 
+            },
+            {
                 "key": "param_generate_unit_tests",
                 "type": "string",
                 "description": "The unit test code that was generated, passed in case of a recursive call",
@@ -31,6 +36,11 @@ coding_workflow_module = CodingWorkflowModule(
                 "type": "boolean",
                 "description": "Whether to include the prompt in code execution",
                 "default": True
+            },
+            {
+                "key": "prompt_parameter",
+                "type": "string",
+                "description": "The input prompt for the task",
             }
         ],
         "user_checkpoints": [
@@ -72,6 +82,20 @@ coding_workflow_module = CodingWorkflowModule(
                     },
                     "required": ["Plan_Workflow"]
                 }
+            },
+            {
+                "key": "code_generation_output_prompt",
+                "name": "Code Generation Output",
+                "content": "{{llm_generation}}\n\n{{code_execution}}",
+                "is_templated": True,
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "llm_generation": "param_generate_code",
+                        "code_execution": "code_execution_param",
+                    },
+                    "required": ["llm_generation"]
+                } 
             },
             {
                 "key": "unit_test_check_agent",
@@ -200,7 +224,8 @@ coding_workflow_module = CodingWorkflowModule(
                 },
                 "required_apis": ["llm_api"],
                 "templates": {
-                    "task_template": "code_generation_task_prompt"
+                    "task_template": "code_generation_task_prompt",
+                    "output_template": "code_generation_output_prompt" ## This template ensures we only retrieve the last nodes of each type
                 },
                 "max_attempts": 2,
                 "recursive": True,
@@ -222,7 +247,8 @@ coding_workflow_module = CodingWorkflowModule(
                     "required": ["Generate_Code"]
                 },
                 "templates": {
-                    "task_template": "code_generation_task_prompt"
+                    "task_template": "code_generation_task_prompt",
+                    "output_template": "code_generation_output_prompt"
                 },
                 "max_attempts": 2,
                 "recursive": True,

@@ -17,6 +17,7 @@ import {
 } from '@mui/icons-material';
 import { Document, Page, pdfjs } from 'react-pdf';
 import Logger from '../../../utils/Logger';
+import ContentStats from '../../ui/markdown/ContentStats';
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -34,7 +35,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
   const [scale, setScale] = useState(1.0);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [charCount, setCharCount] = useState(0);
+  const [strContent, setStrContent] = useState('');
 
   useEffect(() => {
     const extractText = async () => {
@@ -51,7 +52,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
           fullText += pageText + '\n';
         }
         
-        setCharCount(fullText.length);
+        setStrContent(fullText);
       } catch (err) {
         Logger.error('Error extracting PDF text:', err);
       }
@@ -61,8 +62,6 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
       extractText();
     }
   }, [url]);
-
-  const tokenCount = Math.round(charCount / 3);
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     Logger.info('PDF loaded successfully', { numPages });
@@ -87,20 +86,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
 
   return (
     <>
-      <Box className="flex items-center gap-2 mb-1 mt-1">
-        <Chip
-          icon={<Timer className="text-gray-600" />}
-          label={`~${tokenCount} tokens`}
-          size="small"
-          className="bg-gray-100"
-        />
-        <Chip
-          icon={<TextFields className="text-gray-600" />}
-          label={`${charCount} characters`}
-          size="small"
-          className="bg-gray-100"
-        />
-      </Box>
+      <ContentStats content={strContent} />
       <Box className="relative min-h-[400px]">
         {/* PDF Controls - Only show when document is loaded */}
         {!isLoading && numPages > 0 && (

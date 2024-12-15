@@ -17,6 +17,7 @@ import { AccessTime, CheckCircle, Error, Warning, Output, Code, BugReport, DataO
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
 import TaskResponseViewer from './TaskResponseViewer';
+import ContentStats from '../../../ui/markdown/ContentStats';
 
 const ExitCodeChip = styled(Chip)(({ theme }) => ({
     fontWeight: 'bold',
@@ -116,7 +117,10 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
                 <AccordionSection
                     title="Raw Output"
                     content={
+                        <>
+                        <ContentStats content={populatedItem.task_outputs as string} />
                         <AliceMarkdown showCopyButton>{populatedItem.task_outputs as string}</AliceMarkdown>
+                        </>
                     }
                     disabled={!populatedItem.task_outputs}
                 />

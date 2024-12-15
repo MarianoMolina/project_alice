@@ -91,13 +91,12 @@ def sample_html(html: str, max_length: int = 4000, num_samples: int = 4) -> List
 
 def apply_parsing_strategy(html: str, selectors: List[str]) -> Optional[str]:
     """
-    Apply CSS selectors intelligently by handling specificity and avoiding duplicate content.
-    More specific selectors take precedence over general ones.
-
+    Apply CSS selectors intelligently by handling specificity and preventing duplicate content.
+    
     Args:
         html (str): The cleaned HTML content.
         selectors (List[str]): A list of CSS selectors.
-
+        
     Returns:
         Optional[str]: The extracted text content or None if extraction fails.
     """
@@ -105,9 +104,7 @@ def apply_parsing_strategy(html: str, selectors: List[str]) -> Optional[str]:
     soup = BeautifulSoup(html, 'html.parser')
     
     # Sort selectors by specificity (more specific selectors first)
-    # Specificity is roughly determined by number of parts and presence of IDs/classes
     def get_selector_specificity(selector: str) -> int:
-        # Higher number = more specific
         score = 0
         score += selector.count('#') * 100  # ID selectors
         score += selector.count('.') * 10   # Class selectors
@@ -121,13 +118,26 @@ def apply_parsing_strategy(html: str, selectors: List[str]) -> Optional[str]:
     matched_elements = set()
     content_elements = []
     
+    def is_descendant_of_matched(element) -> bool:
+        """Check if element is contained within any previously matched elements."""
+        for matched in matched_elements:
+            if element in matched.descendants:
+                return True
+        return False
+    
     for selector in sorted_selectors:
         # Find all elements matching this selector
         elements = soup.select(selector)
         
         for element in elements:
-            # Skip if we've already matched this element with a more specific selector
-            if element in matched_elements:
+            # Skip if we've already matched this element or any of its ancestors
+            if element in matched_elements or is_descendant_of_matched(element):
+                continue
+            
+            # Skip if this element contains any previously matched elements
+            has_matched_children = any(matched in element.descendants 
+                                     for matched in matched_elements)
+            if has_matched_children:
                 continue
                 
             matched_elements.add(element)
@@ -148,7 +158,7 @@ def apply_parsing_strategy(html: str, selectors: List[str]) -> Optional[str]:
     else:
         LOGGER.warning("No content extracted using the selectors")
         return None
-
+    
 def fallback_parsing_strategy(html: str, selectors: List[str] = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']) -> Optional[str]:
     LOGGER.info("Applying fallback parsing strategy by extracting all <p> tags.")
     soup = BeautifulSoup(html, 'html.parser')

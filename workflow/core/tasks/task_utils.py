@@ -42,69 +42,59 @@ def generate_node_responses_summary(
 ) -> str:
     """
     Generate a summary of node responses, optionally using a template.
+    Uses validate_and_process_function_inputs to handle variable resolution.
     
     Args:
         node_responses: List of node responses to summarize
         verbose: Whether to include detailed information
         output_prompt: Optional prompt template to format the output
-        
-    Returns:
-        Formatted summary string
+        **kwargs: Task inputs and other variables
     """
-    if output_prompt:
-        try:
-            # Extract variables from node responses
-            prompt_vars = {}
-            for param_name in output_prompt.input_variables:
-                matching_node = next(
-                    (node for node in reversed(node_responses)
-                     if node.node_name == param_name and node.references),
-                    None
-                )
-                if matching_node:
-                    value = matching_node.references.detailed_summary()
-                    prompt_vars[param_name] = value
-                elif param_name in output_prompt.parameters.properties:
-                    param_def = output_prompt.parameters.properties[param_name]
-                    if param_def.default is not None:
-                        prompt_vars[param_name] = param_def.default
-                    else:
-                        LOGGER.warning(f"Missing required parameter {param_name} for output template")
-                        return generate_default_summary(node_responses, verbose)
-            kwargs.pop('api_manager', None)
-            kwargs.pop('execution_history', None)
-            kwargs.update(prompt_vars)
-            return output_prompt.format_prompt(**kwargs)
-            
-        except Exception as e:
-            LOGGER.error(f"Error formatting output with template: {str(e)}")
+    if not output_prompt:
+        return generate_default_summary(node_responses, verbose)
+
+    try:
+        # Use validate_and_process_function_inputs to get template variables
+        # Prioritize node outputs over kwargs for template formatting
+        template_vars, error = validate_and_process_function_inputs(
+            params=output_prompt.parameters,
+            execution_history=node_responses,
+            kwargs=kwargs,
+            prioritize_kwargs=False  # Prioritize node outputs for templates
+        )
+        
+        if error:
+            LOGGER.warning(f"Error processing template variables: {error}")
             return generate_default_summary(node_responses, verbose)
-    
-    return generate_default_summary(node_responses, verbose)
+            
+        # Format the template with our collected variables
+        return output_prompt.format_prompt(**template_vars)
+            
+    except Exception as e:
+        LOGGER.error(f"Error formatting output with template: {str(e)}")
+        return generate_default_summary(node_responses, verbose)
 
 def validate_and_process_function_inputs(
     params: FunctionParameters,
     execution_history: List[NodeResponse],
-    kwargs: Dict[str, Any]
+    kwargs: Dict[str, Any],
+    prioritize_kwargs: bool = True
 ) -> Tuple[Dict[str, Any], Optional[str]]:
     """
     Validates and processes input parameters against a FunctionParameters definition.
-    For each parameter defined in FunctionParameters, checks if:
-    1. Value exists in kwargs
-    2. If not in kwargs, looks for matching node name in execution history
-    3. If not found in history, uses default value if available
-    4. For required parameters, returns error if no value is found
+    Can prioritize either kwargs or node outputs when looking for values.
     
     Args:
         params: FunctionParameters object defining expected inputs
         execution_history: Previous execution history to check for variable values
         kwargs: Input parameters to validate and process
+        prioritize_kwargs: Whether to check kwargs before node outputs (default: True)
         
     Returns:
         Tuple containing processed inputs dict and error message (if any)
     """
     def find_in_history(param_name: str) -> Optional[Any]:
-        """Helper to find parameter value in execution history."""
+        """Helper to find parameter value in execution history, prioritizing the last version."""
         matching_node = next(
             (node for node in reversed(execution_history)
              if node.node_name == param_name and node.references),
@@ -116,30 +106,33 @@ def validate_and_process_function_inputs(
 
     def process_parameter(param_name: str, param_def: ParameterDefinition) -> Tuple[Optional[Any], Optional[str]]:
         """Helper to process a single parameter and return (value, error)."""
-        # Check kwargs first
-        if param_name in kwargs:
-            try:
-                return convert_value_to_type(
-                    value=kwargs[param_name],
-                    param_name=param_name,
-                    param_type=param_def.type
-                ), None
-            except (ValueError, TypeError) as e:
-                return None, f"Invalid value for parameter '{param_name}': {str(e)}"
+        value = None
+        
+        # Order of checking depends on prioritization
+        sources = [
+            (kwargs.get(param_name), "kwargs"),
+            (find_in_history(param_name), "history")
+        ]
+        
+        if not prioritize_kwargs:
+            sources.reverse()
+            
+        # Check sources in order
+        for val, source in sources:
+            if val is not None:
+                try:
+                    value = convert_value_to_type(
+                        value=val,
+                        param_name=param_name,
+                        param_type=param_def.type
+                    )
+                    LOGGER.debug(f"Found value for {param_name} in {source}")
+                    return value, None
+                except (ValueError, TypeError) as e:
+                    LOGGER.warning(f"Error converting {source} value for parameter '{param_name}': {str(e)}")
+                    continue
 
-        # Look in history if not in kwargs
-        history_value = find_in_history(param_name)
-        if history_value is not None:
-            try:
-                return convert_value_to_type(
-                    value=history_value,
-                    param_name=param_name,
-                    param_type=param_def.type
-                ), None
-            except (ValueError, TypeError) as e:
-                return None, f"Error converting history value for parameter '{param_name}': {str(e)}"
-
-        # Use default if available
+        # Use default if no valid value found
         if param_def.default is not None:
             return param_def.default, None
 

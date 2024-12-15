@@ -85,11 +85,7 @@ async def execute_task_endpoint(
             LOGGER.debug(f'task_result: {result.model_dump()}')
             LOGGER.debug(f'type: {type(result)}')
             db_result = await db_app.create_entity_in_db('task_responses', result.model_dump(by_alias=True))
-
-            updated_ref = await db_app.get_entity_from_db('task_responses', db_result['_id'])
-
-            LOGGER.info(f'db_result: {updated_ref}')
-            return TaskResponse(**updated_ref).model_dump()
+            return db_result
         except Exception as e:
             import traceback
             LOGGER.error(f'Error: {e}\nTraceback: {traceback.format_exc()}')
@@ -106,4 +102,4 @@ async def execute_task_endpoint(
                 execution_history=None
             )
             db_result = await db_app.create_entity_in_db('task_responses', result.model_dump(by_alias=True))
-            return result.model_dump()
+            return db_result

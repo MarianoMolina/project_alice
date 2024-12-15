@@ -64,9 +64,6 @@ class AliceTask(BaseDataStructure):
     timeout : Optional[int]
         Task timeout in seconds
 
-    include_prompt_in_execution : bool
-        Whether to include the prompt in code execution
-
     node_end_code_routing : TasksEndCodeRouting
         Dictionary defining routing rules between nodes based on exit codes
 
@@ -145,7 +142,6 @@ class AliceTask(BaseDataStructure):
     max_attempts: int = Field(1, description="Maximum attempts per node before failure")
 
     timeout: Optional[int] = Field(default=None, description="Task timeout in seconds") # TODO: Pass timeout to model API Calls or move to Agent
-    include_prompt_in_execution: bool = Field(False, description="Whether to include the prompt in code execution")
     
     # Node and execution routing
     node_end_code_routing: TasksEndCodeRouting = Field(

@@ -205,7 +205,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         });
     }, [addNotification, openDialog]);
 
-    const executeTask = useCallback(async (taskId: string, inputs: any): Promise<PopulatedTaskResponse> => {
+    const executeTask = useCallback(async (taskId: string, inputs: any): Promise<TaskResponse> => {
         try {
             const result = await apiExecuteTask(taskId, inputs);
             addNotification('Task executed successfully', 'success', 5000, {

@@ -1,5 +1,5 @@
-import React, { useCallback } from 'react';
-import { Box, Typography, Button, Card, CardContent } from '@mui/material';
+import React, { useCallback, useState } from 'react';
+import { Box, Typography, Button, Card, CardContent, CircularProgress } from '@mui/material';
 import { Warning } from '@mui/icons-material';
 import useStyles from '../../../styles/UserSettingsStyles';
 import { useDialog } from '../../../contexts/DialogCustomContext';
@@ -12,6 +12,7 @@ const DangerZone: React.FC = () => {
     const { openDialog } = useDialog();
     const { purgeAndReinitializeDatabase } = useApi();
     const { addNotification } = useNotification();
+    const [isLoading, setIsLoading] = useState(false);
 
     const handlePurgeAndReinitialize = useCallback(() => {
         Logger.info('handlePurgeAndReinitialize called');
@@ -30,6 +31,7 @@ const DangerZone: React.FC = () => {
                     text: 'Confirm Purge and Reinitialize',
                     action: async () => {
                         Logger.debug('Dialog confirmed');
+                        setIsLoading(true);
                         try {
                             Logger.info('Purging db');
                             await purgeAndReinitializeDatabase();
@@ -39,6 +41,8 @@ const DangerZone: React.FC = () => {
                         } catch (error) {
                             Logger.error('Failed to purge and reinitialize database:', error);
                             addNotification('Failed to purge and reinitialize database. Please try again.', 'error');
+                        } finally {
+                            setIsLoading(false);
                         }
                     },
                     color: 'error',
@@ -62,12 +66,19 @@ const DangerZone: React.FC = () => {
                     <Button
                         variant="contained"
                         onClick={() => {
-                            Logger.debug('Purge button clicked');
-                            handlePurgeAndReinitialize();
+                            if (!isLoading) {
+                                Logger.debug('Purge button clicked');
+                                handlePurgeAndReinitialize();
+                            }
                         }}
                         className={classes.dangerButton}
+                        disabled={isLoading}
                     >
-                        Purge and Reinitialize Database
+                        {isLoading ? (
+                            <CircularProgress size={24} color="inherit" />
+                        ) : (
+                            'Purge and Reinitialize Database'
+                        )}
                     </Button>
                 </Box>
             </CardContent>

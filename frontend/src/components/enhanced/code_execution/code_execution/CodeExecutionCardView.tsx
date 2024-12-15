@@ -5,6 +5,7 @@ import { CodeExecutionComponentProps, PopulatedCodeExecution } from '../../../..
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
+import ContentStats from '../../../ui/markdown/ContentStats';
 
 const CodeExecutionCardView: React.FC<CodeExecutionComponentProps> = ({ item }) => {
 
@@ -17,7 +18,7 @@ const CodeExecutionCardView: React.FC<CodeExecutionComponentProps> = ({ item }) 
             <EmbeddingChunkViewer
                 key={chunk._id || `embedding-${index}`}
                 item={chunk}
-                items={null} onChange={()=>null} mode={'view'} handleSave={async()=>{}}
+                items={null} onChange={() => null} mode={'view'} handleSave={async () => { }}
             />
         )) : <Typography>No embeddings available</Typography>;
 
@@ -30,7 +31,11 @@ const CodeExecutionCardView: React.FC<CodeExecutionComponentProps> = ({ item }) 
         {
             icon: <TypeSpecimen />,
             primary_text: "Code",
-            secondary_text: <CodeBlock language={populatedItem.code_block.language} code={populatedItem.code_block.code} />
+            secondary_text: (
+                <>
+                    <ContentStats content={populatedItem.code_block.code} />
+                    <CodeBlock language={populatedItem.code_block.language} code={populatedItem.code_block.code} />
+                </>)
         },
     ];
     if (populatedItem.code_output && populatedItem.code_output.output) {

@@ -7,12 +7,12 @@ import {
     Stack,
     Avatar,
 } from '@mui/material';
-import { 
-    Language, 
-    Description, 
-    QueryBuilder, 
-    DataObject, 
-    Source, 
+import {
+    Language,
+    Description,
+    QueryBuilder,
+    DataObject,
+    Source,
     Category,
     Image,
     Cable,
@@ -24,6 +24,7 @@ import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import { referenceCategoryToIcon } from '../../../../utils/EntityReferenceUtils';
 import { apiTypeIcons } from '../../../../utils/ApiUtils';
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
+import ContentStats from '../../../ui/markdown/ContentStats';
 
 const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
     item
@@ -85,13 +86,13 @@ const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
     );
 
     const embeddingChunkViewer = populatedItem.embedding && populatedItem.embedding?.length > 0 ?
-     populatedItem.embedding.map((chunk, index) => (
-        <EmbeddingChunkViewer
-            key={chunk._id || `embedding-${index}`}
-            item={chunk}
-            items={null} onChange={()=>null} mode={'view'} handleSave={async()=>{}}
-        />
-    )) : <Typography>No embeddings available</Typography>;
+        populatedItem.embedding.map((chunk, index) => (
+            <EmbeddingChunkViewer
+                key={chunk._id || `embedding-${index}`}
+                item={chunk}
+                items={null} onChange={() => null} mode={'view'} handleSave={async () => { }}
+            />
+        )) : <Typography>No embeddings available</Typography>;
 
     const listItems = [
         {
@@ -132,7 +133,11 @@ const EntityReferenceCardView: React.FC<EntityReferenceComponentProps> = ({
         {
             icon: <Description />,
             primary_text: "Content",
-            secondary_text: populatedItem.content ? <AliceMarkdown showCopyButton children={populatedItem.content} /> : 'N/A'
+            secondary_text: populatedItem.content ? (
+                <>
+                    <ContentStats content={populatedItem.content} />
+                    <AliceMarkdown showCopyButton children={populatedItem.content} />
+                </>) : 'N/A'
         },
         {
             icon: <Image />,

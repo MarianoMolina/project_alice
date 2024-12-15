@@ -412,7 +412,7 @@ export const generateChatResponse = async (chatId: string): Promise<boolean> => 
   }
 };
 
-export const executeTask = async (taskId: string, inputs: any): Promise<PopulatedTaskResponse> => {
+export const executeTask = async (taskId: string, inputs: any): Promise<TaskResponse> => {
   try {
     // First make the task execution request and get the queue task ID
     const response = await taskAxiosInstance.post('/execute_task', { taskId, inputs });
@@ -420,11 +420,11 @@ export const executeTask = async (taskId: string, inputs: any): Promise<Populate
     const queueTaskId = response.data.task_id;
 
     // Now that we have the queue task ID, set up WebSocket connection
-    const taskResponsePromise = new Promise<PopulatedTaskResponse>((resolve, reject) => {
+    const taskResponsePromise = new Promise<TaskResponse>((resolve, reject) => {
       setupWebSocketConnection(queueTaskId, (message: any) => {
         if (message.status === 'completed') {
           Logger.debug('Task execution completed:', message.result);
-          const result = convertToPopulatedTaskResponse(message.result);
+          const result = convertToTaskResponse(message.result);
           resolve(result);
         } else if (message.status === 'failed') {
           reject(new Error(`Task execution failed: ${message.error}`));

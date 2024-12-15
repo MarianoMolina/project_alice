@@ -88,9 +88,7 @@ async def resume_task_endpoint(
                 result.id,
                 result.model_dump(by_alias=True)
             )
-
-            updated_ref = await db_app.get_entity_from_db('task_responses', db_result['_id'])
-            return TaskResponse(**updated_ref).model_dump()
+            return db_result
 
         except HTTPException:
             raise
@@ -113,4 +111,4 @@ async def resume_task_endpoint(
             )
 
             updated_ref = await db_app.create_entity_in_db('task_responses', result.model_dump(by_alias=True))
-            return result.model_dump()
+            return updated_ref
