@@ -5,9 +5,10 @@ export const FileTypeExtensionsMap: Record<FileType, string[]> = {
     [FileType.IMAGE]: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'],
     [FileType.AUDIO]: ['mp3', 'wav', 'ogg', 'flac'],
     [FileType.VIDEO]: ['mp4', 'avi', 'mov', 'wmv', 'webm'],
-    [FileType.FILE]: ['txt', 'md', 'csv', 'json', 'tsx', 'ts', 'js', 'html', 'css', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip', 'rar', '7z', 'tar', 'gz'],
+    [FileType.FILE]: ['txt', 'md', 'csv', 'json', 'tsx', 'ts', 'js', 'html', 'css', 'pdf', 'doc', 'docx', 'py', 'java', 'cpp', 'c', 'h', 'hpp', 'hxx', 'cxx', 'xml', 'yaml', 'yml', 'toml', 'ini', 'cfg', 'log', 'sh', 'bat'],
 };
 
+export const CodeFileExtensions = ['ts', 'tsx', 'js', 'jsx', 'py', 'java', 'cpp', 'c', 'h', 'hpp', 'hxx', 'cxx', 'html', 'css', 'json', 'xml', 'yaml', 'yml', 'toml', 'ini', 'cfg', 'log', 'sh', 'bat'];
 
 export const inferFileType = (filename: string): FileType => {
     const ext = filename.split('.').pop()?.toLowerCase();

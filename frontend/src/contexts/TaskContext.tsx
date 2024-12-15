@@ -5,11 +5,12 @@ import { AliceTask, PopulatedTask } from '../types/TaskTypes';
 import { useNotification } from './NotificationContext';
 import Logger from '../utils/Logger';
 import { fetchPopulatedItem } from '../services/api';
+import { useCardDialog } from './CardDialogContext';
 
 export interface RecentExecution {
   taskId: string;
   inputs: { [key: string]: any };
-  result: TaskResponse;
+  result: TaskResponse | PopulatedTaskResponse;
   timestamp: Date;
 }
 
@@ -36,6 +37,7 @@ const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { addNotification } = useNotification();
+  const { selectCardItem } = useCardDialog();
   const { fetchItem, executeTask } = useApi();
   const [tasks, setTasks] = useState<AliceTask[]>([]);
   const [selectedTask, setSelectedTask] = useState<PopulatedTask | null>(null);
@@ -52,25 +54,6 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       Logger.error('Error fetching tasks:', error);
     }
   }, [fetchItem]);
-
-  const updateRecentExecutions = useCallback(async () => {
-    // Initialize recentExecutions with the latest 10 task results
-    Logger.debug('Updating recent executions');
-    const sortedResults = (taskResults as TaskResponse[])
-      .sort((a, b) => {
-        const dateA = new Date(a.createdAt || 0).getTime();
-        const dateB = new Date(b.createdAt || 0).getTime();
-        return dateB - dateA;
-      });
-
-    const latestExecutions = sortedResults.slice(0, 10).map(result => ({
-      taskId: result.task_id,
-      inputs: result.task_inputs || {},
-      result: result,
-      timestamp: new Date(result.createdAt || new Date())
-    }));
-    setRecentExecutions(latestExecutions);
-  }, [taskResults]);
 
   const fetchTaskResults = useCallback(async () => {
     try {
@@ -126,16 +109,39 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       Logger.debug('Executing task:', selectedTask._id, inputValues);
       setExecutionStatus('progress');
       const result = await executeTask(selectedTask._id, inputValues);
-      setTaskResults([...taskResults, result as TaskResponse]);
-      await updateRecentExecutions();
-      addNotification('Task executed successfully', 'success');
+      
+      // Create updated results array
+      const updatedResults = [...taskResults, result as TaskResponse];
+      setTaskResults(updatedResults);
+      
+      // Sort and update recent executions using the updated results
+      const sortedResults = updatedResults
+        .sort((a, b) => {
+          const dateA = new Date(a.createdAt || 0).getTime();
+          const dateB = new Date(b.createdAt || 0).getTime();
+          return dateB - dateA;
+        });
+  
+      const latestExecutions = sortedResults.slice(0, 10).map(result => ({
+        taskId: result.task_id,
+        inputs: result.task_inputs || {},
+        result: result,
+        timestamp: new Date(result.createdAt || new Date())
+      }));
+      setRecentExecutions(latestExecutions);
+      
+      Logger.debug('Task executed successfully:', result);
+      addNotification('Task executed successfully', 'success', 5000, {
+        label: 'View Result',
+        onClick: () => selectCardItem('TaskResponse', result._id as string)
+      });
       setExecutionStatus('success');
     } catch (error) {
       Logger.error('Error executing task:', error);
       addNotification('Error executing task', 'error');
       setExecutionStatus('idle');
     }
-  }
+  };
 
   const resetRecentExecutions = () => {
     setRecentExecutions([]);

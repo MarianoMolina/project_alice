@@ -6,7 +6,7 @@ import { CalendarToday, AccessTime, TextSnippet, AttachFile, QueryBuilder, DataO
 import { getFileSize } from '../../../../utils/FileUtils';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
-import FileContentView from './FileContentView';
+import FileContentView from '../FileContentView';
 import { getFileIcon } from '../../../../utils/MessageUtils';
 
 const FileCardView: React.FC<FileComponentProps> = ({ item }) => {

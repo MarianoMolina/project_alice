@@ -4,14 +4,30 @@ import {
   Typography,
   IconButton,
   CircularProgress,
-  Tooltip
+  Tooltip,
+  Chip
 } from '@mui/material';
 import {
-  Download as DownloadIcon
+  Download as DownloadIcon,
+  TextFields,
+  Timer
 } from '@mui/icons-material';
-import { FileType, FileComponentProps } from '../../../../types/FileTypes';
-import { retrieveFile } from '../../../../services/api';
-import Logger from '../../../../utils/Logger';
+import { FileType, FileComponentProps } from '../../../types/FileTypes';
+import { retrieveFile } from '../../../services/api';
+import Logger from '../../../utils/Logger';
+import AliceMarkdown from '../../ui/markdown/alice_markdown/AliceMarkdown';
+import PDFViewer from './PDFViewer';
+import { CodeFileExtensions } from '../../../utils/FileUtils';
+import { CodeBlock } from '../../ui/markdown/CodeBlock';
+
+const isPDF = (filename: string): boolean => {
+  return filename.toLowerCase().endsWith('.pdf');
+};
+
+const isCode = (filename: string): boolean => {
+  const fileExtension = filename.split('.').pop();
+  return CodeFileExtensions.includes(fileExtension || '');
+};
 
 const FileContentView: React.FC<FileComponentProps> = ({ item }) => {
   const [content, setContent] = useState<string>('');
@@ -74,7 +90,8 @@ const FileContentView: React.FC<FileComponentProps> = ({ item }) => {
       </Box>
     );
   }
-
+  const charCount = content.length || 0;
+  const tokenCount = Math.round(charCount / 3);
   return (
     <Box className="relative">
       {/* Download button */}
@@ -114,13 +131,53 @@ const FileContentView: React.FC<FileComponentProps> = ({ item }) => {
           className="w-full"
         />
       )}
-
-      {item?.type === FileType.FILE && (
-        <Box className="p-4 bg-gray-50 rounded font-mono whitespace-pre-wrap break-all max-h-[400px] overflow-auto">
-          {content && content.startsWith('data:') 
-            ? atob(content.split(',')[1])
-            : content}
-        </Box>
+      {item?.type === FileType.FILE && isPDF(item.filename) && (
+        <PDFViewer url={content} />
+      )}
+      {item?.type === FileType.FILE && isCode(item.filename) && (
+        <>
+          <Box className="flex items-center gap-2 mb-1 mt-1">
+            <Chip
+              icon={<Timer className="text-gray-600" />}
+              label={`~${tokenCount} tokens`}
+              size="small"
+              className="bg-gray-100"
+            />
+            <Chip
+              icon={<TextFields className="text-gray-600" />}
+              label={`${charCount} characters`}
+              size="small"
+              className="bg-gray-100"
+            />
+          </Box>
+          <CodeBlock language={item.filename.split('.').pop() || ''} code=
+            {content && content.startsWith('data:')
+              ? atob(content.split(',')[1])
+              : content} />
+        </>
+      )}
+      {item?.type === FileType.FILE && !isPDF(item.filename) && !isCode(item.filename) && (
+        <>
+          <Box className="flex items-center gap-2 mb-1 mt-1">
+            <Chip
+              icon={<Timer className="text-gray-600" />}
+              label={`~${tokenCount} tokens`}
+              size="small"
+              className="bg-gray-100"
+            />
+            <Chip
+              icon={<TextFields className="text-gray-600" />}
+              label={`${charCount} characters`}
+              size="small"
+              className="bg-gray-100"
+            />
+          </Box>
+          <AliceMarkdown>
+            {content && content.startsWith('data:')
+              ? atob(content.split(',')[1])
+              : content}
+          </AliceMarkdown>
+        </>
       )}
     </Box>
   );

@@ -111,10 +111,11 @@ function BaseDbElement<T extends CollectionType[CollectionName] | CollectionPopu
 }: BaseDbElementProps<T>) {
   const [items, setItems] = useState<T[] | null>(null);
   const [item, setItem] = useState<T | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const { fetchItem, createItem, updateItem, deleteItem, fetchPopulatedItem } = useApi();
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -248,7 +249,7 @@ function BaseDbElement<T extends CollectionType[CollectionName] | CollectionPopu
     ), [items, item, handleChange, mode, handleSave, render, handleDelete]);
 
   if (loading) {
-    return <CircularProgress />;
+    return <CircularProgress size={70} sx={{display:'flex', margin:'20px auto'}}/>;
   }
 
   if (error) {

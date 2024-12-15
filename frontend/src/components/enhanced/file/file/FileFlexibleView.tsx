@@ -22,7 +22,7 @@ import { useNotification } from '../../../../contexts/NotificationContext';
 import Logger from '../../../../utils/Logger';
 import { useDialog } from '../../../../contexts/DialogCustomContext';
 import { TextInput } from '../../common/inputs/TextInput';
-import FileContentView from './FileContentView';
+import FileContentView from '../FileContentView';
 
 const FileFlexibleView: React.FC<FileComponentProps> = ({
     item,
@@ -101,14 +101,18 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
             setForm(updatedFile as PopulatedFileReference);
         }
     };
-
+    useEffect(() => {
+        if (selectedFile) {
+          handleOpenDialog();
+        }
+      }, [selectedFile]);
+      
     const handleFileSelect = async () => {
         try {
             const allowedTypes: FileType[] = [FileType.IMAGE, FileType.AUDIO, FileType.VIDEO, FileType.FILE];
             const file = await selectFile(allowedTypes);
             if (file) {
                 setSelectedFile(file);
-                handleOpenDialog();
             } else {
                 Logger.info('No file selected or file type not allowed');
                 addNotification('No file selected or file type not allowed', 'info');
