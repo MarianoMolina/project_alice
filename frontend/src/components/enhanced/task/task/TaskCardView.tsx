@@ -105,6 +105,11 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
             ) : "No required APIs"
         },
         {
+            icon: <APIConfigIcon />,
+            primary_text: "API Validation",
+            secondary_text: item._id && item.required_apis && <ApiValidationManager taskId={item._id} />
+        },
+        {
             icon: <Settings />,
             primary_text: "Input Variables",
             secondary_text: (
@@ -161,11 +166,6 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
                 <TaskFlowchart task={item as PopulatedTask} height={500} minWidth={500} />
                 : "No exit code routing defined"
         },
-        {
-            icon: <APIConfigIcon />,
-            primary_text: "API Validation",
-            secondary_text: item._id && <ApiValidationManager taskId={item._id} />
-        }
     ];
 
     return (

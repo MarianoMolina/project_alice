@@ -7,8 +7,8 @@ import { createEntityReference, updateEntityReference } from '../utils/entityRef
 import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 
 const router = Router();
-router.use(auth);
 router.use(rateLimiterMiddleware);
+router.use(auth);
 
 const generatedRoutes = createRoutes<IEntityReferenceDocument, 'EntityReference'>(EntityReference, 'EntityReference', {
     createItem: async (data, userId) => {

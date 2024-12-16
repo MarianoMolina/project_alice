@@ -6,8 +6,8 @@ import ToolCall from '../models/toolCall.model';
 import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 
 const router = Router();
-router.use(auth);
 router.use(rateLimiterMiddleware);
+router.use(auth);
 const generatedRoutes = createRoutes<IToolCallDocument, 'ToolCall'>(ToolCall, 'ToolCall');
 router.use('/', generatedRoutes);
 

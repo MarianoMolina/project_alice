@@ -7,8 +7,8 @@ import { createUserCheckpoint, updateUserCheckpoint } from '../utils/userCheckpo
 import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 
 const router = Router();
-router.use(auth);
 router.use(rateLimiterMiddleware);
+router.use(auth);
 const generatedRoutes = createRoutes<IUserCheckpointDocument, 'UserCheckpoint'>(UserCheckpoint, 'UserCheckpoint', {
     createItem: async (data, userId) => {
         return await createUserCheckpoint(data, userId);

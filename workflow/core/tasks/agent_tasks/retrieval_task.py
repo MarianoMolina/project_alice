@@ -360,7 +360,7 @@ class RetrievalTask(AliceTask):
             )
 
             # Step 3: Prepare the References object to return
-            embedding_chunks = self.prepare_result_references(top_embeddings)
+            embedding_chunks = self.prepare_result_references(top_embeddings, prompt)
             LOGGER.info(f"Retrieved embeddings: {len(embedding_chunks)}")
 
             return NodeResponse(
@@ -462,15 +462,25 @@ class RetrievalTask(AliceTask):
 
     def prepare_result_references(
         self,
-        top_embeddings: List[ChunkedEmbedding]
+        top_embeddings: List[ChunkedEmbedding],
+        prompt: str
     ) -> List[EmbeddingChunk]:
         """
         Prepare a References object containing the embeddings that meet the threshold,
-        ordered by context and similarity.
+        ordered by context and similarity. Updates each chunk's creation_metadata with 
+        prompt-similarity history.
+
+        Args:
+            top_embeddings: List of ChunkedEmbedding containing reference and similarity data
+            prompt: The current search prompt that generated these similarity scores
+
+        Returns:
+            List[EmbeddingChunk]: Embedding chunks with updated historical prompt-similarity data
         """
         reference_groups: Dict[int, Dict[str, Any]] = {}
-
+        
         LOGGER.info(f"Top embeddings: {[{emb['embedding_chunk'].text_content, emb['similarity']} for emb in top_embeddings]}")
+        
         for item in top_embeddings:
             ref_id = id(item['reference'])
             if ref_id not in reference_groups:
@@ -479,15 +489,24 @@ class RetrievalTask(AliceTask):
                     'reference': item['reference'],
                     'embedding_chunks': []
                 }
+            
+            # Update the creation_metadata directly
+            if 'prompt_similarity_history' not in item['embedding_chunk'].creation_metadata:
+                item['embedding_chunk'].creation_metadata['prompt_similarity_history'] = []
+                
+            item['embedding_chunk'].creation_metadata['prompt_similarity_history'].append({
+                'prompt': prompt,
+                'similarity': item['similarity']
+            })
+            
             reference_groups[ref_id]['embedding_chunks'].append(item['embedding_chunk'])
-
+        
         LOGGER.info(f"Reference groups: {len(reference_groups.keys())}")
+        
         final_embedding_chunks: List[EmbeddingChunk] = []
-        # Sort the embeddings within each reference by their index
         for group in reference_groups.values():
             embedding_chunks = group['embedding_chunks']
             embedding_chunks.sort(key=lambda c: c.index)
-            # Update the reference's embedding with only the selected chunks
             final_embedding_chunks.extend(embedding_chunks)
-
+        
         return final_embedding_chunks

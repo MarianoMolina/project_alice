@@ -8,8 +8,8 @@ const embeddingSchema = new Schema<IEmbeddingChunkDocument, IEmbeddingChunkModel
   text_content: { type: String, required: true },
   index: { type: Number, required: true },
   creation_metadata: { type: Map, of: Schema.Types.Mixed },
-  created_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true },
-  updated_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true }
+  created_by: { type: Schema.Types.ObjectId },
+  updated_by: { type: Schema.Types.ObjectId }
 }, { timestamps: true });
 
 embeddingSchema.methods.apiRepresentation = function (this: IEmbeddingChunkDocument) {

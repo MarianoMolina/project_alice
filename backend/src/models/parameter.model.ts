@@ -10,8 +10,8 @@ const parameterDefinitionSchema = new Schema<IParameterDefinitionDocument, IPara
     required: true, description: "Type of the parameter, like string or integer" },
   description: { type: String, required: true, description: "Description of the parameter" },
   default: { type: Schema.Types.Mixed, default: null, description: "Default value of the parameter" },
-  created_by: { type: Schema.Types.ObjectId, ref: 'User', required: true, autopopulate: true },
-  updated_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true }
+  created_by: { type: Schema.Types.ObjectId, ref: 'User' },
+  updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 
 function ensureObjectId(this: IParameterDefinitionDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {

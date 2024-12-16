@@ -74,13 +74,18 @@ class THPHandler:
                 )
                 return result.returncode == 0 and "[madvise]" in result.stdout
             elif self.system == "Windows":
+                # Check if WSL is running first
+                wsl_check = subprocess.run(["wsl", "echo", "test"], capture_output=True, text=True)
+                if wsl_check.returncode != 0:
+                    self.logger.error("WSL is not running or not installed")
+                    return False
+                    
                 result = subprocess.run(
-                    ["wsl", "cat", "/sys/kernel/mm/transparent_hugepage/enabled"],
+                    ["wsl", "sudo", "cat", "/sys/kernel/mm/transparent_hugepage/enabled"],
                     capture_output=True,
                     text=True
                 )
-                return result.returncode == 0 and "[madvise]" in result.stdout
-                
+                return result.returncode == 0 and "[madvise]" in result.stdout                
         except Exception as e:
             self.logger.error(f"Failed to check THP setting: {e}")
             return False
@@ -127,13 +132,19 @@ class THPHandler:
                 return self._get_current_thp_setting()
             elif self.system == "Linux":
                 commands = [
-                    ["sh", "-c", "echo madvise | tee /sys/kernel/mm/transparent_hugepage/enabled"],
-                    ["sh", "-c", "echo madvise | tee /sys/kernel/mm/transparent_hugepage/defrag"]
+                    ["sudo", "sh", "-c", "echo madvise | tee /sys/kernel/mm/transparent_hugepage/enabled"],
+                    ["sudo", "sh", "-c", "echo madvise | tee /sys/kernel/mm/transparent_hugepage/defrag"]
                 ]
             elif self.system == "Windows":
+                # First check if WSL is available
+                wsl_check = subprocess.run(["wsl", "echo", "test"], capture_output=True, text=True)
+                if wsl_check.returncode != 0:
+                    self.logger.error("WSL is not running or not installed")
+                    return False
+                    
                 commands = [
-                    ["wsl", "sh", "-c", "echo madvise | tee /sys/kernel/mm/transparent_hugepage/enabled"],
-                    ["wsl", "sh", "-c", "echo madvise | tee /sys/kernel/mm/transparent_hugepage/defrag"]
+                    ["wsl", "sudo", "sh", "-c", "echo madvise | sudo tee /sys/kernel/mm/transparent_hugepage/enabled"],
+                    ["wsl", "sudo", "sh", "-c", "echo madvise | sudo tee /sys/kernel/mm/transparent_hugepage/defrag"]
                 ]
             else:
                 self.logger.error(f"Unsupported operating system: {self.system}")
@@ -145,6 +156,9 @@ class THPHandler:
                     result = subprocess.run(cmd, capture_output=True, text=True)
                     if result.returncode != 0:
                         self.logger.error(f"Command failed: {result.stderr}")
+                        # If it's a sudo password prompt, log a more helpful message
+                        if "password" in result.stderr.lower():
+                            self.logger.error("Sudo access required. Please run 'wsl sudo visudo' and add your user to sudoers")
                         return False
                 return self._get_current_thp_setting()
 

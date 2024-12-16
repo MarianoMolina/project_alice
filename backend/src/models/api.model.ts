@@ -10,8 +10,8 @@ const apiSchema = new Schema<IAPIDocument, IAPIModel>({
   is_active: { type: Boolean, default: false },
   default_model: { type: Schema.Types.ObjectId, ref: 'Model', autopopulate: true  },
   api_config: { type:  Schema.Types.ObjectId, ref: 'APIConfig', autopopulate: true  },
-  created_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true  },
-  updated_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true  }
+  created_by: { type: Schema.Types.ObjectId, ref: 'User'  },
+  updated_by: { type: Schema.Types.ObjectId, ref: 'User'  }
 }, { timestamps: true });
 
 apiSchema.methods.apiRepresentation = function (this: IAPIDocument) {

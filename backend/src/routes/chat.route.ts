@@ -58,8 +58,8 @@ customRouter.patch('/:chatId/add_message', async (req: AuthRequest, res: Respons
 });
 // Combine generated and custom routes
 const combinedRouter = Router();
-combinedRouter.use(auth);
 combinedRouter.use(rateLimiterMiddleware);
+combinedRouter.use(auth);
 combinedRouter.use('/', chatRoutes);
 combinedRouter.use('/', customRouter);
 

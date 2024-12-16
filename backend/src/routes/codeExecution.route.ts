@@ -6,8 +6,8 @@ import CodeExecution from '../models/codeExecution.model';
 import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 
 const router = Router();
-router.use(auth);
 router.use(rateLimiterMiddleware);
+router.use(auth);
 const generatedRoutes = createRoutes<ICodeExecutionDocument, 'CodeExecution'>(CodeExecution, 'CodeExecution');
 router.use('/', generatedRoutes);
 

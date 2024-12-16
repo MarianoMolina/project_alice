@@ -287,28 +287,47 @@ export class PopulationService {
         obj: any,
         userId: string | Types.ObjectId
     ): Promise<any> {
+        Logger.debug(`[Starting populateMessages`, { objId: obj._id, messageCount: obj.messages?.length });
+    
         if (!obj.messages || !Array.isArray(obj.messages)) {
+            Logger.debug(`[No messages to populate`, { objId: obj._id });
             return obj;
         }
-
+    
         const MessageModel = mongoose.model('Message');
-        const populatedMessages = await Promise.all(
-            obj.messages.map(async (messageId: string | Types.ObjectId) => {
-                const populatedMessage = await this.findAndPopulate(
-                    MessageModel,
-                    messageId,
-                    userId
-                );
-                return populatedMessage || messageId;
-            })
-        );
-
-        return {
-            ...obj,
-            messages: populatedMessages
-        };
+        try {
+            const populatedMessages = await Promise.all(
+                obj.messages.map(async (messageId: string | Types.ObjectId, index: number) => {
+                    Logger.debug(`[Populating message ${index}`, { messageId });
+                    try {
+                        const populatedMessage = await this.findAndPopulate(
+                            MessageModel,
+                            messageId,
+                            userId
+                        );
+                        Logger.debug(`[Message ${index} populated`, { messageId, populated: !!populatedMessage });
+                        return populatedMessage || messageId;
+                    } catch (error) {
+                        Logger.error(`[Error populating message ${index}`, { messageId, error });
+                        return messageId;
+                    }
+                })
+            );
+    
+            Logger.debug(`[Finished populating messages`, { 
+                objId: obj._id, 
+                populatedCount: populatedMessages.filter(m => typeof m !== 'string').length 
+            });
+    
+            return {
+                ...obj,
+                messages: populatedMessages
+            };
+        } catch (error) {
+            Logger.error(`[Error in populateMessages`, { objId: obj._id, error });
+            return obj;
+        }
     }
-
     private async populateEmbeddable(
         obj: any,
         userId: string | Types.ObjectId

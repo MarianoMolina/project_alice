@@ -274,6 +274,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                     options={Object.values(ApiType).map((apiType) => ({ value: apiType, label: formatCamelCaseString(apiType) }))}
                     multiple
                 />
+                {form._id && <ApiValidationManager taskId={form._id} />}
             </TitleBox>
             <FunctionDefinitionBuilder
                 title="Input Variables"
@@ -348,7 +349,6 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                     multiple
                 />
             )}
-            {form._id && <ApiValidationManager taskId={form._id} />}
         </GenericFlexibleView>
     );
 };

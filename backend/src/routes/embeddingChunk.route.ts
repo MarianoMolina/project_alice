@@ -7,8 +7,8 @@ import { createEmbeddingChunk, updateEmbeddingChunk } from '../utils/embeddingCh
 import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 
 const router = Router();
-router.use(auth);
 router.use(rateLimiterMiddleware);
+router.use(auth);
 const generatedRoutes = createRoutes<IEmbeddingChunkDocument, 'EmbeddingChunk'>(EmbeddingChunk, 'EmbeddingChunk', {
     createItem: async (data, userId) => {
         return await createEmbeddingChunk(data, userId);

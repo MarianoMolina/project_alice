@@ -48,8 +48,8 @@ const taskSchema = new Schema<ITaskDocument, ITaskModel>({
         required: false, 
         description: "Data cluster for the chat"
     },
-    created_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true },
-    updated_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true }
+    created_by: { type: Schema.Types.ObjectId, ref: 'User' },
+    updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 
 taskSchema.methods.apiRepresentation = function (this: ITaskDocument) {

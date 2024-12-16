@@ -7,8 +7,8 @@ const codeExecutionSchema = new Schema<ICodeExecutionDocument, ICodeExecutionMod
     code_block: { type: Schema.Types.Mixed, required: true, description: "Code block to be executed by the tool" },
     code_output: { type: Schema.Types.Mixed, description: "Output of the code execution" },
     embedding: [{ type: Schema.Types.ObjectId, ref: 'EmbeddingChunk', autopopulate: true }],
-    created_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true },
-    updated_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true }
+    created_by: { type: Schema.Types.ObjectId, ref: 'User' },
+    updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 
 codeExecutionSchema.methods.apiRepresentation = function(this: ICodeExecutionDocument) {

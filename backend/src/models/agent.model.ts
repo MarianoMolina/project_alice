@@ -22,8 +22,8 @@ const agentSchema = new Schema<IAgentDocument, IAgentModel>({
     of: { type: Schema.Types.ObjectId, ref: 'Model', autopopulate: true },
     default: new Map()
   },
-  created_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true },
-  updated_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true }
+  created_by: { type: Schema.Types.ObjectId, ref: 'User' },
+  updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
 }, {
   timestamps: true
 });

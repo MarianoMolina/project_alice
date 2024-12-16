@@ -6,8 +6,8 @@ import { DataCluster } from '../models/reference.model';
 import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 
 const router = Router();
-router.use(auth);
 router.use(rateLimiterMiddleware);
+router.use(auth);
 const generatedRoutes  = createRoutes<IDataClusterDocument, 'DataCluster'>(DataCluster, 'DataCluster');
 router.use('/', generatedRoutes);
 

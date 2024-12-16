@@ -6,8 +6,8 @@ import { Router } from 'express';
 import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 
 const router = Router();
-router.use(auth);
 router.use(rateLimiterMiddleware);
+router.use(auth);
 const generatedRoutes = createRoutes<IPromptDocument, 'Prompt'>(Prompt, 'Prompt');
 router.use('/', generatedRoutes);
 

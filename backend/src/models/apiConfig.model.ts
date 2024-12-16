@@ -8,8 +8,8 @@ const apiConfigSchema = new Schema<IAPIConfigDocument, IAPIConfigModel>({
   api_name: { type: String, required: true, description: "Name of the API" },
   data: { type: Schema.Types.Mixed, required: true, description: "Data of the API configuration" },
   health_status: { type: String, enum: ['healthy', 'unhealthy', 'unknown'], default: 'unknown' },
-  created_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true },
-  updated_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true }
+  created_by: { type: Schema.Types.ObjectId, ref: 'User' },
+  updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 
 function ensureObjectId(this: IAPIConfigDocument, next: mongoose.CallbackWithoutResultAndOptionalError) {

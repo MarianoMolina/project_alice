@@ -45,34 +45,38 @@ async def chat_response(
     else:
         # Process the chat response immediately (called by QueueManager)
         LOGGER.info(f'Processing chat response for chat_id: {request.chat_id}')
-        chat_data = await db_app.get_chat(request.chat_id)
-        if not chat_data:
-            raise HTTPException(status_code=404, detail="Chat not found")
+        try:
+            chat_data = await db_app.get_chat(request.chat_id)
+            if not chat_data:
+                raise HTTPException(status_code=404, detail="Chat not found")
 
-        LOGGER.debug(f'Chat_data: {chat_data}')
+            LOGGER.debug(f'Chat_data: {chat_data}')
 
-        # Retrieve API manager
-        api_manager = await db_app.api_setter()
+            # Retrieve API manager
+            api_manager = await db_app.api_setter()
 
-        # Perform deep API availability check
-        api_check_result = await deep_api_check(chat_data, api_manager)
-        LOGGER.debug(f'API Check Result: {api_check_result}')
+            # Perform deep API availability check
+            api_check_result = await deep_api_check(chat_data, api_manager)
+            LOGGER.debug(f'API Check Result: {api_check_result}')
 
-        if api_check_result["status"] == "warning":
-            LOGGER.warning(f'API Warning: {api_check_result["warnings"]}')
+            if api_check_result["status"] == "warning":
+                LOGGER.warning(f'API Warning: {api_check_result["warnings"]}')
 
-        responses = await chat_data.generate_response(api_manager, user_data=db_app.user_data.get('user_obj'))
+            responses = await chat_data.generate_response(api_manager, user_data=db_app.user_data.get('user_obj'))
 
-        LOGGER.debug(f'Responses: {responses}')
+            LOGGER.debug(f'Responses: {responses}')
 
-        # Store messages and task results in order
-        if responses:
-            for response in responses:
-                stored_chat = await db_app.store_chat_message(request.chat_id, response)
-                if not stored_chat:
-                    LOGGER.error(f"Failed to store message: {response} in chat_id {request.chat_id}")
+            # Store messages and task results in order
+            if responses:
+                for response in responses:
+                    stored_chat = await db_app.store_chat_message(request.chat_id, response)
+                    if not stored_chat:
+                        LOGGER.error(f"Failed to store message: {response} in chat_id {request.chat_id}")
 
-            LOGGER.debug(f'Stored messages: {responses}')
-            return {"status": "success"}
+                LOGGER.debug(f'Stored messages: {responses}')
+                return {"status": "success"}
 
-        return {"status": "no responses generated"}
+            return {"status": "no responses generated"}
+        except Exception as e:
+            LOGGER.error(f'Error processing chat response: {e}')
+            raise HTTPException(status_code=500, detail=f"Error processing chat response: {e}")

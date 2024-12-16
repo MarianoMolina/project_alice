@@ -6,6 +6,7 @@ import {
     AccordionSummary,
     AccordionDetails,
     Box,
+    ListItemButton,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { PopulatedTaskResponse, TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
@@ -13,11 +14,12 @@ import { CommandLineLog } from '../../../ui/markdown/CommandLog';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import { styled } from '@mui/material/styles';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { AccessTime, CheckCircle, Error, Warning, Output, Code, BugReport, DataObject, Analytics, Terminal } from '@mui/icons-material';
+import { AccessTime, CheckCircle, Error, Warning, Output, Code, BugReport, DataObject, Analytics, Terminal, Functions } from '@mui/icons-material';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
 import TaskResponseViewer from './TaskResponseViewer';
 import ContentStats from '../../../ui/markdown/ContentStats';
+import { useCardDialog } from '../../../../contexts/CardDialogContext';
 
 const ExitCodeChip = styled(Chip)(({ theme }) => ({
     fontWeight: 'bold',
@@ -38,6 +40,7 @@ const ExitCodeChip = styled(Chip)(({ theme }) => ({
 const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
     item,
 }) => {
+    const { selectCardItem } = useCardDialog();
     if (!item) {
         return <Typography>No task response data available.</Typography>;
     }
@@ -100,6 +103,15 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             secondary_text: populatedItem.createdAt ? new Date(populatedItem.createdAt).toLocaleString() : 'N/A'
         },
         {
+            icon: <Functions />,
+            primary_text: "Task",
+            secondary_text: populatedItem.task_id ? (
+                <ListItemButton onClick={() => item.task_id && selectCardItem && selectCardItem('Task', item.task_id)}>
+                    {item.task_id}
+                </ListItemButton>
+            ) : <Typography variant="body2" color="textSecondary">No task</Typography>
+        },
+        {
             icon: <Code />,
             primary_text: "Inputs",
             secondary_text: (
@@ -118,8 +130,8 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
                     title="Raw Output"
                     content={
                         <>
-                        <ContentStats content={populatedItem.task_outputs as string} />
-                        <AliceMarkdown showCopyButton>{populatedItem.task_outputs as string}</AliceMarkdown>
+                            <ContentStats content={populatedItem.task_outputs as string} />
+                            <AliceMarkdown showCopyButton>{populatedItem.task_outputs as string}</AliceMarkdown>
                         </>
                     }
                     disabled={!populatedItem.task_outputs}
@@ -188,14 +200,14 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
         {
             icon: <Analytics />,
             primary_text: "Usage Metrics",
-            secondary_text: populatedItem.usage_metrics && Object.keys(populatedItem.usage_metrics).length > 0 ? 
-            (
-                <AccordionSection
-                    title="Usage Metrics"
-                    content={<CodeBlock language="json" code={JSON.stringify(populatedItem.usage_metrics, null, 2)} />}
-                    disabled={!populatedItem.usage_metrics}
-                />
-            ) : null
+            secondary_text: populatedItem.usage_metrics && Object.keys(populatedItem.usage_metrics).length > 0 ?
+                (
+                    <AccordionSection
+                        title="Usage Metrics"
+                        content={<CodeBlock language="json" code={JSON.stringify(populatedItem.usage_metrics, null, 2)} />}
+                        disabled={!populatedItem.usage_metrics}
+                    />
+                ) : null
         }
     ];
 

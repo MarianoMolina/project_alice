@@ -9,8 +9,8 @@ import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 const router = Router();
 
 // Apply authentication middleware to all routes
-router.use(auth);
 router.use(rateLimiterMiddleware);
+router.use(auth);
 
 // Generate routes with custom create and update methods
 const taskResultRoutes = createRoutes<ITaskResultDocument, 'TaskResult'>(TaskResult, 'TaskResult', {

@@ -44,8 +44,8 @@ const modelSchema = new Schema<IModelDocument, IModelModel>({
   },  
   model_type: { type: String, enum: ModelType, required: true },
   api_name: { type: String, default: ApiName.LM_STUDIO },
-  created_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true },
-  updated_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true }
+  created_by: { type: Schema.Types.ObjectId, ref: 'User' },
+  updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
 }, {
   timestamps: true
 });

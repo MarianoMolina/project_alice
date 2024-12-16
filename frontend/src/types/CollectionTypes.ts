@@ -245,8 +245,8 @@ export interface BasicDBObj {
 }
 
 export interface BaseDatabaseObject extends BasicDBObj {
-    created_by?: User;
-    updated_by?: User;
+    created_by?: string;
+    updated_by?: string;
 }
 export interface Embeddable extends BaseDatabaseObject {
     embedding?: string[];
