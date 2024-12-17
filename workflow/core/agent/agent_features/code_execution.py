@@ -1,13 +1,11 @@
+import re
 from enum import IntEnum
 from typing import List, Tuple
 from pydantic import Field, BaseModel
 from workflow.core.data_structures import (
-    MessageDict, CodeBlock, CodeExecution, CodeOutput, 
+    MessageDict, CodeBlock, CodeExecution, CodeOutput, get_run_commands
 )
-from workflow.core.data_structures.code import get_run_commands
-from workflow.util.run_code import DockerCodeRunner
-from workflow.util import LOGGER, LOG_LEVEL, get_language_matching, Language
-import re
+from workflow.util import LOGGER, LOG_LEVEL, get_language_matching, Language, DockerCodeRunner
 
 class CodePermission(IntEnum):
     NORMAL = 1      # All valid code blocks are executed

@@ -6,8 +6,6 @@ from docker.errors import DockerException, ContainerError, APIError
 from requests.exceptions import ReadTimeout
 from workflow.util import LOGGER
 
-client = docker.from_env()
-
 class DockerCodeRunner(BaseModel):
     """
     Handles code execution in Docker containers with optional setup commands.
@@ -63,6 +61,7 @@ class DockerCodeRunner(BaseModel):
             ValueError: If language is not supported
             DockerException: If container execution fails
         """
+        client = docker.from_env()
         if language not in self.images:
             raise ValueError(f"Unsupported language: {language}")
 

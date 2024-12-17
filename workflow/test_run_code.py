@@ -7,7 +7,7 @@ if parent_dir not in sys.path:
 from typing import List, Tuple, Dict
 from workflow.util.logger import LOGGER
 from workflow.test.test_utils import TestOutputHandler, TestOutputConfig
-from workflow.util.run_code import DockerCodeRunner
+from util.code_utils.run_code_in_docker import DockerCodeRunner
 
 # Test cases for different languages
 test_cases = {

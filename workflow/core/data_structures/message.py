@@ -91,10 +91,14 @@ class MessageDict(Embeddable):
     
     def convert_to_api_format(self) -> MessageApiFormat:
         """Convert a MessageDict to the API format."""
-        api_message = MessageApiFormat(
-            role=self.role,
-            content=str(self.content)
-        )
-        if self.references.tool_calls:
-            api_message["tool_calls"] = [tool_call.model_dump() for tool_call in self.references.tool_calls]
-        return api_message
+        return convert_message_dict_to_api_format(self)
+    
+def convert_message_dict_to_api_format(message: MessageDict) -> MessageApiFormat:
+    """Convert a MessageDict to the API format."""
+    api_message = MessageApiFormat(
+        role=message.role,
+        content=str(message.content)
+    )
+    if message.references.tool_calls:
+        api_message["tool_calls"] = [tool_call.model_dump() for tool_call in message.references.tool_calls]
+    return api_message

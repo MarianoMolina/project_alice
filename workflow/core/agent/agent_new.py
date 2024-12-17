@@ -1,4 +1,3 @@
-import json, re
 from enum import Enum
 from pydantic import Field, BaseModel
 from typing import Dict, List, Optional
@@ -7,7 +6,6 @@ from workflow.core.data_structures import (
     )
 from workflow.core.agent.agent_features import ToolExecutionAgent, CodeExecutionAgent, ModelAgent, ToolPermission, CodePermission
 from workflow.util import LOGGER, Language
-from enum import IntEnum
 
 class AliceAgent(BaseDataStructure, ToolExecutionAgent, CodeExecutionAgent, ModelAgent):
     """

@@ -470,7 +470,6 @@ class RunEnvironment:
         print("\r" + " " * 70 + "\r", end='')  # Clear the line
         self.logger.info("Docker is ready!")
 
-
     def run_docker_compose(self):
         """Run docker-compose up with proper error handling."""
         self.logger.info("Starting Docker Compose...")
