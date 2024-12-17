@@ -92,6 +92,10 @@ class LLMAnthropic(LLMEngine):
             LOGGER.warning("First message is not from user. Adjusting order.")
             final_adapted.insert(0, {"role": RoleTypes.USER, "content": "Please continue."})
 
+        if final_adapted and final_adapted[-1]["role"] == RoleTypes.ASSISTANT:
+            LOGGER.warning("Last message is from assistant. Adjusting order.")
+            final_adapted.append({"role": RoleTypes.USER, "content": "Please continue."})
+
         return final_adapted
     
     def _convert_into_tool_params(self, tools: List[ToolFunction]) -> List[ToolParam]:
@@ -120,7 +124,8 @@ class LLMAnthropic(LLMEngine):
             )
         )
         
-    async def generate_api_response(self, api_data: ModelConfig, messages: List[MessageApiFormat], system: Optional[str] = None, tools: Optional[List[ToolFunction]] = None, max_tokens: Optional[int] = None, tool_choice: str = 'auto', n: Optional[int] = 1, **kwargs) -> References:
+    async def generate_api_response(self, api_data: ModelConfig, messages: List[MessageApiFormat], system: Optional[str] = None, 
+                                    tools: Optional[List[ToolFunction]] = None, tool_choice: str = 'auto', n: Optional[int] = 1, **kwargs) -> References:
         """
         Generate a chat completion response using Anthropic's API.
 
@@ -175,7 +180,7 @@ class LLMAnthropic(LLMEngine):
         api_params = {
             "model": api_data.model,
             "messages": adjusted_messages,
-            "max_tokens": max_tokens,
+            "max_tokens": api_data.max_tokens_gen,
             "temperature": api_data.temperature,
             "system": system,
         }

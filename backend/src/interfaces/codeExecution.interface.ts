@@ -5,6 +5,7 @@ import { Embeddable } from './embeddingChunk.interface';
 export interface CodeBlock {
     code: string;
     language: string;
+    setup_commands?: string;
 }
 
 export interface CodeOutput {

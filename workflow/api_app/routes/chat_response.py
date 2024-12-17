@@ -79,4 +79,4 @@ async def chat_response(
             return {"status": "no responses generated"}
         except Exception as e:
             LOGGER.error(f'Error processing chat response: {e}')
-            raise HTTPException(status_code=500, detail=f"Error processing chat response: {e}")
+            return {"status": "error", "error": str(e)}

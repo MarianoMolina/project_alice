@@ -2,7 +2,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     env_file:
       - .env
     ports:
@@ -12,15 +12,20 @@ services:
         condition: service_healthy
       workflow:
         condition: service_healthy
+    volumes:
+      - ./frontend:/app:consistent
+      - /app/node_modules
+      - /app/dist
     environment:
-      NODE_ENV: ${NODE_ENV:-production}
+      NODE_ENV: ${NODE_ENV:-development}
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
       PORT: ${FRONTEND_PORT_DOCKER:-4000}
-      CI: "true"
 
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT_DOCKER}"
     depends_on:
@@ -29,11 +34,14 @@ services:
       volume-init:
         condition: service_completed_successfully
     volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - /app/dist
       - ./.env:/app/.env
       - logs:/app/logs
       - shared-uploads:/app/shared-uploads
     environment:
-      NODE_ENV: ${NODE_ENV:-production}
+      NODE_ENV: ${NODE_ENV:-development}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
@@ -42,16 +50,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 10s
-
-  redis:
-    image: redis:6.0-alpine
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
 
   workflow:
     build:
@@ -87,25 +85,35 @@ services:
       retries: 5
       start_period: 5s
 
+  redis:
+    image: redis:6.0-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   volume-init:
-    image: busybox
-    attach: false
-    volumes:
-      - ${COMPOSE_PROJECT_DIR}/logs:/logs
-      - ${COMPOSE_PROJECT_DIR}/shared-uploads:/shared-uploads
-      - ${COMPOSE_PROJECT_DIR}/model_cache:/model_cache 
-    command: |
-      sh -c "
-        echo 'Starting volume initialization' &&
-        ls -la / &&
-        echo 'Creating directories' &&
-        mkdir -p /logs /shared-uploads /model_cache &&
-        echo 'Setting permissions' &&
-        chmod -R 755 /logs /shared-uploads /model_cache &&
-        chown -R 1000:1000 /logs /shared-uploads /model_cache &&
-        echo 'Finished volume initialization' &&
-        ls -la /logs /shared-uploads /model_cache 
-      "
+      image: busybox
+      attach: false
+      volumes:
+        - ${COMPOSE_PROJECT_DIR}/logs:/logs
+        - ${COMPOSE_PROJECT_DIR}/shared-uploads:/shared-uploads
+        - ${COMPOSE_PROJECT_DIR}/model_cache:/model_cache
+      command: |
+        sh -c "
+          echo 'Starting volume initialization' &&
+          ls -la / &&
+          echo 'Creating directories' &&
+          mkdir -p /logs /shared-uploads /model_cache &&
+          echo 'Setting permissions' &&
+          chmod -R 755 /logs /shared-uploads /model_cache &&
+          chown -R 1000:1000 /logs /shared-uploads /model_cache &&
+          echo 'Finished volume initialization' &&
+          ls -la /logs /shared-uploads /model_cache
+        "
 
   mongo:
     image: mongo:latest
@@ -127,6 +135,13 @@ services:
       context: .
       dockerfile: workflow/Dockerfile.bash
     image: mybash:latest
+    command: ["bash"]
+
+  js_image:
+    build:
+      context: .
+      dockerfile: workflow/Dockerfile.js
+    image: myjs:latest
     command: ["bash"]
 
 volumes:

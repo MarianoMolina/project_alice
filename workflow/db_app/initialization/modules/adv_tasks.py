@@ -327,7 +327,7 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "image_gen_task",
                 "task_type": "GenerateImageTask",
-                "task_name": "Image_Gen_Dall_E",
+                "task_name": "DALL-E_Image_Generation",
                 "agent": "oai_agent",
                 "task_description": "Generates an image from the input text",
                 "input_variables": {
@@ -345,7 +345,7 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "image_gen_task_pixart",
                 "task_type": "GenerateImageTask",
-                "task_name": "Image_Gen_Pixart",
+                "task_name": "Pixart_Image_Generation",
                 "agent": "pixart_gen_agent",
                 "task_description": "Generates an image from the input text",
                 "input_variables": {
@@ -363,7 +363,7 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "image_gen_task_gemini",
                 "task_type": "GenerateImageTask",
-                "task_name": "Image_Gen_Gemini",
+                "task_name": "Image_Gen_Gemini_Imagen3",
                 "agent": "gemini_agent",
                 "task_description": "Generates an image from the input text",
                 "input_variables": {

@@ -9,6 +9,7 @@ const DEFAULT_MODEL_CONFIG: IModelConfig = {
   temperature: 0.7,
   seed: null,
   use_cache: false,
+  max_tokens_gen: 4096,
   prompt_config: {
     bos: '<|im_start|>',
     eos: '<|im_end|>',
@@ -24,6 +25,7 @@ const modelConfigSchema = new Schema<IModelConfig>({
   temperature: { type: Number, default: 0.7 },
   seed: { type: Number, default: null },
   use_cache: { type: Boolean, default: false },
+  max_tokens_gen: { type: Number, default: 4096 },
   prompt_config: {
     bos: { type: String, required: true, default: '<|im_start|>' },
     eos: { type: String, required: true, default: '<|im_end|>' },

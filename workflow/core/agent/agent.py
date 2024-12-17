@@ -91,6 +91,7 @@ class AliceAgent(BaseDataStructure):
         description="Level of code execution permission"
     )
     max_consecutive_auto_reply: int = Field(default=10, description="The maximum number of consecutive auto replies")
+    execution_languages: List[Language] = Field(default=[Language.PYTHON, Language.SHELL, Language.JAVASCRIPT, Language.TYPESCRIPT], description="Languages available for code execution")
 
     @property
     def llm_model(self) -> AliceModel:
@@ -150,11 +151,12 @@ class AliceAgent(BaseDataStructure):
     
     def _get_code_exec_prompt(self) -> str:
         """Generate the appropriate code execution prompt based on permission level."""
+        available_languages: str = ", ".join([lang.value for lang in self.execution_languages])
         if self.has_code_exec == CodePermission.NORMAL:
-            return """
+            return f"""
 You have full access to code execution. Any code blocks you provide will be automatically executed.
 Please ensure that whenever you add a code block, you understand it will be executed immediately.
-Only provide code that is safe and appropriate to run.
+Only provide code that is safe and appropriate to run. Available languages: {available_languages}
 
 Example of providing executable code:
 ```python
@@ -162,10 +164,10 @@ print("This will be executed automatically")
 ```
 """
         elif self.has_code_exec == CodePermission.TAGGED_ONLY:
-            return """
+            return f"""
 You have access to code execution, but it requires explicit marking.
 To execute code, add '_execute' to your code block's language tag.
-Only code blocks marked with '_execute' will be executed.
+Only code blocks marked with '_execute' will be executed. Available languages: {available_languages}
 
 Example of providing executable code:
 ```python_execute

@@ -27,6 +27,7 @@ export interface IModelConfig {
     seed: number | null;
     use_cache: boolean;
     prompt_config: ChatTemplateTokens;
+    max_tokens_gen?: number;
 }
 
 export interface IModel extends Document {

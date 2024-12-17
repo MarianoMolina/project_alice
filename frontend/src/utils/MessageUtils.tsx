@@ -24,8 +24,6 @@ export const getMessageTypeIcon = (type?: ContentType) => {
             return <TaskAlt />;
         case ContentType.MULTIPLE:
             return <Groups />;
-        case ContentType.ENTITY_REFERENCE:
-            return <Computer />;
         case ContentType.IMAGE:
             return getFileIcon(FileType.IMAGE);
         case ContentType.VIDEO:

@@ -7,7 +7,7 @@ from workflow.core.data_structures import (
     UserInteraction, UserCheckpoint, Prompt, User, 
     BaseDataStructure, DataCluster, InteractionOwner,
     InteractionOwnerType, MessageGenerators, RoleTypes,
-    TaskResponse, CodeExecution
+    TaskResponse, CodeExecution, References
 )
 from workflow.core.agent import AliceAgent
 from workflow.core.api import APIManager
@@ -347,6 +347,8 @@ class AliceChat(BaseDataStructure):
                         llm_message.references.tool_calls
                     )
                     if tool_responses:
+                        if not llm_message.references.task_responses:
+                            llm_message.references.task_responses = []
                         llm_message.references.task_responses.extend(tool_responses)
                 elif can_tool_call and isinstance(can_tool_call, UserInteraction):
                     if not llm_message.references.user_interactions:
@@ -358,6 +360,8 @@ class AliceChat(BaseDataStructure):
                 if can_execute_code and not isinstance(can_execute_code, UserInteraction):
                     code_executions: List[CodeExecution] = await self._handle_code_execution([llm_message], False)
                     if code_executions:
+                        if not llm_message.references.code_executions:
+                            llm_message.references.code_executions = []
                         llm_message.references.code_executions.extend(code_executions)
                 elif can_execute_code and isinstance(can_execute_code, UserInteraction):
                     if not llm_message.references.user_interactions:

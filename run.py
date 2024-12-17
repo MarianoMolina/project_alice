@@ -4,8 +4,8 @@ import platform
 import os
 import sys
 import logging
-from pathlib import Path
 import signal
+from pathlib import Path
 from typing import Optional, Tuple, List
 
 class DirectoryManager:
@@ -74,18 +74,14 @@ class THPHandler:
                 )
                 return result.returncode == 0 and "[madvise]" in result.stdout
             elif self.system == "Windows":
-                # Check if WSL is running first
-                wsl_check = subprocess.run(["wsl", "echo", "test"], capture_output=True, text=True)
-                if wsl_check.returncode != 0:
-                    self.logger.error("WSL is not running or not installed")
-                    return False
-                    
+                # Try reading the setting directly first
                 result = subprocess.run(
-                    ["wsl", "sudo", "cat", "/sys/kernel/mm/transparent_hugepage/enabled"],
+                    ["wsl", "--exec", "cat", "/sys/kernel/mm/transparent_hugepage/enabled"],
                     capture_output=True,
                     text=True
                 )
-                return result.returncode == 0 and "[madvise]" in result.stdout                
+                return result.returncode == 0 and "[madvise]" in result.stdout
+                
         except Exception as e:
             self.logger.error(f"Failed to check THP setting: {e}")
             return False
@@ -128,44 +124,41 @@ class THPHandler:
                 subprocess.run(["docker", "rm", "-f", container_name], 
                              capture_output=True)
                 
-                # Verify the settings took effect
-                return self._get_current_thp_setting()
             elif self.system == "Linux":
                 commands = [
-                    ["sudo", "sh", "-c", "echo madvise | tee /sys/kernel/mm/transparent_hugepage/enabled"],
-                    ["sudo", "sh", "-c", "echo madvise | tee /sys/kernel/mm/transparent_hugepage/defrag"]
+                    ["sh", "-c", "echo madvise > /sys/kernel/mm/transparent_hugepage/enabled"],
+                    ["sh", "-c", "echo madvise > /sys/kernel/mm/transparent_hugepage/defrag"]
                 ]
-            elif self.system == "Windows":
-                # First check if WSL is available
-                wsl_check = subprocess.run(["wsl", "echo", "test"], capture_output=True, text=True)
-                if wsl_check.returncode != 0:
-                    self.logger.error("WSL is not running or not installed")
-                    return False
-                    
-                commands = [
-                    ["wsl", "sudo", "sh", "-c", "echo madvise | sudo tee /sys/kernel/mm/transparent_hugepage/enabled"],
-                    ["wsl", "sudo", "sh", "-c", "echo madvise | sudo tee /sys/kernel/mm/transparent_hugepage/defrag"]
-                ]
-            else:
-                self.logger.error(f"Unsupported operating system: {self.system}")
-                return False
-
-            if self.system in ["Linux", "Windows"]:
                 for cmd in commands:
-                    self.logger.debug(f"Running command: {cmd}")
                     result = subprocess.run(cmd, capture_output=True, text=True)
                     if result.returncode != 0:
                         self.logger.error(f"Command failed: {result.stderr}")
-                        # If it's a sudo password prompt, log a more helpful message
-                        if "password" in result.stderr.lower():
-                            self.logger.error("Sudo access required. Please run 'wsl sudo visudo' and add your user to sudoers")
                         return False
-                return self._get_current_thp_setting()
+                        
+            elif self.system == "Windows":
+                # Let's try something simpler - use WSL's built-in root user
+                commands = [
+                    'echo madvise | tee /sys/kernel/mm/transparent_hugepage/enabled',
+                    'echo madvise | tee /sys/kernel/mm/transparent_hugepage/defrag'
+                ]
+                
+                for cmd in commands:
+                    # Use WSL's root user directly
+                    result = subprocess.run(
+                        ["wsl", "-u", "root", "-e", "sh", "-c", cmd],
+                        capture_output=True,
+                        text=True
+                    )
+                    if result.returncode != 0:
+                        self.logger.error(f"Command failed: {result.stderr}")
+                        return False
+
+            return self._get_current_thp_setting()
 
         except Exception as e:
             self.logger.error(f"Error configuring THP: {e}")
             return False
-                
+                        
 class LMStudioPathFinder:
     """
     Handles LM Studio CLI discovery, setup, and server management.

@@ -197,8 +197,6 @@ The Workflow container supports various task types, each designed for specific p
 
 2. **CodeGenerationLLMTask**
    - Purpose: Generate code based on prompts
-   - Additional Properties:
-     - `valid_languages`: List of programming languages the task can work with
    - Usage: For tasks that involve code generation or code-related prompts
 
 3. **CodeExecutionLLMTask**

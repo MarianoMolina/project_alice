@@ -34,17 +34,13 @@ class CodeExecutionLLMTask(PromptAgentTask):
         - Error capture and formatting
 
     Attributes:
-    -----------
-    valid_languages : list[Language]
-        Supported programming languages (default: [PYTHON, SHELL])
-        
+    -----------        
     timeout : int
         Maximum execution time in seconds (default: 50)
     """
     agent: AliceAgent = Field(..., description="The agent to use for the task")
     task_name: str = Field("execute_code", description="The name of the task")
     exit_codes: dict[int, str] = Field({0: "Success", 1: "Execution failed."}, description="A dictionary of exit codes for the task")
-    valid_languages: list[Language] = Field([Language.PYTHON, Language.SHELL], description="A list of valid languages for code execution")
     timeout: int = Field(50, description="The maximum time in seconds to wait for code execution")
     required_apis: Optional[List[ApiType]] = Field(None, description="A list of required APIs for the task")
     start_node: str = Field(default='code_execution', description="The name of the starting node")

@@ -26,6 +26,7 @@ export interface ModelConfig {
     seed: number | null;
     use_cache: boolean;
     prompt_config: ChatTemplateTokens;
+    max_tokens_gen?: number;
 }
 export interface AliceModel extends BaseDatabaseObject { 
     short_name: string;
@@ -60,6 +61,7 @@ export const getDefaultModelForm = (): Partial<AliceModel> => ({
         temperature: 0.7,
         seed: null,
         use_cache: true,
+        max_tokens_gen: 4096,
         prompt_config: {
             bos: '<|im_start|>',
             eos: '<|im_end|>',

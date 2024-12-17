@@ -335,20 +335,6 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                 onDataClusterChange={(value) => handleFieldChange('data_cluster', value)}
                 flatten={false}
             />
-
-            {/* CodeExecutionLLMTask specific fields */}
-            {taskType === 'CodeExecutionLLMTask' && (
-                <SelectInput
-                    name="valid_languages"
-                    label="Valid Languages"
-                    value={form.valid_languages || []}
-                    onChange={(value) => handleFieldChange('valid_languages', value)}
-                    disabled={!isEditMode}
-                    description='Valid languages for execution'
-                    options={LANGUAGES.map((lang) => ({ value: lang, label: formatCamelCaseString(lang) }))}
-                    multiple
-                />
-            )}
         </GenericFlexibleView>
     );
 };

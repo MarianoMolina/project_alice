@@ -16,7 +16,6 @@ export enum ContentType {
     FILE = "file",
     TASK_RESULT = 'task_result',
     MULTIPLE = 'multiple',
-    ENTITY_REFERENCE = 'entity_reference',
 }
 
 export enum MessageGenerators {

@@ -227,10 +227,12 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const generateChatResponse = useCallback(async (chatId: string): Promise<boolean> => {
         try {
             const result = await apiGenerateChatResponse(chatId);
-            addNotification('Chat response generated successfully', 'success');
             if (result) {
+                addNotification('Chat response generated successfully', 'success');
                 const updatedChat = await apiFetchPopulatedItem('chats', chatId) as PopulatedAliceChat;
                 emitEvent('updated', 'chats', updatedChat);
+            } else {
+                addNotification('Error generating chat response', 'error');
             }
             return result;
         } catch (error) {

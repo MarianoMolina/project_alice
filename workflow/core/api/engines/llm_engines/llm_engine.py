@@ -87,7 +87,15 @@ class LLMEngine(APIEngine):
     required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
 
 
-    async def generate_api_response(self, api_data: ModelConfig, messages: List[MessageApiFormat], system: Optional[str] = None, tools: Optional[List[ToolFunction]] = None, max_tokens: Optional[int] = None, tool_choice: Optional[str] = 'auto', n: Optional[int] = 1, **kwargs) -> References:
+    async def generate_api_response(self, 
+                                    api_data: ModelConfig, 
+                                    messages: List[MessageApiFormat], 
+                                    system: Optional[str] = None, 
+                                    tools: Optional[List[ToolFunction]] = None, 
+                                    tool_choice: Optional[str] = 'auto', 
+                                    n: Optional[int] = 1, 
+                                    **kwargs
+                                    ) -> References:
         """
         Generates the API response for the task, using the provided API data and messages.
 
@@ -154,7 +162,7 @@ class LLMEngine(APIEngine):
             api_params = {
                 "model": api_data.model,
                 "messages": messages,
-                "max_tokens": max_tokens,
+                "max_tokens": api_data.max_tokens_gen,
                 "temperature": api_data.temperature,
                 "n": n, 
                 "stream": False

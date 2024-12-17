@@ -25,7 +25,6 @@ const taskSchema = new Schema<ITaskDocument, ITaskModel>({
         of: { type: Schema.Types.ObjectId, ref: 'Task', autopopulate: true },
         default: null 
     },
-    valid_languages: [String],
     exit_code_response_map: { type: Map, of: Number, default: null },
     start_node: { type: String, default: null },
     node_end_code_routing: { type: Map, of: Map, default: null },
@@ -63,7 +62,6 @@ taskSchema.methods.apiRepresentation = function (this: ITaskDocument) {
         recursive: this.recursive || false,
         templates: this.templates ? Object.fromEntries(this.templates) : null,
         tasks: this.tasks ? Object.fromEntries(this.tasks) : null,
-        valid_languages: this.valid_languages || [],
         exit_code_response_map: this.exit_code_response_map ? Object.fromEntries(this.exit_code_response_map) : null,
         start_node: this.start_node || null,
         node_end_code_routing: this.node_end_code_routing ? Object.fromEntries(

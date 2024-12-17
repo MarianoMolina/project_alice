@@ -9,7 +9,8 @@ from workflow.core.data_structures import (
 from workflow.util import LOGGER, est_messages_token_count, est_token_count, CHAR_PER_TOKEN, MessagePruner, ScoreConfig, MessageApiFormat
 
 class CohereLLMEngine(LLMEngine):
-    async def generate_api_response(self, api_data: ModelConfig, messages: List[MessageApiFormat], system: Optional[str] = None, tools: Optional[List[ToolFunction]] = None, max_tokens: Optional[int] = None, temperature: Optional[float] = 0.7, tool_choice: Optional[str] = "auto", n: Optional[int] = 1, **kwargs) -> References:
+    async def generate_api_response(self, api_data: ModelConfig, messages: List[MessageApiFormat], system: Optional[str] = None, 
+                                    tools: Optional[List[ToolFunction]] = None, tool_choice: Optional[str] = "auto", n: Optional[int] = 1, **kwargs) -> References:
         if not api_data.api_key:
             raise ValueError("API key not found in API data")
 
@@ -50,8 +51,8 @@ class CohereLLMEngine(LLMEngine):
                 message=cohere_messages[-1]["message"],  # Last message as the current input
                 chat_history=cohere_messages[:-1],  # All previous messages as history
                 tools=cohere_tools if cohere_tools else None,
-                max_tokens=max_tokens,
-                temperature=temperature
+                max_tokens=api_data.max_tokens_gen,
+                temperature=api_data.temperature
             )
 
             tool_calls = None

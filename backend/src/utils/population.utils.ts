@@ -115,7 +115,6 @@ export class PopulationService {
         }
         // Work with a plain object for populations
         let populatedObj = doc.toJSON();
-        this.populatedReferences.set(memoKey, populatedObj as T);
 
         if (config.embeddable && this.isEmbeddable(doc)) {
             populatedObj = await this.populateEmbeddable(populatedObj, userId);
@@ -139,7 +138,7 @@ export class PopulationService {
             populatedObj = await this.populateTasks(populatedObj, config, userId);
         }
         if (config.hasMessages && this.hasMessages(doc)) {
-            Logger.debug('Will populate references:', {
+            Logger.debug('Will populate messages:', {
                 modelName: model.modelName,
                 id,
                 refPath: config.referencePath,
@@ -147,13 +146,18 @@ export class PopulationService {
                 hasDirectRefs: doc.toJSON().hasOwnProperty('references')
             });
             populatedObj = await this.populateMessages(populatedObj, userId);
-            Logger.debug('After reference population:', {
+            Logger.debug('After messages population:', {
                 modelName: model.modelName,
                 id,
-                populatedKeys: Object.keys(populatedObj)
+                populatedObj
             });
         }
         this.populatedReferences.set(memoKey, populatedObj as T);
+        Logger.debug('Returning populated object:', {
+            modelName: model.modelName,
+            id,
+            populatedObj
+        });
 
         return populatedObj as T;
     }

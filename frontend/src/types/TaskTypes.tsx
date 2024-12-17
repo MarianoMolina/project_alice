@@ -35,7 +35,6 @@ export interface AliceTask extends BaseDatabaseObject {
   exit_codes: { [key: string]: string };
   templates: { [key: string]: Prompt | null };
   tasks: { [key: string]: string };
-  valid_languages: string[];
   exit_code_response_map: { [key: string]: number } | null;
   start_node?: string | null;
   required_apis?: ApiType[] | null;
@@ -62,7 +61,6 @@ export const convertToAliceTask = (data: any): AliceTask => {
     recursive: data?.recursive || false,
     templates: data?.templates || {},
     tasks: typeof data?.tasks === 'object' && data?.tasks !== null ? data.tasks : {},
-    valid_languages: data?.valid_languages || [],
     exit_code_response_map: data?.exit_code_response_map || null,
     start_node: data?.start_node || null,
     required_apis: data?.required_apis || null,
@@ -85,7 +83,6 @@ export const convertToPopulatedTask = (data: any): PopulatedTask => {
     recursive: data?.recursive || false,
     templates: data?.templates || {},
     tasks: typeof data?.tasks === 'object' && data?.tasks !== null ? data.tasks : {},
-    valid_languages: data?.valid_languages || [],
     exit_code_response_map: data?.exit_code_response_map || null,
     start_node: data?.start_node || null,
     required_apis: data?.required_apis || null,
@@ -121,7 +118,6 @@ export const getDefaultTaskForm = (taskType: TaskType): PopulatedTask => {
     required_apis: [],
     exit_codes: { 0: "Success", 1: "Failure" },
     recursive: false,
-    valid_languages: [],
     exit_code_response_map: null,
     start_node: null,
     node_end_code_routing: null,
@@ -164,7 +160,7 @@ export const getDefaultTaskForm = (taskType: TaskType): PopulatedTask => {
     case 'CheckTask':
       return { ...baseForm, exit_code_response_map: {}, node_end_code_routing: agentNodeRoutes };
     case 'CodeExecutionLLMTask':
-      return { ...baseForm, valid_languages: ['python', 'javascript'] };
+      return { ...baseForm };
     case 'CodeGenerationLLMTask':
       return { ...baseForm, node_end_code_routing: agentNodeRoutes };
     case 'Workflow':

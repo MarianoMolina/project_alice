@@ -8,7 +8,7 @@ import { CollectionElementString } from '../types/CollectionTypes';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
-import TaskShortListView from '../components/enhanced/task/task/TaskShortListView';
+import TaskListView from '../components/enhanced/task/task/TaskListView';
 import FilterSelect from '../components/ui/sidetab_header/FilterSelect';
 import EnhancedAPIConfig from '../components/enhanced/api_config/api_config/EnhancedAPIConfig';
 import TaskExecuteView from '../components/enhanced/task/task/TaskExecuteView';
@@ -97,8 +97,8 @@ const MemoizedFilterSelect = memo(({ title, currentSelection, options, handleSel
     />
 ));
 
-const MemoizedTaskShortListView = memo(({ items, onView, onInteraction }: TaskListProps) => (
-    <TaskShortListView
+const MemoizedTaskListView = memo(({ items, onView, onInteraction }: TaskListProps) => (
+    <TaskListView
         items={items}
         onView={onView}
         onInteraction={onInteraction}
@@ -296,7 +296,7 @@ const StartTask: React.FC = () => {
                                 );
                             case 'Task':
                                 return (
-                                    <MemoizedTaskShortListView
+                                    <MemoizedTaskListView
                                         items={filteredTasks as AliceTask[] | PopulatedTask[]}
                                         onView={handleTaskView}
                                         onInteraction={handleTabWhenTaskSelect}

@@ -109,4 +109,4 @@ async def chat_resume(
             import traceback
             error_msg = f"Error processing chat resume: {str(e)}\n{traceback.format_exc()}"
             LOGGER.error(error_msg)
-            raise HTTPException(status_code=500, detail=error_msg)
+            return {"status": "error", "error": error_msg}

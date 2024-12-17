@@ -10,7 +10,9 @@ from workflow.util import LOGGER, est_messages_token_count, est_token_count, CHA
 
 class GeminiLLMEngine(LLMEngine):
 
-    async def generate_api_response(self, api_data: ModelConfig, messages: List[MessageApiFormat], system: Optional[str] = None, tools: Optional[List[ToolFunction]] = None, max_tokens: Optional[int] = None, temperature: Optional[float] = 0.7, tool_choice: Optional[str] = "auto", n: Optional[int] = 1, **kwargs) -> References:
+    async def generate_api_response(self, api_data: ModelConfig, messages: List[MessageApiFormat], system: Optional[str] = None, 
+                                    tools: Optional[List[ToolFunction]] = None, 
+                                    tool_choice: Optional[str] = "auto", n: Optional[int] = 1, **kwargs) -> References:
         if not api_data.api_key:
             raise ValueError("API key not found in API data")
         
@@ -73,8 +75,8 @@ class GeminiLLMEngine(LLMEngine):
             chat = model.start_chat(history=history)
 
             generation_config = genai.types.GenerationConfig(
-                max_output_tokens=max_tokens,
-                temperature=temperature
+                max_output_tokens=api_data.max_tokens_gen,
+                temperature=api_data.temperature
             )
 
             # Send the new message to get the response

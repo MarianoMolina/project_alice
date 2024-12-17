@@ -6,8 +6,7 @@ from .user_checkpoint import UserCheckpoint
 from .user_interaction import UserInteraction, UserResponse, InteractionOwnerType, InteractionOwner
 from .user import User, UserRoles
 from .references import References, DataCluster, get_reference_object, references_model_map
-from .model_config import ModelConfig
-from .model import AliceModel
+from .model import AliceModel, ModelConfig
 from .prompt import Prompt
 from .api_utils import ApiName, ApiType, ModelType, ModelApis, API_CONFIG_TYPES, API_CAPABILITIES
 from .tool_calls import ToolCall, ToolCallConfig
