@@ -4,16 +4,13 @@ import {
   Typography,
   IconButton,
   CircularProgress,
-  Tooltip,
-  Chip
+  Tooltip
 } from '@mui/material';
 import {
   ZoomIn as ZoomInIcon,
   ZoomOut as ZoomOutIcon,
   NavigateNext,
-  NavigateBefore,
-  Timer,
-  TextFields
+  NavigateBefore
 } from '@mui/icons-material';
 import { Document, Page, pdfjs } from 'react-pdf';
 import Logger from '../../../utils/Logger';

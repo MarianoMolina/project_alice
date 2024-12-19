@@ -33,6 +33,8 @@ class CodeExecutionAgent(BaseModel):
     )
     execution_languages: List[Language] = Field(default=[Language.PYTHON, Language.SHELL, Language.JAVASCRIPT, Language.TYPESCRIPT], description="Languages available for code execution")
 
+    # TODO: These prompts should be adjustable by the user. However, a similar example is tool calls, where the prompt 
+    # is decided by the llm provider, so this can be considered a similar case. 
     def _get_code_exec_prompt(self) -> str:
         """Generate the appropriate code execution prompt based on permission level."""
         available_languages: str = ", ".join([lang.value for lang in self.execution_languages])
@@ -46,10 +48,12 @@ Example of providing executable code:
 ```python
 print("This will be executed automatically")
 ```
+If you need to install packages, please provide the necessary setup commands in shell blocks.
 """
         elif self.has_code_exec == CodePermission.TAGGED_ONLY:
             return f"""
-You have access to code execution, but it requires explicit marking.
+You have access to code execution, but it requires explicit marking. 
+This allows you to control which code blocks are executed, and which are for demonstration only.
 To execute code, add '_execute' to your code block's language tag.
 Only code blocks marked with '_execute' will be executed. Available languages: {available_languages}
 
@@ -62,6 +66,7 @@ Example of non-executable code:
 ```python
 print("This is just for demonstration")
 ```
+If you need to install packages, please provide the necessary setup commands in shell blocks with the required _execute tag.
 """
         return ""
 
@@ -73,7 +78,7 @@ print("This is just for demonstration")
             messages: List of messages that may contain code blocks
             
         Returns:
-            List of validated CodeBlock objects ready for execution
+            List of CodeBlocks retrieved from the message's content
             
         Notes:
             - Handles both normal and tagged execution modes
@@ -147,10 +152,7 @@ print("This is just for demonstration")
             Tuple containing:
             - List of CodeExecution objects with results
             - Exit code indicating overall success/failure
-        """
-        if self.has_code_exec == CodePermission.DISABLED:
-            return [], 0
-            
+        """            
         code_blocks = self.collect_code_blocks(messages)
         if not code_blocks:
             LOGGER.warning('No executable code blocks found')
@@ -165,7 +167,7 @@ print("This is just for demonstration")
         for code, language, setup in run_commands:
             code_block = CodeBlock(code=code, language=language, setup_commands=setup)
             try:
-                current_exit_code, logs = await runner.run(code, language, setup)
+                logs, current_exit_code = await runner.run(code, language, setup)
 
                 exit_code = current_exit_code if current_exit_code != 0 else exit_code
                 code_executions.append(

@@ -2,7 +2,7 @@ import os
 from typing import List, Dict, Any, Union, TypedDict
 from pydantic import Field, BaseModel
 from workflow.core.tasks.task import AliceTask
-from workflow.core.agent.agent import AliceAgent
+from workflow.core.agent import AliceAgent
 from workflow.core.data_structures import (
     FunctionParameters,
     ParameterDefinition,

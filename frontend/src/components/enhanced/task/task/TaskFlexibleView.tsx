@@ -7,7 +7,6 @@ import { ApiType } from '../../../../types/ApiTypes';
 import { Prompt } from '../../../../types/PromptTypes';
 import { AliceAgent } from '../../../../types/AgentTypes';
 import { taskDescriptions } from '../../../../types/TaskTypes';
-import { LANGUAGES } from '../../../../types/CodeExecutionTypes';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import PromptShortListView from '../../prompt/prompt/PromptShortListView';
 import AgentShortListView from '../../agent/agent/AgentShortListView';

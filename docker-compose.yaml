@@ -137,7 +137,7 @@ services:
     image: mybash:latest
     command: ["bash"]
 
-  js_image:
+  javascript_image:
     build:
       context: .
       dockerfile: workflow/Dockerfile.js

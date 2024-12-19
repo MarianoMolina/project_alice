@@ -439,14 +439,14 @@ class AliceTask(BaseDataStructure):
 
             # Execute nodes
             while current_node:
-                # Check attempt limits
-                if not self.can_retry_node(current_node, execution_history):
-                    return self.create_final_response(
-                        node_responses,
-                        exit_code=1,
-                        diagnostics=f"Maximum attempts reached for node {current_node}",
-                        **kwargs
-                    )
+                # # Check attempt limits
+                # if not self.can_retry_node(current_node, execution_history):
+                #     return self.create_final_response(
+                #         node_responses,
+                #         exit_code=1,
+                #         diagnostics=f"Maximum attempts reached for node {current_node}",
+                #         **kwargs
+                #     ) 
                 
                 # Execute current node
                 node_response = await self.execute_node(
@@ -724,10 +724,10 @@ class AliceTask(BaseDataStructure):
             if not self.can_retry_node(current_node, execution_history):
                 LOGGER.warning(f"Cannot retry node {current_node}")
                 return None
-        elif next_node:
-            if not self.can_retry_node(next_node, execution_history):
-                LOGGER.warning(f"Cannot proceed to node {next_node} - max attempts reached")
-                return None
+        # elif next_node:
+        #     if not self.can_retry_node(next_node, execution_history):
+        #         LOGGER.warning(f"Cannot proceed to node {next_node} - max attempts reached")
+        #         return None
                 
         return next_node
     

@@ -127,7 +127,7 @@ class CodeGenerationLLMTask(PromptAgentTask):
         if not message or not message.content:
             return LLMCodeGenExitCode.GENERATION_FAILED
             
-        code_blocks = self.agent.collect_code_blocs([message])
+        code_blocks = self.agent.collect_code_blocks([message])
         if not code_blocks:
             return LLMCodeGenExitCode.NO_CODE_BLOCKS
             
@@ -166,7 +166,7 @@ class CodeGenerationLLMTask(PromptAgentTask):
                 messages.append(MessageDict(
                     role=RoleTypes.USER,
                     generated_by=MessageGenerators.SYSTEM,
-                    content="The previous code execution failed. Please review the errors above and provide corrected code."
+                    content=f"The previous code execution failed. Please review the errors above and provide corrected code. \n\n{[str(code) for code in last_node.references.code_executions]}"
                 ))
                 
         return messages

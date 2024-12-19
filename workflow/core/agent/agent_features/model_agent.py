@@ -85,15 +85,15 @@ class ModelAgent(BaseModel):
                     raise ValueError(f"Error converting response to MessageDict: {e}")
             else:
                 raise ValueError(f"Invalid response type: {type(response)}")
-        
-        return MessageDict(
-            **response.model_dump(),
-            role=RoleTypes.ASSISTANT,
-            content=response.content if response.content else "Using tools" if response.references.tool_calls else "No response from API",
-            generated_by=MessageGenerators.LLM,
-            type=ContentType.TEXT,
-            assistant_name=self.name,
-        )
+        message_dict = response.model_dump()
+        message_dict.update({
+            'role': RoleTypes.ASSISTANT,
+            'content': response.content if response.content else "Using tools" if response.references.tool_calls else "No response from API",
+            'generated_by': MessageGenerators.LLM,
+            'type': ContentType.TEXT,
+            'assistant_name': self.name,
+        })
+        return MessageDict(**message_dict)
     
     async def generate_vision_response(self, api_manager: APIManager, file_references: List[FileReference], prompt: str) -> MessageDict:
         """

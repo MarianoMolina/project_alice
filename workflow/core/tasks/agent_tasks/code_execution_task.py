@@ -4,8 +4,8 @@ from workflow.util import LOGGER, get_traceback, Language
 from workflow.core.data_structures import (
     MessageDict, ApiType, References, NodeResponse, TasksEndCodeRouting
 )
-from workflow.core.tasks.agent_tasks.prompt_agent_task import PromptAgentTask
-from workflow.core.agent.agent import AliceAgent
+from workflow.core.tasks.agent_tasks.prompt_agent_task import PromptAgentTask, LLMExitCode
+from workflow.core.agent import AliceAgent
 
 class CodeExecutionLLMTask(PromptAgentTask):
     """

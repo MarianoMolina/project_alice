@@ -6,8 +6,9 @@ from workflow.core.data_structures import (
     MessageDict, References, NodeResponse, FunctionParameters, ParameterDefinition, ToolFunction, ApiType, TasksEndCodeRouting, Prompt, ContentType, RoleTypes, MessageGenerators
 )
 from workflow.util import json_to_python_type_mapping, get_traceback
-from workflow.core.agent.agent import AliceAgent
+from workflow.core.agent import AliceAgent
 from workflow.core.tasks.task import AliceTask
+from workflow.core.tasks.task_utils import validate_and_process_function_inputs
 
 from enum import IntEnum
 
@@ -154,55 +155,27 @@ class PromptAgentTask(AliceTask):
                 template = Prompt(**template)
             except Exception as e:
                 raise ValueError(f"Template {self.task_name} is not a valid prompt configuration: {e}")
-        sanitized_inputs = self.update_inputs(**kwargs)
+        execution_history: List[NodeResponse] = kwargs.get("execution_history", [])
+        sanitized_inputs = self.update_inputs(template, execution_history, **kwargs)
         input_string = template.format_prompt(**sanitized_inputs)
         LOGGER.info(f"Input string for task {self.task_name}: {input_string}")
-        msg_list = [MessageDict(content=input_string, role=RoleTypes.USER, generated_by=MessageGenerators.USER, step=self.task_name)]
-        
-        # Add messages from history
-        execution_history: List[NodeResponse] = kwargs.get("execution_history", [])
-        for node in execution_history:
-            if isinstance(node, NodeResponse) and node.parent_task_id == self.id and node.references and node.references.messages:
-                msg_list.extend(node.references.messages)
+        msg_list = [MessageDict(content=input_string, role=RoleTypes.USER, generated_by=MessageGenerators.USER, step=self.task_name)]        
         return msg_list
 
-    def update_inputs(self, **kwargs) -> Dict[str, Any]:
+    def update_inputs(self, template: Prompt, execution_history: List[NodeResponse], **kwargs) -> Dict[str, Any]:
         """
-        TODO: Review if this is necessary, Task already does input validation
+        TODO: Review if this is necessary
         Validates and sanitizes the input parameters based on the defined input_variables.
         """
-        sanitized_input = {}
-        # Validate and sanitize required parameters
-        for param in self.input_variables.required:
-            if param not in kwargs:
-                raise ValueError(f"Missing required parameter: {param}")
-            value = kwargs[param]
-            param_type = self.input_variables.properties[param].type
-            python_type = json_to_python_type_mapping(param_type)
-            if not python_type:
-                raise ValueError(f"Invalid parameter type: {param_type}")
-            if not isinstance(value, python_type):
-                raise TypeError(f"Parameter '{param}' should be of type {param_type}")
-            sanitized_input[param] = value
-        
-        # Validate and sanitize optional parameters
-        for param, definition in self.input_variables.properties.items():
-            if param not in sanitized_input:
-                value = kwargs.get(param, definition.default)
-                if value is not None:
-                    param_type = definition.type
-                    python_type = json_to_python_type_mapping(param_type)
-                    if not python_type:
-                        raise ValueError(f"Invalid parameter type: {param_type}")
-                    if not isinstance(value, python_type):
-                        raise TypeError(f"Parameter '{param}' should be of type {param_type}")
-                sanitized_input[param] = value
-        
-        return sanitized_input
+        return validate_and_process_function_inputs(
+            params=template.parameters,
+            execution_history=execution_history,
+            kwargs=kwargs
+        )
     
     async def execute_llm_generation(self, execution_history: List[NodeResponse], node_responses: List[NodeResponse], **kwargs) -> NodeResponse:
         api_manager: APIManager = kwargs.get("api_manager")
-        messages = self.create_message_list(**kwargs)
+        messages = self.create_message_list(execution_history=execution_history, **kwargs)
         tools_list = self.tool_list(api_manager)
         
         try:
@@ -269,7 +242,7 @@ class PromptAgentTask(AliceTask):
         messages: List[MessageDict] = []
         LOGGER.info(f"Executing code execution for task {self.task_name} with include_prompt_in_execution: {include_prompt_in_execution}")
         if include_prompt_in_execution:
-            prompt_messages = self.create_message_list(**kwargs)
+            prompt_messages = self.create_message_list(execution_history=execution_history, **kwargs)
             messages.extend(prompt_messages)
         llm_reference = self.get_node_reference(node_responses, "llm_generation")
 
@@ -317,7 +290,7 @@ class PromptAgentTask(AliceTask):
             return self._get_available_exit_code(LLMExitCode.FAILURE, "llm_generation")
 
         has_tool_calls = bool(message.references.tool_calls)
-        has_code = bool(self.agent.collect_code_blocs([message]))
+        has_code = bool(self.agent.collect_code_blocks([message]))
 
         # Check agent capabilities
         if has_tool_calls and not self.agent.has_tools:

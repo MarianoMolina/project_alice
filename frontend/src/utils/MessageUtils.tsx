@@ -1,4 +1,4 @@
-import { AudioFile, Chat, Computer, Groups, Image, InsertDriveFile, TaskAlt, VideoFile } from "@mui/icons-material";
+import { AudioFile, Chat, Groups, Image, InsertDriveFile, TaskAlt, VideoFile } from "@mui/icons-material";
 import { FileType } from "../types/FileTypes";
 import { ContentType } from "../types/MessageTypes";
 

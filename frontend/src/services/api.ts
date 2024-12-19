@@ -1,7 +1,7 @@
 import { dbAxiosInstance, dbAxiosInstanceLMS, taskAxiosInstance } from './axiosInstance';
 import { AliceChat, convertToAliceChat, convertToPopulatedAliceChat, PopulatedAliceChat } from '../types/ChatTypes';
 import { getDefaultMessageForm, MessageType, PopulatedMessage } from '../types/MessageTypes';
-import { PopulatedTaskResponse, TaskResponse, convertToPopulatedTaskResponse, convertToTaskResponse } from '../types/TaskResponseTypes';
+import { TaskResponse, convertToTaskResponse } from '../types/TaskResponseTypes';
 import { CollectionName, CollectionPopulatedType, CollectionType } from '../types/CollectionTypes';
 import { FileReference, FileContentReference, PopulatedFileReference } from '../types/FileTypes';
 import { createFileContentReference } from '../utils/FileUtils';

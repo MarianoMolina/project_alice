@@ -129,7 +129,15 @@ services:
     image: mybash:latest
     command: ["bash"]
 
+  javascript_image:
+    build:
+      context: .
+      dockerfile: workflow/Dockerfile.javascript
+    image: myjs:latest
+    command: ["bash"]
+
 volumes:
+  mongo_data:
   logs:
     driver: local
     driver_opts:
@@ -142,7 +150,6 @@ volumes:
       type: none
       o: bind
       device: ${COMPOSE_PROJECT_DIR}/shared-uploads
-  mongo_data:
   model_cache:
     driver: local
     driver_opts:

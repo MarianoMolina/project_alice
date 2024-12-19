@@ -137,6 +137,13 @@ services:
     image: mybash:latest
     command: ["bash"]
 
+  javascript_image:
+    build:
+      context: .
+      dockerfile: workflow/Dockerfile.javascript
+    image: myjs:latest
+    command: ["bash"]
+
 volumes:
   logs:
     driver: local
