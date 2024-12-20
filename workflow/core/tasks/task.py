@@ -439,15 +439,6 @@ class AliceTask(BaseDataStructure):
 
             # Execute nodes
             while current_node:
-                # # Check attempt limits
-                # if not self.can_retry_node(current_node, execution_history):
-                #     return self.create_final_response(
-                #         node_responses,
-                #         exit_code=1,
-                #         diagnostics=f"Maximum attempts reached for node {current_node}",
-                #         **kwargs
-                #     ) 
-                
                 # Execute current node
                 node_response = await self.execute_node(
                     current_node,
@@ -467,8 +458,12 @@ class AliceTask(BaseDataStructure):
                 node_responses.append(node_response)
                 
                 # Get next node
-                current_node = self.get_next_node(current_node, execution_history)
-            
+                next_node, is_retry = self.get_next_node(node_response)
+                if is_retry:
+                    if not self.can_retry_node(next_node, execution_history):
+                        LOGGER.warning(f"Cannot retry node {next_node}")
+                        break
+                current_node = next_node
             return self.create_final_response(node_responses, execution_history=execution_history, **kwargs)
             
         except Exception as e:
@@ -699,41 +694,25 @@ class AliceTask(BaseDataStructure):
             
         return True
 
-    def get_next_node(self, current_node: str, execution_history: List[NodeResponse]) -> Optional[str]:
+    def get_next_node(self, current_node: NodeResponse) -> Optional[Tuple[str, bool]]:
         """
         Determine the next node to execute based on the routing configuration,
         and attempt limits.
         """
-
-        # Fall back to standard routing logic
-        if current_node not in self.node_end_code_routing:
+        if not current_node:
             return None
-            
-        last_node = next(
-            (node for node in reversed(execution_history)
-             if node.parent_task_id == self.id and node.node_name == current_node),
-            None
-        )
-        if not last_node:
-            return None
-            
-        routing = self.node_end_code_routing[current_node]
-        next_node, is_retry = routing.get(last_node.exit_code, (None, False))
         
-        if next_node and is_retry:
-            if not self.can_retry_node(current_node, execution_history):
-                LOGGER.warning(f"Cannot retry node {current_node}")
-                return None
-        # elif next_node:
-        #     if not self.can_retry_node(next_node, execution_history):
-        #         LOGGER.warning(f"Cannot proceed to node {next_node} - max attempts reached")
-        #         return None
-                
-        return next_node
+        if current_node.node_name not in self.node_end_code_routing:
+            return None
+            
+        routing = self.node_end_code_routing[current_node.node_name]
+        next_node, is_retry = routing.get(current_node.exit_code, (None, False))
+        return next_node, is_retry
     
     def determine_next_node(self, execution_history: List[NodeResponse]) -> Optional[str]:
         """
-        Determines the next node to execute based on execution history.
+        Determines the next node to execute based on execution history. It ignores retry logic: it will
+        return the next node even if the current node is marked as a retry.
         
         If there's a previous node from this task in the history, determines next node
         based on its exit code and routing rules. Otherwise, returns the start node
@@ -763,7 +742,7 @@ class AliceTask(BaseDataStructure):
                         return checkpoint.task_next_obj.get(selected_option)
             
             # Otherwise use standard routing logic
-            return self.get_next_node(last_task_node.node_name, execution_history)
+            return self.get_next_node(last_task_node)[0]
         
         # If no previous nodes from this task, return start node or first available
         return self.start_node or next(iter(self.node_end_code_routing.keys()))

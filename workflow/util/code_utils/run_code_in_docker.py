@@ -14,7 +14,7 @@ class DockerCodeRunner(BaseModel):
     Handles code execution in Docker containers with optional setup commands.
     Maintains a simple interface while providing reliable code execution capabilities.
     """
-    timeout: int = Field(default=120, description="Timeout in seconds for code execution")
+    timeout: int = Field(default=60, description="Timeout in seconds for code execution")
     retries: int = Field(default=1, description="Number of retry attempts")
     log_level: str = Field(default='debug', description="Logging verbosity")
     images: Dict[str, str] = Field(
@@ -127,7 +127,7 @@ class DockerCodeRunner(BaseModel):
                 LOGGER.warning(f"Attempt {attempt + 1} failed: {str(e)}")
                 errors.append(str(e))
                 continue
-        return f"{attempt + 1} attempts failed: {str('\n'.join(errors))}", 1
+        return "{} attempts failed: {}".format(attempt + 1, '\n'.join(errors)), 1    
     
 class ContainerLogCollector:
     def __init__(self, container, max_size: int = 10000):

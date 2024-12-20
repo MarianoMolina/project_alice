@@ -305,13 +305,14 @@ coding_workflow_module = CodingWorkflowModule(
                     "Generate_Code": {
                         0: ("Generate_Unit_Tests", False),
                         1: ("Generate_Code", True),
-                        2: ("Generate_Unit_Tests", True),
-                        3: (None, True),
+                        2: ("Generate_Code", True),
+                        3: ("Generate_Code", True),
                     },
                     "Generate_Unit_Tests": {
                         0: ("Check_Unit_Test_Results", False),
                         1: ("Generate_Unit_Tests", True),
-                        2: ("Generate_Unit_Tests", True),
+                        2: ("Check_Unit_Test_Results", True),
+                        3: ("Generate_Unit_Tests", True)
                     },
                     "Check_Unit_Test_Results": {
                         0: (None, False),
@@ -353,14 +354,14 @@ coding_workflow_module = CodingWorkflowModule(
                     "Generate_Code": {
                         0: ("Generate_Unit_Tests", False),
                         1: ("Generate_Code", True),
-                        2: ("Generate_Unit_Tests", True),
-                        3: (None, True),
+                        2: ("Generate_Code", True),
+                        3: ("Generate_Code", True),
                     },
                     "Generate_Unit_Tests": {
                         0: ("Check_Unit_Test_Results", False),
                         1: ("Generate_Unit_Tests", True),
                         2: ("Check_Unit_Test_Results", True),
-                        3: (None, True)
+                        3: ("Generate_Unit_Tests", True)
                     },
                     "Check_Unit_Test_Results": {
                         0: (None, False),

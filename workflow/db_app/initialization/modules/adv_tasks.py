@@ -308,7 +308,7 @@ adv_tasks_module = AdvTasksModule(
                 "task_type": "RetrievalTask",
                 "task_name": "Update_Data_Cluster",
                 "agent": "oai_agent",
-                "task_description": "Ensures all the references in its data cluster have embeddings available. If Update All is set to True, it updates all the embeddings, otherwise only the missing ones.",
+                "task_description": "Ensures all the references in its data cluster have embeddings available. If Update All is set to True, it updates all the embeddings, otherwise only the missing ones. If you change the embedding model, run with update all to update all the embeddings.",
                 "input_variables": {
                     "type": "object",
                     "properties": {

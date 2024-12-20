@@ -30,7 +30,12 @@ class CodeExecution(Embeddable):
     code_output: Optional[CodeOutput] = Field(None, description="The output of the code execution")
 
     def __str__(self) -> str:
-        return f"{self.code_block}\n{self.code_output}" if self.code_output else str(self.code_block)
+        str_start = f"Language: {self.code_block.language}\n"
+        if self.code_block.setup_commands:
+            str_start += f"Setup Commands:\n{self.code_block.setup_commands}\n"
+        if self.code_output:
+            return f"{str_start}Output:\n{self.code_output}"
+        return str_start
 
 def _is_setup_command(code: str, target_language: Language) -> bool:
     """Check if a bash code block contains setup commands for a target language"""

@@ -75,38 +75,38 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
         }
     }, [item, handleDelete]);
 
-    const handleOpenDialog = () => {
-        openDialog({
-            title: 'Confirm File Upload',
-            content: `Are you sure you want to upload ${selectedFile?.name}?`,
-            buttons: [
-                {
-                    text: 'Cancel',
-                    action: () => addNotification('File upload cancelled', 'info'),
-                    color: 'error',
-                    variant: 'contained',
-                },
-                {
-                    text: 'Upload',
-                    action: handleUploadConfirm,
-                    color: 'primary',
-                    variant: 'contained',
-                }
-            ],
-        });
-    }
-
     const handleFileUpdate = (updatedFile: Partial<FileContentReference> | Partial<FileReference>) => {
         if (updatedFile) {
             setForm(updatedFile as PopulatedFileReference);
         }
     };
+
     useEffect(() => {
-        if (selectedFile) {
-          handleOpenDialog();
+        const handleOpenDialog = () => {
+            openDialog({
+                title: 'Confirm File Upload',
+                content: `Are you sure you want to upload ${selectedFile?.name}?`,
+                buttons: [
+                    {
+                        text: 'Cancel',
+                        action: () => addNotification('File upload cancelled', 'info'),
+                        color: 'error',
+                        variant: 'contained',
+                    },
+                    {
+                        text: 'Upload',
+                        action: handleUploadConfirm,
+                        color: 'primary',
+                        variant: 'contained',
+                    }
+                ],
+            });
         }
-      }, [selectedFile]);
-      
+        if (selectedFile) {
+            handleOpenDialog();
+        }
+    }, [selectedFile]);
+
     const handleFileSelect = async () => {
         try {
             const allowedTypes: FileType[] = [FileType.IMAGE, FileType.AUDIO, FileType.VIDEO, FileType.FILE];

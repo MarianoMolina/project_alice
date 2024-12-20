@@ -155,7 +155,7 @@ class PromptAgentTask(AliceTask):
                 template = Prompt(**template)
             except Exception as e:
                 raise ValueError(f"Template {self.task_name} is not a valid prompt configuration: {e}")
-        execution_history: List[NodeResponse] = kwargs.get("execution_history", [])
+        execution_history: List[NodeResponse] = kwargs.pop("execution_history", [])
         sanitized_inputs = self.update_inputs(template, execution_history, **kwargs)
         input_string = template.format_prompt(**sanitized_inputs)
         LOGGER.info(f"Input string for task {self.task_name}: {input_string}")

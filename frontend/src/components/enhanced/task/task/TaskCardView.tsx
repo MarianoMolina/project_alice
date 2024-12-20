@@ -7,7 +7,7 @@ import {
     Tooltip,
     IconButton,
 } from '@mui/material';
-import { Category, Description, Functions, Person, ApiRounded, Settings, Logout, ExitToApp, AttachFile, Api } from '@mui/icons-material';
+import { Category, Description, Functions, Person, ApiRounded, Settings, Logout, ExitToApp, AttachFile, Api, QueryBuilder, Replay } from '@mui/icons-material';
 import { PopulatedTask, TaskComponentProps, taskDescriptions } from '../../../../types/TaskTypes';
 import useStyles from '../TaskStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
@@ -166,6 +166,21 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
                 <TaskFlowchart task={item as PopulatedTask} height={500} minWidth={500} />
                 : "No exit code routing defined"
         },
+        {
+            icon: <Replay />,
+            primary_text: "Recursive",
+            secondary_text: item.max_attempts || "N/A"
+        },
+        {
+            icon: <Replay />,
+            primary_text: "Max attempts",
+            secondary_text: item.max_attempts || "N/A"
+        },
+        {
+            icon: <QueryBuilder />,
+            primary_text: "Created At",
+            secondary_text: new Date(item.createdAt || '').toLocaleString()
+        }
     ];
 
     return (

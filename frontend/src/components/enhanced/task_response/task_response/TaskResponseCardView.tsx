@@ -143,7 +143,7 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             primary_text: "Output",
             secondary_text: (
                 <AccordionSection
-                    title="Node Outputs"
+                    title="Output Nodes"
                     content={
                         populatedItem.node_references ? <TaskResponseViewer item={item} items={null} onChange={() => null} mode={'view'} handleSave={async () => { }} /> : <Typography>No output content available</Typography>
                     }
