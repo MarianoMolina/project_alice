@@ -45,7 +45,6 @@ The backend relies on several environment variables. Ensure these are set in you
 
 - `MONGODB_URI`: MongoDB connection string
 - `JWT_SECRET`: Secret key for JWT token generation
-- `LM_STUDIO_DEFAULT_PRESET`: Default preset for LM Studio models
 
 ## Adding New Task Types
 

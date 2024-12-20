@@ -19,7 +19,7 @@ interface TabConfig<T> {
   group?: string;
 }
 
-interface VerticalMenuSidebarProps<T extends string> {
+export interface VerticalMenuSidebarProps<T extends string> {
   actions?: ActionConfig[];
   tabs: TabConfig<T>[];
   activeTab: T;
@@ -27,9 +27,13 @@ interface VerticalMenuSidebarProps<T extends string> {
   renderContent?: (tabName: T) => React.ReactNode;
   expandedWidth: number;
   collapsedWidth: number;
+  // New props for controlled expansion
+  expanded?: boolean;
+  onExpandedChange?: (expanded: boolean) => void;
+  defaultExpanded?: boolean;
 }
 
-// Memoized action button component
+// Existing components remain the same...
 const ActionButton = memo(({ action }: { action: ActionConfig }) => (
   <Tooltip title={formatCamelCaseString(action.name)} placement="right">
     <span>
@@ -44,7 +48,6 @@ const ActionButton = memo(({ action }: { action: ActionConfig }) => (
   </Tooltip>
 ));
 
-// Memoized actions section component
 const ActionsSection = memo(({ actions }: { actions: ActionConfig[] }) => {
   const classes = useStyles();
   
@@ -57,7 +60,6 @@ const ActionsSection = memo(({ actions }: { actions: ActionConfig[] }) => {
   );
 });
 
-// Memoized tab button component with generic type
 function TabButtonComponent<T extends string>({ 
   tab, 
   isActive, 
@@ -83,7 +85,6 @@ function TabButtonComponent<T extends string>({
 }
 const TabButton = memo(TabButtonComponent) as typeof TabButtonComponent;
 
-// Memoized tab group component with generic type
 function TabGroupComponent<T extends string>({ 
   groupName, 
   groupTabs, 
@@ -119,7 +120,6 @@ function TabGroupComponent<T extends string>({
 }
 const TabGroup = memo(TabGroupComponent) as typeof TabGroupComponent;
 
-// Memoized expand/collapse button
 const ExpandButton = memo(({ 
   isExpanded, 
   onToggle 
@@ -148,20 +148,39 @@ function VerticalMenuSidebar<T extends string>({
   renderContent,
   expandedWidth,
   collapsedWidth,
+  // New controlled props with defaults
+  expanded,
+  onExpandedChange,
+  defaultExpanded = true,
 }: VerticalMenuSidebarProps<T>): React.ReactElement {
   const classes = useStyles();
-  const [isExpanded, setIsExpanded] = useState(true);
+  
+  // Internal state for uncontrolled mode
+  const [internalExpanded, setInternalExpanded] = useState(defaultExpanded);
+  
+  // Determine if we're in controlled mode
+  const isControlled = expanded !== undefined;
+  const isExpanded = isControlled ? expanded : internalExpanded;
 
   const handleTabChange = useCallback((tabName: T) => {
     onTabChange(tabName);
     if (renderContent) {
-      setIsExpanded(true);
+      if (isControlled && onExpandedChange) {
+        onExpandedChange(true);
+      } else {
+        setInternalExpanded(true);
+      }
     }
-  }, [onTabChange, renderContent]);
+  }, [onTabChange, renderContent, isControlled, onExpandedChange]);
 
   const handleExpandToggle = useCallback(() => {
-    setIsExpanded(prev => !prev);
-  }, []);
+    const newValue = !isExpanded;
+    if (isControlled && onExpandedChange) {
+      onExpandedChange(newValue);
+    } else {
+      setInternalExpanded(newValue);
+    }
+  }, [isExpanded, isControlled, onExpandedChange]);
 
   const groupedTabs = useMemo(() => {
     return tabs.reduce((acc, tab) => {

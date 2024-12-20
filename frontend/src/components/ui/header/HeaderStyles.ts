@@ -11,6 +11,9 @@ const useStyles = makeStyles((theme: Theme) => ({
   toolbar: {
     display: 'flex',
     justifyContent: 'space-between',
+    [theme.breakpoints.down('lg')]: {
+      padding: theme.spacing(0, 1),
+    },
   },
   leftSection: {
     flex: 1,
@@ -21,7 +24,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     flex: 2,
     display: 'flex',
     justifyContent: 'center',
-    gap: theme.spacing(3), 
+    gap: theme.spacing(3),
+    [theme.breakpoints.down('lg')]: {
+      display: 'none',
+    },
   },
   rightSection: {
     flex: 1,
@@ -31,6 +37,9 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   userEmail: {
     marginRight: theme.spacing(2),
+    [theme.breakpoints.down('md')]: {
+      display: 'none',
+    },
   },
   activeButton: {
     '&.MuiIconButton-root': {
@@ -65,6 +74,31 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: hexToRgba(theme.palette.info.light, 0.1),
     '&:hover': {
       backgroundColor: hexToRgba(theme.palette.info.light, 0.15),
+    },
+  },
+  drawer: {
+    width: 280,
+    [theme.breakpoints.down('sm')]: {
+      width: '100%',
+    },
+  },
+  drawerHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: theme.spacing(2),
+    '& .MuiIconButton-root': {
+      marginLeft: theme.spacing(1),
+    },
+  },
+  mobileMenuList: {
+    width: '100%',
+    padding: theme.spacing(2, 0),
+    '& .MuiListItem-root': {
+      padding: theme.spacing(1, 3),
+    },
+    '& .MuiListItemIcon-root': {
+      minWidth: 40,
     },
   },
 }));

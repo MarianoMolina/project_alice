@@ -8,6 +8,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     height: '100%',
     backgroundColor: hexToRgba(theme.palette.background.paper, 0.8),
     transition: 'width 0.3s ease',
+    maxWidth: '97%',
   },
   verticalMenu: {
     display: 'flex',

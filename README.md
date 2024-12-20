@@ -76,7 +76,7 @@ The project consists of three main components:
    - Windows: Run `run.bat`
    - Linux/Mac: Run `run.sh`
 
-Alternatively you can just execute run.py using `python run.py` in a commandline while in the repository folder
+Alternatively you can just execute run.py using `python run.py`/`python3 run.py` in a commandline while in the repository folder
 
 This will build and launch the containers. Once ready, the frontend will be accessible at `http://localhost:4000/`. 
 

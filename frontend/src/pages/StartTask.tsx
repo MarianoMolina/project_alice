@@ -18,41 +18,47 @@ import { RecentExecution, useTask } from '../contexts/TaskContext';
 import useStyles from '../styles/StartTaskStyles';
 
 interface MemoizedSidebarProps {
-  actions: Array<{
-    name: string;
-    icon: any;
-    action: () => void;
-  }>;
-  tabs: Array<{
-    name: CollectionElementString;
-    icon: any;
-    group: string;
-  }>;
-  activeTab: CollectionElementString;
-  onTabChange: (tab: CollectionElementString) => void;
-  renderContent: () => React.ReactNode;
-  expandedWidth: number;
-  collapsedWidth: number;
+    actions: Array<{
+        name: string;
+        icon: any;
+        action: () => void;
+    }>;
+    tabs: Array<{
+        name: CollectionElementString;
+        icon: any;
+        group: string;
+    }>;
+    activeTab: CollectionElementString;
+    onTabChange: (tab: CollectionElementString) => void;
+    renderContent: () => React.ReactNode;
+    expandedWidth: number;
+    collapsedWidth: number;
+    expanded: boolean;
+    onExpandedChange: (expanded: boolean) => void;
 }
 
 const MemoizedVerticalMenuSidebar = memo(({
-  actions,
-  tabs,
-  activeTab,
-  onTabChange,
-  renderContent,
-  expandedWidth,
-  collapsedWidth
+    actions,
+    tabs,
+    activeTab,
+    onTabChange,
+    renderContent,
+    expandedWidth,
+    collapsedWidth,
+    expanded, 
+    onExpandedChange,
 }: MemoizedSidebarProps) => (
-  <VerticalMenuSidebar
-    actions={actions}
-    tabs={tabs}
-    activeTab={activeTab}
-    onTabChange={onTabChange}
-    renderContent={renderContent}
-    expandedWidth={expandedWidth}
-    collapsedWidth={collapsedWidth}
-  />
+    <VerticalMenuSidebar
+        actions={actions}
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={onTabChange}
+        renderContent={renderContent}
+        expandedWidth={expandedWidth}
+        collapsedWidth={collapsedWidth}
+        expanded={expanded}
+        onExpandedChange={onExpandedChange}
+    />
 ));
 
 // Define prop types for memoized components
@@ -216,6 +222,7 @@ const StartTask: React.FC = () => {
     const [activeTab, setActiveTab] = useState<CollectionElementString>('Task');
     const [listKey, setListKey] = useState(0);
     const [selectedTaskType, setSelectedTaskType] = useState<string>('');
+    const [isExpanded, setIsExpanded] = useState(true);
 
     const executeTask = useCallback(async () => {
         await handleExecuteTask();
@@ -256,6 +263,7 @@ const StartTask: React.FC = () => {
     const handleTabWhenTaskSelect = useCallback((task: AliceTask | PopulatedTask) => {
         if (task) {
             handleSelectTask(task);
+            setIsExpanded(false);
         }
     }, [handleSelectTask]);
 
@@ -331,6 +339,8 @@ const StartTask: React.FC = () => {
                 renderContent={renderSidebarContent}
                 expandedWidth={TASK_SIDEBAR_WIDTH}
                 collapsedWidth={SIDEBAR_COLLAPSED_WIDTH}
+                expanded={isExpanded}
+                onExpandedChange={setIsExpanded}
             />
             <Box className={classes.mainContainer}>
                 <Box className={classes.taskExecutionContainer}>
