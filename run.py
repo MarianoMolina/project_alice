@@ -421,17 +421,6 @@ class RunEnvironment:
         if not self.dir_manager.ensure_directories(self.required_dirs):
             self.logger.error("Failed to set up one or more required directories")
             sys.exit(1)
-    
-    def is_docker_running(self):
-        """Check if Docker daemon is running."""
-        try:
-            subprocess.run(["docker", "info"], 
-                         stdout=subprocess.DEVNULL, 
-                         stderr=subprocess.DEVNULL, 
-                         check=True)
-            return True
-        except subprocess.CalledProcessError:
-            return False
 
     def start_docker(self):
         """Start Docker based on platform."""
@@ -447,7 +436,75 @@ class RunEnvironment:
         except Exception as e:
             self.logger.error(f"Failed to start Docker: {e}")
             sys.exit(1)
+            
+    def handle_linux_specific(self):
+        """Handle Docker startup for Linux systems with proper error handling."""
+        try:
+            # First verify we can use sudo (this command should always work without password)
+            try:
+                subprocess.run(
+                    ["sudo", "-n", "true"],
+                    check=True,
+                    stderr=subprocess.DEVNULL
+                )
+            except subprocess.CalledProcessError:
+                self.logger.error("""
+    Sudo access required to manage Docker service.
+    Please ensure this script can run with sudo privileges.
+    You may need to configure NOPASSWD in sudoers or run the script with sudo.""")
+                sys.exit(1)
 
+            # Check if Docker service exists
+            service_check = subprocess.run(
+                ["sudo", "systemctl", "list-unit-files", "docker.service"],
+                capture_output=True,
+                text=True
+            )
+            
+            if "docker.service" not in service_check.stdout:
+                self.logger.error("Docker service not found. Please ensure Docker is installed.")
+                sys.exit(1)
+                
+            # Always use sudo to check and manage Docker
+            status = subprocess.run(
+                ["sudo", "systemctl", "is-active", "docker"],
+                capture_output=True,
+                text=True
+            )
+            
+            if status.stdout.strip() != "active":
+                self.logger.info("Docker service not running. Starting with sudo...")
+                try:
+                    subprocess.run(
+                        ["sudo", "systemctl", "start", "docker"],
+                        check=True,
+                        stderr=subprocess.PIPE
+                    )
+                    self.logger.info("Docker service started successfully")
+                    
+                    # Give the service a moment to fully initialize
+                    time.sleep(5)
+                    
+                except subprocess.CalledProcessError as e:
+                    self.logger.error("Failed to start Docker service even with sudo")
+                    sys.exit(1)
+                    
+                # Verify the service started successfully
+                verify_status = subprocess.run(
+                    ["sudo", "systemctl", "is-active", "docker"],
+                    capture_output=True,
+                    text=True
+                )
+                if verify_status.stdout.strip() != "active":
+                    raise RuntimeError("Failed to start Docker service")
+                    
+        except FileNotFoundError as e:
+            self.logger.error(f"Required system command not found: {e.filename}")
+            sys.exit(1)
+        except Exception as e:
+            self.logger.error(f"Unexpected error managing Docker service: {e}")
+            sys.exit(1)
+            
     def wait_for_docker(self, timeout=300):
         """Wait for Docker to be ready with timeout."""
         self.logger.info("Waiting for Docker to start...")
@@ -470,11 +527,22 @@ class RunEnvironment:
         print("\r" + " " * 70 + "\r", end='')  # Clear the line
         self.logger.info("Docker is ready!")
 
+    def is_docker_running(self):
+        """Check if Docker daemon is running."""
+        try:
+            subprocess.run(["sudo", "docker", "info"], 
+                        stdout=subprocess.DEVNULL, 
+                        stderr=subprocess.DEVNULL, 
+                        check=True)
+            return True
+        except subprocess.CalledProcessError:
+            return False
+
     def run_docker_compose(self):
         """Run docker-compose up with proper error handling."""
         self.logger.info("Starting Docker Compose...")
         try:
-            subprocess.run(["docker-compose", "up"], check=True)
+            subprocess.run(["sudo", "docker-compose", "up"], check=True)
         except subprocess.CalledProcessError as e:
             self.logger.error(f"Docker Compose failed: {e}")
             sys.exit(1)
@@ -483,13 +551,21 @@ class RunEnvironment:
         """Cleanup handler for graceful shutdown."""
         self.logger.info("=== Starting Cleanup ===")
         try:
-            subprocess.run(["docker-compose", "down"], check=True)
-            self.logger.info("Successfully shut down all services")
+            # Check if docker-compose exists before trying to use it
+            compose_check = subprocess.run(
+                ["which", "docker-compose"],
+                capture_output=True,
+                text=True
+            )
+            if compose_check.stdout.strip():
+                subprocess.run(["sudo", "docker-compose", "down"], check=True)
+                self.logger.info("Successfully shut down all services")
+            else:
+                self.logger.warning("docker-compose not found, skipping container cleanup")
         except subprocess.CalledProcessError as e:
             self.logger.error(f"Cleanup failed: {e}")
         self.logger.info("=== Cleanup Complete ===")
         sys.exit(0)
-
 if __name__ == "__main__":
     env = RunEnvironment()
     env.run()
