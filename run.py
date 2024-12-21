@@ -535,7 +535,7 @@ class RunEnvironment:
     def is_docker_running(self):
         """Check if Docker daemon is running."""
         try:
-            cmd = ["docker", "info"] if self.system == "Darwin" else ["sudo", "docker", "info"]
+            cmd = ["docker", "info"] if self.system in ["Darwin", "Windows"] else ["sudo", "docker", "info"]
             subprocess.run(cmd, 
                         stdout=subprocess.DEVNULL, 
                         stderr=subprocess.DEVNULL, 
@@ -549,7 +549,7 @@ class RunEnvironment:
         self.logger.info("Starting Docker Compose...")
         try:
             # Don't use sudo on macOS
-            if self.system == "Darwin":
+            if self.system == "Darwin" or self.system == "Windows":
                 cmd = ["docker-compose", "up"]
             else:
                 cmd = ["sudo", "docker-compose", "up"]
