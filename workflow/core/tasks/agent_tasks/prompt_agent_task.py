@@ -156,22 +156,13 @@ class PromptAgentTask(AliceTask):
             except Exception as e:
                 raise ValueError(f"Template {self.task_name} is not a valid prompt configuration: {e}")
         execution_history: List[NodeResponse] = kwargs.pop("execution_history", [])
-        sanitized_inputs = self.update_inputs(template, execution_history, **kwargs)
+        sanitized_inputs, error = validate_and_process_function_inputs(template.parameters, execution_history, kwargs=kwargs)
+        if error:
+            raise ValueError(f"Error processing template variables: {error}")
         input_string = template.format_prompt(**sanitized_inputs)
         LOGGER.info(f"Input string for task {self.task_name}: {input_string}")
         msg_list = [MessageDict(content=input_string, role=RoleTypes.USER, generated_by=MessageGenerators.USER, step=self.task_name)]        
         return msg_list
-
-    def update_inputs(self, template: Prompt, execution_history: List[NodeResponse], **kwargs) -> Dict[str, Any]:
-        """
-        TODO: Review if this is necessary
-        Validates and sanitizes the input parameters based on the defined input_variables.
-        """
-        return validate_and_process_function_inputs(
-            params=template.parameters,
-            execution_history=execution_history,
-            kwargs=kwargs
-        )
     
     async def execute_llm_generation(self, execution_history: List[NodeResponse], node_responses: List[NodeResponse], **kwargs) -> NodeResponse:
         api_manager: APIManager = kwargs.get("api_manager")

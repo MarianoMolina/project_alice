@@ -107,6 +107,7 @@ class API(BaseDataStructure):
             **model.config_obj.model_dump(),
             api_key=api_key,
             base_url=self.api_config.data.get("base_url"),
+            model_costs=model.model_costs,
             model=model.model_name if self.api_name != ApiName.LM_STUDIO else model.id,
         )
 

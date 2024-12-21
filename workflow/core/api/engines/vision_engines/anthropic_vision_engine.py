@@ -61,6 +61,7 @@ class AnthropicVisionEngine(VisionModelEngine):
                         "output_tokens": response.usage.output_tokens,
                     },
                     "finish_reason": response.stop_reason,
+                    "cost": self.calculate_cost(response.usage.input_tokens, response.usage.output_tokens, api_data),
                 }
             )
             return References(messages=[msg])

@@ -173,7 +173,7 @@ adv_tasks_module = AdvTasksModule(
                     "embeddings": "oai_embedding_large",
                     "img_gen": "Dall-E-3",
                     "tts": "tts-1",
-                    "chat": "GPT4-turbo",
+                    "chat": "GPT4o",
                     "stt": "Whisper_1"
                 },
                 "has_code_exec": 0,
@@ -215,7 +215,7 @@ adv_tasks_module = AdvTasksModule(
                 "models": {
                     "stt": "groq_stt_whisper",
                     "vision": "groq_llama_3_2_11b_vision",
-                    "chat": "llama-3.1-70b-versatile",
+                    "chat": "llama-3.3-70b-versatile",
                 },
                 "has_code_exec": 0,
                 "has_tools": 0,

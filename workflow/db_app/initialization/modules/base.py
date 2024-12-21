@@ -33,22 +33,17 @@ base_module = BaseModule(
             {
                 "key": "GPT4o",
                 "short_name": "GPT4o",
-                "model_name": "chatgpt-4o-latest",
+                "model_name": "gpt-4o",
                 "model_type": "chat",
                 "api_name": "openai",
                 "config_obj": {
                     "ctx_size": 128000,
                 },
-            },
-            {
-                "key": "GPT4-turbo",
-                "short_name": "GPT4-turbo",
-                "model_name": "gpt-4-turbo",
-                "model_type": "chat",
-                "api_name": "openai",
-                "config_obj": {
-                    "ctx_size": 128000,
-                },
+                "model_costs": {
+                    "input_token_cost_per_million": 2.5,
+                    "cached_input_token_cost_per_million": 1.5,
+                    "output_token_cost_per_million": 10,
+                }
             },
             {
                 "key": "gpt-4o-mini",
@@ -59,6 +54,11 @@ base_module = BaseModule(
                 "config_obj": {
                     "ctx_size": 128000,
                 },
+                "model_costs": {
+                    "input_token_cost_per_million": 0.15,
+                    "cached_input_token_cost_per_million": 0.075,
+                    "output_token_cost_per_million": 0.6,
+                }
             },
             {
                 "key": "Claude3.5",
@@ -69,6 +69,11 @@ base_module = BaseModule(
                 "config_obj": {
                     "ctx_size": 200000,
                 },
+                "model_costs": {
+                    "input_token_cost_per_million": 3,
+                    "cached_input_token_cost_per_million": 3,
+                    "output_token_cost_per_million": 15,
+                }
             },
             {
                 "key": "Claude3.5_v",
@@ -79,6 +84,11 @@ base_module = BaseModule(
                 "config_obj": {
                     "ctx_size": 200000,
                 },
+                "model_costs": {
+                    "input_token_cost_per_million": 3,
+                    "cached_input_token_cost_per_million": 3,
+                    "output_token_cost_per_million": 15,
+                }
             },
             {
                 "key": "Yi_Coder_9B",
@@ -123,6 +133,9 @@ base_module = BaseModule(
                 "config_obj": {
                     "ctx_size": 2048,
                 },
+                "model_costs": {
+                    "cost_per_unit": 0.0006,
+                }
             },
             {
                 "key": "Dall-E-3",
@@ -133,6 +146,9 @@ base_module = BaseModule(
                 "config_obj": {
                     "ctx_size": 4096,
                 },
+                "model_costs": {
+                    "cost_per_unit": 0.80,
+                }
             },
             {
                 "key": "tts-1",
@@ -143,6 +159,9 @@ base_module = BaseModule(
                 },
                 "model_type": "tts",
                 "api_name": "openai",
+                "model_costs": {
+                    "cost_per_unit": 0.000015,
+                }
             },
             {
                 "key": "tts-1-hd",
@@ -153,6 +172,9 @@ base_module = BaseModule(
                 },
                 "model_type": "tts",
                 "api_name": "openai",
+                "model_costs": {
+                    "cost_per_unit": 0.00003,
+                }
             },
             {
                 "key": "oai_embedding_large",
@@ -163,6 +185,9 @@ base_module = BaseModule(
                 "config_obj": {
                     "ctx_size": 8191,
                 },
+                "model_costs": {
+                    "input_token_cost_per_million": 0.13,
+                }
             },
             {
                 "key": "o1_openai",
@@ -172,7 +197,12 @@ base_module = BaseModule(
                     "ctx_size": 128000,
                 },
                 "model_type": "chat",
-                "api_name": "openai"
+                "api_name": "openai",
+                "model_costs": {
+                    "input_token_cost_per_million": 15,
+                    "cached_input_token_cost_per_million": 7.5,
+                    "output_token_cost_per_million": 60,
+                }
             },
             {
                 "key": "mistral_small",
@@ -183,6 +213,11 @@ base_module = BaseModule(
                 },
                 "model_type": "chat",
                 "api_name": "mistral",
+                "model_costs": {
+                    "input_token_cost_per_million": 0.2,
+                    "cached_input_token_cost_per_million": 0.2,
+                    "output_token_cost_per_million": 0.6,
+                }
             },
             {
                 "key": "gemini_1.5_flash",
@@ -193,6 +228,11 @@ base_module = BaseModule(
                 },
                 "model_type": "chat",
                 "api_name": "gemini",
+                "model_costs": {
+                    "input_token_cost_per_million": 0.0,
+                    "cached_input_token_cost_per_million": 0.0,
+                    "output_token_cost_per_million": 0.0,
+                }
             },
             {
                 "key": "gemini_1.5_flash_v",
@@ -203,6 +243,11 @@ base_module = BaseModule(
                 },
                 "model_type": "vision",
                 "api_name": "gemini",
+                "model_costs": {
+                    "input_token_cost_per_million": 0.0,
+                    "cached_input_token_cost_per_million": 0.0,
+                    "output_token_cost_per_million": 0.0,
+                }
             },
             {
                 "key": "gemini_1.5_flash_stt",
@@ -213,6 +258,12 @@ base_module = BaseModule(
                 },
                 "model_type": "stt",
                 "api_name": "gemini",
+                "model_costs": {
+                    "input_token_cost_per_million": 0.0,
+                    "cached_input_token_cost_per_million": 0.0,
+                    "output_token_cost_per_million": 0.0,
+                    "cost_per_unit": 0,
+                }
             },
             {
                 "key": "gemini_text_embedding",
@@ -223,6 +274,9 @@ base_module = BaseModule(
                 },
                 "model_type": "embeddings",
                 "api_name": "gemini",
+                "model_costs": {
+                    "cost_per_unit": 0,
+                }
             },
             {
                 "key": "gemini_img_gen_imagen_3",
@@ -254,6 +308,11 @@ base_module = BaseModule(
                 },
                 "model_type": "vision",
                 "api_name": "mistral",
+                "model_costs": {
+                    "input_token_cost_per_million": 2,
+                    "cached_input_token_cost_per_million": 2,
+                    "output_token_cost_per_million": 6,
+                }
             },
             {
                 "key": "mistral-embed",
@@ -264,6 +323,11 @@ base_module = BaseModule(
                 },
                 "model_type": "embeddings",
                 "api_name": "mistral",
+                "model_costs": {
+                    "input_token_cost_per_million": 0.1,
+                    "cached_input_token_cost_per_million": 0.0,
+                    "output_token_cost_per_million": 0.0,
+                }
             },
             {
                 "key": "command-r-plus",
@@ -274,16 +338,26 @@ base_module = BaseModule(
                 },
                 "model_type": "chat",
                 "api_name": "cohere",
+                "model_costs": {
+                    "input_token_cost_per_million": 2.5,
+                    "cached_input_token_cost_per_million": 2.5,
+                    "output_token_cost_per_million": 10,
+                }
             },
             {
-                "key": "llama-3.1-70b-versatile",
-                "short_name": "Llama 3.1 70b",
-                "model_name": "llama-3.1-70b-versatile",
+                "key": "llama-3.3-70b-versatile",
+                "short_name": "Llama 3.3 70b",
+                "model_name": "llama-3.3-70b-versatile",
                 "config_obj": {
                     "ctx_size": 128000,
                 },
                 "model_type": "chat",
                 "api_name": "groq",
+                "model_costs": {
+                    "input_token_cost_per_million": 0.59,
+                    "cached_input_token_cost_per_million": 0.59,
+                    "output_token_cost_per_million": 0.79,
+                }
             },
             {
                 "key": "groq_stt_whisper",
@@ -295,6 +369,9 @@ base_module = BaseModule(
                 },
                 "model_type": "stt",
                 "api_name": "groq",
+                "model_costs": {
+                    "cost_per_unit": 0.000185,
+                }
             },
             {
                 "key": "groq_llama_3_2_11b_vision",
@@ -306,6 +383,11 @@ base_module = BaseModule(
                 },
                 "model_type": "vision",
                 "api_name": "groq",
+                "model_costs": {
+                    "input_token_cost_per_million": 0.18,
+                    "cached_input_token_cost_per_million": 0.18,
+                    "output_token_cost_per_million": 0.18,
+                }
             },
             {
                 "key": "bark_large",
@@ -743,7 +825,7 @@ base_module = BaseModule(
                 "name": "Groq API",
                 "api_config": "groq_api_config",
                 "is_active": True,
-                "default_model": "llama-3.1-70b-versatile",
+                "default_model": "llama-3.3-70b-versatile",
             },
             {
                 "key": "groq_vision",

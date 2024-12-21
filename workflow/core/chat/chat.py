@@ -273,7 +273,7 @@ class AliceChat(BaseDataStructure):
                 target_message.references.task_responses.extend(task_responses)
                 return target_message
             elif next_step == CheckpointType.CODE_EXECUTION:
-                code_blocks = self.alice_agent.collect_code_blocs([target_message])
+                code_blocks = self.alice_agent.collect_code_blocks([target_message])
                 if code_blocks:
                     code_executions: List[CodeExecution] = await self._handle_code_execution(
                         [target_message]
@@ -399,7 +399,7 @@ class AliceChat(BaseDataStructure):
     def _can_execute_code(self, message: MessageDict) -> Union[bool, UserInteraction]:
         """Check if code execution is allowed and return a pending interaction if needed."""
         
-        code_blocks = self.alice_agent.collect_code_blocs([message])
+        code_blocks = self.alice_agent.collect_code_blocks([message])
         if not code_blocks or not message.references or not message.references.code_executions or self.alice_agent.has_code_exec == 0: # Disabled
             return False
         if self.alice_agent.has_code_exec == 2:  # WITH_PERMISSION

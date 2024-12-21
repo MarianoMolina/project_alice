@@ -25,6 +25,24 @@ export enum MessageGenerators {
     SYSTEM = 'system'
 }
 
+export interface CostDict {
+    input_cost?: number;
+    output_cost?: number;
+    total_cost?: number;
+}
+export interface UsageDict {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    total_tokens?: number;
+}
+
+export interface MessageCreationMetadata {
+    model?: string;
+    usage?: UsageDict;
+    cost?: CostDict;
+    estimated_tokens?: number;
+}
+
 export interface MessageType extends Embeddable {
     role: RoleType;
     content: string;
@@ -32,7 +50,7 @@ export interface MessageType extends Embeddable {
     step?: string;
     assistant_name?: string;
     type?: ContentType;
-    creation_metadata?: Record<string, any>;
+    creation_metadata?: MessageCreationMetadata & Record<string, any>;
     references?: References;
 }
 

@@ -2,7 +2,9 @@ import axios from 'axios';
 import { getToken } from '../utils/AuthUtils';
 import Logger from '../utils/Logger';
 
-const HOST = process.env.BACKEND_PORT || 'localhost';
+export const HOST = process.env.HOST || 'localhost';
+
+Logger.info('HOST:', HOST);
 
 export const BACKEND_PORT = process.env.BACKEND_PORT || 3000;
 export const WORKFLOW_PORT = process.env.WORKFLOW_PORT || 8000;

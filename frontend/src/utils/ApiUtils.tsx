@@ -3,6 +3,7 @@ import { ApiType, ApiName, ModelApiType } from "../types/ApiTypes";
 import { AIIcon, AnthropicIcon, ArxivIcon, AzureIcon, BarkIcon, CohereIcon, GeminiIcon, GroqIcon, LlamaIcon, LMStudioIcon, 
   MistralIcon, OpenAiIcon, WikipediaIcon, WolframAlphaIcon } from "./CustomIcons";
 import { ModelType } from "../types/ModelTypes";
+import { HOST } from "../services/axiosInstance";
 
 // Base interfaces for API configurations
 interface BaseApiConfig {
@@ -140,11 +141,13 @@ export const API_CAPABILITIES: Record<ApiName, Set<ApiType>> = {
   ]),
 };
 
+
+
 export const API_BASE_URLS: Partial<Record<ApiName, string>> = {
   [ApiName.OPENAI]: 'https://api.openai.com/v1',
   [ApiName.AZURE]: 'https://YOUR_RESOURCE_NAME.openai.azure.com',
   [ApiName.ANTHROPIC]: 'https://api.anthropic.com',
-  [ApiName.LM_STUDIO]: 'http://localhost:1234/v1',
+  [ApiName.LM_STUDIO]: `http://${HOST}:1234/v1`,
   [ApiName.GEMINI]: 'https://api.gemini.ai',
   [ApiName.MISTRAL]: 'https://api.mistral.ai',
   [ApiName.LLAMA]: 'https://api.llama-api.com',

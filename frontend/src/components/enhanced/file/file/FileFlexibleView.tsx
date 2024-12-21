@@ -81,27 +81,27 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
         }
     };
 
+    const handleOpenDialog = () => {
+        openDialog({
+            title: 'Confirm File Upload',
+            content: `Are you sure you want to upload ${selectedFile?.name}?`,
+            buttons: [
+                {
+                    text: 'Cancel',
+                    action: () => addNotification('File upload cancelled', 'info'),
+                    color: 'error',
+                    variant: 'contained',
+                },
+                {
+                    text: 'Upload',
+                    action: handleUploadConfirm,
+                    color: 'primary',
+                    variant: 'contained',
+                }
+            ],
+        });
+    }
     useEffect(() => {
-        const handleOpenDialog = () => {
-            openDialog({
-                title: 'Confirm File Upload',
-                content: `Are you sure you want to upload ${selectedFile?.name}?`,
-                buttons: [
-                    {
-                        text: 'Cancel',
-                        action: () => addNotification('File upload cancelled', 'info'),
-                        color: 'error',
-                        variant: 'contained',
-                    },
-                    {
-                        text: 'Upload',
-                        action: handleUploadConfirm,
-                        color: 'primary',
-                        variant: 'contained',
-                    }
-                ],
-            });
-        }
         if (selectedFile) {
             handleOpenDialog();
         }

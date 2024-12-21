@@ -180,7 +180,7 @@ research_workflow_module = ResearchWorkflowModule(
                         1: ('llm_generation', True),
                     }, 
                 },
-                "max_attempts": 2,
+                "max_attempts": 1,
                 "recursive": True,
             },
             {
@@ -220,7 +220,7 @@ research_workflow_module = ResearchWorkflowModule(
                         1: ('tool_call_execution', True),
                     }, 
                 },
-                "max_attempts": 2,
+                "max_attempts": 1,
                 "recursive": True,
             },
             {
@@ -242,7 +242,7 @@ research_workflow_module = ResearchWorkflowModule(
                 "templates": {
                     "task_template": "research_check_task_prompt"
                 },
-                "max_attempts": 2,
+                "max_attempts": 1,
                 "recursive": True,
             },
             {
@@ -300,7 +300,7 @@ research_workflow_module = ResearchWorkflowModule(
                         1: ("Summarize_Research", True),
                     },
                 },
-                "max_attempts": 2,
+                "max_attempts": 3,
                 "recursive": True,
                 "input_variables": {
                     "type": "object",

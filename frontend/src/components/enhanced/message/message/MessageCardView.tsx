@@ -8,12 +8,12 @@ import { Person, AttachFile, TextSnippet, Engineering, PersonPin, DataObject, Qu
 import { MessageComponentProps, PopulatedMessage } from '../../../../types/MessageTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { hasAnyReferences, References } from '../../../../types/ReferenceTypes';
-import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import AliceMarkdown, { CustomBlockType } from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
 import ReferencesViewer from '../../data_cluster/ReferencesViewer';
 import { getMessageTypeIcon } from '../../../../utils/MessageUtils';
 import ContentStats from '../../../ui/markdown/ContentStats';
+import GenerationMetadataViewer from '../MetadataViewer';
 
 const MessageCardView: React.FC<MessageComponentProps> = ({
     item,
@@ -84,7 +84,8 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
         {
             icon: <Person />,
             primary_text: "Metadata",
-            secondary_text: populatedItem.creation_metadata ? <CodeBlock language="json" code={JSON.stringify(populatedItem.creation_metadata, null, 2)} /> : "N/A",
+            secondary_text: populatedItem.creation_metadata && Object.keys(populatedItem.creation_metadata).length > 0 ? 
+                <GenerationMetadataViewer metadata={populatedItem.creation_metadata} est_tokens={Math.round(item.content.length / 3)}/> : "N/A"
         },
         {
             icon: <QueryBuilder />,

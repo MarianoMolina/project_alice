@@ -44,7 +44,7 @@ class TestEnvironment(BaseModel):
     
     @staticmethod
     def print_summary(summary: Dict[str, Any], module_name: str):
-        LOGGER.info("==== Test Summary ====")
+        LOGGER.info("========= Test Summary =========")
         LOGGER.info(f'Module: {module_name}')
         LOGGER.info(f"Status: {summary['status'].upper()}")
         LOGGER.info(f"Total Tests: {summary['total_tests']}")

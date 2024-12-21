@@ -23,13 +23,14 @@ services:
       dockerfile: Dockerfile
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT_DOCKER}"
+    env_file:
+      - .env
     depends_on:
       mongo:
         condition: service_started
       volume-init:
         condition: service_completed_successfully
     volumes:
-      - ./.env:/app/.env
       - logs:/app/logs
       - shared-uploads:/app/shared-uploads
     environment:
@@ -76,7 +77,6 @@ services:
         condition: service_healthy
     environment:
       - PYTHONPATH=/app
-      - HOST=host.docker.internal
       - REDIS_URL=redis://redis:6379/0
     extra_hosts:
       - "host.docker.internal:host-gateway"

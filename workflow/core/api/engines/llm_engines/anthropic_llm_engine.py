@@ -205,8 +205,6 @@ class LLMAnthropic(LLMEngine):
                         tool_calls = []
                     tool_calls.append(self._process_tool_call(content))
 
-            cost = self.calculate_cost(response.usage.input_tokens, response.usage.output_tokens, response.model)
-
             msg = MessageDict(
                 role=RoleTypes.ASSISTANT,
                 content=message_text,
@@ -218,7 +216,7 @@ class LLMAnthropic(LLMEngine):
                     "usage": response.usage.model_dump(),
                     "finish_reason": response.stop_reason,
                     "system_fingerprint": response.id,
-                    "cost": cost,
+                    "cost": self.calculate_cost(response.usage.input_tokens, response.usage.output_tokens, api_data),
                     "estimated_tokens": estimated_tokens
                 }
             )
@@ -240,31 +238,3 @@ class LLMAnthropic(LLMEngine):
             List[ToolParam]: List of Anthropic-specific tool parameters.
         """
         return [(tool if isinstance(tool, ToolFunction) else ToolFunction(**tool)).convert_to_tool_params() for tool in tools]
-
-    def calculate_cost(self, input_tokens: int, output_tokens: int, model: str) -> float:
-        """
-        Calculate the cost of the API call based on Anthropic's pricing.
-
-        This method uses Anthropic-specific pricing information to calculate
-        the cost of the API call.
-
-        Args:
-            input_tokens (int): Number of tokens in the input.
-            output_tokens (int): Number of tokens in the output.
-            model (str): The Anthropic model used for the API call.
-
-        Returns:
-            float: The calculated cost of the API call.
-
-        Note:
-            If the model is not found in the pricing information, it returns 0.0
-            and logs a warning.
-        """
-        if model in ANTHROPIC_PRICING_1k:
-            input_cost_per_1k, output_cost_per_1k = ANTHROPIC_PRICING_1k[model]
-            input_cost = (input_tokens / 1000) * input_cost_per_1k
-            output_cost = (output_tokens / 1000) * output_cost_per_1k
-            return input_cost + output_cost
-        else:
-            LOGGER.warning(f"Cost calculation not available for model {model}")
-            return 0.0

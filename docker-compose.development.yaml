@@ -33,11 +33,12 @@ services:
         condition: service_started
       volume-init:
         condition: service_completed_successfully
+    env_file:
+      - .env
     volumes:
       - ./backend:/app
       - /app/node_modules
       - /app/dist
-      - ./.env:/app/.env
       - logs:/app/logs
       - shared-uploads:/app/shared-uploads
     environment:
@@ -45,7 +46,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${BACKEND_PORT_DOCKER}/api/health"]
+      test: ["CMD", "curl", "-f", "http://${HOST:-localhost}:${BACKEND_PORT_DOCKER}/api/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -74,12 +75,11 @@ services:
         condition: service_healthy
     environment:
       - PYTHONPATH=/app
-      - HOST=host.docker.internal
       - REDIS_URL=redis://redis:6379/0
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${WORKFLOW_PORT_DOCKER}/health"]
+      test: ["CMD", "curl", "-f", "http://${HOST:-localhost}:${WORKFLOW_PORT_DOCKER}/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -140,11 +140,12 @@ services:
   javascript_image:
     build:
       context: .
-      dockerfile: workflow/Dockerfile.javascript
+      dockerfile: workflow/Dockerfile.js
     image: myjs:latest
     command: ["bash"]
 
 volumes:
+  mongo_data:
   logs:
     driver: local
     driver_opts:
@@ -157,7 +158,6 @@ volumes:
       type: none
       o: bind
       device: ${COMPOSE_PROJECT_DIR}/shared-uploads
-  mongo_data:
   model_cache:
     driver: local
     driver_opts:

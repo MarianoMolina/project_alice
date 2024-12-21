@@ -50,7 +50,7 @@ export const siteSections: Record<string, SiteSection> = {
   structures: {
     id: 'structures',
     path: '/structures',
-    title: 'Create Structures',
+    title: 'Structures',
     description: 'Build or edit your prompts, agents, tasks, chats, and more',
     icon: Construction,
     navGroup: 2,
@@ -60,7 +60,7 @@ export const siteSections: Record<string, SiteSection> = {
   references: {
     id: 'references',
     path: '/references',
-    title: 'View References',
+    title: 'References',
     description: 'Access your saved references and resources',
     icon: LibraryBooksIcon,
     navGroup: 2,

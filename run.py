@@ -68,7 +68,7 @@ class THPHandler:
                 return result.returncode == 0 and "[madvise]" in result.stdout
             elif self.system == "Linux":
                 result = subprocess.run(
-                    ["cat", "/sys/kernel/mm/transparent_hugepage/enabled"],
+                    ["sudo", "cat", "/sys/kernel/mm/transparent_hugepage/enabled"],
                     capture_output=True,
                     text=True
                 )
@@ -126,8 +126,8 @@ class THPHandler:
                 
             elif self.system == "Linux":
                 commands = [
-                    ["sh", "-c", "echo madvise > /sys/kernel/mm/transparent_hugepage/enabled"],
-                    ["sh", "-c", "echo madvise > /sys/kernel/mm/transparent_hugepage/defrag"]
+                    ["sudo", "sh", "-c", "echo madvise > /sys/kernel/mm/transparent_hugepage/enabled"],
+                    ["sudo", "sh", "-c", "echo madvise > /sys/kernel/mm/transparent_hugepage/defrag"]
                 ]
                 for cmd in commands:
                     result = subprocess.run(cmd, capture_output=True, text=True)
@@ -518,19 +518,25 @@ class RunEnvironment:
                 self.logger.error("Docker failed to start within timeout period")
                 sys.exit(1)
                 
-            # Clear the previous line and write the new status
+            # For macOS, check Docker Desktop status
+            if self.system == "Darwin":
+                try:
+                    subprocess.run(["docker", "version"], 
+                            stdout=subprocess.DEVNULL, 
+                            stderr=subprocess.DEVNULL,
+                            check=True)
+                except subprocess.CalledProcessError:
+                    pass
+                    
             print(f"\rDocker is not ready yet. Waiting... [{iteration}/{max_iterations}]", end='', flush=True)
             iteration += 1
             time.sleep(check_interval)
-        
-        # Clear the waiting message and show ready message on new line
-        print("\r" + " " * 70 + "\r", end='')  # Clear the line
-        self.logger.info("Docker is ready!")
-
+            
     def is_docker_running(self):
         """Check if Docker daemon is running."""
         try:
-            subprocess.run(["sudo", "docker", "info"], 
+            cmd = ["docker", "info"] if self.system == "Darwin" else ["sudo", "docker", "info"]
+            subprocess.run(cmd, 
                         stdout=subprocess.DEVNULL, 
                         stderr=subprocess.DEVNULL, 
                         check=True)
@@ -542,7 +548,13 @@ class RunEnvironment:
         """Run docker-compose up with proper error handling."""
         self.logger.info("Starting Docker Compose...")
         try:
-            subprocess.run(["sudo", "docker-compose", "up"], check=True)
+            # Don't use sudo on macOS
+            if self.system == "Darwin":
+                cmd = ["docker-compose", "up"]
+            else:
+                cmd = ["sudo", "docker-compose", "up"]
+                
+            subprocess.run(cmd, check=True)
         except subprocess.CalledProcessError as e:
             self.logger.error(f"Docker Compose failed: {e}")
             sys.exit(1)

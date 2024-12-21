@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { IModelConfig, IModelDocument, IModelModel, ModelType } from '../interfaces/model.interface';
+import { IModelConfig, IModelDocument, IModelModel, ModelCosts, ModelType } from '../interfaces/model.interface';
 import { ApiName } from '../interfaces/api.interface';
 import { getObjectId } from '../utils/utils';
 import mongooseAutopopulate from 'mongoose-autopopulate';
@@ -20,6 +20,12 @@ const DEFAULT_MODEL_CONFIG: IModelConfig = {
   }
 };
 
+const DEFAULT_MODEL_COSTS: ModelCosts = {
+  input_token_cost_per_million: 0.15,
+  cached_input_token_cost_per_million: 0.075,
+  output_token_cost_per_million: 0.6
+};
+
 const modelConfigSchema = new Schema<IModelConfig>({
   ctx_size: { type: Number, required: true },
   temperature: { type: Number, default: 0.7 },
@@ -36,6 +42,12 @@ const modelConfigSchema = new Schema<IModelConfig>({
   }
 });
 
+const modelCostsSchema = new Schema<ModelCosts>({
+  input_token_cost_per_million: { type: Number, required: true },
+  cached_input_token_cost_per_million: { type: Number, required: true },
+  output_token_cost_per_million: { type: Number, required: true }
+});
+
 const modelSchema = new Schema<IModelDocument, IModelModel>({
   short_name: { type: String, required: true },
   model_name: { type: String, required: true },
@@ -46,6 +58,11 @@ const modelSchema = new Schema<IModelDocument, IModelModel>({
   },  
   model_type: { type: String, enum: ModelType, required: true },
   api_name: { type: String, default: ApiName.LM_STUDIO },
+  model_costs: { 
+    type: modelCostsSchema, 
+    required: false, 
+    default: () => ({ ...DEFAULT_MODEL_COSTS }) 
+  },
   created_by: { type: Schema.Types.ObjectId, ref: 'User' },
   updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
 }, {

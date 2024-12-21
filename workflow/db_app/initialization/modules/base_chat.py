@@ -133,7 +133,7 @@ base_chat_module = BaseChatModule(
                 "name": "Alice (Groq)",
                 "system_message": "default_system_message",
                 "models": {
-                    "chat": "llama-3.1-70b-versatile",
+                    "chat": "llama-3.3-70b-versatile",
                 },
                 "max_consecutive_auto_reply": 1,
                 "has_tools": 1,
