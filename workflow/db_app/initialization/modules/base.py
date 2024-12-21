@@ -134,7 +134,7 @@ base_module = BaseModule(
                     "ctx_size": 2048,
                 },
                 "model_costs": {
-                    "cost_per_unit": 0.0006,
+                    "cost_per_unit": 0.0006, # Cost per minute
                 }
             },
             {
@@ -259,10 +259,7 @@ base_module = BaseModule(
                 "model_type": "stt",
                 "api_name": "gemini",
                 "model_costs": {
-                    "input_token_cost_per_million": 0.0,
-                    "cached_input_token_cost_per_million": 0.0,
-                    "output_token_cost_per_million": 0.0,
-                    "cost_per_unit": 0,
+                    "cost_per_unit": 0, # ?
                 }
             },
             {
@@ -275,19 +272,22 @@ base_module = BaseModule(
                 "model_type": "embeddings",
                 "api_name": "gemini",
                 "model_costs": {
-                    "cost_per_unit": 0,
+                    "input_token_cost_per_million": 0.000000025,
+                    "cached_input_token_cost_per_million": 0.00000002,
                 }
             },
             {
                 "key": "gemini_img_gen_imagen_3",
                 "short_name": "Gemini Imagen 3",
                 "model_name": "imagen-3.0-generate-001",
-                "model_format": "OpenChat",
                 "config_obj": {
                     "ctx_size": 2048,
                 },
                 "model_type": "img_gen",
                 "api_name": "gemini",
+                "model_costs": {
+                    "cost_per_unit": 0.04,
+                }
             },
             {
                 "key": "llama3.2_90b",
@@ -298,6 +298,11 @@ base_module = BaseModule(
                 },
                 "model_type": "chat",
                 "api_name": "llama",
+                "model_costs": {
+                    "input_token_cost_per_million": 2.8,
+                    "cached_input_token_cost_per_million": 2.8,
+                    "output_token_cost_per_million": 2.8,
+                }
             },
             {
                 "key": "pixtral12b",
@@ -325,7 +330,7 @@ base_module = BaseModule(
                 "api_name": "mistral",
                 "model_costs": {
                     "input_token_cost_per_million": 0.1,
-                    "cached_input_token_cost_per_million": 0.0,
+                    "cached_input_token_cost_per_million": 0.1,
                     "output_token_cost_per_million": 0.0,
                 }
             },
@@ -370,7 +375,7 @@ base_module = BaseModule(
                 "model_type": "stt",
                 "api_name": "groq",
                 "model_costs": {
-                    "cost_per_unit": 0.000185,
+                    "cost_per_unit": 0.000185, # Cost per minute
                 }
             },
             {

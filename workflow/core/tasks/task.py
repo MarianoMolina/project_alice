@@ -449,7 +449,7 @@ class AliceTask(BaseDataStructure):
 
         try:
             # Validate and process inputs
-            processed_inputs, error_msg = await validate_and_process_function_inputs(
+            processed_inputs, error_msg = validate_and_process_function_inputs(
                 params=self.input_variables,
                 execution_history=execution_history,
                 kwargs=kwargs,

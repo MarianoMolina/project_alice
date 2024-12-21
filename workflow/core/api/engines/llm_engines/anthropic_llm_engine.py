@@ -6,7 +6,7 @@ from anthropic.types import TextBlock, ToolUseBlock, ToolParam, Message
 from workflow.core.data_structures import ToolCall, ToolCallConfig, ToolFunction
 from workflow.core.api.engines.llm_engines.llm_engine import LLMEngine
 from workflow.core.data_structures import MessageDict, ContentType, ModelConfig, References, RoleTypes, MessageGenerators
-from workflow.util import LOGGER, est_messages_token_count, est_token_count, CHAR_PER_TOKEN, MessagePruner, ScoreConfig, MessageApiFormat
+from workflow.util import LOGGER, est_messages_token_count, est_token_count, CHAR_TO_TOKEN, MessagePruner, ScoreConfig, MessageApiFormat
 from workflow.core.api.engines.llm_engines.anthropic_tool_util import ToolNameMapping
 
 ANTHROPIC_PRICING_1k = {
@@ -164,7 +164,7 @@ class LLMAnthropic(LLMEngine):
         if estimated_tokens > api_data.ctx_size:
             LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning.")
             pruner = MessagePruner(
-                max_total_size=api_data.ctx_size * CHAR_PER_TOKEN,
+                max_total_size=api_data.ctx_size * CHAR_TO_TOKEN,
                 score_config=ScoreConfig(),
             )
             messages = await pruner.prune(messages, self, api_data)

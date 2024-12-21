@@ -4,7 +4,7 @@ from openai.types.chat import ChatCompletion
 from pydantic import Field
 from typing import List, Optional, TypedDict
 from workflow.core.api.engines.api_engine import APIEngine
-from workflow.util import LOGGER, est_messages_token_count, ScoreConfig, est_token_count, MessagePruner, CHAR_PER_TOKEN, MessageApiFormat
+from workflow.util import LOGGER, est_messages_token_count, ScoreConfig, est_token_count, MessagePruner, CHAR_TO_TOKEN, MessageApiFormat
 from workflow.core.data_structures import (
     MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, RoleTypes, MessageGenerators, ToolFunction
     )
@@ -162,7 +162,7 @@ class LLMEngine(APIEngine):
 
         if estimated_tokens > api_data.ctx_size:
             pruner = MessagePruner(
-                max_total_size=api_data.ctx_size * CHAR_PER_TOKEN,
+                max_total_size=api_data.ctx_size * CHAR_TO_TOKEN,
                 score_config=ScoreConfig(),
                 )
             LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning. ")

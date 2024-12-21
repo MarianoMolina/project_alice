@@ -17,7 +17,7 @@ from workflow.util import (
     LOGGER,
     est_messages_token_count,
     est_token_count,
-    CHAR_PER_TOKEN,
+    CHAR_TO_TOKEN,
     MessagePruner,
     ScoreConfig,
     MessageApiFormat,
@@ -71,7 +71,7 @@ class GeminiLLMEngine(LLMEngine):
                 f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning. "
             )
             pruner = MessagePruner(
-                max_total_size=api_data.ctx_size * CHAR_PER_TOKEN,
+                max_total_size=api_data.ctx_size * CHAR_TO_TOKEN,
                 score_config=ScoreConfig(),
             )
             messages = await pruner.prune(messages, self, api_data)

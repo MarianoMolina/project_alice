@@ -1,3 +1,5 @@
+import { CHAR_TO_TOKEN } from "./Constants";
+
 export enum LengthUnit {
     CHARACTERS = 'characters',
     TOKENS = 'tokens'
@@ -50,7 +52,7 @@ export function getStringLength(str: string, opts: FormatOptions): string | numb
     if (opts.unit === LengthUnit.CHARACTERS) {
         value = str.length;
     } else {
-        const charToTokenRatio = parseFloat(process.env.CharToToken || '3.2');
+        const charToTokenRatio = CHAR_TO_TOKEN;
         value = Math.ceil(str.length / charToTokenRatio);
     }
 
