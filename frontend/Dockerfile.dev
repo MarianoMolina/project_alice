@@ -5,7 +5,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy package.json and package-lock.json
-COPY package*.json ./
+COPY frontend/package*.json ./
 
 RUN printf "fetch-retry-maxtimeout=300000\nfetch-retry-mintimeout=20000\nfetch-retries=5\n" > .npmrc
 
