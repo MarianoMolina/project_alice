@@ -11,6 +11,7 @@ WORKFLOW_PORT = os.getenv("REACT_APP_WORKFLOW_PORT", 8000)
 FRONTEND_PORT_DOCKER = os.getenv("FRONTEND_PORT_DOCKER", 4000)
 BACKEND_PORT_DOCKER = os.getenv("BACKEND_PORT_DOCKER", 3000)
 HOST = os.getenv("REACT_APP_HOST", "localhost")
+print(f"HOST: {HOST}")
 DOCKER_HOST = "host.docker.internal"
 FRONTEND_HOST = os.getenv("FRONTEND_HOST", "frontend")
 BACKEND_HOST = os.getenv("BACKEND_HOST", "backend")
