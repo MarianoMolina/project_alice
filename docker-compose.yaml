@@ -1,10 +1,6 @@
 services:
   frontend:
-    build:
-      context: .
-      dockerfile: frontend/Dockerfile
-    env_file:
-      - .env
+    image: ${REGISTRY_PATH}/frontend:latest
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT_DOCKER}"
     depends_on:

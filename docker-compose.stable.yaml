@@ -1,8 +1,6 @@
 services:
   frontend:
-    build:
-      context: .
-      dockerfile: frontend/Dockerfile
+    image: ${REGISTRY_PATH}/frontend:latest
     env_file:
       - .env
     ports:

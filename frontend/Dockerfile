@@ -37,6 +37,6 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/.env ./.env
 COPY frontend/package.json ./
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 EXPOSE ${FRONTEND_PORT_DOCKER}
 CMD ["npm", "run", "start:prod"]
