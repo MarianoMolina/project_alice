@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-CHAR_TO_TOKEN = os.getenv("REACT_APP_CHAR_TO_TOKEN", 3.2)
+CHAR_TO_TOKEN = float(os.getenv("REACT_APP_CHAR_TO_TOKEN", "3.2"))
 EST_TOKENS_PER_TOOL = 100 
 
 BACKEND_PORT = os.getenv("REACT_APP_BACKEND_PORT", 3000)
