@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import dotenv from 'dotenv';
-dotenv.config();
+import { LOG_LEVEL } from './const';
 
 enum LogLevel {
   ERROR = 0,
@@ -89,9 +88,8 @@ class LoggerClass {
   }
 
   private getLogLevelFromEnv(): LogLevel {
-    console.log('envLogLevel:', process.env.LOG_LEVEL);
-    const envLogLevel = process.env.LOG_LEVEL?.toUpperCase();
-    switch (envLogLevel) {
+    console.log('envLogLevel:', LOG_LEVEL);
+    switch (LOG_LEVEL) {
       case 'ERROR': return LogLevel.ERROR;
       case 'WARN': return LogLevel.WARN;
       case 'INFO': return LogLevel.INFO;

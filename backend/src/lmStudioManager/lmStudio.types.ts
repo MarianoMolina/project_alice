@@ -222,7 +222,6 @@ export const DEFAULT_MODEL_CONFIG: LLMLoadModelConfig = {
     }
 };
 
-export const LM_STUDIO_URL = process.env.LM_STUDIO_URL || 'host.docker.internal:1234';
 
 export interface ChatTemplateTokens {
     bos: string;

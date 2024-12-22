@@ -1,3 +1,5 @@
+import { LOG_LEVEL } from "./Constants";
+
 enum LogLevel {
     ERROR = 0,
     WARN = 1,
@@ -22,8 +24,7 @@ enum LogLevel {
     }
   
     private getLogLevelFromEnv(): LogLevel {
-      const envLogLevel = process.env.REACT_APP_LOG_LEVEL?.toUpperCase();
-      switch (envLogLevel) {
+      switch (LOG_LEVEL) {
         case 'ERROR': return LogLevel.ERROR;
         case 'WARN': return LogLevel.WARN;
         case 'INFO': return LogLevel.INFO;

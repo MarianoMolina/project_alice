@@ -10,12 +10,12 @@ import {
     ChatCompletionParams, ChatCompletionResponse,
     ChatTemplateTokens,
     CompletionParams, CompletionResponse,
-    DEFAULT_MODEL_CONFIG, DEFAULT_TOKENS,
-    LM_STUDIO_URL, LoadedModel
+    DEFAULT_MODEL_CONFIG, DEFAULT_TOKENS, LoadedModel
 } from "./lmStudio.types";
 import { MessageBuilder } from "./messageBuilder";
 import { FileService } from "./fileService";
 import Logger from "../utils/logger"
+import { LM_STUDIO_URL } from "../utils/const";
 
 
 export interface ExtendedDownloadedModel extends DownloadedModel {

@@ -1,6 +1,7 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import Logger from '../utils/Logger';
+import { NODE_ENV } from '../utils/Constants';
 
 interface Props {
   children: ReactNode;
@@ -50,7 +51,7 @@ class ErrorBoundary extends Component<Props, State> {
           <Button variant="contained" color="primary" onClick={this.handleReload}>
             Reload Page
           </Button>
-          {process.env.NODE_ENV === 'development' && (
+          {NODE_ENV === 'development' && (
             <Box mt={3}>
               <Typography variant="h6">Error Details:</Typography>
               <Typography variant="body2" color="error">

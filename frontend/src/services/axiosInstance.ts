@@ -1,13 +1,9 @@
 import axios from 'axios';
 import { getToken } from '../utils/AuthUtils';
 import Logger from '../utils/Logger';
-
-export const HOST = process.env.HOST || 'localhost';
+import { BACKEND_PORT, HOST, WORKFLOW_PORT } from '../utils/Constants';
 
 Logger.info('HOST:', HOST);
-
-export const BACKEND_PORT = process.env.BACKEND_PORT || 3000;
-export const WORKFLOW_PORT = process.env.WORKFLOW_PORT || 8000;
 
 export const BACKEND_URL = `http://${HOST}:${BACKEND_PORT}`;
 export const BACKEND_API_URL = `http://${HOST}:${BACKEND_PORT}/api`;

@@ -9,8 +9,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import { getObjectId } from './utils';
 import { processEmbeddings } from './embeddingChunk.utils';
-
-const UPLOAD_DIR = process.env.SHARED_UPLOAD_DIR || '/app/shared-uploads';
+import { UPLOAD_DIR } from './const';
 
 Logger.info(`UPLOAD_DIR is set to: ${UPLOAD_DIR}`);
 
