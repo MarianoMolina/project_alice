@@ -13,7 +13,7 @@ services:
       workflow:
         condition: service_healthy
     environment:
-      NODE_ENV: ${NODE_ENV:-production}
+      REACT_APP_NODE_ENV: ${REACT_APP_NODE_ENV:-production}
       PORT: ${FRONTEND_PORT_DOCKER:-4000}
       CI: "true"
 
@@ -22,7 +22,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "${BACKEND_PORT}:${BACKEND_PORT_DOCKER}"
+      - "${REACT_APP_BACKEND_PORT}:${BACKEND_PORT_DOCKER}"
     env_file:
       - .env
     depends_on:
@@ -34,7 +34,7 @@ services:
       - logs:/app/logs
       - shared-uploads:/app/shared-uploads
     environment:
-      NODE_ENV: ${NODE_ENV:-production}
+      REACT_APP_NODE_ENV: ${REACT_APP_NODE_ENV:-production}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
@@ -60,7 +60,7 @@ services:
     env_file:
       - .env
     ports:
-      - "${WORKFLOW_PORT}:${WORKFLOW_PORT_DOCKER}"
+      - "${REACT_APP_WORKFLOW_PORT}:${WORKFLOW_PORT_DOCKER}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - logs:/app/logs

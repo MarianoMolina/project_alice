@@ -3,7 +3,7 @@ import { ApiType, ApiName, ModelApiType } from "../types/ApiTypes";
 import { AIIcon, AnthropicIcon, ArxivIcon, AzureIcon, BarkIcon, CohereIcon, GeminiIcon, GroqIcon, LlamaIcon, LMStudioIcon, 
   MistralIcon, OpenAiIcon, WikipediaIcon, WolframAlphaIcon } from "./CustomIcons";
 import { ModelType } from "../types/ModelTypes";
-import { HOST } from "../services/axiosInstance";
+import { HOST } from "./Constants";
 
 // Base interfaces for API configurations
 interface BaseApiConfig {

@@ -2,22 +2,22 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-CHAR_TO_TOKEN = os.getenv("CHAR_TO_TOKEN", 3.2)
+CHAR_TO_TOKEN = os.getenv("REACT_APP_CHAR_TO_TOKEN", 3.2)
 EST_TOKENS_PER_TOOL = 100 
 
-BACKEND_PORT = os.getenv("BACKEND_PORT", 3000)
+BACKEND_PORT = os.getenv("REACT_APP_BACKEND_PORT", 3000)
 FRONTEND_PORT = os.getenv("FRONTEND_PORT", 4000)
-WORKFLOW_PORT = os.getenv("WORKFLOW_PORT", 8000)
+WORKFLOW_PORT = os.getenv("REACT_APP_WORKFLOW_PORT", 8000)
 FRONTEND_PORT_DOCKER = os.getenv("FRONTEND_PORT_DOCKER", 4000)
 BACKEND_PORT_DOCKER = os.getenv("BACKEND_PORT_DOCKER", 3000)
-HOST = os.getenv("HOST", "localhost")
+HOST = os.getenv("REACT_APP_HOST", "localhost")
 DOCKER_HOST = "host.docker.internal"
 FRONTEND_HOST = os.getenv("FRONTEND_HOST", "frontend")
 BACKEND_HOST = os.getenv("BACKEND_HOST", "backend")
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN")
 SHARED_UPLOAD_DIR = os.getenv("SHARED_UPLOAD_DIR", '/app/shared-uploads')
 # Environment variable to control log level
-LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+LOG_LEVEL = os.getenv("REACT_APP_LOG_LEVEL", "INFO")
 
 LOGGING_FOLDER = os.getenv("LOGGING_FOLDER", "logs")
 

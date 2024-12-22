@@ -22,7 +22,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "${BACKEND_PORT}:${BACKEND_PORT_DOCKER}"
+      - "${REACT_APP_BACKEND_PORT}:${BACKEND_PORT_DOCKER}"
     env_file:
       - .env
     depends_on:
@@ -60,7 +60,7 @@ services:
     env_file:
       - .env
     ports:
-      - "${WORKFLOW_PORT}:${WORKFLOW_PORT_DOCKER}"
+      - "${REACT_APP_WORKFLOW_PORT}:${WORKFLOW_PORT_DOCKER}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - logs:/app/logs
@@ -81,7 +81,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${WORKFLOW_PORT_DOCKER}/health"]
+      test: ["CMD", "curl", "-f", "http://${REACT_APP_HOST:-localhost}:${WORKFLOW_PORT_DOCKER}/health"]
       interval: 30s
       timeout: 10s
       retries: 5

@@ -1,4 +1,4 @@
-import { WORKFLOW_PORT } from '../services/axiosInstance';
+import { WORKFLOW_PORT } from './Constants';
 import Logger from './Logger';
 
 interface WebSocketMessage {
