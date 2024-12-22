@@ -1,9 +1,9 @@
 FROM node:18-alpine AS build
-# Set the working directory
 WORKDIR /app
-
-# Copy .env from root first
 COPY .env ./
+# Let's see what's actually in the .env file
+RUN export HOST=$(grep ^HOST= .env | cut -d '=' -f2-) && \
+    echo "BUILD TIME HOST VALUE: $HOST"
 
 # Copy package.json and package-lock.json from frontend directory
 COPY frontend/package*.json ./
