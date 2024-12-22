@@ -16,3 +16,4 @@ run_script.log
 .DS_Store
 **/.DS_Store
 vm_scripts.txt
+docker_registry_update.*

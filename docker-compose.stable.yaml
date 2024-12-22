@@ -1,8 +1,6 @@
 services:
   frontend:
     image: ${REGISTRY_PATH}/frontend:latest
-    env_file:
-      - .env
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT_DOCKER}"
     depends_on:
@@ -34,7 +32,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${BACKEND_PORT_DOCKER}/api/health"]
+      test: ["CMD", "curl", "-f", "http://${REACT_APP_HOST:-localhost}:${BACKEND_PORT_DOCKER}/api/health"]
       interval: 30s
       timeout: 10s
       retries: 5

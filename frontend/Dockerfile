@@ -15,7 +15,7 @@ RUN npm ci --legacy-peer-deps
 RUN npm install -g typescript
 
 # Add `/app/node_modules/.bin` to $PATH
-ENV PATH /app/node_modules/.bin:$PATH
+ENV PATH=/app/node_modules/.bin:$PATH
 
 # Copy the frontend application code
 COPY frontend/ ./
