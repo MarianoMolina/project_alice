@@ -7,7 +7,6 @@ def add_cors_middleware(app):
         f"http://{HOST}",
         f"http://{HOST}:{BACKEND_PORT}",
         f"http://{HOST}:{FRONTEND_PORT}",
-        f"http://marianomolina.me:{FRONTEND_PORT}", # For production
         f"http://{DOCKER_HOST}:{BACKEND_PORT}",
         f"http://{DOCKER_HOST}:{FRONTEND_PORT}",
         f"http://{BACKEND_HOST}:{BACKEND_PORT_DOCKER}",

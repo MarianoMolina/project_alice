@@ -7,7 +7,6 @@ const corsOptions: CorsOptions = {
   origin: [
     `http://${HOST}:${FRONTEND_PORT}`,
     `http://${HOST}:${WORKFLOW_PORT}`,
-    `http://marianomolina.me:${FRONTEND_PORT}`, // For production
     `http://${FRONTEND_HOST}:${FRONTEND_PORT_DOCKER}`,
     `http://${WORKFLOW_HOST}:${WORKFLOW_PORT_DOCKER}`
   ],

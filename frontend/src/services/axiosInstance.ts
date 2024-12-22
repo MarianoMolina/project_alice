@@ -5,9 +5,9 @@ import { BACKEND_PORT, HOST, WORKFLOW_PORT } from '../utils/Constants';
 
 Logger.info('HOST:', HOST);
 
-export const BACKEND_URL = `http://${HOST}:${BACKEND_PORT}`;
-export const BACKEND_API_URL = `http://${HOST}:${BACKEND_PORT}/api`;
-export const WORKFLOW_URL = `http://${HOST}:${WORKFLOW_PORT}`;
+export const BACKEND_URL = `/backend`;
+export const BACKEND_API_URL = `/backend/api`;
+export const WORKFLOW_URL = `/workflow`;
 
 // Create axios instance for database API
 const dbAxiosInstanceLMS = axios.create({
