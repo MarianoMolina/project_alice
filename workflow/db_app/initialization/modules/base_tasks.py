@@ -5,7 +5,7 @@ from workflow.db_app.initialization.modules.init_module import InitializationMod
 class BaseTasksModule(InitializationModule):
     """This module defines the base tasks, their agents, parameters and prompts."""
     name: str = "base_tasks"
-    dependencies: List[str] = ["base"]
+    dependencies: List[str] = ["base", "base_local"]
     data: Dict[str, List[Dict[str, Any]]] = Field(default_factory=dict)
 
 base_tasks_module = BaseTasksModule(

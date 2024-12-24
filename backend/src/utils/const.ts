@@ -10,7 +10,7 @@ export const FRONTEND_PORT = process.env.FRONTEND_PORT || 4000;
 export const WORKFLOW_PORT = process.env.REACT_APP_WORKFLOW_PORT || 8000;
 export const HOST = process.env.REACT_APP_HOST || 'localhost';
 export const FRONTEND_HOST = process.env.FRONTEND_HOST || 'frontend';
-export const WORKFLOW_HOST = process.env.WORKFLOW_HOST || 'workflow';
+export const WORKFLOW_HOST = process.env.REACT_APP_WORKFLOW_HOST || 'workflow';
 export const FRONTEND_PORT_DOCKER = process.env.FRONTEND_PORT_DOCKER || 4000;
 export const WORKFLOW_PORT_DOCKER = process.env.WORKFLOW_PORT_DOCKER || 8000;
 

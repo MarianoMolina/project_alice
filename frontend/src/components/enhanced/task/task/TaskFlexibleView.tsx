@@ -174,6 +174,22 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
         />
     ), [form?.templates?.output_template, isEditMode, activeAccordion, handleAccordionToggle, handleOutputPromptSelect]);
 
+    const memoizedCodePromptSelect = useMemo(() => (
+        <EnhancedSelect<Prompt>
+            componentType="prompts"
+            EnhancedView={PromptShortListView}
+            selectedItems={form?.templates?.code_template ? [form.templates.code_template] : []}
+            onSelect={handleOutputPromptSelect}
+            isInteractable={isEditMode}
+            label="Select Output Prompt"
+            activeAccordion={activeAccordion}
+            description='This prompt can be used to pass extra code blocks during execution. Important when developing a snippet that depends on another piece of code. Ensure the code is in a proper code block.'
+            onAccordionToggle={handleAccordionToggle}
+            accordionEntityName="code_template"
+            showCreateButton={true}
+        />
+    ), [form?.templates?.code_template, isEditMode, activeAccordion, handleAccordionToggle, handleOutputPromptSelect]);
+
     const memoizedAgentSelect = useMemo(() => (
         <EnhancedSelect<AliceAgent>
             componentType="agents"
@@ -286,6 +302,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             {memoizedTaskSelect}
             {memoizedPromptSelect}
             {memoizedOutputPromptSelect}
+            {taskType === TaskType.CodeGenerationLLMTask && memoizedCodePromptSelect}
             <TaskEndCodeRoutingBuilder
                 title="Inner Nodes End Code Routing"
                 startNode={form.start_node}

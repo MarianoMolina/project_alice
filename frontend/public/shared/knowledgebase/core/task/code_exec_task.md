@@ -18,8 +18,6 @@ code_exec = CodeExecutionLLMTask(
 
 result = await code_exec.run(
     prompt="Code to execute",
-    include_prompt_in_execution=True
-)
 ```
 
 ---

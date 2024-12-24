@@ -57,7 +57,10 @@ const AgentCardView: React.FC<AgentComponentProps> = ({
             icon: <LibraryBooks />,
             primary_text: "System message",
             secondary_text: (
-                <ListItemButton onClick={() => item.system_message?._id && selectCardItem && selectCardItem('Prompt', item.system_message._id, item.system_message)}>
+                <ListItemButton
+                    sx={{ padding: '8px 0'}}
+                    onClick={() => item.system_message?._id && selectCardItem && selectCardItem('Prompt', item.system_message._id, item.system_message)}
+                >
                     <AliceMarkdown>{item.system_message?.content || 'N/A'}</AliceMarkdown>
                 </ListItemButton>
             )
@@ -68,20 +71,20 @@ const AgentCardView: React.FC<AgentComponentProps> = ({
             secondary_text: item.max_consecutive_auto_reply?.toString() ?? 'none'
         },
         {
-            icon: 
-            <PermissionIcon
-                permission={item.has_tools}
-                type="tool"
-            />,
+            icon:
+                <PermissionIcon
+                    permission={item.has_tools}
+                    type="tool"
+                />,
             primary_text: "Tool Use",
             secondary_text: mapToolPermission(item.has_tools)
         },
         {
-            icon: 
-            <PermissionIcon
-                permission={item.has_code_exec}
-                type="code"
-            />,
+            icon:
+                <PermissionIcon
+                    permission={item.has_code_exec}
+                    type="code"
+                />,
             primary_text: "Code Execution",
             secondary_text: mapCodePermission(item.has_code_exec)
         },

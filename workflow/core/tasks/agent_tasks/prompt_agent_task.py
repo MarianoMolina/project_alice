@@ -104,7 +104,7 @@ class PromptAgentTask(AliceTask):
         ),
         description="Inputs that the agent will require. Default is a 'prompt' string."
     )
-    templates: Dict[str, Any] = Field(..., description="A dictionary of template names and their prompt objects. task_template is used to format the agent input message, output_template is used to format the output.")
+    templates: Dict[str, Any] = Field(..., description="A dictionary of template names and their prompt objects. task_template is used to format the agent input message, output_template is used to format the output. code_template is used to add context to the code execution")
     start_node: str = Field(default='llm_generation', description="The name of the starting node")
     node_end_code_routing: TasksEndCodeRouting = Field(
         default={
@@ -228,13 +228,24 @@ class PromptAgentTask(AliceTask):
             
         except Exception as e:
             return self.get_failed_task_response(diagnostics=str(e), execution_history=execution_history)
+        
+    def get_code_template_messages(self, execution_history: List[NodeResponse], **kwargs) -> List[MessageDict]:
+        code_template = self.templates["code_template"]
+        if not isinstance(code_template, Prompt):
+            code_template = Prompt(**code_template)
+        code_inputs, error = validate_and_process_function_inputs(code_template.parameters, execution_history, kwargs=kwargs)
+        if error:
+            raise ValueError(f"Error processing code template variables: {error}")
+        code_string = code_template.format_prompt(**code_inputs)
+        return [MessageDict(content=code_string, role=RoleTypes.USER, generated_by=MessageGenerators.USER, step=self.task_name)]
 
-    async def execute_code_execution(self, execution_history: List[NodeResponse], node_responses: List[NodeResponse], include_prompt_in_execution: Optional[bool] = False, **kwargs) -> NodeResponse:
+
+    async def execute_code_execution(self, execution_history: List[NodeResponse], node_responses: List[NodeResponse], **kwargs) -> NodeResponse:
         messages: List[MessageDict] = []
-        LOGGER.info(f"Executing code execution for task {self.task_name} with include_prompt_in_execution: {include_prompt_in_execution}")
-        if include_prompt_in_execution:
-            prompt_messages = self.create_message_list(execution_history=execution_history, **kwargs)
-            messages.extend(prompt_messages)
+        if self.templates.get("code_template"):
+            code_messages = self.get_code_template_messages(execution_history, **kwargs)
+            messages.extend(code_messages)
+            LOGGER.info(f"Executing code execution for task {self.task_name} with code_messages: {code_messages}")
         llm_reference = self.get_node_reference(node_responses, "llm_generation")
 
         if not llm_reference or not llm_reference.messages:
@@ -253,7 +264,7 @@ class PromptAgentTask(AliceTask):
         messages.extend(llm_reference.messages)
 
         try:
-            code_executions, exit_code  = await self.agent.process_code_execution(messages)
+            code_executions, exit_code = await self.agent.process_code_execution(messages)
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name="code_execution",

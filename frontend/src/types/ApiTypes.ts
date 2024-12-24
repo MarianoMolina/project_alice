@@ -28,8 +28,6 @@ export enum ApiName {
     GROQ = 'groq',
     LLAMA = 'llama',
     ANTHROPIC = 'anthropic',
-    BARK = 'bark',
-    PIXART = 'pixart',
     GOOGLE_SEARCH = 'google_search',
     REDDIT = 'reddit',
     WIKIPEDIA = 'wikipedia',
@@ -37,6 +35,9 @@ export enum ApiName {
     ARXIV = 'arxiv',
     GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph',
     WOLFRAM_ALPHA = 'wolfram_alpha',
+    
+    BARK = 'bark',
+    PIXART = 'pixart',
     LM_STUDIO = 'lm_studio',
     CUSTOM = 'Custom',
 }

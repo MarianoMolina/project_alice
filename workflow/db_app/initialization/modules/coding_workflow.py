@@ -131,6 +131,19 @@ coding_workflow_module = CodingWorkflowModule(
                     },
                     "required": ["Plan_Workflow"]
                 }
+            },
+            {
+                "key": "unit_test_code_template",
+                "name": "Unit Test Code Template",
+                "content": "{{ Generate_Code }}",
+                "is_templated": True,
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "Generate_Code": "param_generate_code",
+                    },
+                    "required": ["Generate_Code"]
+                }
             }
         ],
         "agents": [
@@ -248,7 +261,8 @@ coding_workflow_module = CodingWorkflowModule(
                 },
                 "templates": {
                     "task_template": "code_generation_task_prompt",
-                    "output_template": "code_generation_output_prompt"
+                    "output_template": "code_generation_output_prompt",
+                    "code_template": "unit_test_code_template"
                 },
                 "max_attempts": 1,
                 "recursive": True,

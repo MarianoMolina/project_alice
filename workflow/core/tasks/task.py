@@ -79,9 +79,6 @@ class AliceTask(BaseDataStructure):
     max_attempts : int
         Maximum number of attempts per node before failure (default: 1)
 
-    timeout : Optional[int]
-        Task timeout in seconds
-
     node_end_code_routing : TasksEndCodeRouting
         Dictionary defining routing rules between nodes based on exit codes
 
@@ -161,10 +158,6 @@ class AliceTask(BaseDataStructure):
         True, description="Whether task can be executed recursively"
     )
     max_attempts: int = Field(1, description="Maximum attempts per node before failure")
-
-    timeout: Optional[int] = Field(
-        default=None, description="Task timeout in seconds"
-    )  # TODO: Pass timeout to model API Calls or move to Agent
 
     # Node and execution routing
     node_end_code_routing: TasksEndCodeRouting = Field(
@@ -886,7 +879,7 @@ class AliceTask(BaseDataStructure):
             result_diagnostic=diagnostics,
             node_references=node_references or [],
             execution_history=exec_history,
-            usage_metrics=usage_metrics
+            usage_metrics=usage_metrics,
         )
 
     def get_external_execution_history_length(

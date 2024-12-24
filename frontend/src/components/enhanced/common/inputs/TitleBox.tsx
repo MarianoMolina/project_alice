@@ -14,12 +14,13 @@ const TitleBox = ({ title, children, sx }: TitleBoxProps) => {
     <BorderedContainer
       sx={{
         m: 1, // Preserve the original margin from TitleBox
-        p: 3,
+        py: 3,
+        px: 1,
         ...sx
       }}
     >
       <Typography
-        variant="h6"
+        variant="body1"
         sx={{
           position: 'absolute',
           top: -12,

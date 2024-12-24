@@ -79,7 +79,7 @@ const CommonCardView = <T extends CollectionName>({
                                         {item.primary_text}
                                     </Typography>
                                     <Box className={classes.secondaryText}>{item.secondary_text}</Box>
-                                </Box>
+                                </Box> 
                             </ListItem>
                         ))}
                     </List>

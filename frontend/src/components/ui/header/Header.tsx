@@ -34,7 +34,7 @@ interface NavGroupProps {
 const Header: React.FC = () => {
   const classes = useStyles();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('lg')); // 1200px
+  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // 900px
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, user, logout } = useAuth();

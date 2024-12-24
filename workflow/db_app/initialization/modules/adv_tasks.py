@@ -64,12 +64,6 @@ adv_tasks_module = AdvTasksModule(
                 "default": "nova"
             },
             {
-                "key": "voice_bark_parameter",
-                "type": "string",
-                "description": "The voice to use for the speech.", # TODO: Add Bark TTS voices to description
-                "default": "v2/en_speaker_6"
-            },
-            {
                 "key": "speed_parameter",
                 "type": "number",
                 "description": "The speed of the speech."
@@ -222,28 +216,6 @@ adv_tasks_module = AdvTasksModule(
                 "max_consecutive_auto_reply": 1,
             },
             {
-                "key": "pixart_gen_agent",
-                "name": "Pixart Agent",
-                "system_message": "default_system_message",
-                "models": {
-                    "img_gen": "pixart_sigma_model",
-                },
-                "has_code_exec": 0,
-                "has_tools": 0,
-                "max_consecutive_auto_reply": 1,
-            },
-            {
-                "key": "bark_tts_agent",
-                "name": "Bark TTS Agent",
-                "system_message": "default_system_message",
-                "models": {
-                    "tts": "bark_large",
-                },
-                "has_code_exec": 0,
-                "has_tools": 0,
-                "max_consecutive_auto_reply": 1,
-            },
-            {
                 "key": "web_scrape_selector_agent",
                 "name": "Web Scrape Selector",
                 "system_message": "web_scrape_selector_agent_prompt",
@@ -343,24 +315,6 @@ adv_tasks_module = AdvTasksModule(
                 "required_apis": ["img_generation"],
             },
             {
-                "key": "image_gen_task_pixart",
-                "task_type": "GenerateImageTask",
-                "task_name": "Pixart_Image_Generation",
-                "agent": "pixart_gen_agent",
-                "task_description": "Generates an image from the input text",
-                "input_variables": {
-                    "type": "object",
-                    "properties": {
-                        "prompt": "prompt_img_gen",
-                        "n": "n_parameter",
-                        "size": "size_parameter",
-                        "quality": "quality_parameter"
-                    },
-                    "required": ["prompt"]
-                },
-                "required_apis": ["img_generation"],
-            },
-            {
                 "key": "image_gen_task_gemini",
                 "task_type": "GenerateImageTask",
                 "task_name": "Image_Gen_Gemini_Imagen3",
@@ -389,23 +343,6 @@ adv_tasks_module = AdvTasksModule(
                     "properties": {
                         "text": "text_parameter",
                         "voice": "voice_parameter",
-                        "speed": "speed_parameter"
-                    },
-                    "required": ["text"]
-                },
-                "required_apis": ["text_to_speech"]
-            },
-            {
-                "key": "bark_tts_task",
-                "task_type": "TextToSpeechTask",
-                "task_name": "Bark_TTS_Task",
-                "agent": "bark_tts_agent",
-                "task_description": "Converts text to speech using the Bark TTS API",
-                "input_variables": {
-                    "type": "object",
-                    "properties": {
-                        "text": "text_parameter",
-                        "voice": "voice_bark_parameter",
                         "speed": "speed_parameter"
                     },
                     "required": ["text"]

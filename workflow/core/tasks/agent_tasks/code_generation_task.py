@@ -79,11 +79,6 @@ class CodeGenerationLLMTask(PromptAgentTask):
                     description="The input prompt for the task",
                     default=None
                 ),
-                "include_prompt_in_execution": ParameterDefinition(
-                    type="boolean",
-                    description="Whether to include the prompt in code execution",
-                    default=True
-                )
             },
             required=["prompt"]
         ),

@@ -11,7 +11,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   toolbar: {
     display: 'flex',
     justifyContent: 'space-between',
-    [theme.breakpoints.down('lg')]: {
+    [theme.breakpoints.down('md')]: {
       padding: theme.spacing(0, 1),
     },
   },
@@ -25,7 +25,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: 'flex',
     justifyContent: 'center',
     gap: theme.spacing(3),
-    [theme.breakpoints.down('lg')]: {
+    [theme.breakpoints.down('md')]: {
       display: 'none',
     },
   },
@@ -78,7 +78,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   drawer: {
     width: 280,
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('md')]: {
       width: '100%',
     },
   },

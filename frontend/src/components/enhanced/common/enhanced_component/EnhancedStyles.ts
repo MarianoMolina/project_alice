@@ -44,22 +44,18 @@ const useStyles = makeStyles((theme: Theme) => ({
         overflowY: 'auto',
     },
     listItem: {
-        width: '100%',
-        display: 'flex',
-        alignItems: 'flex-start',
         marginBottom: theme.spacing(2),
+        padding: `${theme.spacing(1)} 0 !important`,
     },
     listItemContent: {
         display: 'flex',
         flexDirection: 'column',
         flexGrow: 1,
         marginLeft: theme.spacing(2),
-        maxWidth: 'calc(100% - 85px)',
+        maxWidth: 'calc(100% - 40px)',
     },
     listItemIcon: {
-        minWidth: 'auto',
-        marginRight: theme.spacing(2),
-        marginTop: theme.spacing(1),
+        minWidth: '28px !important',
     },
     primaryText: {
         fontWeight: 'bold',
@@ -84,7 +80,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     flexibleViewContainer: {
         display: 'flex',
         flexDirection: 'column',
-        padding: theme.spacing(3),
+        padding: theme.spacing(1),
         backgroundColor: `${theme.palette.background.paper}cc !important`,
     },
     elementTypeText: {

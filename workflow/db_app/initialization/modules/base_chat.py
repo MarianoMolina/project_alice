@@ -72,19 +72,6 @@ base_chat_module = BaseChatModule(
                 "has_code_execution": 0,
             },
             {
-                "key": "lm_studio_alice",
-                "name": "Alice (LM Studio)",
-                "system_message": "default_system_message",
-                "models": {
-                    "chat": "Yi_Coder_9B",
-                    "embeddings": "nomic-embed-text-v1",
-                    "vision": "llava_vision",
-                },
-                "max_consecutive_auto_reply": 1,
-                "has_tools": 1,
-                "has_code_execution": 0,
-            },
-            {
                 "key": "gemini_alice",
                 "name": "Alice (Gemini)",
                 "system_message": "default_system_message",
