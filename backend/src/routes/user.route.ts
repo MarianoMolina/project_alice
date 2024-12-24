@@ -9,6 +9,7 @@ import axios from 'axios';
 import Logger from '../utils/logger';
 import { purgeAndReinitialize } from '../utils/purge.utils';
 import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
+import { JWT_SECRET } from '../utils/const';
 
 const router: Router = express.Router();
 
@@ -64,7 +65,7 @@ router.post('/login', async (req: Request, res: Response) => {
     const payload = { userId: user._id, role: user.role };
     const token = jwt.sign(
       payload,
-      process.env.JWT_SECRET as string,
+      JWT_SECRET as string,
       { expiresIn: '30d' }
     );
     Logger.debug('User logged in:', user.email);

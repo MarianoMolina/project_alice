@@ -131,6 +131,19 @@ coding_workflow_module = CodingWorkflowModule(
                     },
                     "required": ["Plan_Workflow"]
                 }
+            },
+            {
+                "key": "unit_test_code_template",
+                "name": "Unit Test Code Template",
+                "content": "{{ Generate_Code }}",
+                "is_templated": True,
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "Generate_Code": "param_generate_code",
+                    },
+                    "required": ["Generate_Code"]
+                }
             }
         ],
         "agents": [
@@ -150,9 +163,9 @@ coding_workflow_module = CodingWorkflowModule(
                 "name": "Coding Agent",
                 "system_message": "coding_agent",
                 "models": {
-                    "chat": "GPT4o",
+                    "chat": "Claude3.5",
                 },
-                "max_consecutive_auto_reply": 2,
+                "max_consecutive_auto_reply": 1,
                 "has_tools": 0,
                 "has_code_exec": 1,                
             },
@@ -163,7 +176,7 @@ coding_workflow_module = CodingWorkflowModule(
                 "models": {
                     "chat": "GPT4o",
                 },
-                "max_consecutive_auto_reply": 2,
+                "max_consecutive_auto_reply": 1,
                 "has_tools": 0,
                 "has_code_exec": 1,                
             },
@@ -227,7 +240,7 @@ coding_workflow_module = CodingWorkflowModule(
                     "task_template": "code_generation_task_prompt",
                     "output_template": "code_generation_output_prompt" ## This template ensures we only retrieve the last nodes of each type
                 },
-                "max_attempts": 2,
+                "max_attempts": 1,
                 "recursive": True,
             },
             {
@@ -248,9 +261,10 @@ coding_workflow_module = CodingWorkflowModule(
                 },
                 "templates": {
                     "task_template": "code_generation_task_prompt",
-                    "output_template": "code_generation_output_prompt"
+                    "output_template": "code_generation_output_prompt",
+                    "code_template": "unit_test_code_template"
                 },
-                "max_attempts": 2,
+                "max_attempts": 1,
                 "recursive": True,
                 "exit_codes": {0: "Success", 1: "Generation failed.", 2: "No code blocks in response"}
             },
@@ -282,7 +296,7 @@ coding_workflow_module = CodingWorkflowModule(
                 "templates": {
                     "task_template": "unit_test_check_prompt"
                 },
-                "max_attempts": 2,
+                "max_attempts": 1,
                 "recursive": True,
             },
             {
@@ -305,13 +319,14 @@ coding_workflow_module = CodingWorkflowModule(
                     "Generate_Code": {
                         0: ("Generate_Unit_Tests", False),
                         1: ("Generate_Code", True),
-                        2: ("Generate_Unit_Tests", True),
-                        3: (None, True),
+                        2: ("Generate_Code", True),
+                        3: ("Generate_Code", True),
                     },
                     "Generate_Unit_Tests": {
                         0: ("Check_Unit_Test_Results", False),
                         1: ("Generate_Unit_Tests", True),
-                        2: ("Generate_Unit_Tests", True),
+                        2: ("Check_Unit_Test_Results", True),
+                        3: ("Generate_Unit_Tests", True)
                     },
                     "Check_Unit_Test_Results": {
                         0: (None, False),
@@ -320,7 +335,7 @@ coding_workflow_module = CodingWorkflowModule(
                         3: ("Generate_Unit_Tests", True)
                     }
                 },
-                "max_attempts": 2,
+                "max_attempts": 3,
                 "recursive": True,
                 "input_variables": {
                     "type": "object",
@@ -353,14 +368,14 @@ coding_workflow_module = CodingWorkflowModule(
                     "Generate_Code": {
                         0: ("Generate_Unit_Tests", False),
                         1: ("Generate_Code", True),
-                        2: ("Generate_Unit_Tests", True),
-                        3: (None, True),
+                        2: ("Generate_Code", True),
+                        3: ("Generate_Code", True),
                     },
                     "Generate_Unit_Tests": {
                         0: ("Check_Unit_Test_Results", False),
                         1: ("Generate_Unit_Tests", True),
                         2: ("Check_Unit_Test_Results", True),
-                        3: (None, True)
+                        3: ("Generate_Unit_Tests", True)
                     },
                     "Check_Unit_Test_Results": {
                         0: (None, False),
@@ -369,7 +384,7 @@ coding_workflow_module = CodingWorkflowModule(
                         3: ("Generate_Unit_Tests", True)
                     }
                 },
-                "max_attempts": 2,
+                "max_attempts": 3,
                 "recursive": True,
                 "input_variables": {
                     "type": "object",

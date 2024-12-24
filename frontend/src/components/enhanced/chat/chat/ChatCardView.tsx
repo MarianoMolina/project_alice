@@ -5,8 +5,9 @@ import {
   ListItemText,
   List,
   Box,
+  Chip,
 } from '@mui/material';
-import { Person, Functions, Message as MessageIcon, AttachFile, QueryBuilder } from '@mui/icons-material';
+import { Person, Functions, Message as MessageIcon, AttachFile, QueryBuilder, ContactMail } from '@mui/icons-material';
 import { ChatComponentProps, PopulatedAliceChat } from '../../../../types/ChatTypes';
 import { hasAnyReferences, References } from '../../../../types/ReferenceTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
@@ -16,6 +17,7 @@ import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import { MessageType } from '../../../../types/MessageTypes';
 import MessageShortListView from '../../message/message/MessageShortListView';
 import ApiValidationManager from '../../api/ApiValidationManager';
+import theme from '../../../../Theme';
 
 const ChatCardView: React.FC<ChatComponentProps> = ({
   item,
@@ -101,6 +103,26 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
       icon: <QueryBuilder />,
       primary_text: "API validation",
       secondary_text: <ApiValidationManager chatId={item._id} />
+    },
+    {
+      icon: <ContactMail />,
+      primary_text: "User Checkpoints",
+      secondary_text: (
+        !item.default_user_checkpoints || Object.keys(item.default_user_checkpoints).length === 0 ?
+          <Typography variant="body2" color="textSecondary">No user checkpoints defined</Typography> :
+          <Box>
+            {Object.entries(item.default_user_checkpoints).map(([nodeName, checkpoint]) => (
+              checkpoint && (
+                <Chip
+                  key={nodeName}
+                  label={`${nodeName}`}
+                  onClick={() => selectCardItem && checkpoint._id && selectCardItem('UserCheckpoint', checkpoint._id, checkpoint)}
+                  sx={{margin:`${theme.spacing(0.25)} !important`}}
+                />
+              )
+            ))}
+          </Box>
+      )
     },
     {
       icon: <QueryBuilder />,

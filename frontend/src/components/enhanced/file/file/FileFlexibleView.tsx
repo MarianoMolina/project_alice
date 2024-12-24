@@ -75,6 +75,12 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
         }
     }, [item, handleDelete]);
 
+    const handleFileUpdate = (updatedFile: Partial<FileContentReference> | Partial<FileReference>) => {
+        if (updatedFile) {
+            setForm(updatedFile as PopulatedFileReference);
+        }
+    };
+
     const handleOpenDialog = () => {
         openDialog({
             title: 'Confirm File Upload',
@@ -95,18 +101,12 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
             ],
         });
     }
-
-    const handleFileUpdate = (updatedFile: Partial<FileContentReference> | Partial<FileReference>) => {
-        if (updatedFile) {
-            setForm(updatedFile as PopulatedFileReference);
-        }
-    };
     useEffect(() => {
         if (selectedFile) {
-          handleOpenDialog();
+            handleOpenDialog();
         }
-      }, [selectedFile]);
-      
+    }, [selectedFile]);
+
     const handleFileSelect = async () => {
         try {
             const allowedTypes: FileType[] = [FileType.IMAGE, FileType.AUDIO, FileType.VIDEO, FileType.FILE];

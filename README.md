@@ -20,9 +20,18 @@ Alice is an agentic workflow framework that integrates task execution and intell
 > - **NOTE**: If you update to this version, you'll need to reinitialize your database (User settings -> Danger Zone). This update required a lot of changes to the framework, and making it backwards compatible is inefficient at this stage. Keep in mind Project ALice is still in Alpha, and changes should be expected
 
 > v0.3.1:
-> - LM STUDIO: Refactored the manager, but now requires you use a specific build (0.3.5 9-H is functional). Added a status section to the User Settings. 
-> - FRONTEND: Optimized chat interface to reduce memory hog
-> - 
+> - BACKEND: 
+>   - Refactored the LM STUDIO manager, but now requires you use a specific build (0.3.5 9-H is functional), since with the speed of development, the LMS SDK is evolving quickly. 
+>   - Added a 'populated' endpoint to all routes in order to avoid unnecessary bloating
+> - FRONTEND: 
+>   - Optimized item population to reduce memory hog. Now viewing items will require loading them, but having a big database won't break your computer. 
+>   - Added a Context % estimation to the chat interface. 
+>   - Added an API validation for chats and task to check that they have all the necessary APIs available. 
+>   - Added a status section for LM Studio to the User Settings, as well as one for the Workflow module. 
+>   - Added a menu to all item cards and forms with functions like (1) download, (2) copy, (3) duplicate, (4) delete (forms) and (5) edit (cards). 
+> - WORKFLOW:
+>   - Fixes to the communication to the Backend, both to get the new populated routes and to properly use LM Studio
+
 
 > What's next? Planned developments for v0.4 (find detailed info below):
 > - Agent using computer
@@ -67,7 +76,7 @@ The project consists of three main components:
    - Windows: Run `run.bat`
    - Linux/Mac: Run `run.sh`
 
-Alternatively you can just execute run.py using `python run.py` in a commandline while in the repository folder
+Alternatively you can just execute run.py using `python run.py`/`python3 run.py` in a commandline while in the repository folder
 
 This will build and launch the containers. Once ready, the frontend will be accessible at `http://localhost:4000/`. 
 

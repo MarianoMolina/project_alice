@@ -1,4 +1,4 @@
-import { AudioFile, Chat, Computer, Groups, Image, InsertDriveFile, TaskAlt, VideoFile } from "@mui/icons-material";
+import { AudioFile, Chat, Groups, Image, InsertDriveFile, TaskAlt, VideoFile } from "@mui/icons-material";
 import { FileType } from "../types/FileTypes";
 import { ContentType } from "../types/MessageTypes";
 
@@ -24,8 +24,6 @@ export const getMessageTypeIcon = (type?: ContentType) => {
             return <TaskAlt />;
         case ContentType.MULTIPLE:
             return <Groups />;
-        case ContentType.ENTITY_REFERENCE:
-            return <Computer />;
         case ContentType.IMAGE:
             return getFileIcon(FileType.IMAGE);
         case ContentType.VIDEO:

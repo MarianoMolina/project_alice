@@ -10,13 +10,12 @@ import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 import { TextInput } from '../../common/inputs/TextInput';
 import { SelectInput } from '../../common/inputs/SelectInput';
 import { IconSelectInput } from '../../common/inputs/IconSelectInput';
-import Logger from '../../../../utils/Logger';
 import TitleBox from '../../common/inputs/TitleBox';
 
 const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
     item,
     onChange,
-    mode,
+    mode, 
     handleSave,
     handleDelete,
 }) => {
@@ -150,7 +149,6 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
 
     const renderConfigFields = () => {
         if (!form.api_name) return null;
-        Logger.info('API name:', form.api_name);
 
         const data = form.data || {};
 

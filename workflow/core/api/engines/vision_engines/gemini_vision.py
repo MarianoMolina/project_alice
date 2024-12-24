@@ -1,13 +1,29 @@
 import google.generativeai as genai
 from typing import List, Optional
 from workflow.core.data_structures import (
-    MessageDict, ModelConfig, FileReference, get_file_content, References, RoleTypes, MessageGenerators, ContentType
-    )
-from workflow.core.api.engines.vision_engines.vision_model_engine import VisionModelEngine
+    MessageDict,
+    ModelConfig,
+    FileReference,
+    get_file_content,
+    References,
+    RoleTypes,
+    MessageGenerators,
+    ContentType,
+)
+from workflow.core.api.engines.vision_engines.vision_model_engine import (
+    VisionModelEngine,
+)
 from workflow.util import LOGGER
 
-class GeminiVisionEngine(VisionModelEngine):        
-    async def generate_api_response(self, api_data: ModelConfig, file_references: List[FileReference], prompt: str, max_tokens: Optional[int] = None) -> References:
+
+class GeminiVisionEngine(VisionModelEngine):
+    async def generate_api_response(
+        self,
+        api_data: ModelConfig,
+        file_references: List[FileReference],
+        prompt: str,
+        max_tokens: Optional[int] = None,
+    ) -> References:
         """
         Analyzes images using Google's Gemini vision model.
 
@@ -26,22 +42,26 @@ class GeminiVisionEngine(VisionModelEngine):
         content = [prompt]
         for file_ref in file_references:
             image_data = get_file_content(file_ref)
-            LOGGER.debug(f"File type: {file_ref.type}, Data type: {type(image_data)}, Data size: {len(image_data)} bytes")
-            
+            LOGGER.debug(
+                f"File type: {file_ref.type}, Data type: {type(image_data)}, Data size: {len(image_data)} bytes"
+            )
+
             try:
                 image = genai.Image.from_bytes(image_data)
                 content.append(image)
             except Exception as e:
-                LOGGER.warning(f"Failed to process image data for file {file_ref.filename}: {str(e)}")
+                LOGGER.warning(
+                    f"Failed to process image data for file {file_ref.filename}: {str(e)}"
+                )
 
         try:
             response = model.generate_content(
                 content,
                 generation_config=genai.types.GenerationConfig(
                     max_output_tokens=max_tokens
-                )
+                ),
             )
-            
+
             msg = MessageDict(
                 role=RoleTypes.ASSISTANT,
                 content=response.text,
@@ -49,11 +69,18 @@ class GeminiVisionEngine(VisionModelEngine):
                 type=ContentType.TEXT,
                 creation_metadata={
                     "model": api_data.model,
-                    "prompt_tokens": response.usage_metadata.prompt_token_count,
-                    "completion_tokens": response.candidates[0].token_count,
-                    "total_tokens": response.usage_metadata.total_token_count,
-                    "finish_reason": response.candidates[0].finish_reason.name
-                }
+                    "usage": {
+                        "prompt_tokens": response.usage_metadata.prompt_token_count,
+                        "completion_tokens": response.usage_metadata.candidates_token_count,
+                        "total_tokens": response.usage_metadata.total_token_count,
+                    },
+                    "cost": self.calculate_cost(
+                        response.usage_metadata.prompt_token_count,
+                        response.usage_metadata.candidates_token_count,
+                        api_data,
+                    ),
+                    "finish_reason": response.candidates[0].finish_reason.name,
+                },
             )
             return References(messages=[msg])
         except Exception as e:

@@ -2,12 +2,27 @@ import traceback
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletion
 from pydantic import Field
-from typing import List, Optional
+from typing import List, Optional, TypedDict
 from workflow.core.api.engines.api_engine import APIEngine
-from workflow.util import LOGGER, est_messages_token_count, ScoreConfig, est_token_count, MessagePruner, CHAR_PER_TOKEN, MessageApiFormat
+from workflow.util import LOGGER, est_messages_token_count, ScoreConfig, est_token_count, MessagePruner, CHAR_TO_TOKEN, MessageApiFormat
 from workflow.core.data_structures import (
     MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, RoleTypes, MessageGenerators, ToolFunction
     )
+
+class CostDict(TypedDict, total=False):
+    input_cost: float
+    output_cost: float
+    total_cost: float
+    
+class UsageDict(TypedDict, total=False):
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
+
+class MetadataDict(TypedDict, total=False):
+    model: str
+    usage: UsageDict
+    cost: CostDict
 
 class LLMEngine(APIEngine):
     """
@@ -87,7 +102,15 @@ class LLMEngine(APIEngine):
     required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
 
 
-    async def generate_api_response(self, api_data: ModelConfig, messages: List[MessageApiFormat], system: Optional[str] = None, tools: Optional[List[ToolFunction]] = None, max_tokens: Optional[int] = None, tool_choice: Optional[str] = 'auto', n: Optional[int] = 1, **kwargs) -> References:
+    async def generate_api_response(self, 
+                                    api_data: ModelConfig, 
+                                    messages: List[MessageApiFormat], 
+                                    system: Optional[str] = None, 
+                                    tools: Optional[List[ToolFunction]] = None, 
+                                    tool_choice: Optional[str] = 'auto', 
+                                    n: Optional[int] = 1, 
+                                    **kwargs
+                                    ) -> References:
         """
         Generates the API response for the task, using the provided API data and messages.
 
@@ -139,7 +162,7 @@ class LLMEngine(APIEngine):
 
         if estimated_tokens > api_data.ctx_size:
             pruner = MessagePruner(
-                max_total_size=api_data.ctx_size * CHAR_PER_TOKEN,
+                max_total_size=api_data.ctx_size * CHAR_TO_TOKEN,
                 score_config=ScoreConfig(),
                 )
             LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning. ")
@@ -154,7 +177,7 @@ class LLMEngine(APIEngine):
             api_params = {
                 "model": api_data.model,
                 "messages": messages,
-                "max_tokens": max_tokens,
+                "max_tokens": api_data.max_tokens_gen,
                 "temperature": api_data.temperature,
                 "n": n, 
                 "stream": False
@@ -197,7 +220,7 @@ class LLMEngine(APIEngine):
                     "usage": response.usage.model_dump(),
                     "finish_reason": choice.finish_reason,
                     "system_fingerprint": response.system_fingerprint,
-                    "cost": self.calculate_cost(response.usage.prompt_tokens, response.usage.completion_tokens, response.model),
+                    "cost": self.calculate_cost(response.usage.prompt_tokens, response.usage.completion_tokens, api_data),
                     "estimated_tokens": estimated_tokens
                 }
             )
@@ -208,7 +231,7 @@ class LLMEngine(APIEngine):
             LOGGER.error(traceback.format_exc())
             raise
 
-    def calculate_cost(self, prompt_tokens: int, completion_tokens: int, model: str) -> float:
+    def calculate_cost(self, prompt_tokens: int, completion_tokens: int, model_config: ModelConfig) -> CostDict:
         """
         Calculate the cost of the API call based on token usage and model.
 
@@ -220,18 +243,12 @@ class LLMEngine(APIEngine):
         Returns:
             float: The calculated cost of the API call.
         """
-        pricing = {
-            'gpt-3.5-turbo': (0.0015, 0.002),  # (input_price, output_price) per 1K tokens
-            'gpt-4': (0.03, 0.06),
-            'gpt-4-32k': (0.06, 0.12),
-            "llama3-70b-8192": (0.00059, 0.00079),
-            "mixtral-8x7b-32768": (0.00024, 0.00024),
-            "llama3-8b-8192": (0.00005, 0.00008),
-            "gemma-7b-it": (0.00007, 0.00007),
+        input_cost_per_mill = model_config.model_costs.input_token_cost_per_million if not model_config.use_cache else model_config.model_costs.cached_input_token_cost_per_million
+        input_cost = (prompt_tokens / 1000000) * input_cost_per_mill
+        output_cost = (completion_tokens / 1000000) * model_config.model_costs.output_token_cost_per_million
+        output = {
+            "input_cost": input_cost,
+            "output_cost": output_cost,
+            "total_cost": input_cost + output_cost
         }
-
-        model_pricing = pricing.get(model, (0.0, 0.0))
-        input_cost = (prompt_tokens / 1000) * model_pricing[0]
-        output_cost = (completion_tokens / 1000) * model_pricing[1]
-
-        return input_cost + output_cost
+        return output

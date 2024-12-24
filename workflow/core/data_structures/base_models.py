@@ -22,9 +22,7 @@ class ContentType(str, Enum):
     FILE = FileType.FILE.value
     TEXT = 'text'
     TASK_RESULT = 'task_result'
-    ENTITY_REFERENCE = 'entity_reference'
     MULTIPLE = 'multiple'
-    CODE_EXECUTION = 'code_execution'
 
 RouteMapTuple = Tuple[Union[str, None], bool]
 RouteMap = Dict[int, RouteMapTuple]

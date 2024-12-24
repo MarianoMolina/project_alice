@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Slider, Typography } from '@mui/material';
-import { AliceModel, getDefaultModelForm, ModelComponentProps, ModelType, ModelConfig, ChatTemplateTokens } from '../../../../types/ModelTypes';
+import { AliceModel, getDefaultModelForm, ModelComponentProps, ModelType, ModelConfig, ChatTemplateTokens, ModelCosts } from '../../../../types/ModelTypes';
 import { ApiName } from '../../../../types/ApiTypes';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 import { apiNameIcons, modelTypeIcons } from '../../../../utils/ApiUtils';
@@ -56,6 +56,19 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
         });
     }, []);
 
+    const handleCostsChange = useCallback((field: keyof ModelCosts, value: number) => {
+        setForm(prevForm => {
+            const defaultCosts = getDefaultModelForm().model_costs;
+            return {
+                ...prevForm,
+                model_costs: {
+                    ...(prevForm.model_costs ?? defaultCosts),
+                    [field]: value
+                }
+            } as Partial<AliceModel>;
+        });
+    }, []);
+
     const handlePromptConfigChange = useCallback((field: keyof ChatTemplateTokens, value: string) => {
         setForm(prevForm => {
             const defaultForm = getDefaultModelForm();
@@ -87,6 +100,7 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
             handleDelete(item);
         }
     }, [item, handleDelete]);
+
     return (
         <GenericFlexibleView
             elementType='Model'
@@ -170,6 +184,14 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                     onChange={(value) => handleConfigChange('use_cache', value ?? false)}
                     disabled={!isEditMode}
                 />
+                <NumericInput
+                    name='max_tokens_gen'
+                    label="Max tokens"
+                    value={form.config_obj?.max_tokens_gen ?? 4096}
+                    description='The maximum number of tokens to generate in a single request.'
+                    onChange={(value) => handleConfigChange('max_tokens_gen', value ?? 4096)}
+                    disabled={!isEditMode}
+                />
                 <BorderedBox title="Prompt Configuration">
                     <TextInput
                         name='bos'
@@ -214,7 +236,33 @@ const ModelFlexibleView: React.FC<ModelComponentProps> = ({
                         disabled={!isEditMode}
                     />
                 </BorderedBox>
+            </BorderedBox>
 
+            <BorderedBox title="Model Costs">
+                <NumericInput
+                    name='input_token_cost'
+                    label="Input Token Cost (per million)"
+                    value={form.model_costs?.input_token_cost_per_million ?? 0.15}
+                    description='Cost per million tokens for input/prompt tokens'
+                    onChange={(value) => handleCostsChange('input_token_cost_per_million', value ?? 0.15)}
+                    disabled={!isEditMode}
+                />
+                <NumericInput
+                    name='cached_input_token_cost'
+                    label="Cached Input Token Cost (per million)"
+                    value={form.model_costs?.cached_input_token_cost_per_million ?? 0.075}
+                    description='Cost per million tokens for cached input tokens'
+                    onChange={(value) => handleCostsChange('cached_input_token_cost_per_million', value ?? 0.075)}
+                    disabled={!isEditMode}
+                />
+                <NumericInput
+                    name='output_token_cost'
+                    label="Output Token Cost (per million)"
+                    value={form.model_costs?.output_token_cost_per_million ?? 0.6}
+                    description='Cost per million tokens for generated output tokens'
+                    onChange={(value) => handleCostsChange('output_token_cost_per_million', value ?? 0.6)}
+                    disabled={!isEditMode}
+                />
             </BorderedBox>
 
         </GenericFlexibleView>

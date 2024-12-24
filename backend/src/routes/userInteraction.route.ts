@@ -7,8 +7,8 @@ import { createUserInteraction, updateUserInteraction } from '../utils/userInter
 import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 
 const router = Router();
-router.use(auth);
 router.use(rateLimiterMiddleware);
+router.use(auth);
 const generatedRoutes = createRoutes<IUserInteractionDocument, 'UserInteraction'>(UserInteraction, 'UserInteraction', {
     createItem: async (data, userId) => {
         return await createUserInteraction(data, userId);

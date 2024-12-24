@@ -129,7 +129,6 @@ const MessageFlexibleView: React.FC<MessageComponentProps> = ({
                     { value: ContentType.FILE, label: 'File' },
                     { value: ContentType.TASK_RESULT, label: 'Task Result' },
                     { value: ContentType.MULTIPLE, label: 'Multiple' },
-                    { value: ContentType.ENTITY_REFERENCE, label: 'Entity Reference' }
                 ]}
                 disabled={!isEditMode}
                 description='Select the type of content'

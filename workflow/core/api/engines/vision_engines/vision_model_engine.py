@@ -5,10 +5,12 @@ from openai import AsyncOpenAI
 from workflow.core.data_structures import (
     MessageDict, ModelConfig, FileReference, get_file_content, ApiType, References, FunctionParameters, ParameterDefinition, 
     RoleTypes, MessageGenerators, ContentType)
-from workflow.core.api.engines.api_engine import APIEngine
+from workflow.core.api.engines.llm_engines import LLMEngine
 from workflow.util import LOGGER
 
-class VisionModelEngine(APIEngine):
+# TODO: Vision model apis tend to charge images at a flat "token" rate, so we should consider adding a cost calculation method to the VisionModelEngine class.
+
+class VisionModelEngine(LLMEngine):
     """
     Vision analysis API engine implementing the OpenAI GPT-4V interface.
     
@@ -109,6 +111,7 @@ class VisionModelEngine(APIEngine):
                 creation_metadata={
                     "model": response.model,
                     "usage": response.usage.model_dump(),
+                    "costs": self.calculate_cost(response.usage.prompt_tokens, response.usage.completion_tokens, api_data),
                     "finish_reason": response.choices[0].finish_reason
                 }
             )

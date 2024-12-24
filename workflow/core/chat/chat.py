@@ -7,7 +7,7 @@ from workflow.core.data_structures import (
     UserInteraction, UserCheckpoint, Prompt, User, 
     BaseDataStructure, DataCluster, InteractionOwner,
     InteractionOwnerType, MessageGenerators, RoleTypes,
-    TaskResponse, CodeExecution
+    TaskResponse, CodeExecution, References
 )
 from workflow.core.agent import AliceAgent
 from workflow.core.api import APIManager
@@ -273,7 +273,7 @@ class AliceChat(BaseDataStructure):
                 target_message.references.task_responses.extend(task_responses)
                 return target_message
             elif next_step == CheckpointType.CODE_EXECUTION:
-                code_blocks = self.alice_agent.collect_code_blocs([target_message])
+                code_blocks = self.alice_agent.collect_code_blocks([target_message])
                 if code_blocks:
                     code_executions: List[CodeExecution] = await self._handle_code_execution(
                         [target_message]
@@ -347,6 +347,8 @@ class AliceChat(BaseDataStructure):
                         llm_message.references.tool_calls
                     )
                     if tool_responses:
+                        if not llm_message.references.task_responses:
+                            llm_message.references.task_responses = []
                         llm_message.references.task_responses.extend(tool_responses)
                 elif can_tool_call and isinstance(can_tool_call, UserInteraction):
                     if not llm_message.references.user_interactions:
@@ -358,6 +360,8 @@ class AliceChat(BaseDataStructure):
                 if can_execute_code and not isinstance(can_execute_code, UserInteraction):
                     code_executions: List[CodeExecution] = await self._handle_code_execution([llm_message], False)
                     if code_executions:
+                        if not llm_message.references.code_executions:
+                            llm_message.references.code_executions = []
                         llm_message.references.code_executions.extend(code_executions)
                 elif can_execute_code and isinstance(can_execute_code, UserInteraction):
                     if not llm_message.references.user_interactions:
@@ -395,7 +399,7 @@ class AliceChat(BaseDataStructure):
     def _can_execute_code(self, message: MessageDict) -> Union[bool, UserInteraction]:
         """Check if code execution is allowed and return a pending interaction if needed."""
         
-        code_blocks = self.alice_agent.collect_code_blocs([message])
+        code_blocks = self.alice_agent.collect_code_blocks([message])
         if not code_blocks or not message.references or not message.references.code_executions or self.alice_agent.has_code_exec == 0: # Disabled
             return False
         if self.alice_agent.has_code_exec == 2:  # WITH_PERMISSION

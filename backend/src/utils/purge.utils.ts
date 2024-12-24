@@ -20,9 +20,7 @@ import EntityReference from '../models/entityReference.model';
 import ToolCall from '../models/toolCall.model';
 import CodeExecution from '../models/codeExecution.model';
 import APIConfig from '../models/apiConfig.model';
-
-const workflow_port = process.env.WORKFLOW_PORT_DOCKER || 8000;
-const workflow_name = process.env.WORKFLOW_NAME || 'workflow';
+import { WORKFLOW_HOST, WORKFLOW_PORT_DOCKER } from './const';
 
 export async function purgeAndReinitialize(userId: string, token: string): Promise<void> {
   Logger.info('Purging data for userId:', userId);
@@ -77,7 +75,7 @@ export async function purgeAndReinitialize(userId: string, token: string): Promi
     Logger.info('All collections purged');
 
     // Reinitialize the user database
-    const workflowUrl = `http://${workflow_name}:${workflow_port}/initialize_user_database`;
+    const workflowUrl = `http://${WORKFLOW_HOST}:${WORKFLOW_PORT_DOCKER}/initialize_user_database`;
     await axios.post(workflowUrl, {}, {
       headers: {
         Authorization: token

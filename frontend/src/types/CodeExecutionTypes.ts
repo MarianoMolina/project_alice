@@ -2,6 +2,7 @@ import { convertToBaseDatabaseObject, convertToEmbeddable, convertToPopulatedEmb
 export interface CodeBlock {
     code: string;
     language: string;
+    setup_commands?: string;
 }
 
 export interface CodeOutput {

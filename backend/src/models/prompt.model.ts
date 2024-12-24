@@ -7,8 +7,8 @@ import mongooseAutopopulate from 'mongoose-autopopulate';
 const promptSchema = new Schema<IPromptDocument, IPromptModel>({
   name: { type: String, required: true },
   content: { type: String, required: true },
-  created_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true },
-  updated_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true },
+  created_by: { type: Schema.Types.ObjectId, ref: 'User' },
+  updated_by: { type: Schema.Types.ObjectId, ref: 'User' },
   is_templated: { type: Boolean, default: false },
   parameters: {
     type: functionParametersSchema,

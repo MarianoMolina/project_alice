@@ -7,8 +7,8 @@ import { Router } from 'express';
 import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 
 const router = Router();
-router.use(auth);
 router.use(rateLimiterMiddleware);
+router.use(auth);
 const MessageRoutes = createRoutes<IMessageDocument, 'Message'>(Message, 'Message', {
   createItem: async (data, userId) => {
     return await createMessage(data, userId);

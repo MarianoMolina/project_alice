@@ -5,17 +5,7 @@ import { makeStyles } from '@mui/styles';
 export const useStyles = makeStyles((theme: Theme) => ({
     nodeContainer: {
         position: 'relative',
-        paddingLeft: theme.spacing(3),
         width: '100%',
-        '&::before': {
-            content: '""',
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            bottom: 0,
-            width: 2,
-            backgroundColor: theme.palette.divider,
-        }
     },
     nodeContent: {
         position: 'relative',
@@ -26,7 +16,7 @@ export const useStyles = makeStyles((theme: Theme) => ({
             top: theme.spacing(3),
             width: theme.spacing(3),
             height: 2,
-            backgroundColor: theme.palette.divider,
+            backgroundColor: theme.palette.secondary.light,
         }
     },
     nodeHeader: {

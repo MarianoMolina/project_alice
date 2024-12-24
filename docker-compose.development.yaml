@@ -1,10 +1,8 @@
 services:
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
-    env_file:
-      - .env
+      context: .
+      dockerfile: frontend/Dockerfile.dev
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT_DOCKER}"
     depends_on:
@@ -20,24 +18,25 @@ services:
       NODE_ENV: ${NODE_ENV:-development}
       CHOKIDAR_USEPOLLING: "true"
       WATCHPACK_POLLING: "true"
-      PORT: ${FRONTEND_PORT_DOCKER:-4000}
+      PORT: ${FRONTEND_PORT_DOCKER:-3000}
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
     ports:
-      - "${BACKEND_PORT}:${BACKEND_PORT_DOCKER}"
+      - "${REACT_APP_BACKEND_PORT}:${BACKEND_PORT_DOCKER}"
     depends_on:
       mongo:
         condition: service_started
       volume-init:
         condition: service_completed_successfully
+    env_file:
+      - .env
     volumes:
       - ./backend:/app
       - /app/node_modules
       - /app/dist
-      - ./.env:/app/.env
       - logs:/app/logs
       - shared-uploads:/app/shared-uploads
     environment:
@@ -45,7 +44,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${BACKEND_PORT_DOCKER}/api/health"]
+      test: ["CMD", "curl", "-f", "http://${REACT_APP_BACKEND_HOST:-backend}:${BACKEND_PORT_DOCKER}/api/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -54,10 +53,11 @@ services:
   workflow:
     build:
       context: ./workflow
+      dockerfile: Dockerfile
     env_file:
       - .env
     ports:
-      - "${WORKFLOW_PORT}:${WORKFLOW_PORT_DOCKER}"
+      - "${REACT_APP_WORKFLOW_PORT}:${WORKFLOW_PORT_DOCKER}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - logs:/app/logs
@@ -74,12 +74,11 @@ services:
         condition: service_healthy
     environment:
       - PYTHONPATH=/app
-      - HOST=host.docker.internal
       - REDIS_URL=redis://redis:6379/0
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${WORKFLOW_PORT_DOCKER}/health"]
+      test: ["CMD", "curl", "-f", "http://${REACT_APP_WORKFLOW_HOST:-workflow}:${WORKFLOW_PORT_DOCKER}/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -137,7 +136,15 @@ services:
     image: mybash:latest
     command: ["bash"]
 
+  javascript_image:
+    build:
+      context: .
+      dockerfile: workflow/Dockerfile.js
+    image: myjs:latest
+    command: ["bash"]
+
 volumes:
+  mongo_data:
   logs:
     driver: local
     driver_opts:
@@ -150,7 +157,6 @@ volumes:
       type: none
       o: bind
       device: ${COMPOSE_PROJECT_DIR}/shared-uploads
-  mongo_data:
   model_cache:
     driver: local
     driver_opts:

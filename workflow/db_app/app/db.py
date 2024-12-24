@@ -4,8 +4,8 @@ from bson import ObjectId
 from typing import Dict, Any, Optional, Literal, Union
 from pydantic import BaseModel, Field, ConfigDict
 from workflow.core.tasks import available_task_types
-from workflow.core import AliceAgent, AliceChat, Prompt, AliceModel, AliceTask, API, User, MessageDict, FileReference, FileContentReference
-from workflow.util.const import BACKEND_PORT, HOST
+from workflow.core import AliceChat, AliceTask, API, MessageDict, FileReference, FileContentReference
+from workflow.util.const import BACKEND_PORT, DOCKER_HOST
 from workflow.core.data_structures import EntityType
 from workflow.util import LOGGER
 
@@ -42,7 +42,7 @@ class BackendAPI(BaseModel):
         >>> api = BackendAPI(base_url="http://api.example.com", user_token="your_token_here")
         >>> prompts = await api.get_prompts()
     """
-    base_url: Literal[f"http://{HOST}:{BACKEND_PORT}/api"] = Field(f"http://{HOST}:{BACKEND_PORT}/api", description="The base URL of the backend API", frozen=True)
+    base_url: Literal[f"http://{DOCKER_HOST}:{BACKEND_PORT}/api"] = Field(f"http://{DOCKER_HOST}:{BACKEND_PORT}/api", description="The base URL of the backend API", frozen=True)
     user_data: dict = Field(default={
         "user_token": None, 
         "user_obj": None

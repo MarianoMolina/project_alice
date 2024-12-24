@@ -6,7 +6,7 @@ from anthropic.types import TextBlock, ToolUseBlock, ToolParam, Message
 from workflow.core.data_structures import ToolCall, ToolCallConfig, ToolFunction
 from workflow.core.api.engines.llm_engines.llm_engine import LLMEngine
 from workflow.core.data_structures import MessageDict, ContentType, ModelConfig, References, RoleTypes, MessageGenerators
-from workflow.util import LOGGER, est_messages_token_count, est_token_count, CHAR_PER_TOKEN, MessagePruner, ScoreConfig, MessageApiFormat
+from workflow.util import LOGGER, est_messages_token_count, est_token_count, CHAR_TO_TOKEN, MessagePruner, ScoreConfig, MessageApiFormat
 from workflow.core.api.engines.llm_engines.anthropic_tool_util import ToolNameMapping
 
 ANTHROPIC_PRICING_1k = {
@@ -92,6 +92,10 @@ class LLMAnthropic(LLMEngine):
             LOGGER.warning("First message is not from user. Adjusting order.")
             final_adapted.insert(0, {"role": RoleTypes.USER, "content": "Please continue."})
 
+        if final_adapted and final_adapted[-1]["role"] == RoleTypes.ASSISTANT:
+            LOGGER.warning("Last message is from assistant. Adjusting order.")
+            final_adapted.append({"role": RoleTypes.USER, "content": "Please continue."})
+
         return final_adapted
     
     def _convert_into_tool_params(self, tools: List[ToolFunction]) -> List[ToolParam]:
@@ -120,7 +124,8 @@ class LLMAnthropic(LLMEngine):
             )
         )
         
-    async def generate_api_response(self, api_data: ModelConfig, messages: List[MessageApiFormat], system: Optional[str] = None, tools: Optional[List[ToolFunction]] = None, max_tokens: Optional[int] = None, tool_choice: str = 'auto', n: Optional[int] = 1, **kwargs) -> References:
+    async def generate_api_response(self, api_data: ModelConfig, messages: List[MessageApiFormat], system: Optional[str] = None, 
+                                    tools: Optional[List[ToolFunction]] = None, tool_choice: str = 'auto', n: Optional[int] = 1, **kwargs) -> References:
         """
         Generate a chat completion response using Anthropic's API.
 
@@ -159,7 +164,7 @@ class LLMAnthropic(LLMEngine):
         if estimated_tokens > api_data.ctx_size:
             LOGGER.warning(f"Estimated tokens ({estimated_tokens}) exceed context size ({api_data.ctx_size}) of model {api_data.model}. Pruning.")
             pruner = MessagePruner(
-                max_total_size=api_data.ctx_size * CHAR_PER_TOKEN,
+                max_total_size=api_data.ctx_size * CHAR_TO_TOKEN,
                 score_config=ScoreConfig(),
             )
             messages = await pruner.prune(messages, self, api_data)
@@ -175,7 +180,7 @@ class LLMAnthropic(LLMEngine):
         api_params = {
             "model": api_data.model,
             "messages": adjusted_messages,
-            "max_tokens": max_tokens,
+            "max_tokens": api_data.max_tokens_gen,
             "temperature": api_data.temperature,
             "system": system,
         }
@@ -200,8 +205,6 @@ class LLMAnthropic(LLMEngine):
                         tool_calls = []
                     tool_calls.append(self._process_tool_call(content))
 
-            cost = self.calculate_cost(response.usage.input_tokens, response.usage.output_tokens, response.model)
-
             msg = MessageDict(
                 role=RoleTypes.ASSISTANT,
                 content=message_text,
@@ -213,7 +216,7 @@ class LLMAnthropic(LLMEngine):
                     "usage": response.usage.model_dump(),
                     "finish_reason": response.stop_reason,
                     "system_fingerprint": response.id,
-                    "cost": cost,
+                    "cost": self.calculate_cost(response.usage.input_tokens, response.usage.output_tokens, api_data),
                     "estimated_tokens": estimated_tokens
                 }
             )
@@ -235,31 +238,3 @@ class LLMAnthropic(LLMEngine):
             List[ToolParam]: List of Anthropic-specific tool parameters.
         """
         return [(tool if isinstance(tool, ToolFunction) else ToolFunction(**tool)).convert_to_tool_params() for tool in tools]
-
-    def calculate_cost(self, input_tokens: int, output_tokens: int, model: str) -> float:
-        """
-        Calculate the cost of the API call based on Anthropic's pricing.
-
-        This method uses Anthropic-specific pricing information to calculate
-        the cost of the API call.
-
-        Args:
-            input_tokens (int): Number of tokens in the input.
-            output_tokens (int): Number of tokens in the output.
-            model (str): The Anthropic model used for the API call.
-
-        Returns:
-            float: The calculated cost of the API call.
-
-        Note:
-            If the model is not found in the pricing information, it returns 0.0
-            and logs a warning.
-        """
-        if model in ANTHROPIC_PRICING_1k:
-            input_cost_per_1k, output_cost_per_1k = ANTHROPIC_PRICING_1k[model]
-            input_cost = (input_tokens / 1000) * input_cost_per_1k
-            output_cost = (output_tokens / 1000) * output_cost_per_1k
-            return input_cost + output_cost
-        else:
-            LOGGER.warning(f"Cost calculation not available for model {model}")
-            return 0.0

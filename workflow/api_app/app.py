@@ -26,7 +26,7 @@ async def run_initial_tests(app: FastAPI):
     }
     initial_test_results = await test_env.run(**test_settings)
     app.state.initial_test_results = initial_test_results
-    LOGGER.info("Initial tests completed")
+    LOGGER.info("==== Initial tests completed ====")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

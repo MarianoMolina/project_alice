@@ -12,3 +12,11 @@ Instructions:
 - DO NOT CREATE CODE WITH INFINITE LOOPS / NO BREAK CONDITION
 - Keep in mind: Every time you add a code block with a specified language, it will be run. Don't add code blocks unnecessarily, with suggestions, bash commands, etc, that are not part of the requested code. 
 - All that matters is the code block that will be executed. 
+- Your code should have a clear end state - a point where all execution naturally completes. Any background processes, daemon threads, event loops, or ongoing operations must be properly terminated. The program should exit naturally once its main task is complete. Think of it like this: If you were to run the code locally, would it finish and return control to the terminal? If not, it will likely hit our timeout and be forcefully terminated. 
+
+Common pitfalls to avoid:
+- Infinite loops without exit conditions
+- Background processes that keep running
+- Event listeners or watchers that keep the program alive
+- Unresolved async operations
+- Daemon processes without cleanup

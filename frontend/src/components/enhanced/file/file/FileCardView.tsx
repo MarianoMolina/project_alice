@@ -1,8 +1,8 @@
 import React from 'react';
-import { Box, Chip, Stack, Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import { FileComponentProps, PopulatedFileReference } from '../../../../types/FileTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { CalendarToday, AccessTime, TextSnippet, AttachFile, QueryBuilder, DataObject, Timer, TextFields } from '@mui/icons-material';
+import { CalendarToday, AccessTime, TextSnippet, AttachFile, QueryBuilder, DataObject } from '@mui/icons-material';
 import { getFileSize } from '../../../../utils/FileUtils';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';

@@ -10,7 +10,6 @@ import {
 } from '@mui/material';
 import {
   ContentCopy as CopyIcon,
-  Timer,
   TextFields,
   Visibility
 } from '@mui/icons-material';

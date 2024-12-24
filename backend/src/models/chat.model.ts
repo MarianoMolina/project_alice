@@ -54,8 +54,8 @@ const aliceChatSchema = new Schema<IAliceChatDocument, IAliceChatModel>({
     of: { type: Schema.Types.ObjectId, ref: 'UserCheckpoint', autopopulate: true },
     default: () => new Map(),
   },
-  created_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true },
-  updated_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true }
+  created_by: { type: Schema.Types.ObjectId, ref: 'User'},
+  updated_by: { type: Schema.Types.ObjectId, ref: 'User'}
 }, { timestamps: true });
 
 aliceChatSchema.methods.apiRepresentation = function (this: IAliceChatDocument) {

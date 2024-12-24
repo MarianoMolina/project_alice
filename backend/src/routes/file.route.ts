@@ -44,8 +44,8 @@ customRouter.get('/serve/:id', async (req: AuthRequest, res: Response) => {
 
 // Combine generated and custom routes
 const combinedRouter = Router();
-combinedRouter.use(auth); // Apply auth middleware to all routes
 combinedRouter.use(rateLimiterMiddleware);
+combinedRouter.use(auth);
 combinedRouter.use('/', generatedRouter);
 combinedRouter.use('/', customRouter);
 

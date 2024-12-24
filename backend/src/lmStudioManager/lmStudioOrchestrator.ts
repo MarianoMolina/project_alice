@@ -54,7 +54,7 @@ export class LMStudioRouteManager {
                 // Queue periodic cleanup
                 this.requestQueue.enqueue(
                     async () => {
-                        Logger.info('Performing periodic inactive model cleanup');
+                        Logger.debug('Performing periodic inactive model cleanup');
                         await this.lmStudioManager.unloadInactiveModels();
                     },
                     'periodic-cleanup'

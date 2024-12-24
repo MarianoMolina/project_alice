@@ -34,7 +34,6 @@ export interface ITask extends DataClusterHolder {
   node_end_code_routing: Map<string, Map<string, any>> | null;
   exit_codes: Map<string, string>;
   exit_code_response_map: Map<string, number> | null;
-  valid_languages: string[];
   created_by: Types.ObjectId | IUserDocument;
   updated_by: Types.ObjectId | IUserDocument;
 }

@@ -1,7 +1,7 @@
 from typing import List
 from pydantic import Field
 from workflow.core.tasks.task import AliceTask
-from workflow.core.agent.agent import AliceAgent
+from workflow.core.agent import AliceAgent
 from workflow.core.data_structures import (
     FunctionParameters, ParameterDefinition, MessageDict, ApiType, References, NodeResponse, TasksEndCodeRouting
 )

@@ -4,8 +4,8 @@ import platform
 import os
 import sys
 import logging
-from pathlib import Path
 import signal
+from pathlib import Path
 from typing import Optional, Tuple, List
 
 class DirectoryManager:
@@ -68,14 +68,15 @@ class THPHandler:
                 return result.returncode == 0 and "[madvise]" in result.stdout
             elif self.system == "Linux":
                 result = subprocess.run(
-                    ["cat", "/sys/kernel/mm/transparent_hugepage/enabled"],
+                    ["sudo", "cat", "/sys/kernel/mm/transparent_hugepage/enabled"],
                     capture_output=True,
                     text=True
                 )
                 return result.returncode == 0 and "[madvise]" in result.stdout
             elif self.system == "Windows":
+                # Try reading the setting directly first
                 result = subprocess.run(
-                    ["wsl", "cat", "/sys/kernel/mm/transparent_hugepage/enabled"],
+                    ["wsl", "--exec", "cat", "/sys/kernel/mm/transparent_hugepage/enabled"],
                     capture_output=True,
                     text=True
                 )
@@ -123,35 +124,41 @@ class THPHandler:
                 subprocess.run(["docker", "rm", "-f", container_name], 
                              capture_output=True)
                 
-                # Verify the settings took effect
-                return self._get_current_thp_setting()
             elif self.system == "Linux":
                 commands = [
-                    ["sh", "-c", "echo madvise | tee /sys/kernel/mm/transparent_hugepage/enabled"],
-                    ["sh", "-c", "echo madvise | tee /sys/kernel/mm/transparent_hugepage/defrag"]
+                    ["sudo", "sh", "-c", "echo madvise > /sys/kernel/mm/transparent_hugepage/enabled"],
+                    ["sudo", "sh", "-c", "echo madvise > /sys/kernel/mm/transparent_hugepage/defrag"]
                 ]
-            elif self.system == "Windows":
-                commands = [
-                    ["wsl", "sh", "-c", "echo madvise | tee /sys/kernel/mm/transparent_hugepage/enabled"],
-                    ["wsl", "sh", "-c", "echo madvise | tee /sys/kernel/mm/transparent_hugepage/defrag"]
-                ]
-            else:
-                self.logger.error(f"Unsupported operating system: {self.system}")
-                return False
-
-            if self.system in ["Linux", "Windows"]:
                 for cmd in commands:
-                    self.logger.debug(f"Running command: {cmd}")
                     result = subprocess.run(cmd, capture_output=True, text=True)
                     if result.returncode != 0:
                         self.logger.error(f"Command failed: {result.stderr}")
                         return False
-                return self._get_current_thp_setting()
+                        
+            elif self.system == "Windows":
+                # Let's try something simpler - use WSL's built-in root user
+                commands = [
+                    'echo madvise | tee /sys/kernel/mm/transparent_hugepage/enabled',
+                    'echo madvise | tee /sys/kernel/mm/transparent_hugepage/defrag'
+                ]
+                
+                for cmd in commands:
+                    # Use WSL's root user directly
+                    result = subprocess.run(
+                        ["wsl", "-u", "root", "-e", "sh", "-c", cmd],
+                        capture_output=True,
+                        text=True
+                    )
+                    if result.returncode != 0:
+                        self.logger.error(f"Command failed: {result.stderr}")
+                        return False
+
+            return self._get_current_thp_setting()
 
         except Exception as e:
             self.logger.error(f"Error configuring THP: {e}")
             return False
-                
+                        
 class LMStudioPathFinder:
     """
     Handles LM Studio CLI discovery, setup, and server management.
@@ -414,17 +421,6 @@ class RunEnvironment:
         if not self.dir_manager.ensure_directories(self.required_dirs):
             self.logger.error("Failed to set up one or more required directories")
             sys.exit(1)
-    
-    def is_docker_running(self):
-        """Check if Docker daemon is running."""
-        try:
-            subprocess.run(["docker", "info"], 
-                         stdout=subprocess.DEVNULL, 
-                         stderr=subprocess.DEVNULL, 
-                         check=True)
-            return True
-        except subprocess.CalledProcessError:
-            return False
 
     def start_docker(self):
         """Start Docker based on platform."""
@@ -440,7 +436,75 @@ class RunEnvironment:
         except Exception as e:
             self.logger.error(f"Failed to start Docker: {e}")
             sys.exit(1)
+            
+    def handle_linux_specific(self):
+        """Handle Docker startup for Linux systems with proper error handling."""
+        try:
+            # First verify we can use sudo (this command should always work without password)
+            try:
+                subprocess.run(
+                    ["sudo", "-n", "true"],
+                    check=True,
+                    stderr=subprocess.DEVNULL
+                )
+            except subprocess.CalledProcessError:
+                self.logger.error("""
+    Sudo access required to manage Docker service.
+    Please ensure this script can run with sudo privileges.
+    You may need to configure NOPASSWD in sudoers or run the script with sudo.""")
+                sys.exit(1)
 
+            # Check if Docker service exists
+            service_check = subprocess.run(
+                ["sudo", "systemctl", "list-unit-files", "docker.service"],
+                capture_output=True,
+                text=True
+            )
+            
+            if "docker.service" not in service_check.stdout:
+                self.logger.error("Docker service not found. Please ensure Docker is installed.")
+                sys.exit(1)
+                
+            # Always use sudo to check and manage Docker
+            status = subprocess.run(
+                ["sudo", "systemctl", "is-active", "docker"],
+                capture_output=True,
+                text=True
+            )
+            
+            if status.stdout.strip() != "active":
+                self.logger.info("Docker service not running. Starting with sudo...")
+                try:
+                    subprocess.run(
+                        ["sudo", "systemctl", "start", "docker"],
+                        check=True,
+                        stderr=subprocess.PIPE
+                    )
+                    self.logger.info("Docker service started successfully")
+                    
+                    # Give the service a moment to fully initialize
+                    time.sleep(5)
+                    
+                except subprocess.CalledProcessError as e:
+                    self.logger.error("Failed to start Docker service even with sudo")
+                    sys.exit(1)
+                    
+                # Verify the service started successfully
+                verify_status = subprocess.run(
+                    ["sudo", "systemctl", "is-active", "docker"],
+                    capture_output=True,
+                    text=True
+                )
+                if verify_status.stdout.strip() != "active":
+                    raise RuntimeError("Failed to start Docker service")
+                    
+        except FileNotFoundError as e:
+            self.logger.error(f"Required system command not found: {e.filename}")
+            sys.exit(1)
+        except Exception as e:
+            self.logger.error(f"Unexpected error managing Docker service: {e}")
+            sys.exit(1)
+            
     def wait_for_docker(self, timeout=300):
         """Wait for Docker to be ready with timeout."""
         self.logger.info("Waiting for Docker to start...")
@@ -454,21 +518,43 @@ class RunEnvironment:
                 self.logger.error("Docker failed to start within timeout period")
                 sys.exit(1)
                 
-            # Clear the previous line and write the new status
+            # For macOS, check Docker Desktop status
+            if self.system == "Darwin":
+                try:
+                    subprocess.run(["docker", "version"], 
+                            stdout=subprocess.DEVNULL, 
+                            stderr=subprocess.DEVNULL,
+                            check=True)
+                except subprocess.CalledProcessError:
+                    pass
+                    
             print(f"\rDocker is not ready yet. Waiting... [{iteration}/{max_iterations}]", end='', flush=True)
             iteration += 1
             time.sleep(check_interval)
-        
-        # Clear the waiting message and show ready message on new line
-        print("\r" + " " * 70 + "\r", end='')  # Clear the line
-        self.logger.info("Docker is ready!")
-
+            
+    def is_docker_running(self):
+        """Check if Docker daemon is running."""
+        try:
+            cmd = ["docker", "info"] if self.system in ["Darwin", "Windows"] else ["sudo", "docker", "info"]
+            subprocess.run(cmd, 
+                        stdout=subprocess.DEVNULL, 
+                        stderr=subprocess.DEVNULL, 
+                        check=True)
+            return True
+        except subprocess.CalledProcessError:
+            return False
 
     def run_docker_compose(self):
         """Run docker-compose up with proper error handling."""
         self.logger.info("Starting Docker Compose...")
         try:
-            subprocess.run(["docker-compose", "up"], check=True)
+            # Don't use sudo on macOS
+            if self.system == "Darwin" or self.system == "Windows":
+                cmd = ["docker-compose", "up"]
+            else:
+                cmd = ["sudo", "docker-compose", "up"]
+                
+            subprocess.run(cmd, check=True)
         except subprocess.CalledProcessError as e:
             self.logger.error(f"Docker Compose failed: {e}")
             sys.exit(1)
@@ -477,13 +563,21 @@ class RunEnvironment:
         """Cleanup handler for graceful shutdown."""
         self.logger.info("=== Starting Cleanup ===")
         try:
-            subprocess.run(["docker-compose", "down"], check=True)
-            self.logger.info("Successfully shut down all services")
+            # Check if docker-compose exists before trying to use it
+            compose_check = subprocess.run(
+                ["which", "docker-compose"],
+                capture_output=True,
+                text=True
+            )
+            if compose_check.stdout.strip():
+                subprocess.run(["sudo", "docker-compose", "down"], check=True)
+                self.logger.info("Successfully shut down all services")
+            else:
+                self.logger.warning("docker-compose not found, skipping container cleanup")
         except subprocess.CalledProcessError as e:
             self.logger.error(f"Cleanup failed: {e}")
         self.logger.info("=== Cleanup Complete ===")
         sys.exit(0)
-
 if __name__ == "__main__":
     env = RunEnvironment()
     env.run()

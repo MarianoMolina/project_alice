@@ -20,12 +20,19 @@ export interface ChatTemplateTokens {
     tool_role?: string;
 }
 
+export interface ModelCosts {
+    input_token_cost_per_million: number;
+    cached_input_token_cost_per_million: number;
+    output_token_cost_per_million: number;
+}
+
 export interface ModelConfig {
     ctx_size: number;
     temperature: number;
     seed: number | null;
     use_cache: boolean;
     prompt_config: ChatTemplateTokens;
+    max_tokens_gen?: number;
 }
 export interface AliceModel extends BaseDatabaseObject { 
     short_name: string;
@@ -33,6 +40,7 @@ export interface AliceModel extends BaseDatabaseObject {
     model_type: ModelType;
     api_name: ApiName;
     config_obj?: ModelConfig;
+    model_costs?: ModelCosts;
 }
 
 export const convertToAliceModel = (data: any): AliceModel => {
@@ -60,6 +68,7 @@ export const getDefaultModelForm = (): Partial<AliceModel> => ({
         temperature: 0.7,
         seed: null,
         use_cache: true,
+        max_tokens_gen: 4096,
         prompt_config: {
             bos: '<|im_start|>',
             eos: '<|im_end|>',
@@ -68,5 +77,11 @@ export const getDefaultModelForm = (): Partial<AliceModel> => ({
             assistant_role: 'assistant',
             tool_role: 'tool'
         }
+    },
+    model_costs: {
+        input_token_cost_per_million: 0.15,
+        cached_input_token_cost_per_million: 0.075,
+        output_token_cost_per_million: 0.6
     }
+
 });

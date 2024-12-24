@@ -28,8 +28,8 @@ const handleErrors = (res: Response, error: any) => {
 };
 
 // All routes require authentication
-router.use(auth);
 router.use(rateLimiterMiddleware);
+router.use(auth);
 
 // List all available models
 router.get('/v1/models', async (_req: AuthRequest, res: Response) => {

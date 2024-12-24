@@ -7,7 +7,7 @@ from workflow.util.text_splitters.text_splitter import (
     LengthType,
     Language
 )
-from workflow.util.const import CHAR_PER_TOKEN
+from workflow.util.const import CHAR_TO_TOKEN
 
 # Fixtures
 @pytest.fixture
@@ -62,9 +62,9 @@ def test_invalid_initialization():
 # String Size Calculation Tests
 def test_token_length_calculation(default_splitter):
     text = "This is a test sentence."
-    expected_tokens = len(text) // CHAR_PER_TOKEN
+    expected_tokens = len(text) // CHAR_TO_TOKEN
     actual_tokens = default_splitter.get_string_size(text)
-    assert actual_tokens == expected_tokens, f"Expected {expected_tokens} tokens but got {actual_tokens}. CHAR_PER_TOKEN={CHAR_PER_TOKEN}"
+    assert actual_tokens == expected_tokens, f"Expected {expected_tokens} tokens but got {actual_tokens}. CHAR_TO_TOKEN={CHAR_TO_TOKEN}"
 
 def test_character_length_calculation(custom_splitter):
     text = "This is a test sentence."

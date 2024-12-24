@@ -2,7 +2,7 @@ from typing import List, Tuple, Optional, Dict, Any
 from pydantic import Field, BaseModel
 import json
 from workflow.core.tasks.task import AliceTask
-from workflow.core.agent.agent import AliceAgent
+from workflow.core.agent import AliceAgent
 from workflow.core.data_structures import (
     ApiType, References, NodeResponse, MessageDict, FunctionParameters, ParameterDefinition, TasksEndCodeRouting, 
     MessageGenerators, RoleTypes, ContentType, EntityReference, ReferenceCategory, Prompt
@@ -305,27 +305,6 @@ Example response format:
         LOGGER.debug(f"Unique selectors collected: {unique_selectors}")
         return unique_selectors if unique_selectors else None, creation_metadata if creation_metadata else None
     
-    def create_message_list(self, **kwargs) -> List[MessageDict]:
-        template = self.get_prompt_template("task_template")
-        if not template:
-            raise ValueError(f"Template {self.task_name} not retrieved correctly.")
-        if not isinstance(template, Prompt):
-            try: 
-                template = Prompt(**template)
-            except Exception as e:
-                raise ValueError(f"Template {self.task_name} is not a valid prompt configuration: {e}")
-        sanitized_inputs = self.update_inputs(**kwargs)
-        input_string = template.format_prompt(**sanitized_inputs)
-        LOGGER.debug(f"Input string for task {self.task_name}: {input_string}")
-        msg_list = [MessageDict(content=input_string, role=RoleTypes.USER, generated_by=MessageGenerators.USER, step=self.task_name)]
-        
-        # Add messages from history
-        execution_history: List[NodeResponse] = kwargs.get("execution_history", [])
-        for node in execution_history:
-            if isinstance(node, NodeResponse) and node.parent_task_id == self.id and node.references and node.references.messages:
-                msg_list.extend(node.references.messages)
-        return msg_list
-    
     def get_node_exit_code(self, message: MessageDict, node_name: str) -> int:
         """Determine LLM exit code based on content and available routes."""
         if not message or not message.content:
@@ -394,4 +373,3 @@ Provide a concise, cleaar and comprehensive summary of the site's contents. Make
                 )]),
                 execution_order=len(execution_history)
             )
-## TODO: Add an optional summarization step that uses the LLM model to summarize the content and create the entity description.

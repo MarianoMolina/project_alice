@@ -28,7 +28,6 @@ const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => 
         if (message.role === RoleType.USER) {
             if (message.created_by) {
                 if (typeof message.created_by === 'string') return "User";
-                if (typeof message.created_by === 'object' && 'name' in message.created_by) return message.created_by.name;
             }
             return "User";
         }

@@ -11,14 +11,12 @@ const userCheckpointSchema = new Schema<IUserCheckpointDocument, IUserCheckpoint
     created_by: { 
         type: Schema.Types.ObjectId, 
         ref: 'User', 
-        required: true,
-        autopopulate: true 
+        required: true
     },
     updated_by: { 
         type: Schema.Types.ObjectId, 
         ref: 'User', 
-        required: true,
-        autopopulate: true 
+        required: true
     }
 }, { timestamps: true });
 

@@ -3,27 +3,29 @@ import {
     fetchItem as apiFetchItem,
     createItem as apiCreateItem,
     updateItem as apiUpdateItem,
-    executeTask as apiExecuteTask,
-    generateChatResponse as apiGenerateChatResponse,
     sendMessage as apiSendMessage,
     purgeAndReinitializeDatabase as apiPurgeAndReinitializeDatabase,
     uploadFileContentReference as apiUploadFileContentReference,
     updateFile as apiUpdateFile,
     retrieveFile as apiRetrieveFile,
-    requestFileTranscript as apiRequestFileTranscript,
     updateMessageInChat as apiUpdateMessageInChat,
     deleteItem as apiDeleteItem,
-    resumeTask as apiResumeTask,
-    fetchLMStudioModels as apiFetchLMStudioModels, 
+    fetchLMStudioModels as apiFetchLMStudioModels,
     unloadLMStudioModel as apiUnloadLMStudioModel,
-    resumeChat as apiResumeChat,
     LMStudioModel,
-    checkWorkflowHealth as apiCheckWorkflowHealth,
-    checkWorkflowUserHealth as apiCheckWorkflowUserHealth,
     fetchPopulatedItem as apiFetchPopulatedItem,
+} from '../services/api';
+import {
+    executeTask as apiExecuteTask,
+    generateChatResponse as apiGenerateChatResponse,
+    resumeTask as apiResumeTask,
+    resumeChat as apiResumeChat,
+    requestFileTranscript as apiRequestFileTranscript,
     validateChatApis as apiValidateChatApis,
     validateTaskApis as apiValidateTaskApis,
-} from '../services/api';
+    checkWorkflowHealth as apiCheckWorkflowHealth,
+    checkWorkflowUserHealth as apiCheckWorkflowUserHealth,
+} from '../services/workflowApi';
 import { useNotification } from './NotificationContext';
 import { useCardDialog } from './CardDialogContext';
 import { CollectionName, CollectionType, CollectionElementString, collectionNameToElementString, CollectionPopulatedType } from '../types/CollectionTypes';
@@ -227,10 +229,12 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const generateChatResponse = useCallback(async (chatId: string): Promise<boolean> => {
         try {
             const result = await apiGenerateChatResponse(chatId);
-            addNotification('Chat response generated successfully', 'success');
             if (result) {
+                addNotification('Chat response generated successfully', 'success');
                 const updatedChat = await apiFetchPopulatedItem('chats', chatId) as PopulatedAliceChat;
                 emitEvent('updated', 'chats', updatedChat);
+            } else {
+                addNotification('Error generating chat response', 'error');
             }
             return result;
         } catch (error) {
@@ -253,7 +257,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }, [addNotification]);
 
     const resumeTask = useCallback(async (
-        taskResponseId: string, 
+        taskResponseId: string,
         additionalInputs: Record<string, any> = {}
     ): Promise<TaskResponse> => {
         try {
@@ -288,7 +292,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             throw error;
         }
     }, [addNotification, selectCardItem]);
-    
+
     const uploadFileContentReference = useCallback(async (itemData: Partial<FileContentReference>): Promise<FileReference> => {
         try {
             const result = await apiUploadFileContentReference(itemData);
@@ -376,15 +380,15 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         try {
             // Use existing updateItem method
             const result = await updateItem('userinteractions', interactionId, itemData);
-            
+
             // If there's a user response and a task_response_id, check if we need to resume the task
             if (result.user_response && result.owner.type === 'task_response' && result.owner.id) {
                 const taskResponse = await apiFetchItem('taskresults', result.owner.id) as TaskResponse;
-                
+
                 if (taskResponse.status === 'pending') {
                     Logger.debug('Associated task is pending, attempting to resume with user response');
                     await resumeTask(result.owner.id);
-                    
+
                     // Additional notification for task resumption
                     addNotification('Associated task resumed', 'info', 5000, {
                         label: 'View Task',
@@ -406,7 +410,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             throw error;
         }
     }, [updateItem, resumeTask, addNotification, selectCardItem, resumeChat]);
-    
+
     const updateMessageInChat = useCallback(async (chatId: string, message: MessageType): Promise<MessageType> => {
         try {
             const result = await apiUpdateMessageInChat(chatId, message);

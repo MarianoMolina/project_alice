@@ -14,7 +14,9 @@ import {
     Tooltip,
     Button,
     FormControl,
-    InputLabel
+    InputLabel,
+    useTheme,
+    useMediaQuery
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
@@ -25,7 +27,6 @@ import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import useStyles from './FunctionStyles';
 import * as FunctionUtils from './FunctionUtils';
 import Logger from '../../../../utils/Logger';
-import theme from '../../../../Theme';
 import { Visibility } from '@mui/icons-material';
 
 interface FunctionDefinitionBuilderProps {
@@ -47,6 +48,10 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
     const [parameters, setParameters] = useState<ParameterDefinition[]>([]);
     const [activeParameters, setActiveParameters] = useState<FunctionUtils.ActiveParameter[]>([]);
     const initializedRef = useRef(false);
+
+    // Add responsive breakpoint check
+    const theme = useTheme();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down('md')); // 'md' is typically 900px
 
     useEffect(() => {
         fetchItem('parameters').then((params: any) => {
@@ -122,7 +127,7 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
             <InputLabel shrink sx={{ backgroundColor: theme.palette.primary.dark }}>{title}</InputLabel>
             <div className={`relative p-4 border border-gray-200/60 rounded-lg ml-2 mr-2 ${classes.container}`}>
                 {!isViewOnly && (
-                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                         <Button
                             variant="contained"
                             color="primary"
@@ -138,9 +143,9 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
                         {validationMessage}
                     </Alert>
                 )}
-                <Grid container spacing={2}>
+                <Grid container spacing={2} direction={isSmallScreen ? 'column' : 'row'}>
                     {!isViewOnly && (
-                        <Grid item xs={6}>
+                        <Grid item xs={12} md={6}>
                             <Typography variant="subtitle1" gutterBottom>All Parameters</Typography>
                             <Paper className={classes.parameterList}>
                                 <EnhancedParameter
@@ -155,13 +160,20 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
                             </Paper>
                         </Grid>
                     )}
-                    <Grid item xs={isViewOnly ? 12 : 6}>
+                    <Grid item xs={12} md={isViewOnly ? 12 : 6}>
                         <Typography variant="subtitle1" gutterBottom>Active Parameters</Typography>
                         <Paper className={classes.parameterList}>
                             {activeParameters.filter(param => param.isActive).length > 0 ? (
                                 <List>
                                     {activeParameters.filter(param => param.isActive).map((param) => (
-                                        <ListItem key={param._id}>
+                                        <ListItem 
+                                            key={param._id}
+                                            sx={{
+                                                flexDirection: isSmallScreen ? 'column' : 'row',
+                                                alignItems: isSmallScreen ? 'stretch' : 'center',
+                                                gap: isSmallScreen ? 1 : 0
+                                            }}
+                                        >
                                             <TextField
                                                 label="Parameter Name"
                                                 value={param.name}
@@ -172,7 +184,15 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
                                                 margin="normal"
                                                 disabled={isViewOnly}
                                             />
-                                            <Box>
+                                            <Box 
+                                                sx={{ 
+                                                    display: 'flex', 
+                                                    alignItems: 'center',
+                                                    justifyContent: isSmallScreen ? 'space-between' : 'flex-end',
+                                                    width: isSmallScreen ? '100%' : 'auto',
+                                                    mt: isSmallScreen ? 1 : 0
+                                                }}
+                                            >
                                                 <FormControlLabel
                                                     control={
                                                         <Checkbox
@@ -183,25 +203,27 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
                                                     }
                                                     label="Required"
                                                 />
-                                            </Box>
-                                            <IconButton
-                                                edge="end"
-                                                aria-label="view"
-                                                onClick={() => selectCardItem('Parameter', param._id!, param)}
-                                            >
-                                                <Visibility />
-                                            </IconButton>
-                                            {!isViewOnly && (
-                                                <Tooltip title="Deactivate">
+                                                <Box sx={{ display: 'flex', gap: 1 }}>
                                                     <IconButton
                                                         edge="end"
-                                                        aria-label="deactivate"
-                                                        onClick={() => handleParameterToggle(param._id!)}
+                                                        aria-label="view"
+                                                        onClick={() => selectCardItem('Parameter', param._id!, param)}
                                                     >
-                                                        <CloseIcon />
+                                                        <Visibility />
                                                     </IconButton>
-                                                </Tooltip>
-                                            )}
+                                                    {!isViewOnly && (
+                                                        <Tooltip title="Deactivate">
+                                                            <IconButton
+                                                                edge="end"
+                                                                aria-label="deactivate"
+                                                                onClick={() => handleParameterToggle(param._id!)}
+                                                            >
+                                                                <CloseIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    )}
+                                                </Box>
+                                            </Box>
                                         </ListItem>
                                     ))}
                                 </List>

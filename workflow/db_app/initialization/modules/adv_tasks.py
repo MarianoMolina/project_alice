@@ -64,12 +64,6 @@ adv_tasks_module = AdvTasksModule(
                 "default": "nova"
             },
             {
-                "key": "voice_bark_parameter",
-                "type": "string",
-                "description": "The voice to use for the speech.", # TODO: Add Bark TTS voices to description
-                "default": "v2/en_speaker_6"
-            },
-            {
                 "key": "speed_parameter",
                 "type": "number",
                 "description": "The speed of the speech."
@@ -173,7 +167,7 @@ adv_tasks_module = AdvTasksModule(
                     "embeddings": "oai_embedding_large",
                     "img_gen": "Dall-E-3",
                     "tts": "tts-1",
-                    "chat": "GPT4-turbo",
+                    "chat": "GPT4o",
                     "stt": "Whisper_1"
                 },
                 "has_code_exec": 0,
@@ -215,29 +209,7 @@ adv_tasks_module = AdvTasksModule(
                 "models": {
                     "stt": "groq_stt_whisper",
                     "vision": "groq_llama_3_2_11b_vision",
-                    "chat": "llama-3.1-70b-versatile",
-                },
-                "has_code_exec": 0,
-                "has_tools": 0,
-                "max_consecutive_auto_reply": 1,
-            },
-            {
-                "key": "pixart_gen_agent",
-                "name": "Pixart Agent",
-                "system_message": "default_system_message",
-                "models": {
-                    "img_gen": "pixart_sigma_model",
-                },
-                "has_code_exec": 0,
-                "has_tools": 0,
-                "max_consecutive_auto_reply": 1,
-            },
-            {
-                "key": "bark_tts_agent",
-                "name": "Bark TTS Agent",
-                "system_message": "default_system_message",
-                "models": {
-                    "tts": "bark_large",
+                    "chat": "llama-3.3-70b-versatile",
                 },
                 "has_code_exec": 0,
                 "has_tools": 0,
@@ -308,7 +280,7 @@ adv_tasks_module = AdvTasksModule(
                 "task_type": "RetrievalTask",
                 "task_name": "Update_Data_Cluster",
                 "agent": "oai_agent",
-                "task_description": "Ensures all the references in its data cluster have embeddings available. If Update All is set to True, it updates all the embeddings, otherwise only the missing ones.",
+                "task_description": "Ensures all the references in its data cluster have embeddings available. If Update All is set to True, it updates all the embeddings, otherwise only the missing ones. If you change the embedding model, run with update all to update all the embeddings.",
                 "input_variables": {
                     "type": "object",
                     "properties": {
@@ -327,26 +299,8 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "image_gen_task",
                 "task_type": "GenerateImageTask",
-                "task_name": "Image_Gen_Dall_E",
+                "task_name": "DALL-E_Image_Generation",
                 "agent": "oai_agent",
-                "task_description": "Generates an image from the input text",
-                "input_variables": {
-                    "type": "object",
-                    "properties": {
-                        "prompt": "prompt_img_gen",
-                        "n": "n_parameter",
-                        "size": "size_parameter",
-                        "quality": "quality_parameter"
-                    },
-                    "required": ["prompt"]
-                },
-                "required_apis": ["img_generation"],
-            },
-            {
-                "key": "image_gen_task_pixart",
-                "task_type": "GenerateImageTask",
-                "task_name": "Image_Gen_Pixart",
-                "agent": "pixart_gen_agent",
                 "task_description": "Generates an image from the input text",
                 "input_variables": {
                     "type": "object",
@@ -363,7 +317,7 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "image_gen_task_gemini",
                 "task_type": "GenerateImageTask",
-                "task_name": "Image_Gen_Gemini",
+                "task_name": "Image_Gen_Gemini_Imagen3",
                 "agent": "gemini_agent",
                 "task_description": "Generates an image from the input text",
                 "input_variables": {
@@ -389,23 +343,6 @@ adv_tasks_module = AdvTasksModule(
                     "properties": {
                         "text": "text_parameter",
                         "voice": "voice_parameter",
-                        "speed": "speed_parameter"
-                    },
-                    "required": ["text"]
-                },
-                "required_apis": ["text_to_speech"]
-            },
-            {
-                "key": "bark_tts_task",
-                "task_type": "TextToSpeechTask",
-                "task_name": "Bark_TTS_Task",
-                "agent": "bark_tts_agent",
-                "task_description": "Converts text to speech using the Bark TTS API",
-                "input_variables": {
-                    "type": "object",
-                    "properties": {
-                        "text": "text_parameter",
-                        "voice": "voice_bark_parameter",
                         "speed": "speed_parameter"
                     },
                     "required": ["text"]

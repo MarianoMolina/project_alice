@@ -21,12 +21,19 @@ export interface ChatTemplateTokens {
     tool_role?: string;
 }
 
+export interface ModelCosts {
+    input_token_cost_per_million: number;
+    cached_input_token_cost_per_million: number;
+    output_token_cost_per_million: number;
+}
+
 export interface IModelConfig {
     ctx_size: number;
     temperature: number;
     seed: number | null;
     use_cache: boolean;
     prompt_config: ChatTemplateTokens;
+    max_tokens_gen?: number;
 }
 
 export interface IModel extends Document {
@@ -35,6 +42,7 @@ export interface IModel extends Document {
     api_name: ApiName;
     model_type: ModelType;
     config_obj?: IModelConfig;
+    model_costs?: ModelCosts;
     created_by: Types.ObjectId | IUserDocument;
     updated_by: Types.ObjectId | IUserDocument;
 }

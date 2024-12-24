@@ -4,13 +4,10 @@ import {
   Typography,
   IconButton,
   CircularProgress,
-  Tooltip,
-  Chip
+  Tooltip
 } from '@mui/material';
 import {
-  Download as DownloadIcon,
-  TextFields,
-  Timer
+  Download as DownloadIcon
 } from '@mui/icons-material';
 import { FileType, FileComponentProps } from '../../../types/FileTypes';
 import { retrieveFile } from '../../../services/api';

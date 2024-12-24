@@ -34,6 +34,7 @@ const StructuresPage: React.FC = () => {
     const [isCreating, setIsCreating] = useState(false);
     const [viewMode, setViewMode] = useState<'list' | 'shortList' | 'table'>('list');
     const [lastUpdate, setLastUpdate] = useState<number>(Date.now());
+    const [isExpanded, setIsExpanded] = useState(true);
 
     const tabs = [
         // Core Group
@@ -65,6 +66,7 @@ const StructuresPage: React.FC = () => {
         setSelectedItem(item as CollectionPopulatedElement);
         setIsCreating(false);
         setShowActiveComponent(true);
+        setIsExpanded(false);
     }, []);
 
     const handleSave = useCallback(async (item: CollectionPopulatedElement | CollectionElement | null) => {
@@ -194,6 +196,8 @@ const StructuresPage: React.FC = () => {
                 renderContent={renderActiveList}
                 expandedWidth={viewMode === 'table' ? TASK_SIDEBAR_WIDTH_TABLE : viewMode === 'list' ? TASK_SIDEBAR_WIDTH : TASK_SIDEBAR_WIDTH_COMPACT}
                 collapsedWidth={SIDEBAR_COLLAPSED_WIDTH}
+                expanded={isExpanded}
+                onExpandedChange={setIsExpanded}
             />
             <Box className={classes.databaseContent}>
                 {renderActiveComponent()}

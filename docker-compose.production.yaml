@@ -1,8 +1,8 @@
 services:
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: frontend/Dockerfile
     env_file:
       - .env
     ports:
@@ -22,14 +22,15 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "${BACKEND_PORT}:${BACKEND_PORT_DOCKER}"
+      - "${REACT_APP_BACKEND_PORT}:${BACKEND_PORT_DOCKER}"
+    env_file:
+      - .env
     depends_on:
       mongo:
         condition: service_started
       volume-init:
         condition: service_completed_successfully
     volumes:
-      - ./.env:/app/.env
       - logs:/app/logs
       - shared-uploads:/app/shared-uploads
     environment:
@@ -37,7 +38,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${BACKEND_PORT_DOCKER}/api/health"]
+      test: ["CMD", "curl", "-f", "http://${REACT_APP_BACKEND_HOST:-backend}:${BACKEND_PORT_DOCKER}/api/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -59,7 +60,7 @@ services:
     env_file:
       - .env
     ports:
-      - "${WORKFLOW_PORT}:${WORKFLOW_PORT_DOCKER}"
+      - "${REACT_APP_WORKFLOW_PORT}:${WORKFLOW_PORT_DOCKER}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - logs:/app/logs
@@ -76,12 +77,11 @@ services:
         condition: service_healthy
     environment:
       - PYTHONPATH=/app
-      - HOST=host.docker.internal
       - REDIS_URL=redis://redis:6379/0
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${WORKFLOW_PORT_DOCKER}/health"]
+      test: ["CMD", "curl", "-f", "http://${REACT_APP_WORKFLOW_HOST:-workflow}:${WORKFLOW_PORT_DOCKER}/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -129,7 +129,15 @@ services:
     image: mybash:latest
     command: ["bash"]
 
+  javascript_image:
+    build:
+      context: .
+      dockerfile: workflow/Dockerfile.js
+    image: myjs:latest
+    command: ["bash"]
+
 volumes:
+  mongo_data:
   logs:
     driver: local
     driver_opts:
@@ -142,7 +150,6 @@ volumes:
       type: none
       o: bind
       device: ${COMPOSE_PROJECT_DIR}/shared-uploads
-  mongo_data:
   model_cache:
     driver: local
     driver_opts:

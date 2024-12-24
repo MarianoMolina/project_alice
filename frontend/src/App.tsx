@@ -23,6 +23,7 @@ import DialogComponent from './components/ui/dialog/DialogCustom';
 import Knowledgebase from './pages/Knowledgebase';
 import StructuresPage from './pages/Structures';
 import ReferencesPage from './pages/ReferencesPage';
+import RedirectIfAuthenticated from './layouts/RedirectLogged';
 
 const App: React.FC = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -51,12 +52,28 @@ const App: React.FC = () => {
                 <MainLayout>
                   <Routes>
                     <Route path="/" element={<HomePage />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={
-                      <CardDialogProvider>
-                          <Register />
-                      </CardDialogProvider>
-                    } />
+                    <Route
+                      path="/login"
+                      element={
+                        <RedirectIfAuthenticated
+                          element={<Login />}
+                          redirectTo="/"
+                        />
+                      }
+                    />
+                    <Route
+                      path="/register"
+                      element={
+                        <RedirectIfAuthenticated
+                          element={
+                            <CardDialogProvider>
+                              <Register />
+                            </CardDialogProvider>
+                          }
+                          redirectTo="/"
+                        />
+                      }
+                    />
                     <Route path="/chat-alice" element={<ProtectedRoute element={<ChatAlice />} />} />
                     <Route path="/start-task" element={<ProtectedRoute element={<CreateWorkflow />} />} />
                     <Route path="/structures" element={<ProtectedRoute element={<StructuresPage />} />} />

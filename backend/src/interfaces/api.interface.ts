@@ -28,10 +28,6 @@ export enum ApiName {
   GROQ = 'groq',
   LLAMA = 'llama',
   ANTHROPIC = 'anthropic',
-  LM_STUDIO = 'lm_studio',
-  CUSTOM = 'Custom',
-  BARK = 'bark',
-  PIXART_IMG_GEN = 'pixart',
   GOOGLE_SEARCH = 'google_search',
   REDDIT_SEARCH = 'reddit',
   WIKIPEDIA_SEARCH = 'wikipedia',
@@ -39,6 +35,11 @@ export enum ApiName {
   ARXIV_SEARCH = 'arxiv',
   GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph',
   WOLFRAM_ALPHA = 'wolfram_alpha',
+  
+  PIXART_IMG_GEN = 'pixart',
+  LM_STUDIO = 'lm_studio',
+  CUSTOM = 'Custom',
+  BARK = 'bark',
 }
 
 export interface IAPI {

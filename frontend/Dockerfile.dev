@@ -5,7 +5,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy package.json and package-lock.json
-COPY package*.json ./
+COPY frontend/package*.json ./
 
 RUN printf "fetch-retry-maxtimeout=300000\nfetch-retry-mintimeout=20000\nfetch-retries=5\n" > .npmrc
 
@@ -17,7 +17,7 @@ RUN npm ci --legacy-peer-deps
 ENV PATH /app/node_modules/.bin:$PATH
 
 # Copy the rest of the application code
-COPY . .
+COPY frontend/ .
 
 # Set the environment variable for development mode
 ENV NODE_ENV=development

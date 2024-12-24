@@ -2,6 +2,7 @@ import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { AuthRequest } from '../interfaces/auth.interface';
 import Logger from '../utils/logger';
+import { JWT_SECRET } from '../utils/const';
 
 const auth = (req: AuthRequest, res: Response, next: NextFunction): void => {
   try {
@@ -13,7 +14,7 @@ const auth = (req: AuthRequest, res: Response, next: NextFunction): void => {
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: string, role: string };
+      const decoded = jwt.verify(token, JWT_SECRET as string) as { userId: string, role: string };
       
       req.user = {
         userId: decoded.userId,

@@ -31,6 +31,7 @@ CMD curl -f http://localhost:3000/api/health || exit 1
 
 # Switch to the user with UID 1000
 USER 1000
+ENV NODE_ENV=development
 
 # Start the Node.js application
 CMD ["sh", "-c", "npm run build && nodemon --watch src --ext ts --exec 'npm run build && node dist/index.js'"]

@@ -1,53 +1,48 @@
-import os
 from typing import List, Dict, Any
 from pydantic import Field
 from workflow.db_app.initialization.modules.init_module import InitializationModule
+from workflow.util.const import (
+    OPENAI_API_KEY,
+    ANTHROPIC_API_KEY,
+    MISTRAL_API_KEY,
+    GEMINI_API_KEY,
+    COHERE_API_KEY,
+    LLAMA_API_KEY,
+    GROQ_API_KEY,
+    EXA_API_KEY,
+    REDDIT_CLIENT_ID,
+    REDDIT_CLIENT_SECRET,
+    GOOGLE_API_KEY,
+    GOOGLE_CSE_ID,
+    GOOGLE_KNOWLEDGE_GRAPH_API_KEY,
+    WOLFRAM_ALPHA_APP_ID,
+)
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-COHERE_API_KEY = os.getenv("COHERE_API_KEY")
-LLAMA_API_KEY = os.getenv("LLAMA_API_KEY")
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-EXA_API_KEY = os.getenv("EXA_API_KEY")
-REDDIT_CLIENT_ID = os.getenv("REDDIT_CLIENT_ID")
-REDDIT_CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET")
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
-BACKEND_HOST = os.getenv("BACKEND_HOST")
-BACKEND_PORT = os.getenv("BACKEND_PORT")
-GOOGLE_KNOWLEDGE_GRAPH_API_KEY = os.getenv("GOOGLE_KNOWLEDGE_GRAPH_API_KEY")
-WOLFRAM_ALPHA_APP_ID = os.getenv("WOLFRAM_ALPHA_APP_ID")
-LOCAL_LLM_API_URL = f"http://{BACKEND_HOST}:{BACKEND_PORT}/lm_studio/v1"
 
 class BaseModule(InitializationModule):
     """This module defines the base models and apis for the system, as well as the default parameter and prompt."""
+
     name: str = "base"
     dependencies: List[str] = []
     data: Dict[str, List[Dict[str, Any]]] = Field(default_factory=dict)
 
+
 base_module = BaseModule(
-    data = {
+    data={
         "models": [
             {
                 "key": "GPT4o",
                 "short_name": "GPT4o",
-                "model_name": "chatgpt-4o-latest",
+                "model_name": "gpt-4o",
                 "model_type": "chat",
                 "api_name": "openai",
                 "config_obj": {
                     "ctx_size": 128000,
                 },
-            },
-            {
-                "key": "GPT4-turbo",
-                "short_name": "GPT4-turbo",
-                "model_name": "gpt-4-turbo",
-                "model_type": "chat",
-                "api_name": "openai",
-                "config_obj": {
-                    "ctx_size": 128000,
+                "model_costs": {
+                    "input_token_cost_per_million": 2.5,
+                    "cached_input_token_cost_per_million": 1.5,
+                    "output_token_cost_per_million": 10,
                 },
             },
             {
@@ -59,6 +54,11 @@ base_module = BaseModule(
                 "config_obj": {
                     "ctx_size": 128000,
                 },
+                "model_costs": {
+                    "input_token_cost_per_million": 0.15,
+                    "cached_input_token_cost_per_million": 0.075,
+                    "output_token_cost_per_million": 0.6,
+                },
             },
             {
                 "key": "Claude3.5",
@@ -68,6 +68,11 @@ base_module = BaseModule(
                 "model_type": "chat",
                 "config_obj": {
                     "ctx_size": 200000,
+                },
+                "model_costs": {
+                    "input_token_cost_per_million": 3,
+                    "cached_input_token_cost_per_million": 3,
+                    "output_token_cost_per_million": 15,
                 },
             },
             {
@@ -79,39 +84,10 @@ base_module = BaseModule(
                 "config_obj": {
                     "ctx_size": 200000,
                 },
-            },
-            {
-                "key": "Yi_Coder_9B",
-                "short_name": "Yi Coder 9B Chat",
-                "model_name": "lmstudio-community/Yi-Coder-9B-Chat-GGUF/Yi-Coder-9B-Chat-Q6_K.gguf",
-                "api_name": "lm_studio",
-                "model_type": "chat",
-                "config_obj": {
-                    "ctx_size": 128000,
-                },
-            },
-            {
-                "key": "nomic-embed-text-v1",
-                "short_name": "Nomic Embed Text",
-                "model_name": "nomic-ai/nomic-embed-text-v1.5-GGUF/nomic-embed-text-v1.5.Q8_0.gguf",
-                "api_name": "lm_studio",
-                "model_type": "embeddings",
-                "config_obj": {
-                    "ctx_size": 2048,
-                },
-            },
-            {
-                "key": "llava_vision", 
-                "short_name": "Llava 1.5 7B Vision",
-                "model_name": "second-state/Llava-v1.5-7B-GGUF/llava-v1.5-7b-mmproj-model-f16.gguf",
-                "model_type": "vision",
-                "api_name": "lm_studio",
-                "config_obj": {
-                    "ctx_size": 4096,
-                    "prompt_config": {
-                        "bos": "<s>",
-                        "eos": "</s>",
-                    }
+                "model_costs": {
+                    "input_token_cost_per_million": 3,
+                    "cached_input_token_cost_per_million": 3,
+                    "output_token_cost_per_million": 15,
                 },
             },
             {
@@ -123,6 +99,9 @@ base_module = BaseModule(
                 "config_obj": {
                     "ctx_size": 2048,
                 },
+                "model_costs": {
+                    "cost_per_unit": 0.0006,  # Cost per minute
+                },
             },
             {
                 "key": "Dall-E-3",
@@ -132,6 +111,9 @@ base_module = BaseModule(
                 "api_name": "openai",
                 "config_obj": {
                     "ctx_size": 4096,
+                },
+                "model_costs": {
+                    "cost_per_unit": 0.80,
                 },
             },
             {
@@ -143,6 +125,9 @@ base_module = BaseModule(
                 },
                 "model_type": "tts",
                 "api_name": "openai",
+                "model_costs": {
+                    "cost_per_unit": 0.000015,
+                },
             },
             {
                 "key": "tts-1-hd",
@@ -153,6 +138,9 @@ base_module = BaseModule(
                 },
                 "model_type": "tts",
                 "api_name": "openai",
+                "model_costs": {
+                    "cost_per_unit": 0.00003,
+                },
             },
             {
                 "key": "oai_embedding_large",
@@ -163,16 +151,24 @@ base_module = BaseModule(
                 "config_obj": {
                     "ctx_size": 8191,
                 },
+                "model_costs": {
+                    "input_token_cost_per_million": 0.13,
+                },
             },
             {
                 "key": "o1_openai",
                 "short_name": "O1",
-                "model_name": "o1-preview", 
+                "model_name": "o1-preview",
                 "config_obj": {
                     "ctx_size": 128000,
                 },
                 "model_type": "chat",
-                "api_name": "openai"
+                "api_name": "openai",
+                "model_costs": {
+                    "input_token_cost_per_million": 15,
+                    "cached_input_token_cost_per_million": 7.5,
+                    "output_token_cost_per_million": 60,
+                },
             },
             {
                 "key": "mistral_small",
@@ -183,6 +179,11 @@ base_module = BaseModule(
                 },
                 "model_type": "chat",
                 "api_name": "mistral",
+                "model_costs": {
+                    "input_token_cost_per_million": 0.2,
+                    "cached_input_token_cost_per_million": 0.2,
+                    "output_token_cost_per_million": 0.6,
+                },
             },
             {
                 "key": "gemini_1.5_flash",
@@ -193,6 +194,11 @@ base_module = BaseModule(
                 },
                 "model_type": "chat",
                 "api_name": "gemini",
+                "model_costs": {
+                    "input_token_cost_per_million": 0.0,
+                    "cached_input_token_cost_per_million": 0.0,
+                    "output_token_cost_per_million": 0.0,
+                },
             },
             {
                 "key": "gemini_1.5_flash_v",
@@ -203,6 +209,11 @@ base_module = BaseModule(
                 },
                 "model_type": "vision",
                 "api_name": "gemini",
+                "model_costs": {
+                    "input_token_cost_per_million": 0.0,
+                    "cached_input_token_cost_per_million": 0.0,
+                    "output_token_cost_per_million": 0.0,
+                },
             },
             {
                 "key": "gemini_1.5_flash_stt",
@@ -213,6 +224,9 @@ base_module = BaseModule(
                 },
                 "model_type": "stt",
                 "api_name": "gemini",
+                "model_costs": {
+                    "cost_per_unit": 0,  # ?
+                },
             },
             {
                 "key": "gemini_text_embedding",
@@ -223,17 +237,23 @@ base_module = BaseModule(
                 },
                 "model_type": "embeddings",
                 "api_name": "gemini",
+                "model_costs": {
+                    "input_token_cost_per_million": 0.000000025,
+                    "cached_input_token_cost_per_million": 0.00000002,
+                },
             },
             {
                 "key": "gemini_img_gen_imagen_3",
                 "short_name": "Gemini Imagen 3",
                 "model_name": "imagen-3.0-generate-001",
-                "model_format": "OpenChat",
                 "config_obj": {
                     "ctx_size": 2048,
                 },
                 "model_type": "img_gen",
                 "api_name": "gemini",
+                "model_costs": {
+                    "cost_per_unit": 0.04,
+                },
             },
             {
                 "key": "llama3.2_90b",
@@ -244,6 +264,11 @@ base_module = BaseModule(
                 },
                 "model_type": "chat",
                 "api_name": "llama",
+                "model_costs": {
+                    "input_token_cost_per_million": 2.8,
+                    "cached_input_token_cost_per_million": 2.8,
+                    "output_token_cost_per_million": 2.8,
+                },
             },
             {
                 "key": "pixtral12b",
@@ -254,6 +279,11 @@ base_module = BaseModule(
                 },
                 "model_type": "vision",
                 "api_name": "mistral",
+                "model_costs": {
+                    "input_token_cost_per_million": 2,
+                    "cached_input_token_cost_per_million": 2,
+                    "output_token_cost_per_million": 6,
+                },
             },
             {
                 "key": "mistral-embed",
@@ -264,6 +294,11 @@ base_module = BaseModule(
                 },
                 "model_type": "embeddings",
                 "api_name": "mistral",
+                "model_costs": {
+                    "input_token_cost_per_million": 0.1,
+                    "cached_input_token_cost_per_million": 0.1,
+                    "output_token_cost_per_million": 0.0,
+                },
             },
             {
                 "key": "command-r-plus",
@@ -274,59 +309,55 @@ base_module = BaseModule(
                 },
                 "model_type": "chat",
                 "api_name": "cohere",
+                "model_costs": {
+                    "input_token_cost_per_million": 2.5,
+                    "cached_input_token_cost_per_million": 2.5,
+                    "output_token_cost_per_million": 10,
+                },
             },
             {
-                "key": "llama-3.1-70b-versatile",
-                "short_name": "Llama 3.1 70b",
-                "model_name": "llama-3.1-70b-versatile",
+                "key": "llama-3.3-70b-versatile",
+                "short_name": "Llama 3.3 70b",
+                "model_name": "llama-3.3-70b-versatile",
                 "config_obj": {
                     "ctx_size": 128000,
                 },
                 "model_type": "chat",
                 "api_name": "groq",
+                "model_costs": {
+                    "input_token_cost_per_million": 0.59,
+                    "cached_input_token_cost_per_million": 0.59,
+                    "output_token_cost_per_million": 0.79,
+                },
             },
             {
                 "key": "groq_stt_whisper",
                 "short_name": "Groq Whisper",
                 "model_name": "whisper-large-v3",
-                "model_format": "Base",
                 "config_obj": {
                     "ctx_size": 2048,
                 },
                 "model_type": "stt",
                 "api_name": "groq",
+                "model_costs": {
+                    "cost_per_unit": 0.000185,  # Cost per minute
+                },
             },
             {
                 "key": "groq_llama_3_2_11b_vision",
                 "short_name": "Llama 3.2 11b Vision",
                 "model_name": "llama-3.2-11b-vision-preview",
-                "model_format": "Llama3",
                 "config_obj": {
                     "ctx_size": 8000,
                 },
                 "model_type": "vision",
                 "api_name": "groq",
+                "model_costs": {
+                    "input_token_cost_per_million": 0.18,
+                    "cached_input_token_cost_per_million": 0.18,
+                    "output_token_cost_per_million": 0.18,
+                },
             },
-            {
-                "key": "bark_large",
-                "short_name": "Bark Large",
-                "model_name": "suno/bark",
-                "config_obj": {
-                    "ctx_size": 256,
-                },
-                "model_type": "tts",
-                "api_name": "bark",
-            }, 
-            {
-                "key": "pixart_sigma_model",
-                "short_name": "Pixart Sigma",
-                "model_name": "PixArt-alpha/PixArt-Sigma-XL-2-1024-MS",
-                "config_obj": {
-                    "ctx_size": 256,
-                },
-                "model_type": "img_gen",
-                "api_name": "pixart",
-            }
         ],
         "api_configs": [
             {
@@ -335,7 +366,7 @@ base_module = BaseModule(
                 "api_name": "openai",
                 "data": {
                     "api_key": OPENAI_API_KEY,
-                    "base_url": "https://api.openai.com/v1"
+                    "base_url": "https://api.openai.com/v1",
                 },
                 "health_status": "healthy" if OPENAI_API_KEY else "unhealthy",
             },
@@ -345,7 +376,7 @@ base_module = BaseModule(
                 "api_name": "anthropic",
                 "data": {
                     "api_key": ANTHROPIC_API_KEY,
-                    "base_url": "https://api.anthropic.com"
+                    "base_url": "https://api.anthropic.com",
                 },
                 "health_status": "healthy" if ANTHROPIC_API_KEY else "unhealthy",
             },
@@ -355,7 +386,7 @@ base_module = BaseModule(
                 "api_name": "mistral",
                 "data": {
                     "api_key": MISTRAL_API_KEY,
-                    "base_url": "https://api.mistral.ai/v1"
+                    "base_url": "https://api.mistral.ai/v1",
                 },
                 "health_status": "healthy" if MISTRAL_API_KEY else "unhealthy",
             },
@@ -365,7 +396,7 @@ base_module = BaseModule(
                 "api_name": "gemini",
                 "data": {
                     "api_key": GEMINI_API_KEY,
-                    "base_url": "https://api.gemini.ai"
+                    "base_url": "https://api.gemini.ai",
                 },
                 "health_status": "healthy" if GEMINI_API_KEY else "unhealthy",
             },
@@ -375,7 +406,7 @@ base_module = BaseModule(
                 "api_name": "cohere",
                 "data": {
                     "api_key": COHERE_API_KEY,
-                    "base_url": "https://api.cohere.ai"
+                    "base_url": "https://api.cohere.ai",
                 },
                 "health_status": "healthy" if COHERE_API_KEY else "unhealthy",
             },
@@ -385,7 +416,7 @@ base_module = BaseModule(
                 "api_name": "llama",
                 "data": {
                     "api_key": LLAMA_API_KEY,
-                    "base_url": "https://api.llama-api.com"
+                    "base_url": "https://api.llama-api.com",
                 },
                 "health_status": "healthy" if LLAMA_API_KEY else "unhealthy",
             },
@@ -395,7 +426,7 @@ base_module = BaseModule(
                 "api_name": "groq",
                 "data": {
                     "api_key": GROQ_API_KEY,
-                    "base_url": "https://api.groq.com/openai/v1"
+                    "base_url": "https://api.groq.com/openai/v1",
                 },
                 "health_status": "healthy" if GROQ_API_KEY else "unhealthy",
             },
@@ -403,10 +434,7 @@ base_module = BaseModule(
                 "key": "exa_api_config",
                 "name": "Exa API Config",
                 "api_name": "exa",
-                "data": {
-                    "api_key": EXA_API_KEY,
-                    "base_url": "https://api.exa.ai/v1"
-                },
+                "data": {"api_key": EXA_API_KEY, "base_url": "https://api.exa.ai/v1"},
                 "health_status": "healthy" if EXA_API_KEY else "unhealthy",
             },
             {
@@ -417,78 +445,51 @@ base_module = BaseModule(
                     "client_id": REDDIT_CLIENT_ID,
                     "client_secret": REDDIT_CLIENT_SECRET,
                 },
-                "health_status": "healthy" if REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET else "unhealthy",
+                "health_status": (
+                    "healthy"
+                    if REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET
+                    else "unhealthy"
+                ),
             },
             {
                 "key": "google_knowledge_graph_api_config",
                 "name": "Google Knowledge Graph API Config",
                 "api_name": "google_knowledge_graph",
-                "data": {
-                    "api_key": GOOGLE_KNOWLEDGE_GRAPH_API_KEY
-                },
-                "health_status": "healthy" if GOOGLE_KNOWLEDGE_GRAPH_API_KEY else "unhealthy",
+                "data": {"api_key": GOOGLE_KNOWLEDGE_GRAPH_API_KEY},
+                "health_status": (
+                    "healthy" if GOOGLE_KNOWLEDGE_GRAPH_API_KEY else "unhealthy"
+                ),
             },
             {
                 "key": "wolfram_alpha_api_config",
                 "name": "Wolfram Alpha API Config",
                 "api_name": "wolfram_alpha",
-                "data": {
-                    "app_id": WOLFRAM_ALPHA_APP_ID
-                },
+                "data": {"app_id": WOLFRAM_ALPHA_APP_ID},
                 "health_status": "healthy" if WOLFRAM_ALPHA_APP_ID else "unhealthy",
             },
             {
                 "key": "google_search_api_config",
                 "name": "Google Search API Config",
                 "api_name": "google_search",
-                "data": {
-                    "api_key": GOOGLE_API_KEY,
-                    "cse_id": GOOGLE_CSE_ID
-                },
-                "health_status": "healthy" if GOOGLE_API_KEY and GOOGLE_CSE_ID else "unhealthy",
-            },
-            {
-                "key": "local_lm_api_config",
-                "name": "LM Studio API Config",
-                "api_name": "lm_studio",
-                "data": {
-                    "api_key": "dummy_key",
-                    "base_url": LOCAL_LLM_API_URL
-                },
-                "health_status": "healthy" if LOCAL_LLM_API_URL else "unhealthy",
-            },
-            {
-                "key": "bark_api_config",
-                "name": "Bark API Config",
-                "api_name": "bark",
-                "data": {
-                    "base_url": LOCAL_LLM_API_URL
-                },
-                "health_status": "healthy" if LOCAL_LLM_API_URL else "unhealthy",
-            },
-            {
-                "key": "pixart_api_config",
-                "name": "Pixart API Config",
-                "api_name": "pixart",
-                "data": {
-                    "base_url": LOCAL_LLM_API_URL
-                },
-                "health_status": "healthy" if LOCAL_LLM_API_URL else "unhealthy",
+                "data": {"api_key": GOOGLE_API_KEY, "cse_id": GOOGLE_CSE_ID},
+                "health_status": (
+                    "healthy" if GOOGLE_API_KEY and GOOGLE_CSE_ID else "unhealthy"
+                ),
             },
             {
                 "key": "wikipedia_api_config",
                 "name": "Wikipedia API Config",
                 "api_name": "wikipedia",
                 "data": {},
-                "health_status": "healthy"
+                "health_status": "healthy",
             },
             {
                 "key": "arxiv_api_config",
                 "name": "Arxiv API Config",
                 "api_name": "arxiv",
                 "data": {},
-                "health_status": "healthy"
-            }
+                "health_status": "healthy",
+            },
         ],
         "apis": [
             {
@@ -656,24 +657,6 @@ base_module = BaseModule(
                 "default_model": "llama3.2_90b",
             },
             {
-                "key": "local_lm_studio",
-                "api_type": "llm_api",
-                "api_name": "lm_studio",
-                "name": "LM Studio API",
-                "api_config": "local_lm_api_config",
-                "is_active": True,
-                "default_model": "Yi_Coder_9B",
-            },
-            {
-                "key": "local_lm_studio_embeddings",
-                "api_type": "embeddings",
-                "api_name": "lm_studio",
-                "name": "LM Studio API",
-                "api_config": "local_lm_api_config",
-                "is_active": True,
-                "default_model": "nomic-embed-text-v1",
-            },
-            {
                 "key": "img_vision",
                 "api_type": "img_vision",
                 "api_name": "openai",
@@ -683,22 +666,13 @@ base_module = BaseModule(
                 "default_model": "GPT4o",
             },
             {
-                "key": "img_vision_lm_studio",
-                "api_type": "img_vision",
-                "api_name": "lm_studio",
-                "name": "LM Studio Image Vision",
-                "api_config": "local_lm_api_config",
-                "is_active": True,
-                "default_model": "llava_vision"
-            },
-            {
                 "key": "img_vision_anthropic",
                 "api_type": "img_vision",
                 "api_name": "anthropic",
                 "name": "Anthropic Image Vision",
                 "api_config": "anthropic_api_config",
                 "is_active": True,
-                "default_model": "Claude3.5"
+                "default_model": "Claude3.5",
             },
             {
                 "key": "img_generation",
@@ -707,16 +681,16 @@ base_module = BaseModule(
                 "name": "Image Generation",
                 "api_config": "openai_api_config",
                 "is_active": True,
-                "default_model": "Dall-E-3"
+                "default_model": "Dall-E-3",
             },
             {
                 "key": "speech_to_text",
                 "api_type": "speech_to_text",
                 "api_name": "openai",
                 "name": "OpenAI Speech to Text",
-                "api_config": "openai_api_config", # Since whisper is open source, do we need a key?
+                "api_config": "openai_api_config",  # Since whisper is open source, do we need a key?
                 "is_active": True,
-                "default_model": "Whisper_1"
+                "default_model": "Whisper_1",
             },
             {
                 "key": "text_to_speech",
@@ -725,16 +699,16 @@ base_module = BaseModule(
                 "name": "Text to Speech",
                 "api_config": "openai_api_config",
                 "is_active": True,
-                "default_model": "tts-1"
-           },
+                "default_model": "tts-1",
+            },
             {
                 "key": "embedding_api",
-                "api_type": "embeddings", 
+                "api_type": "embeddings",
                 "api_name": "openai",
-                "name": "OpenAI Embeddings", 
+                "name": "OpenAI Embeddings",
                 "api_config": "openai_api_config",
                 "is_active": True,
-                "default_model": "oai_embedding_large"            
+                "default_model": "oai_embedding_large",
             },
             {
                 "key": "groq_llm",
@@ -743,7 +717,7 @@ base_module = BaseModule(
                 "name": "Groq API",
                 "api_config": "groq_api_config",
                 "is_active": True,
-                "default_model": "llama-3.1-70b-versatile",
+                "default_model": "llama-3.3-70b-versatile",
             },
             {
                 "key": "groq_vision",
@@ -763,31 +737,13 @@ base_module = BaseModule(
                 "is_active": True,
                 "default_model": "groq_stt_whisper",
             },
-            {
-                "key": "bark_tts",
-                "api_type": "text_to_speech",
-                "api_name": "bark",
-                "name": "Bark TTS",
-                "api_config": "bark_api_config",
-                "is_active": True,
-                "default_model": "bark_large",
-            },
-            {
-                "key": "pixart_img_gen",
-                "api_type": "img_generation",
-                "api_name": "pixart", # This should probably be called diffusers_img_gen
-                "name": "Pixart Image Generation",
-                "api_config": "pixart_api_config",
-                "is_active": True,
-                "default_model": "pixart_sigma_model",
-            }
         ],
         "parameters": [
             {
                 "key": "prompt_parameter",
                 "type": "string",
                 "description": "The input prompt for the task",
-                "default": None
+                "default": None,
             },
         ],
         "prompts": [
@@ -798,12 +754,10 @@ base_module = BaseModule(
                 "is_templated": True,
                 "parameters": {
                     "type": "object",
-                    "properties": {
-                        "prompt": "prompt_parameter"
-                    },
-                    "required": ["prompt"]
-                }
+                    "properties": {"prompt": "prompt_parameter"},
+                    "required": ["prompt"],
+                },
             },
-        ]
+        ],
     }
 )

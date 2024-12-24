@@ -9,7 +9,7 @@ const Dashboard = () => {
   const sections = getDashboardSections();
 
   return (
-    <div className="h-full max-w-6xl mx-auto p-4">
+    <div className="h-full max-w-6xl mx-auto">
       <BentoGrid className="max-w-4xl mx-auto">
         {sections.map((section) => (
           <BentoGridItem

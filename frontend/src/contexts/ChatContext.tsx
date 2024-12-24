@@ -126,7 +126,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         try {
             Logger.debug('Sending message:', message);
             setMessages(prevMessages => [...prevMessages, message]);
-            await sendMessage(currentChatId, message);
+            const updatedChat = await sendMessage(currentChatId, message);
+            setMessages(updatedChat.messages);
             await generateResponse();
         } catch (error) {
             Logger.error('Error sending message or generating response:', error);

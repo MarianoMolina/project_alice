@@ -29,8 +29,9 @@ const NODE_DEFINITIONS: { [key: string]: NodeDefinition } = {
     getInputs: (data: BaseTaskData) => data.templates?.['task_template']?.parameters || null,
     getContent: (data: BaseTaskData, selectCardItem: (type: CollectionElementString, id?: string, data?: CollectionPopulatedElement) => void) => (
       <Stack spacing={1}>
-        {['agent_system_message', 'task_template', 'output_template'].map(templateName => {
+        {['agent_system_message', 'task_template', 'output_template', 'code_template'].map(templateName => {
           const template = templateName === 'agent_system_message' ? data.agent?.system_message : data.templates?.[templateName];
+          if (!template) return null;
           return (
             <Chip
               key={templateName}
@@ -51,7 +52,6 @@ const NODE_DEFINITIONS: { [key: string]: NodeDefinition } = {
   },
 
   tool_call_execution: {
-    // TODO: Add include_prompt_in_execution bool
     getInputs: (data: BaseTaskData) => data.templates?.['task_template']?.parameters || null,
     getOutputType: () => OutputType.TASK_RESPONSE,
     requiredApis: [] as ApiType[]

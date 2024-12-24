@@ -57,8 +57,8 @@ const taskResultSchema = new Schema<ITaskResultDocument, ITaskResultModel>({
   execution_history: { type: [executionHistoryItemSchema], default: [] },
   node_references: { type: [nodeResponseSchema], default: [] },
   embedding: [{ type: Schema.Types.ObjectId, ref: 'EmbeddingChunk'}],
-  created_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true },
-  updated_by: { type: Schema.Types.ObjectId, ref: 'User', autopopulate: true }
+  created_by: { type: Schema.Types.ObjectId, ref: 'User' },
+  updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 
 taskResultSchema.methods.apiRepresentation = function(this: ITaskResultDocument) {

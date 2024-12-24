@@ -30,14 +30,15 @@ import CodeExecutionRoutes from './routes/codeExecution.route';
 import APIConfigRoutes from './routes/apiConfig.route';
 
 import './models';
+import { MONGODB_URI } from './utils/const';
 
 dotenv.config();
 
 const app = express();
 
-Logger.info('MongoDB URI:', process.env.MONGODB_URI);
+Logger.info('MongoDB URI:', MONGODB_URI);
 
-mongoose.connect(process.env.MONGODB_URI || "mongodb://mongo/alice_database")
+mongoose.connect(MONGODB_URI)
     .then(() => {
         Logger.info('Connected to MongoDB');
     })

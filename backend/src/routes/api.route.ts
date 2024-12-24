@@ -6,8 +6,8 @@ import { IAPIDocument } from '../interfaces/api.interface';
 import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 
 const router = Router();
-router.use(auth);
 router.use(rateLimiterMiddleware);
+router.use(auth);
 const generatedRoutes  = createRoutes<IAPIDocument, 'API'>(API, 'API');
 router.use('/', generatedRoutes);
 

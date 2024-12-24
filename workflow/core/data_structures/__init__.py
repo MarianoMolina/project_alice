@@ -1,4 +1,4 @@
-from .message import MessageDict, MessageGenerators, RoleTypes
+from .message import MessageDict, MessageGenerators, RoleTypes, convert_message_dict_to_api_format
 from .file_reference import FileReference, FileContentReference, generate_file_content_reference, get_file_content
 from .task_response import TaskResponse, complete_inner_execution_history
 from .node_response import NodeResponse, ExecutionHistoryItem
@@ -6,12 +6,11 @@ from .user_checkpoint import UserCheckpoint
 from .user_interaction import UserInteraction, UserResponse, InteractionOwnerType, InteractionOwner
 from .user import User, UserRoles
 from .references import References, DataCluster, get_reference_object, references_model_map
-from .model_config import ModelConfig
-from .model import AliceModel
+from .model import AliceModel, ModelConfig
 from .prompt import Prompt
 from .api_utils import ApiName, ApiType, ModelType, ModelApis, API_CONFIG_TYPES, API_CAPABILITIES
 from .tool_calls import ToolCall, ToolCallConfig
-from .code import CodeBlock, CodeOutput, CodeExecution
+from .code import CodeBlock, CodeOutput, CodeExecution, get_run_commands
 from .entity_reference import EntityReference, ReferenceCategory, ImageReference
 from .parameters import ParameterDefinition, FunctionConfig, FunctionParameters, ToolFunction, ensure_tool_function
 from .base_models import EntityType, FileType, ContentType, TasksEndCodeRouting, EmbeddingChunk, Embeddable, BaseDataStructure
@@ -48,8 +47,8 @@ EntityReference.model_rebuild()
 ImageReference.model_rebuild()
 
 __all__ = ['FileReference', 'ContentType', 'FileType', 'FileContentReference', 'generate_file_content_reference', 'get_file_content', 'MessageDict', 'ModelConfig',
-           'TaskResponse', 'User', 'UserRoles', 'UserInteraction', 'ExecutionHistoryItem', 'NodeResponse', 'TasksEndCodeRouting', 'EmbeddingChunk',
+           'TaskResponse', 'User', 'UserRoles', 'UserInteraction', 'ExecutionHistoryItem', 'NodeResponse', 'TasksEndCodeRouting', 'EmbeddingChunk', 'get_run_commands',
            'ApiName', 'ApiType', 'ModelType', 'ParameterDefinition', 'FunctionConfig', 'FunctionParameters', 'ToolCall', 'ToolCallConfig', 'UserCheckpoint', 'UserResponse',
-           'ToolFunction', 'ensure_tool_function', 'EntityType', 'ModelApis', 'FileOutput', 'References', 'complete_inner_execution_history', 'Embeddable',
+           'ToolFunction', 'ensure_tool_function', 'EntityType', 'ModelApis', 'FileOutput', 'References', 'complete_inner_execution_history', 'Embeddable', 'convert_message_dict_to_api_format',
            'AliceModel', 'Prompt', 'BaseDataStructure', 'DataCluster', 'InteractionOwnerType', 'InteractionOwner', 'MessageGenerators', 'RoleTypes', 'CodeBlock',
            'CodeOutput', 'CodeExecution', 'API_CONFIG_TYPES', 'API_CAPABILITIES', 'EntityReference', 'ReferenceCategory', 'ImageReference', 'get_reference_object', 'references_model_map']

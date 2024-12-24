@@ -42,6 +42,7 @@ const ChatAlice: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState('Select Chat');
   const [selectedApiProvider, setSelectedApiProvider] = useState<string>('');
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const chatInputRef = useRef<ChatInputRef>(null);
 
@@ -50,6 +51,7 @@ const ChatAlice: React.FC = () => {
     if (!chat._id) return;
     await handleSelectChat(chat._id);
     setActiveTab('Current Chat');
+    setIsExpanded(false)
   }, [handleSelectChat]);
 
   const handleCreateNew = useCallback(() => {
@@ -250,6 +252,8 @@ const ChatAlice: React.FC = () => {
         renderContent={renderSidebarContent}
         expandedWidth={TASK_SIDEBAR_WIDTH}
         collapsedWidth={SIDEBAR_COLLAPSED_WIDTH}
+        expanded={isExpanded}
+        onExpandedChange={setIsExpanded}
       />
       <Box className={classes.chatAliceMain}>
         <Box className={classes.chatAliceMessages}>
