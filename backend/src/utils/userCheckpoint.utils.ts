@@ -36,7 +36,7 @@ export async function updateUserCheckpoint(
     userId: string
 ): Promise<IUserCheckpointDocument | null> {
     try {
-        Logger.info('userCheckpointData received in updateUserCheckpoint:', userCheckpointData);
+        Logger.debug('userCheckpointData received in updateUserCheckpoint:', userCheckpointData);
         const existingUserCheckpoint = await UserCheckpoint.findById(userCheckpointId);
         if (!existingUserCheckpoint) {
             throw new Error('Task result not found');

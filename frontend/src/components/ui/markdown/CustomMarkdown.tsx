@@ -20,7 +20,7 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
   const navigate = useNavigate();
 
   const logProps = (componentName: string, props: any) => {
-    Logger.info(`${componentName} props:`, props);
+    Logger.debug(`${componentName} props:`, props);
   };
 
   const components: Components = {

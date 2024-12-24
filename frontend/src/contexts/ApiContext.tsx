@@ -325,7 +325,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     const requestFileTranscript = useCallback(async (fileId: string, agentId?: string, chatId?: string): Promise<PopulatedMessage> => {
         try {
-            Logger.info(`Requesting transcript for file: ${fileId}`);
+            Logger.debug(`Requesting transcript for file: ${fileId}`);
             const fileData = await apiFetchPopulatedItem('files', fileId) as FileReference;
 
             if (fileData.transcript) {

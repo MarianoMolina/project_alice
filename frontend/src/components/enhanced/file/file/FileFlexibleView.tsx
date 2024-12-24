@@ -114,7 +114,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
             if (file) {
                 setSelectedFile(file);
             } else {
-                Logger.info('No file selected or file type not allowed');
+                Logger.debug('No file selected or file type not allowed');
                 addNotification('No file selected or file type not allowed', 'info');
             }
         } catch (error) {
@@ -129,7 +129,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
             const file = await uploadFileContentReference(fileContentReference);
             if (!file) {
                 addNotification('File upload failed or was cancelled', 'error');
-                Logger.info('File upload failed or was cancelled');
+                Logger.debug('File upload failed or was cancelled');
                 return;
             }
             setForm(file as PopulatedFileReference);

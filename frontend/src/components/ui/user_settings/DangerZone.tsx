@@ -15,7 +15,7 @@ const DangerZone: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const handlePurgeAndReinitialize = useCallback(() => {
-        Logger.info('handlePurgeAndReinitialize called');
+        Logger.debug('handlePurgeAndReinitialize called');
         openDialog({
             title: 'Confirm Database Purge and Reinitialization',
             content: 'Are you sure you want to purge and reinitialize your database? This action cannot be undone and will delete all your current data.',
@@ -33,9 +33,9 @@ const DangerZone: React.FC = () => {
                         Logger.debug('Dialog confirmed');
                         setIsLoading(true);
                         try {
-                            Logger.info('Purging db');
+                            Logger.debug('Purging db');
                             await purgeAndReinitializeDatabase();
-                            Logger.info('Database successfully purged and reinitialized');
+                            Logger.debug('Database successfully purged and reinitialized');
                             addNotification('Database successfully purged and reinitialized', 'success');
                             window.location.reload();
                         } catch (error) {

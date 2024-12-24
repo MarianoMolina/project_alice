@@ -1,80 +1,84 @@
-import { LOG_LEVEL } from "./Constants";
+import { BACKEND_URL, LOG_LEVEL, NODE_ENV, WORKFLOW_URL } from "./Constants";
 
 enum LogLevel {
-    ERROR = 0,
-    WARN = 1,
-    INFO = 2,
-    DEBUG = 3
+  ERROR = 0,
+  WARN = 1,
+  INFO = 2,
+  DEBUG = 3
+}
+
+class LoggerClass {
+  private static instance: LoggerClass;
+  private level: LogLevel;
+
+  private constructor() {
+    this.level = this.getLogLevelFromEnv();
+    this.info('LOG_LEVEL:', LogLevel[this.level]);
   }
-  
-  class LoggerClass {
-    private static instance: LoggerClass;
-    private level: LogLevel;
-  
-    private constructor() {
-      this.level = this.getLogLevelFromEnv();
-      this.info('LOG_LEVEL:', LogLevel[this.level]);
+
+  public static getInstance(): LoggerClass {
+    if (!LoggerClass.instance) {
+      LoggerClass.instance = new LoggerClass();
     }
-  
-    public static getInstance(): LoggerClass {
-      if (!LoggerClass.instance) {
-        LoggerClass.instance = new LoggerClass();
-      }
-      return LoggerClass.instance;
-    }
-  
-    private getLogLevelFromEnv(): LogLevel {
-      switch (LOG_LEVEL) {
-        case 'ERROR': return LogLevel.ERROR;
-        case 'WARN': return LogLevel.WARN;
-        case 'INFO': return LogLevel.INFO;
-        case 'DEBUG': return LogLevel.DEBUG;
-        default: return LogLevel.INFO;
-      }
-    }
-  
-    public setLogLevel(level: LogLevel) {
-      this.level = level;
-    }
-  
-    private log(level: LogLevel, message: string, ...args: any[]) {
-      if (level <= this.level) {
-        const timestamp = new Date().toISOString();
-        const logMessage = `[${timestamp}] FRONTEND - ${LogLevel[level]}: ${message}`;
-        
-        switch (level) {
-          case LogLevel.ERROR:
-            console.error(logMessage, ...args);
-            break;
-          case LogLevel.WARN:
-            console.warn(logMessage, ...args);
-            break;
-          case LogLevel.INFO:
-            console.info(logMessage, ...args);
-            break;
-          case LogLevel.DEBUG:
-            console.debug(logMessage, ...args);
-            break;
-        }
-      }
-    }
-  
-    public error(message: string, ...args: any[]) {
-      this.log(LogLevel.ERROR, message, ...args);
-    }
-  
-    public warn(message: string, ...args: any[]) {
-      this.log(LogLevel.WARN, message, ...args);
-    }
-  
-    public info(message: string, ...args: any[]) {
-      this.log(LogLevel.INFO, message, ...args);
-    }
-  
-    public debug(message: string, ...args: any[]) {
-      this.log(LogLevel.DEBUG, message, ...args);
+    return LoggerClass.instance;
+  }
+
+  private getLogLevelFromEnv(): LogLevel {
+    switch (LOG_LEVEL) {
+      case 'ERROR': return LogLevel.ERROR;
+      case 'WARN': return LogLevel.WARN;
+      case 'INFO': return LogLevel.INFO;
+      case 'DEBUG': return LogLevel.DEBUG;
+      default: return LogLevel.INFO;
     }
   }
-  
-  const Logger = LoggerClass.getInstance();
-  export default Logger;
+
+  public setLogLevel(level: LogLevel) {
+    this.level = level;
+  }
+
+  private log(level: LogLevel, message: string, ...args: any[]) {
+    if (level <= this.level) {
+      const timestamp = new Date().toISOString();
+      const logMessage = `[${timestamp}] FRONTEND - ${LogLevel[level]}: ${message}`;
+
+      switch (level) {
+        case LogLevel.ERROR:
+          console.error(logMessage, ...args);
+          break;
+        case LogLevel.WARN:
+          console.warn(logMessage, ...args);
+          break;
+        case LogLevel.INFO:
+          console.info(logMessage, ...args);
+          break;
+        case LogLevel.DEBUG:
+          console.debug(logMessage, ...args);
+          break;
+      }
+    }
+  }
+
+  public error(message: string, ...args: any[]) {
+    this.log(LogLevel.ERROR, message, ...args);
+  }
+
+  public warn(message: string, ...args: any[]) {
+    this.log(LogLevel.WARN, message, ...args);
+  }
+
+  public info(message: string, ...args: any[]) {
+    this.log(LogLevel.INFO, message, ...args);
+  }
+
+  public debug(message: string, ...args: any[]) {
+    this.log(LogLevel.DEBUG, message, ...args);
+  }
+}
+
+const Logger = LoggerClass.getInstance();
+export default Logger;
+
+Logger.debug(`Backend URL: ${BACKEND_URL}`);
+Logger.debug(`Workflow URL: ${WORKFLOW_URL}`);
+Logger.debug(`NODE_ENV: ${NODE_ENV}`);

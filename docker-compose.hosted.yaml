@@ -1,6 +1,6 @@
 services:
   frontend:
-    image: ${REGISTRY_PATH}/frontend:latest
+    image: ${REGISTRY_PATH}/frontend:hosted
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT_DOCKER}"
     depends_on:
@@ -12,9 +12,10 @@ services:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: ${FRONTEND_PORT_DOCKER:-3000}
       CI: "true"
+      REACT_APP_DEPLOYMENT: "hosted"
 
   backend:
-    image: ${REGISTRY_PATH}/backend:latest
+    image: ${REGISTRY_PATH}/backend:hosted
     ports:
       - "${REACT_APP_BACKEND_PORT}:${BACKEND_PORT_DOCKER}"
     env_file:
@@ -49,7 +50,7 @@ services:
       retries: 5
 
   workflow:
-    image: ${REGISTRY_PATH}/workflow:latest
+    image: ${REGISTRY_PATH}/workflow:hosted
     env_file:
       - .env
     ports:

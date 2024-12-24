@@ -35,7 +35,7 @@ const KnowledgebaseContent: React.FC = () => {
         const path = location.pathname.split('/shared/')[1] || 'knowledgebase/index';
         const normalizedPath = normalizePath(path);
         
-        Logger.info(`Fetching content for path: ${normalizedPath}`);
+        Logger.debug(`Fetching content for path: ${normalizedPath}`);
         
         // Always append .md when fetching the file
         const response = await fetch(`/shared/${normalizedPath}.md`);

@@ -124,7 +124,7 @@ export const selectFile = async (
     allowedTypes: FileType[] = Object.values(FileType)
 ): Promise<File | null> => {
     return new Promise((resolve) => {
-        Logger.info('Selecting file...');
+        Logger.debug('Selecting file...');
         Logger.debug('Allowed file types:', allowedTypes);
         const input = document.createElement('input');
         input.type = 'file';

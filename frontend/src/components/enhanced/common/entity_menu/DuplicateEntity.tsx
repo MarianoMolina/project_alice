@@ -57,7 +57,6 @@ export function DuplicateEntity<T extends CollectionName>({
   const handleDuplicate = () => {
     const elementString = collectionNameToElementString[itemType];
     const cleanedItem = cleanForDuplication(item, itemType);
-    Logger.info('DuplicateEntity', elementString, cleanedItem);
     selectFlexibleItem(elementString, 'create', undefined, cleanedItem);
   };
 

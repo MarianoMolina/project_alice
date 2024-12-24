@@ -111,7 +111,7 @@ class WolframAlphaEngine(APISearchEngine):
                         )
                         LOGGER.error(f"Error from API: {resp.status} {error_text}")
                         return References(messages=[msg])
-                    LOGGER.debug(f"Response status: {resp.read()}")
+                    LOGGER.debug(f"Response status: {await resp.read()}")
                     response_data = await resp.read()
 
                     LOGGER.debug(f"Response data: {response_data}")

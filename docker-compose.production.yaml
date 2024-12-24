@@ -14,7 +14,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: ${NODE_ENV:-production}
-      PORT: ${FRONTEND_PORT_DOCKER:-4000}
+      PORT: ${FRONTEND_PORT_DOCKER:-3000}
       CI: "true"
 
   backend:

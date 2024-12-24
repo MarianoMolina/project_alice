@@ -280,7 +280,7 @@ export async function updateTaskResult(
   userId: string
 ): Promise<ITaskResultDocument | null> {
   try {
-    Logger.info('taskResultData received in updateTaskResult:', taskResultData);
+    Logger.debug('taskResultData received in updateTaskResult:', taskResultData);
     
     const existingTaskResult = await TaskResult.findById(taskResultId);
     if (!existingTaskResult) {

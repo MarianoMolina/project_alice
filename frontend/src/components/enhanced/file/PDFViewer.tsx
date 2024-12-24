@@ -61,7 +61,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
   }, [url]);
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    Logger.info('PDF loaded successfully', { numPages });
+    Logger.debug('PDF loaded successfully', { numPages });
     setNumPages(numPages);
     setPageNumber(1);
     setIsLoading(false);

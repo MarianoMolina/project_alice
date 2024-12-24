@@ -41,7 +41,7 @@ export async function updateToolCall(
     userId: string
 ): Promise<IToolCallDocument | null> {
     try {
-        Logger.info('toolCallData received in updateToolCall:', toolCallData);
+        Logger.debug('toolCallData received in updateToolCall:', toolCallData);
         const existingToolCall = await ToolCall.findById(toolCallId);
         if (!existingToolCall) {
             throw new Error('Tool call not found');

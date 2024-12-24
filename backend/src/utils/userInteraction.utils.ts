@@ -41,7 +41,7 @@ export async function updateUserInteraction(
     userId: string
 ): Promise<IUserInteractionDocument | null> {
     try {
-        Logger.info('userInteractionData received in updateUserInteraction:', userInteractionData);
+        Logger.debug('userInteractionData received in updateUserInteraction:', userInteractionData);
         const existingUserInteraction = await UserInteraction.findById(userInteractionId);
         if (!existingUserInteraction) {
             throw new Error('Task result not found');

@@ -169,7 +169,7 @@ export const purgeAndReinitializeDatabase = async (): Promise<void> => {
   try {
     Logger.info('Purging and reinitializing database');
     const response = await dbAxiosInstance.post('/users/purge-and-reinitialize');
-    Logger.info('Database purged and reinitialized:', response.data.message);
+    Logger.debug('Database purged and reinitialized:', response.data.message);
   } catch (error) {
     Logger.error('Error purging and reinitializing database:', error);
     throw error;
