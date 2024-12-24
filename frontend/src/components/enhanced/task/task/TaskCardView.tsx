@@ -7,7 +7,7 @@ import {
     Tooltip,
     IconButton,
 } from '@mui/material';
-import { Category, Description, Functions, Person, ApiRounded, Settings, Logout, ExitToApp, AttachFile, Api, QueryBuilder, Replay } from '@mui/icons-material';
+import { Category, Description, Functions, Person, ApiRounded, Settings, Logout, ExitToApp, AttachFile, Api, QueryBuilder, Replay, ContactMail } from '@mui/icons-material';
 import { PopulatedTask, TaskComponentProps, taskDescriptions } from '../../../../types/TaskTypes';
 import useStyles from '../TaskStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
@@ -135,6 +135,26 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
             )
         },
         {
+            icon: <ContactMail />,
+            primary_text: "User Checkpoints",
+            secondary_text: (
+                !item.user_checkpoints || Object.keys(item.user_checkpoints).length === 0 ?
+                    <Typography variant="body2" color="textSecondary">No user checkpoints defined</Typography> :
+                    <Box>
+                        {Object.entries(item.user_checkpoints).map(([nodeName, checkpoint]) => (
+                            checkpoint && (
+                                <Chip
+                                    key={nodeName}
+                                    label={`${nodeName}`}
+                                    onClick={() => selectCardItem && checkpoint._id && selectCardItem('UserCheckpoint', checkpoint._id, checkpoint)}
+                                    className={classes.chip}
+                                />
+                            )
+                        ))}
+                    </Box>
+            )
+        },
+        {
             icon: <Logout />,
             primary_text: "Exit Codes",
             secondary_text: (
@@ -154,10 +174,10 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
         {
             icon: <AttachFile />,
             primary_text: "References",
-            secondary_text: item.data_cluster && 
-                hasAnyReferences(item.data_cluster as References) ? 
-                    <DataClusterManager dataCluster={item.data_cluster as PopulatedDataCluster} /> :
-                        <Typography>"N/A"</Typography>,
+            secondary_text: item.data_cluster &&
+                hasAnyReferences(item.data_cluster as References) ?
+                <DataClusterManager dataCluster={item.data_cluster as PopulatedDataCluster} /> :
+                <Typography>"N/A"</Typography>,
         },
         {
             icon: <ExitToApp />,

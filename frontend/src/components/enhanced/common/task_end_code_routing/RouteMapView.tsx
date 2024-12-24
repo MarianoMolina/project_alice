@@ -72,7 +72,7 @@ const RouteMapView: React.FC<RouteMapProps> = ({
     <Tooltip title="If checked, this end code will be taken as a retry attempt, useful to avoid loops. If disabled, the end code can be considered normal behavior">
       <FormControlLabel
         control={
-          <Checkbox
+          <Checkbox 
             checked={retry}
             onChange={(e) => handleRouteChange(exitCode, nextTask, e.target.checked)}
             size="small"

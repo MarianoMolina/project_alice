@@ -25,6 +25,7 @@ import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 import { useApi } from '../../../../contexts/ApiContext';
 import TitleBox from '../../common/inputs/TitleBox';
 import ApiValidationManager from '../../api/ApiValidationManager';
+import UserCheckpointManager from '../../user_checkpoint/UserCheckpointManager';
 
 const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     item,
@@ -42,7 +43,11 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     const isEditMode = mode === 'edit' || mode === 'create';
     const title = mode === 'create' ? 'Create New Task' : mode === 'edit' ? 'Edit Task' : 'Task Details';
     const saveButtonText = form._id ? 'Update Task' : 'Create Task';
-
+    const availableNodes = useMemo(() => {
+        if (!form.node_end_code_routing) return [];
+        return Object.keys(form.node_end_code_routing);
+    }, [form.node_end_code_routing]);
+    
     useEffect(() => {
         if (isSaving) {
             handleSave();
@@ -222,6 +227,15 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             showCreateButton={true}
         />
     ), [form?.tasks, isEditMode, activeAccordion, handleAccordionToggle, handleTaskSelect]);
+    const memoizedUserCheckpointManager = useMemo(() => (
+        <UserCheckpointManager
+            userCheckpoints={form.user_checkpoints || {}}
+            availableNodes={availableNodes}
+            onChange={(checkpoints) => handleFieldChange('user_checkpoints', checkpoints)}
+            isEditMode={isEditMode}
+            fetchPopulatedItem={fetchPopulatedItem}
+        />
+    ), [form.user_checkpoints, availableNodes, handleFieldChange, isEditMode, fetchPopulatedItem]);
 
     const memoizedFlowchartTask = useMemo(() => ({
         ...form,
@@ -302,6 +316,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             {memoizedTaskSelect}
             {memoizedPromptSelect}
             {memoizedOutputPromptSelect}
+            {form.node_end_code_routing && memoizedUserCheckpointManager}
             {taskType === TaskType.CodeGenerationLLMTask && memoizedCodePromptSelect}
             <TaskEndCodeRoutingBuilder
                 title="Inner Nodes End Code Routing"

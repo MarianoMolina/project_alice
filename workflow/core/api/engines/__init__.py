@@ -11,7 +11,6 @@ from .api_engine import APIEngine
 ApiEngineMap = {
     ApiType.LLM_MODEL: {
         ApiName.OPENAI: LLMEngine,
-        ApiName.LM_STUDIO: LLMEngine,
         ApiName.AZURE: LLMEngine,
         ApiName.MISTRAL: LLMEngine,
         ApiName.LLAMA: LLMEngine,
@@ -19,6 +18,7 @@ ApiEngineMap = {
         ApiName.ANTHROPIC: LLMAnthropic,
         ApiName.GEMINI: GeminiLLMEngine,
         ApiName.COHERE: CohereLLMEngine,
+        ApiName.LM_STUDIO: LLMEngine,
     },
     ApiType.GOOGLE_SEARCH: {
         ApiName.GOOGLE_SEARCH: GoogleSearchAPI,
@@ -44,11 +44,11 @@ ApiEngineMap = {
     ApiType.IMG_VISION: {
         ApiName.OPENAI: VisionModelEngine,
         ApiName.ANTHROPIC: AnthropicVisionEngine,
-        ApiName.LM_STUDIO: VisionModelEngine,
         ApiName.LLAMA: VisionModelEngine,
         ApiName.MISTRAL: VisionModelEngine,
         ApiName.GEMINI: GeminiVisionEngine,
-        ApiName.GROQ: VisionModelEngine
+        ApiName.GROQ: VisionModelEngine,
+        ApiName.LM_STUDIO: VisionModelEngine,
     },
     ApiType.IMG_GENERATION: {
         ApiName.OPENAI: ImageGenerationEngine,

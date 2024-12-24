@@ -27,10 +27,7 @@ class ApiName(str, Enum):
     COHERE = 'cohere'
     LLAMA = 'llama'
     AZURE = 'azure'
-    LM_STUDIO = 'lm_studio'
     GROQ = 'groq'
-    BARK = 'bark'
-    PIXART = 'pixart'
     GOOGLE_SEARCH = 'google_search'
     REDDIT = 'reddit'
     WIKIPEDIA = 'wikipedia'
@@ -38,7 +35,11 @@ class ApiName(str, Enum):
     ARXIV = 'arxiv'
     GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph'
     WOLFRAM_ALPHA = 'wolfram_alpha'
-    CUSTOM = 'custom'
+    
+    # LM_STUDIO = 'lm_studio'
+    # BARK = 'bark'
+    # PIXART = 'pixart'
+    # CUSTOM = 'custom'
 
 # Type definitions for different API configurations
 class BaseApiConfig(TypedDict):
@@ -74,11 +75,8 @@ API_CONFIG_TYPES: Dict[ApiName, Dict] = {
     ApiName.MISTRAL: BaseApiConfig,
     ApiName.COHERE: BaseApiConfig,
     ApiName.LLAMA: BaseApiConfig,
-    ApiName.LM_STUDIO: LocalApiConfig,
     ApiName.AZURE: BaseApiConfig,
     ApiName.GROQ: BaseApiConfig,
-    ApiName.BARK: LocalApiConfig,
-    ApiName.PIXART: LocalApiConfig,
     ApiName.GOOGLE_SEARCH: GoogleSearchConfig,
     ApiName.REDDIT: RedditConfig,
     ApiName.WIKIPEDIA: NoConfig,
@@ -86,6 +84,9 @@ API_CONFIG_TYPES: Dict[ApiName, Dict] = {
     ApiName.ARXIV: NoConfig,
     ApiName.GOOGLE_KNOWLEDGE_GRAPH: ExaConfig,
     ApiName.WOLFRAM_ALPHA: WolframConfig,
+    ApiName.LM_STUDIO: LocalApiConfig,
+    ApiName.BARK: LocalApiConfig,
+    ApiName.PIXART: LocalApiConfig,
 }
 
 # Map of ApiName to supported ApiTypes
@@ -121,11 +122,6 @@ API_CAPABILITIES = {
         ApiType.LLM_MODEL,
         ApiType.IMG_VISION
     },
-    ApiName.LM_STUDIO: {
-        ApiType.LLM_MODEL,
-        ApiType.IMG_VISION,
-        ApiType.EMBEDDINGS
-    },
     ApiName.GROQ: {
         ApiType.LLM_MODEL,
         ApiType.IMG_VISION,
@@ -133,12 +129,6 @@ API_CAPABILITIES = {
     },
     ApiName.AZURE: {
         ApiType.LLM_MODEL
-    },
-    ApiName.BARK: {
-        ApiType.TEXT_TO_SPEECH
-    },
-    ApiName.PIXART: {
-        ApiType.IMG_GENERATION
     },
     ApiName.GOOGLE_SEARCH: {
         ApiType.GOOGLE_SEARCH
@@ -161,6 +151,17 @@ API_CAPABILITIES = {
     ApiName.WOLFRAM_ALPHA: {
         ApiType.WOLFRAM_ALPHA
     },
+    ApiName.LM_STUDIO: {
+        ApiType.LLM_MODEL,
+        ApiType.IMG_VISION,
+        ApiType.EMBEDDINGS
+    },
+    ApiName.BARK: {
+        ApiType.TEXT_TO_SPEECH
+    },
+    ApiName.PIXART: {
+        ApiType.IMG_GENERATION
+    },
     ApiName.CUSTOM: {
         ApiType.LLM_MODEL,
         ApiType.IMG_VISION,
@@ -168,7 +169,6 @@ API_CAPABILITIES = {
         ApiType.SPEECH_TO_TEXT,
         ApiType.TEXT_TO_SPEECH,
         ApiType.EMBEDDINGS
-
     }
 }
 

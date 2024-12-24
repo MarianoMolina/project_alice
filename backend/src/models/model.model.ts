@@ -56,8 +56,8 @@ const modelSchema = new Schema<IModelDocument, IModelModel>({
     required: false, 
     default: () => ({ ...DEFAULT_MODEL_CONFIG }) 
   },  
-  model_type: { type: String, enum: ModelType, required: true },
-  api_name: { type: String, default: ApiName.LM_STUDIO },
+  model_type: { type: String, enum: Object.values(ModelType), required: true },
+  api_name: { type: String, enum: Object.values(ApiName), required: true },
   model_costs: { 
     type: modelCostsSchema, 
     required: false, 

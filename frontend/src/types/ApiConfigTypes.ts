@@ -29,7 +29,7 @@ export interface APIConfigComponentProps extends EnhancedComponentProps<APIConfi
 }
 export const getDefaultAPIConfigForm = (): Partial<APIConfig> => ({
     name: '',
-    api_name: ApiName.LM_STUDIO,
+    api_name: ApiName.OPENAI,
     data: {},
     health_status: HealthStatus.HEALTHY
 });

@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   titleText: {
     marginTop: `${theme.spacing(2)} !important`,
-  },
+  }
 }));
 
 export default useStyles;
