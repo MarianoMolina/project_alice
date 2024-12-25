@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Any, Union
-from pydantic import Field, field_validator
+from pydantic import field_validator
 from workflow.core.data_structures import ApiType, ApiName, ModelConfig, ModelApis, AliceModel, BaseDataStructure
 from workflow.core.api.api_config import APIConfig
 from workflow.util import LOGGER

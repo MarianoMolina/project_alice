@@ -195,9 +195,9 @@ base_module = BaseModule(
                 "model_type": "chat",
                 "api_name": "gemini",
                 "model_costs": {
-                    "input_token_cost_per_million": 0.0,
-                    "cached_input_token_cost_per_million": 0.0,
-                    "output_token_cost_per_million": 0.0,
+                    "input_token_cost_per_million": 0.075,
+                    "cached_input_token_cost_per_million": 0.01875,
+                    "output_token_cost_per_million": 0.3,
                 },
             },
             {
@@ -210,9 +210,9 @@ base_module = BaseModule(
                 "model_type": "vision",
                 "api_name": "gemini",
                 "model_costs": {
-                    "input_token_cost_per_million": 0.0,
-                    "cached_input_token_cost_per_million": 0.0,
-                    "output_token_cost_per_million": 0.0,
+                    "input_token_cost_per_million": 0.075,
+                    "cached_input_token_cost_per_million": 0.01875,
+                    "output_token_cost_per_million": 0.3,
                 },
             },
             {

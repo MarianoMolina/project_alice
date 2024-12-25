@@ -59,14 +59,40 @@ class APIConfig(BaseDataStructure):
     
     def validate_config(self) -> bool:
         """
-        Validates that the data dictionary contains all required fields for the given api_name
+        Validates that the data dictionary contains all required fields for the given api_name.
+        If health_status is 'unhealthy', allows null values for required fields.
+        If health_status is 'healthy' but config is invalid, marks as unhealthy and warns.
         """
         config_type = API_CONFIG_TYPES[self.api_name]
+        
         # Handle APIs that don't require configuration
         if config_type is NoConfig:
             return True
+            
         required_fields = config_type.__annotations__.keys()
-        return all(field in self.data for field in required_fields)
+        
+        # For unhealthy configs, just check fields exist (can be null)
+        if self.health_status == "unhealthy":
+            return all(field in self.data for field in required_fields)
+            
+        # For healthy configs, validate fields exist and are non-null
+        is_valid = all(
+            field in self.data and self.data[field] is not None 
+            for field in required_fields
+        )
+        
+        # If marked healthy but invalid, log warning and mark unhealthy
+        if not is_valid:
+            LOGGER.warning(
+                f"API {self.name} ({self.api_name}) marked as healthy but has invalid config. "
+                f"Missing or null required fields: "
+                f"{[f for f in required_fields if f not in self.data or self.data[f] is None]}. "
+                f"Marking as unhealthy."
+            )
+            self.health_status = "unhealthy"
+            return True
+            
+        return True
     
     def get_supported_types(self) -> List[ApiType]:
         """
