@@ -61,6 +61,7 @@ class API(BaseDataStructure):
     @classmethod
     def validate_api_config(cls, v: Optional[Union[Dict, APIConfig]], info) -> Optional[APIConfig]:
         """Validates and converts api_config input to APIConfig object if needed"""
+        LOGGER.debug(f"Validating API config for {info}")
         if not v:
             return v
             

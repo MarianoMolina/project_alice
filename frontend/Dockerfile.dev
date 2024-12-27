@@ -21,6 +21,8 @@ COPY frontend/ .
 
 # Set the environment variable for development mode
 ENV NODE_ENV=development
+ENV CHOKIDAR_USEPOLLING=true
+ENV WATCHPACK_POLLING=true
 
 EXPOSE ${FRONTEND_PORT_DOCKER}
 # Start the development server

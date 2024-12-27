@@ -2,6 +2,7 @@ from typing import Dict, List
 from pydantic import Field
 from workflow.core.data_structures import BaseDataStructure, ApiName, ApiType, API_CONFIG_TYPES, API_CAPABILITIES
 from workflow.core.data_structures.api_utils import NoConfig
+from workflow.util import LOGGER
 
 class APIConfig(BaseDataStructure):
     """
@@ -58,30 +59,22 @@ class APIConfig(BaseDataStructure):
     health_status: str = Field("unknown", pattern="^(healthy|unhealthy|unknown)$")
     
     def validate_config(self) -> bool:
-        """
-        Validates that the data dictionary contains all required fields for the given api_name.
-        If health_status is 'unhealthy', allows null values for required fields.
-        If health_status is 'healthy' but config is invalid, marks as unhealthy and warns.
-        """
+        LOGGER.debug(f"Validating config for {self.api_name}")
         config_type = API_CONFIG_TYPES[self.api_name]
+        LOGGER.debug(f"Config type: {config_type}")
         
-        # Handle APIs that don't require configuration
-        if config_type is NoConfig:
+        if config_type is NoConfig or self.health_status == "unhealthy":
+            LOGGER.debug("No config required")
             return True
             
         required_fields = config_type.__annotations__.keys()
-        
-        # For unhealthy configs, just check fields exist (can be null)
-        if self.health_status == "unhealthy":
-            return all(field in self.data for field in required_fields)
             
-        # For healthy configs, validate fields exist and are non-null
         is_valid = all(
-            field in self.data and self.data[field] is not None 
+            field in self.data and self.data[field] is not None
             for field in required_fields
         )
+        LOGGER.debug(f"Healthy validation result: {is_valid}")
         
-        # If marked healthy but invalid, log warning and mark unhealthy
         if not is_valid:
             LOGGER.warning(
                 f"API {self.name} ({self.api_name}) marked as healthy but has invalid config. "

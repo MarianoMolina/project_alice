@@ -39,8 +39,11 @@ export interface UsageDict {
 export interface MessageCreationMetadata {
     model?: string;
     usage?: UsageDict;
-    cost?: CostDict;
     estimated_tokens?: number;
+    finish_reason?: string;
+    system_fingerprint?: string;
+    cost?: CostDict;
+    generation_details?: Record<string, any>;
 }
 
 export interface MessageType extends Embeddable {

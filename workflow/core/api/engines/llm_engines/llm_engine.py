@@ -6,23 +6,9 @@ from typing import List, Optional, TypedDict
 from workflow.core.api.engines.api_engine import APIEngine
 from workflow.util import LOGGER, est_messages_token_count, ScoreConfig, est_token_count, MessagePruner, CHAR_TO_TOKEN, MessageApiFormat
 from workflow.core.data_structures import (
-    MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, RoleTypes, MessageGenerators, ToolFunction
+    MessageDict, ContentType, ModelConfig, ApiType, References, FunctionParameters, ParameterDefinition, ToolCall, RoleTypes, MessageGenerators, ToolFunction,
+    MetadataDict, CostDict
     )
-
-class CostDict(TypedDict, total=False):
-    input_cost: float
-    output_cost: float
-    total_cost: float
-    
-class UsageDict(TypedDict, total=False):
-    prompt_tokens: int
-    completion_tokens: int
-    total_tokens: int
-
-class MetadataDict(TypedDict, total=False):
-    model: str
-    usage: UsageDict
-    cost: CostDict
 
 class LLMEngine(APIEngine):
     """
@@ -215,21 +201,21 @@ class LLMEngine(APIEngine):
                 references=References(tool_calls=tool_calls),
                 generated_by=MessageGenerators.LLM,
                 type=ContentType.TEXT,
-                creation_metadata={
-                    "model": response.model,
-                    "usage": response.usage.model_dump(),
-                    "finish_reason": choice.finish_reason,
-                    "system_fingerprint": response.system_fingerprint,
-                    "cost": self.calculate_cost(response.usage.prompt_tokens, response.usage.completion_tokens, api_data),
-                    "estimated_tokens": estimated_tokens
-                }
+                creation_metadata=MetadataDict(
+                    model = response.model,
+                    usage = response.usage.model_dump(),
+                    cost = self.calculate_cost(response.usage.prompt_tokens, response.usage.completion_tokens, api_data),
+                    estimated_tokens = int(estimated_tokens),
+                    system_fingerprint = response.system_fingerprint,
+                    finish_reason = choice.finish_reason,
+                    )
             )
             return References(messages=[msg])
 
         except Exception as e:
             LOGGER.error(f"Error in LLM API call: {str(e)}")
             LOGGER.error(traceback.format_exc())
-            raise
+            raise Exception(f"Error in LLM API call: {str(e)}")
 
     def calculate_cost(self, prompt_tokens: int, completion_tokens: int, model_config: ModelConfig) -> CostDict:
         """

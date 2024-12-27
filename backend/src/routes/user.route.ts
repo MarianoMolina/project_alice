@@ -51,7 +51,7 @@ router.post('/register', async (req: Request, res: Response) => {
 router.post('/login', async (req: Request, res: Response) => {
   const { email, password } = req.body;
   try {
-    Logger.debug('Logging request with email:', email);
+    Logger.debug('Log in request with email:', email);
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });

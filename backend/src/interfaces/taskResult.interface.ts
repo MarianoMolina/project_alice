@@ -22,7 +22,7 @@ export interface ITaskResult extends Embeddable {
     task_outputs: string | null;
     task_inputs: Map<string, any> | null;
     result_diagnostic: string | null;
-    usage_metrics: Map<string, string> | null;
+    usage_metrics: Map<string, any> | null;
     execution_history?: ExecutionHistoryItem[];
     node_references?: NodeResponse[];
     created_by: Types.ObjectId | IUserDocument;

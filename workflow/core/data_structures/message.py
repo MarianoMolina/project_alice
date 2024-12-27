@@ -2,7 +2,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Optional, Dict, Any, List, TYPE_CHECKING
 from pydantic import Field, field_validator
-from workflow.core.data_structures.base_models import Embeddable, ContentType, FileType
+from workflow.core.data_structures.base_models import Embeddable, ContentType, FileType, MetadataDict
 from workflow.core.data_structures.central_types import ReferencesType
 from workflow.util.message_prune.message_prune_utils import RoleTypes, MessageApiFormat
 
@@ -27,7 +27,7 @@ class MessageDict(Embeddable):
     assistant_name: Optional[str] = Field(default="", description="Name of the assistant")
     type: ContentType = Field(default=ContentType.TEXT, description="Type of the message")
     references: ReferencesType = Field(default_factory=get_default_references, description="References associated with this message")
-    creation_metadata: Optional[Dict[str, Any]] = Field(default=None, description="Metadata about the creation of the message, like cost, tokens, end reason, etc.")
+    creation_metadata: Optional[MetadataDict] = Field(default=None, description="Metadata about the creation of the message, like cost, tokens, end reason, etc.")
 
     @field_validator('references')
     def validate_references(cls, v):

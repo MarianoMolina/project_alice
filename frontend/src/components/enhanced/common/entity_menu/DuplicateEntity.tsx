@@ -3,7 +3,6 @@ import { styled } from '@mui/system';
 import { BaseDatabaseObject, CollectionName, CollectionPopulatedType, collectionNameToElementString } from '../../../../types/CollectionTypes';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import { FileCopy } from '@mui/icons-material';
-import Logger from '../../../../utils/Logger';
 
 interface DuplicateEntityProps<T extends CollectionName> {
   item: CollectionPopulatedType[T];

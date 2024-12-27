@@ -9,6 +9,7 @@ from workflow.core.data_structures import (
     RoleTypes,
     MessageGenerators,
     ContentType,
+    MetadataDict,
 )
 from workflow.core.api.engines.vision_engines.vision_model_engine import (
     VisionModelEngine,
@@ -61,26 +62,27 @@ class GeminiVisionEngine(VisionModelEngine):
                     max_output_tokens=max_tokens
                 ),
             )
+            creation_metadata = MetadataDict(
+                model=api_data.model,
+                usage={
+                    "prompt_tokens": response.usage_metadata.prompt_token_count,
+                    "completion_tokens": response.usage_metadata.candidates_token_count,
+                    "total_tokens": response.usage_metadata.total_token_count,
+                },
+                costs=self.calculate_cost(
+                    response.usage_metadata.prompt_token_count,
+                    response.usage_metadata.candidates_token_count,
+                    api_data,
+                ),
+                finish_reason=response.candidates[0].finish_reason.name,
+            )
 
             msg = MessageDict(
                 role=RoleTypes.ASSISTANT,
                 content=response.text,
                 generated_by=MessageGenerators.TOOL,
                 type=ContentType.TEXT,
-                creation_metadata={
-                    "model": api_data.model,
-                    "usage": {
-                        "prompt_tokens": response.usage_metadata.prompt_token_count,
-                        "completion_tokens": response.usage_metadata.candidates_token_count,
-                        "total_tokens": response.usage_metadata.total_token_count,
-                    },
-                    "cost": self.calculate_cost(
-                        response.usage_metadata.prompt_token_count,
-                        response.usage_metadata.candidates_token_count,
-                        api_data,
-                    ),
-                    "finish_reason": response.candidates[0].finish_reason.name,
-                },
+                creation_metadata=creation_metadata,
             )
             return References(messages=[msg])
         except Exception as e:

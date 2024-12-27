@@ -80,7 +80,7 @@ class SpeechToTextEngine(APIEngine):
             LOGGER.debug(f"Model {model} not recognized. Defaulting to whisper-1.")
             model = 'whisper-1'
 
-        response_format = "text" if not timestamp_granularities else "verbose_json"
+        response_format = "verbose_json"
 
         # validate timestamp_granularities
         for granularity in timestamp_granularities:
@@ -96,15 +96,21 @@ class SpeechToTextEngine(APIEngine):
                     response_format=response_format,
                     timestamp_granularities=timestamp_granularities
                 )
-
+            transcript = transcription if isinstance(transcription, str) else transcription.text
+            duration = transcription.duration if 'duration' in transcription else None
             msg = MessageDict(
                 role=RoleTypes.ASSISTANT,
-                content=f'Transcription: {transcription}',
+                content=f'Transcription: {transcript}',
                 generated_by=MessageGenerators.TOOL,
                 type=ContentType.TEXT,
                 creation_metadata={
                     "model": model,
-                    "length": len(transcription),
+                    "generation_details": {
+                        "length": len(transcript),  
+                    },
+                    "cost": {
+                        "total_cost": api_data.model_costs.cost_per_unit * duration if duration else 0
+                        }
                 }
             )
             return References(messages=[msg])

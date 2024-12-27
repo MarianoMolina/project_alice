@@ -74,7 +74,8 @@ class GeminiImageGenerationEngine(ImageGenerationEngine):
                         creation_metadata={
                             "prompt": prompt, 
                             "aspect_ratio": aspect_ratio,
-                            "model": api_data.model
+                            "model": api_data.model,
+                            "cost": api_data.model_costs.cost_per_unit | 0,
                         }
                     )
                 ))

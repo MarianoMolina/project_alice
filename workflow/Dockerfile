@@ -62,7 +62,7 @@ ENV PYTHONPATH=/app
 EXPOSE 8000
 
 HEALTHCHECK --interval=10s --timeout=10s --start-period=30s --retries=20 \
-  CMD curl -f http://localhost:${WORKFLOW_PORT_DOCKER}/health || exit 1
+  CMD curl -f http://${HOST}:${WORKFLOW_PORT_DOCKER}/health || exit 1
 
 # Copy entrypoint script and convert to Unix line endings
 COPY entrypoint.sh /entrypoint.sh

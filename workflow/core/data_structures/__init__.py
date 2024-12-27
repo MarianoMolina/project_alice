@@ -13,8 +13,7 @@ from .tool_calls import ToolCall, ToolCallConfig
 from .code import CodeBlock, CodeOutput, CodeExecution, get_run_commands
 from .entity_reference import EntityReference, ReferenceCategory, ImageReference
 from .parameters import ParameterDefinition, FunctionConfig, FunctionParameters, ToolFunction, ensure_tool_function
-from .base_models import EntityType, FileType, ContentType, TasksEndCodeRouting, EmbeddingChunk, Embeddable, BaseDataStructure
-
+from .base_models import EntityType, FileType, ContentType, TasksEndCodeRouting, EmbeddingChunk, Embeddable, BaseDataStructure, MetadataDict, CostDict, UsageDict
 # Rebuild all models
 MessageDict.model_rebuild()
 FileReference.model_rebuild()
@@ -51,4 +50,5 @@ __all__ = ['FileReference', 'ContentType', 'FileType', 'FileContentReference', '
            'ApiName', 'ApiType', 'ModelType', 'ParameterDefinition', 'FunctionConfig', 'FunctionParameters', 'ToolCall', 'ToolCallConfig', 'UserCheckpoint', 'UserResponse',
            'ToolFunction', 'ensure_tool_function', 'EntityType', 'ModelApis', 'FileOutput', 'References', 'complete_inner_execution_history', 'Embeddable', 'convert_message_dict_to_api_format',
            'AliceModel', 'Prompt', 'BaseDataStructure', 'DataCluster', 'InteractionOwnerType', 'InteractionOwner', 'MessageGenerators', 'RoleTypes', 'CodeBlock',
-           'CodeOutput', 'CodeExecution', 'API_CONFIG_TYPES', 'API_CAPABILITIES', 'EntityReference', 'ReferenceCategory', 'ImageReference', 'get_reference_object', 'references_model_map']
+           'CodeOutput', 'CodeExecution', 'API_CONFIG_TYPES', 'API_CAPABILITIES', 'EntityReference', 'ReferenceCategory', 'ImageReference', 'get_reference_object', 'references_model_map', 
+           'MetadataDict', 'CostDict', 'UsageDict']

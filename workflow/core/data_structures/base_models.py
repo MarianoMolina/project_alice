@@ -1,6 +1,7 @@
 from bson import ObjectId
 from pydantic import BaseModel, Field, HttpUrl, AfterValidator
 from typing import Optional, Literal, Tuple, Union, Dict, List, Annotated
+from typing_extensions import TypedDict
 from enum import Enum
 from pydantic_core import Url
 from workflow.util import LOGGER, get_traceback
@@ -71,11 +72,31 @@ class BaseDataStructure(BaseModel):
             LOGGER.error(f'Traceback: {get_traceback()}')
             raise
 
+
+class CostDict(TypedDict, total=False):
+    input_cost: float
+    output_cost: float
+    total_cost: float
+    
+class UsageDict(TypedDict, total=False):
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
+
+class MetadataDict(TypedDict, total=False):
+    model: str
+    usage: UsageDict
+    estimated_tokens: int
+    finish_reason: str
+    system_fingerprint: str
+    cost: CostDict
+    generation_details: dict
+
 class EmbeddingChunk(BaseDataStructure):
     vector: List[float] = Field(..., description="The embedding vector")
     text_content: str = Field(..., description="The text content that the embedding vector represents")
     index: int = Field(..., description="The index of the embedding chunk in the original text")
-    creation_metadata: dict = Field(default_factory=dict, description="Metadata about the creation of the embedding")
+    creation_metadata: MetadataDict = Field(default_factory=dict, description="Metadata about the creation of the embedding")
 
     def __str__(self) -> str:
         return f"EmbeddingChunk: Index: {self.index}\nContent: {self.text_content}.\n"

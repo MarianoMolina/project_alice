@@ -10,7 +10,9 @@ export interface LoginResponse {
 
 export const loginUser = async (email: string, password: string): Promise<LoginResponse> => {
   try {
-    Logger.debug('Logging in with email:', email);
+    Logger.debug('Starting login request');
+    Logger.debug('Request URL:', dbAxiosInstance.defaults.baseURL + '/users/login');
+    Logger.debug('Request payload:', { email, password });
     const response = await dbAxiosInstance.post<LoginResponse>('/users/login', { email, password });
     Logger.debug('Login response:', response.data);
     return response.data;
@@ -26,6 +28,7 @@ export const loginUser = async (email: string, password: string): Promise<LoginR
 
 export const registerUser = async (name: string, email: string, password: string): Promise<User> => {
   try {
+    Logger.debug('Registering user with email:', email);
     const response = await dbAxiosInstance.post<User>('/users/register', { name, email, password });
     return response.data;
   } catch (error: unknown) {

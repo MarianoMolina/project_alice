@@ -161,7 +161,7 @@ class GeminiLLMEngine(LLMEngine):
                         "total_tokens": response.usage_metadata.total_token_count,
                     },
                     "finish_reason": response.candidates[0].finish_reason.name,
-                    "estimated_tokens": estimated_tokens,
+                    "estimated_tokens": int(estimated_tokens),
                     "cost": self.calculate_cost(
                         response.usage_metadata.prompt_token_count,
                         response.usage_metadata.candidates_token_count,

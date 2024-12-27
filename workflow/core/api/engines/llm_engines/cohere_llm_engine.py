@@ -111,7 +111,7 @@ class CohereLLMEngine(LLMEngine):
                         "total_tokens": response.meta.tokens.output_tokens + response.meta.tokens.input_tokens,
                     },
                     "finish_reason": response.finish_reason,
-                    "estimated_tokens": estimated_tokens,
+                    "estimated_tokens": int(estimated_tokens),
                     "cost": self.calculate_cost(
                         response.meta.tokens.input_tokens,
                         response.meta.tokens.output_tokens,

@@ -53,7 +53,7 @@ const taskResultSchema = new Schema<ITaskResultDocument, ITaskResultModel>({
   task_outputs: { type: String, default: null },
   task_inputs: { type: Map, of: Schema.Types.Mixed, default: null },
   result_diagnostic: { type: String, default: null },
-  usage_metrics: { type: Map, of: String, default: null },
+  usage_metrics: { type: Map, of: Schema.Types.Mixed, default: null },
   execution_history: { type: [executionHistoryItemSchema], default: [] },
   node_references: { type: [nodeResponseSchema], default: [] },
   embedding: [{ type: Schema.Types.ObjectId, ref: 'EmbeddingChunk'}],

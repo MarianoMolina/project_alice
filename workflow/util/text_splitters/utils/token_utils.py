@@ -4,7 +4,7 @@ from workflow.util.message_prune.message_prune_utils import calculate_message_si
 
 def est_token_count(text: str) -> int:
     """Estimate token count for a given string."""
-    return len(text) // CHAR_TO_TOKEN
+    return int(len(text) // CHAR_TO_TOKEN)
 
 def est_messages_token_count(messages: List[MessageApiFormat], tools: List[Any] = None) -> int:
     """Estimate token count for a list of messages and optional tools."""

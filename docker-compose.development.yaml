@@ -15,10 +15,9 @@ services:
       - /app/node_modules
       - /app/dist
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
-      CHOKIDAR_USEPOLLING: "true"
-      WATCHPACK_POLLING: "true"
       PORT: ${FRONTEND_PORT_DOCKER:-3000}
+    env_file:
+      - .env
 
   backend:
     build:

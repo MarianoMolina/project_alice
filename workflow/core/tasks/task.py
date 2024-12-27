@@ -843,12 +843,54 @@ class AliceTask(BaseDataStructure):
         return self.start_node or next(iter(self.node_end_code_routing.keys()))
 
     def collect_metadata(self, node_responses: NodeResponse) -> Dict[str, Any]:
-        usage_metrics = {"messages": []}
+        """
+        Collects metadata from node responses, only creating dictionary entries for metrics that have data.
+        
+        Args:
+            node_responses (NodeResponse): List of node responses containing references with potential metadata
+            
+        Returns:
+            Dict[str, Any]: Dictionary containing only metrics that have data
+        """
+        usage_metrics = {}
         for node in node_responses:
-            if node.references and node.references.messages:
-                for message in node.references.messages:
-                    if message.creation_metadata:
-                        usage_metrics["messages"].append(message.creation_metadata)
+            if node.references:
+                if node.references.messages:
+                    for message in node.references.messages:
+                        if message.creation_metadata:
+                            if "messages" not in usage_metrics:
+                                usage_metrics["messages"] = []
+                            usage_metrics["messages"].append(message.creation_metadata)
+                            
+                if node.references.files:
+                    for file in node.references.files:
+                        if file.transcript and file.transcript.creation_metadata:
+                            if "files" not in usage_metrics:
+                                usage_metrics["files"] = []
+                            usage_metrics["files"].append(file.transcript.creation_metadata)
+                            
+                if node.references.embeddings:
+                    for embedding in node.references.embeddings:
+                        if embedding.creation_metadata:
+                            if "embeddings" not in usage_metrics:
+                                usage_metrics["embeddings"] = []
+                            usage_metrics["embeddings"].append(embedding.creation_metadata)
+                            
+                if node.references.entity_references:
+                    for entity in node.references.entity_references:
+                        if entity.metadata and 'creation_metadata' in entity.metadata:
+                            if "entity_references" not in usage_metrics:
+                                usage_metrics["entity_references"] = []
+                            usage_metrics["entity_references"].append(entity.metadata["creation_metadata"])
+                            
+                if node.references.task_responses:
+                    for task_response in node.references.task_responses:
+                        if task_response.usage_metrics:
+                            if "task_responses" not in usage_metrics:
+                                usage_metrics["task_responses"] = []
+                            usage_metrics["task_responses"].append(task_response.usage_metrics)
+                            
+        return usage_metrics
 
     # Response creation methods
     def get_task_response(

@@ -25,6 +25,7 @@ export interface ModelCosts {
     input_token_cost_per_million: number;
     cached_input_token_cost_per_million: number;
     output_token_cost_per_million: number;
+    cost_per_unit?: number;
 }
 
 export interface IModelConfig {

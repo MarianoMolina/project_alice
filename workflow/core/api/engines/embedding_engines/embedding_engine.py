@@ -2,7 +2,6 @@ import re
 from pydantic import Field
 from typing import List
 from openai import AsyncOpenAI
-from openai.types import CreateEmbeddingResponse
 from workflow.core.data_structures import (
     ModelConfig,
     ApiType,
@@ -10,9 +9,10 @@ from workflow.core.data_structures import (
     References,
     FunctionParameters,
     ParameterDefinition,
+    CostDict
 )
 from workflow.core.api.engines.api_engine import APIEngine
-from workflow.util import LOGGER, est_token_count, Language, TextSplitter, SemanticTextSplitter, SplitterType, cosine_similarity, get_language_matching, get_traceback
+from workflow.util import LOGGER, est_token_count, Language, TextSplitter, SemanticTextSplitter, SplitterType, get_language_matching, get_traceback
 
 class EmbeddingEngine(APIEngine):
     """
@@ -122,15 +122,24 @@ class EmbeddingEngine(APIEngine):
 
             # Extract embeddings from the response
             embeddings = [data.embedding for data in response.data]
+            
+            individual_usage = {
+                "prompt_tokens": response.usage.prompt_tokens // len(embeddings),
+                "total_tokens": response.usage.total_tokens // len(embeddings),
+            }
 
             # Create EmbeddingChunks objects for each input
             for idx, (input_text, embedding) in enumerate(zip(inputs, embeddings)):
-                creation_metadata = self.get_usage(response)
                 embedding_chunk = EmbeddingChunk(
                     vector=embedding,
                     text_content=input_text,
                     index=idx,
-                    creation_metadata=creation_metadata,
+                    creation_metadata={
+                        "model": response.model,
+                        "usage": individual_usage,
+                        "estimated_tokens": est_token_count(input_text),
+                        "cost": self.calculate_costs(response.usage.prompt_tokens//len(embeddings), api_data)
+                        },
                 )
                 chunks.append(embedding_chunk)
             return chunks
@@ -162,20 +171,20 @@ class EmbeddingEngine(APIEngine):
             # Extract embeddings from the response
             embeddings = [data.embedding for data in response.data]
             # This method loses the context of the usage information
-            LOGGER.info(f"Generated embeddings - Usage information: {self.get_usage(response)}")
             return embeddings
         except Exception as e:
             LOGGER.error(f"Error in OpenAI embeddings API call: {str(e)} - Traceback: {get_traceback()}")
             return embeddings
         
     @staticmethod
-    def get_usage(response: CreateEmbeddingResponse) -> dict:
+    def calculate_costs(prompt_tokens: int, model_config: ModelConfig) -> CostDict:
         """
         Extracts usage information from the API response.
         """
-        return {
-            "model": response.model,
-            "total_data_len": len(response.data),
-            "prompt_tokens": response.usage.prompt_tokens,
-            "total_tokens": response.usage.total_tokens,
+        input_cost_per_mill = model_config.model_costs.input_token_cost_per_million if not model_config.use_cache else model_config.model_costs.cached_input_token_cost_per_million
+        input_cost = (prompt_tokens / 1000000) * input_cost_per_mill
+        output = {
+            "input_cost": input_cost,
+            "total_cost": input_cost
         }
+        return output

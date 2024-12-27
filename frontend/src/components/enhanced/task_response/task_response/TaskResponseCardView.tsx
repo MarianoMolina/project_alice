@@ -20,6 +20,7 @@ import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/Embeddin
 import TaskResponseViewer from './TaskResponseViewer';
 import ContentStats from '../../../ui/markdown/ContentStats';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import TaskResponseMetadataViewer from '../TaskResponseMetadataViewer';
 
 const ExitCodeChip = styled(Chip)(({ theme }) => ({
     fontWeight: 'bold',
@@ -123,32 +124,28 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
             )
         },
         {
-            icon: <DataObject />,
-            primary_text: "Raw Output",
-            secondary_text: (
-                <AccordionSection
-                    title="Raw Output"
-                    content={
-                        <>
-                            <ContentStats content={populatedItem.task_outputs as string} />
-                            <AliceMarkdown showCopyButton>{populatedItem.task_outputs as string}</AliceMarkdown>
-                        </>
-                    }
-                    disabled={!populatedItem.task_outputs}
-                />
-            )
-        },
-        {
             icon: <Output />,
             primary_text: "Output",
             secondary_text: (
-                <AccordionSection
-                    title="Output Nodes"
-                    content={
-                        populatedItem.node_references ? <TaskResponseViewer item={item} items={null} onChange={() => null} mode={'view'} handleSave={async () => { }} /> : <Typography>No output content available</Typography>
-                    }
-                    disabled={!populatedItem.node_references?.length}
-                />
+                <>
+                    <AccordionSection
+                        title="Raw Output"
+                        content={
+                            <>
+                                <ContentStats content={populatedItem.task_outputs as string} />
+                                <AliceMarkdown showCopyButton>{populatedItem.task_outputs as string}</AliceMarkdown>
+                            </>
+                        }
+                        disabled={!populatedItem.task_outputs}
+                    />
+                    <AccordionSection
+                        title="Output Nodes"
+                        content={
+                            populatedItem.node_references ? <TaskResponseViewer item={item} items={null} onChange={() => null} mode={'view'} handleSave={async () => { }} /> : <Typography>No output content available</Typography>
+                        }
+                        disabled={!populatedItem.node_references?.length}
+                    />
+                </>
             )
         },
         {
@@ -178,13 +175,8 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
         {
             icon: <DataObject />,
             primary_text: "Execution History",
-            secondary_text: (
-                <AccordionSection
-                    title='Execution History'
-                    content={<CodeBlock language="json" code={JSON.stringify(populatedItem.execution_history, null, 2)} />}
-                    disabled={!populatedItem.execution_history}
-                />
-            )
+            secondary_text: populatedItem.usage_metrics && Object.keys(populatedItem.usage_metrics).length > 0 ? 
+                <TaskResponseMetadataViewer usageMetrics={populatedItem.usage_metrics} est_tokens={0}/> : "N/A"
         },
         {
             icon: <DataObject />,

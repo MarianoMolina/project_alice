@@ -45,7 +45,8 @@ const modelConfigSchema = new Schema<IModelConfig>({
 const modelCostsSchema = new Schema<ModelCosts>({
   input_token_cost_per_million: { type: Number, required: true },
   cached_input_token_cost_per_million: { type: Number, required: true },
-  output_token_cost_per_million: { type: Number, required: true }
+  output_token_cost_per_million: { type: Number, required: true },
+  cost_per_unit: { type: Number, default: null }
 });
 
 const modelSchema = new Schema<IModelDocument, IModelModel>({

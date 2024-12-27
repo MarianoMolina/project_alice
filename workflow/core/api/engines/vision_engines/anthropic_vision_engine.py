@@ -1,10 +1,29 @@
 from typing import List
-from workflow.core.data_structures import get_file_content, MessageDict, ModelConfig, FileReference, References, RoleTypes, MessageGenerators, ContentType
-from workflow.core.api.engines.vision_engines.vision_model_engine import VisionModelEngine
+from workflow.core.data_structures import (
+    get_file_content,
+    MessageDict,
+    ModelConfig,
+    FileReference,
+    References,
+    RoleTypes,
+    MessageGenerators,
+    ContentType,
+    MetadataDict,
+)
+from workflow.core.api.engines.vision_engines.vision_model_engine import (
+    VisionModelEngine,
+)
 from anthropic import AsyncAnthropic
 
+
 class AnthropicVisionEngine(VisionModelEngine):
-    async def generate_api_response(self, api_data: ModelConfig, file_references: List[FileReference], prompt: str, max_tokens: int = 300) -> References:
+    async def generate_api_response(
+        self,
+        api_data: ModelConfig,
+        file_references: List[FileReference],
+        prompt: str,
+        max_tokens: int = 300,
+    ) -> References:
         """
         Analyzes images using Anthropic's Claude vision model.
 
@@ -22,19 +41,18 @@ class AnthropicVisionEngine(VisionModelEngine):
         content = []
         for file_ref in file_references:
             image_data = get_file_content(file_ref)
-            content.append({
-                "type": "image",
-                "source": {
-                    "type": "base64",
-                    "media_type": file_ref.file_type,
-                    "data": image_data,
+            content.append(
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": file_ref.file_type,
+                        "data": image_data,
+                    },
                 }
-            })
+            )
 
-        content.append({
-            "type": "text",
-            "text": prompt
-        })
+        content.append({"type": "text", "text": prompt})
 
         try:
             response = await client.messages.create(
@@ -47,6 +65,19 @@ class AnthropicVisionEngine(VisionModelEngine):
                     }
                 ],
             )
+            creation_metadata = MetadataDict(
+                model=api_data.model,
+                usage={
+                    "prompt_tokens": response.usage.input_tokens,
+                    "completion_tokens": response.usage.output_tokens,
+                    "total_tokens": response.usage.input_tokens
+                    + response.usage.output_tokens,
+                },
+                cost=self.calculate_cost(
+                    response.usage.input_tokens, response.usage.output_tokens, api_data
+                ),
+                finish_reason=response.stop_reason,
+            )
 
             msg = MessageDict(
                 role=RoleTypes.ASSISTANT,
@@ -54,15 +85,7 @@ class AnthropicVisionEngine(VisionModelEngine):
                 generated_by=MessageGenerators.TOOL,
                 type=ContentType.TEXT,
                 references=file_references,
-                creation_metadata={
-                    "model": api_data.model,
-                    "usage": {
-                        "input_tokens": response.usage.input_tokens,
-                        "output_tokens": response.usage.output_tokens,
-                    },
-                    "finish_reason": response.stop_reason,
-                    "cost": self.calculate_cost(response.usage.input_tokens, response.usage.output_tokens, api_data),
-                }
+                creation_metadata=creation_metadata,
             )
             return References(messages=[msg])
         except Exception as e:

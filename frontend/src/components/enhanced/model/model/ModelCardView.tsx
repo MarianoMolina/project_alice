@@ -14,7 +14,8 @@ import {
     Api,
     Message,
     AttachMoney,
-    Settings
+    Settings,
+    Money
 } from '@mui/icons-material';
 import { ModelComponentProps } from '../../../../types/ModelTypes';
 import useStyles from '../ModelStyles';
@@ -94,17 +95,22 @@ const ModelCardView: React.FC<ModelComponentProps> = ({ item }) => {
         <Box className={classes.chipContainer}>
             <Chip
                 icon={<AttachMoney />}
-                label={`Input: $${item.model_costs?.input_token_cost_per_million?.toFixed(3) || '0.150'}/M`}
+                label={`Input: $${item.model_costs?.input_token_cost_per_million?.toFixed(3) || '0'}/M`}
                 className={classes.chip}
             />
             <Chip
                 icon={<Cached />}
-                label={`Cached: $${item.model_costs?.cached_input_token_cost_per_million?.toFixed(3) || '0.075'}/M`}
+                label={`Cached: $${item.model_costs?.cached_input_token_cost_per_million?.toFixed(3) || '0'}/M`}
                 className={classes.chip}
             />
             <Chip
                 icon={<AttachMoney />}
-                label={`Output: $${item.model_costs?.output_token_cost_per_million?.toFixed(3) || '0.600'}/M`}
+                label={`Output: $${item.model_costs?.output_token_cost_per_million?.toFixed(3) || '0'}/M`}
+                className={classes.chip}
+            />
+            <Chip
+                icon={<Money />}
+                label={`Total: $${item.model_costs?.cost_per_unit?.toFixed(3) || '0'}/M`}
                 className={classes.chip}
             />
         </Box>

@@ -4,7 +4,7 @@ from typing import List, Union, Optional
 from openai import AsyncOpenAI
 from workflow.core.data_structures import (
     MessageDict, ModelConfig, FileReference, get_file_content, ApiType, References, FunctionParameters, ParameterDefinition, 
-    RoleTypes, MessageGenerators, ContentType)
+    RoleTypes, MessageGenerators, ContentType, MetadataDict)
 from workflow.core.api.engines.llm_engines import LLMEngine
 from workflow.util import LOGGER
 
@@ -103,21 +103,36 @@ class VisionModelEngine(LLMEngine):
                 max_tokens=max_tokens
             )
             response_content = response.choices[0].message.content
+
             msg = MessageDict(
                 role=RoleTypes.ASSISTANT,
                 content=response_content,
                 generated_by=MessageGenerators.LLM,
                 type=ContentType.TEXT,
-                creation_metadata={
-                    "model": response.model,
-                    "usage": response.usage.model_dump(),
-                    "costs": self.calculate_cost(response.usage.prompt_tokens, response.usage.completion_tokens, api_data),
-                    "finish_reason": response.choices[0].finish_reason
-                }
+                creation_metadata=self.create_metadata_dict(response, api_data)
             )
             return References(messages=[msg])
         except Exception as e:
             raise Exception(f"Error in vision model API call: {str(e)}")
+        
+    def create_metadata_dict(self, response, api_data: ModelConfig) -> MetadataDict:
+        """
+        Create a MetadataDict object from the response and API data.
+        
+        Args:
+            response: The API response object.
+            api_data: The API configuration data.
+        
+        Returns:
+            MetadataDict: The metadata dictionary.
+        """
+        return MetadataDict(
+            model=api_data.model,
+            usage=response.usage.model_dump(),
+            costs=self.calculate_cost(response.usage.prompt_tokens, response.usage.completion_tokens, api_data),
+            finish_reason=response.choices[0].finish_reason
+        )
+        
 
     def ensure_base64(self, data: Union[str, bytes]) -> Optional[str]:
         """

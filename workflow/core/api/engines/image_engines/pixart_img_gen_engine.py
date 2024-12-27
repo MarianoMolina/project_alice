@@ -102,6 +102,7 @@ class PixArtImgGenEngine(ImageGenerationEngine):
                                 "prompt": prompt,
                                 "negative_prompt": negative_prompt,
                                 "model": model_name,
+                                "cost": 0,
                             },
                         ),
                     )

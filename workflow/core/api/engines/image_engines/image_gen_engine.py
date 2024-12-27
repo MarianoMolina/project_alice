@@ -2,70 +2,88 @@ from pydantic import Field
 from typing import List
 from openai import AsyncOpenAI
 from workflow.core.data_structures import (
-    ModelConfig, ApiType, FileContentReference, MessageDict, 
-    ContentType, FileType, References, FunctionParameters, 
-    ParameterDefinition, RoleTypes, MessageGenerators
-    )
+    ModelConfig,
+    ApiType,
+    FileContentReference,
+    MessageDict,
+    ContentType,
+    FileType,
+    References,
+    FunctionParameters,
+    ParameterDefinition,
+    RoleTypes,
+    MessageGenerators,
+)
 from workflow.core.api.engines.api_engine import APIEngine
 from workflow.util import LOGGER, get_traceback
+
 
 class ImageGenerationEngine(APIEngine):
     """
     Image generation API engine implementing the DALL-E interface.
-    
+
     Provides a standardized interface for text-to-image generation,
     supporting multiple images and quality options. Features:
     - Multiple image generation
     - Size and quality control
     - Base64 image encoding
-    
+
     Input Interface:
         - prompt: Text description of desired image(s)
         - negative_prompt: Undesired elements (model-dependent)
         - n: Number of images to generate
         - size: Image dimensions
         - quality: Generation quality level
-    
+
     Returns:
         References object containing FileContentReference(s) with:
         - Generated image(s) in base64 format
         - Generation parameters and metadata
         - Transcripts containing prompts and settings
     """
+
     input_variables: FunctionParameters = Field(
         default=FunctionParameters(
             type="object",
             properties={
                 "prompt": ParameterDefinition(
                     type="string",
-                    description="A text description of the desired image(s)."
+                    description="A text description of the desired image(s).",
                 ),
                 "negative_prompt": ParameterDefinition(
                     type="string",
-                    description="A text description undesired elements. Not all models use it."
+                    description="A text description undesired elements. Not all models use it.",
                 ),
                 "n": ParameterDefinition(
                     type="integer",
                     description="The number of images to generate.",
-                    default=1
+                    default=1,
                 ),
                 "size": ParameterDefinition(
                     type="string",
                     description="The size of the generated images.",
-                    default="1024x1024"
+                    default="1024x1024",
                 ),
                 "quality": ParameterDefinition(
                     type="string",
                     description="The quality of the image generation.",
-                    default="standard"
+                    default="standard",
                 ),
             },
-            required=["prompt"]
+            required=["prompt"],
         )
     )
     required_api: ApiType = Field(ApiType.LLM_MODEL, title="The API engine required")
 
-    async def generate_api_response(self, api_data: ModelConfig, prompt: str, n: int = 1, size: str = "1024x1024", quality: str = "standard", **kwargs) -> References:
+    async def generate_api_response(
+        self,
+        api_data: ModelConfig,
+        prompt: str,
+        n: int = 1,
+        size: str = "1024x1024",
+        quality: str = "standard",
+        **kwargs,
+    ) -> References:
         """
         Generates images using OpenAI's DALL-E model.
         Args:
@@ -78,10 +96,7 @@ class ImageGenerationEngine(APIEngine):
         Returns:
             References: Generated image information wrapped in a MessageDict object.
         """
-        client = AsyncOpenAI(
-            api_key=api_data.api_key,
-            base_url=api_data.base_url
-        )
+        client = AsyncOpenAI(api_key=api_data.api_key, base_url=api_data.base_url)
         model = api_data.model
         if quality not in ["standard", "hd"]:
             quality = "standard"
@@ -97,24 +112,37 @@ class ImageGenerationEngine(APIEngine):
                 n=int(n),
                 size=size,
                 quality=quality,
-                response_format='b64_json'
+                response_format="b64_json",
             )
-            
+
             # Create FileContentReferences
             file_references: List[FileContentReference] = []
             for index, image_data in enumerate(response.data):
-                filename = self.generate_filename(prompt, model, index + 1, 'png')
-                file_references.append(FileContentReference(
-                    filename=filename,
-                    type=FileType.IMAGE,
-                    content=image_data.b64_json,  # Already base64 encoded
-                    transcript=MessageDict(
-                        role=RoleTypes.TOOL, 
-                        content=f"Image generated by model {model}. \n\nPrompt: '{prompt}' \n\nSize: {size}", 
-                        type=ContentType.TEXT, 
-                        generated_by=MessageGenerators.TOOL, 
-                        creation_metadata={"prompt": prompt, "size": size, "quality": quality, "model": model})
-                ))
+                filename = self.generate_filename(prompt, model, index + 1, "png")
+                file_references.append(
+                    FileContentReference(
+                        filename=filename,
+                        type=FileType.IMAGE,
+                        content=image_data.b64_json,  # Already base64 encoded
+                        transcript=MessageDict(
+                            role=RoleTypes.TOOL,
+                            content=f"Image generated by model {model}. \n\nPrompt: '{prompt}' \n\nSize: {size}",
+                            type=ContentType.TEXT,
+                            generated_by=MessageGenerators.TOOL,
+                            creation_metadata={
+                                "generation_details": {
+                                    "prompt": prompt,
+                                    "size": size,
+                                    "quality": quality,
+                                },
+                                "model": model,
+                                "cost": {
+                                    "total_cost": api_data.model_costs.cost_per_unit or 0
+                                },
+                            },
+                        ),
+                    )
+                )
 
             return References(files=file_references)
         except Exception as e:
