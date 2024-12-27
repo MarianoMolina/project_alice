@@ -3,6 +3,7 @@ import base64, io, magic, os
 from typing import Union, BinaryIO, Optional
 from pydantic import Field, field_validator
 from PIL import Image
+from pypdf import PdfReader
 from workflow.core.data_structures.base_models import FileType, Embeddable
 from workflow.core.data_structures.message import MessageDict
 from workflow.util import LOGGER
@@ -43,22 +44,32 @@ class FileReference(Embeddable):
         
         For non-text files, it uses the transcript if available.
         For text files, it reads the content directly from the file.
-        
-        Args:
-            max_chars (int): Maximum number of characters to return for text files.
-        
-        Returns:
-            str: A string containing file information and content.
+        For PDFs, it extracts the text content.
         """
         file_info = f"\n\nName: {self.filename}\n\nType: {self.type.value}\n\n"
         
         if self.type == FileType.FILE:
             try:
-                with open(self.storage_path, 'r') as file:
-                    content = file.read(max_chars)
-                return f"{file_info}Content (first {max_chars} characters):\n{content}"
+                if self.file_extension.lower() == '.pdf':
+                    with open(self.storage_path, 'rb') as file:
+                        pdf = PdfReader(file)
+                        text = ""
+                        for page in pdf.pages:
+                            text += page.extract_text() or ""
+                            if len(text) > max_chars:
+                                text = text[:max_chars]
+                                break
+                    return f"{file_info}Content (first {max_chars} characters):\n{text}"
+                else:
+                    with open(self.storage_path, 'r') as file:
+                        content = file.read(max_chars)
+                    return f"{file_info}Content (first {max_chars} characters):\n{content}"
+            except UnicodeDecodeError:
+                if self.file_extension.lower() != '.pdf':  # Only log warning if it's not a PDF
+                    LOGGER.warning(f"File {self.filename} appears to be binary, not text")
+                return f"{file_info}Content: [Binary file]"
             except Exception as e:
-                LOGGER.error(f"Error reading text file {self.filename}: {str(e)}")
+                LOGGER.error(f"Error reading file {self.filename}: {str(e)}")
                 return f"{file_info}Error: Unable to read file content"
         elif self.transcript:
             model_name = self.transcript.creation_metadata.get('model', 'Unknown') if self.transcript.creation_metadata else 'Unknown'

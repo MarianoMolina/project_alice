@@ -98,7 +98,7 @@ adv_tasks_module = AdvTasksModule(
             {
                 "key": "retrieval_output_template",
                 "name": "Retrieval output template",
-                "content": """  """,
+                "content": """Retrieved chunks:\n\n{{retrieve_relevant_embeddings}}""",
                 "is_templated": True,
                 "parameters": {
                     "type": "object",

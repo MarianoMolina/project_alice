@@ -62,9 +62,23 @@ research_workflow_module = ResearchWorkflowModule(
                     "type": "object",
                     "properties": {
                         "Research_Brief": "param_research_brief_task",
-                        "Check_Research": "param_research_check_task",
                     },
                     "required": ["Research_Brief"]
+                }
+            },
+            {
+                "key": "retry_data_retrieval_task_prompt",
+                "name": "Retry Data Retrieval Task",
+                "content": get_prompt_file("retry_data_retrieval_task.prompt"),
+                "is_templated": True,
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "Research_Brief": "param_research_brief_task",
+                        "Retrieve_Data": "param_data_retrieval_task",
+                        "Check_Research": "param_research_check_task",
+                    },
+                    "required": ["Research_Brief", "Retrieve_Data", "Check_Research"]
                 }
             },
             {
@@ -91,6 +105,7 @@ research_workflow_module = ResearchWorkflowModule(
                     "properties": {
                         "prompt": "prompt_parameter",
                         "Retrieve_Data": "param_data_retrieval_task",
+                        "Retry_Retrieve_Data": "param_data_retrieval_task",
                     },
                     "required": ["prompt", "Retrieve_Data"]
                 }
@@ -192,8 +207,7 @@ research_workflow_module = ResearchWorkflowModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "Research_Brief": "param_research_brief_task",
-                        "Research_Check_Task": "param_research_check_task",
+                        "Research_Brief": "param_research_brief_task"
                     },
                     "required": ["Research_Brief"]
                 },
@@ -209,6 +223,47 @@ research_workflow_module = ResearchWorkflowModule(
                 "required_apis": ["llm_api"],
                 "templates": {
                     "task_template": "data_retrieval_task_prompt"
+                },
+                "node_end_code_routing": {
+                    'llm_generation':{
+                        0: ('tool_call_execution', False),
+                        1: ('llm_generation', True),
+                    }, 
+                    'tool_call_execution':{
+                        0: (None, False),
+                        1: ('tool_call_execution', True),
+                    }, 
+                },
+                "max_attempts": 1,
+                "recursive": True,
+            },
+            {
+                "key": "retry_data_retrieval_task",
+                "task_type": "PromptAgentTask",
+                "task_name": "Retry_Retrieve_Data",
+                "task_description": "Generates tool calls for data retrieval based on the research brief provided",
+                "agent": "data_retrieval_expert",
+                "input_variables": {
+                    "type": "object",
+                    "properties": {
+                        "Research_Brief": "param_research_brief_task",
+                        "Retrieve_Data": "param_data_retrieval_task",
+                        "Check_Research": "param_research_check_task",
+                    },
+                    "required": ["Research_Brief", "Retrieve_Data", "Check_Research"]
+                },
+                "tasks": {
+                    "Exa_Search": "exa_search",
+                    "Wikipedia_Search": "wikipedia_search",
+                    "Google_Search": "google_search",
+                    "Arxiv_Search": "arxiv_search",
+                    "Knowledge_Graph_Search": "knowledge_graph_search_task",
+                    "Wolfram_Alpha_Query": "wolfram_alpha_query_task",
+                    "Reddit_Search": "reddit_search",
+                },
+                "required_apis": ["llm_api"],
+                "templates": {
+                    "task_template": "retry_data_retrieval_task_prompt"
                 },
                 "node_end_code_routing": {
                     'llm_generation':{
@@ -256,6 +311,7 @@ research_workflow_module = ResearchWorkflowModule(
                     "properties": {
                         "prompt": "prompt_parameter",
                         "Retrieve_Data": "param_data_retrieval_task",
+                        "Retry_Retrieve_Data": "param_data_retrieval_task",
                     },
                     "required": ["prompt", "Retrieve_Data"]
                 },
@@ -277,6 +333,7 @@ research_workflow_module = ResearchWorkflowModule(
                 "tasks": {
                     "Research_Brief": "research_brief_task",
                     "Retrieve_Data": "data_retrieval_task",
+                    "Retry_Retrieve_Data": "retry_data_retrieval_task",
                     "Check_Research": "research_check_task",
                     "Summarize_Research": "research_summary_task",
                 },
@@ -293,7 +350,11 @@ research_workflow_module = ResearchWorkflowModule(
                     "Check_Research": {
                         0: ("Summarize_Research", False),
                         1: ("Check_Research", True),
-                        2: ("Retrieve_Data", False),
+                        2: ("Retry_Retrieve_Data", False),
+                    },
+                    "Retry_Retrieve_Data": {
+                        0: ("Summarize_Research", False),
+                        1: ("Retry_Retrieve_Data", True),
                     },
                     "Summarize_Research": {
                         0: (None, False),

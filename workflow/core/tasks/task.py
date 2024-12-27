@@ -222,11 +222,11 @@ class AliceTask(BaseDataStructure):
             return values
 
         try:
-            LOGGER.debug(f"Processing routing data: {routing}")
+            LOGGER.info(f"Processing routing data: {routing}")
             converted_routing = {}
 
             for node, routes in routing.items():
-                LOGGER.debug(f"Processing node {node} with routes: {routes}")
+                LOGGER.info(f"Processing node {node} with routes: {routes}")
                 converted_routes = {}
 
                 for code, route in routes.items():
@@ -271,7 +271,7 @@ class AliceTask(BaseDataStructure):
                 else:
                     LOGGER.warning(f"No valid routes found for node {node}")
 
-            LOGGER.debug(f"Converted routing: {converted_routing}")
+            LOGGER.info(f"Converted routing: {converted_routing}")
             values["node_end_code_routing"] = converted_routing
 
         except Exception as e:
@@ -293,8 +293,8 @@ class AliceTask(BaseDataStructure):
         Returns:
             dict: The serialized AliceTask instance
         """
-        LOGGER.debug(f"AliceTask.model_dump called for {self.__class__.__name__}")
-        LOGGER.debug(f"Dict keys: {list(self.__dict__.keys())}")
+        LOGGER.info(f"AliceTask.model_dump called for {self.__class__.__name__}")
+        LOGGER.info(f"Dict keys: {list(self.__dict__.keys())}")
 
         # Create exclude set if not provided
         if exclude is None:
@@ -303,7 +303,7 @@ class AliceTask(BaseDataStructure):
 
         try:
             data = super().model_dump(*args, exclude=exclude, **kwargs)
-            LOGGER.debug(f"AliceTask base dump succeeded")
+            LOGGER.info(f"AliceTask base dump succeeded")
         except TypeError as e:
             LOGGER.error(f"TypeError in AliceTask model_dump: {str(e)}")
             LOGGER.error(f"Full task state: {vars(self)}")
@@ -466,7 +466,8 @@ class AliceTask(BaseDataStructure):
                     )
 
             # Determine starting node based on execution history
-            current_node = self.determine_next_node(execution_history)
+            current_node = self.resolve_next_node(execution_history)
+            LOGGER.info(f'Starting task "{self.task_name}" from node "{current_node}"')
 
             # Execute nodes
             while current_node:
@@ -480,8 +481,8 @@ class AliceTask(BaseDataStructure):
                     node_response.references
                     and node_response.references.user_interactions
                 ):
-                    LOGGER.debug(f"User interaction detected for node {current_node}")
-                    LOGGER.debug(
+                    LOGGER.info(f"User interaction detected for node {current_node}")
+                    LOGGER.info(
                         f"Node response user interaction: {node_response.references.user_interactions[0]}"
                     )
                     node_responses.append(node_response)
@@ -581,8 +582,8 @@ class AliceTask(BaseDataStructure):
             LOGGER.error(
                 f"No implementation found for node {node_name} as method_name {method_name} in task {self.task_name}"
             )
-            LOGGER.debug(f"Available methods: {dir(self)}")
-            LOGGER.debug(f"Self class: {self.__class__.__name__}")
+            LOGGER.info(f"Available methods: {dir(self)}")
+            LOGGER.info(f"Self class: {self.__class__.__name__}")
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name=node_name,
@@ -615,7 +616,7 @@ class AliceTask(BaseDataStructure):
                         )
                     else:
                         kwargs[node_name] = value
-                    LOGGER.debug(f"Updated variable {node_name} with node output")
+                    LOGGER.info(f"Updated variable {node_name} with node output")
                 except (ValueError, TypeError) as e:
                     LOGGER.warning(
                         f"Failed to update variable {node_name} with node output: {e}"
@@ -687,7 +688,7 @@ class AliceTask(BaseDataStructure):
         """
         execution_history = execution_history or []
         node_name = node_name or self.start_node or "default"
-        LOGGER.debug(f"Checking user checkpoints for node {node_name}")
+        LOGGER.info(f"Checking user checkpoints for node {node_name}")
 
         if node_name in self.user_checkpoints:
             completed_interaction = next(
@@ -702,7 +703,7 @@ class AliceTask(BaseDataStructure):
             )
 
             if not completed_interaction:
-                LOGGER.debug(f"Creating user interaction for node {node_name}")
+                LOGGER.info(f"Creating user interaction for node {node_name}")
                 return self.create_user_interaction(node_name, len(execution_history))
         return None
 
@@ -781,10 +782,22 @@ class AliceTask(BaseDataStructure):
 
         return True
 
-    def get_next_node(self, current_node: NodeResponse) -> Optional[Tuple[str, bool]]:
+    def get_next_node(self, current_node: NodeResponse) -> Tuple[Optional[str], bool]:
         """
-        Determine the next node to execute based on the routing configuration,
-        and attempt limits.
+        Direct lookup of routing rules to detect task progression or completion.
+
+        Checks the routing table to determine:
+        1. Whether current node completes the task (returns None)
+        2. What the next node should be if task continues
+        3. Whether next node should be treated as a retry
+
+        Args:
+            current_node: The node response from which to determine routing
+
+        Returns:
+            Tuple[Optional[str], bool]: 
+                - Tuple of (None, False) if this node completes the task execution
+                - Tuple of (next_node_name, is_retry) if task should continue
         """
         if not current_node:
             return None
@@ -793,25 +806,27 @@ class AliceTask(BaseDataStructure):
             return None
 
         routing = self.node_end_code_routing[current_node.node_name]
-        next_node, is_retry = routing.get(current_node.exit_code, (None, False))
-        return next_node, is_retry
+        return routing.get(current_node.exit_code, (None, False))
 
-    def determine_next_node(
+    def resolve_next_node(
         self, execution_history: List[NodeResponse]
-    ) -> Optional[str]:
+    ) -> str:
         """
-        Determines the next node to execute based on execution history. It ignores retry logic: it will
-        return the next node even if the current node is marked as a retry.
-
-        If there's a previous node from this task in the history, determines next node
-        based on its exit code and routing rules. Otherwise, returns the start node
-        or first available node.
+        ALWAYS returns a valid next node to execute.
+        
+        Determines the next node to execute based on execution history:
+        - Uses routing rules to determine next node in current task execution
+        - When get_next_node signals end-of-task (by returning None), initiates a new 
+          task execution by returning start_node
+        - Handles user interaction checkpoints if present
+        - Ignores retry flags (will return the next node even if marked for retry)
 
         Args:
             execution_history: List of previous node executions
 
         Returns:
-            Optional[str]: Name of the next node to execute, or None if no valid next node
+            str: Name of the next node to execute. Always returns a valid node name, 
+                initiating new task execution when needed.
         """
         # Find the last node from this task
         last_task_node = next(
@@ -837,8 +852,10 @@ class AliceTask(BaseDataStructure):
                         return checkpoint.task_next_obj.get(selected_option)
 
             # Otherwise use standard routing logic
-            return self.get_next_node(last_task_node)[0]
-
+            next_node = self.get_next_node(last_task_node)[0]
+            if next_node is None:
+                return self.start_node or next(iter(self.node_end_code_routing.keys()))
+            return next_node 
         # If no previous nodes from this task, return start node or first available
         return self.start_node or next(iter(self.node_end_code_routing.keys()))
 
@@ -971,7 +988,7 @@ class AliceTask(BaseDataStructure):
         """
         if exit_code is None:
             exit_code = self.map_final_exit_code(node_responses)
-            LOGGER.debug(f"Final exit code for task {self.task_name}: {exit_code}")
+            LOGGER.info(f"Final exit code for task {self.task_name}: {exit_code}")
 
         if diagnostics is None:
             diagnostics = self.exit_codes.get(exit_code, "Task execution completed")
@@ -1019,13 +1036,13 @@ class AliceTask(BaseDataStructure):
 
         for node_name, node in last_node_responses.items():
             # Get all codes that don't retry (success codes)
-            LOGGER.debug(f"Checking success codes for node {node_name}")
+            LOGGER.info(f"Checking success codes for node {node_name}")
             success_codes = [
                 code
                 for code, (_, is_retry) in self.node_end_code_routing[node_name].items()
                 if not is_retry
             ]
-            LOGGER.debug(
+            LOGGER.info(
                 f"Node name: {node_name}\nExit code: {node.exit_code}\nSuccess codes: {success_codes}"
             )
             if node.exit_code not in success_codes:

@@ -91,6 +91,7 @@ class MetadataDict(TypedDict, total=False):
     system_fingerprint: str
     cost: CostDict
     generation_details: dict
+    prompt_similarity_history: List[dict]
 
 class EmbeddingChunk(BaseDataStructure):
     vector: List[float] = Field(..., description="The embedding vector")

@@ -110,6 +110,8 @@ class Workflow(AliceTask):
                 raise ValueError(f"Task {node_name} not found in workflow.")
 
             # Execute the task using the common input validation logic
+            # We don't pass the node responses because the task inputs are already validated in the kwargs
+            # And the task's run method should not be aware of the prior nodes in the workflow beyond kwarg variables
             task_result = await current_task.run(
                 execution_history=execution_history,
                 **kwargs

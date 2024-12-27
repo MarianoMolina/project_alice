@@ -6,8 +6,8 @@ import {
     Grid,
     Tooltip,
 } from '@mui/material';
-import { MessageCreationMetadata } from '../../../../types/MessageTypes';
 import { collectionElementIcons } from '../../../../utils/CollectionUtils';
+import { MessageCreationMetadata } from '../../../../types/CollectionTypes';
 
 interface CreationMetadataViewerProps {
     metadata?: MessageCreationMetadata & Record<string, any>;

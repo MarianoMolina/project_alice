@@ -3,4 +3,6 @@ Here's the user prompt:
 Here's the data collected:
 {{ Retrieve_Data }}
 
+{% if Retry_Retrieve_Data %}{{ Retry_Retrieve_Data }}{% endif %}
+
 Remember to use markdown formatting for readability and provide in-text citations using markdown links [Source Name](URL). PLEASE DON'T FORGET TO LINK TO URLS RELATED TO YOUR SUMMARY RETRIEVED DURING THE RESEARCH. 

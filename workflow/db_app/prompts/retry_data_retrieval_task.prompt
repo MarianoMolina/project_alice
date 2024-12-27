@@ -1,0 +1,8 @@
+{{ Research_Brief }}
+
+Retry attempt. Previous attempt was insufficient:
+{{ Retrieve_Data }}
+
+Feedback:
+{{ Check_Research }}
+Please refine your queries based on this feedback.

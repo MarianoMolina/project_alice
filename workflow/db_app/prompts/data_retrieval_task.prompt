@@ -1,8 +1,1 @@
 {{ Research_Brief }}
-{% if Check_Research %}
-Retry attempt. Previous attempt was insufficient. 
-
-Feedback:
-{{ Check_Research }}
-Please refine your queries based on this feedback.
-{% endif %}

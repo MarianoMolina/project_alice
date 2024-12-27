@@ -57,7 +57,7 @@ class GoogleSearchAPI(APISearchEngine):
         categories = self.determine_categories(data)
 
         # Collect additional metadata
-        metadata = {key: value for key, value in data.items() if key not in {"title", "link", "snippet", "pagemap", "cse_image"}}
+        metadata = {key: value for key, value in data.items() if key not in {"title", "link", "snippet", "cse_image"}}
 
         # Create the EntityReference instance
         entity = EntityReference(

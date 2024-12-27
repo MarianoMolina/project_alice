@@ -1,4 +1,4 @@
-import { convertToEmbeddable, convertToPopulatedEmbeddable, Embeddable, EnhancedComponentProps, PopulatedEmbeddable } from "./CollectionTypes";
+import { convertToEmbeddable, convertToPopulatedEmbeddable, Embeddable, EnhancedComponentProps, MessageCreationMetadata, PopulatedEmbeddable } from "./CollectionTypes";
 import { convertToPopulatedReferences, PopulatedReferences, References } from "./ReferenceTypes";
 
 export enum RoleType {
@@ -23,27 +23,6 @@ export enum MessageGenerators {
     LLM = 'llm',
     TOOL = 'tool',
     SYSTEM = 'system'
-}
-
-export interface CostDict {
-    input_cost?: number;
-    output_cost?: number;
-    total_cost?: number;
-}
-export interface UsageDict {
-    prompt_tokens?: number;
-    completion_tokens?: number;
-    total_tokens?: number;
-}
-
-export interface MessageCreationMetadata {
-    model?: string;
-    usage?: UsageDict;
-    estimated_tokens?: number;
-    finish_reason?: string;
-    system_fingerprint?: string;
-    cost?: CostDict;
-    generation_details?: Record<string, any>;
 }
 
 export interface MessageType extends Embeddable {

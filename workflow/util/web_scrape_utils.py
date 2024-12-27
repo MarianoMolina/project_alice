@@ -1,6 +1,6 @@
 import requests
-from bs4 import BeautifulSoup
 import re
+from bs4 import BeautifulSoup
 from typing import List, Optional
 from workflow.util import LOGGER
 
@@ -67,27 +67,53 @@ def preprocess_html(html: str) -> str:
 
 def sample_html(html: str, max_length: int = 4000, num_samples: int = 4) -> List[str]:
     """
-    Sample chunks of the HTML content for the agent.
-
+    Sample chunks of the HTML content, respecting HTML tag boundaries and max_length.
+    
     Args:
-        html (str): The cleaned HTML content.
+        html (str): The cleaned HTML content
         max_length (int, optional): Maximum number of characters per sample. Defaults to 4000.
         num_samples (int, optional): Number of samples to generate. Defaults to 4.
-
+        
     Returns:
-        List[str]: A list of HTML samples.
+        List[str]: A list of HTML samples, each approximately max_length in size
     """
     total_length = len(html)
-    LOGGER.info(f"Total HTML length: {total_length} characters.")
+    LOGGER.debug(f"Total HTML length: {total_length} characters.")
+    
     if total_length <= max_length:
-        LOGGER.info("HTML length is within the maximum limit. No sampling needed.")
+        LOGGER.debug("HTML length is within the maximum limit. No sampling needed.")
         return [html]
-    else:
-        # Split the HTML into num_samples chunks
-        chunk_size = total_length // num_samples
-        samples = [html[i*chunk_size : (i+1)*chunk_size] for i in range(num_samples)]
-        LOGGER.info(f"HTML content split into {num_samples} samples.")
-        return samples
+    
+    # Split HTML at tag boundaries
+    tag_pattern = r'(<[^>]+>|[^<]+)'
+    chunks = re.findall(tag_pattern, html)
+    
+    samples = []
+    current_chunk = []
+    current_length = 0
+    
+    for chunk in chunks:
+        chunk_length = len(chunk)
+        
+        if current_length + chunk_length > max_length:
+            if current_chunk:  # If we have accumulated content
+                samples.append(''.join(current_chunk))
+                current_chunk = []
+                current_length = 0
+                
+                # Break if we have enough samples
+                if len(samples) >= num_samples:
+                    break
+        
+        current_chunk.append(chunk)
+        current_length += chunk_length
+    
+    # Add any remaining content as the last chunk
+    if current_chunk and len(samples) < num_samples:
+        samples.append(''.join(current_chunk))
+    
+    LOGGER.debug(f"HTML content split into {len(samples)} samples.")
+    return samples
 
 def apply_parsing_strategy(html: str, selectors: List[str]) -> Optional[str]:
     """

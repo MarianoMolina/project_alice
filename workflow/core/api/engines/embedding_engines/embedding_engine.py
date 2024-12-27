@@ -138,7 +138,7 @@ class EmbeddingEngine(APIEngine):
                         "model": response.model,
                         "usage": individual_usage,
                         "estimated_tokens": est_token_count(input_text),
-                        "cost": self.calculate_costs(response.usage.prompt_tokens//len(embeddings), api_data)
+                        "cost": self.calculate_costs(individual_usage["prompt_tokens"], api_data)
                         },
                 )
                 chunks.append(embedding_chunk)

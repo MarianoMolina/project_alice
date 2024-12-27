@@ -175,8 +175,13 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
         {
             icon: <DataObject />,
             primary_text: "Execution History",
-            secondary_text: populatedItem.usage_metrics && Object.keys(populatedItem.usage_metrics).length > 0 ? 
-                <TaskResponseMetadataViewer usageMetrics={populatedItem.usage_metrics} est_tokens={0}/> : "N/A"
+            secondary_text: (
+                <AccordionSection
+                    title='Execution History'
+                    content={<CodeBlock language="json" code={JSON.stringify(populatedItem.execution_history, null, 2)} />}
+                    disabled={!populatedItem.execution_history}
+                />
+            )
         },
         {
             icon: <DataObject />,
@@ -192,14 +197,8 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
         {
             icon: <Analytics />,
             primary_text: "Usage Metrics",
-            secondary_text: populatedItem.usage_metrics && Object.keys(populatedItem.usage_metrics).length > 0 ?
-                (
-                    <AccordionSection
-                        title="Usage Metrics"
-                        content={<CodeBlock language="json" code={JSON.stringify(populatedItem.usage_metrics, null, 2)} />}
-                        disabled={!populatedItem.usage_metrics}
-                    />
-                ) : null
+            secondary_text: populatedItem.usage_metrics && Object.keys(populatedItem.usage_metrics).length > 0 ? 
+                <TaskResponseMetadataViewer usageMetrics={populatedItem.usage_metrics} est_tokens={0}/> : "N/A"
         }
     ];
 

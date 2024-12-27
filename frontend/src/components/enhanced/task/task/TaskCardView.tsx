@@ -189,7 +189,7 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
         {
             icon: <Cyclone />,
             primary_text: "Recursive",
-            secondary_text: item.max_attempts || "N/A"
+            secondary_text: item.recursive || "N/A"
         },
         {
             icon: <Replay />,
