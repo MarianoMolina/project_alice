@@ -7,7 +7,7 @@ import {
     Tooltip,
     IconButton,
 } from '@mui/material';
-import { Category, Description, Functions, Person, ApiRounded, Settings, Logout, ExitToApp, AttachFile, Api, QueryBuilder, Replay, ContactMail } from '@mui/icons-material';
+import { Category, Description, Functions, Person, ApiRounded, Settings, Logout, ExitToApp, AttachFile, Api, QueryBuilder, Replay, ContactMail, Cyclone } from '@mui/icons-material';
 import { PopulatedTask, TaskComponentProps, taskDescriptions } from '../../../../types/TaskTypes';
 import useStyles from '../TaskStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
@@ -173,7 +173,7 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
         },
         {
             icon: <AttachFile />,
-            primary_text: "References",
+            primary_text: "Data Cluster",
             secondary_text: item.data_cluster &&
                 hasAnyReferences(item.data_cluster as References) ?
                 <DataClusterManager dataCluster={item.data_cluster as PopulatedDataCluster} /> :
@@ -187,7 +187,7 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
                 : "No exit code routing defined"
         },
         {
-            icon: <Replay />,
+            icon: <Cyclone />,
             primary_text: "Recursive",
             secondary_text: item.max_attempts || "N/A"
         },

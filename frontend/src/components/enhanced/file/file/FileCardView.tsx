@@ -9,6 +9,7 @@ import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/Embeddin
 import FileContentView from '../FileContentView';
 import { getFileIcon } from '../../../../utils/MessageUtils';
 import ContentStats from '../../../ui/markdown/ContentStats';
+import MessageFullView from '../../message/message/MessageFullView';
 
 const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
 
@@ -29,7 +30,7 @@ const FileCardView: React.FC<FileComponentProps> = ({ item }) => {
     const transcript = populatedItem.transcript ? (
         <Stack direction="column" spacing={1}>
             <ContentStats content={populatedItem.transcript.content} />
-            <AliceMarkdown showCopyButton>{populatedItem.transcript.content}</AliceMarkdown>
+            <MessageFullView item={populatedItem.transcript} items={null} onChange={() => null} mode={'view'} handleSave={async () => { }}/>
         </Stack>
     ) : 'N/A';
 

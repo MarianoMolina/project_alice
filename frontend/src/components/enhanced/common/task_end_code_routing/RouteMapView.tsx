@@ -7,7 +7,6 @@ import {
   FormControlLabel, 
   Checkbox, 
   Tooltip,
-  useMediaQuery,
   Stack
 } from '@mui/material';
 import { RouteMap } from '../../../../types/TaskTypes';
@@ -19,6 +18,7 @@ interface RouteMapProps {
   availableTasks: string[];
   onChange: (newRouteMap: RouteMap) => void;
   isViewMode: boolean;
+  containerWidth: number;
 }
 
 const RouteMapView: React.FC<RouteMapProps> = ({
@@ -27,9 +27,10 @@ const RouteMapView: React.FC<RouteMapProps> = ({
   availableTasks,
   onChange,
   isViewMode,
+  containerWidth,
 }) => {
   const classes = useStyles();
-  const isMobile = useMediaQuery('(max-width:800px)');
+  const isCompact = containerWidth < 500;
 
   const handleRouteChange = (exitCode: number, nextTask: string | null, retry: boolean) => {
     if (!isViewMode) {
@@ -80,13 +81,13 @@ const RouteMapView: React.FC<RouteMapProps> = ({
             className={classes.checkbox}
           />
         }
-        label={isMobile ? "Retry" : ""}
+        label={isCompact ? "Retry" : ""}
         className={classes.formControlCheckbox}
       />
     </Tooltip>
   );
 
-  if (isMobile) {
+  if (isCompact) {
     return (
       <Box sx={{ mt: 2 }}>
         {Object.entries(exitCodes).map(([exitCode, description]) => {

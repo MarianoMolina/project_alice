@@ -341,15 +341,19 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                                 item={message as MessageType}
                                 mode={'view'}
                                 onView={(message) => selectCardItem && selectCardItem('Message', message._id ?? '', message)}
-                                handleSave={async () =>{}}
+                                handleSave={async () => { }}
                                 items={null}
-                                onChange={() =>{}}
+                                onChange={() => { }}
                             />
                         ))}
                     </Box>
                 </TitleBox>
             )}
-            {form._id && <ApiValidationManager chatId={form._id} />}
+            {form._id && (
+                <TitleBox title="API validation" >
+                    <ApiValidationManager chatId={form._id} />
+                </TitleBox>
+            )}
         </GenericFlexibleView>
     );
 };

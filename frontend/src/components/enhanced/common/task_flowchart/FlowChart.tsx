@@ -113,7 +113,7 @@ const Flowchart: React.FC<FlowchartProps> = ({
     return (
       <Box sx={containerStyle}>
         <Typography variant="h6">{title}</Typography>
-        <Alert severity="info" sx={{ width: '100%', marginTop: 10 }}>
+        <Alert severity="info" sx={{ width: 'calc(100% - 16px)', marginTop: 10 }}>
           No tasks found to build the flowchart.
         </Alert>
       </Box>
@@ -121,7 +121,7 @@ const Flowchart: React.FC<FlowchartProps> = ({
   }
 
   return (
-    <FormControl fullWidth variant="outlined" sx={{ marginTop: 1, marginBottom: 1 }}>
+    <FormControl variant="outlined" sx={{ margin: 1, width: 'calc(100% - 16px)' }}>
       <InputLabel shrink sx={{ backgroundColor: theme.palette.primary.dark }}>{title}</InputLabel>
       <div className="relative py-4 border border-gray-200/60 rounded-lg ml-1 mr-1">
         <Box sx={containerStyle}>

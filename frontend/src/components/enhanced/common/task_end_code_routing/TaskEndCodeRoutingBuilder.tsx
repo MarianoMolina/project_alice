@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { Box, Typography, Select, MenuItem, Alert, IconButton, Tooltip, FormControl } from '@mui/material';
 import { PopulatedTask, RouteMap, TasksEndCodeRouting, TaskType } from '../../../../types/TaskTypes';
 import RouteMapView from './RouteMapView';
@@ -33,8 +33,24 @@ const TaskEndCodeRoutingBuilder: React.FC<TaskEndCodeRoutingBuilderProps> = ({
 }) => {
   const [warnings, setWarnings] = useState<string[]>([]);
   const [selectedNode, setSelectedNode] = useState<string>('');
+  const [containerWidth, setContainerWidth] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
   const classes = useStyles();
 
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const observer = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const isWideLayout = containerWidth > 1000;
   const getAvailableNodes = useCallback(() => {
     if (taskType === TaskType.Workflow) {
       return tasks?.map(task => task.task_name) || [];
@@ -151,101 +167,115 @@ const TaskEndCodeRoutingBuilder: React.FC<TaskEndCodeRoutingBuilderProps> = ({
     }))
   ];
 
+  // Render a task card with consistent styling
+  const renderTaskCard = (nodeName: string, routeMap: RouteMap) => (
+    <Box 
+      key={nodeName} 
+      className={classes.taskCard}
+      sx={{ maxWidth: isWideLayout ? 'none' : '500px' }}
+    >
+      <Box sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        mb: 1
+      }}>
+        <Typography variant="subtitle1" fontWeight="bold">
+          {formatCamelCaseString(nodeName)}
+        </Typography>
+        {!isViewMode && (
+          <Tooltip title="Remove node">
+            <IconButton
+              size="small"
+              onClick={() => handleNodeRemove(nodeName)}
+              sx={{
+                color: 'error.main',
+                '&:hover': {
+                  backgroundColor: 'error.light',
+                }
+              }}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Box>
+      <RouteMapView
+        routeMap={routeMap}
+        exitCodes={getNodeExitCodes(nodeName)}
+        availableTasks={getAvailableNodes()}
+        onChange={(newRouteMap) => handleRouteMapChange(nodeName, newRouteMap)}
+        isViewMode={isViewMode}
+        containerWidth={isWideLayout ? containerWidth / 2 : containerWidth} // Account for gap
+      />
+    </Box>
+  );
+
   return (
     <TitleBox title={title}>
+      <Box ref={containerRef}>
+        {/* Start Node Selection */}
+        <Box sx={{ mt: 2 }}>
+          <SelectInput
+            name="start_node"
+            label="Start Node"
+            value={startNode || ''}
+            onChange={(value) => onChangeStartNode(value as string || null)}
+            disabled={isViewMode}
+            description="Select the node that will be executed first"
+            options={startNodeOptions}
+            required
+          />
+        </Box>
 
-      {/* Start Node Selection */}
-      <Box sx={{ mt: 2 }}>
-        <SelectInput
-          name="start_node"
-          label="Start Node"
-          value={startNode || ''}
-          onChange={(value) => onChangeStartNode(value as string || null)}
-          disabled={isViewMode}
-          description="Select the node that will be executed first"
-          options={startNodeOptions}
-          required
-        />
-      </Box>
+        {/* Warnings Display */}
+        {warnings.length > 0 && (
+          <Alert severity="warning" icon={<WarningIcon />} className={classes.warningAlert}>
+            <Typography variant="body1">Routing Warnings:</Typography>
+            <ul>
+              {warnings.map((warning, index) => (
+                <li key={index}>{warning}</li>
+              ))}
+            </ul>
+          </Alert>
+        )}
 
-      {/* Warnings Display */}
-      {warnings.length > 0 && (
-        <Alert severity="warning" icon={<WarningIcon />} className={classes.warningAlert}>
-          <Typography variant="body1">Routing Warnings:</Typography>
-          <ul>
-            {warnings.map((warning, index) => (
-              <li key={index}>{warning}</li>
-            ))}
-          </ul>
-        </Alert>
-      )}
+        {/* Responsive Grid Layout for Task Cards */}
+        <Box 
+          className={classes.routingContainer}
+          sx={{
+            gridTemplateColumns: isWideLayout ? 'repeat(2, 1fr)' : '1fr',
+          }}
+        >
+          {Object.entries(routing).map(([nodeName, routeMap]) => 
+            renderTaskCard(nodeName, routeMap)
+          )}
+        </Box>
 
-      {/* Routing Nodes */}
-      <Box className={classes.routingContainer}>
-        {Object.entries(routing).map(([nodeName, routeMap]) => (
-          <Box key={nodeName} sx={{ mt: 2 }}>
-            <Box className={classes.taskCard}>
-              <Box sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                mb: 1
-              }}>
-                <Typography variant="subtitle1" fontWeight="bold">
-                  {formatCamelCaseString(nodeName)}
-                </Typography>
-                {!isViewMode && (
-                  <Tooltip title="Remove node">
-                    <IconButton
-                      size="small"
-                      onClick={() => handleNodeRemove(nodeName)}
-                      sx={{
-                        color: 'error.main',
-                        '&:hover': {
-                          backgroundColor: 'error.light',
-                        }
-                      }}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                )}
-              </Box>
-              <RouteMapView
-                routeMap={routeMap}
-                exitCodes={getNodeExitCodes(nodeName)}
-                availableTasks={getAvailableNodes()}
-                onChange={(newRouteMap) => handleRouteMapChange(nodeName, newRouteMap)}
-                isViewMode={isViewMode}
-              />
-            </Box>
-          </Box>
-        ))}
-      </Box>
-
-      {/* Add New Node Selection */}
-      {!isViewMode && unusedNodes.length > 0 && (
-        <FormControl fullWidth sx={{ mt: 2 }}>
-          <Select
-            value={selectedNode}
-            onChange={(e) => {
-              const value = e.target.value as string;
-              setSelectedNode(value);
-              handleNodeAdd(value);
-            }}
-            displayEmpty
-          >
-            <MenuItem value="" disabled>
-              Add a {taskType === TaskType.Workflow ? 'task' : 'node'}
-            </MenuItem>
-            {unusedNodes.map(node => (
-              <MenuItem key={node} value={node}>
-                {formatCamelCaseString(node)}
+        {/* Add New Node Selection */}
+        {!isViewMode && unusedNodes.length > 0 && (
+          <FormControl fullWidth sx={{ mt: 2 }}>
+            <Select
+              value={selectedNode}
+              onChange={(e) => {
+                const value = e.target.value as string;
+                setSelectedNode(value);
+                handleNodeAdd(value);
+              }}
+              displayEmpty
+            >
+              <MenuItem value="" disabled>
+                Add a {taskType === TaskType.Workflow ? 'task' : 'node'}
               </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      )}
+              {unusedNodes.map(node => (
+                <MenuItem key={node} value={node}>
+                  {formatCamelCaseString(node)}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
+      </Box>
     </TitleBox>
   );
 };

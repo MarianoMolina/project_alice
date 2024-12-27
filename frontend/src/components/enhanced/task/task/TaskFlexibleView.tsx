@@ -47,7 +47,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
         if (!form.node_end_code_routing) return [];
         return Object.keys(form.node_end_code_routing);
     }, [form.node_end_code_routing]);
-    
+
     useEffect(() => {
         if (isSaving) {
             handleSave();
@@ -303,7 +303,11 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                     options={Object.values(ApiType).map((apiType) => ({ value: apiType, label: formatCamelCaseString(apiType) }))}
                     multiple
                 />
-                {form._id && <ApiValidationManager taskId={form._id} />}
+                {form._id && (
+                    <TitleBox title="API validation" >
+                        <ApiValidationManager taskId={form._id} />
+                    </TitleBox>
+                )}
             </TitleBox>
             <FunctionDefinitionBuilder
                 title="Input Variables"
