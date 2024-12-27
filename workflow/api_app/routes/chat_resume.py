@@ -108,5 +108,5 @@ async def chat_resume(
         except Exception as e:
             import traceback
             error_msg = f"Error processing chat resume: {str(e)}\n{traceback.format_exc()}"
-            LOGGER.error(error_msg)
-            return {"status": "error", "error": error_msg}
+            LOGGER.error(f"{error_msg}\n{traceback.format_exc()}")
+            return {"status": "error", "error": "An internal error has occurred. Please try again later."}

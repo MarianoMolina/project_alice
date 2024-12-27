@@ -34,7 +34,7 @@ router.use(rateLimiterMiddleware);
 router.post('/register', async (req: Request, res: Response) => {
   const { name, email, password, role } = req.body;
   try {
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: { $eq: email } });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
@@ -52,7 +52,7 @@ router.post('/login', async (req: Request, res: Response) => {
   const { email, password } = req.body;
   try {
     Logger.debug('Log in request with email:', email);
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: { $eq: email } });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
@@ -110,7 +110,8 @@ router.patch('/:id', userSelfOrAdmin, async (req: AuthRequest, res: Response) =>
     if (req.body.password) {
       req.body.password = await bcrypt.hash(req.body.password, 10);
     }
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true, });
+    const updateData = { $set: req.body };
+    const user = await User.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true, });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -123,7 +124,7 @@ router.patch('/:id', userSelfOrAdmin, async (req: AuthRequest, res: Response) =>
 router.post('/purge-and-reinitialize', auth, async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
-    
+
     if (!userId) {
       return res.status(401).json({ message: 'Unauthorized' });
     }

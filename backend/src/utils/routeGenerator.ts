@@ -48,7 +48,7 @@ export function createRoutes<T extends Document, K extends ModelName>(
         });
         item._id = new Types.ObjectId();
         await item.save();
-        saved_item = await model.findById(item._id);
+        saved_item = await model.findById({ _id: { $eq:item._id} });
       }
       if (!saved_item) {
         res.status(400).json({ error: `Failed to create ${modelName.toLowerCase()}` });
@@ -70,9 +70,10 @@ export function createRoutes<T extends Document, K extends ModelName>(
         }
         updated_item = await options.updateItem(req.params.id, req.body, req.user?.userId);
       } else {
+        const updateData = { ...req.body, updated_by: req.user?.userId };
         updated_item = await model.findOneAndUpdate(
           { _id: req.params.id, created_by: req.user?.userId },
-          { ...req.body, updated_by: req.user?.userId },
+          { $set: updateData },
           { new: true, runValidators: true }
         );
       }

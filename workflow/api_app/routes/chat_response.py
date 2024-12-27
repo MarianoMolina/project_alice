@@ -78,5 +78,5 @@ async def chat_response(
 
             return {"status": "no responses generated"}
         except Exception as e:
-            LOGGER.error(f'Error processing chat response: {e}')
-            return {"status": "error", "error": str(e)}
+            LOGGER.error(f'Error processing chat response: {e}', exc_info=True)
+            return {"status": "error", "message": "An internal error has occurred. Please try again later."}

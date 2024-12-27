@@ -129,7 +129,7 @@ export class LMStudioRouteManager {
         modelConfig: Partial<IModelConfig>;
         modelType: ModelType;
     }> {
-        const modelInfo = await Model.findById(modelId);
+        const modelInfo = await Model.findById({ _id: { $eq: modelId } });
         if (!modelInfo) {
             throw new Error(`Model with ID ${modelId} not found`);
         }
