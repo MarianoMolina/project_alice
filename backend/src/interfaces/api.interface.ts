@@ -26,8 +26,10 @@ export enum ApiName {
   MISTRAL = 'mistral',
   COHERE = 'cohere',
   GROQ = 'groq',
+  DEEPSEEK = 'deepseek',
   LLAMA = 'llama',
   ANTHROPIC = 'anthropic',
+  
   GOOGLE_SEARCH = 'google_search',
   REDDIT_SEARCH = 'reddit',
   WIKIPEDIA_SEARCH = 'wikipedia',

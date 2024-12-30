@@ -16,6 +16,7 @@ from workflow.util.const import (
     GOOGLE_CSE_ID,
     GOOGLE_KNOWLEDGE_GRAPH_API_KEY,
     WOLFRAM_ALPHA_APP_ID,
+    DEEPSEEK_API_KEY,
 )
 
 
@@ -316,6 +317,21 @@ base_module = BaseModule(
                 },
             },
             {
+                "key": "deepseek-chat",
+                "short_name": "Deepseek Chat",
+                "model_name": "deepseek-chat",
+                "config_obj": {
+                    "ctx_size": 64000,
+                },
+                "model_type": "chat",
+                "api_name": "deepseek",
+                "model_costs": {
+                    "input_token_cost_per_million": 0.14,
+                    "cached_input_token_cost_per_million": 0.07,
+                    "output_token_cost_per_million": 0.28,
+                }
+            },
+            {
                 "key": "llama-3.3-70b-versatile",
                 "short_name": "Llama 3.3 70b",
                 "model_name": "llama-3.3-70b-versatile",
@@ -429,6 +445,16 @@ base_module = BaseModule(
                     "base_url": "https://api.groq.com/openai/v1",
                 },
                 "health_status": "healthy" if GROQ_API_KEY else "unhealthy",
+            },
+            {
+              "key": "deepseek_api_config",
+                "name": "Deepseek API Config",
+                "api_name": "deepseek",
+                "data": {
+                    "api_key": DEEPSEEK_API_KEY,
+                    "base_url": "https://api.deepseek.ai/v1",
+                },
+                "health_status": "healthy" if DEEPSEEK_API_KEY else "unhealthy", 
             },
             {
                 "key": "exa_api_config",
@@ -718,6 +744,15 @@ base_module = BaseModule(
                 "api_config": "groq_api_config",
                 "is_active": True,
                 "default_model": "llama-3.3-70b-versatile",
+            },
+            {
+                "key": "deepseek_llm", 
+                "api_type": "llm_api",
+                "api_name": "deepseek",
+                "name": "Deepseek API",
+                "api_config": "deepseek_api_config",
+                "is_active": True,
+                "default_model": "deepseek-chat",
             },
             {
                 "key": "groq_vision",

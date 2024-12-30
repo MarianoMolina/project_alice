@@ -203,19 +203,6 @@ adv_tasks_module = AdvTasksModule(
                 "max_consecutive_auto_reply": 1,
             },
             {
-                "key": "Groq_agent",
-                "name": "Alice (Groq)",
-                "system_message": "default_system_message",
-                "models": {
-                    "stt": "groq_stt_whisper",
-                    "vision": "groq_llama_3_2_11b_vision",
-                    "chat": "llama-3.3-70b-versatile",
-                },
-                "has_code_exec": 0,
-                "has_tools": 0,
-                "max_consecutive_auto_reply": 1,
-            },
-            {
                 "key": "web_scrape_selector_agent",
                 "name": "Web Scrape Selector",
                 "system_message": "web_scrape_selector_agent_prompt",

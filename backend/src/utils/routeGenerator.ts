@@ -71,9 +71,15 @@ export function createRoutes<T extends Document, K extends ModelName>(
         updated_item = await options.updateItem(req.params.id, req.body, req.user?.userId);
       } else {
         const updateData = { ...req.body, updated_by: req.user?.userId };
+        const sanitizedUpdateData = model.schema.obj;
+        for (const key in updateData) {
+          if (sanitizedUpdateData.hasOwnProperty(key)) {
+            (sanitizedUpdateData as any)[key] = updateData[key];
+          }
+        }
         updated_item = await model.findOneAndUpdate(
           { _id: req.params.id, created_by: req.user?.userId },
-          { $set: updateData },
+          { $set: sanitizedUpdateData },
           { new: true, runValidators: true }
         );
       }

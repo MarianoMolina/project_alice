@@ -236,16 +236,15 @@ export class FileService {
         const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
 
         let redirectCount = 0;
-        let currentUrl = parsedUrl;
 
         try {
             while (redirectCount <= this.maxRedirects) {
-                const response = await fetch(currentUrl.toString(), {
+                const response = await fetch(parsedUrl.toString(), {
                     signal: controller.signal,
                     headers: {
                         'Accept': Array.from(this.supportedMimeTypes.keys()).join(', '),
                     },
-                    redirect: 'manual', // Handle redirects manually for security
+                    redirect: 'manual',
                 });
 
                 // Handle redirects
@@ -258,10 +257,12 @@ export class FileService {
                         );
                     }
 
-                    // Validate the redirect URL
-                    currentUrl = await this.validateUrl(
-                        new URL(redirectUrl, currentUrl).toString()
-                    );
+                    // Validate the redirect URL BEFORE creating a new request
+                    const nextUrl = new URL(redirectUrl, parsedUrl).toString();
+                    const validatedRedirectUrl = await this.validateUrl(nextUrl);
+
+                    // Only after validation do we update parsedUrl
+                    Object.assign(parsedUrl, validatedRedirectUrl);
                     redirectCount++;
                     continue;
                 }
@@ -318,7 +319,6 @@ export class FileService {
             clearTimeout(timeout);
         }
     }
-
     private validateFileType(mimeType: string): MimeTypeMapping {
         const mapping = this.supportedMimeTypes.get(mimeType);
         if (!mapping) {

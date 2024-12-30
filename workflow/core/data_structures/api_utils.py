@@ -28,6 +28,7 @@ class ApiName(str, Enum):
     LLAMA = 'llama'
     AZURE = 'azure'
     GROQ = 'groq'
+    DEEPSEEK = 'deepseek'
     GOOGLE_SEARCH = 'google_search'
     REDDIT = 'reddit'
     WIKIPEDIA = 'wikipedia'
@@ -79,6 +80,7 @@ API_CONFIG_TYPES: Dict[ApiName, Dict] = {
     ApiName.LLAMA: BaseApiConfig,
     ApiName.AZURE: BaseApiConfig,
     ApiName.GROQ: BaseApiConfig,
+    ApiName.DEEPSEEK: BaseApiConfig,
     ApiName.GOOGLE_SEARCH: GoogleSearchConfig,
     ApiName.REDDIT: RedditConfig,
     ApiName.WIKIPEDIA: NoConfig,
@@ -171,6 +173,9 @@ API_CAPABILITIES = {
         ApiType.SPEECH_TO_TEXT,
         ApiType.TEXT_TO_SPEECH,
         ApiType.EMBEDDINGS
+    },
+    ApiName.DEEPSEEK: {
+        ApiType.LLM_MODEL
     }
 }
 

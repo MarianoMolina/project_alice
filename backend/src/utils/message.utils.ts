@@ -13,7 +13,7 @@ export async function createMessage(
 ): Promise<IMessageDocument | null> {
   try {
     Logger.debug('messageData received in createMessage:', messageData);
-    
+
     if ('_id' in messageData) {
       Logger.warn(`Removing _id from messageData: ${messageData._id}`);
       delete messageData._id;
@@ -21,7 +21,7 @@ export async function createMessage(
 
     if (messageData.references) {
       messageData.references = await processReferences(
-        messageData.references, 
+        messageData.references,
         userId,
         chatId ? {
           id: chatId,
@@ -58,7 +58,7 @@ export async function createMessage(
     Logger.debug('Message object created, data:', JSON.stringify(message.toObject(), null, 2));
 
     const savedMessage = await message.save();
-    
+
     Logger.debug('Message saved successfully:', JSON.stringify(savedMessage.toObject(), null, 2));
     Logger.debug(`Message created with ID: ${savedMessage._id}`);
 
@@ -84,11 +84,11 @@ export async function updateMessage(
       throw new Error('Message not found');
     }
 
-    const processedMessageData = { ...messageData };
+    const processedMessageData = validateMessageData({ ...messageData });
 
     if (processedMessageData.references) {
       processedMessageData.references = await processReferences(
-        processedMessageData.references, 
+        processedMessageData.references,
         userId,
         chatId ? {
           id: chatId,
@@ -114,9 +114,10 @@ export async function updateMessage(
     processedMessageData.updated_by = userId ? new Types.ObjectId(userId) : undefined;
     processedMessageData.updatedAt = new Date();
 
+    const updateData = { $set: processedMessageData };
     const updatedMessage = await Message.findByIdAndUpdate(
       messageId,
-      processedMessageData,
+      updateData,
       { new: true, runValidators: true }
     );
 
@@ -161,4 +162,27 @@ export function messagesEqual(
   }
 
   return true;
+}
+
+function validateMessageData(data: Partial<IMessageDocument>): Partial<IMessageDocument> {
+  const validKeys: (keyof IMessageDocument)[] = [
+    'content',
+    'role',
+    'generated_by',
+    'step',
+    'assistant_name',
+    'type',
+    'creation_metadata',
+    'embedding',
+    'references',
+    'updated_by',
+    'updatedAt'
+  ];
+  const validatedData: Partial<IMessageDocument> = {};
+  for (const key of validKeys) {
+    if (data[key] !== undefined) {
+      validatedData[key] = data[key];
+    }
+  }
+  return validatedData;
 }

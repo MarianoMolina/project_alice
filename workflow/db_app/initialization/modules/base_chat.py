@@ -121,10 +121,23 @@ base_chat_module = BaseChatModule(
                 "system_message": "default_system_message",
                 "models": {
                     "chat": "llama-3.3-70b-versatile",
+                    "stt": "groq_stt_whisper",
+                    "vision": "groq_llama_3_2_11b_vision",
                 },
                 "max_consecutive_auto_reply": 1,
                 "has_tools": 1,
                 "has_code_execution": 0,
+            },
+            {
+                "key": "deepseek_alice",
+                "name": "Alice (Deepseek)",
+                "system_message": "default_system_message",
+                "models": {
+                    "chat": "deepseek-chat",
+                },
+                "max_consecutive_auto_reply": 1,
+                "has_tools": 1,
+                "has_code_execution": 0,                
             }
         ],
         "chats": [
@@ -190,6 +203,15 @@ base_chat_module = BaseChatModule(
                     "tool_call": "default_tool_call_checkpoint",
                     "code_execution": "default_code_exec_checkpoint"
                 }
+            },
+            {
+                "key": "deepseek_chat",
+                "name": "Deepseek Chat",
+                "alice_agent": "deepseek_alice",
+                "default_user_checkpoints": {
+                    "tool_call": "default_tool_call_checkpoint",
+                    "code_execution": "default_code_exec_checkpoint"
+                },                
             }
         ]
     }

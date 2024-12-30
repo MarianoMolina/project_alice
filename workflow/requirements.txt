@@ -19,7 +19,6 @@ docker
 openai
 google-api-python-client
 git+https://github.com/google-gemini/generative-ai-python@imagen  # For Imagen support # google-generativeai
-groq
 cohere
 anthropic
 wikipedia

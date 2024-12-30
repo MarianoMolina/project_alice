@@ -19,6 +19,7 @@ ApiEngineMap = {
         ApiName.GEMINI: GeminiLLMEngine,
         ApiName.COHERE: CohereLLMEngine,
         ApiName.LM_STUDIO: LLMEngine,
+        ApiName.DEEPSEEK: LLMEngine
     },
     ApiType.GOOGLE_SEARCH: {
         ApiName.GOOGLE_SEARCH: GoogleSearchAPI,

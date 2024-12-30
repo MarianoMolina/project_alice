@@ -1,6 +1,6 @@
 import { ColorLens, Download, Edit, EditNote, Google, RecordVoiceOver, Reddit, Search, Tag, Visibility } from "@mui/icons-material";
 import { ApiType, ApiName, ModelApiType } from "../types/ApiTypes";
-import { AIIcon, AnthropicIcon, ArxivIcon, AzureIcon, BarkIcon, CohereIcon, GeminiIcon, GroqIcon, LlamaIcon, LMStudioIcon, 
+import { AIIcon, AnthropicIcon, ArxivIcon, AzureIcon, BarkIcon, CohereIcon, DeepseekIcon, GeminiIcon, GroqIcon, LlamaIcon, LMStudioIcon, 
   MistralIcon, OpenAiIcon, WikipediaIcon, WolframAlphaIcon } from "./CustomIcons";
 import { ModelType } from "../types/ModelTypes";
 import { HOST } from "./Constants";
@@ -46,6 +46,7 @@ export type ApiConfigType = {
   [ApiName.LLAMA]: BaseApiConfig;
   [ApiName.AZURE]: BaseApiConfig;
   [ApiName.GROQ]: BaseApiConfig;
+  [ApiName.DEEPSEEK]: BaseApiConfig;
   [ApiName.GOOGLE_SEARCH]: GoogleSearchConfig;
   [ApiName.REDDIT]: RedditConfig;
   [ApiName.WIKIPEDIA]: EmptyConfig;
@@ -95,6 +96,9 @@ export const API_CAPABILITIES: Record<ApiName, Set<ApiType>> = {
     ApiType.LLM_MODEL,
     ApiType.IMG_VISION,
     ApiType.TEXT_TO_SPEECH
+  ]),
+  [ApiName.DEEPSEEK]: new Set([
+    ApiType.LLM_MODEL
   ]),
   [ApiName.AZURE]: new Set([
     ApiType.LLM_MODEL
@@ -152,6 +156,7 @@ export const API_BASE_URLS: Partial<Record<ApiName, string>> = {
   [ApiName.LLAMA]: 'https://api.llama-api.com',
   [ApiName.COHERE]: 'https://api.cohere.ai',
   [ApiName.GROQ]: 'https://api.groq.com/openai/v1',
+  [ApiName.DEEPSEEK]: 'https://api.deepseek.com/v1',
   [ApiName.LM_STUDIO]: `http://${HOST}:1234/v1`,
 };
 
@@ -164,6 +169,7 @@ export const apiNameIcons: Record<ApiName, React.ReactElement> = {
   [ApiName.GOOGLE_SEARCH]: <Google />,
   [ApiName.GEMINI]: <GeminiIcon />,
   [ApiName.GROQ]: <GroqIcon />, 
+  [ApiName.DEEPSEEK]: <DeepseekIcon />,
   [ApiName.ANTHROPIC]: <AnthropicIcon />,
   [ApiName.WIKIPEDIA]: <WikipediaIcon />,
   [ApiName.ARXIV]: <ArxivIcon />,
