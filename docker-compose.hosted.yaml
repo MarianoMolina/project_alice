@@ -1,8 +1,6 @@
 services:
   frontend:
     image: ${REGISTRY_PATH}/frontend:hosted
-    ports:
-      - "${FRONTEND_PORT}:${FRONTEND_PORT_DOCKER}"
     depends_on:
       backend:
         condition: service_healthy
@@ -16,8 +14,6 @@ services:
 
   backend:
     image: ${REGISTRY_PATH}/backend:hosted
-    ports:
-      - "${REACT_APP_BACKEND_PORT}:${BACKEND_PORT_DOCKER}"
     env_file:
       - .env
     depends_on:
@@ -33,7 +29,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://${REACT_APP_BACKEND_HOST:-localhost}:${BACKEND_PORT_DOCKER}/api/health"]
+      test: ["CMD", "curl", "-f", "http://${BACKEND_HOST:-localhost}:${BACKEND_PORT_DOCKER}/api/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -53,8 +49,6 @@ services:
     image: ${REGISTRY_PATH}/workflow:hosted
     env_file:
       - .env
-    ports:
-      - "${REACT_APP_WORKFLOW_PORT}:${WORKFLOW_PORT_DOCKER}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - logs:/app/logs
@@ -75,7 +69,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://${REACT_APP_WORKFLOW_HOST:-localhost}:${WORKFLOW_PORT_DOCKER}/health"]
+      test: ["CMD", "curl", "-f", "http://${WORKFLOW_HOST:-localhost}:${WORKFLOW_PORT_DOCKER}/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -108,7 +102,10 @@ services:
     volumes:
       - mongo_data:/data/db
     attach: false
-
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      
   python_image:
     image: ${REGISTRY_PATH}/mypython:latest
     command: ["bash"]
@@ -121,6 +118,21 @@ services:
     image: ${REGISTRY_PATH}/myjs:latest
     command: ["bash"]
 
+  nginx:
+    image: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      frontend:
+        condition: service_started
+      backend:
+        condition: service_healthy
+      workflow:
+        condition: service_healthy
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - /etc/letsencrypt:/etc/letsencrypt:ro
 volumes:
   mongo_data:
   logs:
