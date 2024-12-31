@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState, memo } from 'react';
-import { Box, Typography, List, Accordion, AccordionSummary, AccordionDetails, SelectChangeEvent } from '@mui/material';
+import { Box, Typography, List, Accordion, AccordionSummary, AccordionDetails, SelectChangeEvent, CircularProgress } from '@mui/material';
 import { Add, Functions, Assignment, ExpandMore } from '@mui/icons-material';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
 import { AliceTask, PopulatedTask, TaskType } from '../types/TaskTypes';
@@ -16,7 +16,18 @@ import TaskResponseListView from '../components/enhanced/task_response/task_resp
 import { useCardDialog } from '../contexts/CardDialogContext';
 import { RecentExecution, useTask } from '../contexts/TaskContext';
 import useStyles from '../styles/StartTaskStyles';
-
+const TaskLoadingState = memo(() => {
+    const classes = useStyles();
+    
+    return (
+        <Box className={classes.loadingContainer} display="flex" alignItems="center" justifyContent="center">
+            <CircularProgress size={40} />
+            <Typography variant="body1" sx={{ ml: 2 }}>
+                Loading task details...
+            </Typography>
+        </Box>
+    );
+});
 interface MemoizedSidebarProps {
     actions: Array<{
         name: string;
@@ -45,7 +56,7 @@ const MemoizedVerticalMenuSidebar = memo(({
     renderContent,
     expandedWidth,
     collapsedWidth,
-    expanded, 
+    expanded,
     onExpandedChange,
 }: MemoizedSidebarProps) => (
     <VerticalMenuSidebar
@@ -216,6 +227,7 @@ const StartTask: React.FC = () => {
         setInputValues,
         setTaskById,
         tasks,
+        selectionStatus
     } = useTask();
     const { selectCardItem, selectFlexibleItem } = useCardDialog();
 
@@ -328,7 +340,36 @@ const StartTask: React.FC = () => {
         selectCardItem,
         classes
     ]);
+    const renderTaskExecutionContent = () => {
+        if (selectionStatus === 'loading') {
+            return <TaskLoadingState />;
+        }
 
+        if (selectionStatus === 'error') {
+            return (
+                <PlaceholderSkeleton
+                    mode="task"
+                    text="Error loading task. Please try selecting again."
+                />
+            );
+        }
+
+        if (!selectedTask) {
+            return (
+                <PlaceholderSkeleton
+                    mode="task"
+                    text="Select a task to execute."
+                />
+            );
+        }
+
+        return (
+            <MemoizedTaskExecuteView
+                item={selectedTask}
+                onExecute={executeTask}
+            />
+        );
+    };
     return (
         <Box className={classes.container}>
             <MemoizedVerticalMenuSidebar
@@ -344,14 +385,7 @@ const StartTask: React.FC = () => {
             />
             <Box className={classes.mainContainer}>
                 <Box className={classes.taskExecutionContainer}>
-                    {selectedTask ? (
-                        <MemoizedTaskExecuteView
-                            item={selectedTask}
-                            onExecute={executeTask}
-                        />
-                    ) : (
-                        <PlaceholderSkeleton mode="task" text="Select a task to execute." />
-                    )}
+                    {renderTaskExecutionContent()}
                 </Box>
                 <Box className={classes.apiAndRecentExecutionsContainer}>
                     <APIStatusSection />

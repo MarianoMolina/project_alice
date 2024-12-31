@@ -20,16 +20,17 @@ interface TaskContextType {
   taskResults: (TaskResponse | PopulatedTaskResponse)[];
   inputValues: { [key: string]: any };
   executionStatus: 'idle' | 'progress' | 'success';
+  selectionStatus: 'idle' | 'loading' | 'success' | 'error';
   recentExecutions: RecentExecution[];
   fetchTasks: () => Promise<void>;
   fetchTaskResults: () => Promise<void>;
-  handleSelectTask: (task: AliceTask | PopulatedTask) => void;
+  handleSelectTask: (task: AliceTask | PopulatedTask) => Promise<void>;
   handleInputChange: (key: string, value: any) => void;
   setInputValues: (values: { [key: string]: any }) => void;
   handleExecuteTask: () => Promise<void>;
   setSelectedTask: (task: PopulatedTask | null) => void;
   resetRecentExecutions: () => void;
-  setTaskById: (taskId: string) => void;
+  setTaskById: (taskId: string) => Promise<void>;
   getTaskResultsById: (taskId: string) => TaskResponse[];
 }
 
@@ -44,6 +45,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [taskResults, setTaskResults] = useState<(TaskResponse | PopulatedTaskResponse)[]>([]);
   const [inputValues, setInputValues] = useState<{ [key: string]: any }>({});
   const [executionStatus, setExecutionStatus] = useState<'idle' | 'progress' | 'success'>('idle');
+  const [selectionStatus, setSelectionStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [recentExecutions, setRecentExecutions] = useState<RecentExecution[]>([]);
 
   const fetchTasks = useCallback(async () => {
@@ -86,17 +88,36 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [fetchTasks, fetchTaskResults]);
 
   const setTaskById = async (taskId: string) => {
-    const task = await fetchPopulatedItem('tasks', taskId);
-    if (task) {
-      setSelectedTask(task as PopulatedTask);
+    setSelectionStatus('loading');
+    try {
+      const task = await fetchPopulatedItem('tasks', taskId);
+      if (task) {
+        setSelectedTask(task as PopulatedTask);
+        setSelectionStatus('success');
+      } else {
+        setSelectionStatus('error');
+        Logger.error('Task not found:', taskId);
+      }
+    } catch (error) {
+      setSelectionStatus('error');
+      Logger.error('Error fetching task:', error);
     }
   };
 
   const handleSelectTask = async (task: AliceTask | PopulatedTask) => {
-    if (!task._id) return;
-    await setTaskById(task._id);
-    setInputValues({});
-    setExecutionStatus('idle');
+    if (!task._id) {
+      setSelectionStatus('error');
+      return;
+    }
+
+    try {
+      await setTaskById(task._id);
+      setInputValues({});
+      setExecutionStatus('idle');
+    } catch (error) {
+      setSelectionStatus('error');
+      Logger.error('Error selecting task:', error);
+    }
   };
 
   const handleInputChange = (key: string, value: any) => {
@@ -157,6 +178,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     taskResults,
     inputValues,
     executionStatus,
+    selectionStatus,
     recentExecutions,
     fetchTasks,
     fetchTaskResults,

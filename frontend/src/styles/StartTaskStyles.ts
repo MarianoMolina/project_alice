@@ -105,6 +105,17 @@ const useStyles = makeStyles((theme: Theme) => ({
         overflowY: 'auto',
         flexGrow: 1,
     },
+    loadingContainer: {
+        minHeight: '200px',
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: theme.palette.background.paper,
+        borderRadius: theme.shape.borderRadius,
+        padding: theme.spacing(3),
+        boxShadow: theme.shadows[1]
+    },
 }));
 
 export default useStyles;
