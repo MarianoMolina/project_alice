@@ -36,11 +36,6 @@ coding_workflow_module = CodingWorkflowModule(
                 "type": "boolean",
                 "description": "Whether to include the prompt in code execution",
                 "default": True
-            },
-            {
-                "key": "prompt_parameter",
-                "type": "string",
-                "description": "The input prompt for the task",
             }
         ],
         "user_checkpoints": [

@@ -11,6 +11,7 @@ import { TextInput } from '../../common/inputs/TextInput';
 import { SelectInput } from '../../common/inputs/SelectInput';
 import { IconSelectInput } from '../../common/inputs/IconSelectInput';
 import TitleBox from '../../common/inputs/TitleBox';
+import Logger from '../../../../utils/Logger';
 
 const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
     item,
@@ -34,10 +35,20 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
     }, [isSaving, handleSave]);
 
     useEffect(() => {
-        if (item) {
+        if (item && Object.keys(item).length > 0) {
             setForm(item);
-        } else if (!item || Object.keys(item).length === 0) {
-            onChange(getDefaultAPIConfigForm());
+        } else {
+            const defaultForm = getDefaultAPIConfigForm();
+            const defaultCompleteForm = {
+                ...defaultForm, 
+                data: {
+                    api_key: '',
+                    base_url: API_BASE_URLS[defaultForm.api_name as ApiName] || '',
+                }
+            }
+            Logger.info('Setting default form values:', defaultForm);
+            setForm(defaultCompleteForm);
+            onChange(defaultCompleteForm);
         }
     }, [item, onChange]);
 

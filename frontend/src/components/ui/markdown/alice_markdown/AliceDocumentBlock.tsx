@@ -44,7 +44,7 @@ export const AliceDocumentBlockComponent: React.FC<{ node: any }> = ({ node }) =
         <Box className="flex items-center gap-4 flex-1">
           {getIconByType(type)}
           <Divider orientation="vertical" flexItem />
-          <Typography variant="body1" className="font-medium">
+          <Typography variant="caption" className="font-medium">
             {title}
           </Typography>
           <Typography variant="caption" className="text-gray-400">

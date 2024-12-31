@@ -24,7 +24,7 @@ export const AnalysisBlockComponent: React.FC<{ node: any }> = ({ node }) => {
         <Box className="flex items-center gap-4 flex-1">
           <Psychology/>
           <Divider orientation="vertical" flexItem />
-          <Typography variant="body1" className="font-medium">
+          <Typography variant="caption" className="font-medium">
             {title}
           </Typography>
         </Box>

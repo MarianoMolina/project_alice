@@ -16,13 +16,13 @@ Alice is an agentic workflow framework that integrates task execution and intell
 > - APIS: New APIs for Wolfram Alpha, Google's Knowledge Graph, PixArt Image Generation (local), Bark TTS (local). Support for local embeddings
 > - DATA CLUSTERS: Now chats and tasks can hold updatable data clusters that hold embeddable references like messages, files, task responses, etc. You can add any reference in your environment to a data cluster to give your chats/tasks access to it. The new retrieval tasks leverage this. 
 > - TEXT MGMT: Added 2 Text Splitter methods (recursive and semantic), which are used by the embedding and RAG logic (as well as other APIs with that need to chunk the input, except LLMs), and a Message Pruner class that scores and prunes messages, which is used by the LLM API engines to avoid contex size issues
-> - REDIS QUEUE: Implemented a queue system for the Workflow module to handle incoming requests. 
-> - **NOTE**: If you update to this version, you'll need to reinitialize your database (User settings -> Danger Zone). This update required a lot of changes to the framework, and making it backwards compatible is inefficient at this stage. Keep in mind Project ALice is still in Alpha, and changes should be expected
+> - REDIS QUEUE: Implemented a queue system for the Workflow module to handle incoming requests -> now it can handle concurrent tasks being executed
+> - **NOTE**: If you update to this version, you'll need to reinitialize your database (User settings -> Danger Zone). This update required a lot of changes to the framework, and making it backwards compatible is inefficient at this stage. Keep in mind Project Alice is still in Alpha, and changes should be expected
 
-> v0.3.1:
+> v0.3.5:
 > - BACKEND: 
 >   - Refactored the LM STUDIO manager, but now requires you use a specific build (0.3.5 9-H is functional), since with the speed of development, the LMS SDK is evolving quickly. 
->   - Added a 'populated' endpoint to all routes in order to avoid unnecessary bloating
+>   - Added a 'populated' endpoint to all routes in order to avoid unnecessary bloating -> Now the frontend only retrieves non-populated items when loading collection lists
 > - FRONTEND: 
 >   - Optimized item population to reduce memory hog. Now viewing items will require loading them, but having a big database won't break your computer. 
 >   - Added a Context % estimation to the chat interface. 
@@ -30,8 +30,8 @@ Alice is an agentic workflow framework that integrates task execution and intell
 >   - Added a status section for LM Studio to the User Settings, as well as one for the Workflow module. 
 >   - Added a menu to all item cards and forms with functions like (1) download, (2) copy, (3) duplicate, (4) delete (forms) and (5) edit (cards). 
 > - WORKFLOW:
->   - Fixes to the communication to the Backend, both to get the new populated routes and to properly use LM Studio
-
+>   - Updated the communication to the Backend, both to get the new populated routes and to properly use LM Studio
+>   - Fixed a lot of issues with task/workflow and code execution logic. 
 
 > What's next? Planned developments for v0.4 (find detailed info below):
 > - Agent using computer
@@ -238,9 +238,9 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
 ## Future Features / Upgrades / History
 
 1. **Workflow generator** [Done - Upgrading]: Improve the interface for workflow generation. Ideally, something that allows the user to handle tasks/nodes, visualize the execution of it, etc. 
-   - [Added 10/24]: Flowchart for workflows
+   - [Added 10/24]: Flowchart for tasks / workflows
    - [Added 10/24]: Basic route end code editor
-   - [Working on]: Adding a "task visualization" logic to the flowcharts, enabling the frontend to display a *parsed* representation of the task, and its nodes, showing the available and required inputs, as they are passed in the flow, as well as task_templates and output_templates to show how the content will be passed 
+   - [Added 12/24]: Adding a "task visualization" logic to the flowcharts, enabling the frontend to display a *parsed* representation of the task, and its nodes, showing the available and required inputs, as they are passed in the flow, as well as task_templates and output_templates to show how the content will be passed 
 
 2. **More API engines and base tasks** [Done - Upgrading]: BeautifulSoup to scrap websites, vision_models, text_to_image_models, text_to_speech_models, etc. This will enable a new set of tasks to be created. This includes adding more providers, like Google, Mistral, etc. 
    - [Added 10/24]: 21 new API providers, with their corresponding models, for a total of 160 distinct entities for you to use. 
@@ -252,8 +252,8 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
    - [Added 9/24]: Both generation (TTS and Image Generation) as well as transcription (STT and Image Vision) available
 
 4. **Complex Information Flows** [In Progress]: 
-   - Implement more advanced agent tools, such as ReAct and RAG agents, to enable more sophisticated reasoning and decision-making capabilities.
-   - Implement interactive workflows, where the agent could either ask for permission, or deploy a request/action conditional to user approval (human in the loop)
+   - [Added 12/24]: Implement more advanced agent tools, such as ReAct and RAG agents, to enable more sophisticated reasoning and decision-making capabilities.
+   - [Added 12/24]:Implement interactive workflows, where the agent could either ask for permission, or deploy a request/action conditional to user approval (human in the loop)
    - [Added 11/24]: User Checkpoints and User interactions help define a 'pause' condition for a task and a node router based on user response. Task can now continue executing from a 'pending' task response -> Potentially could implement being able to remove a node, and set the task to continue from a specific node and produce a new task result, which can be useful when updating/improving a workflow, for example
    - [Added 11/24]: Now all tasks execute a set of nodes, with workflows executing inner tasks, and other tasks executing class methods, with the node routing deciding the flow. This simplifies how information is passed during a task execution, since now tasks check if inputs are available in the executed nodes, and passes them to the next node that needs them. 
    - [Added 11/24]: RAG! Semantic and code chunking as methods to split the embeddings into the most relevant chunks, and RAG tasks that take a data cluster and a prompt, and return relevant chunks. 
@@ -276,8 +276,10 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
 
 7. **Improvements and fixes** [In Progress]: There are several misc areas I think are crucial in the mid-term to tackle:
    - Edge-case analysis
-   - Lazy-loading on the frontend
-   - Context management -> be able to predict the context size of a chat or task instance, prevent extreme cases, etc. 
+   - [Added 12/24]: Optimize the frontend information request logic to reduce bloat
+   - [Added 12/24]: Context management and cost tracking:
+     - Now you can see the estimated size of your chat in the interface.
+     - Now all tasks and messages keep track of costs and usage 
    - [Improved 9/24] Improve error handling and logging
       - [Added 9/24]: Logging folder, and better logs from all containers
       - [Added 9/24]: Logging managers with levels, allowing for dev and prod setups
@@ -292,9 +294,9 @@ If you've created new tasks, workflows, or initialization modules that you'd lik
    - [Improved 9/24]: Improved the module logic, simplifying it a bit
 
 10. **Cost management**: Currently, the completion metadata is stored, but not much is done with it. Goals are:
-   - Good tracking of costs
-   - Task cost estimation based on an algorithm and, when it exists, past data to improve the estimation. 
-   - Cost/use tracking by API in a clear UI
+   - [Improved 12/24]: Basic cost tracking available in the frontend
+   - Cost/use tracking by API
+   - Task cost estimations
 
 11. **Local deployment**: Offer more options for local deployment, especially for smaller models like TTS (even RVC), image generation, etc. (local llm, embeddings and vision can already be used with LM Studio) 
    - Offer something closer to Automatic111 for img gen. An option I've thought about is having a ComfyUI container with a set of workflows pre-set that work off the box. 

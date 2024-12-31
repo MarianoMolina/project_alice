@@ -1,11 +1,10 @@
 import React from 'react';
-import { Box, Typography, Chip, Accordion, AccordionSummary, AccordionDetails, Tooltip, IconButton } from '@mui/material';
+import { Box, Typography, Chip, Accordion, AccordionSummary, AccordionDetails, Tooltip } from '@mui/material';
 import { PopulatedReferences } from '../../../types/ReferenceTypes';
 import ReferencesViewer from '../data_cluster/ReferencesViewer';
 import { useStyles } from '../data_cluster/ReferencesStyles';
-import { ExpandMore, Visibility } from '@mui/icons-material';
+import { ExpandMore } from '@mui/icons-material';
 import { formatCamelCaseString } from '../../../utils/StyleUtils';
-import { useCardDialog } from '../../../contexts/CardDialogContext';
 
 interface NodeReferencesViewerProps {
     references: PopulatedReferences;
@@ -34,7 +33,6 @@ export const NodeReferencesViewer: React.FC<NodeReferencesViewerProps> = ({
     exitCode
 }) => {
     const classes = useStyles();
-    const { selectCardItem } = useCardDialog();
 
     if (!references) return null;
 

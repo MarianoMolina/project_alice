@@ -452,7 +452,7 @@ base_module = BaseModule(
                 "api_name": "deepseek",
                 "data": {
                     "api_key": DEEPSEEK_API_KEY,
-                    "base_url": "https://api.deepseek.ai/v1",
+                    "base_url": "https://api.deepseek.com/v1",
                 },
                 "health_status": "healthy" if DEEPSEEK_API_KEY else "unhealthy", 
             },

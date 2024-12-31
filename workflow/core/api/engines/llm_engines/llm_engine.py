@@ -16,7 +16,7 @@ class LLMEngine(APIEngine):
     
     This engine defines the standard interface for language model interactions,
     with a default implementation using the OpenAI SDK. It works with any
-    OpenAI-compatible endpoint (OpenAI, Azure, LMStudio, etc.) and handles:
+    OpenAI-compatible endpoint (OpenAI, Azure, LMStudio, Groq, Deepseek, etc.) and handles:
     - Message-based interactions
     - Tool/function calling
     - Token counting and context management
@@ -130,6 +130,8 @@ class LLMEngine(APIEngine):
 
         # Ensure the base_url doesn't end with a slash
         base_url = base_url.rstrip('/')
+        
+        LOGGER.info(f"Generating API response for model {api_data.model} with base URL {base_url}")
 
         # Create the client with the correct base_url
         client = AsyncOpenAI(
@@ -173,7 +175,8 @@ class LLMEngine(APIEngine):
             if tools:
                 api_params["tools"] = tools
                 api_params["tool_choice"] = tool_choice
-
+                
+            LOGGER.debug(f"API call parameters: {api_params}")
             response: ChatCompletion = await client.chat.completions.create(**api_params)
 
             # We'll use the first choice for the MessageDict

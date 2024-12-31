@@ -24,8 +24,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     minHeight: 0,
   },
   chatAliceInput: {
-    borderTop: `1px solid ${theme.palette.divider}`,
-    padding: theme.spacing(1, 1, 0, 1),
+    margin: theme.spacing(0, 1, 1, 1),
     display: 'flex',
     flexDirection: 'column',
   },

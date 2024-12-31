@@ -44,5 +44,5 @@ async def api_health_check(
     return {
         "status": "OK",
         "message": "Workflow module working correctly",
-        "api_health": "All chill dog",
+        "api_health": "Placeholder - Everything seems fine but there's currently no specific logic to test the APIs",
     }

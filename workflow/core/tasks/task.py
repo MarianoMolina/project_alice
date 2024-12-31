@@ -147,7 +147,7 @@ class AliceTask(BaseDataStructure):
         - Task execution pauses at checkpoints until user input is received
     """
 
-    # Basic task information
+    # Basic task debugrmation
     id: Optional[str] = Field(default=None, description="Task ID", alias="_id")
     task_name: str = Field(..., description="Name of the task")
     task_description: str = Field(..., description="Clear description of task purpose")
@@ -222,11 +222,11 @@ class AliceTask(BaseDataStructure):
             return values
 
         try:
-            LOGGER.info(f"Processing routing data: {routing}")
+            LOGGER.debug(f"Processing routing data: {routing}")
             converted_routing = {}
 
             for node, routes in routing.items():
-                LOGGER.info(f"Processing node {node} with routes: {routes}")
+                LOGGER.debug(f"Processing node {node} with routes: {routes}")
                 converted_routes = {}
 
                 for code, route in routes.items():
@@ -271,7 +271,7 @@ class AliceTask(BaseDataStructure):
                 else:
                     LOGGER.warning(f"No valid routes found for node {node}")
 
-            LOGGER.info(f"Converted routing: {converted_routing}")
+            LOGGER.debug(f"Converted routing: {converted_routing}")
             values["node_end_code_routing"] = converted_routing
 
         except Exception as e:
@@ -293,8 +293,8 @@ class AliceTask(BaseDataStructure):
         Returns:
             dict: The serialized AliceTask instance
         """
-        LOGGER.info(f"AliceTask.model_dump called for {self.__class__.__name__}")
-        LOGGER.info(f"Dict keys: {list(self.__dict__.keys())}")
+        LOGGER.debug(f"AliceTask.model_dump called for {self.__class__.__name__}")
+        LOGGER.debug(f"Dict keys: {list(self.__dict__.keys())}")
 
         # Create exclude set if not provided
         if exclude is None:
@@ -303,7 +303,7 @@ class AliceTask(BaseDataStructure):
 
         try:
             data = super().model_dump(*args, exclude=exclude, **kwargs)
-            LOGGER.info(f"AliceTask base dump succeeded")
+            LOGGER.debug(f"AliceTask base dump succeeded")
         except TypeError as e:
             LOGGER.error(f"TypeError in AliceTask model_dump: {str(e)}")
             LOGGER.error(f"Full task state: {vars(self)}")
@@ -467,7 +467,7 @@ class AliceTask(BaseDataStructure):
 
             # Determine starting node based on execution history
             current_node = self.resolve_next_node(execution_history)
-            LOGGER.info(f'Starting task "{self.task_name}" from node "{current_node}"')
+            LOGGER.debug(f'Starting task "{self.task_name}" from node "{current_node}"')
 
             # Execute nodes
             while current_node:
@@ -481,8 +481,8 @@ class AliceTask(BaseDataStructure):
                     node_response.references
                     and node_response.references.user_interactions
                 ):
-                    LOGGER.info(f"User interaction detected for node {current_node}")
-                    LOGGER.info(
+                    LOGGER.debug(f"User interaction detected for node {current_node}")
+                    LOGGER.debug(
                         f"Node response user interaction: {node_response.references.user_interactions[0]}"
                     )
                     node_responses.append(node_response)
@@ -582,8 +582,8 @@ class AliceTask(BaseDataStructure):
             LOGGER.error(
                 f"No implementation found for node {node_name} as method_name {method_name} in task {self.task_name}"
             )
-            LOGGER.info(f"Available methods: {dir(self)}")
-            LOGGER.info(f"Self class: {self.__class__.__name__}")
+            LOGGER.debug(f"Available methods: {dir(self)}")
+            LOGGER.debug(f"Self class: {self.__class__.__name__}")
             return NodeResponse(
                 parent_task_id=self.id,
                 node_name=node_name,
@@ -616,7 +616,7 @@ class AliceTask(BaseDataStructure):
                         )
                     else:
                         kwargs[node_name] = value
-                    LOGGER.info(f"Updated variable {node_name} with node output")
+                    LOGGER.debug(f"Updated variable {node_name} with node output")
                 except (ValueError, TypeError) as e:
                     LOGGER.warning(
                         f"Failed to update variable {node_name} with node output: {e}"
@@ -688,7 +688,7 @@ class AliceTask(BaseDataStructure):
         """
         execution_history = execution_history or []
         node_name = node_name or self.start_node or "default"
-        LOGGER.info(f"Checking user checkpoints for node {node_name}")
+        LOGGER.debug(f"Checking user checkpoints for node {node_name}")
 
         if node_name in self.user_checkpoints:
             completed_interaction = next(
@@ -703,7 +703,7 @@ class AliceTask(BaseDataStructure):
             )
 
             if not completed_interaction:
-                LOGGER.info(f"Creating user interaction for node {node_name}")
+                LOGGER.debug(f"Creating user interaction for node {node_name}")
                 return self.create_user_interaction(node_name, len(execution_history))
         return None
 
@@ -988,7 +988,7 @@ class AliceTask(BaseDataStructure):
         """
         if exit_code is None:
             exit_code = self.map_final_exit_code(node_responses)
-            LOGGER.info(f"Final exit code for task {self.task_name}: {exit_code}")
+            LOGGER.debug(f"Final exit code for task {self.task_name}: {exit_code}")
 
         if diagnostics is None:
             diagnostics = self.exit_codes.get(exit_code, "Task execution completed")
@@ -1036,13 +1036,13 @@ class AliceTask(BaseDataStructure):
 
         for node_name, node in last_node_responses.items():
             # Get all codes that don't retry (success codes)
-            LOGGER.info(f"Checking success codes for node {node_name}")
+            LOGGER.debug(f"Checking success codes for node {node_name}")
             success_codes = [
                 code
                 for code, (_, is_retry) in self.node_end_code_routing[node_name].items()
                 if not is_retry
             ]
-            LOGGER.info(
+            LOGGER.debug(
                 f"Node name: {node_name}\nExit code: {node.exit_code}\nSuccess codes: {success_codes}"
             )
             if node.exit_code not in success_codes:

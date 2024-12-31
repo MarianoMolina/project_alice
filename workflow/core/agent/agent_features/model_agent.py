@@ -59,7 +59,7 @@ class ModelAgent(BaseModel):
             - Handles tool calls based on agent's permission level
             - Stores response in standardized MessageDict format
         """
-        LOGGER.info("Generating LLM response")
+        LOGGER.info(f"Agent {self.name} generating response with {len(messages)} messages")
         chat_model = self.llm_model
         response_ref: References = await api_manager.generate_response_with_api_engine(
             api_type=ApiType.LLM_MODEL,

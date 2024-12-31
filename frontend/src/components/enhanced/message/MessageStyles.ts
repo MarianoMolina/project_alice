@@ -4,7 +4,6 @@ import { makeStyles } from '@mui/styles';
 const useStyles = makeStyles((theme: Theme) => ({
   message: {
     marginBottom: theme.spacing(1),
-    paddingLeft: theme.spacing(5),
     padding: theme.spacing(1),
     borderRadius: theme.shape.borderRadius,
     position: 'relative',

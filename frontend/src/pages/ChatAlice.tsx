@@ -268,16 +268,18 @@ const ChatAlice: React.FC = () => {
             />
           )}
         </Box>
-        <Box className={classes.chatAliceInput}>
-          <ChatInput
-            ref={chatInputRef}
-            sendMessage={handleSendMessage}
-            currentChatId={currentChatId}
-            chatSelected={!!currentChatId}
-            chatContextCharacterCount={chatContextCharacterCount}
-            maxContext={maxContext}
-          />
-        </Box>
+        {currentChatId && (
+          <Box className={classes.chatAliceInput}>
+            <ChatInput
+              ref={chatInputRef}
+              sendMessage={handleSendMessage}
+              currentChatId={currentChatId}
+              chatSelected={!!currentChatId}
+              chatContextCharacterCount={chatContextCharacterCount}
+              maxContext={maxContext}
+            />
+          </Box>
+        )}
       </Box>
     </Box>
   );

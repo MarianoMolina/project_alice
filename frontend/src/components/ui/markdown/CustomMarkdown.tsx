@@ -5,6 +5,8 @@ import {
   Typography,
   Link as MuiLink,
   Divider,
+  SxProps,
+  Theme
 } from '@mui/material';
 import useStyles from './MarkdownStyles';
 import { CodeBlock } from './CodeBlock';
@@ -23,33 +25,39 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
     Logger.debug(`${componentName} props:`, props);
   };
 
+  const wrapStyles: SxProps<Theme> = {
+    whiteSpace: 'pre-wrap',
+    overflowWrap: 'break-word',
+    hyphens: 'auto'
+  };
+
   const components: Components = {
     h1: ({ node, ...props }) => {
       logProps('h1', props);
-      return <Typography className={classes.h1} component="h1" variant="h1" {...props} />;
+      return <Typography sx={wrapStyles} className={classes.h1} component="h1" variant="h1" {...props} />;
     },
     h2: ({ node, ...props }) => {
       logProps('h2', props);
-      return <Typography className={classes.h2} component="h2" variant="h2" {...props} />;
+      return <Typography sx={wrapStyles} className={classes.h2} component="h2" variant="h2" {...props} />;
     },
     h3: ({ node, ...props }) => {
       logProps('h3', props);
-      return <Typography className={classes.h3} component="h3" variant="h3" {...props} />;
+      return <Typography sx={wrapStyles} className={classes.h3} component="h3" variant="h3" {...props} />;
     },
     h4: ({ node, ...props }) => {
       logProps('h4', props);
-      return <Typography className={classes.h4} component="h4" variant="h4" {...props} />;
+      return <Typography sx={wrapStyles} className={classes.h4} component="h4" variant="h4" {...props} />;
     },
     h5: ({ node, ...props }) => {
       logProps('h5', props);
-      return <Typography className={classes.h5} component="h5" variant="h5" {...props} />;
+      return <Typography sx={wrapStyles} className={classes.h5} component="h5" variant="h5" {...props} />;
     },
     h6: ({ node, ...props }) => {
       logProps('h6', props);
-      return <Typography className={classes.h6} component="h6" variant="h6" {...props} />;
+      return <Typography sx={wrapStyles} className={classes.h6} component="h6" variant="h6" {...props} />;
     },
     p: ({ node, ...props }) => {
-      return <Typography paragraph className={classes.markdownText} {...props} />;
+      return <Typography sx={wrapStyles} paragraph className={classes.markdownText} {...props} />;
     },
     a: ({ href, children, ...props }) => {
       logProps('a', { href, ...props });
@@ -59,15 +67,12 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
         
         if (!href) return;
 
-        // Handle internal knowledgebase links
         if (href.startsWith('/shared/knowledgebase')) {
           const cleanPath = href.replace(/\.md$/, '');
           navigate(cleanPath);
         } else if (href.startsWith('http://') || href.startsWith('https://')) {
-          // External links open in new tab
           window.open(href, '_blank', 'noopener,noreferrer');
         } else {
-          // Other internal links
           navigate(href);
         }
       };
@@ -75,7 +80,7 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
       return (
         <MuiLink
           onClick={handleClick}
-          style={{ cursor: 'pointer' }}
+          sx={wrapStyles}
           className={classes.link}
           {...props}
         >
@@ -90,7 +95,8 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
         <Typography
           component="ol"
           className={classes.markdownText}
-          style={{
+          sx={{
+            ...wrapStyles,
             listStyleType: 'decimal',
             paddingLeft: '2rem',
             marginBottom: '1rem'
@@ -106,7 +112,8 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
         <Typography
           component="ul"
           className={classes.markdownText}
-          style={{
+          sx={{
+            ...wrapStyles,
             listStyleType: 'disc',
             paddingLeft: '2rem',
             marginBottom: '1rem'
@@ -122,6 +129,7 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
         <Typography
           component="li"
           className={classes.markdownText}
+          sx={wrapStyles}
           {...restProps}
         />
       );
@@ -137,7 +145,7 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
           <Typography
             component="span"
             className={classes.inlineVariable}
-            style={{ fontStyle: 'italic' }}
+            sx={{ ...wrapStyles, fontStyle: 'italic' }}
             {...props}
           >
             {children}

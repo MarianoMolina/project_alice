@@ -36,11 +36,6 @@ base_tasks_module = BaseTasksModule(
                 "default": "all"
             },
             {
-                "key": "prompt_parameter",
-                "type": "string",
-                "description": "The entity to search for in the Knowledge Graph."
-            },
-            {
                 "key": "types_parameter",
                 "type": "string",
                 "description": "An optional list of entity types to restrict the results. Provide them as comma separated values. Types are: Book, BookSeries, EducationalOrganization, Event, GovernmentOrganization, LocalBusiness, Movie, MovieSeries, MusicAlbum, MusicGroup, MusicRecording, Organization, Periodical, Person, Place, SportsTeam, TVEpisode, TVSeries, VideoGame, VideoGameSeries, WebSite"
@@ -49,11 +44,6 @@ base_tasks_module = BaseTasksModule(
                 "key": "limit_parameter",
                 "type": "integer",
                 "description": "Limits the number of entities to be returned. Maximum is 500. Default is 10."
-            },
-            {
-                "key": "wolfram_prompt_parameter",
-                "type": "string",
-                "description": "The prompt string to be sent to Wolfram Alpha."
             },
             {
                 "key": "units_parameter",
@@ -75,7 +65,7 @@ base_tasks_module = BaseTasksModule(
                 "input_variables": {
                     "type": "object",
                     "properties": {
-                        "prompt": "wolfram_prompt_parameter",
+                        "prompt": "prompt_parameter",
                         "units": "units_parameter",
                         "format": "format_parameter"
                     },

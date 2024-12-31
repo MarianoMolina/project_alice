@@ -31,5 +31,5 @@ export const getDefaultAPIConfigForm = (): Partial<APIConfig> => ({
     name: '',
     api_name: ApiName.OPENAI,
     data: {},
-    health_status: HealthStatus.HEALTHY
+    health_status: HealthStatus.HEALTHY,
 });

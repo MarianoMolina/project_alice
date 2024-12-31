@@ -10,6 +10,7 @@ import useStyles from '../PromptStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { useCardDialog } from '../../../../contexts/CardDialogContext';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
+import ContentStats from '../../../ui/markdown/ContentStats';
 
 const PromptCardView: React.FC<PromptComponentProps> = ({
     item,
@@ -25,9 +26,12 @@ const PromptCardView: React.FC<PromptComponentProps> = ({
             icon: <Code />,
             primary_text: "Content",
             secondary_text: (
-                <AliceMarkdown showCopyButton>
-                    {item.content}
-                </AliceMarkdown>
+                <>
+                    <ContentStats content={item.content} />
+                    <AliceMarkdown showCopyButton>
+                        {item.content}
+                    </AliceMarkdown>
+                </>
             )
         },
         {
@@ -35,11 +39,11 @@ const PromptCardView: React.FC<PromptComponentProps> = ({
             primary_text: "Templated",
             secondary_text: item.is_templated ? (
                 <Tooltip title="Click here to view the parsed prompt">
-                <Chip
-                    label="Yes"
-                    color="primary"
-                    onClick={() => selectPromptParsedDialog(item)}
-                />
+                    <Chip
+                        label="Yes"
+                        color="primary"
+                        onClick={() => selectPromptParsedDialog(item)}
+                    />
                 </Tooltip>
             ) : 'No'
         },

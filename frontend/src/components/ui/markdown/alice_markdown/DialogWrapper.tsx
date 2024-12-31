@@ -15,11 +15,8 @@ export const DialogWrapper: React.FC<DialogWrapperProps> = ({ open, onClose, tit
         onClose={onClose}
         maxWidth="lg"
         fullWidth
-        PaperProps={{
-            className: 'p-2',
-        }}
     >
-        <DialogTitle className="flex justify-between items-center">
+        <DialogTitle className="flex justify-between items-center" sx={{padding: '8px'}}>
             <Box>
                 <Typography variant="h6">{title}</Typography>
 
@@ -31,6 +28,6 @@ export const DialogWrapper: React.FC<DialogWrapperProps> = ({ open, onClose, tit
                 <CloseIcon fontSize="small" />
             </IconButton>
         </DialogTitle>
-        <DialogContent>{children}</DialogContent>
+        <DialogContent sx={{padding:0}}>{children}</DialogContent>
     </Dialog>
 );
