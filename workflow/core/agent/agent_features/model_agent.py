@@ -221,7 +221,7 @@ class ModelAgent(BaseModel):
             - Creates structured EmbeddingChunk objects for storage
         """
         embeddings_model = self.models[ModelType.EMBEDDINGS] or api_manager.get_api_by_type(ApiType.EMBEDDINGS).default_model
-        LOGGER.info(f'Generating embedding for length {len(input)}')
+        LOGGER.debug(f'Generating embedding for length {len(input)}')
         if not embeddings_model:
             raise ValueError("No embeddings model available for the agent or in the API manager")
         

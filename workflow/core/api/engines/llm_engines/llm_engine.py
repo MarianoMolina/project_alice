@@ -131,7 +131,7 @@ class LLMEngine(APIEngine):
         # Ensure the base_url doesn't end with a slash
         base_url = base_url.rstrip('/')
         
-        LOGGER.info(f"Generating API response for model {api_data.model} with base URL {base_url}")
+        LOGGER.debug(f"Generating API response for model {api_data.model} with base URL {base_url}")
 
         # Create the client with the correct base_url
         client = AsyncOpenAI(
