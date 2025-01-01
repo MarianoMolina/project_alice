@@ -162,13 +162,9 @@ class TextToSpeechEngine(APIEngine):
         except Exception as e:
             LOGGER.error(f"Error generating speech: {get_traceback()}")
             LOGGER.error(f"Error in OpenAI text-to-speech API call: {str(e)}")
-            return References(
-                messages=[
-                    MessageDict(
-                        role=RoleTypes.TOOL,
-                        content=f"Error in OpenAI text-to-speech API call: {str(e)}\n\nInput: '{input}' - Model: {model} - Voice: {voice}\n\n"
-                        + get_traceback(),
-                        generated_by=MessageGenerators.SYSTEM,
-                    )
-                ]
+            return MessageDict(
+                role=RoleTypes.TOOL,
+                content=f"Error in OpenAI text-to-speech API call: {str(e)}\n\nInput: '{input}' - Model: {model} - Voice: {voice}\n\n"
+                + get_traceback(),
+                generated_by=MessageGenerators.SYSTEM,
             )
