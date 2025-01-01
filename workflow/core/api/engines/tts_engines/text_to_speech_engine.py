@@ -100,11 +100,13 @@ class TextToSpeechEngine(APIEngine):
             inputs = splitter.split_text(input)
         else:
             inputs.append(input)
-        responses: List[FileContentReference] = [
+        responses: List[FileContentReference | MessageDict] = [
             await self.api_call(client, api_data, input, voice, speed, model, index)
             for index, input in enumerate(inputs)
         ]
-        return References(files=responses)
+        files = [r for r in responses if isinstance(r, FileContentReference)]
+        messages = [r for r in responses if isinstance(r, MessageDict)]
+        return References(files=files, messages=messages)
 
     async def api_call(
         self,
@@ -115,7 +117,7 @@ class TextToSpeechEngine(APIEngine):
         speed: float = 1.0,
         model: str = None,
         index: int = 0,
-    ) -> FileContentReference:
+    ) -> FileContentReference | MessageDict:
         try:
             LOGGER.debug(
                 f"Generating speech with model {model}, voice {voice}, speed {speed}"
@@ -164,7 +166,7 @@ class TextToSpeechEngine(APIEngine):
                 messages=[
                     MessageDict(
                         role=RoleTypes.TOOL,
-                        content=f"Error in OpenAI text-to-speech API call: {str(e)}\n\n"
+                        content=f"Error in OpenAI text-to-speech API call: {str(e)}\n\nInput: '{input}' - Model: {model} - Voice: {voice}\n\n"
                         + get_traceback(),
                         generated_by=MessageGenerators.SYSTEM,
                     )
