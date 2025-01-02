@@ -176,7 +176,12 @@ const Landing: React.FC = () => {
                         mb: 2,
                         background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.secondary.main} 90%)`,
                         WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent'
+                        WebkitTextFillColor: 'transparent',
+                        fontSize: {
+                            xs: '2.5rem', 
+                            sm: '4rem',  
+                            md: '6rem' 
+                          }
                     }}>
                     Project Alice
                 </Typography>
