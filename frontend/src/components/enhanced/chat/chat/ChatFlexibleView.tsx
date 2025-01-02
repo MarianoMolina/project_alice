@@ -17,7 +17,7 @@ import UserCheckpointShortListView from '../../user_checkpoint/user_checkpoint/U
 import TitleBox from '../../common/inputs/TitleBox';
 import { TextInput } from '../../common/inputs/TextInput';
 import { useAuth } from '../../../../contexts/AuthContext';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import Logger from '../../../../utils/Logger';
 import MessageListView from '../../message/message/MessageListView';
 import { MessageType } from '../../../../types/MessageTypes';
@@ -31,7 +31,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     handleSave,
     handleDelete,
 }) => {
-    const { selectCardItem } = useCardDialog();
+    const { selectCardItem } = useDialog();
     const { user } = useAuth();
     const { fetchPopulatedItem } = useApi();
     const [form, setForm] = useState<Partial<PopulatedAliceChat>>(item as PopulatedAliceChat || getDefaultChatForm());

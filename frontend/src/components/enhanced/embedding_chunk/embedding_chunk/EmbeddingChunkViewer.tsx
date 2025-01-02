@@ -15,11 +15,11 @@ import {
 } from '@mui/icons-material';
 import { EmbeddingChunkComponentProps } from '../../../../types/EmbeddingChunkTypes';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import ContentStats from '../../../ui/markdown/ContentStats';
 
 const EmbeddingChunkViewer: React.FC<EmbeddingChunkComponentProps> = ({ item }) => {
-  const { selectCardItem } = useCardDialog();
+  const { selectCardItem } = useDialog();
   if (!item) {
     return null;
   }

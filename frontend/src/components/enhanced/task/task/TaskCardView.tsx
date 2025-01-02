@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
     Typography,
     Box,
@@ -7,11 +7,11 @@ import {
     Tooltip,
     IconButton,
 } from '@mui/material';
-import { Category, Description, Functions, Person, ApiRounded, Settings, Logout, ExitToApp, AttachFile, Api, QueryBuilder, Replay, ContactMail, Cyclone } from '@mui/icons-material';
+import { Category, Description, Functions, Person, ApiRounded, Settings, Logout, ExitToApp, AttachFile, Api, QueryBuilder, Replay, ContactMail, Cyclone, Visibility } from '@mui/icons-material';
 import { PopulatedTask, TaskComponentProps, taskDescriptions } from '../../../../types/TaskTypes';
 import useStyles from '../TaskStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import TaskFlowchart from '../../common/task_flowchart/FlowChart';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 import { hasAnyReferences, References } from '../../../../types/ReferenceTypes';
@@ -19,7 +19,7 @@ import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
 import { apiTypeIcons } from '../../../../utils/ApiUtils';
 import { ApiType } from '../../../../types/ApiTypes';
 import { PopulatedDataCluster } from '../../../../types/DataClusterTypes';
-import { APIConfigIcon } from '../../../../utils/CustomIcons';
+import { APIConfigIcon, LogicFlowIcon } from '../../../../utils/CustomIcons';
 import ApiValidationManager from '../../api/ApiValidationManager';
 
 interface ChipItem {
@@ -33,7 +33,13 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
     item,
 }) => {
     const classes = useStyles();
-    const { selectCardItem } = useCardDialog();
+    const { selectCardItem, selectTaskFlowchartItem } = useDialog();
+
+    const handleViewFlow = useCallback(() => {
+        if (item) {
+            selectTaskFlowchartItem(item as PopulatedTask);
+        }
+    }, [item, selectTaskFlowchartItem]);
 
     if (!item) {
         return <Typography>No task data available.</Typography>;
@@ -180,16 +186,25 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
                 <Typography>"N/A"</Typography>,
         },
         {
-            icon: <ExitToApp />,
-            primary_text: "Task flow",
+            icon: <LogicFlowIcon />,
+            primary_text: "Task flowchart",
             secondary_text: (item.node_end_code_routing && Object.keys(item.node_end_code_routing).length > 0) ?
-                <TaskFlowchart task={item as PopulatedTask} height={500} minWidth={500} />
+                <Tooltip title="View task flowchart">
+                    <IconButton
+                        color="default"
+                        onClick={handleViewFlow}
+                        size="small"
+                        aria-label="view task flowchart"
+                    >
+                        <Visibility />
+                    </IconButton>
+                </Tooltip>
                 : "No exit code routing defined"
         },
         {
             icon: <Cyclone />,
             primary_text: "Recursive",
-            secondary_text: item.recursive || "N/A"
+            secondary_text: item.recursive ? 'True' : 'False'
         },
         {
             icon: <Replay />,

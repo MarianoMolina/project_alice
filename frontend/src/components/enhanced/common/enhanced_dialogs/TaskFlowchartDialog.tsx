@@ -1,18 +1,19 @@
 import React from 'react';
 import { Dialog, DialogTitle, DialogContent } from '@mui/material';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import TaskFlowchart from '../../common/task_flowchart/FlowChart';
+import CardTitle from '../enhanced_component/CardTitle';
 
-const PromptParsedDialog: React.FC = () => {
+const FlowChartDialog: React.FC = () => {
     const {
         selectedTaskFlowchartItem,
         isTaskFlowchartDialogOpen, 
         closeTaskFlowchartDialog,
-    } = useCardDialog();
+    } = useDialog();
 
     if (!selectedTaskFlowchartItem) return null;
 
-    let title = `Task: ${selectedTaskFlowchartItem.task_name}` || 'Task Flowchart';
+    let title = selectedTaskFlowchartItem.task_name || 'Task Flowchart';
 
     return (
         <Dialog
@@ -22,7 +23,7 @@ const PromptParsedDialog: React.FC = () => {
             fullWidth
         >
             <DialogTitle>
-                {title}
+                <CardTitle title={title} elementType='Task' item={selectedTaskFlowchartItem}  itemType='tasks'/>
             </DialogTitle>
             <DialogContent>
                 <TaskFlowchart task={selectedTaskFlowchartItem} height={800} miniMap />
@@ -31,4 +32,4 @@ const PromptParsedDialog: React.FC = () => {
     );
 };
 
-export default PromptParsedDialog;
+export default FlowChartDialog;

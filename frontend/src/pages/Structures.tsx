@@ -19,7 +19,7 @@ import EnhancedAPIConfig from '../components/enhanced/api_config/api_config/Enha
 import EnhancedUserCheckpoint from '../components/enhanced/user_checkpoint/user_checkpoint/EnhancedUserCheckpoint';
 import useStyles from '../styles/DatabaseStyles';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
-import { useCardDialog } from '../contexts/CardDialogContext';
+import { useDialog } from '../contexts/DialogContext';
 import Logger from '../utils/Logger';
 import ToggleBox from '../components/ui/sidetab_header/ToggleBox';
 import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
@@ -28,7 +28,7 @@ import { collectionElementIcons } from '../utils/CollectionUtils';
 const StructuresPage: React.FC = () => {
     const classes = useStyles();
     const [selectedItem, setSelectedItem] = useState<CollectionPopulatedElement | null>(null);
-    const { selectCardItem } = useCardDialog();
+    const { selectCardItem } = useDialog();
     const [activeTab, setActiveTab] = useState<CollectionElementString>('Agent');
     const [showActiveComponent, setShowActiveComponent] = useState(false);
     const [isCreating, setIsCreating] = useState(false);

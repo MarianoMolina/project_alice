@@ -10,7 +10,7 @@ import {
 import { Category, LibraryBooks, Code, ChatBubbleOutline, BadgeOutlined, QueryBuilder } from '@mui/icons-material';
 import { AgentComponentProps, mapCodePermission, mapToolPermission } from '../../../../types/AgentTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import { PermissionIcon } from '../PermissionIcons';
 import { modelTypeIcons } from '../../../../utils/ApiUtils';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
@@ -19,7 +19,7 @@ import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 const AgentCardView: React.FC<AgentComponentProps> = ({
     item,
 }) => {
-    const { selectCardItem } = useCardDialog();
+    const { selectCardItem } = useDialog();
     if (!item) {
         return <Typography>No agent data available.</Typography>;
     }

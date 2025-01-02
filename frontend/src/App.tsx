@@ -1,29 +1,26 @@
 import React, { useState, useCallback } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import theme from './Theme';
+import { AuthProvider } from './contexts/AuthContext';
+import { NotificationProvider } from './contexts/NotificationContext';
+import { DialogProvider } from './contexts/DialogContext';
 import HomePage from './pages/HomePage';
 import ChatAlice from './pages/ChatAlice';
 import MainLayout from './layouts/main_layout/MainLayout';
 import CreateWorkflow from './pages/StartTask';
-import Login from './pages/Login'; 
+import Login from './pages/Login';
 import Register from './pages/Register';
 import ProtectedRoute from './layouts/ProtectedRoute';
 import UserSettings from './pages/UserSettings';
 import NavigationGuard from './components/ui/navigation_guard/NavigationGuard';
-import { AuthProvider } from './contexts/AuthContext';
-import './assets/fonts/fonts.css';
 import ErrorBoundary from './layouts/ErrorBoundary';
-import { NotificationProvider } from './contexts/NotificationContext';
-import NotificationComponent from './components/ui/notification/Notification';
-import { DialogProvider } from './contexts/DialogCustomContext';
-import { CardDialogProvider } from './contexts/CardDialogContext';
-import DialogComponent from './components/ui/dialog/DialogCustom';
 import Knowledgebase from './pages/Knowledgebase';
 import StructuresPage from './pages/Structures';
 import ReferencesPage from './pages/ReferencesPage';
 import RedirectIfAuthenticated from './layouts/RedirectLogged';
+import CssBaseline from '@mui/material/CssBaseline';
+import theme from './Theme';
+import './assets/fonts/fonts.css';
 
 const App: React.FC = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -39,11 +36,9 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <NotificationProvider>
-        <DialogProvider>
-          <NotificationComponent />
-          <DialogComponent />
-          <AuthProvider>
-            <ThemeProvider theme={theme}>
+        <AuthProvider>
+          <ThemeProvider theme={theme}>
+            <DialogProvider>
               <CssBaseline />
               <NavigationGuard
                 hasUnsavedChanges={hasUnsavedChanges}
@@ -66,9 +61,7 @@ const App: React.FC = () => {
                       element={
                         <RedirectIfAuthenticated
                           element={
-                            <CardDialogProvider>
-                              <Register />
-                            </CardDialogProvider>
+                            <Register />
                           }
                           redirectTo="/"
                         />
@@ -90,9 +83,9 @@ const App: React.FC = () => {
                   </Routes>
                 </MainLayout>
               </NavigationGuard>
-            </ThemeProvider>
-          </AuthProvider>
-        </DialogProvider>
+            </DialogProvider>
+          </ThemeProvider>
+        </AuthProvider>
       </NotificationProvider>
     </ErrorBoundary>
   );

@@ -4,7 +4,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { CircularProgress, Box } from '@mui/material';
 import { TaskProvider } from '../contexts/TaskContext';
 import { ChatProvider } from '../contexts/ChatContext';
-import { CardDialogProvider } from '../contexts/CardDialogContext';
 
 interface ProtectedRouteProps {
   element: React.ReactNode;
@@ -23,13 +22,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
   }
 
   return isAuthenticated ? (
-    <CardDialogProvider>
       <TaskProvider>
         <ChatProvider>
           {element}
         </ChatProvider>
       </TaskProvider>
-    </CardDialogProvider>
   ) : (
     <Navigate to="/login" replace state={{ from: location }} />
   );

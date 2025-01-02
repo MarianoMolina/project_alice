@@ -7,7 +7,7 @@ import { TaskResponse } from '../../../types/TaskResponseTypes';
 import { EntityReference } from '../../../types/EntityReferenceTypes';
 import { UserInteraction } from '../../../types/UserInteractionTypes';
 import { EmbeddingChunk } from '../../../types/EmbeddingChunkTypes';
-import { useCardDialog } from '../../../contexts/CardDialogContext';
+import { useDialog } from '../../../contexts/DialogContext';
 import { CollectionElementString } from '../../../types/CollectionTypes';
 import { ReferenceType } from '../../../types/ReferenceTypes';
 import { ToolCall } from '../../../types/ToolCallTypes';
@@ -30,12 +30,12 @@ const ReferenceChip: React.FC<ReferenceChipProps> = ({
   delete: deleteOption = false,
   onDelete
 }) => {
-  const { selectCardItem } = useCardDialog();
+  const { selectCardItem } = useDialog();
 
   const getLabel = () => {
     switch (type) {
       case 'Message':
-        return (reference as MessageType).content.substring(0, 20) + '...';
+        return (reference as MessageType).content?.substring(0, 20) + '...';
       
       case 'File':
         return (reference as FileReference | FileContentReference).filename;

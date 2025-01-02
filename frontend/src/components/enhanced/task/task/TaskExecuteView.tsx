@@ -8,11 +8,12 @@ import { PopulatedTask, TaskComponentProps } from '../../../../types/TaskTypes';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 import TaskResponseList from '../../task_response/task_response/TaskResponseListView';
 import ParameterInputFields from '../../parameter/ParameterInputFields';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import { useTask } from '../../../../contexts/TaskContext';
 import { useAuth } from '../../../../contexts/AuthContext';
 import useStyles from '../TaskStyles';
 import ApiValidationManager from '../../api/ApiValidationManager';
+import { LogicFlowIcon } from '../../../../utils/CustomIcons';
 
 // Props interfaces for memoized components
 interface TaskHeaderProps {
@@ -21,6 +22,7 @@ interface TaskHeaderProps {
     onViewPrompt: () => void;
     onViewTask: () => void;
     onViewResults: () => void;
+    onViewFlow: () => void;
 }
 
 interface TaskResultsDialogProps {
@@ -37,7 +39,8 @@ const TaskHeader = memo(({
     taskTemplate,
     onViewPrompt,
     onViewTask,
-    onViewResults
+    onViewResults,
+    onViewFlow,
 }: TaskHeaderProps) => {
 
     return (
@@ -56,6 +59,16 @@ const TaskHeader = memo(({
                         </IconButton>
                     </Tooltip>
                 )}
+                <Tooltip title="View task flowchart">
+                    <IconButton
+                        color="default"
+                        onClick={onViewFlow}
+                        size="small"
+                        aria-label="view task flowchart"
+                    >
+                        <LogicFlowIcon />
+                    </IconButton>
+                </Tooltip>
                 <Tooltip title="View task details">
                     <IconButton
                         color="default"
@@ -153,7 +166,7 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
         setInputValues,
         getTaskResultsById,
     } = useTask();
-    const { selectCardItem, selectPromptParsedDialog } = useCardDialog();
+    const { selectCardItem, selectPromptParsedDialog, selectTaskFlowchartItem } = useDialog();
     const [isResultsDialogOpen, setIsResultsDialogOpen] = useState(false);
     const { user } = useAuth();
 
@@ -190,6 +203,12 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
         setIsResultsDialogOpen(true);
     }, []);
 
+    const handleViewFlow = useCallback(() => {
+        if (item?._id) {
+            selectTaskFlowchartItem(item as PopulatedTask);
+        }
+    }, [item?._id, selectTaskFlowchartItem]);
+
     const handleCloseResultsDialog = useCallback(() => {
         setIsResultsDialogOpen(false);
     }, []);
@@ -213,6 +232,7 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
                     onViewPrompt={handleViewPrompt}
                     onViewTask={handleViewTask}
                     onViewResults={handleViewResults}
+                    onViewFlow={handleViewFlow}
                 />
 
                 <Typography variant="body2" mb={2}>

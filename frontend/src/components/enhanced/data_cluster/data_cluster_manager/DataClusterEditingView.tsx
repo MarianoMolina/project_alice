@@ -7,7 +7,7 @@ import { CollectionType } from '../../../../types/CollectionTypes';
 import ReferenceChip from '../ReferenceChip';
 import { REFERENCE_CONFIG } from './DataClusterManagerTypes';
 import { useApi } from '../../../../contexts/ApiContext';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 
 interface DataClusterEditingViewProps {
     editedCluster: PopulatedDataCluster;
@@ -19,7 +19,7 @@ const DataClusterEditingView: React.FC<DataClusterEditingViewProps> = ({
     onClusterChange
 }) => {
     const { fetchPopulatedItem } = useApi();
-    const { selectDialog } = useCardDialog();
+    const { selectDialog } = useDialog();
     const [selectedIds, setSelectedIds] = useState<{ [K in keyof References]?: string[] }>({});
 
     const handleAddClick = (referenceType: keyof References) => {

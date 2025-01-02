@@ -9,7 +9,7 @@ import { PopulatedDataCluster } from '../../../../types/DataClusterTypes';
 import { hasAnyReferences, References } from '../../../../types/ReferenceTypes';
 import { ACTION_BUTTON_CONFIG } from './DataClusterManagerTypes';
 import DataClusterShortListView from '../data_cluster/DataClusterShortListView';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import { ViewType } from './DataClusterManagerTypes';
 
 interface DataClusterHeaderProps {
@@ -37,7 +37,7 @@ const DataClusterHeader = memo(({
     onDataClusterChange,
     inEditMode
 }: DataClusterHeaderProps) => {
-    const { selectDialog } = useCardDialog();
+    const { selectDialog } = useDialog();
 
     const handleSelect = async (selectedCluster: PopulatedDataCluster) => {
         if (isEditable && onDataClusterChange) {

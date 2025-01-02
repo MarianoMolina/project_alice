@@ -19,7 +19,7 @@ import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
 import TaskResponseViewer from './TaskResponseViewer';
 import ContentStats from '../../../ui/markdown/ContentStats';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import TaskResponseMetadataViewer from '../TaskResponseMetadataViewer';
 
 const ExitCodeChip = styled(Chip)(({ theme }) => ({
@@ -41,7 +41,7 @@ const ExitCodeChip = styled(Chip)(({ theme }) => ({
 const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
     item,
 }) => {
-    const { selectCardItem } = useCardDialog();
+    const { selectCardItem } = useDialog();
     if (!item) {
         return <Typography>No task response data available.</Typography>;
     }

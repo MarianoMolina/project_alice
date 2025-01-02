@@ -12,7 +12,7 @@ import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import PromptShortListView from '../../prompt/prompt/PromptShortListView';
 import ModelShortListView from '../../model/model/ModelShortListView';
 import { useApi } from '../../../../contexts/ApiContext';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import { TextInput } from '../../common/inputs/TextInput';
 import { SelectInput } from '../../common/inputs/SelectInput';
@@ -36,7 +36,7 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     handleDelete,
 }) => {
     const { fetchPopulatedItem } = useApi();
-    const { selectCardItem } = useCardDialog();
+    const { selectCardItem } = useDialog();
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [form, setForm] = useState<Partial<AliceAgent>>(item || getDefaultAgentForm());
     const [isSaving, setIsSaving] = useState(false);

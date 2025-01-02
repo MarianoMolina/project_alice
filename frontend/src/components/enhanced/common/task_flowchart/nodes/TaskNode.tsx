@@ -8,7 +8,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import { getNodeAreas } from './shared_nodes/ShareNodes';
 import { TaskNodeData } from '../utils/FlowChartUtils';
 import theme from '../../../../../Theme';
-import { useCardDialog } from '../../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../../contexts/DialogContext';
 import { DataObject, ExpandMore } from '@mui/icons-material';
 import { formatCamelCaseString } from '../../../../../utils/StyleUtils';
 
@@ -19,7 +19,7 @@ const TaskNode: React.FC<NodeProps<TaskNodeData>> = ({
 }) => {
   const { inputArea, outputArea, exitCodeArea } = getNodeAreas(data);
   const innerNodes = Object.keys(data.node_end_code_routing || {});
-  const { selectCardItem, selectPromptParsedDialog } = useCardDialog();
+  const { selectCardItem, selectPromptParsedDialog } = useDialog();
   const handleViewTask = (event: React.MouseEvent) => {
     event.stopPropagation();
     selectCardItem('Task', data._id, data);

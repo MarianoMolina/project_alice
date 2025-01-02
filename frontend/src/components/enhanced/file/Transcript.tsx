@@ -4,7 +4,7 @@ import { MessageType, PopulatedMessage } from '../../../types/MessageTypes';
 import { useApi } from '../../../contexts/ApiContext';
 import EnhancedMessage from '../message/message/EnhancedMessage';
 import Logger from '../../../utils/Logger';
-import { useDialog } from '../../../contexts/DialogCustomContext';
+import { useDialog } from '../../../contexts/DialogContext';
 
 interface TranscriptProps {
   fileId: string;

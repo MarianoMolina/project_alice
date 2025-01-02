@@ -3,7 +3,7 @@ import { Box, Dialog, DialogTitle } from '@mui/material';
 import { CollectionElement } from '../../../../types/CollectionTypes';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import { useApi } from '../../../../contexts/ApiContext';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import Logger from '../../../../utils/Logger';
 
 const EnhancedSelectDialog = () => {
@@ -17,8 +17,9 @@ const EnhancedSelectDialog = () => {
         selectDialogTitle,
         selectDialogFilters,
         selectDialogMultiple,
-        closeSelectDialog
-    } = useCardDialog();
+        closeSelectDialog,
+        selectDialogZIndex
+    } = useDialog();
 
     if (!selectedComponentType || !selectedEnhancedView || !selectDialogTitle || !onSelectCallback) {
         return null;
@@ -44,6 +45,7 @@ const EnhancedSelectDialog = () => {
             onClose={closeSelectDialog}
             maxWidth="md"
             fullWidth
+            sx={{ zIndex: selectDialogZIndex }}
         >
             <DialogTitle>{selectDialogTitle}</DialogTitle>
             <Box className="p-4">

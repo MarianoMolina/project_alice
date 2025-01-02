@@ -9,7 +9,7 @@ import {
 import { ApiComponentProps, ApiName, ApiType, ModelApiType } from '../../../../types/ApiTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { Api, Category, PowerSettingsNew, QueryBuilder, Settings } from '@mui/icons-material';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import { apiNameIcons, apiTypeIcons } from '../../../../utils/ApiUtils';
 import { AIIcon } from '../../../../utils/CustomIcons';
 import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
@@ -24,7 +24,7 @@ const ApiCardView: React.FC<ApiComponentProps> = ({
     item,
     onChange,
 }) => {
-    const { selectCardItem } = useCardDialog();
+    const { selectCardItem } = useDialog();
 
     if (!item) {
         return <Typography>No API data available.</Typography>;

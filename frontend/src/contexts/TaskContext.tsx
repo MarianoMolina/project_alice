@@ -5,7 +5,7 @@ import { AliceTask, PopulatedTask } from '../types/TaskTypes';
 import { useNotification } from './NotificationContext';
 import Logger from '../utils/Logger';
 import { fetchPopulatedItem } from '../services/api';
-import { useCardDialog } from './CardDialogContext';
+import { useDialog } from './DialogContext';
 
 export interface RecentExecution {
   taskId: string;
@@ -38,7 +38,7 @@ const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { addNotification } = useNotification();
-  const { selectCardItem } = useCardDialog();
+  const { selectCardItem } = useDialog();
   const { fetchItem, executeTask } = useApi();
   const [tasks, setTasks] = useState<AliceTask[]>([]);
   const [selectedTask, setSelectedTask] = useState<PopulatedTask | null>(null);

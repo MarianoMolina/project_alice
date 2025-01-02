@@ -20,7 +20,7 @@ import { createFileContentReference, getFileSize, selectFile } from '../../../..
 import { useApi } from '../../../../contexts/ApiContext';
 import { useNotification } from '../../../../contexts/NotificationContext';
 import Logger from '../../../../utils/Logger';
-import { useDialog } from '../../../../contexts/DialogCustomContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import { TextInput } from '../../common/inputs/TextInput';
 import FileContentView from '../FileContentView';
 

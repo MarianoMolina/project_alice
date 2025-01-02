@@ -13,7 +13,7 @@ import { hasAnyReferences, References } from '../../../../types/ReferenceTypes';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import { MessageType } from '../../../../types/MessageTypes';
 import MessageShortListView from '../../message/message/MessageShortListView';
 import ApiValidationManager from '../../api/ApiValidationManager';
@@ -23,7 +23,7 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
   item,
 }) => {
 
-  const { selectCardItem } = useCardDialog();
+  const { selectCardItem } = useDialog();
   if (!item) {
     return <Typography>No chat data available.</Typography>;
   }

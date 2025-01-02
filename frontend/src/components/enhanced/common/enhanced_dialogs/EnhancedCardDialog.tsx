@@ -9,7 +9,7 @@ import EnhancedParameter from '../../parameter/parameter/EnhancedParameter';
 import EnhancedAPI from '../../api/api/EnhancedApi';
 import EnhancedAgent from '../../agent/agent/EnhancedAgent';
 import EnhancedFile from '../../file/file/EnhancedFile';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import { CollectionPopulatedType } from '../../../../types/CollectionTypes';
 import AgentCardView from '../../agent/agent/AgentCardView';
 import TaskCardView from '../../task/task/TaskCardView';
@@ -57,7 +57,14 @@ import CodeExecutionCardView from '../../code_execution/code_execution/CodeExecu
 import APIConfigCardView from '../../api_config/api_config/APIConfigCardView';
 
 const EnhancedCardDialog: React.FC = () => {
-  const { selectedCardItem, selectedCardItemType, closeCardDialog, selectCardItem, isCardDialogOpen } = useCardDialog();
+  const { 
+    selectedCardItem, 
+    selectedCardItemType, 
+    closeCardDialog, 
+    isCardDialogOpen,
+    cardDialogZIndex,
+    selectCardItem,
+  } = useDialog();
 
   const renderDialogContent = () => {
     if (!selectedCardItem || !selectedCardItemType) return null;
@@ -258,7 +265,12 @@ const EnhancedCardDialog: React.FC = () => {
   };
 
   return (
-    <Dialog open={isCardDialogOpen} onClose={closeCardDialog} maxWidth='xl'>
+    <Dialog 
+      open={isCardDialogOpen} 
+      onClose={closeCardDialog} 
+      maxWidth='xl'
+      style={{ zIndex: cardDialogZIndex }}
+    >
       {renderDialogContent()}
     </Dialog>
   );

@@ -14,7 +14,7 @@ import EnchancedChat from '../components/enhanced/chat/chat/EnhancedChat';
 import EnhancedAPI from '../components/enhanced/api/api/EnhancedApi';
 import useStyles from '../styles/DatabaseStyles';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
-import { useCardDialog } from '../contexts/CardDialogContext';
+import { useDialog } from '../contexts/DialogContext';
 import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
 import EnhancedMessage from '../components/enhanced/message/message/EnhancedMessage';
 import Logger from '../utils/Logger';
@@ -32,7 +32,7 @@ import { fetchPopulatedItem } from '../services/api';
 const Database: React.FC = () => {
     const classes = useStyles();
     const [selectedItem, setSelectedItem] = useState<CollectionPopulatedElement | null>(null);
-    const { selectCardItem } = useCardDialog();
+    const { selectCardItem } = useDialog();
     const [activeTab, setActiveTab] = useState<CollectionElementString>('Agent');
     const [showActiveComponent, setShowActiveComponent] = useState(false);
     const [isCreating, setIsCreating] = useState(false);

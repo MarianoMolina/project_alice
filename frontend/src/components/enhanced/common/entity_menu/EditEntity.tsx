@@ -2,7 +2,7 @@ import { IconButton, Tooltip, Box, Typography } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { styled } from '@mui/system';
 import { CollectionName, CollectionPopulatedType, collectionNameToElementString } from '../../../../types/CollectionTypes';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 
 interface EditEntityProps<T extends CollectionName> {
   item: CollectionPopulatedType[T];
@@ -31,7 +31,7 @@ export function EditEntity<T extends CollectionName>({
   tooltipText,
   showLabel = false
 }: EditEntityProps<T>) {
-  const { selectFlexibleItem } = useCardDialog();
+  const { selectFlexibleItem } = useDialog();
 
   const handleEdit = () => {
     const elementString = collectionNameToElementString[itemType];

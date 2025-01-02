@@ -17,15 +17,13 @@ import {
 } from '@mui/icons-material';
 import { UserInteractionComponentProps } from '../../../../types/UserInteractionTypes';
 import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
-import { useDialog } from '../../../../contexts/DialogCustomContext';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import { useApi } from '../../../../contexts/ApiContext';
 import Logger from '../../../../utils/Logger';
 
 const UserInteractionViewer: React.FC<UserInteractionComponentProps> = ({ item }) => {
   const [interaction, setInteraction] = useState(item);
-  const { openDialog } = useDialog();
-  const { selectCardItem } = useCardDialog();
+  const { selectCardItem, openDialog } = useDialog();
   const { updateUserInteraction } = useApi();
 
   if (!interaction) return null;

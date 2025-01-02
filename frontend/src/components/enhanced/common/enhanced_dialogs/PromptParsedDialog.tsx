@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dialog, DialogTitle, DialogContent } from '@mui/material';
 import { useAuth } from '../../../../contexts/AuthContext';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import PromptParsedView from '../../prompt/PromptParsedView';
 
 const PromptParsedDialog: React.FC = () => {
@@ -14,8 +14,9 @@ const PromptParsedDialog: React.FC = () => {
     systemPromptInputs,
     closePromptDialog,
     onPromptInputsChange,
-    onSystemPromptInputsChange
-  } = useCardDialog();
+    onSystemPromptInputsChange,
+    promptDialogZIndex
+  } = useDialog();
   const effectiveSystemInputs = selectedSystemPromptItem && 
     (!systemPromptInputs || !systemPromptInputs.user_data) && 
     user ? 
@@ -34,6 +35,7 @@ const PromptParsedDialog: React.FC = () => {
       open={isPromptDialogOpen}
       onClose={closePromptDialog}
       maxWidth="md"
+      style={{ zIndex: promptDialogZIndex }}
       fullWidth
     >
       <DialogTitle>

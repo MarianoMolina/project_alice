@@ -6,7 +6,7 @@ import ApiSetup from '../components/ui/registration/ApiSetup';
 import RegistrationComplete from '../components/ui/registration/RegistrationComplete';
 import useStyles from '../styles/RegisterStyles';
 import Logger from '../utils/Logger';
-import { useCardDialog } from '../contexts/CardDialogContext';
+import { useDialog } from '../contexts/DialogContext';
 import { useApi } from '../contexts/ApiContext';
 import { APIConfig } from '../types/ApiConfigTypes';
 
@@ -21,7 +21,7 @@ const Register = () => {
   const [userApis, setUserApis] = useState<APIConfig[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const classes = useStyles();
-  const { selectFlexibleItem, selectedFlexibleItem } = useCardDialog();
+  const { selectFlexibleItem, selectedFlexibleItem } = useDialog();
   const { fetchItem } = useApi();
 
   const updateAPIs = useCallback(async () => {

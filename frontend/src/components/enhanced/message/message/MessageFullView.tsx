@@ -5,7 +5,7 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import useStyles from '../MessageStyles';
 import { MessageComponentProps, MessageGenerators, RoleType } from '../../../../types/MessageTypes';
 import { BackgroundBeams } from '../../../ui/aceternity/BackgroundBeams';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import { useNotification } from '../../../../contexts/NotificationContext';
 import AliceMarkdown, { CustomBlockType } from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
@@ -15,7 +15,7 @@ import { PopulatedDataCluster } from '../../../../types/DataClusterTypes';
 
 const MessageFullView: React.FC<MessageComponentProps> = ({ item: message }) => {
     const classes = useStyles();
-    const { selectCardItem, selectFlexibleItem } = useCardDialog();
+    const { selectCardItem, selectFlexibleItem } = useDialog();
     const { addNotification } = useNotification();
 
     if (!message) {

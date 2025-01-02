@@ -3,7 +3,7 @@ import { Card, CardContent, Typography, IconButton, Box } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import { UserInteraction, UserResponse } from '../../../types/UserInteractionTypes';
-import { useDialog } from '../../../contexts/DialogCustomContext';
+import { useDialog } from '../../../contexts/DialogContext';
 import { useApi } from '../../../contexts/ApiContext';
 import Logger from '../../../utils/Logger';
 

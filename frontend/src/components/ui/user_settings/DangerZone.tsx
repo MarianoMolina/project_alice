@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { Box, Typography, Button, Card, CardContent, CircularProgress } from '@mui/material';
 import { Warning } from '@mui/icons-material';
 import useStyles from '../../../styles/UserSettingsStyles';
-import { useDialog } from '../../../contexts/DialogCustomContext';
+import { useDialog } from '../../../contexts/DialogContext';
 import { useApi } from '../../../contexts/ApiContext';
 import { useNotification } from '../../../contexts/NotificationContext';
 import Logger from '../../../utils/Logger';

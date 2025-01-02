@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Box, IconButton, Accordion, AccordionSummary, AccordionDetails, Chip, Tooltip, FormControl, InputLabel } from '@mui/material';
 import { Edit, Close, ExpandMore, Add, Info } from '@mui/icons-material';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import useStyles from './EnhancedSelectStyles';
 import { CollectionName, CollectionType, CollectionElementString, collectionNameToElementString, collectionNameToEnhancedComponent } from '../../../../types/CollectionTypes';
 import Logger from '../../../../utils/Logger';
@@ -41,7 +41,7 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
   filters
 }: EnhancedSelectProps<T>) {
   const classes = useStyles();
-  const { selectFlexibleItem, selectCardItem } = useCardDialog();
+  const { selectFlexibleItem, selectCardItem } = useDialog();
   const [localExpanded, setLocalExpanded] = useState(false);
   Logger.debug('EnhancedSelect', { componentType, selectedItems, isInteractable, multiple, label, activeAccordion, accordionEntityName, showCreateButton, filters });
 

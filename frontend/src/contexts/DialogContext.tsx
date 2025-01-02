@@ -1,21 +1,45 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { CollectionElementString, CollectionElement, CollectionName, CollectionPopulatedElement } from '../types/CollectionTypes';
 import { Prompt } from '../types/PromptTypes';
-import Logger from '../utils/Logger';
 import { ApiProvider } from './ApiContext';
-import EnhancedCardDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedCardDialog';
-import EnhancedFlexibleDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedFlexibleDialog';
-import PromptParsedDialog from '../components/enhanced/common/enhanced_card_dialog/PromptParsedDialog';
-import EnhancedSelectDialog from '../components/enhanced/common/enhanced_card_dialog/EnhancedSelectDialog';
 import { PopulatedTask } from '../types/TaskTypes';
+import Logger from '../utils/Logger';
+import EnhancedCardDialog from '../components/enhanced/common/enhanced_dialogs/EnhancedCardDialog';
+import EnhancedFlexibleDialog from '../components/enhanced/common/enhanced_dialogs/EnhancedFlexibleDialog';
+import PromptParsedDialog from '../components/enhanced/common/enhanced_dialogs/PromptParsedDialog';
+import EnhancedSelectDialog from '../components/enhanced/common/enhanced_dialogs/EnhancedSelectDialog';
+import DialogComponent from '../components/ui/dialog/DialogCustom';
+import FlowChartDialog from '../components/enhanced/common/enhanced_dialogs/TaskFlowchartDialog';
+
+// Message Dialog Types
+interface DialogButton {
+  text: string;
+  action: () => void;
+  variant?: 'text' | 'outlined' | 'contained';
+  color?: 'inherit' | 'primary' | 'secondary' | 'success' | 'error' | 'info' | 'warning';
+  disabled?: boolean;
+}
+
+interface DialogOptions {
+  title: string;
+  content: string;
+  buttons: DialogButton[];
+}
 
 interface DialogContextType {
+  // Message Dialog
+  dialogOptions: DialogOptions | null;
+  openDialog: (options: DialogOptions) => void;
+  closeDialog: () => void;
+  messageDialogZIndex: number;
+
   // Card Dialog
   selectCardItem: (itemType: CollectionElementString, itemId?: string, item?: CollectionPopulatedElement) => void;
   selectedCardItem: CollectionPopulatedElement | null;
   selectedCardItemType: CollectionElementString | null;
   isCardDialogOpen: boolean;
   closeCardDialog: () => void;
+  cardDialogZIndex: number;
 
   // Flexible Dialog
   selectFlexibleItem: (itemType: CollectionElementString, mode: 'create' | 'edit', itemId?: string, item?: CollectionPopulatedElement) => void;
@@ -24,6 +48,7 @@ interface DialogContextType {
   flexibleDialogMode: 'create' | 'edit' | null;
   isFlexibleDialogOpen: boolean;
   closeFlexibleDialog: () => void;
+  flexibleDialogZIndex: number;
 
   // Prompt Parsed Dialog
   selectPromptParsedDialog: (
@@ -42,6 +67,7 @@ interface DialogContextType {
   onSystemPromptInputsChange?: (inputs: Record<string, any>) => void;
   isPromptDialogOpen: boolean;
   closePromptDialog: () => void;
+  promptDialogZIndex: number;
 
   // Select Dialog
   selectDialog: <T extends CollectionElement | CollectionPopulatedElement>(
@@ -62,17 +88,29 @@ interface DialogContextType {
   selectDialogMultiple: boolean;
   isSelectDialogOpen: boolean;
   closeSelectDialog: () => void;
+  selectDialogZIndex: number;
 
   // Flowchart Dialog
-  selectTaskFlowchartItem: (itemId: string) => void;
+  selectTaskFlowchartItem: (item: PopulatedTask) => void;
   selectedTaskFlowchartItem: PopulatedTask | null;
   isTaskFlowchartDialogOpen: boolean;
   closeTaskFlowchartDialog: () => void;
+  taskFlowchartDialogZIndex: number;
 }
 
-const CardDialogContext = createContext<DialogContextType | undefined>(undefined);
+const DialogContext = createContext<DialogContextType | undefined>(undefined);
 
-export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
+export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
+  // Message Dialog State
+  const [dialogOptions, setDialogOptions] = useState<DialogOptions | null>(null);
+
+  // Dialog open timestamps for z-index management
+  const [cardDialogOpenedAt, setCardDialogOpenedAt] = useState<number | null>(null);
+  const [flexibleDialogOpenedAt, setFlexibleDialogOpenedAt] = useState<number | null>(null);
+  const [promptDialogOpenedAt, setPromptDialogOpenedAt] = useState<number | null>(null);
+  const [selectDialogOpenedAt, setSelectDialogOpenedAt] = useState<number | null>(null);
+  const [taskFlowchartDialogOpenedAt, setTaskFlowchartDialogOpenedAt] = useState<number | null>(null);
+
   // Card Dialog State
   const [selectedCardItem, setSelectedCardItem] = useState<CollectionPopulatedElement | null>(null);
   const [selectedCardItemType, setSelectedCardItemType] = useState<CollectionElementString | null>(null);
@@ -84,7 +122,7 @@ export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
   const [flexibleDialogMode, setFlexibleDialogMode] = useState<'create' | 'edit' | null>(null);
   const [isFlexibleDialogOpen, setIsFlexibleDialogOpen] = useState(false);
 
-  // Prompt Parsed Dialog State
+  // Prompt Dialog State
   const [selectedPromptItem, setSelectedPromptItem] = useState<Prompt | undefined>(undefined);
   const [selectedSystemPromptItem, setSelectedSystemPromptItem] = useState<Prompt | undefined>(undefined);
   const [promptInputs, setPromptInputs] = useState<Record<string, any> | undefined>(undefined);
@@ -107,42 +145,59 @@ export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
   const [selectedTaskFlowchartItem, setSelectedTaskFlowchartItem] = useState<PopulatedTask | null>(null);
   const [isTaskFlowchartDialogOpen, setIsTaskFlowchartDialogOpen] = useState(false);
 
-  const closeCardDialog = useCallback(() => {
-    setSelectedCardItem(null);
-    setSelectedCardItemType(null);
-    setIsCardDialogOpen(false);
+  // Message Dialog Actions
+  const openDialog = useCallback((options: DialogOptions) => {
+    setDialogOptions(options);
   }, []);
 
-  const closeFlexibleDialog = useCallback(() => {
-    setSelectedFlexibleItem(null);
-    setSelectedFlexibleItemType(null);
-    setFlexibleDialogMode(null);
-    setIsFlexibleDialogOpen(false);
+  const closeDialog = useCallback(() => {
+    setDialogOptions(null);
   }, []);
 
-  const closePromptDialog = useCallback(() => {
-    setSelectedPromptItem(undefined);
-    setSelectedSystemPromptItem(undefined);
-    setPromptInputs(undefined);
-    setSystemPromptInputs(undefined);
-    setOnPromptInputsChange(undefined);
-    setOnSystemPromptInputsChange(undefined);
-    setIsPromptDialogOpen(false);
-  }, []);
+  // Z-index calculations
+  const {
+    cardDialogZIndex,
+    flexibleDialogZIndex,
+    promptDialogZIndex,
+    selectDialogZIndex,
+    taskFlowchartDialogZIndex,
+    messageDialogZIndex
+  } = useMemo(() => {
+    const openTimestamps = [
+      { type: 'card', timestamp: cardDialogOpenedAt },
+      { type: 'flexible', timestamp: flexibleDialogOpenedAt },
+      { type: 'prompt', timestamp: promptDialogOpenedAt },
+      { type: 'select', timestamp: selectDialogOpenedAt },
+      { type: 'taskFlowchart', timestamp: taskFlowchartDialogOpenedAt },
+      // Add message dialog to z-index calculation if it's open
+      ...(dialogOptions ? [{ type: 'message', timestamp: Date.now() }] : [])
+    ].filter(item => item.timestamp !== null);
 
-  const closeSelectDialog = useCallback(() => {
-    setSelectedComponentType(undefined);
-    setSelectedEnhancedView(undefined);
-    setSelectedItems([]);
-    setOnSelectCallback(undefined);
-    setSelectDialogTitle(undefined);
-    setSelectDialogFilters(undefined);
-    setSelectDialogMultiple(false);
-    setIsSelectDialogOpen(false);
-  }, []);
+    const latestDialog = openTimestamps.length > 0
+      ? openTimestamps.reduce((latest, current) =>
+        current.timestamp! > latest.timestamp! ? current : latest
+      )
+      : null;
+
+    return {
+      cardDialogZIndex: latestDialog?.type === 'card' ? 1300 : 1100,
+      flexibleDialogZIndex: latestDialog?.type === 'flexible' ? 1300 : 1100,
+      promptDialogZIndex: latestDialog?.type === 'prompt' ? 1300 : 1100,
+      selectDialogZIndex: latestDialog?.type === 'select' ? 1300 : 1100,
+      taskFlowchartDialogZIndex: latestDialog?.type === 'taskFlowchart' ? 1300 : 1100,
+      messageDialogZIndex: latestDialog?.type === 'message' ? 1300 : 1100
+    };
+  }, [
+    cardDialogOpenedAt,
+    flexibleDialogOpenedAt,
+    promptDialogOpenedAt,
+    selectDialogOpenedAt,
+    taskFlowchartDialogOpenedAt,
+    dialogOptions
+  ]);
 
   const selectCardItem = useCallback((itemType: CollectionElementString, itemId?: string, item?: CollectionPopulatedElement) => {
-    Logger.debug('CardDialogContext selectCardItem', { itemType, itemId, item });
+    Logger.debug('DialogContext selectCardItem', { itemType, itemId, item });
     setSelectedCardItemType(itemType);
     if (item) {
       setSelectedCardItem(item);
@@ -152,6 +207,7 @@ export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
       setSelectedCardItem(null);
     }
     setIsCardDialogOpen(true);
+    setCardDialogOpenedAt(Date.now());
   }, []);
 
   const selectFlexibleItem = useCallback((
@@ -172,13 +228,14 @@ export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
       }
     } else {
       if (item) {
-        Logger.debug('CardDialogContext selectFlexibleItem', { itemType, item });
+        Logger.debug('DialogContext selectFlexibleItem', { itemType, item });
         setSelectedFlexibleItem(item);
       } else {
         setSelectedFlexibleItem(null);
       }
     }
     setIsFlexibleDialogOpen(true);
+    setFlexibleDialogOpenedAt(Date.now());
   }, []);
 
   const selectPromptParsedDialog = useCallback((
@@ -196,6 +253,7 @@ export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
     setOnPromptInputsChange(() => promptInputsChange);
     setOnSystemPromptInputsChange(() => systemPromptInputsChange);
     setIsPromptDialogOpen(true);
+    setPromptDialogOpenedAt(Date.now());
   }, []);
 
   const selectDialog = useCallback(<T extends CollectionElement | CollectionPopulatedElement>(
@@ -215,27 +273,75 @@ export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
     setSelectDialogMultiple(multiple);
     setSelectDialogFilters(filters);
     setIsSelectDialogOpen(true);
+    setSelectDialogOpenedAt(Date.now());
   }, []);
 
-  const selectTaskFlowchartItem = useCallback((itemId: string) => {
-    setSelectedTaskFlowchartItem(null);
+  const selectTaskFlowchartItem = useCallback((item: PopulatedTask) => {
+    setSelectedTaskFlowchartItem(item);
     setIsTaskFlowchartDialogOpen(true);
+    setTaskFlowchartDialogOpenedAt(Date.now());
+  }, []);
+
+  const closeCardDialog = useCallback(() => {
+    setSelectedCardItem(null);
+    setSelectedCardItemType(null);
+    setIsCardDialogOpen(false);
+    setCardDialogOpenedAt(null);
+  }, []);
+
+  const closeFlexibleDialog = useCallback(() => {
+    setSelectedFlexibleItem(null);
+    setSelectedFlexibleItemType(null);
+    setFlexibleDialogMode(null);
+    setIsFlexibleDialogOpen(false);
+    setFlexibleDialogOpenedAt(null);
+  }, []);
+
+  const closePromptDialog = useCallback(() => {
+    setSelectedPromptItem(undefined);
+    setSelectedSystemPromptItem(undefined);
+    setPromptInputs(undefined);
+    setSystemPromptInputs(undefined);
+    setOnPromptInputsChange(undefined);
+    setOnSystemPromptInputsChange(undefined);
+    setIsPromptDialogOpen(false);
+    setPromptDialogOpenedAt(null);
+  }, []);
+
+  const closeSelectDialog = useCallback(() => {
+    setSelectedComponentType(undefined);
+    setSelectedEnhancedView(undefined);
+    setSelectedItems([]);
+    setOnSelectCallback(undefined);
+    setSelectDialogTitle(undefined);
+    setSelectDialogFilters(undefined);
+    setSelectDialogMultiple(false);
+    setIsSelectDialogOpen(false);
+    setSelectDialogOpenedAt(null);
   }, []);
 
   const closeTaskFlowchartDialog = useCallback(() => {
     setSelectedTaskFlowchartItem(null);
     setIsTaskFlowchartDialogOpen(false);
+    setTaskFlowchartDialogOpenedAt(null);
   }, []);
 
   return (
-    <CardDialogContext.Provider
+    <DialogContext.Provider
       value={{
+        // Message Dialog
+        dialogOptions,
+        openDialog,
+        closeDialog,
+        messageDialogZIndex,
+
         // Card Dialog
         selectCardItem,
         selectedCardItem,
         selectedCardItemType,
         isCardDialogOpen,
         closeCardDialog,
+        cardDialogZIndex,
 
         // Flexible Dialog
         selectFlexibleItem,
@@ -244,6 +350,7 @@ export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
         flexibleDialogMode,
         isFlexibleDialogOpen,
         closeFlexibleDialog,
+        flexibleDialogZIndex,
 
         // Prompt Parsed Dialog
         selectPromptParsedDialog,
@@ -255,6 +362,7 @@ export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
         onSystemPromptInputsChange,
         isPromptDialogOpen,
         closePromptDialog,
+        promptDialogZIndex,
 
         // Select Dialog
         selectDialog,
@@ -267,29 +375,33 @@ export const CardDialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
         selectDialogMultiple,
         isSelectDialogOpen,
         closeSelectDialog,
+        selectDialogZIndex,
 
         // Flowchart Dialog
         selectTaskFlowchartItem,
         selectedTaskFlowchartItem,
         isTaskFlowchartDialogOpen,
-        closeTaskFlowchartDialog        
+        closeTaskFlowchartDialog,
+        taskFlowchartDialogZIndex
       }}
     >
       <ApiProvider>
+        <DialogComponent />
         <EnhancedCardDialog />
         <EnhancedFlexibleDialog />
         <PromptParsedDialog />
         <EnhancedSelectDialog />
+        <FlowChartDialog />
         {children}
       </ApiProvider>
-    </CardDialogContext.Provider>
+    </DialogContext.Provider>
   );
 };
 
-export const useCardDialog = () => {
-  const context = useContext(CardDialogContext);
+export const useDialog = () => {
+  const context = useContext(DialogContext);
   if (context === undefined) {
-    throw new Error('useCardDialog must be used within a DialogProvider');
+    throw new Error('useDialog must be used within a DialogProvider');
   }
   return context;
 };

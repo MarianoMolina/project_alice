@@ -1,7 +1,7 @@
 import { IconButton, Tooltip, Box, Typography } from '@mui/material';
 import { styled } from '@mui/system';
 import { BaseDatabaseObject, CollectionName, CollectionPopulatedType, collectionNameToElementString } from '../../../../types/CollectionTypes';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import { FileCopy } from '@mui/icons-material';
 
 interface DuplicateEntityProps<T extends CollectionName> {
@@ -51,7 +51,7 @@ export function DuplicateEntity<T extends CollectionName>({
   tooltipText,
   showLabel = false
 }: DuplicateEntityProps<T>) {
-  const { selectFlexibleItem } = useCardDialog();
+  const { selectFlexibleItem } = useDialog();
 
   const handleDuplicate = () => {
     const elementString = collectionNameToElementString[itemType];

@@ -19,14 +19,14 @@ import { FileType, FileComponentProps } from '../../../../types/FileTypes';
 import { getFileSize } from '../../../../utils/FileUtils';
 import Logger from '../../../../utils/Logger';
 import { retrieveFile } from '../../../../services/api';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import { getFileIcon } from '../../../../utils/MessageUtils';
 
 const FileViewer: React.FC<FileComponentProps> = ({ item }) => {
   const [content, setContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { selectCardItem } = useCardDialog();
+  const { selectCardItem } = useDialog();
 
   const handleDownload = async () => {
     try {

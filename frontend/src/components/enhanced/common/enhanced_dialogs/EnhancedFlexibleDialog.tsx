@@ -11,7 +11,7 @@ import EnhancedAgent from '../../agent/agent/EnhancedAgent';
 import EnhancedFile from '../../file/file/EnhancedFile';
 import EnhancedMessage from '../../message/message/EnhancedMessage';
 import EnhancedEntityReference from '../../entity_reference/entity_reference/EnhancedEntityReference';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import { CollectionPopulatedType, ComponentMode } from '../../../../types/CollectionTypes';
 import Logger from '../../../../utils/Logger';
 import EnhancedUserCheckpoint from '../../user_checkpoint/user_checkpoint/EnhancedUserCheckpoint';
@@ -46,7 +46,8 @@ const EnhancedFlexibleDialog: React.FC = () => {
     flexibleDialogMode, 
     closeFlexibleDialog, 
     isFlexibleDialogOpen,
-  } = useCardDialog();
+    flexibleDialogZIndex,
+  } = useDialog();
 
   const renderDialogContent = () => {
     if (!selectedFlexibleItemType || !flexibleDialogMode || !isFlexibleDialogOpen) return null;
@@ -165,7 +166,7 @@ const EnhancedFlexibleDialog: React.FC = () => {
   };
 
   return (
-    <Dialog open={isFlexibleDialogOpen} onClose={closeFlexibleDialog} maxWidth='xl'>
+    <Dialog open={isFlexibleDialogOpen} onClose={closeFlexibleDialog} maxWidth='xl' style={{ zIndex: flexibleDialogZIndex }}>
       {renderDialogContent()}
     </Dialog>
   );

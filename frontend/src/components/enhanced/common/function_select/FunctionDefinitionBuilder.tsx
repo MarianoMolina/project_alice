@@ -23,7 +23,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { ParameterDefinition, FunctionParameters } from '../../../../types/ParameterTypes';
 import EnhancedParameter from '../../parameter/parameter/EnhancedParameter';
 import { useApi } from '../../../../contexts/ApiContext';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import useStyles from './FunctionStyles';
 import * as FunctionUtils from './FunctionUtils';
 import Logger from '../../../../utils/Logger';
@@ -44,7 +44,7 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
 }) => {
     const classes = useStyles();
     const { fetchItem } = useApi();
-    const { selectFlexibleItem, selectCardItem } = useCardDialog();
+    const { selectFlexibleItem, selectCardItem } = useDialog();
     const [parameters, setParameters] = useState<ParameterDefinition[]>([]);
     const [activeParameters, setActiveParameters] = useState<FunctionUtils.ActiveParameter[]>([]);
     const initializedRef = useRef(false);

@@ -2,14 +2,14 @@ import React, { useCallback } from 'react';
 import { Box, Typography, Button, Card, CardContent, Paper } from '@mui/material';
 import { Api } from '@mui/icons-material';
 import useStyles from '../../../styles/UserSettingsStyles';
-import { useCardDialog } from '../../../contexts/CardDialogContext';
+import { useDialog } from '../../../contexts/DialogContext';
 import EnhancedAPIConfig from '../../../components/enhanced/api_config/api_config/EnhancedAPIConfig';
 import { APIConfig } from '../../../types/ApiConfigTypes';
 import Logger from '../../../utils/Logger';
 
 const ApiConfigurations: React.FC = () => {
     const classes = useStyles();
-    const { selectFlexibleItem } = useCardDialog();
+    const { selectFlexibleItem } = useDialog();
 
     const handleApiSelect = useCallback((item: Partial<APIConfig>) => {
         Logger.debug('APIConfig selected:', item);

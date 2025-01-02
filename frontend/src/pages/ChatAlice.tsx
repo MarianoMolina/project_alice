@@ -11,7 +11,7 @@ import EnhancedTaskResponse from '../components/enhanced/task_response/task_resp
 import ChatInput, { ChatInputRef } from '../components/enhanced/chat/ChatInput';
 import useStyles from '../styles/ChatAliceStyles';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
-import { useCardDialog } from '../contexts/CardDialogContext';
+import { useDialog } from '../contexts/DialogContext';
 import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
 import EnhancedMessage from '../components/enhanced/message/message/EnhancedMessage';
 import Logger from '../utils/Logger';
@@ -38,7 +38,7 @@ const ChatAlice: React.FC = () => {
     chatContextCharacterCount,
     maxContext,
   } = useChat();
-  const { selectCardItem, selectFlexibleItem } = useCardDialog();
+  const { selectCardItem, selectFlexibleItem } = useDialog();
 
   const [activeTab, setActiveTab] = useState('Select Chat');
   const [selectedApiProvider, setSelectedApiProvider] = useState<string>('');

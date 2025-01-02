@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import NotificationComponent from '../components/ui/notification/Notification';
 
 type NotificationType = 'info' | 'success' | 'warning' | 'error';
 
@@ -49,6 +50,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
 
   return (
     <NotificationContext.Provider value={{ notifications, addNotification, removeNotification }}>
+      <NotificationComponent />
       {children}
     </NotificationContext.Provider>
   );

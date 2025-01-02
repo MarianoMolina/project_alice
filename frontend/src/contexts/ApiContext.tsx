@@ -27,13 +27,12 @@ import {
     checkWorkflowUserHealth as apiCheckWorkflowUserHealth,
 } from '../services/workflowApi';
 import { useNotification } from './NotificationContext';
-import { useCardDialog } from './CardDialogContext';
+import { useDialog } from './DialogContext';
 import { CollectionName, CollectionType, CollectionElementString, collectionNameToElementString, CollectionPopulatedType } from '../types/CollectionTypes';
 import { AliceChat, PopulatedAliceChat } from '../types/ChatTypes';
 import { MessageType, PopulatedMessage } from '../types/MessageTypes';
 import { TaskResponse } from '../types/TaskResponseTypes';
 import { FileReference, FileContentReference } from '../types/FileTypes';
-import { useDialog } from './DialogCustomContext';
 import Logger from '../utils/Logger';
 import { globalEventEmitter } from '../utils/EventEmitter';
 import { UserInteraction } from '../types/UserInteractionTypes';
@@ -80,8 +79,7 @@ export const useApi = () => {
 
 export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { addNotification } = useNotification();
-    const { selectCardItem } = useCardDialog();
-    const { openDialog } = useDialog();
+    const { selectCardItem, openDialog } = useDialog();
     const { refreshUserData } = useAuth();
 
     const emitEvent = (eventType: string, collectionName: CollectionName, item: any) => {

@@ -5,20 +5,18 @@ import {
 } from '@mui/material';
 import { Language, QueryBuilder, DataObject, Functions, QuestionAnswer } from '@mui/icons-material';
 import { PopulatedUserInteraction, UserInteractionComponentProps } from '../../../../types/UserInteractionTypes';
-import { useDialog } from '../../../../contexts/DialogCustomContext';
 import { useApi } from '../../../../contexts/ApiContext';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import Logger from '../../../../utils/Logger';
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 
 const UserInteractionCardView: React.FC<UserInteractionComponentProps> = ({
     item: initialItem
 }) => {
     const [item, setItem] = useState(initialItem as PopulatedUserInteraction);
-    const { openDialog } = useDialog();
-    const { selectCardItem } = useCardDialog();
+    const { openDialog, selectCardItem } = useDialog();
     const { updateUserInteraction } = useApi();
 
     if (!item) {

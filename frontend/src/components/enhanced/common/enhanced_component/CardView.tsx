@@ -11,6 +11,7 @@ import {
 import { CollectionName, CollectionPopulatedType } from '../../../../types/CollectionTypes';
 import useStyles from './EnhancedStyles';
 import EntityActionsMenu from '../entity_menu/EntityActionsMenu';
+import CardTitle from './CardTitle';
 
 interface ListItemData {
     icon: React.ReactElement;
@@ -44,23 +45,12 @@ const CommonCardView = <T extends CollectionName>({
     return (
         <Card className={classes.card}>
             <CardContent className={classes.cardContent}>
-                <Box className={classes.titleContainer}>
-                    {elementType && (
-                        <Typography variant="caption" className={classes.elementType}>
-                            {elementType}
-                        </Typography>
-                    )}
-                    <Box className={classes.titleContent}>
-                        <Typography variant="h5" className={classes.title}>
-                            {title}
-                        </Typography>
-                        {item && itemType && (
-                            <Box className={classes.downloadButton}>
-                                <EntityActionsMenu item={item} itemType={itemType} />
-                            </Box>
-                        )}
-                    </Box>
-                </Box>
+                <CardTitle
+                    title={title}
+                    elementType={elementType}
+                    item={item}
+                    itemType={itemType}
+                />
                 {id && (
                     <Typography variant="caption" className={classes.id}>
                         ID: {id}

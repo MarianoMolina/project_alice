@@ -13,7 +13,7 @@ import FilterSelect from '../components/ui/sidetab_header/FilterSelect';
 import EnhancedAPIConfig from '../components/enhanced/api_config/api_config/EnhancedAPIConfig';
 import TaskExecuteView from '../components/enhanced/task/task/TaskExecuteView';
 import TaskResponseListView from '../components/enhanced/task_response/task_response/TaskResponseListView';
-import { useCardDialog } from '../contexts/CardDialogContext';
+import { useDialog } from '../contexts/DialogContext';
 import { RecentExecution, useTask } from '../contexts/TaskContext';
 import useStyles from '../styles/StartTaskStyles';
 const TaskLoadingState = memo(() => {
@@ -151,7 +151,7 @@ const MemoizedTaskResponseListView = memo(({ execution, onView, onInteraction }:
 
 const APIStatusSection = memo(() => {
     const classes = useStyles();
-    const { selectCardItem } = useCardDialog();
+    const { selectCardItem } = useDialog();
 
     const handleApiConfigInteraction = useCallback((apiConfig: APIConfig) => {
         if (apiConfig._id) selectCardItem('APIConfig', apiConfig._id);
@@ -229,7 +229,7 @@ const StartTask: React.FC = () => {
         tasks,
         selectionStatus
     } = useTask();
-    const { selectCardItem, selectFlexibleItem } = useCardDialog();
+    const { selectCardItem, selectFlexibleItem } = useDialog();
 
     const [activeTab, setActiveTab] = useState<CollectionElementString>('Task');
     const [listKey, setListKey] = useState(0);

@@ -8,7 +8,7 @@ import { Code, Assignment, QueryBuilder, Settings } from '@mui/icons-material';
 import { PromptComponentProps } from '../../../../types/PromptTypes';
 import useStyles from '../PromptStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import ContentStats from '../../../ui/markdown/ContentStats';
 
@@ -16,7 +16,7 @@ const PromptCardView: React.FC<PromptComponentProps> = ({
     item,
 }) => {
     const classes = useStyles();
-    const { selectCardItem, selectPromptParsedDialog } = useCardDialog();
+    const { selectCardItem, selectPromptParsedDialog } = useDialog();
     if (!item) {
         return <Typography>No prompt data available.</Typography>;
     }

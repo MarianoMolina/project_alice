@@ -4,7 +4,7 @@ import { Accordion, AccordionDetails, AccordionSummary, Box, IconButton, Stack, 
 import { DataObject, ExpandMore } from '@mui/icons-material';
 import { ApiType } from '../../../../../../types/ApiTypes';
 import theme from '../../../../../../Theme';
-import { useCardDialog } from '../../../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../../../contexts/DialogContext';
 import { NodeConfig } from './TaskTypeNodeDefinitions';
 import { RequiredApis } from './RequiredApisArea';
 import { formatCamelCaseString } from '../../../../../../utils/StyleUtils';
@@ -17,7 +17,7 @@ interface NodeContentAreaProps {
 }
 
 export const NodeContentArea: React.FC<NodeContentAreaProps> = ({ data, nodeConfig, requiredApis }) => {
-    const { selectCardItem, selectPromptParsedDialog } = useCardDialog();
+    const { selectCardItem, selectPromptParsedDialog } = useDialog();
     const taskTemplate = useMemo(() =>
         data?.templates?.task_template || undefined
         , [data?.templates]);

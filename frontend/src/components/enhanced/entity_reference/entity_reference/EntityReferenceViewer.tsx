@@ -15,10 +15,10 @@ import {
 } from '@mui/icons-material';
 import { EntityReferenceComponentProps } from '../../../../types/EntityReferenceTypes';
 import { apiTypeIcons } from '../../../../utils/ApiUtils';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 
 const EntityReferenceViewer: React.FC<EntityReferenceComponentProps> = ({ item }) => {
-  const { selectCardItem } = useCardDialog();
+  const { selectCardItem } = useDialog();
   
   if (!item) return null;
 

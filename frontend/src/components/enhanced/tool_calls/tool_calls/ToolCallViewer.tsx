@@ -16,10 +16,10 @@ import {
 import { ToolCallComponentProps } from '../../../../types/ToolCallTypes';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
-import { useCardDialog } from '../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../contexts/DialogContext';
 
 const ToolCallViewer: React.FC<ToolCallComponentProps> = ({ item }) => {
-  const { selectCardItem } = useCardDialog();
+  const { selectCardItem } = useDialog();
   
   if (!item) return null;
 

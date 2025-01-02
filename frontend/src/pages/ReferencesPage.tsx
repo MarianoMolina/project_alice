@@ -19,7 +19,7 @@ import EnhancedCodeExecution from '../components/enhanced/code_execution/code_ex
 import EnhancedToolCall from '../components/enhanced/tool_calls/tool_calls/EnhancedToolCall';
 import useStyles from '../styles/DatabaseStyles';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
-import { useCardDialog } from '../contexts/CardDialogContext';
+import { useDialog } from '../contexts/DialogContext';
 import Logger from '../utils/Logger';
 import ToggleBox from '../components/ui/sidetab_header/ToggleBox';
 import EnhancedEntityReference from '../components/enhanced/entity_reference/entity_reference/EnhancedEntityReference';
@@ -30,7 +30,7 @@ const ReferencesPage: React.FC = () => {
     const classes = useStyles();
     const { fetchPopulatedItem } = useApi();
     const [selectedItem, setSelectedItem] = useState<CollectionPopulatedElement | null>(null);
-    const { selectCardItem } = useCardDialog();
+    const { selectCardItem } = useDialog();
     const [activeTab, setActiveTab] = useState<CollectionElementString>('Message');
     const [showActiveComponent, setShowActiveComponent] = useState(false);
     const [isCreating, setIsCreating] = useState(false);

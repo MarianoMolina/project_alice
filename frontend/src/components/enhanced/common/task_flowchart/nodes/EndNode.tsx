@@ -4,7 +4,7 @@ import { Box, IconButton, Tooltip } from '@mui/material';
 import DescriptionIcon from '@mui/icons-material/Description';
 import theme from '../../../../../Theme';
 import { hexToRgba } from '../../../../../utils/StyleUtils';
-import { useCardDialog } from '../../../../../contexts/CardDialogContext';
+import { useDialog } from '../../../../../contexts/DialogContext';
 import { Prompt } from '../../../../../types/PromptTypes';
 
 interface EndNodeData {
@@ -17,7 +17,7 @@ const EndNode: React.FC<NodeProps<EndNodeData>> = ({
   data,
 }) => {
   const ref = useRef<HTMLDivElement | null>(null);
-  const { selectCardItem } = useCardDialog();
+  const { selectCardItem } = useDialog();
 
   useEffect(() => {
     if (ref.current) {
