@@ -20,6 +20,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
+import GitHubIcon from '@mui/icons-material/GitHub';
 import { useAuth } from '../../../contexts/AuthContext';
 import useStyles from './HeaderStyles';
 import Logger from '../../../utils/Logger';
@@ -51,6 +52,13 @@ const Header: React.FC = () => {
     Logger.info('Logging out');
     logout();
     navigate('/login');
+    if (isMobile) {
+      setMobileMenuOpen(false);
+    }
+  };
+
+  const handleGitHubClick = () => {
+    window.open('https://github.com/MarianoMolina/project_alice', '_blank');
     if (isMobile) {
       setMobileMenuOpen(false);
     }
@@ -143,11 +151,25 @@ const Header: React.FC = () => {
               </ListItemIcon>
               <ListItemText primary="Logout" />
             </ListItem>
+            <ListItem button onClick={handleGitHubClick}>
+              <ListItemIcon>
+                <GitHubIcon />
+              </ListItemIcon>
+              <ListItemText primary="GitHub Repository" />
+            </ListItem>
           </>
         ) : (
-          <ListItem button onClick={() => handleNavigation('/login')}>
-            <ListItemText primary="Login" />
-          </ListItem>
+          <>
+            <ListItem button onClick={handleGitHubClick}>
+              <ListItemIcon>
+                <GitHubIcon />
+              </ListItemIcon>
+              <ListItemText primary="GitHub Repository" />
+            </ListItem>
+            <ListItem button onClick={() => handleNavigation('/login')}>
+              <ListItemText primary="Login" />
+            </ListItem>
+          </>
         )}
       </List>
     </Drawer>
@@ -192,17 +214,31 @@ const Header: React.FC = () => {
                   <MenuIcon />
                 </IconButton>
               ) : (
-                <Tooltip title="Logout">
-                  <IconButton color="inherit" onClick={handleLogout}>
-                    <LogoutIcon />
-                  </IconButton>
-                </Tooltip>
+                <>
+                  <Tooltip title="GitHub Repository">
+                    <IconButton color="inherit" onClick={handleGitHubClick}>
+                      <GitHubIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Logout">
+                    <IconButton color="inherit" onClick={handleLogout}>
+                      <LogoutIcon />
+                    </IconButton>
+                  </Tooltip>
+                </>
               )}
             </>
           ) : (
-            <Button color="inherit" onClick={() => handleNavigation('/login')}>
-              Login
-            </Button>
+            <>
+              <Tooltip title="GitHub Repository">
+                <IconButton color="inherit" onClick={handleGitHubClick}>
+                  <GitHubIcon />
+                </IconButton>
+              </Tooltip>
+              <Button color="inherit" onClick={() => handleNavigation('/login')}>
+                Login
+              </Button>
+            </>
           )}
         </Box>
       </Toolbar>

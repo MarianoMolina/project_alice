@@ -204,10 +204,10 @@ const TaskExecuteView: React.FC<TaskComponentProps> = ({
     }, []);
 
     const handleViewFlow = useCallback(() => {
-        if (item?._id) {
+        if (item) {
             selectTaskFlowchartItem(item as PopulatedTask);
         }
-    }, [item?._id, selectTaskFlowchartItem]);
+    }, [item, selectTaskFlowchartItem]);
 
     const handleCloseResultsDialog = useCallback(() => {
         setIsResultsDialogOpen(false);

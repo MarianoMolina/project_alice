@@ -105,6 +105,7 @@ const FileFlexibleView: React.FC<FileComponentProps> = ({
         if (selectedFile) {
             handleOpenDialog();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedFile]);
 
     const handleFileSelect = async () => {

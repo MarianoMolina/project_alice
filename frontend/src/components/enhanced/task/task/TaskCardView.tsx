@@ -7,12 +7,11 @@ import {
     Tooltip,
     IconButton,
 } from '@mui/material';
-import { Category, Description, Functions, Person, ApiRounded, Settings, Logout, ExitToApp, AttachFile, Api, QueryBuilder, Replay, ContactMail, Cyclone, Visibility } from '@mui/icons-material';
+import { Category, Description, Functions, Person, ApiRounded, Settings, Logout, AttachFile, Api, QueryBuilder, Replay, ContactMail, Cyclone, Visibility } from '@mui/icons-material';
 import { PopulatedTask, TaskComponentProps, taskDescriptions } from '../../../../types/TaskTypes';
 import useStyles from '../TaskStyles';
 import CommonCardView from '../../common/enhanced_component/CardView';
 import { useDialog } from '../../../../contexts/DialogContext';
-import TaskFlowchart from '../../common/task_flowchart/FlowChart';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 import { hasAnyReferences, References } from '../../../../types/ReferenceTypes';
 import { formatStringWithSpaces } from '../../../../utils/StyleUtils';

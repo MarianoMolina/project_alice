@@ -10,7 +10,6 @@ import {
 } from '@mui/material';
 import { CollectionName, CollectionPopulatedType } from '../../../../types/CollectionTypes';
 import useStyles from './EnhancedStyles';
-import EntityActionsMenu from '../entity_menu/EntityActionsMenu';
 import CardTitle from './CardTitle';
 
 interface ListItemData {
