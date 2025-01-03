@@ -12,25 +12,25 @@ const Landing: React.FC = () => {
     const features = [
         {
             title: "Create your own Agents",
-            description: "Build and deploy AI agents, choosing their model, system prompt and skills like coding and tool use",
+            description: "Build and deploy AI agents: choose their model, system prompt and skills (coding & tools)",
             icon: <Psychology sx={{ fontSize: 40 }} />,
             gridSize: { xs: 12, md: 4 }
         },
         {
             title: "Chat with your agents",
-            description: "Choose the right agent for your goal. Chat with them to get things done",
+            description: "Choose the right agent for your goal. Chat with them and get things done",
             icon: <Chat sx={{ fontSize: 40 }} />,
             gridSize: { xs: 12, md: 8 }
         },
         {
             title: "Build & Execute Tasks",
-            description: "Build and deploy your own tasks and workflows, execute them directly or give them to your agents as tools",
+            description: "Build, test and deploy your own tasks and workflows, execute them yourself or give them to your agents as tools",
             icon: <Build sx={{ fontSize: 40 }} />,
             gridSize: { xs: 12, md: 8 }
         },
         {
             title: "Model Integration",
-            description: "Connect your agents to any AI model from any of the available APIs",
+            description: "Connect your agents to any model from any of the available APIs",
             icon: <Cloud sx={{ fontSize: 40 }} />,
             gridSize: { xs: 12, md: 4 }
         },
@@ -97,27 +97,27 @@ const Landing: React.FC = () => {
                         />
                     </Box>
                 );
-                case "Model Integration":
-                    return (
-                        <Box sx={{
-                            mt: 'auto',
-                            width: '100%',
-                            height: 300,
-                            position: 'relative',
-                            overflow: 'hidden'
-                        }}>
-                            <img
-                                src="/shared/img/diagrams/Available_LLM_APIs.png"
-                                alt="Available APIs"
-                                style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    objectFit: 'contain',
-                                    objectPosition: 'bottom'
-                                }}
-                            />
-                        </Box>
-                    );
+            case "Model Integration":
+                return (
+                    <Box sx={{
+                        mt: 'auto',
+                        width: '100%',
+                        height: 300,
+                        position: 'relative',
+                        overflow: 'hidden'
+                    }}>
+                        <img
+                            src="/shared/img/diagrams/Available_LLM_APIs.png"
+                            alt="Available APIs"
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                                objectPosition: 'bottom'
+                            }}
+                        />
+                    </Box>
+                );
             case "Chat with your agents":
                 return (
                     <Box sx={{
@@ -139,26 +139,9 @@ const Landing: React.FC = () => {
                         />
                     </Box>
                 );
-            // default:
-            //     return (
-            //         <Box sx={{
-            //             mt: 'auto',
-            //             width: '100%',
-            //             height: 200,
-            //             bgcolor: 'action.hover',
-            //             borderRadius: 1,
-            //             display: 'flex',
-            //             alignItems: 'center',
-            //             justifyContent: 'center'
-            //         }}>
-            //             <Typography variant="body2" color="text.secondary">
-            //                 Visual Preview
-            //             </Typography>
-            //         </Box>
-            //     );
         }
     };
-    const words = ['simplicity', 'transparency', 'fun', 'control']
+    const words = ['simplicity', 'transparency', 'fun', 'creativity', 'collaboration', 'privacy', 'security'];
 
     return (
         <Box sx={{
@@ -180,17 +163,17 @@ const Landing: React.FC = () => {
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         fontSize: {
-                            xs: '2.5rem', 
-                            sm: '4rem',  
-                            md: '6rem' 
-                          }
+                            xs: '2.5rem',
+                            sm: '4rem',
+                            md: '6rem'
+                        }
                     }}>
                     Project Alice
                 </Typography>
 
                 <Typography variant="h4" component="h2"
                     sx={{ mb: 4, color: theme.palette.text.secondary }}>
-                    Where AI Meets <FlipWords words={words} className={'text-white'} />
+                    Where AI meets <FlipWords words={words} className={'text-white'} />
                 </Typography>
 
                 <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mb: 6 }}>

@@ -14,7 +14,7 @@ RUN printf "fetch-retry-maxtimeout=300000\nfetch-retry-mintimeout=20000\nfetch-r
 RUN npm ci --legacy-peer-deps
 
 # Add `/app/node_modules/.bin` to $PATH
-ENV PATH /app/node_modules/.bin:$PATH
+ENV PATH=/app/node_modules/.bin:$PATH
 
 # Copy the rest of the application code
 COPY frontend/ .

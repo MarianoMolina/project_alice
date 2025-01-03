@@ -21,6 +21,9 @@ class ApiType(str, Enum):
 
 ### 2. API Names
 ApiName represents specific implementations or providers:
+
+![APIs](../../../../shared/img/diagrams/Available_LLM_APIs.png)
+
 ```python
 class ApiName(str, Enum):
     OPENAI = 'openai'
