@@ -5,7 +5,7 @@ from workflow.util.logger import LOGGER
 
 router = APIRouter()
 
-@router.post("/initialize_user_database/")
+@router.post("/initialize_user_database")
 async def initialize_user_database(request: Request, db_app=Depends(get_db_app)) -> dict:
     """
     Initialize the user's database with the default structure.
