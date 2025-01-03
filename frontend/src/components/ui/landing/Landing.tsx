@@ -4,6 +4,7 @@ import { Box, Button, Typography, Grid, Paper } from '@mui/material';
 import { Build, Psychology, Cloud, Storage, RocketLaunch, Group, Chat } from '@mui/icons-material';
 import theme from '../../../Theme';
 import logo from '../../../assets/img/logo1024.png';
+import { FlipWords } from '../aceternity/FlipWords';
 
 const Landing: React.FC = () => {
     const navigate = useNavigate();
@@ -41,13 +42,13 @@ const Landing: React.FC = () => {
         },
         {
             title: "Simple Deployment",
-            description: "Deploy and scale your solutions with ease. From testing to production in minutes",
+            description: "Deploy and scale your solutions with ease. Use your own API keys or subscribe to our service to cut through the noise",
             icon: <RocketLaunch sx={{ fontSize: 40 }} />,
             gridSize: { xs: 12, md: 4 }
         },
         {
             title: "Open Source",
-            description: "Join our community and help shape the future of AI workflow management",
+            description: "Join our community and help shape the future of agentic workflows",
             icon: <Group sx={{ fontSize: 40 }} />,
             gridSize: { xs: 12, md: 4 }
         }
@@ -85,7 +86,7 @@ const Landing: React.FC = () => {
                         overflow: 'hidden'
                     }}>
                         <img
-                            src="/shared/img/random/ai_working.png"
+                            src="/shared/img/random/ai_working_2.png"
                             alt="AI Working"
                             style={{
                                 width: '100%',
@@ -157,6 +158,7 @@ const Landing: React.FC = () => {
             //     );
         }
     };
+    const words = ['simplicity', 'transparency', 'fun', 'control']
 
     return (
         <Box sx={{
@@ -188,7 +190,7 @@ const Landing: React.FC = () => {
 
                 <Typography variant="h4" component="h2"
                     sx={{ mb: 4, color: theme.palette.text.secondary }}>
-                    Where AI Meets Simplicity
+                    Where AI Meets <FlipWords words={words} className={'text-white'} />
                 </Typography>
 
                 <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mb: 6 }}>

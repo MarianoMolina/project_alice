@@ -12,6 +12,9 @@ A friendly and intelligent AI assistant named Alice, represented as a glowing, e
 
 Alice is built on several core components that work together to create a versatile and powerful AI interaction environment:
 
+
+![Logic Flow](../../shared/img/diagrams/basic_logic_flow.png)
+
 1. **Agents**: The primary AI entities that interact with users and perform tasks. [LINK](/shared/knowledgebase/core/agent.md)
 2. **Models**: The underlying AI models that power the agents' capabilities. [LINK](/shared/knowledgebase/core/model.md)
 3. **Chats**: Conversational interfaces where users interact with agents. [LINK](/shared/knowledgebase/core/chat.md)
@@ -40,6 +43,8 @@ Alice is built on several core components that work together to create a versati
 ## System Architecture Overview
 
 The Alice system is designed with a modular architecture:
+
+![Container Flow](../../shared/img/diagrams/Container_flow.png)
 
 - **Frontend**: Where you probably are -> a ReactJS/TS user interface for interacting with the system, viewing the database and executing new processes.
 - **Backend**: A NodeJS/TS module in charge of managing data persistence and authentication.

@@ -44,7 +44,7 @@ const useStyles = makeStyles((theme: Theme) => ({
             duration: theme.transitions.duration.leavingScreen,
         }),
         backgroundColor: theme.palette.background.paper,
-        overflow: 'hidden',
+        overflow: 'auto',
         width: 250,
         flexShrink: 0,
         [theme.breakpoints.down('sm')]: {

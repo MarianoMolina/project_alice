@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   userEmail: {
     marginRight: theme.spacing(2),
-    [theme.breakpoints.down('md')]: {
+    [theme.breakpoints.down('lg')]: {
       display: 'none',
     },
   },

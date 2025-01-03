@@ -22,7 +22,7 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
   const navigate = useNavigate();
 
   const logProps = (componentName: string, props: any) => {
-    Logger.debug(`${componentName} props:`, props);
+    Logger.info(`${componentName} props:`, props);
   };
 
   const wrapStyles: SxProps<Theme> = {
@@ -122,16 +122,23 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ className, children }) 
         />
       );
     },
-    li: ({ node, ...props }) => {
+    li: ({ node, children, ...props }) => {
       logProps('li', props);
       const { ordered, ...restProps } = props;
+      
+      // Filter out the standalone newline characters
+      const cleanChildren = React.Children.toArray(children)
+        .filter(child => typeof child !== 'string' || child.trim() !== '');
+      
       return (
         <Typography
           component="li"
           className={classes.markdownText}
           sx={wrapStyles}
           {...restProps}
-        />
+        >
+          {cleanChildren}
+        </Typography>
       );
     },
     hr: ({ node, ...props }) => {
