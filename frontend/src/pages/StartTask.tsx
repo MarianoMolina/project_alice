@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState, memo } from 'react';
-import { Box, Typography, List, Accordion, AccordionSummary, AccordionDetails, SelectChangeEvent, CircularProgress } from '@mui/material';
-import { Add, Functions, Assignment, ExpandMore } from '@mui/icons-material';
+import { Box, Typography, List, Accordion, AccordionSummary, AccordionDetails, SelectChangeEvent, CircularProgress, IconButton } from '@mui/material';
+import { Add, Functions, Assignment, ExpandMore, Info } from '@mui/icons-material';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
 import { AliceTask, PopulatedTask, TaskType } from '../types/TaskTypes';
 import { APIConfig } from '../types/ApiConfigTypes';
@@ -16,9 +16,10 @@ import TaskResponseListView from '../components/enhanced/task_response/task_resp
 import { useDialog } from '../contexts/DialogContext';
 import { RecentExecution, useTask } from '../contexts/TaskContext';
 import useStyles from '../styles/StartTaskStyles';
+import APICapabilitiesDialog from '../components/enhanced/api/ApiCapabilitiesDialog';
 const TaskLoadingState = memo(() => {
     const classes = useStyles();
-    
+
     return (
         <Box className={classes.loadingContainer} display="flex" alignItems="center" justifyContent="center">
             <CircularProgress size={40} />
@@ -152,6 +153,7 @@ const MemoizedTaskResponseListView = memo(({ execution, onView, onInteraction }:
 const APIStatusSection = memo(() => {
     const classes = useStyles();
     const { selectCardItem } = useDialog();
+    const [showCapabilities, setShowCapabilities] = useState(false);
 
     const handleApiConfigInteraction = useCallback((apiConfig: APIConfig) => {
         if (apiConfig._id) selectCardItem('APIConfig', apiConfig._id);
@@ -159,7 +161,12 @@ const APIStatusSection = memo(() => {
 
     return (
         <Box className={classes.apiStatusContainer}>
-            <Typography variant="h6" className={classes.sectionTitle}>API Status</Typography>
+            <Typography variant="h6" className={classes.sectionTitle}>
+                API Status
+                <IconButton>
+                    <Info onClick={() => setShowCapabilities(true)} />
+                </IconButton>
+            </Typography>
             <Box className={classes.apiTooltipContainer}>
                 <EnhancedAPIConfig
                     mode="tooltip"
@@ -167,7 +174,12 @@ const APIStatusSection = memo(() => {
                     onInteraction={handleApiConfigInteraction}
                 />
             </Box>
-        </Box>
+
+            <APICapabilitiesDialog
+                open={showCapabilities}
+                onClose={() => setShowCapabilities(false)}
+            />
+        </Box >
     );
 });
 

@@ -7,6 +7,9 @@ import { fetchItem, updateItem } from '../services/api';
 
 interface AuthContextProps {
   isAuthenticated: boolean;
+  initializingDatabase: boolean;
+  needsOnboarding: boolean;
+  setNeedsOnboarding: (value: boolean) => void;
   user: User | null;
   refreshUserData: () => Promise<void>;
   loading: boolean;
@@ -26,6 +29,8 @@ const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [initializingDatabase, setInitializingDatabase] = useState<boolean>(false);
+  const [needsOnboarding, setNeedsOnboarding] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
@@ -58,7 +63,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       localStorage.setItem('user', JSON.stringify(userToSave));
       if (token) localStorage.setItem('token', token);
-      
+
       setUser(userToSave);
       setIsAuthenticated(true);
     } catch (error) {
@@ -112,8 +117,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (name: string, email: string, password: string) => {
     try {
       await registerUser(name, email, password);
+      setNeedsOnboarding(true);
+      setInitializingDatabase(true);
       await login(email, password);
       await initializeUserDatabase();
+      setInitializingDatabase(false);
     } catch (error) {
       Logger.error('Registration failed:', error);
       throw error;
@@ -129,7 +137,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, loading, login, loginAndNavigate, register, logout, getToken, updateUser, refreshUserData  }}>
+    <AuthContext.Provider value={{
+      isAuthenticated, initializingDatabase, needsOnboarding, 
+      setNeedsOnboarding,
+      user, loading, login, loginAndNavigate, register, logout,
+      getToken, updateUser, refreshUserData
+    }}>
       {children}
     </AuthContext.Provider>
   );

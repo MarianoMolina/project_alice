@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
-import { 
-  Button, 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
   DialogActions,
   CircularProgress,
   Alert,
@@ -22,10 +22,12 @@ import {
   ExpandLess as ExpandLessIcon,
   Warning as WarningIcon,
   CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon
+  Error as ErrorIcon,
+  Info
 } from '@mui/icons-material';
 import { useApi } from '../../../contexts/ApiContext';
 import { hasValidationWarnings } from '../../../utils/ApiUtils';
+import APICapabilitiesDialog from './ApiCapabilitiesDialog';
 
 interface ApiValidationManagerProps {
   chatId?: string;
@@ -33,10 +35,10 @@ interface ApiValidationManagerProps {
   onValidationComplete?: (hasWarnings: boolean) => void;
 }
 
-export default function ApiValidationManager({ 
-  chatId, 
-  taskId, 
-  onValidationComplete 
+export default function ApiValidationManager({
+  chatId,
+  taskId,
+  onValidationComplete
 }: ApiValidationManagerProps) {
   const { validateChatApis, validateTaskApis } = useApi();
   const [loading, setLoading] = useState(false);
@@ -44,6 +46,7 @@ export default function ApiValidationManager({
   const [validationResult, setValidationResult] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
+  const [showCapabilities, setShowCapabilities] = useState(false);
 
   const handleValidation = useCallback(async () => {
     if (!chatId && !taskId) {
@@ -55,10 +58,10 @@ export default function ApiValidationManager({
     setError(null);
 
     try {
-      const result = chatId 
+      const result = chatId
         ? await validateChatApis(chatId)
         : await validateTaskApis(taskId!);
-      
+
       setValidationResult(result);
       const warnings = hasValidationWarnings(result);
       onValidationComplete?.(warnings);
@@ -70,7 +73,7 @@ export default function ApiValidationManager({
   }, [chatId, taskId, validateChatApis, validateTaskApis, onValidationComplete]);
 
   const toggleSection = (section: string) => {
-    setExpandedSections(prev => 
+    setExpandedSections(prev =>
       prev.includes(section)
         ? prev.filter(s => s !== section)
         : [...prev, section]
@@ -96,7 +99,7 @@ export default function ApiValidationManager({
         <ListItemText
           primary={
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              {task.status === 'valid' 
+              {task.status === 'valid'
                 ? <CheckCircleIcon color="success" sx={{ fontSize: 20 }} />
                 : <WarningIcon color="warning" sx={{ fontSize: 20 }} />
               }
@@ -105,7 +108,7 @@ export default function ApiValidationManager({
           }
         />
         {task.child_tasks.length > 0 && (
-          <IconButton 
+          <IconButton
             onClick={() => toggleSection(task.task_name)}
             size="small"
           >
@@ -117,7 +120,7 @@ export default function ApiValidationManager({
       {task.child_tasks.length > 0 && (
         <Collapse in={expandedSections.includes(task.task_name)}>
           <List>
-            {task.child_tasks.map((childTask: any) => 
+            {task.child_tasks.map((childTask: any) =>
               renderTaskValidation(childTask, level + 1)
             )}
           </List>
@@ -132,7 +135,7 @@ export default function ApiValidationManager({
         <ListItemText
           primary={
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              {chat.status === 'valid' 
+              {chat.status === 'valid'
                 ? <CheckCircleIcon color="success" sx={{ fontSize: 20 }} />
                 : <WarningIcon color="warning" sx={{ fontSize: 20 }} />
               }
@@ -143,7 +146,7 @@ export default function ApiValidationManager({
         />
       </ListItem>
       {renderWarnings(chat.warnings)}
-      
+
       {chat.agent_tools.length > 0 && (
         <>
           <Typography sx={{ mt: 2, mb: 1 }} fontWeight="bold">Agent Tools</Typography>
@@ -152,7 +155,7 @@ export default function ApiValidationManager({
           </List>
         </>
       )}
-      
+
       {chat.retrieval_tools.length > 0 && (
         <>
           <Typography sx={{ mt: 2, mb: 1 }} fontWeight="bold">Retrieval Tools</Typography>
@@ -167,8 +170,8 @@ export default function ApiValidationManager({
   const getStatusIcon = () => {
     if (!validationResult) return null;
     const hasWarnings = hasValidationWarnings(validationResult);
-    
-    return hasWarnings 
+
+    return hasWarnings
       ? <WarningIcon color="warning" sx={{ fontSize: 20 }} />
       : <CheckCircleIcon color="success" sx={{ fontSize: 20 }} />;
   };
@@ -188,8 +191,8 @@ export default function ApiValidationManager({
               </IconButton>
             </Tooltip>
             {validationResult && (
-              <Button 
-                variant="text" 
+              <Button
+                variant="text"
                 size="small"
                 onClick={() => setDialogOpen(true)}
               >
@@ -202,8 +205,8 @@ export default function ApiValidationManager({
 
       {/* Error display */}
       {error && (
-        <Alert 
-          severity="error" 
+        <Alert
+          severity="error"
           sx={{ mt: 1 }}
           action={
             <IconButton
@@ -226,11 +229,16 @@ export default function ApiValidationManager({
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>API Validation Report</DialogTitle>
+        <DialogTitle>
+          API Validation Report
+          <IconButton>
+            <Info onClick={() => setShowCapabilities(true)} />
+          </IconButton>
+        </DialogTitle>
         <DialogContent>
           {validationResult && (
             <Box sx={{ mt: 1 }}>
-              {chatId 
+              {chatId
                 ? renderChatValidation(validationResult)
                 : renderTaskValidation(validationResult)
               }
@@ -239,8 +247,8 @@ export default function ApiValidationManager({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Close</Button>
-          <Button 
-            onClick={handleValidation} 
+          <Button
+            onClick={handleValidation}
             variant="contained"
             disabled={loading}
             startIcon={loading ? <CircularProgress size={20} /> : <RefreshIcon />}
@@ -249,6 +257,11 @@ export default function ApiValidationManager({
           </Button>
         </DialogActions>
       </Dialog>
+
+      <APICapabilitiesDialog
+        open={showCapabilities}
+        onClose={() => setShowCapabilities(false)}
+      />
     </Box>
   );
 }

@@ -177,6 +177,8 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
         p: 1,
         backgroundColor: 'background.paper',
         borderRadius: '8px',
+        maxWidth: '90%',
+        margin: '0 5%',
       }}
     >
       <Box sx={{ display: 'flex', flexDirection: 'column'}}>

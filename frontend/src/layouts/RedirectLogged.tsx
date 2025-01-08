@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 interface RedirectIfAuthenticatedProps {
@@ -11,11 +11,13 @@ const RedirectIfAuthenticated: React.FC<RedirectIfAuthenticatedProps> = ({
   element,
   redirectTo = '/'
 }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, needsOnboarding } = useAuth();
+  const location = useLocation();
 
   // If user is authenticated, redirect to the specified path (defaults to home)
-  if (isAuthenticated) {
-    return <Navigate to={redirectTo} replace />;
+  // If its the registration page and the user needs onboarding, stay in registration
+  if (isAuthenticated && !(location.pathname === '/register' && needsOnboarding)) {
+    return <Navigate to={needsOnboarding ? '/register' : redirectTo} replace />;
   }
 
   // If user is not authenticated, render the provided element
