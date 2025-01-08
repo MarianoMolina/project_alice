@@ -1,13 +1,12 @@
 import React from 'react';
 import {
     Box,
-    Typography,
     Button,
     Paper,
 } from '@mui/material';
 import useStyles from './EnhancedStyles';
 import { CollectionName, CollectionPopulatedType } from '../../../../types/CollectionTypes';
-import EntityActionsMenu from '../entity_menu/EntityActionsMenu';
+import CardTitle from './CardTitle';
 
 interface GenericFlexibleViewProps <T extends CollectionName> {
     title: string;
@@ -37,31 +36,16 @@ const GenericFlexibleView = <T extends CollectionName>({
     const classes = useStyles();
 
     const actions = {
-        edit: false,
+        edit: mode === 'view' ? true : false,
         download: true,
         copy: true,
+        duplicate: true,
         delete: mode !== 'create' ? true : false
     };
 
     return (
         <Paper className={classes.flexibleViewContainer}>
-            <Box className={classes.titleContainer}>
-                {elementType && (
-                    <Typography variant="caption" className={classes.elementTypeText}>
-                        {elementType}
-                    </Typography>
-                )}
-                <Box className={classes.titleContent}>
-                    <Typography variant="h5" className={classes.title}>
-                        {title}
-                    </Typography>
-                    {item && itemType && (
-                        <Box className={classes.downloadButton}>
-                            <EntityActionsMenu item={item} itemType={itemType} onDelete={onDelete} actions={actions}/>
-                        </Box>
-                    )}
-                </Box>
-            </Box>
+            <CardTitle title={title} elementType={elementType} item={item} itemType={itemType} onDelete={onDelete} actions={actions}/>
             <Box className={classes.formContainer}>
                 {children}
             </Box>

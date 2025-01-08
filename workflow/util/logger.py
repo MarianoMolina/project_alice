@@ -1,6 +1,6 @@
 import logging, os
 from logging.handlers import RotatingFileHandler
-from workflow.util.const import LOGGING_FOLDER, LOG_LEVEL
+from workflow.util.const import LOGGING_FOLDER, LOG_LEVEL, HOST
 
 def setup_logging(log_level=logging.WARNING) -> logging.Logger:
     # Create logs directory if it doesn't exist
@@ -40,4 +40,7 @@ def setup_logging(log_level=logging.WARNING) -> logging.Logger:
     
     return logger
 
+# Add this before importing bitsandbytes
 LOGGER = setup_logging(getattr(logging, LOG_LEVEL))
+LOGGER.debug(f"Logger initialized with log level {LOG_LEVEL}")
+LOGGER.debug(f"Host: {HOST}")

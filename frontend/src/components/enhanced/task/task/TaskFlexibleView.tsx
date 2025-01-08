@@ -268,7 +268,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
                     value={taskType}
                     onChange={(value) => handleFieldChange('task_type', value)}
                     disabled={!isEditMode}
-                    description={taskType && taskDescriptions[taskType]}
+                    description={taskType && taskDescriptions[taskType] ? taskDescriptions[taskType].description : ''}
                     options={Object.values(TaskType).map((type) => ({ value: type, label: formatCamelCaseString(type) }))}
                 />
                 <TextInput

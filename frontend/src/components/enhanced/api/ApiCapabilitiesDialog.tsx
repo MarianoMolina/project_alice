@@ -1,4 +1,3 @@
-// APICapabilitiesDialog.tsx
 import React, { useState, useMemo } from 'react';
 import {
   Dialog,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { AliceTask, TaskComponentProps, taskTypeIcons } from '../../../../types/TaskTypes';
+import { AliceTask, TaskComponentProps, taskDescriptions } from '../../../../types/TaskTypes';
 import { IconButton, Tooltip, Typography } from '@mui/material';
 import EnhancedListView from '../../common/enhanced_component/ListView';
 import { Functions } from '@mui/icons-material';
@@ -16,7 +16,7 @@ const TaskListView: React.FC<TaskComponentProps> = ({
         <>
             <Tooltip title={formatCamelCaseString(task.task_type)}>
                 <IconButton size="small">
-                    {taskTypeIcons[task.task_type] || <Functions />}
+                    {taskDescriptions[task.task_type].icon || <Functions />}
                 </IconButton>
             </Tooltip>
             <Typography component="span" variant="body2" color="textPrimary">

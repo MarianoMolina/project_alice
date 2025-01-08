@@ -70,7 +70,7 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
             icon: <Category />,
             primary_text: "Task Type",
             secondary_text: item.task_type ? (
-                <Tooltip title={taskDescriptions[item.task_type]} arrow>
+                <Tooltip title={taskDescriptions[item.task_type].description} arrow>
                     <Typography>{item.task_type}</Typography>
                 </Tooltip>
             ) : <Typography variant="body2" color="textSecondary">No task type</Typography>
