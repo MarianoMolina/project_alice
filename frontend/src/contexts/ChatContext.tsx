@@ -25,6 +25,7 @@ interface ChatContextType {
     currentChat: PopulatedAliceChat | null;
     addTaskToChat: (taskId: string) => Promise<void>;
     isTaskInChat: (taskId: string) => boolean;
+    lastMessageRole: string | undefined;
     chatContextCharacterCount: number;
     maxContext: number;
 }
@@ -59,6 +60,10 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             size += message.content.length;
         });
         return size
+    }, [messages])
+
+    const lastMessageRole = useMemo(() => {
+        return messages.length > 0 ? messages[messages.length - 1].role : undefined
     }, [messages])
 
     const chatContextCharacterCount = useMemo(() => {
@@ -201,6 +206,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         addTaskToChat,
         isTaskInChat,
         chatContextCharacterCount,
+        lastMessageRole,
         maxContext,
     };
 

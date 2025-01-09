@@ -36,8 +36,8 @@ pymongo # BSON
 pypdf
 
 # Local generation
-transformers
-diffusers
+transformers==4.47.1 
+diffusers==0.32.1
 --extra-index-url https://download.pytorch.org/whl/cu118
 sentencepiece
 ftfy

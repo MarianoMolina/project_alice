@@ -1,6 +1,6 @@
 import { ChangeEvent, KeyboardEvent, useState, forwardRef, useImperativeHandle, useCallback } from 'react';
 import { Box, IconButton, Paper, TextField, Tooltip, Typography } from '@mui/material';
-import { ContentType, getDefaultMessageForm, MessageType, PopulatedMessage } from '../../../types/MessageTypes';
+import { ContentType, getDefaultMessageForm, MessageType, PopulatedMessage, RoleType } from '../../../types/MessageTypes';
 import { FileReference, FileType, PopulatedFileReference } from '../../../types/FileTypes';
 import { createFileContentReference, selectFile } from '../../../utils/FileUtils';
 import { useApi } from '../../../contexts/ApiContext';
@@ -15,13 +15,10 @@ import { PopulatedToolCall, ToolCall } from '../../../types/ToolCallTypes';
 import { CodeExecution, PopulatedCodeExecution } from '../../../types/CodeExecutionTypes';
 import { EmbeddingChunk } from '../../../types/EmbeddingChunkTypes';
 import { PopulatedUserInteraction, UserInteraction } from '../../../types/UserInteractionTypes';
+import { useChat } from '../../../contexts/ChatContext';
+import ActionButton from './ChatActionButton';
 
 interface ChatInputProps {
-  sendMessage: (chatId: string, message: PopulatedMessage) => Promise<void>;
-  currentChatId: string | null;
-  chatSelected: boolean;
-  chatContextCharacterCount: number;
-  maxContext: number;
 }
 
 export interface ChatInputRef {
@@ -35,15 +32,10 @@ export interface ChatInputRef {
   addUserInteractionReference: (userInteraction: PopulatedUserInteraction | UserInteraction) => void;
 }
 
-const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
-  sendMessage,
-  currentChatId,
-  chatSelected,
-  chatContextCharacterCount,
-  maxContext
-}, ref) => {
+const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ }, ref) => {
   const { addNotification } = useNotification();
   const { uploadFileContentReference } = useApi();
+  const { handleSendMessage, currentChatId, chatContextCharacterCount, maxContext, isGenerating, generateResponse, handleRegenerateResponse, lastMessageRole } = useChat();
   const [newMessage, setNewMessage] = useState<PopulatedMessage>(getDefaultMessageForm());
 
   const tokenEst = Math.floor(chatContextCharacterCount / 3)
@@ -121,7 +113,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey && chatSelected) {
+    if (e.key === 'Enter' && !e.shiftKey && currentChatId) {
       e.preventDefault();
       handleSend();
     }
@@ -130,7 +122,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
   const handleSend = () => {
     if (currentChatId && (newMessage.content.trim() || hasReferences(newMessage.references as References))) {
       Logger.debug('Sending message content:', newMessage.content);
-      sendMessage(currentChatId, newMessage);
+      handleSendMessage(currentChatId, newMessage);
       setNewMessage(getDefaultMessageForm());
     }
   };
@@ -168,20 +160,18 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
   };
 
   const hasReferencesToShow = hasReferences(newMessage.references as References);
-  const showSendButton = chatSelected && (newMessage.content.trim() || hasReferencesToShow);
+  const showSendButton = currentChatId && (newMessage.content.trim() || hasReferencesToShow);
 
   return (
-    <Paper 
+    <Paper
       elevation={1}
-      sx={{ 
+      sx={{
         p: 1,
         backgroundColor: 'background.paper',
         borderRadius: '8px',
-        maxWidth: '90%',
-        margin: '0 5%',
       }}
     >
-      <Box sx={{ display: 'flex', flexDirection: 'column'}}>
+      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
         {/* Text Input Area */}
         <TextField
           variant="standard"
@@ -192,7 +182,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
           value={newMessage.content}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          disabled={!chatSelected}
+          disabled={!currentChatId}
           placeholder="Type your message..."
           sx={{
             width: '100%',
@@ -214,16 +204,16 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
         />
 
         {/* Bottom Area */}
-        <Box sx={{ 
-          display: 'flex', 
+        <Box sx={{
+          display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
           minHeight: '40px'
         }}>
           {/* Reference Chips Area */}
-          <Box sx={{ 
-            display: 'flex', 
-            flexWrap: 'wrap', 
+          <Box sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
             gap: 1,
             flex: 1,
             marginRight: 2
@@ -232,12 +222,36 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
           </Box>
 
           {/* Actions Area */}
-          <Box sx={{ 
-            display: 'flex', 
+          <Box sx={{
+            display: 'flex',
             alignItems: 'center',
             gap: 1,
             flexShrink: 0
           }}>
+            <ActionButton
+              isGenerating={isGenerating}
+              role={lastMessageRole ? lastMessageRole as RoleType : undefined}
+              generateResponse={generateResponse}
+              handleRegenerateResponse={handleRegenerateResponse}
+            />
+
+            {/* Action Buttons */}
+            <Tooltip title="Upload an image, video, sound or text file">
+              <span>
+                <IconButton
+                  onClick={handleAddFile}
+                  disabled={!currentChatId}
+                  size="medium"
+                  sx={{
+                    width: '40px',
+                    height: '40px',
+                  }}
+                >
+                  <AttachFile />
+                </IconButton>
+              </span>
+            </Tooltip>
+
             {/* Context Percentage */}
             <Tooltip title={`Est. context used: ${tokenEst} / ${maxContext}`}>
               <Typography
@@ -246,23 +260,6 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({
               >
                 {percentageToken}
               </Typography>
-            </Tooltip>
-
-            {/* Action Buttons */}
-            <Tooltip title="Upload an image, video, sound or text file">
-              <span>
-                <IconButton
-                  onClick={handleAddFile}
-                  disabled={!chatSelected}
-                  size="medium"
-                  sx={{ 
-                    width: '40px',
-                    height: '40px',
-                  }}
-                >
-                  <AttachFile />
-                </IconButton>
-              </span>
             </Tooltip>
 
             <Tooltip title="Send message">

@@ -13,6 +13,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     flexDirection: 'column',
     minWidth: 0,
     height: '100%',
+    position: 'relative',
   },
   chatAliceMessages: {
     flexGrow: 1,
@@ -24,9 +25,14 @@ const useStyles = makeStyles((theme: Theme) => ({
     minHeight: 0,
   },
   chatAliceInput: {
-    margin: theme.spacing(0, 1, 1, 1),
     display: 'flex',
     flexDirection: 'column',
+    maxWidth: '80%',
+    margin: '0 10%',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   actionButtonContainer: {
     display: 'flex',

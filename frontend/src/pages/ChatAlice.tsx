@@ -258,9 +258,7 @@ const ChatAlice: React.FC = () => {
       <Box className={classes.chatAliceMain}>
         <Box className={classes.chatAliceMessages}>
           {currentChat ? (
-            <ChatMessagesFullView
-              showRegenerate={true}
-            />
+            <ChatMessagesFullView />
           ) : (
             <PlaceholderSkeleton
               mode="chat"
@@ -272,11 +270,6 @@ const ChatAlice: React.FC = () => {
           <Box className={classes.chatAliceInput}>
             <ChatInput
               ref={chatInputRef}
-              sendMessage={handleSendMessage}
-              currentChatId={currentChatId}
-              chatSelected={!!currentChatId}
-              chatContextCharacterCount={chatContextCharacterCount}
-              maxContext={maxContext}
             />
           </Box>
         )}

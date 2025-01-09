@@ -1,20 +1,18 @@
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import { Box, Button, Tooltip } from '@mui/material';
+import { Box } from '@mui/material';
 import { useChat } from '../../../../contexts/ChatContext';
 import PlaceholderSkeleton from '../../../ui/placeholder_skeleton/PlaceholderSkeleton';
 import MessageFullView from '../../message/message/MessageFullView';
 import useStyles from '../ChatStyles';
 
 interface ChatMessagesFullViewProps {
-  showRegenerate?: boolean;
 }
-const ChatMessagesFullView: React.FC<ChatMessagesFullViewProps> = React.memo(({
-  showRegenerate = true,
-}) => {
+
+const ChatMessagesFullView: React.FC<ChatMessagesFullViewProps> = React.memo(() => {
   const classes = useStyles();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [shouldScroll, setShouldScroll] = useState(false);
-  const { isGenerating, generateResponse, handleRegenerateResponse, currentChat } = useChat();
+  const { currentChat } = useChat();
 
   const scrollToBottom = useCallback(() => {
     if (shouldScroll) {
@@ -31,28 +29,6 @@ const ChatMessagesFullView: React.FC<ChatMessagesFullViewProps> = React.memo(({
     scrollToBottom();
   }, [scrollToBottom]);
 
-  const renderActionButton = useCallback(() => {
-    if (isGenerating) {
-      return <Button disabled>Generating...</Button>;
-    }
-    const lastMessage = currentChat?.messages[currentChat?.messages.length - 1];
-    if (lastMessage && lastMessage.role === 'user' && generateResponse) {
-      return (
-        <Tooltip title="Request a new response from the assistant based on the last message">
-          <Button variant='contained' onClick={generateResponse}>Request Response</Button>
-        </Tooltip>
-      );
-    }
-    if (lastMessage && lastMessage.role === 'assistant' && handleRegenerateResponse) {
-      return (
-        <Tooltip title="Remove the last assistant reply and generate a new response">
-          <Button variant='contained' onClick={handleRegenerateResponse}>Regenerate Response</Button>
-        </Tooltip>
-      );
-    }
-    return null;
-  }, [isGenerating, currentChat?.messages, generateResponse, handleRegenerateResponse]);
-
   const memoizedMessages = useMemo(() => (
     currentChat?.messages.map((message) => (
       <MessageFullView
@@ -60,7 +36,7 @@ const ChatMessagesFullView: React.FC<ChatMessagesFullViewProps> = React.memo(({
         mode={'view'}
         item={message}
         items={null}
-        onChange={() => {}}
+        onChange={() => { }}
         handleSave={async () => undefined}
       />
     ))
@@ -82,11 +58,6 @@ const ChatMessagesFullView: React.FC<ChatMessagesFullViewProps> = React.memo(({
         )}
         <div ref={messagesEndRef} />
       </Box>
-      {showRegenerate && (
-        <Box className={classes.actionButtonContainer}>
-          {renderActionButton()}
-        </Box>
-      )}
     </Box>
   );
 });

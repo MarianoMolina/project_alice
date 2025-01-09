@@ -5,13 +5,12 @@ const useStyles = makeStyles((theme: Theme) => ({
   fullChatView: {
     display: 'flex',
     flexDirection: 'column',
-    height: '100%',
     position: 'relative',
   },
   messagesContainer: {
     flexGrow: 1,
     overflowY: 'auto',
-    paddingBottom: theme.spacing(8), // Add padding to account for the action button
+    marginBottom: theme.spacing(12),
   },
   actionButtonContainer: {
     position: 'absolute',
