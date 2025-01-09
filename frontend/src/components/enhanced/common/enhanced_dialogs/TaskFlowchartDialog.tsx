@@ -3,6 +3,7 @@ import { Dialog, DialogTitle, DialogContent } from '@mui/material';
 import { useDialog } from '../../../../contexts/DialogContext';
 import TaskFlowchart from '../../common/task_flowchart/FlowChart';
 import CardTitle from '../enhanced_component/CardTitle';
+import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 
 const FlowChartDialog: React.FC = () => {
     const {
@@ -13,7 +14,7 @@ const FlowChartDialog: React.FC = () => {
 
     if (!selectedTaskFlowchartItem) return null;
 
-    let title = selectedTaskFlowchartItem.task_name || 'Task Flowchart';
+    let title = formatCamelCaseString(selectedTaskFlowchartItem.task_name) || 'Task Flowchart';
 
     return (
         <Dialog
@@ -26,7 +27,7 @@ const FlowChartDialog: React.FC = () => {
                 <CardTitle title={title} elementType='Task' item={selectedTaskFlowchartItem}  itemType='tasks'/>
             </DialogTitle>
             <DialogContent>
-                <TaskFlowchart task={selectedTaskFlowchartItem} height={800} miniMap />
+                <TaskFlowchart task={selectedTaskFlowchartItem} height={600} miniMap />
             </DialogContent>
         </Dialog>
     );

@@ -42,7 +42,7 @@ export const NodeReferencesViewer: React.FC<NodeReferencesViewerProps> = ({
                 <AccordionSummary expandIcon={<ExpandMore />} className={classes.nodeHeader}>
                     <Tooltip title={nodeName} arrow>
                         <Typography
-                            variant={level === 0 ? "h6" : "subtitle1"}
+                            variant={level === 0 ? "body1" : "subtitle1"}
                             sx={{
                                 flexGrow: 1,
                                 fontWeight: level === 0 ? 600 : 500,

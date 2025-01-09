@@ -14,6 +14,7 @@ import ReferencesViewer from '../../data_cluster/ReferencesViewer';
 import { getMessageTypeIcon } from '../../../../utils/MessageUtils';
 import ContentStats from '../../../ui/markdown/ContentStats';
 import GenerationMetadataViewer from '../MetadataViewer';
+import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 
 const MessageCardView: React.FC<MessageComponentProps> = ({
     item,
@@ -72,9 +73,12 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
             icon: <AttachFile />,
             primary_text: "References",
             secondary_text: populatedItem.references && hasAnyReferences(populatedItem.references as References) ?
-                <ReferencesViewer
-                    references={populatedItem.references}
-                /> : "N/A"
+                <DataClusterManager
+                    title="References"
+                    dataCluster={populatedItem.references}
+                    isEditable={false}
+                />
+                : "N/A"
         },
         {
             icon: <DataObject />,
@@ -84,8 +88,8 @@ const MessageCardView: React.FC<MessageComponentProps> = ({
         {
             icon: <Person />,
             primary_text: "Metadata",
-            secondary_text: populatedItem.creation_metadata && Object.keys(populatedItem.creation_metadata).length > 0 ? 
-                <GenerationMetadataViewer metadata={populatedItem.creation_metadata} est_tokens={Math.round(item.content.length / 3)}/> : "N/A"
+            secondary_text: populatedItem.creation_metadata && Object.keys(populatedItem.creation_metadata).length > 0 ?
+                <GenerationMetadataViewer metadata={populatedItem.creation_metadata} est_tokens={Math.round(item.content.length / 3)} /> : "N/A"
         },
         {
             icon: <QueryBuilder />,

@@ -7,6 +7,7 @@ import {
     AccordionDetails,
     Box,
     ListItemButton,
+    Stack,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { PopulatedTaskResponse, TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
@@ -17,10 +18,11 @@ import CommonCardView from '../../common/enhanced_component/CardView';
 import { AccessTime, CheckCircle, Error, Warning, Output, Code, BugReport, DataObject, Analytics, Terminal, Functions } from '@mui/icons-material';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
-import TaskResponseViewer from './TaskResponseViewer';
 import ContentStats from '../../../ui/markdown/ContentStats';
 import { useDialog } from '../../../../contexts/DialogContext';
 import TaskResponseMetadataViewer from '../TaskResponseMetadataViewer';
+import { NodeReferencesViewer } from '../NodeReferencesViewer';
+import { PopulatedReferences } from '../../../../types/ReferenceTypes';
 
 const ExitCodeChip = styled(Chip)(({ theme }) => ({
     fontWeight: 'bold',
@@ -37,6 +39,26 @@ const ExitCodeChip = styled(Chip)(({ theme }) => ({
         color: theme.palette.error.contrastText,
     },
 }));
+
+const TaskNodeViewer: React.FC<TaskResponseComponentProps> = ({
+    item,
+}) => {
+    return (
+        <Stack>
+            {item?.node_references?.map((nodeResponse, index) => (
+                <Box key={`${nodeResponse.node_name}-${index}`} sx={{ 'display': 'flex' }}>
+                    <NodeReferencesViewer
+                        references={nodeResponse.references as PopulatedReferences}
+                        level={0}
+                        nodeName={nodeResponse.node_name}
+                        executionOrder={nodeResponse.execution_order}
+                        exitCode={nodeResponse.exit_code}
+                    />
+                </Box>
+            ))}
+        </Stack>
+    );
+};
 
 const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
     item,
@@ -141,7 +163,9 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
                     <AccordionSection
                         title="Output Nodes"
                         content={
-                            populatedItem.node_references ? <TaskResponseViewer item={item} items={null} onChange={() => null} mode={'view'} handleSave={async () => { }} /> : <Typography>No output content available</Typography>
+                            populatedItem.node_references ?
+                                <TaskNodeViewer item={populatedItem} items={null} onChange={() => null} mode={'view'} handleSave={async () => { }} />
+                                : <Typography>No output content available</Typography>
                         }
                         disabled={!populatedItem.node_references?.length}
                     />
@@ -197,8 +221,8 @@ const TaskResponseCardView: React.FC<TaskResponseComponentProps> = ({
         {
             icon: <Analytics />,
             primary_text: "Usage Metrics",
-            secondary_text: populatedItem.usage_metrics && Object.keys(populatedItem.usage_metrics).length > 0 ? 
-                <TaskResponseMetadataViewer usageMetrics={populatedItem.usage_metrics} est_tokens={0}/> : "N/A"
+            secondary_text: populatedItem.usage_metrics && Object.keys(populatedItem.usage_metrics).length > 0 ?
+                <TaskResponseMetadataViewer usageMetrics={populatedItem.usage_metrics} est_tokens={0} /> : "N/A"
         }
     ];
 
