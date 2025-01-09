@@ -31,12 +31,9 @@ const ChatAlice: React.FC = () => {
     pastChats,
     currentChatId,
     handleSelectChat,
-    handleSendMessage,
     currentChat,
     addTaskToChat,
     isTaskInChat,
-    chatContextCharacterCount,
-    maxContext,
   } = useChat();
   const { selectCardItem, selectFlexibleItem } = useDialog();
 
