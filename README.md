@@ -33,6 +33,10 @@ Alice is an agentic workflow framework that integrates task execution and intell
 >   - Updated the communication to the Backend, both to get the new populated routes and to properly use LM Studio
 >   - Fixed a lot of issues with task/workflow and code execution logic. 
 
+> v0.3.10:
+> - BACKEND:
+>  - Added encryption to most reference objects. You will need to restart your DB if you update to this version. 
+
 > What's next? Planned developments for v0.4 (find detailed info below):
 > - Agent using computer
 > - Communication APIs -> Gmail, potentially messaging

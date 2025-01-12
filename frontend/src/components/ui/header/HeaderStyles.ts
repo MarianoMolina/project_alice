@@ -79,7 +79,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   drawer: {
     width: 280,
     [theme.breakpoints.down('md')]: {
-      width: '100%',
+      maxWidth: '100%',
     },
   },
   drawerHeader: {

@@ -21,6 +21,8 @@ import RedirectIfAuthenticated from './layouts/RedirectLogged';
 import CssBaseline from '@mui/material/CssBaseline';
 import theme from './Theme';
 import './assets/fonts/fonts.css';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 
 const App: React.FC = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -47,6 +49,8 @@ const App: React.FC = () => {
                 <MainLayout>
                   <Routes>
                     <Route path="/" element={<HomePage />} />
+                    <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                    <Route path="/terms-of-service" element={<TermsOfService />} />
                     <Route
                       path="/login"
                       element={
