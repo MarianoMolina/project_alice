@@ -1,6 +1,9 @@
 import { CheckpointType } from "./ChatTypes";
 import { BasicDBObj, convertToBasicDBObj } from "./CollectionTypes";
 
+export type CreationMethod = 'password' | 'google';
+
+
 export type UserCheckpoints = {
     [CheckpointType.TOOL_CALL]: string;
     [CheckpointType.CODE_EXECUTION]: string;
@@ -10,6 +13,7 @@ export interface UserDefaultChatConfig {
     agent_tools: string[];
     retrieval_tools: string[];
     data_cluster?: string;
+    creationMethod?: CreationMethod;
     default_user_checkpoints: UserCheckpoints;
 }
 

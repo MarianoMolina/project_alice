@@ -20,7 +20,7 @@ export interface IUser {
     email: string;
     password?: string;
     role: 'user' | 'admin';
-    creationMethod: CreationMethod;
+    creationMethod?: CreationMethod;
     default_chat_config?: IUserDefaultChatConfig;
 }
 
