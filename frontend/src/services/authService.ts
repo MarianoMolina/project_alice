@@ -4,8 +4,10 @@ import { User } from '../types/UserTypes';
 import Logger from '../utils/Logger';
 
 export interface LoginResponse {
-  token: string;
   user: User;
+  token?: string;
+  isNewUser?: boolean;
+  message?: string;
 }
 
 export const loginUser = async (email: string, password: string): Promise<LoginResponse> => {
@@ -26,10 +28,10 @@ export const loginUser = async (email: string, password: string): Promise<LoginR
   }
 };
 
-export const registerUser = async (name: string, email: string, password: string): Promise<User> => {
+export const registerUser = async (name: string, email: string, password: string): Promise<LoginResponse> => {
   try {
-    Logger.debug('Registering user with email:', email);
-    const response = await dbAxiosInstance.post<User>('/users/register', { name, email, password });
+    Logger.debug('Registering and logging in user with email:', email);
+    const response = await dbAxiosInstance.post<LoginResponse>('/users/register', { name, email, password });
     return response.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
@@ -54,3 +56,19 @@ export const initializeUserDatabase = async (): Promise<String> => {
     throw error;
   }
 }
+
+export const handleGoogleOAuth = async (credential: string): Promise<LoginResponse> => {
+  try {
+    Logger.info('Starting Google OAuth authentication');
+    const response = await dbAxiosInstance.post<LoginResponse>('/users/oauth/google', { credential });
+    Logger.info('OAuth authentication response:', response.data);
+    return response.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      Logger.error('OAuth authentication error:', error.response?.data);
+    } else {
+      Logger.error('Unexpected error:', error);
+    }
+    throw error;
+  }
+};

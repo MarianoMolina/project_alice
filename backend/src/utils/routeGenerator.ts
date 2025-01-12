@@ -8,6 +8,16 @@ import { PopulationService } from './population.utils';
 
 type RouteHandler = (req: AuthRequest, res: Response) => Promise<void>;
 
+// Middleware to handle admin user context
+const adminUserContext = (req: AuthRequest, res: Response, next: Function) => {
+  if (req.user?.role === 'admin' && req.query.asUser) {
+    req.effectiveUserId = req.query.asUser as string;
+  } else {
+    req.effectiveUserId = req.user?.userId;
+  }
+  next();
+};
+
 interface RouteOptions<T extends Document> {
   createItem?: (data: Partial<T>, userId: string) => Promise<T | null>;
   updateItem?: (id: string, data: Partial<T>, userId: string) => Promise<T | null>;
@@ -25,6 +35,7 @@ export function createRoutes<T extends Document, K extends ModelName>(
   populationService: PopulationService = new PopulationService()
 ) {
   const router = Router();
+  router.use(adminUserContext);
 
   const handleErrors = (res: Response, error: any) => {
     Logger.error(`Error in ${modelName} route:`, error);
@@ -35,16 +46,16 @@ export function createRoutes<T extends Document, K extends ModelName>(
     try {
       let saved_item: T | null;
       if (options.createItem) {
-        if (!req.user?.userId) {
+        if (!req.effectiveUserId) {
           res.status(401).json({ error: 'Unauthorized' });
           return;
         }
-        saved_item = await options.createItem(req.body, req.user?.userId);
+        saved_item = await options.createItem(req.body, req.effectiveUserId);
       } else {
         const item = new model({
           ...req.body,
-          created_by: req.user?.userId,
-          updated_by: req.user?.userId
+          created_by: req.effectiveUserId,
+          updated_by: req.effectiveUserId
         });
         await item.save();
         saved_item = await model.findById(item._id);
@@ -63,13 +74,13 @@ export function createRoutes<T extends Document, K extends ModelName>(
     try {
       let updated_item: T | null;
       if (options.updateItem) {
-        if (!req.user?.userId) {
+        if (!req.effectiveUserId) {
           res.status(401).json({ error: 'Unauthorized' });
           return;
         }
-        updated_item = await options.updateItem(req.params.id, req.body, req.user?.userId);
+        updated_item = await options.updateItem(req.params.id, req.body, req.effectiveUserId);
       } else {
-        const updateData = { ...req.body, updated_by: req.user?.userId };
+        const updateData = { ...req.body, updated_by: req.effectiveUserId };
         const sanitizedUpdateData = model.schema.obj;
         for (const key in updateData) {
           if (sanitizedUpdateData.hasOwnProperty(key)) {
@@ -77,7 +88,7 @@ export function createRoutes<T extends Document, K extends ModelName>(
           }
         }
         updated_item = await model.findOneAndUpdate(
-          { _id: req.params.id, created_by: req.user?.userId },
+          { _id: req.params.id, created_by: req.effectiveUserId },
           { $set: sanitizedUpdateData },
           { new: true, runValidators: true }
         );
@@ -96,9 +107,9 @@ export function createRoutes<T extends Document, K extends ModelName>(
     try {
       let deleted_item: T | null;
       if (options.deleteItem) {
-        deleted_item = await options.deleteItem(req.params.id, req.user?.userId ?? '');
+        deleted_item = await options.deleteItem(req.params.id, req.effectiveUserId ?? '');
       } else {
-        deleted_item = await model.findOneAndDelete({ _id: req.params.id, created_by: req.user?.userId });
+        deleted_item = await model.findOneAndDelete({ _id: req.params.id, created_by: req.effectiveUserId });
       }
       if (!deleted_item) {
         res.status(404).json({ error: `${modelName} not found` });
@@ -114,13 +125,13 @@ export function createRoutes<T extends Document, K extends ModelName>(
     try {
       let items: T[];
       if (options.getAllItems) {
-        if (!req.user?.userId) {
+        if (!req.effectiveUserId) {
           res.status(401).json({ error: 'Unauthorized' });
           return;
         }
-        items = await options.getAllItems(req.user?.userId);
+        items = await options.getAllItems(req.effectiveUserId);
       } else {
-        items = await model.find({ created_by: req.user?.userId });
+        items = await model.find({ created_by: req.effectiveUserId });
       }
       res.status(200).json(items);
     } catch (error) {
@@ -132,19 +143,19 @@ export function createRoutes<T extends Document, K extends ModelName>(
     try {
       let items: T[];
       if (options.getAllPopulatedItems) {
-        if (!req.user?.userId) {
+        if (!req.effectiveUserId) {
           res.status(401).json({ error: 'Unauthorized' });
           return;
         }
-        items = await options.getAllPopulatedItems(req.user?.userId);
+        items = await options.getAllPopulatedItems(req.effectiveUserId);
       } else {
-        if (!req.user?.userId) {
+        if (!req.effectiveUserId) {
           res.status(401).json({ error: 'Unauthorized' });
           return;
         }
 
         // First get all items for this user
-        const unpopulatedItems = await model.find({ created_by: req.user?.userId }) as (T & { _id: Types.ObjectId })[];
+        const unpopulatedItems = await model.find({ created_by: req.effectiveUserId }) as (T & { _id: Types.ObjectId })[];
 
         // Then populate each item using the PopulationService
         const populatedItems = await Promise.all(
@@ -181,13 +192,13 @@ export function createRoutes<T extends Document, K extends ModelName>(
     try {
       let item: T | null;
       if (options.getItem) {
-        if (!req.user?.userId) {
+        if (!req.effectiveUserId) {
           res.status(401).json({ error: 'Unauthorized' });
           return;
         }
-        item = await options.getItem(req.params.id, req.user?.userId);
+        item = await options.getItem(req.params.id, req.effectiveUserId);
       } else {
-        item = await model.findOne({ _id: req.params.id, created_by: req.user?.userId });
+        item = await model.findOne({ _id: req.params.id, created_by: req.effectiveUserId });
       }
       if (!item) {
         res.status(404).json({ error: `${modelName} not found` });
@@ -203,17 +214,17 @@ export function createRoutes<T extends Document, K extends ModelName>(
     try {
       let item: T | null;
 
-      if (!req.user?.userId) {
+      if (!req.effectiveUserId) {
         res.status(401).json({ error: 'Unauthorized' });
         return;
       }
       if (options.getPopulatedItem) {
-        item = await options.getPopulatedItem(req.params.id, req.user?.userId);
+        item = await options.getPopulatedItem(req.params.id, req.effectiveUserId);
       } else {
         item = await populationService.findAndPopulate(
           model,
           req.params.id,
-          req.user.userId
+          req.effectiveUserId
         );
       }
 

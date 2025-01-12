@@ -28,15 +28,16 @@ import DataClusterRoutes from './routes/dataCluster.route';
 import ToolCallRoutes from './routes/toolCall.route';
 import CodeExecutionRoutes from './routes/codeExecution.route';
 import APIConfigRoutes from './routes/apiConfig.route';
-
 import './models';
-import { MONGODB_URI } from './utils/const';
+import { MONGODB_URI, ENCRYPTION_KEY } from './utils/const';
+import { EncryptionService } from './utils/encrypt.utils';
+EncryptionService.initialize(ENCRYPTION_KEY);
 
 dotenv.config();
 
 const app = express();
 
-Logger.info('MongoDB URI:', MONGODB_URI);
+Logger.debug('MongoDB URI:', MONGODB_URI);
 
 mongoose.connect(MONGODB_URI)
     .then(() => {

@@ -88,7 +88,7 @@ class MetadataDict(TypedDict, total=False):
     usage: UsageDict
     estimated_tokens: int
     finish_reason: str
-    system_fingerprint: str
+    system_fingerprint: str | None
     cost: CostDict
     generation_details: dict
     prompt_similarity_history: List[dict]

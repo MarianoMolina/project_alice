@@ -543,22 +543,71 @@ class RunEnvironment:
             return True
         except subprocess.CalledProcessError:
             return False
-
+        
     def run_docker_compose(self):
-        """Run docker-compose up with proper error handling."""
-        self.logger.info("Starting Docker Compose...")
-        try:
-            # Don't use sudo on macOS
-            if self.system == "Darwin" or self.system == "Windows":
-                cmd = ["docker-compose", "up"]
-            else:
-                cmd = ["sudo", "docker-compose", "up"]
+            """Run docker-compose pull and up with proper error handling."""
+            self.logger.info("Starting Docker Compose...")
+            try:
+                # Don't use sudo on macOS and Windows
+                if self.system == "Darwin" or self.system == "Windows":
+                    base_cmd = ["docker-compose"]
+                else:
+                    base_cmd = ["sudo", "docker-compose"]
                 
-            subprocess.run(cmd, check=True)
-        except subprocess.CalledProcessError as e:
-            self.logger.error(f"Docker Compose failed: {e}")
-            sys.exit(1)
-
+                # Ask user about updating images
+                response = input("Would you like to update Docker images? [y/N]: ").lower().strip()
+                should_update = response in ['y', 'yes']
+                
+                if should_update:
+                    self.logger.info("[Step 5/5] Pulling Docker images...")
+                    try:
+                        # Try to pull images, but don't fail if custom images can't be pulled
+                        subprocess.run(base_cmd + ["pull"], stderr=subprocess.PIPE, check=False)
+                    except subprocess.CalledProcessError:
+                        pass  # Ignore pull errors as some images might need to be built
+                    
+                    # Check if we need to build any images
+                    config_output = subprocess.run(
+                        base_cmd + ["config", "--services"],
+                        capture_output=True,
+                        text=True,
+                        check=True
+                    )
+                    services = config_output.stdout.strip().split('\n')
+                    
+                    # Try to build each service
+                    self.logger.info("Building any custom images...")
+                    for service in services:
+                        try:
+                            # Check if service needs building
+                            build_check = subprocess.run(
+                                base_cmd + ["build", "--dry-run", service],
+                                capture_output=True,
+                                text=True,
+                                check=False
+                            )
+                            
+                            if build_check.returncode == 0:
+                                self.logger.info(f"Building {service}...")
+                                subprocess.run(base_cmd + ["build", service], check=True)
+                        except subprocess.CalledProcessError as e:
+                            self.logger.warning(f"Failed to build {service}: {e}")
+                            # Continue with other services rather than failing completely
+                            continue
+                else:
+                    self.logger.info("Skipping Docker image update...")
+                
+                # Start the containers
+                self.logger.info("Starting containers...")
+                subprocess.run(base_cmd + ["up"], check=True)
+                
+            except subprocess.CalledProcessError as e:
+                self.logger.error(f"Docker Compose failed: {e}")
+                sys.exit(1)
+            except Exception as e:
+                self.logger.error(f"Unexpected error in Docker Compose operation: {e}")
+                sys.exit(1)
+            
     def cleanup(self, signum, frame):
         """Cleanup handler for graceful shutdown."""
         self.logger.info("=== Starting Cleanup ===")

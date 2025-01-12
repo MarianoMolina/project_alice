@@ -3,6 +3,7 @@ import { IEntityReferenceDocument, IEntityReferenceModel, ReferenceCategoryType 
 import { getObjectId, getObjectIdForList } from "../utils/utils";
 import { ApiType } from "../interfaces/api.interface";
 import mongooseAutopopulate from 'mongoose-autopopulate';
+import { EncryptionService } from "../utils/encrypt.utils";
 
 const imageReferenceSchema = new Schema({
   url: { type: String, required: true },
@@ -11,9 +12,9 @@ const imageReferenceSchema = new Schema({
 }, { _id: false });
 
 const entityConnectionSchema = new Schema({
-  entity_id: { 
-    type: Schema.Types.ObjectId, 
-    required: true, 
+  entity_id: {
+    type: Schema.Types.ObjectId,
+    required: true,
     ref: 'EntityReference',
   },
   similarity_score: { type: Number, default: 0 },
@@ -22,8 +23,48 @@ const entityConnectionSchema = new Schema({
 const entityReferenceSchema = new Schema<IEntityReferenceDocument, IEntityReferenceModel>({
   source_id: String,
   name: String,
-  description: String,
-  content: String,
+  description: {
+    type: String,
+    set: function (content: string) {
+      if (!content) return content;
+      try {
+        return EncryptionService.getInstance().encrypt(content);
+      } catch (error) {
+        console.error('Encryption error:', error);
+        throw new Error('Failed to encrypt entity reference description');
+      }
+    },
+    get: function (encryptedContent: string) {
+      if (!encryptedContent) return encryptedContent;
+      try {
+        return EncryptionService.getInstance().decrypt(encryptedContent);
+      } catch (error) {
+        console.error('Decryption error:', error);
+        throw new Error('Failed to decrypt entity reference description');
+      }
+    }
+  },
+  content: {
+    type: String,
+    set: function (content: string) {
+      if (!content) return content;
+      try {
+        return EncryptionService.getInstance().encrypt(content);
+      } catch (error) {
+        console.error('Encryption error:', error);
+        throw new Error('Failed to encrypt entity reference content');
+      }
+    },
+    get: function (encryptedContent: string) {
+      if (!encryptedContent) return encryptedContent;
+      try {
+        return EncryptionService.getInstance().decrypt(encryptedContent);
+      } catch (error) {
+        console.error('Decryption error:', error);
+        throw new Error('Failed to decrypt entity reference content');
+      }
+    }
+  },
   url: String,
   images: [imageReferenceSchema],
   categories: [{
@@ -39,7 +80,7 @@ const entityReferenceSchema = new Schema<IEntityReferenceDocument, IEntityRefere
   updated_by: { type: Schema.Types.ObjectId, ref: 'User', required: true, autopopulate: true }
 }, { timestamps: true });
 
-entityReferenceSchema.methods.apiRepresentation = function(this: IEntityReferenceDocument) {
+entityReferenceSchema.methods.apiRepresentation = function (this: IEntityReferenceDocument) {
   return {
     id: this._id || null,
     source_id: this.source_id || null,

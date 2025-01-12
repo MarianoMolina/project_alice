@@ -17,7 +17,8 @@ const userDefaultChatConfigSchema = new Schema({
 const userSchema = new Schema<IUserDocument, IUserModel>({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  password: { type: String },
+  creationMethod: { type: String, enum: ["password", "google"] },
   role: { type: String, enum: ["user", "admin"], default: "user" },
   default_chat_config: { type: userDefaultChatConfigSchema, required: false }
 }, {

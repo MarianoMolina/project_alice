@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loginUser, registerUser, LoginResponse, initializeUserDatabase } from '../services/authService';
+import { loginUser, registerUser, LoginResponse, initializeUserDatabase, handleGoogleOAuth } from '../services/authService';
 import { User } from '../types/UserTypes';
 import Logger from '../utils/Logger';
 import { fetchItem, updateItem } from '../services/api';
@@ -19,6 +19,7 @@ interface AuthContextProps {
   logout: () => void;
   getToken: () => string | null;
   updateUser: (userData: Partial<User>) => Promise<void>;
+  loginWithGoogle: (credential: string) => Promise<void>;
 }
 
 interface AuthProviderProps {
@@ -56,10 +57,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return localStorage.getItem('token');
   }, []);
 
-  const saveUserData = useCallback((userData: LoginResponse | User) => {
+  const saveUserData = useCallback((userData: LoginResponse) => {
     try {
-      const userToSave = 'user' in userData ? userData.user : userData;
-      const token = 'token' in userData ? userData.token : getToken();
+      const userToSave = userData.user
+      const token = userData.token
 
       localStorage.setItem('user', JSON.stringify(userToSave));
       if (token) localStorage.setItem('token', token);
@@ -69,30 +70,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       Logger.error('Error saving user data:', error);
     }
-  }, [getToken]);
+  }, []);
 
   const refreshUserData = useCallback(async () => {
     try {
       if (!user?._id) throw new Error('No user ID found');
       const refreshedUser = await fetchItem('users', user._id) as User;
-      saveUserData(refreshedUser);
+      const userData = {
+        user: refreshedUser,
+        token: getToken() ?? undefined
+      }
+      saveUserData(userData);
     } catch (error) {
       Logger.error('Error refreshing user data:', error);
       throw error;
     }
-  }, [user?._id, saveUserData]);
+  }, [user?._id, saveUserData, getToken]);
 
-  const updateUser = useCallback(async (userData: Partial<User>) => {
+  const updateUser = useCallback(async (user: Partial<User>) => {
     try {
       if (!user?._id) throw new Error('No user ID found');
-      const updatedUser = await updateItem('users', user._id, userData);
+      const updatedUser = await updateItem('users', user._id, user);
       Logger.debug('Updated user:', updatedUser);
-      saveUserData(updatedUser);
+      const userDataNew = {
+        user: updatedUser,
+        token: getToken() ?? undefined
+      }
+      saveUserData(userDataNew);
     } catch (error) {
       Logger.error('Error updating user:', error);
       throw error;
     }
-  }, [user?._id, saveUserData]);
+  }, [user?._id, saveUserData, getToken]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -113,15 +122,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       throw error;
     }
   }
+  const setupNewUser = async (userData: LoginResponse) => {
+    try {
+      Logger.info('Setting up new user:', userData.user);
+      saveUserData(userData);
+      setNeedsOnboarding(true);
+      setInitializingDatabase(true);
+      navigate('/register');
+      await initializeUserDatabase();
+      setInitializingDatabase(false);
+    } catch (error) {
+      Logger.error('Error setting up new user:', error);
+      throw error;
+    }
+  }
 
   const register = async (name: string, email: string, password: string) => {
     try {
-      await registerUser(name, email, password);
-      setNeedsOnboarding(true);
-      setInitializingDatabase(true);
-      await login(email, password);
-      await initializeUserDatabase();
-      setInitializingDatabase(false);
+      const userData = await registerUser(name, email, password);
+      if (userData) await setupNewUser(userData);
     } catch (error) {
       Logger.error('Registration failed:', error);
       throw error;
@@ -131,9 +150,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
+    setInitializingDatabase(false);
+    setNeedsOnboarding(false);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     navigate('/login');
+  };
+
+  const loginWithGoogle = async (credential: string) => {
+    try {
+      const userData = await handleGoogleOAuth(credential);
+      if (userData.isNewUser) await setupNewUser(userData);
+      else saveUserData(userData);
+    } catch (error) {
+      Logger.error('Google login failed:', error);
+      throw error;
+    }
   };
 
   return (
@@ -141,7 +173,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       isAuthenticated, initializingDatabase, needsOnboarding, 
       setNeedsOnboarding,
       user, loading, login, loginAndNavigate, register, logout,
-      getToken, updateUser, refreshUserData
+      getToken, updateUser, refreshUserData, loginWithGoogle
     }}>
       {children}
     </AuthContext.Provider>

@@ -2,10 +2,31 @@ import mongoose, { Schema } from 'mongoose';
 import { getObjectId } from '../utils/utils';
 import { IEmbeddingChunkDocument, IEmbeddingChunkModel } from '../interfaces/embeddingChunk.interface';
 import mongooseAutopopulate from 'mongoose-autopopulate';
+import { EncryptionService } from '../utils/encrypt.utils';
 
 const embeddingSchema = new Schema<IEmbeddingChunkDocument, IEmbeddingChunkModel>({
   vector: { type: [Number], required: true },
-  text_content: { type: String, required: true },
+  text_content: {
+    type: String, required: true,
+    set: function (content: string) {
+      if (!content) return content;
+      try {
+        return EncryptionService.getInstance().encrypt(content);
+      } catch (error) {
+        console.error('Encryption error:', error);
+        throw new Error('Failed to encrypt embedding chunk content');
+      }
+    },
+    get: function (encryptedContent: string) {
+      if (!encryptedContent) return encryptedContent;
+      try {
+        return EncryptionService.getInstance().decrypt(encryptedContent);
+      } catch (error) {
+        console.error('Decryption error:', error);
+        throw new Error('Failed to decrypt embedding chunk content');
+      }
+    }
+  },
   index: { type: Number, required: true },
   creation_metadata: { type: Map, of: Schema.Types.Mixed },
   created_by: { type: Schema.Types.ObjectId },

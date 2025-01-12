@@ -9,7 +9,8 @@ import axios from 'axios';
 import Logger from '../utils/logger';
 import { purgeAndReinitialize } from '../utils/purge.utils';
 import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
-import { JWT_SECRET } from '../utils/const';
+import { GOOGLE_CLIENT_ID, JWT_SECRET } from '../utils/const';
+import { createAuthResponse, googleClient } from '../utils/auth.utils';
 
 const router: Router = express.Router();
 
@@ -30,51 +31,87 @@ const userSelfOrAdmin = (req: AuthRequest, res: Response, next: Function) => {
 // Public routes
 router.use(rateLimiterMiddleware);
 
-// Register a new user
 router.post('/register', async (req: Request, res: Response) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password } = req.body;
   try {
     const existingUser = await User.findOne({ email: { $eq: email } });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
+
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashedPassword, role: role || 'user' });
+    const user = new User({ 
+      name, 
+      email, 
+      password: hashedPassword, 
+      creationMethod: 'password'
+    });
     await user.save();
-    res.status(201).json(user.apiRepresentation());
+
+    return res.status(201).json(createAuthResponse(user));
   } catch (error) {
     handleErrors(res, error);
   }
 });
 
-// Login a user
 router.post('/login', async (req: Request, res: Response) => {
   const { email, password } = req.body;
   try {
     Logger.debug('Log in request with email:', email);
     const user = await User.findOne({ email: { $eq: email } });
-    if (!user) {
+    if (!user || !user.password) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
-    Logger.debug('User found:', JSON.stringify(user));
-    const isMatch = await bcrypt.compare(password, user.password);
+
+    const isMatch = await bcrypt.compare(password, user.password!);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
-    Logger.debug('Password matched for user:', user.email);
-    const payload = { userId: user._id, role: user.role };
-    const token = jwt.sign(
-      payload,
-      JWT_SECRET as string,
-      { expiresIn: '30d' }
-    );
+
     Logger.debug('User logged in:', user.email);
-    res.status(200).json({ token, user: user.apiRepresentation() });
+    return res.status(200).json(createAuthResponse(user));
   } catch (error) {
     handleErrors(res, error);
   }
 });
 
+router.post('/oauth/google', async (req: Request, res: Response) => {
+  try {
+    const { credential } = req.body;
+    
+    // Verify the Google token and get user info
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: GOOGLE_CLIENT_ID
+    });
+    
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email) {
+      return res.status(400).json({ message: 'Invalid Google token' });
+    }
+
+    // Find or create user
+    let user = await User.findOne({ email: payload.email });
+    const isNewUser = !user;
+    if (!user) {
+      // Create new user
+      user = new User({
+        name: payload.name,
+        email: payload.email,
+        creationMethod: 'google'
+      });
+      await user.save();
+    }
+
+    return res.status(200).json({
+      ...createAuthResponse(user),
+      isNewUser,
+      message: isNewUser ? 'User registered successfully with Google' : 'User logged in successfully with Google'
+    });
+  } catch (error) {
+    handleErrors(res, error);
+  }
+});
 // Protected routes (require authentication)
 router.use(auth);
 
@@ -104,17 +141,53 @@ router.get('/:id', userSelfOrAdmin, async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Update a user by ID (authenticated users can update their own info, admins can update any user's info)
+// Update user route
 router.patch('/:id', userSelfOrAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    if (req.body.password) {
-      req.body.password = await bcrypt.hash(req.body.password, 10);
+    const updateFields = new Set(Object.keys(req.body));
+    const schemaFields = new Set(Object.keys(User.schema.paths));
+    
+    // Remove fields that aren't in the schema
+    const sanitizedData: Record<string, any> = {};
+    for (const field of updateFields) {
+      // Skip the role field unless user is admin
+      if (field === 'role' && req.user?.role !== 'admin') {
+        continue;
+      }
+      
+      // Only include fields that exist in the schema
+      if (schemaFields.has(field)) {
+        sanitizedData[field] = req.body[field];
+      }
     }
-    const updateData = { $set: req.body };
-    const user = await User.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true, });
+
+    // If there's nothing to update after sanitization
+    if (Object.keys(sanitizedData).length === 0) {
+      return res.status(400).json({ message: 'No valid fields to update' });
+    }
+
+    // Handle password update separately to ensure hashing
+    if (sanitizedData.password) {
+      sanitizedData.password = await bcrypt.hash(sanitizedData.password, 10);
+    }
+
+    // Use $set to prevent operators injection
+    const updateData = { $set: sanitizedData };
+
+    // Perform the update with sanitized data
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { 
+        new: true,
+        runValidators: true,
+      }
+    );
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
     res.json(user.apiRepresentation());
   } catch (error) {
     handleErrors(res, error);

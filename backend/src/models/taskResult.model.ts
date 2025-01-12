@@ -3,8 +3,9 @@ import { ExecutionHistoryItem, ITaskResultDocument, ITaskResultModel, NodeRespon
 import { referencesSchema } from './reference.model';
 import mongooseAutopopulate from 'mongoose-autopopulate';
 import { getObjectId, getObjectIdForList } from '../utils/utils';
+import { EncryptionService } from '../utils/encrypt.utils';
 
-// Create a schema for ExecutionHistoryItem
+// ExecutionHistoryItem and NodeResponse schemas remain the same
 const executionHistoryItemSchema = new Schema<ExecutionHistoryItem>({
   parent_task_id: { type: Schema.Types.ObjectId, ref: 'Task' },
   node_name: { type: String, required: true },
@@ -12,7 +13,6 @@ const executionHistoryItemSchema = new Schema<ExecutionHistoryItem>({
   exit_code: { type: Number }
 });
 
-// Create a schema for NodeResponse that extends ExecutionHistoryItem
 const nodeResponseSchema = new Schema<NodeResponse>({
   parent_task_id: { type: Schema.Types.ObjectId, ref: 'Task' },
   node_name: { type: String, required: true },
@@ -21,6 +21,7 @@ const nodeResponseSchema = new Schema<NodeResponse>({
   references: { type: referencesSchema, default: () => ({}) }
 });
 
+// Node middleware remains the same
 function ensureObjectIdForSaveNode(
   this: NodeResponse,
   next: mongoose.CallbackWithoutResultAndOptionalError
@@ -44,13 +45,35 @@ executionHistoryItemSchema.pre('findOneAndUpdate', ensureObjectIdForUpdateNode);
 nodeResponseSchema.pre('save', ensureObjectIdForSaveNode);
 nodeResponseSchema.pre('findOneAndUpdate', ensureObjectIdForUpdateNode);
 
+// Updated TaskResult schema with encrypted task_outputs
 const taskResultSchema = new Schema<ITaskResultDocument, ITaskResultModel>({
   task_name: { type: String, required: true },
   task_id: { type: Schema.Types.ObjectId, ref: 'Task', required: true },
   task_description: { type: String, required: true },
   status: { type: String, enum: ["pending", "complete", "failed"], required: true },
   result_code: { type: Number, required: true },
-  task_outputs: { type: String, default: null },
+  task_outputs: { 
+    type: String, 
+    default: null,
+    set: function(content: string) {
+      if (!content) return content;
+      try {
+        return EncryptionService.getInstance().encrypt(content);
+      } catch (error) {
+        console.error('Encryption error:', error);
+        throw new Error('Failed to encrypt task outputs');
+      }
+    },
+    get: function(encryptedContent: string) {
+      if (!encryptedContent) return encryptedContent;
+      try {
+        return EncryptionService.getInstance().decrypt(encryptedContent);
+      } catch (error) {
+        console.error('Decryption error:', error);
+        throw new Error('Failed to decrypt task outputs');
+      }
+    }
+  },
   task_inputs: { type: Map, of: Schema.Types.Mixed, default: null },
   result_diagnostic: { type: String, default: null },
   usage_metrics: { type: Map, of: Schema.Types.Mixed, default: null },
@@ -59,7 +82,11 @@ const taskResultSchema = new Schema<ITaskResultDocument, ITaskResultModel>({
   embedding: [{ type: Schema.Types.ObjectId, ref: 'EmbeddingChunk'}],
   created_by: { type: Schema.Types.ObjectId, ref: 'User' },
   updated_by: { type: Schema.Types.ObjectId, ref: 'User' }
-}, { timestamps: true });
+}, { 
+  timestamps: true,
+  toJSON: { getters: true },  // Ensure getters are called when converting to JSON
+  toObject: { getters: true } // Ensure getters are called when converting to Object
+});
 
 taskResultSchema.methods.apiRepresentation = function(this: ITaskResultDocument) {
   return {
@@ -102,10 +129,37 @@ function ensureObjectIdForUpdate(
   const update = this.getUpdate() as any;
   if (!update) return next();
   const context = { model: 'TaskResult', field: '' };
+
+  // Handle direct updates
   if (update.embedding) update.embedding = getObjectIdForList(update.embedding, { ...context, field: 'embedding' });
   if (update.created_by) update.created_by = getObjectId(update.created_by, { ...context, field: 'created_by' });
   if (update.updated_by) update.updated_by = getObjectId(update.updated_by, { ...context, field: 'updated_by' });
   if (update.task_id) update.task_id = getObjectId(update.task_id, { ...context, field: 'task_id' });
+  if (update.task_outputs) {
+    try {
+      update.task_outputs = EncryptionService.getInstance().encrypt(update.task_outputs);
+    } catch (error) {
+      console.error('Encryption error during update:', error);
+      throw new Error('Failed to encrypt task outputs during update');
+    }
+  }
+
+  // Handle $set operations
+  if (update.$set) {
+    if (update.$set.embedding) update.$set.embedding = getObjectIdForList(update.$set.embedding, { ...context, field: 'embedding' });
+    if (update.$set.created_by) update.$set.created_by = getObjectId(update.$set.created_by, { ...context, field: 'created_by' });
+    if (update.$set.updated_by) update.$set.updated_by = getObjectId(update.$set.updated_by, { ...context, field: 'updated_by' });
+    if (update.$set.task_id) update.$set.task_id = getObjectId(update.$set.task_id, { ...context, field: 'task_id' });
+    if (update.$set.task_outputs) {
+      try {
+        update.$set.task_outputs = EncryptionService.getInstance().encrypt(update.$set.task_outputs);
+      } catch (error) {
+        console.error('Encryption error during $set update:', error);
+        throw new Error('Failed to encrypt task outputs during $set update');
+      }
+    }
+  }
+
   next();
 }
 

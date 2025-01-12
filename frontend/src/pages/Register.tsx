@@ -11,9 +11,11 @@ import { useApi } from '../contexts/ApiContext';
 import { APIConfig } from '../types/ApiConfigTypes';
 import InitializingDatabase from '../components/ui/registration/InitializingDataBase';
 import CreateAccount from '../components/ui/registration/CreateAccount';
+import GoogleOAuthButton from '../components/ui/registration/GoogleOauth';
+import { GOOGLE_CLIENT_ID } from '../utils/Constants';
 
 const Register = () => {
-  const { register, setNeedsOnboarding, isAuthenticated, initializingDatabase, needsOnboarding } = useAuth();
+  const { register, setNeedsOnboarding, isAuthenticated, initializingDatabase, needsOnboarding, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [userApis, setUserApis] = useState<APIConfig[]>([]);
@@ -80,10 +82,38 @@ const Register = () => {
     }
   };
 
+  // Add this handler for Google OAuth
+  const handleGoogleSuccess = async (credential: string) => {
+    setIsLoading(true);
+    try {
+      await loginWithGoogle(credential);
+      await updateAPIs();
+      setStep(2);
+    } catch (error) {
+      Logger.error('Google OAuth failed:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const steps = [
     {
       label: 'Create Account',
-      content: <CreateAccount onSubmit={handleRegister} />,
+      content: (
+        <>
+          <CreateAccount onSubmit={handleRegister} />
+          {GOOGLE_CLIENT_ID && (
+            <Box className="my-4">
+              <Typography variant="body2" align="center" className="mb-2">
+                Or
+              </Typography>
+              <GoogleOAuthButton
+                onSuccess={handleGoogleSuccess}
+              />
+            </Box>
+          )}
+        </>
+      ),
     },
     {
       label: 'Initializing your database',

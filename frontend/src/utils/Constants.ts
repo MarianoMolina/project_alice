@@ -5,6 +5,7 @@ export const TASK_SIDEBAR_WIDTH_TABLE = 750;
 export const TASK_SIDEBAR_WIDTH_COMPACT = 350;
 
 export const HOST = process.env.REACT_APP_HOST || window.location.hostname;
+export const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || '';
 export const BACKEND_PORT = process.env.REACT_APP_BACKEND_PORT || '3000';
 export const WORKFLOW_PORT = process.env.REACT_APP_WORKFLOW_PORT || '8000';
 export const BACKEND_HOST = process.env.REACT_APP_BACKEND_HOST || 'backend';
