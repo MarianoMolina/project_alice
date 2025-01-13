@@ -1,6 +1,6 @@
 import React, { memo, ReactNode, useMemo } from 'react';
 import { Box } from '@mui/material';
-import Header from '../../components/ui/header/HeaderNew';
+import Header from '../../components/ui/header/Header';
 import useStyles from './MainLayoutStyles';
 import { WavyBackground } from '../../components/ui/aceternity/WavyBackground';
 

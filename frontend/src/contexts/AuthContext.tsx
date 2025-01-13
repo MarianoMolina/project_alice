@@ -7,6 +7,7 @@ import { fetchItem, updateItem } from '../services/api';
 
 interface AuthContextProps {
   isAuthenticated: boolean;
+  isAdmin: boolean;
   initializingDatabase: boolean;
   needsOnboarding: boolean;
   setNeedsOnboarding: (value: boolean) => void;
@@ -30,6 +31,7 @@ const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [initializingDatabase, setInitializingDatabase] = useState<boolean>(false);
   const [needsOnboarding, setNeedsOnboarding] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
@@ -43,6 +45,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (savedUser === 'null') Logger.warn('savedUser is null');
         const parsedUser = JSON.parse(savedUser);
         setUser(parsedUser);
+        if (parsedUser.role === 'admin') setIsAdmin(true);
         setIsAuthenticated(true);
       }
     } catch (error) {
@@ -66,6 +69,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (token) localStorage.setItem('token', token);
 
       setUser(userToSave);
+      if (userToSave.role === 'admin') setIsAdmin(true);
       setIsAuthenticated(true);
     } catch (error) {
       Logger.error('Error saving user data:', error);
@@ -149,6 +153,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     setUser(null);
+    setIsAdmin(false);
     setIsAuthenticated(false);
     setInitializingDatabase(false);
     setNeedsOnboarding(false);
@@ -170,7 +175,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{
-      isAuthenticated, initializingDatabase, needsOnboarding, 
+      isAuthenticated, initializingDatabase, needsOnboarding, isAdmin,
       setNeedsOnboarding,
       user, loading, login, loginAndNavigate, register, logout,
       getToken, updateUser, refreshUserData, loginWithGoogle

@@ -1,13 +1,14 @@
+import { ApiConfigType } from "../utils/ApiUtils";
 import { CheckpointType } from "./ChatTypes";
 import { BasicDBObj, convertToBasicDBObj } from "./CollectionTypes";
 
 export type CreationMethod = 'password' | 'google';
 
-
 export type UserCheckpoints = {
     [CheckpointType.TOOL_CALL]: string;
     [CheckpointType.CODE_EXECUTION]: string;
 };
+
 export interface UserDefaultChatConfig {
     alice_agent: string;
     agent_tools: string[];
@@ -17,11 +18,16 @@ export interface UserDefaultChatConfig {
     default_user_checkpoints: UserCheckpoints;
 }
 
+export interface AdminTools {
+    api_key_map: ApiConfigType;
+}
+
 export interface User extends BasicDBObj {
     name: string;
     email: string;
     role?: 'user' | 'admin';
     default_chat_config?: UserDefaultChatConfig;
+    admin_tools?:  { [key: string]: any };
 }
 
 export const converToUserDefaultChatConfig = (data: any): UserDefaultChatConfig => {

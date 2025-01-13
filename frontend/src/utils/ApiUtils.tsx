@@ -59,6 +59,7 @@ export type ApiConfigType = {
   [ApiName.BARK]: LocalApiConfig;
   [ApiName.PIXART]: LocalApiConfig;
 };
+
 // API capabilities mapping
 export const API_CAPABILITIES: Record<ApiName, Set<ApiType>> = {
   [ApiName.OPENAI]: new Set([
@@ -144,8 +145,6 @@ export const API_CAPABILITIES: Record<ApiName, Set<ApiType>> = {
     ApiType.EMBEDDINGS
   ]),
 };
-
-
 
 export const API_BASE_URLS: Partial<Record<ApiName, string>> = {
   [ApiName.OPENAI]: 'https://api.openai.com/v1',

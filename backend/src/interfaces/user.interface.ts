@@ -14,6 +14,21 @@ export interface IUserDefaultChatConfig {
     default_user_checkpoints: Map<string, Types.ObjectId | IUserCheckpointDocument>;
 }
 
+export enum UserTier {
+    FREE = 'free',
+    PRO = 'pro',
+    ENTERPRISE = 'enterprise'
+}
+
+export interface IUserStats {
+    user_tier: UserTier;
+    log_in_attempts: number;
+    last_log_in_attempt: Date | null;
+    log_in_successes: number;
+    last_log_in_success: Date | null;
+    actions_taken: number;
+}
+
 // Update the IUser interface
 export interface IUser {
     name: string;
@@ -22,6 +37,7 @@ export interface IUser {
     role: 'user' | 'admin';
     creationMethod?: CreationMethod;
     default_chat_config?: IUserDefaultChatConfig;
+    stats?: IUserStats;
 }
 
 export interface IUserMethods {

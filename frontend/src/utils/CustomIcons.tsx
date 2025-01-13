@@ -81,19 +81,19 @@ export const CohereIcon = (props: SvgIconProps) => (
 export const AzureIcon = (props: SvgIconProps) => (
   <SvgIcon {...props} viewBox="-0.4500000000000005 0.38 800.8891043012813 754.2299999999999">
     <linearGradient id="a" gradientUnits="userSpaceOnUse" x1="353.1" x2="107.1" y1="56.3" y2="783">
-      <stop offset="0" stop-color="#114a8b" />
-      <stop offset="1" stop-color="#0669bc" />
+      <stop offset="0" stopColor="#114a8b" />
+      <stop offset="1" stopColor="#0669bc" />
     </linearGradient>
     <linearGradient id="b" gradientUnits="userSpaceOnUse" x1="429.8" x2="372.9" y1="394.9" y2="414.2">
-      <stop offset="0" stop-opacity=".3" />
-      <stop offset=".1" stop-opacity=".2" />
-      <stop offset=".3" stop-opacity=".1" />
-      <stop offset=".6" stop-opacity=".1" />
-      <stop offset="1" stop-opacity="0" />
+      <stop offset="0" stopOpacity=".3" />
+      <stop offset=".1" stopOpacity=".2" />
+      <stop offset=".3" stopOpacity=".1" />
+      <stop offset=".6" stopOpacity=".1" />
+      <stop offset="1" stopOpacity="0" />
     </linearGradient>
     <linearGradient id="c" gradientUnits="userSpaceOnUse" x1="398.4" x2="668.4" y1="35.1" y2="754.4">
-      <stop offset="0" stop-color="#3ccbf4" />
-      <stop offset="1" stop-color="#2892df" />
+      <stop offset="0" stopColor="#3ccbf4" />
+      <stop offset="1" stopColor="#2892df" />
     </linearGradient>
     <path
       d="M266.71.4h236.71L257.69 728.9a37.8 37.8 0 0 1-5.42 10.38c-2.33 3.16-5.14 5.93-8.33 8.22s-6.71 4.07-10.45 5.27-7.64 1.82-11.56 1.82H37.71c-5.98 0-11.88-1.42-17.2-4.16A37.636 37.636 0 0 1 7.1 738.87a37.762 37.762 0 0 1-6.66-16.41c-.89-5.92-.35-11.97 1.56-17.64L230.94 26.07c1.25-3.72 3.08-7.22 5.42-10.38 2.33-3.16 5.15-5.93 8.33-8.22 3.19-2.29 6.71-4.07 10.45-5.27S262.78.38 266.7.38v.01z"

@@ -14,6 +14,9 @@ import {
     unloadLMStudioModel as apiUnloadLMStudioModel,
     LMStudioModel,
     fetchPopulatedItem as apiFetchPopulatedItem,
+    applyApiConfigToUser as apiApplyApiConfigToUser,
+    updateAdminApiKeyMap as apiUpdateAdminApiKeyMap,
+    getAdminApiConfigMap as apiGetAdminApiConfigMap,
 } from '../services/api';
 import {
     executeTask as apiExecuteTask,
@@ -37,6 +40,8 @@ import Logger from '../utils/Logger';
 import { globalEventEmitter } from '../utils/EventEmitter';
 import { UserInteraction } from '../types/UserInteractionTypes';
 import { useAuth } from './AuthContext';
+import { ApiName } from '../types/ApiTypes';
+import { ApiConfigType } from '../utils/ApiUtils';
 
 interface ApiContextType {
     fetchItem: typeof apiFetchItem;
@@ -60,6 +65,9 @@ interface ApiContextType {
     fetchPopulatedItem: typeof apiFetchPopulatedItem;
     validateChatApis: typeof apiValidateChatApis;
     validateTaskApis: typeof apiValidateTaskApis;
+    applyApiConfigToUser: typeof apiApplyApiConfigToUser;
+    updateAdminApiKeyMap: typeof apiUpdateAdminApiKeyMap;
+    getAdminApiConfigMap: typeof apiGetAdminApiConfigMap;
     updateUserInteraction: (
         interactionId: string,
         itemData: Partial<UserInteraction>
@@ -80,7 +88,7 @@ export const useApi = () => {
 export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { addNotification } = useNotification();
     const { selectCardItem, openDialog } = useDialog();
-    const { refreshUserData } = useAuth();
+    const { refreshUserData, isAdmin } = useAuth();
 
     const emitEvent = (eventType: string, collectionName: CollectionName, item: any) => {
         globalEventEmitter.emit(`${eventType}:${collectionName}`, item);
@@ -436,6 +444,46 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     }, [addNotification, refreshUserData]);
 
+    const applyApiConfigToUser = useCallback(async (userId: string, apiNames: ApiName[]): Promise<void> => {
+        try {
+            if (isAdmin) {
+                await apiApplyApiConfigToUser(userId, apiNames);
+                addNotification('API configuration applied successfully', 'success');
+            } else {
+                addNotification('You do not have permission to apply API configurations', 'error');
+            }
+        } catch (error) {
+            addNotification('Error applying API configuration', 'error');
+            Logger.error('Error applying API configuration:', error);
+            throw error;
+        }
+    }, [addNotification, isAdmin]);
+
+    const updateAdminApiKeyMap = useCallback(async (key_map: Partial<ApiConfigType>): Promise<void> => {
+        try {
+            if (isAdmin) {
+                await apiUpdateAdminApiKeyMap(key_map);
+                addNotification('API key map updated successfully', 'success');
+            } else {
+                addNotification('You do not have permission to update the API key map', 'error');
+            }
+        } catch (error) {
+            addNotification('Error updating API key map', 'error');
+            Logger.error('Error updating API key map:', error);
+            throw error;
+        }
+    }, [addNotification, isAdmin]);
+
+    const getAdminApiConfigMap = useCallback(async (mapName?: string): Promise<ApiConfigType> => {
+        try {
+            return await apiGetAdminApiConfigMap(mapName);
+        } catch (error) {
+            addNotification('Error fetching API key map', 'error');
+            Logger.error('Error fetching API key map:', error);
+            throw error;
+        }
+    }, [addNotification]);
+
     const value: ApiContextType = {
         fetchItem: apiFetchItem,
         createItem,
@@ -460,6 +508,9 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         fetchPopulatedItem: apiFetchPopulatedItem,
         validateChatApis: apiValidateChatApis,
         validateTaskApis: apiValidateTaskApis,
+        applyApiConfigToUser,
+        updateAdminApiKeyMap,
+        getAdminApiConfigMap,
     };
 
     return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>;

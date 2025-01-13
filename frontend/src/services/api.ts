@@ -4,9 +4,11 @@ import { MessageType, PopulatedMessage } from '../types/MessageTypes';
 import { CollectionName, CollectionPopulatedType, CollectionType } from '../types/CollectionTypes';
 import { FileReference, FileContentReference } from '../types/FileTypes';
 import { createFileContentReference } from '../utils/FileUtils';
-import Logger from '../utils/Logger';
 import { converters, populatedConverters } from '../utils/Converters';
 import { requestFileTranscript } from './workflowApi';
+import { ApiName } from '../types/ApiTypes';
+import { ApiConfigType } from '../utils/ApiUtils';
+import Logger from '../utils/Logger';
 
 export interface LMStudioModel {
   id: string;
@@ -163,8 +165,6 @@ export const deleteItem = async <T extends CollectionName>(
   }
 };
 
-
-
 export const purgeAndReinitializeDatabase = async (): Promise<void> => {
   try {
     Logger.info('Purging and reinitializing database');
@@ -218,7 +218,6 @@ export const retrieveFile = async (fileId: string): Promise<Blob> => {
   }
 };
 
-
 export const updateMessageInChat = async (chatId: string, updatedMessage: MessageType): Promise<MessageType> => {
   try {
     const response = await dbAxiosInstance.patch(`/chats/${chatId}/update_message`, { message: updatedMessage });
@@ -260,3 +259,52 @@ export const sendMessage = async (chatId: string, message: PopulatedMessage): Pr
     throw error;
   }
 };
+
+export const getAdminApiConfigMap = async (
+  mapName: string = 'upgrade_admin_api_key_map'
+): Promise<ApiConfigType> => {
+  try {
+    Logger.info('Fetching admin API key map:', mapName);
+    const response = await dbAxiosInstance.get(`/users/api-config-map/${mapName}`);
+    Logger.info('Received admin API key map:', response.data);
+    Logger.info('Config:', response.data.configs);
+    return response.data.configs;
+  } catch (error) {
+    Logger.error('Error fetching admin API key map:', error);
+    throw error;
+  }
+}
+
+export const applyApiConfigToUser = async (
+  userId: string,
+  apiNames: ApiName[],
+  mapName: string = 'upgrade_admin_api_key_map'
+): Promise<void> => {
+  try {
+    Logger.debug('Applying API config to user:', userId, 'for APIs:', apiNames);
+    const url = `/users/apply-api-config/${userId}`;
+    const response = await dbAxiosInstance.post(url, { mapName, apiNames });
+    Logger.debug('Successfully applied API config:', response.data);
+  } catch (error) {
+    Logger.error('Error applying API config to user:', error);
+    throw error;
+  }
+};
+
+export const updateAdminApiKeyMap = async (
+  apiKeyMap: Partial<ApiConfigType>,
+  mapName: string = 'upgrade_admin_api_key_map'
+): Promise<void> => {
+  try {
+    const update_obj = {
+      mapName,
+      configs: apiKeyMap
+    };
+    Logger.debug('Updating admin API key map:', JSON.stringify(update_obj, null, 2));
+    const response = await dbAxiosInstance.post(`/users/update-api-config-map`, update_obj);
+    Logger.debug('Successfully updated admin API key map:', response.data);
+  } catch (error) {
+    Logger.error('Error updating admin API key map:', error);
+    throw error;
+  }
+}

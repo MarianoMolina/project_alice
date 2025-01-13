@@ -29,7 +29,7 @@ export enum ApiName {
   DEEPSEEK = 'deepseek',
   LLAMA = 'llama',
   ANTHROPIC = 'anthropic',
-  
+
   GOOGLE_SEARCH = 'google_search',
   REDDIT_SEARCH = 'reddit',
   WIKIPEDIA_SEARCH = 'wikipedia',
@@ -37,7 +37,7 @@ export enum ApiName {
   ARXIV_SEARCH = 'arxiv',
   GOOGLE_KNOWLEDGE_GRAPH = 'google_knowledge_graph',
   WOLFRAM_ALPHA = 'wolfram_alpha',
-  
+
   PIXART_IMG_GEN = 'pixart',
   LM_STUDIO = 'lm_studio',
   CUSTOM = 'Custom',

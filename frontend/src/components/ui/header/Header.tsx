@@ -6,25 +6,20 @@ import {
   Box,
   Tooltip,
   Button,
-  Typography,
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   useMediaQuery,
   useTheme,
-  Divider
+  Avatar
 } from '@mui/material';
-import { useNavigate, useLocation } from 'react-router-dom';
-import LogoutIcon from '@mui/icons-material/Logout';
+import { useNavigate } from 'react-router-dom';
 import MenuIcon from '@mui/icons-material/Menu';
-import CloseIcon from '@mui/icons-material/Close';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { useAuth } from '../../../contexts/AuthContext';
 import useStyles from './HeaderStyles';
 import Logger from '../../../utils/Logger';
 import { getSectionsByNavGroup, siteSections } from '../../../utils/SectionIcons';
+import { NavigationButton } from './NavigationButton';
+import { UserMenu } from './UserMenu';
+import { MobileMenu } from './MobileMenu';
 
 interface NavGroupProps {
   groupIndex: 1 | 2 | 3;
@@ -35,40 +30,30 @@ interface NavGroupProps {
 const Header: React.FC = () => {
   const classes = useStyles();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // 900px
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
-  const location = useLocation();
   const { isAuthenticated, user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
 
   const handleNavigation = (path: string): void => {
     navigate(path);
-    if (isMobile) {
-      setMobileMenuOpen(false);
-    }
+    setMobileMenuOpen(false);
+    setUserMenuAnchor(null);
   };
 
   const handleLogout = (): void => {
     Logger.info('Logging out');
     logout();
     navigate('/login');
-    if (isMobile) {
-      setMobileMenuOpen(false);
-    }
+    setMobileMenuOpen(false);
+    setUserMenuAnchor(null);
   };
 
   const handleGitHubClick = () => {
     window.open('https://github.com/MarianoMolina/project_alice', '_blank');
-    if (isMobile) {
-      setMobileMenuOpen(false);
-    }
-  };
-
-  const isActive = (path: string): boolean => {
-    if (path.endsWith('/')) {
-      return location.pathname.startsWith(path);
-    }
-    return location.pathname === path;
+    setMobileMenuOpen(false);
+    setUserMenuAnchor(null);
   };
 
   const NavGroup: React.FC<NavGroupProps> = ({ groupIndex, children, isMobile }) => (
@@ -77,118 +62,27 @@ const Header: React.FC = () => {
     </Box>
   );
 
-  const renderNavButton = (sectionId: string, isMobileView = false) => {
-    const section = siteSections[sectionId];
-    
-    if (isMobileView) {
-      return (
-        <ListItem 
-          key={section.id}
-          button
-          onClick={() => handleNavigation(section.path)}
-          selected={isActive(section.path)}
-        >
-          <ListItemIcon>
-            <section.icon />
-          </ListItemIcon>
-          <ListItemText primary={section.title} />
-        </ListItem>
-      );
-    }
-
-    return (
-      <Tooltip key={section.id} title={section.title}>
-        <IconButton
-          color="inherit"
-          onClick={() => handleNavigation(section.path)}
-          className={isActive(section.path) ? classes.activeButton : ''}
-        >
-          <section.icon />
-        </IconButton>
-      </Tooltip>
-    );
-  };
-
-  const renderMobileMenu = () => (
-    <Drawer
-      anchor="right"
-      open={mobileMenuOpen}
-      onClose={() => setMobileMenuOpen(false)}
-      classes={{ paper: classes.drawer }}
-    >
-      <Box className={classes.drawerHeader}>
-        <Typography variant="h6">Menu</Typography>
-        <IconButton onClick={() => setMobileMenuOpen(false)}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
-      <Divider />
-      <List className={classes.mobileMenuList}>
-        {renderNavButton('home', true)}
-        <Divider />
-        
-        {isAuthenticated && (
-          <>
-            {[1, 2, 3].map((groupIndex) => (
-              <Box key={groupIndex}>
-                <NavGroup groupIndex={groupIndex as 1 | 2 | 3} isMobile>
-                  {getSectionsByNavGroup(groupIndex as 1 | 2 | 3).map(section =>
-                    renderNavButton(section.id, true)
-                  )}
-                </NavGroup>
-                <Divider />
-              </Box>
-            ))}
-          </>
-        )}
-
-        {isAuthenticated ? (
-          <>
-            {renderNavButton('settings', true)}
-            <ListItem button onClick={handleLogout}>
-              <ListItemIcon>
-                <LogoutIcon />
-              </ListItemIcon>
-              <ListItemText primary="Logout" />
-            </ListItem>
-            <ListItem button onClick={handleGitHubClick}>
-              <ListItemIcon>
-                <GitHubIcon />
-              </ListItemIcon>
-              <ListItemText primary="GitHub Repository" />
-            </ListItem>
-          </>
-        ) : (
-          <>
-            <ListItem button onClick={handleGitHubClick}>
-              <ListItemIcon>
-                <GitHubIcon />
-              </ListItemIcon>
-              <ListItemText primary="GitHub Repository" />
-            </ListItem>
-            <ListItem button onClick={() => handleNavigation('/login')}>
-              <ListItemText primary="Login" />
-            </ListItem>
-          </>
-        )}
-      </List>
-    </Drawer>
-  );
-
   return (
     <AppBar position="static" className={classes.header}>
       <Toolbar className={classes.toolbar}>
         <Box className={classes.leftSection}>
-          {renderNavButton('home')}
+          <NavigationButton
+            section={siteSections['home']}
+            onClick={handleNavigation}
+          />
         </Box>
         
         {isAuthenticated && !isMobile && (
           <Box className={classes.centerSection}>
             {[1, 2, 3].map((groupIndex) => (
               <NavGroup key={groupIndex} groupIndex={groupIndex as 1 | 2 | 3}>
-                {getSectionsByNavGroup(groupIndex as 1 | 2 | 3).map(section => 
-                  renderNavButton(section.id)
-                )}
+                {getSectionsByNavGroup(groupIndex as 1 | 2 | 3).map(section => (
+                  <NavigationButton
+                    key={section.id}
+                    section={section}
+                    onClick={handleNavigation}
+                  />
+                ))}
               </NavGroup>
             ))}
           </Box>
@@ -198,12 +92,17 @@ const Header: React.FC = () => {
           {isAuthenticated ? (
             <>
               {!isMobile && (
-                <>
-                  <Typography variant="body1" className={classes.userEmail}>
-                    {user?.email}
-                  </Typography>
-                  {renderNavButton('settings')}
-                </>
+                <Tooltip title="Account settings">
+                  <IconButton
+                    onClick={(e) => setUserMenuAnchor(e.currentTarget)}
+                    size="small"
+                    sx={{ ml: 2 }}
+                  >
+                    <Avatar sx={{ width: 32, height: 32 }}>
+                      {user?.email?.[0].toUpperCase()}
+                    </Avatar>
+                  </IconButton>
+                </Tooltip>
               )}
               {isMobile ? (
                 <IconButton
@@ -214,27 +113,20 @@ const Header: React.FC = () => {
                   <MenuIcon />
                 </IconButton>
               ) : (
-                <>
-                  <Tooltip title="GitHub Repository">
-                    <IconButton color="inherit" onClick={handleGitHubClick}>
-                      <GitHubIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Logout">
-                    <IconButton color="inherit" onClick={handleLogout}>
-                      <LogoutIcon />
-                    </IconButton>
-                  </Tooltip>
-                </>
+                <Tooltip title="GitHub Repository">
+                  <IconButton color="inherit" onClick={handleGitHubClick}>
+                    <GitHubIcon />
+                  </IconButton>
+                </Tooltip>
               )}
             </>
           ) : (
             <>
-              <Tooltip title="GitHub Repository">
-                <IconButton color="inherit" onClick={handleGitHubClick}>
-                  <GitHubIcon />
-                </IconButton>
-              </Tooltip>
+            <Tooltip title="GitHub Repository">
+              <IconButton color="inherit" onClick={handleGitHubClick}>
+                <GitHubIcon />
+              </IconButton>
+            </Tooltip>
               <Button color="inherit" onClick={() => handleNavigation('/login')}>
                 Login
               </Button>
@@ -242,7 +134,25 @@ const Header: React.FC = () => {
           )}
         </Box>
       </Toolbar>
-      {renderMobileMenu()}
+
+      <UserMenu
+        user={user}
+        anchorEl={userMenuAnchor}
+        onClose={() => setUserMenuAnchor(null)}
+        onLogout={handleLogout}
+        onNavigate={handleNavigation}
+      />
+
+      <MobileMenu
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        onNavigate={handleNavigation}
+        onLogout={handleLogout}
+        onGitHubClick={handleGitHubClick}
+        isAuthenticated={isAuthenticated}
+        user={user}
+        classes={classes}
+      />
     </AppBar>
   );
 };

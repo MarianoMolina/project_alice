@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Api, Factory, Key, Person, SvgIconComponent, Warning } from '@mui/icons-material';
+import { Api, Factory, Key, Person, SvgIconComponent, Warning, AdminPanelSettings } from '@mui/icons-material';
 import { Box } from '@mui/material';
 import { SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
 import { User } from '../types/UserTypes';
@@ -10,6 +10,7 @@ import ApiConfigurations from '../components/ui/user_settings/ApiConfigurations'
 import UserToken from '../components/ui/user_settings/UserToken';
 import DangerZone from '../components/ui/user_settings/DangerZone';
 import LMStudioStatus from '../components/ui/user_settings/LMStudioStatus';
+import AdminTools from '../components/ui/user_settings/AdminTools/AdminTools';
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
 import { useApi } from '../contexts/ApiContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -24,7 +25,7 @@ interface UserSettingsProps {
 const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => {
     const classes = useStyles();
     const { fetchItem } = useApi();
-    const { user } = useAuth();
+    const { user, isAdmin } = useAuth();
     const [userObject, setUserObject] = useState<User | null>(null);
     const [originalUserObject, setOriginalUserObject] = useState<User | null>(null);
     const [activeTab, setActiveTab] = useState('Personal information');
@@ -39,6 +40,7 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
         { name: 'Danger Zone', icon: Warning },
         { name: 'LM Studio Status', icon: LMStudioIcon as SvgIconComponent},
         { name: 'Workflow Module Status', icon: Factory },
+        ...(isAdmin ? [{ name: 'Admin Tools', icon: AdminPanelSettings }] : []),
     ];
 
     useEffect(() => {
@@ -80,6 +82,8 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
                 return <LMStudioStatus />;
             case 'Workflow Module Status':
                 return <WorkflowHealthStatus />;
+            case 'Admin Tools':
+                return isAdmin ? <AdminTools /> : null;
             default:
                 return null;
         }
