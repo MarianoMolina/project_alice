@@ -70,7 +70,7 @@ const ApiCardView: React.FC<ApiComponentProps> = ({
             icon: <Settings />,
             primary_text: "API Config",
             secondary_text: item.api_config ? (
-                <ListItemButton onClick={() => item._id && selectCardItem && selectCardItem('APIConfig', item._id, item)}>
+                <ListItemButton onClick={() => item._id && selectCardItem && selectCardItem('APIConfig', item.api_config._id, item.api_config)}>
                     <ListItemText primary={item.api_config.name} />
                 </ListItemButton>
             ) : "N/A"

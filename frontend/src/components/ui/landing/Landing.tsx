@@ -29,7 +29,7 @@ const Landing: React.FC = () => {
             gridSize: { xs: 12, md: 8 }
         },
         {
-            title: "Model Integration",
+            title: "Use your favorite Models",
             description: "Connect your agents to any model from any of the available APIs",
             icon: <Cloud sx={{ fontSize: 40 }} />,
             gridSize: { xs: 12, md: 4 }
@@ -97,7 +97,7 @@ const Landing: React.FC = () => {
                         />
                     </Box>
                 );
-            case "Model Integration":
+            case "Use your favorite Models":
                 return (
                     <Box sx={{
                         mt: 'auto',

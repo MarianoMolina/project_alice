@@ -13,6 +13,7 @@ FRONTEND_PORT_DOCKER = os.getenv("FRONTEND_PORT_DOCKER", 4000)
 BACKEND_PORT_DOCKER = os.getenv("BACKEND_PORT_DOCKER", 3000)
 HOST = os.getenv("REACT_APP_HOST", "localhost")
 DOCKER_HOST = "host.docker.internal"
+WORKFLOW_SERVICE_KEY = os.getenv("WORKFLOW_SERVICE_KEY", "workflow_service_key")
 FRONTEND_HOST = os.getenv("FRONTEND_HOST", "frontend")
 BACKEND_HOST = os.getenv("REACT_APP_BACKEND_HOST", "backend")
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN")

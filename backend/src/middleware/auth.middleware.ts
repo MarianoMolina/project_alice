@@ -18,8 +18,9 @@ const auth = (req: AuthRequest, res: Response, next: NextFunction): void => {
       
       req.user = {
         userId: decoded.userId,
-        role: decoded.role
+        role: decoded.role,
       };
+      req.effectiveUserId = decoded.userId;
 
       next();
     } catch (jwtError) {

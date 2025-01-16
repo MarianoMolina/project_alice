@@ -1,35 +1,10 @@
-import { StructureType, ApiConfigMapsStructure } from '../interfaces/structuredStorage.interface';
-import { ApiConfigType } from '../interfaces/apiConfig.interface';
+import { StructureType } from '../interfaces/structuredStorage.interface';
 import { Types } from 'mongoose';
 import StructuredStorage from '../models/structuredStorage.model';
-import { ApiName } from '../interfaces/api.interface';
 import APIConfig from '../models/apiConfig.model';
 import Logger from './logger';
+import { ApiConfigMapsStructure, ApiConfigType, ApiName, createEmptyApiConfig } from './api.utils';
 
-function createEmptyApiConfig(): ApiConfigType {
-    return {
-        [ApiName.OPENAI]: { api_key: '', base_url: '' },
-        [ApiName.ANTHROPIC]: { api_key: '', base_url: '' },
-        [ApiName.GEMINI]: { api_key: '', base_url: '' },
-        [ApiName.MISTRAL]: { api_key: '', base_url: '' },
-        [ApiName.COHERE]: { api_key: '', base_url: '' },
-        [ApiName.LLAMA]: { api_key: '', base_url: '' },
-        [ApiName.AZURE]: { api_key: '', base_url: '' },
-        [ApiName.GROQ]: { api_key: '', base_url: '' },
-        [ApiName.DEEPSEEK]: { api_key: '', base_url: '' },
-        [ApiName.GOOGLE_SEARCH]: { api_key: '', cse_id: '' },
-        [ApiName.REDDIT_SEARCH]: { client_id: '', client_secret: '' },
-        [ApiName.WIKIPEDIA_SEARCH]: {},
-        [ApiName.EXA_SEARCH]: { api_key: '' },
-        [ApiName.ARXIV_SEARCH]: {},
-        [ApiName.GOOGLE_KNOWLEDGE_GRAPH]: { api_key: '' },
-        [ApiName.WOLFRAM_ALPHA]: { app_id: '' },
-        [ApiName.LM_STUDIO]: { base_url: '' },
-        [ApiName.CUSTOM]: { api_key: '', base_url: '' },
-        [ApiName.BARK]: { base_url: '' },
-        [ApiName.PIXART_IMG_GEN]: { base_url: '' }
-    };
-}
 /**
  * Updates or creates an API configuration map
  * @param mapKey - The key identifier for the map (e.g., "default_configs")

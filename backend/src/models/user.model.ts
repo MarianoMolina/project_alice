@@ -4,7 +4,7 @@ import { getObjectId, getObjectIdForList, getObjectIdForMap } from '../utils/uti
 import Logger from '../utils/logger';
 
 const userDefaultChatConfigSchema = new Schema({
-  alice_agent: { type: Schema.Types.ObjectId, ref: 'Agent', required: true },
+  alice_agent: { type: Schema.Types.ObjectId, ref: 'Agent' },
   agent_tools: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
   retrieval_tools: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
   data_cluster: { type: Schema.Types.ObjectId, ref: 'DataCluster' },

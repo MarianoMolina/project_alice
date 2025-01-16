@@ -1,7 +1,8 @@
 import mongoose, { Schema } from 'mongoose';
-import { ApiType, IAPIDocument, IAPIModel } from '../interfaces/api.interface';
+import { IAPIDocument, IAPIModel } from '../interfaces/api.interface';
 import { getObjectId } from '../utils/utils';
 import mongooseAutopopulate from 'mongoose-autopopulate';
+import { ApiType } from '../utils/api.utils';
 
 const apiSchema = new Schema<IAPIDocument, IAPIModel>({
   api_type: { type: String, enum: Object.values(ApiType), required: true },
@@ -51,7 +52,6 @@ function ensureObjectIdForUpdate(this: mongoose.Query<any, any>, next: mongoose.
 apiSchema.pre('save', ensureObjectIdForSave);
 apiSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
 apiSchema.plugin(mongooseAutopopulate);
-
 const API = mongoose.model<IAPIDocument, IAPIModel>('API', apiSchema);
 
 export default API;

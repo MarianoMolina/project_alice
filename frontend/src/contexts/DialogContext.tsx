@@ -10,6 +10,7 @@ import PromptParsedDialog from '../components/enhanced/common/enhanced_dialogs/P
 import EnhancedSelectDialog from '../components/enhanced/common/enhanced_dialogs/EnhancedSelectDialog';
 import DialogComponent from '../components/ui/dialog/DialogCustom';
 import FlowChartDialog from '../components/enhanced/common/enhanced_dialogs/TaskFlowchartDialog';
+import EnhancedSelectOptionsDialog from '../components/enhanced/common/enhanced_dialogs/EnhancedSelectOptionsDialog';
 
 // Message Dialog Types
 interface DialogButton {
@@ -90,6 +91,34 @@ interface DialogContextType {
   closeSelectDialog: () => void;
   selectDialogZIndex: number;
 
+  // Enhanced Select options Dialog
+  selectEnhancedOptions: <T extends CollectionElement | CollectionPopulatedElement>(
+    componentType: CollectionName,
+    EnhancedComponent: React.ComponentType<any>,
+    title: string,
+    selectedItems: T[],
+    onSelect: (selectedItem: T) => void,
+    isInteractable: boolean,
+    multiple: boolean,
+    filters?: Record<string, any>
+  ) => void;
+  isEnhancedOptionsDialogOpen: boolean;
+  closeEnhancedOptionsDialog: () => void;
+  updateEnhancedOptionsSelectedItems: <T extends CollectionElement | CollectionPopulatedElement>(
+    newSelectedItems: T[]
+  ) => void;
+  enhancedOptionsDialogProps: {
+    componentType: CollectionName;
+    EnhancedComponent: React.ComponentType<any>;
+    title: string;
+    selectedItems: (CollectionElement | CollectionPopulatedElement)[];
+    onSelect: (selectedItems: CollectionElement | CollectionPopulatedElement) => void;
+    isInteractable: boolean;
+    multiple: boolean;
+    filters?: Record<string, any>;
+  } | null;
+  enhancedOptionsDialogZIndex: number;
+
   // Flowchart Dialog
   selectTaskFlowchartItem: (item: PopulatedTask) => void;
   selectedTaskFlowchartItem: PopulatedTask | null;
@@ -141,6 +170,23 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
   const [selectDialogMultiple, setSelectDialogMultiple] = useState<boolean>(false);
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
 
+  // Enhanced Select Options Dialog State
+  const [enhancedOptionsDialogOpenedAt, setEnhancedOptionsDialogOpenedAt] = useState<number | null>(null);
+
+  // Add enhanced options dialog state
+  const [enhancedOptionsDialogProps, setEnhancedOptionsDialogProps] = useState<{
+    componentType: CollectionName;
+    EnhancedComponent: React.ComponentType<any>;
+    title: string;
+    selectedItems: (CollectionElement | CollectionPopulatedElement)[];
+    onSelect: (selectedItems: CollectionElement | CollectionPopulatedElement) => void;
+    isInteractable: boolean;
+    multiple: boolean;
+    filters?: Record<string, any>;
+  } | null>(null);
+  const [isEnhancedOptionsDialogOpen, setIsEnhancedOptionsDialogOpen] = useState(false);
+
+
   // Flowchart Dialog State
   const [selectedTaskFlowchartItem, setSelectedTaskFlowchartItem] = useState<PopulatedTask | null>(null);
   const [isTaskFlowchartDialogOpen, setIsTaskFlowchartDialogOpen] = useState(false);
@@ -161,7 +207,8 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
     promptDialogZIndex,
     selectDialogZIndex,
     taskFlowchartDialogZIndex,
-    messageDialogZIndex
+    messageDialogZIndex,
+    enhancedOptionsDialogZIndex
   } = useMemo(() => {
     const openTimestamps = [
       { type: 'card', timestamp: cardDialogOpenedAt },
@@ -169,6 +216,7 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
       { type: 'prompt', timestamp: promptDialogOpenedAt },
       { type: 'select', timestamp: selectDialogOpenedAt },
       { type: 'taskFlowchart', timestamp: taskFlowchartDialogOpenedAt },
+      { type: 'enhancedOptions', timestamp: enhancedOptionsDialogOpenedAt },
       // Add message dialog to z-index calculation if it's open
       ...(dialogOptions ? [{ type: 'message', timestamp: Date.now() }] : [])
     ].filter(item => item.timestamp !== null);
@@ -185,7 +233,8 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
       promptDialogZIndex: latestDialog?.type === 'prompt' ? 1300 : 1100,
       selectDialogZIndex: latestDialog?.type === 'select' ? 1300 : 1100,
       taskFlowchartDialogZIndex: latestDialog?.type === 'taskFlowchart' ? 1300 : 1100,
-      messageDialogZIndex: latestDialog?.type === 'message' ? 1300 : 1100
+      messageDialogZIndex: latestDialog?.type === 'message' ? 1300 : 1100,
+      enhancedOptionsDialogZIndex: latestDialog?.type === 'enhancedOptions' ? 1300 : 1100
     };
   }, [
     cardDialogOpenedAt,
@@ -193,6 +242,7 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
     promptDialogOpenedAt,
     selectDialogOpenedAt,
     taskFlowchartDialogOpenedAt,
+    enhancedOptionsDialogOpenedAt,
     dialogOptions
   ]);
 
@@ -275,7 +325,41 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
     setIsSelectDialogOpen(true);
     setSelectDialogOpenedAt(Date.now());
   }, []);
+  const selectEnhancedOptions = useCallback(<T extends CollectionElement | CollectionPopulatedElement>(
+    componentType: CollectionName,
+    EnhancedComponent: React.ComponentType<any>,
+    title: string,
+    selectedItems: T[],
+    onSelect: (selectedItem: T) => void,
+    isInteractable: boolean,
+    multiple: boolean,
+    filters?: Record<string, any>
+  ) => {
+    setEnhancedOptionsDialogProps({
+      componentType,
+      EnhancedComponent,
+      title,
+      selectedItems,
+      onSelect: onSelect as (selectedItems: CollectionElement | CollectionPopulatedElement) => void,
+      isInteractable,
+      multiple,
+      filters
+    });
+    setIsEnhancedOptionsDialogOpen(true);
+    setEnhancedOptionsDialogOpenedAt(Date.now());
+  }, []);
 
+  const updateEnhancedOptionsSelectedItems = useCallback(<T extends CollectionElement | CollectionPopulatedElement>(
+    newSelectedItems: T[]
+  ) => {
+    setEnhancedOptionsDialogProps(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        selectedItems: newSelectedItems
+      };
+    });
+  }, []);
   const selectTaskFlowchartItem = useCallback((item: PopulatedTask) => {
     setSelectedTaskFlowchartItem(item);
     setIsTaskFlowchartDialogOpen(true);
@@ -318,6 +402,12 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
     setSelectDialogMultiple(false);
     setIsSelectDialogOpen(false);
     setSelectDialogOpenedAt(null);
+  }, []);
+
+  const closeEnhancedOptionsDialog = useCallback(() => {
+    setEnhancedOptionsDialogProps(null);
+    setIsEnhancedOptionsDialogOpen(false);
+    setEnhancedOptionsDialogOpenedAt(null);
   }, []);
 
   const closeTaskFlowchartDialog = useCallback(() => {
@@ -368,6 +458,7 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
         selectDialog,
         selectedComponentType,
         selectedEnhancedView,
+        updateEnhancedOptionsSelectedItems,
         selectedItems,
         onSelectCallback,
         selectDialogTitle,
@@ -376,6 +467,13 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
         isSelectDialogOpen,
         closeSelectDialog,
         selectDialogZIndex,
+
+        // Select Options Dialog
+        selectEnhancedOptions,
+        enhancedOptionsDialogProps,
+        isEnhancedOptionsDialogOpen,
+        closeEnhancedOptionsDialog,
+        enhancedOptionsDialogZIndex,
 
         // Flowchart Dialog
         selectTaskFlowchartItem,
@@ -391,6 +489,7 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
         <EnhancedFlexibleDialog />
         <PromptParsedDialog />
         <EnhancedSelectDialog />
+        <EnhancedSelectOptionsDialog />
         <FlowChartDialog />
         {children}
       </ApiProvider>

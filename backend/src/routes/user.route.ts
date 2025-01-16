@@ -10,13 +10,12 @@ import { purgeAndReinitialize } from '../utils/purge.utils';
 import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 import { GOOGLE_CLIENT_ID } from '../utils/const';
 import { createAuthResponse, googleClient } from '../utils/auth.utils';
-import { ApiName } from '../interfaces/api.interface';
 import { applyApiConfigFromMap, upsertApiConfigMap } from '../utils/structuredStorage.utils';
-import { ApiConfigType } from '../interfaces/apiConfig.interface';
 import { Types } from 'mongoose';
 import StructuredStorage from '../models/structuredStorage.model';
 import { StructureType } from '../interfaces/structuredStorage.interface';
 import { createUserWithRole, UserStatsManager } from '../utils/user.utils';
+import { ApiConfigType, ApiName } from '../utils/api.utils';
 
 const router: Router = express.Router();
 
@@ -208,7 +207,7 @@ router.patch('/:id', userSelfOrAdmin, async (req: AuthRequest, res: Response) =>
 
 router.post('/purge-and-reinitialize', auth, async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.effectiveUserId;
 
     if (!userId) {
       return res.status(401).json({ message: 'Unauthorized' });
@@ -394,4 +393,5 @@ router.get(
     }
   }
 );
+
 export default router;

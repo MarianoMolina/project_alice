@@ -89,8 +89,8 @@ API_CONFIG_TYPES: Dict[ApiName, Dict] = {
     ApiName.GOOGLE_KNOWLEDGE_GRAPH: ExaConfig,
     ApiName.WOLFRAM_ALPHA: WolframConfig,
     ApiName.LM_STUDIO: LocalApiConfig,
-    ApiName.BARK: LocalApiConfig,
-    ApiName.PIXART: LocalApiConfig,
+    ApiName.BARK: NoConfig,
+    ApiName.PIXART: NoConfig,
 }
 
 # Map of ApiName to supported ApiTypes

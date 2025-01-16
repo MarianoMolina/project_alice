@@ -3,6 +3,9 @@ import mongoose from 'mongoose';
 import 'mongoose-schema-jsonschema';
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
+import { EncryptionService } from './utils/encrypt.utils';
+import { MONGODB_URI, ENCRYPTION_KEY } from './utils/const';
+EncryptionService.initialize(ENCRYPTION_KEY);
 import ModelRoutes from './routes/model.route';
 import AgentRoutes from './routes/agent.route';
 import TaskRoutes from './routes/task.route';
@@ -25,13 +28,11 @@ import UserCheckpointRoutes from './routes/userCheckpoint.route';
 import UserInteractionRoutes from './routes/userInteraction.route';
 import EmbeddingChunkRoutes from './routes/embeddingChunk.route';
 import DataClusterRoutes from './routes/dataCluster.route';
+import WorkflowRoutes from './routes/workflow.route';
 import ToolCallRoutes from './routes/toolCall.route';
 import CodeExecutionRoutes from './routes/codeExecution.route';
 import APIConfigRoutes from './routes/apiConfig.route';
 import './models';
-import { MONGODB_URI, ENCRYPTION_KEY } from './utils/const';
-import { EncryptionService } from './utils/encrypt.utils';
-EncryptionService.initialize(ENCRYPTION_KEY);
 
 dotenv.config();
 
@@ -62,6 +63,7 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 // Health route should be registered before other routes
 app.use('/lm_studio', LmStudioRoute);
+app.use('/api/workflow', WorkflowRoutes);
 app.use('/api/health', HealthRoutes);
 app.use('/api/apis', APIRoutes);
 app.use('/api/agents', AgentRoutes);

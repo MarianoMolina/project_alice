@@ -4,92 +4,16 @@ import {
     IStructuredStorageDocument,
     IStructuredStorageModel,
     StructureType,
-    StructureDataType,
-    ApiConfigMapsStructure
+    StructureDataType
 } from '../interfaces/structuredStorage.interface';
 import { getObjectId } from '../utils/utils';
-import { ApiName } from '../interfaces/api.interface';
-import { ApiConfigType } from '../interfaces/apiConfig.interface';
-import { encryptedDataPlugin } from '../utils/apiConfig.utils';
+import { validateApiConfigMap } from '../utils/api.utils';
+import { EncryptionService } from '../utils/encrypt.utils';
 
-// Type guard for checking if an object is a valid ApiConfigType
-const isApiConfigMap = (data: unknown): data is ApiConfigMapsStructure => {
-    if (typeof data !== 'object' || data === null) return false;
-
-    const obj = data as Record<string, ApiConfigType>;
-
-    // Check each key-value pair in the object
-    return Object.entries(obj).every(([key, apiConfig]) => {
-        // Check if key is string and apiConfig is an object
-        if (typeof key !== 'string' || typeof apiConfig !== 'object' || apiConfig === null) {
-            return false;
-        }
-
-        // For each API config object, validate its structure based on api_name
-        return Object.entries(apiConfig).every(([apiName, config]) => {
-            // Validate that the apiName is valid
-            if (!Object.values(ApiName).includes(apiName as ApiName)) {
-                return false;
-            }
-
-            // Validate that config matches its expected type
-            switch (apiName as ApiName) {
-                case ApiName.OPENAI:
-                case ApiName.ANTHROPIC:
-                case ApiName.GEMINI:
-                case ApiName.MISTRAL:
-                case ApiName.COHERE:
-                case ApiName.LLAMA:
-                case ApiName.AZURE:
-                case ApiName.GROQ:
-                case ApiName.DEEPSEEK:
-                case ApiName.CUSTOM:
-                    return 'api_key' in config && 'base_url' in config &&
-                        typeof config.api_key === 'string' &&
-                        typeof config.base_url === 'string';
-
-                case ApiName.GOOGLE_SEARCH:
-                    return 'api_key' in config && 'cse_id' in config &&
-                        typeof config.api_key === 'string' &&
-                        typeof config.cse_id === 'string';
-
-                case ApiName.REDDIT_SEARCH:
-                    return 'client_id' in config && 'client_secret' in config &&
-                        typeof config.client_id === 'string' &&
-                        typeof config.client_secret === 'string';
-
-                case ApiName.WIKIPEDIA_SEARCH:
-                case ApiName.ARXIV_SEARCH:
-                    return Object.keys(config).length === 0;
-
-                case ApiName.EXA_SEARCH:
-                case ApiName.GOOGLE_KNOWLEDGE_GRAPH:
-                    return 'api_key' in config &&
-                        typeof config.api_key === 'string';
-
-                case ApiName.WOLFRAM_ALPHA:
-                    return 'app_id' in config &&
-                        typeof config.app_id === 'string';
-
-                case ApiName.LM_STUDIO:
-                case ApiName.BARK:
-                case ApiName.PIXART_IMG_GEN:
-                    return 'base_url' in config &&
-                        typeof config.base_url === 'string';
-
-                default:
-                    return false;
-            }
-        });
-    });
-};
-
-// Validation functions for each structure type
 const structureValidators: {
     [K in StructureType]: (data: unknown) => data is StructureDataType[K]
 } = {
-    [StructureType.API_CONFIG_MAPS]: isApiConfigMap
-    // Add validators for other structure types here
+    [StructureType.API_CONFIG_MAPS]: validateApiConfigMap
 };
 
 const structuredStorageSchema = new Schema<IStructuredStorageDocument>({
@@ -114,7 +38,26 @@ const structuredStorageSchema = new Schema<IStructuredStorageDocument>({
                 return validatorFn(value);
             },
             message: 'Invalid data structure for the specified type'
-        }]
+        }],
+        set: function(this: IStructuredStorageDocument & {type: StructureType}, data: unknown) {
+            if (!data) return data;
+            // Now properly typed
+            const validatorFn = structureValidators[this.type];
+            if (!validatorFn(data)) {
+                throw new Error('Invalid data structure for the specified type');
+            }
+            const stringData = typeof data === 'string' ? data : JSON.stringify(data);
+            return EncryptionService.getInstance().encrypt(stringData);
+        },
+        get: function(encryptedData: string) {
+            if (!encryptedData) return encryptedData;
+            const decrypted = EncryptionService.getInstance().decrypt(encryptedData);
+            try {
+                return JSON.parse(decrypted);
+            } catch {
+                return decrypted;
+            }
+        }
     },
     is_active: {
         type: Boolean,
@@ -133,7 +76,9 @@ const structuredStorageSchema = new Schema<IStructuredStorageDocument>({
     }
 }, {
     timestamps: true,
-    strict: true
+    strict: true,
+    toJSON: { getters: true },
+    toObject: { getters: true }
 });
 
 // Add methods
@@ -177,7 +122,6 @@ function ensureObjectIdForUpdate(
     if (update.updated_by) update.updated_by = getObjectId(update.updated_by, { ...context, field: 'updated_by' });
     next();
 }
-structuredStorageSchema.plugin(encryptedDataPlugin, { fields: ['data'] });
 structuredStorageSchema.pre('save', ensureObjectId);
 structuredStorageSchema.pre('findOneAndUpdate', ensureObjectIdForUpdate);
 

@@ -6,11 +6,13 @@ import {
     Divider,
     Typography,
     CircularProgress,
+    TextField,
+    Button,
 } from '@mui/material';
+import { Add as AddIcon } from '@mui/icons-material';
 import { UserListView } from './UserListView';
 import { ApiName } from '../../../../types/ApiTypes';
-import { ApiConfigType } from '../../../../utils/ApiUtils';
-import { initializeApiConfigMap } from './AdminUtils';
+import { ApiConfigType, initializeApiConfigMap } from '../../../../utils/ApiUtils';
 import AdminApiConfigForm from './ApiConfigForm';
 import { useApi } from '../../../../contexts/ApiContext';
 import { User } from '../../../../types/UserTypes';
@@ -20,81 +22,159 @@ import Logger from '../../../../utils/Logger';
 export const AdminTools: React.FC = () => {
     const { addNotification } = useNotification();
     const { fetchItem, applyApiConfigToUser, updateAdminApiKeyMap, getAdminApiConfigMap } = useApi();
+    
+    // State for API configuration
     const [apiConfig, setApiConfig] = useState<ApiConfigType>(initializeApiConfigMap());
     const [users, setUsers] = useState<User[]>([]);
     const [enabledApis, setEnabledApis] = useState<Set<ApiName>>(
         new Set(Object.keys(apiConfig) as ApiName[])
     );
+    
+    // State for loading indicators
     const [loading, setLoading] = useState(false);
     const [updateLoading, setUpdateLoading] = useState(false);
+    
+    // State for map selection
+    const [currentMapName, setCurrentMapName] = useState('upgrade_admin_api_key_map');
+    const [newMapName, setNewMapName] = useState('');
+    const [isCreatingNewMap, setIsCreatingNewMap] = useState(false);
+
+    // Load data based on selected map
+    const loadData = useCallback(async (mapName: string) => {
+        setUpdateLoading(true);
+        Logger.info('Starting data load for map:', mapName);
+        
+        try {
+            const [usersData, config] = await Promise.all([
+                fetchItem('users') as Promise<User[]>,
+                getAdminApiConfigMap(mapName)
+            ]);
+            
+            Logger.info('Users loaded:', usersData);
+            Logger.info('Config loaded:', config);
+            
+            setUsers(usersData);
+            
+            if (config) {
+                Logger.info('Setting config state:', config);
+                setApiConfig(config);
+                const newEnabledApis = new Set(Object.keys(config) as ApiName[]);
+                Logger.info('Setting enabled APIs:', Array.from(newEnabledApis));
+                setEnabledApis(newEnabledApis);
+            }
+        } catch (error) {
+            Logger.error('Load error:', error);
+            addNotification('Failed to load data', 'error');
+        } finally {
+            setUpdateLoading(false);
+            Logger.info('Loading complete');
+        }
+    }, [fetchItem, addNotification, getAdminApiConfigMap]);
 
     useEffect(() => {
-        const loadData = async () => {
-            setUpdateLoading(true);
-            Logger.info('Starting data load...');
-            
-            try {
-                const [usersData, config] = await Promise.all([
-                    fetchItem('users') as Promise<User[]>,
-                    getAdminApiConfigMap()
-                ]);
-                
-                Logger.info('Users loaded:', usersData);
-                Logger.info('Config loaded:', config);
-                
-                setUsers(usersData);
-                
-                if (config) {
-                    Logger.info('Setting config state:', config);
-                    setApiConfig(config);
-                    const newEnabledApis = new Set(Object.keys(config) as ApiName[]);
-                    Logger.info('Setting enabled APIs:', Array.from(newEnabledApis));
-                    setEnabledApis(newEnabledApis);
-                }
-            } catch (error) {
-                Logger.error('Load error:', error);
-                addNotification('Failed to load data', 'error');
-            } finally {
-                setUpdateLoading(false);
-                Logger.info('Loading complete');
-            }
-        };
-    
-        loadData();
-    }, [fetchItem, addNotification, getAdminApiConfigMap]);
+        loadData(currentMapName);
+    }, [loadData, currentMapName]);
 
     // Handle API config changes and save
     const handleSaveConfig = useCallback(async (newConfig: ApiConfigType, newEnabledApis: Set<ApiName>) => {
         setLoading(true);
         try {
-            await updateAdminApiKeyMap(newConfig);
+            await updateAdminApiKeyMap(newConfig, currentMapName);
             setApiConfig(newConfig);
             setEnabledApis(newEnabledApis);
-            addNotification('API configuration saved successfully','success');
+            addNotification('API configuration saved successfully', 'success');
         } catch (error) {
             addNotification('Failed to save API configuration', 'error');
         } finally {
             setLoading(false);
         }
-    }, [updateAdminApiKeyMap, addNotification]);
+    }, [updateAdminApiKeyMap, addNotification, currentMapName]);
 
     // Handle user API updates
     const handleUpdateUserApis = useCallback(async (userId: string) => {
         setUpdateLoading(true);
         try {
             const enabledApisArray = Array.from(enabledApis);
-            await applyApiConfigToUser(userId, enabledApisArray);
+            await applyApiConfigToUser(userId, enabledApisArray, currentMapName);
             addNotification('User APIs updated successfully', 'success');
         } catch (error) {
             addNotification('Failed to update user APIs', 'error');
         } finally {
             setUpdateLoading(false);
         }
-    }, [applyApiConfigToUser, addNotification, enabledApis]);
+    }, [applyApiConfigToUser, addNotification, enabledApis, currentMapName]);
+
+    // Handle creating new map
+    const handleCreateNewMap = async () => {
+        if (!newMapName.trim()) {
+            addNotification('Please enter a map name', 'error');
+            return;
+        }
+
+        try {
+            // Initialize new map with default config
+            await updateAdminApiKeyMap(initializeApiConfigMap(), newMapName);
+            setCurrentMapName(newMapName);
+            setIsCreatingNewMap(false);
+            setNewMapName('');
+            addNotification('New API key map created successfully', 'success');
+        } catch (error) {
+            addNotification('Failed to create new API key map', 'error');
+        }
+    };
 
     return (
         <Box>
             <Grid container spacing={3}>
+                {/* Map Selection Section */}
+                <Grid item xs={12}>
+                    <Paper elevation={0} variant="outlined" sx={{ p: 2}}>
+                        <Box display="flex" alignItems="center" gap={2}>
+                            <TextField
+                                label="Current API Key Map"
+                                value={currentMapName}
+                                onChange={(e) => setCurrentMapName(e.target.value)}
+                                sx={{ flexGrow: 1 }}
+                            />
+                            <Button
+                                variant="outlined"
+                                startIcon={<AddIcon />}
+                                onClick={() => setIsCreatingNewMap(true)}
+                            >
+                                New Map
+                            </Button>
+                        </Box>
+
+                        {isCreatingNewMap && (
+                            <Box mt={2} display="flex" alignItems="center" gap={2}>
+                                <TextField
+                                    label="New Map Name"
+                                    value={newMapName}
+                                    onChange={(e) => setNewMapName(e.target.value)}
+                                    fullWidth
+                                    placeholder="Enter new map name"
+                                />
+                                <Button
+                                    variant="contained"
+                                    onClick={handleCreateNewMap}
+                                    disabled={!newMapName.trim()}
+                                >
+                                    Create
+                                </Button>
+                                <Button
+                                    variant="outlined"
+                                    onClick={() => {
+                                        setIsCreatingNewMap(false);
+                                        setNewMapName('');
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                            </Box>
+                        )}
+                    </Paper>
+                </Grid>
+
                 {/* API Configuration Section */}
                 <Grid item xs={12} lg={8}>
                     <Paper
@@ -180,6 +260,7 @@ export const AdminTools: React.FC = () => {
                                     )}
                                     onUpdateUserApis={handleUpdateUserApis}
                                     isUpdating={updateLoading}
+                                    canToggleEdit={true}
                                 />
                             )}
                         </Box>
@@ -189,5 +270,3 @@ export const AdminTools: React.FC = () => {
         </Box>
     );
 };
-
-export default AdminTools;

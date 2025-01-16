@@ -32,6 +32,7 @@ CMD curl -f http://${REACT_APP_BACKEND_HOST}:${BACKEND_PORT_DOCKER}/api/health |
 # Switch to the user with UID 1000
 USER 1000
 ENV NODE_ENV=development
-
+ENV CHOKIDAR_USEPOLLING=true
+ENV WATCHPACK_POLLING=true
 # Start the Node.js application
 CMD ["sh", "-c", "npm run build && nodemon --watch src --ext ts --exec 'npm run build && node dist/index.js'"]

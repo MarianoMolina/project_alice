@@ -34,13 +34,11 @@ const UserCheckpointManager: React.FC<UserCheckpointManagerProps> = ({
     userCheckpoints,
     availableNodes,
     onChange,
-    isEditMode,
-    fetchPopulatedItem
+    isEditMode
 }) => {
     const isMobile = useMediaQuery('(max-width:900px)');
     const [rows, setRows] = useState<CheckpointRow[]>([]);
     const [error, setError] = useState<string | null>(null);
-    const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
 
     // Initialize rows from existing checkpoints
     useEffect(() => {
@@ -73,15 +71,12 @@ const UserCheckpointManager: React.FC<UserCheckpointManagerProps> = ({
         });
     };
 
-    const handleCheckpointSelect = async (rowId: string, selectedIds: string[]) => {
+    const handleCheckpointSelect = async (rowId: string, selectedIds: UserCheckpoint[]) => {
         try {
             if (selectedIds.length > 0) {
-                const result = await fetchPopulatedItem('usercheckpoints', selectedIds[0]);
-                const checkpoint = Array.isArray(result) ? result[0] : result;
-
                 setRows(prevRows => {
                     const newRows = prevRows.map(row =>
-                        row.id === rowId ? { ...row, checkpoint: checkpoint as UserCheckpoint } : row
+                        row.id === rowId ? { ...row, checkpoint: selectedIds[0] as UserCheckpoint } : row
                     );
                     updateParentState(newRows);
                     return newRows;
@@ -197,10 +192,7 @@ const UserCheckpointManager: React.FC<UserCheckpointManagerProps> = ({
                                     onSelect={(ids) => handleCheckpointSelect(row.id, ids)}
                                     isInteractable={isEditMode}
                                     label="Select Checkpoint"
-                                    accordionEntityName={`checkpoint-${row.id}`}
                                     showCreateButton={true}
-                                    activeAccordion={activeAccordion}
-                                    onAccordionToggle={setActiveAccordion}
                                     description="Select a checkpoint to be used at this node. When the node is reached during execution, the user checkpoint will trigger and create a User Interaction request, stopping the execution until the user feedback is received."
                                 />
                             )}

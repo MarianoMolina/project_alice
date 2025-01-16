@@ -5,7 +5,7 @@ from typing import Dict, Any, Optional, Literal, Union
 from pydantic import BaseModel, Field, ConfigDict
 from workflow.core.tasks import available_task_types
 from workflow.core import AliceChat, AliceTask, API, MessageDict, FileReference, FileContentReference
-from workflow.util.const import BACKEND_PORT, DOCKER_HOST
+from workflow.util.const import BACKEND_PORT, DOCKER_HOST, WORKFLOW_SERVICE_KEY
 from workflow.core.data_structures import EntityType
 from workflow.util import LOGGER
 
@@ -90,6 +90,12 @@ class BackendAPI(BaseModel):
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.user_data.get('user_token')}"
         }
+    def _get_headers_workflow(self):
+        return {
+            'Content-Type': 'application/json',
+            'X-Workflow-Service-Key': WORKFLOW_SERVICE_KEY,
+            'X-User-Context': self.user_data.get('user_token')
+        }
 
     # Function to preprocess the data
     async def preprocess_data(self, data):
@@ -125,25 +131,19 @@ class BackendAPI(BaseModel):
                 LOGGER.error(f"Error retrieving tasks: {e}")
                 return {}
 
-    async def get_apis(self, api_id: Optional[str] = None) -> Dict[str, API]:
-        if api_id is None:
-            url = f"{self.base_url}/apis"
-        else:
-            url = f"{self.base_url}/apis/{api_id}"
-        headers = self._get_headers()
+    async def get_apis(self) -> Dict[str, API]:
+        url = f"{self.base_url}/workflow/api_request"
+        headers = self._get_headers_workflow()
         
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.get(url, headers=headers) as response:
                     response.raise_for_status()
-                    apis = await response.json()
-                    
-                    if isinstance(apis, list):
-                        apis = [await self.preprocess_data(api) for api in apis]
-                        return {api["_id"]: API(**api) for api in apis}
-                    else:
-                        apis = await self.preprocess_data(apis)
-                        return {apis["_id"]: API(**apis)}
+                    response_object = await response.json()
+                    if response_object.get("message") != "Success":
+                        raise ValueError(f"Failed to retrieve APIs: {response_object.get('message')}")
+                    apis = [await self.preprocess_data(api) for api in response_object.get("apis")]
+                    return {api["_id"]: API(**api) for api in apis}
             except aiohttp.ClientError as e:
                 LOGGER.error(f"Error retrieving APIs: {e}")
                 return {}

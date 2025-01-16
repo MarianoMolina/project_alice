@@ -1,8 +1,8 @@
 import mongoose, { Schema } from 'mongoose';
 import { IModelConfig, IModelDocument, IModelModel, ModelCosts, ModelType } from '../interfaces/model.interface';
-import { ApiName } from '../interfaces/api.interface';
 import { getObjectId } from '../utils/utils';
 import mongooseAutopopulate from 'mongoose-autopopulate';
+import { ApiName } from '../utils/api.utils';
 
 const DEFAULT_MODEL_CONFIG: IModelConfig = {
   ctx_size: 4096, 

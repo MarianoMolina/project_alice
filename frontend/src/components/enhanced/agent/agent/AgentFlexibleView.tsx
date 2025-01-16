@@ -75,10 +75,9 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
         }
     }, [item, handleDelete]);
 
-    const handleModelChange = useCallback(async (selectedIds: string[]) => {
+    const handleModelChange = useCallback(async (models: AliceModel[]) => {
         const updatedModels: { [key in ModelType]?: AliceModel } = {};
-        for (const id of selectedIds) {
-            const model = await fetchPopulatedItem('models', id) as AliceModel;
+        for (const model of models) {
             if (model && model.model_type) {
                 updatedModels[model.model_type] = model;
             }
@@ -86,12 +85,8 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
         setForm(prevForm => ({ ...prevForm, models: updatedModels }));
     }, [fetchPopulatedItem]);
 
-    const handlePromptChange = useCallback(async (selectedIds: string[]) => {
-        let updatedSystemMessage: Prompt | undefined;
-        if (selectedIds.length > 0) {
-            updatedSystemMessage = await fetchPopulatedItem('prompts', selectedIds[0]) as Prompt;
-        }
-        setForm(prevForm => ({ ...prevForm, system_message: updatedSystemMessage }));
+    const handlePromptChange = useCallback(async (prompts: Prompt[]) => {
+        setForm(prevForm => ({ ...prevForm, system_message: prompts[0] }));
     }, [fetchPopulatedItem]);
 
     const handleAccordionToggle = useCallback((accordion: string | null) => {
@@ -111,11 +106,7 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             onSelect={handlePromptChange}
             isInteractable={isEditMode}
             label="Select System Message"
-            activeAccordion={activeAccordion}
             description='The system message that the agent will use to respond to the user.'
-            onAccordionToggle={handleAccordionToggle}
-            onView={(id) => selectCardItem("Prompt", id)}
-            accordionEntityName="system-message"
         />
     ), [form.system_message, handlePromptChange, isEditMode, activeAccordion, handleAccordionToggle, selectCardItem]);
 
@@ -129,10 +120,6 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             multiple
             description='The models that the agent will use to respond to the user. Can have one model per model type.'
             label="Select Models"
-            activeAccordion={activeAccordion}
-            onAccordionToggle={handleAccordionToggle}
-            onView={(id) => selectCardItem("Model", id)}
-            accordionEntityName="models"
         />
     ), [form.models, handleModelChange, isEditMode, activeAccordion, handleAccordionToggle, selectCardItem]);
 

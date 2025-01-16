@@ -3,6 +3,7 @@ dotenv.config();
 
 export const MONGODB_URI = process.env.MONGODB_URI || "mongodb://mongo/alice_database"
 export const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || "encryption_key"
+export const WORKFLOW_SERVICE_KEY = process.env.WORKFLOW_SERVICE_KEY || "workflow_service_key";
 export const PORT = process.env.REACT_APP_BACKEND_PORT || 3000
 export const LM_STUDIO_URL = process.env.LM_STUDIO_URL || 'host.docker.internal:1234';
 export const JWT_SECRET = process.env.JWT_SECRET

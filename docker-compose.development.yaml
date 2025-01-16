@@ -52,12 +52,13 @@ services:
   workflow:
     build:
       context: ./workflow
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     env_file:
       - .env
     ports:
       - "${REACT_APP_WORKFLOW_PORT}:${WORKFLOW_PORT_DOCKER}"
     volumes:
+      - ./workflow:/app/workflow:consistent  
       - /var/run/docker.sock:/var/run/docker.sock
       - logs:/app/logs
       - shared-uploads:/app/shared-uploads:ro
@@ -74,6 +75,7 @@ services:
     environment:
       - PYTHONPATH=/app
       - REDIS_URL=redis://redis:6379/0
+      - WATCHDOG_POLLING=true
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:

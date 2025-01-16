@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Container, Typography, Box, Stepper, Step, StepLabel, StepContent, CircularProgress } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -10,9 +10,7 @@ import { useDialog } from '../contexts/DialogContext';
 import { useApi } from '../contexts/ApiContext';
 import { APIConfig } from '../types/ApiConfigTypes';
 import InitializingDatabase from '../components/ui/registration/InitializingDataBase';
-import CreateAccount from '../components/ui/registration/CreateAccount';
-import GoogleOAuthButton from '../components/ui/registration/GoogleOauth';
-import { GOOGLE_CLIENT_ID } from '../utils/Constants';
+import LoginCard from '../components/ui/registration/LoginCard';
 
 const Register = () => {
   const { register, setNeedsOnboarding, isAuthenticated, initializingDatabase, needsOnboarding, loginWithGoogle } = useAuth();
@@ -96,22 +94,21 @@ const Register = () => {
       setIsLoading(false);
     }
   };
+  const handleSubmit = async ({ name, email, password }: { name?: string; email: string; password: string }) => {
+    if (name) {
+      await handleRegister(name, email, password);
+    }
+  };
   const steps = [
     {
-      label: 'Create Account',
+      label: 'Register to create your account',
       content: (
         <>
-          <CreateAccount onSubmit={handleRegister} />
-          {GOOGLE_CLIENT_ID && (
-            <Box className="my-4">
-              <Typography variant="body2" align="center" className="mb-2">
-                Or
-              </Typography>
-              <GoogleOAuthButton
-                onSuccess={handleGoogleSuccess}
-              />
-            </Box>
-          )}
+          <LoginCard
+            cardType="register"
+            onSubmit={handleSubmit}
+            onGoogleSuccess={handleGoogleSuccess}
+          />
         </>
       ),
     },
@@ -132,7 +129,7 @@ const Register = () => {
       ),
     },
     {
-      label: 'Complete',
+      label: 'Complete!',
       content: isLoading ? (
         <CircularProgress size={24} />
       ) : (

@@ -25,7 +25,7 @@ const customRouter = Router();
 customRouter.patch('/:chatId/add_message', async (req: AuthRequest, res: Response) => {
   const { chatId } = req.params;
   const message: Partial<IMessageDocument> = req.body.message;
-  const userId = req.user?.userId;
+  const userId = req.effectiveUserId;
  
   try {
     if (!userId) {

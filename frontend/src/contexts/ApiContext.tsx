@@ -41,7 +41,8 @@ import { globalEventEmitter } from '../utils/EventEmitter';
 import { UserInteraction } from '../types/UserInteractionTypes';
 import { useAuth } from './AuthContext';
 import { ApiName } from '../types/ApiTypes';
-import { ApiConfigType } from '../utils/ApiUtils';
+import { ApiConfigType, initializeApiConfigMap } from '../utils/ApiUtils';
+import { AxiosError } from 'axios';
 
 interface ApiContextType {
     fetchItem: typeof apiFetchItem;
@@ -444,10 +445,10 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     }, [addNotification, refreshUserData]);
 
-    const applyApiConfigToUser = useCallback(async (userId: string, apiNames: ApiName[]): Promise<void> => {
+    const applyApiConfigToUser = useCallback(async (userId: string, apiNames: ApiName[], mapName?: string): Promise<void> => {
         try {
             if (isAdmin) {
-                await apiApplyApiConfigToUser(userId, apiNames);
+                await apiApplyApiConfigToUser(userId, apiNames, mapName);
                 addNotification('API configuration applied successfully', 'success');
             } else {
                 addNotification('You do not have permission to apply API configurations', 'error');
@@ -459,10 +460,10 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     }, [addNotification, isAdmin]);
 
-    const updateAdminApiKeyMap = useCallback(async (key_map: Partial<ApiConfigType>): Promise<void> => {
+    const updateAdminApiKeyMap = useCallback(async (key_map: Partial<ApiConfigType>, mapName?: string): Promise<void> => {
         try {
             if (isAdmin) {
-                await apiUpdateAdminApiKeyMap(key_map);
+                await apiUpdateAdminApiKeyMap(key_map, mapName);
                 addNotification('API key map updated successfully', 'success');
             } else {
                 addNotification('You do not have permission to update the API key map', 'error');
@@ -476,8 +477,12 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     const getAdminApiConfigMap = useCallback(async (mapName?: string): Promise<ApiConfigType> => {
         try {
-            return await apiGetAdminApiConfigMap(mapName);
+            const config = await apiGetAdminApiConfigMap(mapName);
+            return config;
         } catch (error) {
+            if (error instanceof AxiosError && error.response?.data?.message === 'No API configuration maps found') {
+                return initializeApiConfigMap();
+            }
             addNotification('Error fetching API key map', 'error');
             Logger.error('Error fetching API key map:', error);
             throw error;

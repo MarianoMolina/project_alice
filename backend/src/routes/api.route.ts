@@ -8,7 +8,7 @@ import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
 const router = Router();
 router.use(rateLimiterMiddleware);
 router.use(auth);
-const generatedRoutes  = createRoutes<IAPIDocument, 'API'>(API, 'API');
+const generatedRoutes = createRoutes<IAPIDocument, 'API'>(API, 'API');
 router.use('/', generatedRoutes);
 
 export default router;

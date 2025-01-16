@@ -111,36 +111,32 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
     }, []);
 
-    const handlePromptSelect = useCallback(async (selectedIds: string[]) => {
+    const handlePromptSelect = useCallback(async (selectedIds: Prompt[]) => {
         if (selectedIds.length > 0) {
-            const prompt = await fetchPopulatedItem('prompts', selectedIds[0]) as Prompt;
-            setForm(prevForm => ({ ...prevForm, templates: { ...form.templates, task_template: prompt } }));
+            setForm(prevForm => ({ ...prevForm, templates: { ...form.templates, task_template: selectedIds[0] } }));
         } else {
             setForm(prevForm => ({ ...prevForm, templates: { ...form.templates, task_template: null } }));
         }
     }, [fetchPopulatedItem, form.templates]);
 
-    const handleOutputPromptSelect = useCallback(async (selectedIds: string[]) => {
+    const handleOutputPromptSelect = useCallback(async (selectedIds: Prompt[]) => {
         if (selectedIds.length > 0) {
-            const prompt = await fetchPopulatedItem('prompts', selectedIds[0]) as Prompt;
-            setForm(prevForm => ({ ...prevForm, templates: { ...prevForm.templates, output_template: prompt } }));
+            setForm(prevForm => ({ ...prevForm, templates: { ...prevForm.templates, output_template: selectedIds[0] } }));
         } else {
             setForm(prevForm => ({ ...prevForm, templates: { ...prevForm.templates, output_template: null } }));
         }
     }, [fetchPopulatedItem]);
 
-    const handleAgentSelect = useCallback(async (selectedIds: string[]) => {
+    const handleAgentSelect = useCallback(async (selectedIds: AliceAgent[]) => {
         if (selectedIds.length > 0) {
-            const agent = await fetchPopulatedItem('agents', selectedIds[0]) as AliceAgent;
-            setForm(prevForm => ({ ...prevForm, agent }));
+            setForm(prevForm => ({ ...prevForm, agent: selectedIds[0] }));
         } else {
             setForm(prevForm => ({ ...prevForm, agent: null }));
         }
     }, [fetchPopulatedItem]);
 
-    const handleTaskSelect = useCallback(async (selectedIds: string[]) => {
-        const tasks = await Promise.all(selectedIds.map(id => fetchPopulatedItem('tasks', id) as Promise<PopulatedTask>));
-        const tasksObject = tasks.reduce((acc, task) => {
+    const handleTaskSelect = useCallback(async (selectedIds: PopulatedTask[]) => {
+        const tasksObject = selectedIds.reduce((acc, task) => {
             acc[task.task_name] = task;
             return acc;
         }, {} as Record<string, PopulatedTask>);
@@ -155,9 +151,6 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             onSelect={handlePromptSelect}
             isInteractable={isEditMode}
             label="Select Input Template"
-            activeAccordion={activeAccordion}
-            onAccordionToggle={handleAccordionToggle}
-            accordionEntityName="prompts"
             description='The prompt template that will be used to structure the task input. Used in Agent tasks like PromptAgentTask'
             showCreateButton={true}
         />
@@ -171,10 +164,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             onSelect={handleOutputPromptSelect}
             isInteractable={isEditMode}
             label="Select Output Prompt"
-            activeAccordion={activeAccordion}
             description='The prompt template that will be used to structure the task output. Can be used in any task type.'
-            onAccordionToggle={handleAccordionToggle}
-            accordionEntityName="output_template"
             showCreateButton={true}
         />
     ), [form?.templates?.output_template, isEditMode, activeAccordion, handleAccordionToggle, handleOutputPromptSelect]);
@@ -187,10 +177,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             onSelect={handleOutputPromptSelect}
             isInteractable={isEditMode}
             label="Select Output Prompt"
-            activeAccordion={activeAccordion}
             description='This prompt can be used to pass extra code blocks during execution. Important when developing a snippet that depends on another piece of code. Ensure the code is in a proper code block.'
-            onAccordionToggle={handleAccordionToggle}
-            accordionEntityName="code_template"
             showCreateButton={true}
         />
     ), [form?.templates?.code_template, isEditMode, activeAccordion, handleAccordionToggle, handleOutputPromptSelect]);
@@ -203,9 +190,6 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             onSelect={handleAgentSelect}
             isInteractable={isEditMode}
             label="Select Agent"
-            activeAccordion={activeAccordion}
-            onAccordionToggle={handleAccordionToggle}
-            accordionEntityName="agent"
             description='The agent responsible for this task. Used in Agent tasks like PromptAgentTask, ImageGenerationTaks, CodeGenerationTask and CheckTask, amongst others. The models this agent has will be used when executing the task.'
             showCreateButton={true}
         />
@@ -221,9 +205,6 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             multiple
             label="Select Tasks"
             description='The tasks that will be executed, if the task type is Workflow. Otherwise, these tasks are passed to agents as tools'
-            activeAccordion={activeAccordion}
-            onAccordionToggle={handleAccordionToggle}
-            accordionEntityName="tasks"
             showCreateButton={true}
         />
     ), [form?.tasks, isEditMode, activeAccordion, handleAccordionToggle, handleTaskSelect]);

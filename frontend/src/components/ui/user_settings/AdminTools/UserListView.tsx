@@ -11,11 +11,12 @@ import {
   DialogActions,
   Button,
   Typography,
+  Tooltip,
 } from '@mui/material';
-import { Person, Edit, Warning } from '@mui/icons-material';
+import { Person, Warning, SystemUpdate } from '@mui/icons-material';
 import { ApiName } from '../../../../types/ApiTypes';
 import { User } from '../../../../types/UserTypes';
-import { UserDetail } from './UserDetail';
+import { UserDetailDialog } from './UserDetailDialog';
 
 interface UserListViewProps {
   users: User[];
@@ -23,6 +24,7 @@ interface UserListViewProps {
   disabledApis: Set<ApiName>;
   onUpdateUserApis: (userId: string, enabledApis: ApiName[]) => Promise<void>;
   isUpdating: boolean;
+  canToggleEdit?: boolean;
 }
 
 export const UserListView: React.FC<UserListViewProps> = ({
@@ -31,6 +33,7 @@ export const UserListView: React.FC<UserListViewProps> = ({
   disabledApis,
   onUpdateUserApis,
   isUpdating,
+  canToggleEdit = false,
 }) => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showUpdateConfirm, setShowUpdateConfirm] = useState(false);
@@ -76,30 +79,35 @@ export const UserListView: React.FC<UserListViewProps> = ({
               secondary={user.role}
             />
             <ListItemSecondaryAction>
-              <IconButton 
-                edge="end" 
-                onClick={() => handleViewUser(user)}
-                disabled={isUpdating}
-              >
-                <Person />
-              </IconButton>
-              <IconButton 
-                edge="end" 
-                onClick={() => handleUpdateClick(user)}
-                disabled={isUpdating}
-              >
-                <Edit />
-              </IconButton>
+              <Tooltip title="View user details">
+                <IconButton
+                  edge="end"
+                  onClick={() => handleViewUser(user)}
+                  disabled={isUpdating}
+                >
+                  <Person />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Update user's API Configs with the Admin API key map">
+                <IconButton
+                  edge="end"
+                  onClick={() => handleUpdateClick(user)}
+                  disabled={isUpdating}
+                >
+                  <SystemUpdate />
+                </IconButton>
+              </Tooltip>
             </ListItemSecondaryAction>
           </ListItem>
         ))}
       </List>
 
       {selectedUser && (
-        <UserDetail
+        <UserDetailDialog
           user={selectedUser}
           open={!!selectedUser}
           onClose={() => setSelectedUser(null)}
+          canToggleEdit={canToggleEdit}
         />
       )}
 

@@ -1,10 +1,9 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { Box, IconButton, Accordion, AccordionSummary, AccordionDetails, Chip, Tooltip, FormControl, InputLabel } from '@mui/material';
-import { Edit, Close, ExpandMore, Add, Info } from '@mui/icons-material';
+import React, { useCallback, useMemo } from 'react';
+import { Box, IconButton, Chip, Tooltip, FormControl, InputLabel } from '@mui/material';
+import { Edit, Add, Info } from '@mui/icons-material';
 import { useDialog } from '../../../../contexts/DialogContext';
 import useStyles from './EnhancedSelectStyles';
 import { CollectionName, CollectionType, CollectionElementString, collectionNameToElementString, collectionNameToEnhancedComponent } from '../../../../types/CollectionTypes';
-import Logger from '../../../../utils/Logger';
 import theme from '../../../../Theme';
 import BorderedContainer from '../inputs/BorderContainer';
 
@@ -12,14 +11,13 @@ interface EnhancedSelectProps<T extends CollectionType[CollectionName]> {
   componentType: CollectionName;
   EnhancedView: React.ComponentType<any>;
   selectedItems: T[];
-  onSelect: (selectedIds: string[]) => void;
+  onSelect: (selectedItems: T[]) => void;
   isInteractable: boolean;
   multiple?: boolean;
   label: string;
-  activeAccordion: string | null;
-  onAccordionToggle: (accordionName: string | null) => void;
+  activeAccordion?: string | null;
+  onAccordionToggle?: (accordionName: string | null) => void;
   onView?: (id: string) => void;
-  accordionEntityName: string;
   showCreateButton?: boolean;
   description?: string;
   filters?: Record<string, any>;
@@ -33,43 +31,50 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
   isInteractable,
   multiple = false,
   label,
-  activeAccordion,
-  onAccordionToggle,
-  accordionEntityName,
   showCreateButton = false,
   description,
   filters
 }: EnhancedSelectProps<T>) {
   const classes = useStyles();
-  const { selectFlexibleItem, selectCardItem } = useDialog();
-  const [localExpanded, setLocalExpanded] = useState(false);
-  Logger.debug('EnhancedSelect', { componentType, selectedItems, isInteractable, multiple, label, activeAccordion, accordionEntityName, showCreateButton, filters });
+  const { selectFlexibleItem, selectCardItem, selectEnhancedOptions, updateEnhancedOptionsSelectedItems } = useDialog();
+  const collectionElementString = collectionNameToElementString[componentType] as CollectionElementString;
+  const elementEnhanced = collectionNameToEnhancedComponent[componentType];
 
-  const EnhancedComponent = collectionNameToEnhancedComponent[componentType];
+  const handleOpenOptions = useCallback(() => {
+    selectEnhancedOptions(
+      componentType,
+      elementEnhanced,
+      label,
+      selectedItems,
+      (selectedItem: T) => {
+        if (multiple) {
+          // For multiple selection, merge with existing items
+          const uniqueItems = [...selectedItems];
+          if (!uniqueItems.some(item => item._id === selectedItem._id)) {
+              uniqueItems.push(selectedItem);
+          }
+          updateEnhancedOptionsSelectedItems(uniqueItems);
+          onSelect(uniqueItems);
+        } else {
+          updateEnhancedOptionsSelectedItems([selectedItem]);
+          onSelect([selectedItem]);
+        }
+      },
+      isInteractable,
+      multiple,
+      filters
+    );
+  }, [componentType, elementEnhanced, label, selectedItems, onSelect, isInteractable, multiple, filters, selectEnhancedOptions, updateEnhancedOptionsSelectedItems]);
 
-  const accordionName = `select-${accordionEntityName}`;
-  const isExpanded = activeAccordion === accordionName || localExpanded;
-
-  const handleToggle = () => {
-    if (onAccordionToggle !== undefined) {
-      onAccordionToggle(isExpanded ? null : accordionName);
-    }
-    setLocalExpanded(!isExpanded);
-    return;
-  };
+  const handleCreate = useCallback(() => {
+    selectFlexibleItem(collectionElementString, 'create');
+  }, [selectFlexibleItem, collectionElementString]);
 
   const handleDelete = useCallback((itemToDelete: T) => {
-    const updatedIds = selectedItems
+    const updatedItems = selectedItems
       .filter(item => item._id !== itemToDelete._id)
-      .map(item => item._id!);
-    onSelect(updatedIds);
+    onSelect(updatedItems);
   }, [selectedItems, onSelect]);
-
-  const collectionElementString = collectionNameToElementString[componentType] as CollectionElementString;
-
-  const handleCreate = () => {
-    selectFlexibleItem(collectionElementString, 'create');
-  };
 
   const commonProps = useMemo(() => ({
     items: null,
@@ -77,32 +82,6 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
     mode: 'view',
     handleSave: async () => undefined,
   }), []);
-
-  const handleInteraction = useCallback((item: T) => {
-    const newSelectedIds = multiple
-      ? [...selectedItems.map(i => i._id!), item._id!]
-      : [item._id!];
-    onSelect(newSelectedIds);
-
-    if (!multiple) {
-      setLocalExpanded(false);
-    }
-  }, [multiple, selectedItems, onSelect]);
-
-  const handleView = useCallback((item: T) => {
-    selectCardItem(collectionElementString, item._id!);
-  }, [selectCardItem, collectionElementString]);
-
-  const memoizedEnhancedComponent = useMemo(() => (
-    <EnhancedComponent
-      mode="shortList"
-      fetchAll={true}
-      onInteraction={handleInteraction}
-      onView={handleView}
-      isInteractable={isInteractable}
-      filters={filters} // Pass filters to EnhancedComponent
-    />
-  ), [EnhancedComponent, handleInteraction, handleView, isInteractable, filters]); // Add filters to dependencies
 
   const renderSelectedItem = useCallback((item: T) => (
     <Chip
@@ -116,51 +95,69 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
 
   return (
     <FormControl fullWidth variant="outlined" sx={{ marginTop: 1, marginBottom: 1 }}>
-      <InputLabel shrink sx={{ backgroundColor: theme.palette.primary.dark }}>{label}{multiple ? ' (multiple)' : null}</InputLabel>
+      <InputLabel shrink sx={{ backgroundColor: theme.palette.primary.dark }}>
+        {label}{multiple ? ' (multiple)' : null}
+      </InputLabel>
       <BorderedContainer>
-        <Box className={classes.chipContainer}>
-          {selectedItems?.map(renderSelectedItem)}
-          <Box className={classes.buttonContainer}>
+        <Box sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          gap: 1,
+          minHeight: '48px'
+        }}>
+          <Box sx={{
+            flex: 1,
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 1,
+            alignItems: 'center',
+            minHeight: '40px'
+          }}>
+            {selectedItems?.map(renderSelectedItem)}{selectedItems.length === 0 && 'None'}
+          </Box>
+
+          <Box sx={{
+            display: 'flex',
+            gap: 1,
+            alignItems: 'center',
+            justifyContent: { xs: 'flex-start', sm: 'flex-end' },
+            padding: '4px'
+          }}>
             {description && (
               <Tooltip title={description}>
-                <IconButton
-                  size="small"
-                >
-                  <Info />
+                <IconButton size="small">
+                  <Info fontSize="small" />
                 </IconButton>
               </Tooltip>
             )}
-            <Tooltip title={isInteractable ? isExpanded ? 'Close' : 'Edit' : ''}>
-              <IconButton
-                onClick={handleToggle}
-                disabled={!isInteractable}
-                size="small"
-                className={classes.editButton}
-              >
-                {isExpanded ? <Close /> : <Edit />}
-              </IconButton>
-            </Tooltip>
-            {showCreateButton && (
-              <Tooltip title={isInteractable ? 'Create' : ''}>
+            <Tooltip title={isInteractable ? 'Select Items' : ''}>
+              <span>
                 <IconButton
-                  onClick={handleCreate}
+                  onClick={handleOpenOptions}
                   disabled={!isInteractable}
                   size="small"
-                  className={classes.createButton}
+                  className={classes.editButton}
                 >
-                  <Add />
+                  <Edit fontSize="small" />
                 </IconButton>
+              </span>
+            </Tooltip>
+            {showCreateButton && (
+              <Tooltip title={isInteractable ? 'Create New' : ''}>
+                <span>
+                  <IconButton
+                    onClick={handleCreate}
+                    disabled={!isInteractable}
+                    size="small"
+                    className={classes.createButton}
+                  >
+                    <Add fontSize="small" />
+                  </IconButton>
+                </span>
               </Tooltip>
             )}
           </Box>
         </Box>
-        <Accordion expanded={isExpanded} onChange={handleToggle}>
-          <AccordionSummary expandIcon={<ExpandMore />} sx={{ minHeight: 0 }}>
-          </AccordionSummary>
-          <AccordionDetails>
-            {memoizedEnhancedComponent}
-          </AccordionDetails>
-        </Accordion>
       </BorderedContainer>
     </FormControl>
   );

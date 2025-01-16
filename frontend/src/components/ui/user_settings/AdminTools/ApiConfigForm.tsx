@@ -10,8 +10,7 @@ import {
   Grid,
 } from '@mui/material';
 import { Save } from '@mui/icons-material';
-import { API_CAPABILITIES, ApiConfigType, apiNameIcons } from '../../../../utils/ApiUtils';
-import { initializeApiConfigMap } from './AdminUtils';
+import { API_CAPABILITIES, ApiConfigType, apiNameIcons, initializeApiConfigMap } from '../../../../utils/ApiUtils';
 import { ApiName } from '../../../../types/ApiTypes';
 import Logger from '../../../../utils/Logger';
 
@@ -127,7 +126,7 @@ export const AdminApiConfigForm: React.FC<AdminApiConfigFormProps> = ({
   return (
     <Box>
       <Box mb={2} display="flex" justifyContent="space-between" alignItems="center">
-        <Typography variant="h5">API Configuration</Typography>
+        <Typography variant="h5">Admin API key map</Typography>
         <Button
           variant="contained"
           color="primary"

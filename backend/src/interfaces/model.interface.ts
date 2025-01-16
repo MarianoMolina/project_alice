@@ -1,6 +1,6 @@
 import  { Document, Types, Model } from 'mongoose';
-import { ApiName } from './api.interface';
 import { IUserDocument } from './user.interface';
+import { ApiName } from '../utils/api.utils';
 
 export enum ModelType {
     INSTRUCT = 'instruct',

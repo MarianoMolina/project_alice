@@ -5,18 +5,18 @@ import { SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
 import { User } from '../types/UserTypes';
 import { LMStudioIcon } from '../utils/CustomIcons';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
-import PersonalInformation from '../components/ui/user_settings/PersonalInformation';
 import ApiConfigurations from '../components/ui/user_settings/ApiConfigurations';
 import UserToken from '../components/ui/user_settings/UserToken';
 import DangerZone from '../components/ui/user_settings/DangerZone';
 import LMStudioStatus from '../components/ui/user_settings/LMStudioStatus';
-import AdminTools from '../components/ui/user_settings/AdminTools/AdminTools';
+import {AdminTools} from '../components/ui/user_settings/AdminTools/AdminTools';
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
 import { useApi } from '../contexts/ApiContext';
 import { useAuth } from '../contexts/AuthContext';
 import useStyles from '../styles/UserSettingsStyles';
 import Logger from '../utils/Logger';
 import WorkflowHealthStatus from '../components/ui/user_settings/WorkflowStatus';
+import UserDetail from '../components/enhanced/user/UserDetail';
 
 interface UserSettingsProps {
     setHasUnsavedChanges: (value: boolean) => void;
@@ -67,10 +67,15 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
         switch (activeTab) {
             case 'Personal information':
                 return (
-                    <PersonalInformation
-                        userObject={userObject}
-                        setUserObject={setUserObject}
-                    />
+                    // <PersonalInformation
+                    //     userObject={userObject}
+                    //     setUserObject={setUserObject}
+                    // />
+                    <UserDetail
+                        user={userObject}
+                        initialEditState={false}
+                        canToggleEdit={true}
+                        />
                 );
             case 'APIs':
                 return <ApiConfigurations />;

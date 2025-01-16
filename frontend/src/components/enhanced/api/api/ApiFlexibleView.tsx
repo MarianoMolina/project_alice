@@ -98,19 +98,17 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
         }));
     }, []);
 
-    const handleApiConfigChange = useCallback(async (selectedIds: string[]) => {
-        if (selectedIds.length > 0) {
-            const config = await fetchPopulatedItem('apiconfigs', selectedIds[0]) as APIConfig;
-            setForm(prevForm => ({ ...prevForm, api_config: config }));
+    const handleApiConfigChange = useCallback(async (apis: APIConfig[]) => {
+        if (apis.length > 0) {
+            setForm(prevForm => ({ ...prevForm, api_config: apis[0] }));
         } else {
             setForm(prevForm => ({ ...prevForm, api_config: undefined }));
         }
     }, [fetchPopulatedItem]);
 
-    const handleDefaultModelChange = useCallback(async (selectedIds: string[]) => {
-        if (selectedIds.length > 0) {
-            const model = await fetchPopulatedItem('models', selectedIds[0]) as AliceModel;
-            setForm(prevForm => ({ ...prevForm, default_model: model }));
+    const handleDefaultModelChange = useCallback(async (models: AliceModel[]) => {
+        if (models.length > 0) {
+            setForm(prevForm => ({ ...prevForm, default_model: models[0] }));
         } else {
             setForm(prevForm => ({ ...prevForm, default_model: undefined }));
         }
@@ -179,10 +177,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                     onSelect={handleApiConfigChange}
                     isInteractable={isEditMode}
                     label="API Configuration"
-                    activeAccordion={activeAccordion}
                     description='Select the configuration for this API'
-                    onAccordionToggle={handleAccordionToggle}
-                    accordionEntityName="api-config"
                     showCreateButton={true}
                     filters={{ api_name: form.api_name }}
                 />
@@ -196,10 +191,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
                     onSelect={handleDefaultModelChange}
                     isInteractable={isEditMode}
                     label="Select Default Model"
-                    activeAccordion={activeAccordion}
                     description='Select the default model for this API'
-                    onAccordionToggle={handleAccordionToggle}
-                    accordionEntityName="default-model"
                     showCreateButton={true}
                 />
             )}

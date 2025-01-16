@@ -8,7 +8,7 @@ export const AnthropicIcon = (props: SvgIconProps) => (
 
 export const LogicFlowIcon = (props: SvgIconProps) => (
   <SvgIcon {...props} viewBox="0 0 24 24">
-    <path fill-rule="evenodd" clip-rule="evenodd"
+    <path fillRule="evenodd" clip-rule="evenodd"
       d="M7.49996 6C7.49996 5.17157 8.17154 4.5 8.99997 4.5H15C15.8284 4.5 16.5 5.17157 16.5 6V7C16.5 7.82843 15.8284 8.5 15 8.5H12.5V10.7928L16.2071 14.5H20C20.2761 14.5 20.5 14.7239 20.5 15V18C20.5 18.2761 20.2761 18.5 20 18.5C19.7239 18.5 19.5 18.2761 19.5 18V15.5H16.6714C16.6508 15.5343 16.6257 15.5666 16.5962 15.5961L12.3535 19.8388C12.1583 20.034 11.8417 20.034 11.6464 19.8388L7.40377 15.5961C7.37422 15.5666 7.34914 15.5343 7.32853 15.5H4.5C4.22386 15.5 4 15.2761 4 15C4 14.7239 4.22386 14.5 4.5 14.5H7.79281L11.5 10.7928V8.5H8.99997C8.17154 8.5 7.49996 7.82843 7.49996 7V6ZM8.99997 5.5C8.72382 5.5 8.49997 5.72386 8.49997 6V7C8.49997 7.27614 8.72382 7.5 8.99997 7.5H15C15.2761 7.5 15.5 7.27614 15.5 7V6C15.5 5.72386 15.2761 5.5 15 5.5H8.99997ZM12 11.7071L8.46443 15.2426L12 18.7781L15.5355 15.2426L12 11.7071Z"
       // fill="#47495F"
     />
@@ -252,48 +252,48 @@ export const AIIcon = (props: SvgIconProps) => (
 
 export const AIAgentIcon = (props: SvgIconProps) => (
   <SvgIcon {...props} viewBox="0 0 400 400">
-    <path d="M97.8357 54.6682C177.199 59.5311 213.038 52.9891 238.043 52.9891C261.298 52.9891 272.24 129.465 262.683 152.048C253.672 173.341 100.331 174.196 93.1919 165.763C84.9363 156.008 89.7095 115.275 89.7095 101.301" stroke="#000000" stroke-opacity="0.9" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M97.8357 54.6682C177.199 59.5311 213.038 52.9891 238.043 52.9891C261.298 52.9891 272.24 129.465 262.683 152.048C253.672 173.341 100.331 174.196 93.1919 165.763C84.9363 156.008 89.7095 115.275 89.7095 101.301" stroke="#000000" strokeOpacity="0.9" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M98.3318 190.694C-10.6597 291.485 121.25 273.498 148.233 295.083"
       stroke="#000000"
-      stroke-opacity="0.9" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+      strokeOpacity="0.9" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M98.3301 190.694C99.7917 213.702 101.164 265.697 100.263 272.898"
       stroke="#000000"
-      stroke-opacity="0.9" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+      strokeOpacity="0.9" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M208.308 136.239C208.308 131.959 208.308 127.678 208.308 123.396"
       stroke="#000000"
-      stroke-opacity="0.9" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+      strokeOpacity="0.9" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M177.299 137.271C177.035 133.883 177.3 126.121 177.3 123.396"
       stroke="#000000"
-      stroke-opacity="0.9" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+      strokeOpacity="0.9" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M203.398 241.72C352.097 239.921 374.881 226.73 312.524 341.851"
       stroke="#000000"
-      stroke-opacity="0.9" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+      strokeOpacity="0.9" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M285.55 345.448C196.81 341.85 136.851 374.229 178.223 264.504"
       stroke="#000000"
-      stroke-opacity="0.9" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+      strokeOpacity="0.9" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M180.018 345.448C160.77 331.385 139.302 320.213 120.658 304.675"
       stroke="#000000"
-      stroke-opacity="0.9" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+      strokeOpacity="0.9" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M218.395 190.156C219.024 205.562 219.594 220.898 219.594 236.324"
       stroke="#000000"
-      stroke-opacity="0.9" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+      strokeOpacity="0.9" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M218.395 190.156C225.896 202.037 232.97 209.77 241.777 230.327"
       stroke="#000000"
-      stroke-opacity="0.9" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+      strokeOpacity="0.9" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M80.1174 119.041C75.5996 120.222 71.0489 119.99 66.4414 120.41"
       stroke="#000000"
-      stroke-opacity="0.9" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+      strokeOpacity="0.9" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M59.5935 109.469C59.6539 117.756 59.5918 125.915 58.9102 134.086"
       stroke="#000000"
-      stroke-opacity="0.9" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+      strokeOpacity="0.9" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M277.741 115.622C281.155 115.268 284.589 114.823 287.997 114.255"
       stroke="#000000"
-      stroke-opacity="0.9" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+      strokeOpacity="0.9" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M291.412 104.682C292.382 110.109 292.095 115.612 292.095 121.093"
       stroke="#000000"
-      stroke-opacity="0.9" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+      strokeOpacity="0.9" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M225.768 116.466C203.362 113.993 181.657 115.175 160.124 118.568"
       stroke="#000000"
-      stroke-opacity="0.9" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+      strokeOpacity="0.9" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" />
   </SvgIcon>
 );

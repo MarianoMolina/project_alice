@@ -133,32 +133,28 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
         setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
     }, []);
 
-    const handleAgentChange = useCallback(async (selectedIds: string[]) => {
+    const handleAgentChange = useCallback(async (selectedIds: AliceAgent[]) => {
         if (selectedIds.length > 0) {
-            const agent = await fetchPopulatedItem('agents', selectedIds[0]) as AliceAgent;
-            setForm(prevForm => ({ ...prevForm, alice_agent: agent }));
+            setForm(prevForm => ({ ...prevForm, alice_agent: selectedIds[0] }));
         } else {
             setForm(prevForm => ({ ...prevForm, alice_agent: undefined }));
         }
     }, [fetchPopulatedItem]);
 
-    const handleFunctionsChange = useCallback(async (selectedIds: string[]) => {
-        const functions = await Promise.all(selectedIds.map(id => fetchPopulatedItem('tasks', id) as Promise<PopulatedTask>));
-        setForm(prevForm => ({ ...prevForm, agent_tools: functions }));
+    const handleFunctionsChange = useCallback(async (selectedIds: PopulatedTask[]) => {
+        setForm(prevForm => ({ ...prevForm, agent_tools: selectedIds }));
     }, [fetchPopulatedItem]);
 
-    const handleRetrievalFunctionsChange = useCallback(async (selectedIds: string[]) => {
-        const functions = await Promise.all(selectedIds.map(id => fetchPopulatedItem('tasks', id) as Promise<PopulatedTask>));
-        setForm(prevForm => ({ ...prevForm, retrieval_tools: functions }));
+    const handleRetrievalFunctionsChange = useCallback(async (selectedIds: PopulatedTask[]) => {
+        setForm(prevForm => ({ ...prevForm, retrieval_tools: selectedIds }));
     }, [fetchPopulatedItem]);
 
-    const handleToolCallCheckpointChange = useCallback(async (selectedIds: string[]) => {
+    const handleToolCallCheckpointChange = useCallback(async (selectedIds: UserCheckpoint[]) => {
         if (selectedIds.length > 0) {
-            const checkpoint = await fetchPopulatedItem('usercheckpoints', selectedIds[0]) as UserCheckpoint;
             setForm(prevForm => {
                 // Initialize default checkpoints if they don't exist
                 const currentCheckpoints = prevForm.default_user_checkpoints ?? {
-                    [CheckpointType.TOOL_CALL]: checkpoint,
+                    [CheckpointType.TOOL_CALL]: selectedIds[0],
                     [CheckpointType.CODE_EXECUTION]: {
                         user_prompt: '',
                         options_obj: {},
@@ -171,16 +167,15 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                     ...prevForm,
                     default_user_checkpoints: {
                         ...currentCheckpoints,
-                        [CheckpointType.TOOL_CALL]: checkpoint
+                        [CheckpointType.TOOL_CALL]: selectedIds[0]
                     }
                 };
             });
         }
     }, [fetchPopulatedItem]);
 
-    const handleCodeExecCheckpointChange = useCallback(async (selectedIds: string[]) => {
+    const handleCodeExecCheckpointChange = useCallback(async (selectedIds: UserCheckpoint[]) => {
         if (selectedIds.length > 0) {
-            const checkpoint = await fetchPopulatedItem('usercheckpoints', selectedIds[0]) as UserCheckpoint;
             setForm(prevForm => {
                 // Initialize default checkpoints if they don't exist
                 const currentCheckpoints = prevForm.default_user_checkpoints ?? {
@@ -190,14 +185,14 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                         task_next_obj: {},
                         request_feedback: false
                     },
-                    [CheckpointType.CODE_EXECUTION]: checkpoint
+                    [CheckpointType.CODE_EXECUTION]: selectedIds[0]
                 };
 
                 return {
                     ...prevForm,
                     default_user_checkpoints: {
                         ...currentCheckpoints,
-                        [CheckpointType.CODE_EXECUTION]: checkpoint
+                        [CheckpointType.CODE_EXECUTION]: selectedIds[0]
                     }
                 };
             });
@@ -213,9 +208,6 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             isInteractable={isEditMode}
             label="Select Chat Agent"
             description='This agent will be used to respond to user messages in the chat. This models in this agent will be used to generate responses, transcribe files, etc'
-            activeAccordion={activeAccordion}
-            onAccordionToggle={handleAccordionToggle}
-            accordionEntityName="agent"
             showCreateButton={true}
         />
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -231,9 +223,6 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             multiple
             label="Select Agent Tools"
             description='These tools will be given to the agent. '
-            activeAccordion={activeAccordion}
-            onAccordionToggle={handleAccordionToggle}
-            accordionEntityName="agent_tools"
             showCreateButton={true}
         />
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -249,9 +238,6 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             multiple
             label="Select Retrieval Tools"
             description='These tools will be given to the agent, and provided access to the data cluster in the chat.'
-            activeAccordion={activeAccordion}
-            onAccordionToggle={handleAccordionToggle}
-            accordionEntityName="retrieval_tools"
             showCreateButton={true}
         />
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -266,9 +252,6 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             isInteractable={isEditMode}
             label="Select Tool Call Checkpoint"
             description='This checkpoint will be used when the agent calls a tool if their permission level is 2.'
-            activeAccordion={activeAccordion}
-            onAccordionToggle={handleAccordionToggle}
-            accordionEntityName="tool_call_checkpoint"
             showCreateButton={true}
         />
     ), [form.default_user_checkpoints, handleToolCallCheckpointChange, isEditMode, activeAccordion, handleAccordionToggle]);
@@ -282,9 +265,6 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             isInteractable={isEditMode}
             label="Select Code Execution Checkpoint"
             description='This checkpoint will be used when the agent executes code and their permission level = 2.'
-            activeAccordion={activeAccordion}
-            onAccordionToggle={handleAccordionToggle}
-            accordionEntityName="code_exec_checkpoint"
             showCreateButton={true}
         />
     ), [form.default_user_checkpoints, handleCodeExecCheckpointChange, isEditMode, activeAccordion, handleAccordionToggle]);

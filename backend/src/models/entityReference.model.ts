@@ -1,9 +1,9 @@
 import mongoose, { Schema } from "mongoose";
 import { IEntityReferenceDocument, IEntityReferenceModel, ReferenceCategoryType } from "../interfaces/entityReference.interface";
 import { getObjectId, getObjectIdForList } from "../utils/utils";
-import { ApiType } from "../interfaces/api.interface";
 import mongooseAutopopulate from 'mongoose-autopopulate';
 import { EncryptionService } from "../utils/encrypt.utils";
+import { ApiType } from "../utils/api.utils";
 
 const imageReferenceSchema = new Schema({
   url: { type: String, required: true },

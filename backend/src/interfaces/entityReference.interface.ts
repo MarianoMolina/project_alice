@@ -1,7 +1,7 @@
 import { Document, Model, Types } from "mongoose";
 import { IUserDocument } from "./user.interface";
 import { Embeddable } from "./embeddingChunk.interface";
-import { ApiType } from "./api.interface";
+import { ApiType } from "../utils/api.utils";
 
 export interface IImageReference {
     url: string;

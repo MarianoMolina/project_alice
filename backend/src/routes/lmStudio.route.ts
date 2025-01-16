@@ -29,7 +29,7 @@ const handleErrors = (res: Response, error: any) => {
 
 // All routes require authentication
 router.use(rateLimiterMiddleware);
-router.use(auth);
+router.use(auth); // TODO: Switch completion endpoints to workflowAuth middleware
 
 // List all available models
 router.get('/v1/models', async (_req: AuthRequest, res: Response) => {
