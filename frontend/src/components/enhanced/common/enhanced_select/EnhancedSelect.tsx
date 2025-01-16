@@ -38,11 +38,13 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
 }: EnhancedSelectProps<T>) {
   const classes = useStyles();
   const { selectFlexibleItem, selectCardItem, selectEnhancedOptions } = useDialog();
-  const [ items, setItems ] = React.useState<T[]>(selectedItems);
+  const [items, setItems] = React.useState<T[]>(selectedItems);
   const collectionElementString = collectionNameToElementString[componentType] as CollectionElementString;
   const elementEnhanced = collectionNameToEnhancedComponent[componentType];
+  Logger.info('EnhancedSelect - selected items:', items, selectedItems);
 
   const localOnSelect = useCallback((selectedItems: T[]) => {
+    Logger.info('EnhancedSelect - localOnSelect - selected items:', selectedItems, items);
     setItems(selectedItems);
     onSelect(selectedItems);
   }, [onSelect]);
@@ -53,21 +55,22 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
       elementEnhanced,
       label,
       (selectedItem: T) => {
-        Logger.info('EnhancedSelect - handleOpenOptions - selected item:', selectedItem, items);
         if (multiple) {
-          // For multiple selection, merge with existing items
-          const uniqueItems = [...items];
-          if (!uniqueItems.some(item => item._id === selectedItem._id)) {
+          setItems(currentItems => {
+            const uniqueItems = [...currentItems];
+            if (!uniqueItems.some(item => item._id === selectedItem._id)) {
               uniqueItems.push(selectedItem);
-          }
-          localOnSelect(uniqueItems);
+            }
+            onSelect(uniqueItems);
+            return uniqueItems;
+          });
         } else {
           localOnSelect([selectedItem]);
         }
       },
       multiple,
     );
-  }, [componentType, elementEnhanced, label, localOnSelect, multiple, selectEnhancedOptions, items]);
+  }, [componentType, elementEnhanced, label, multiple, onSelect, selectEnhancedOptions]);
 
   const handleCreate = useCallback(() => {
     selectFlexibleItem(collectionElementString, 'create');
