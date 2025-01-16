@@ -26,7 +26,14 @@ interface DialogOptions {
   content: string;
   buttons: DialogButton[];
 }
-
+interface EnhancedOptionsDialogOpts {
+  componentType: CollectionName,
+  EnhancedComponent: React.ComponentType<any>,
+  title: string,
+  onSelect: (selectedItem: CollectionElement | CollectionPopulatedElement) => void,
+  multiple: boolean,
+  filters?: Record<string, any>
+}
 interface DialogContextType {
   // Message Dialog
   dialogOptions: DialogOptions | null;
@@ -96,27 +103,13 @@ interface DialogContextType {
     componentType: CollectionName,
     EnhancedComponent: React.ComponentType<any>,
     title: string,
-    selectedItems: T[],
     onSelect: (selectedItem: T) => void,
-    isInteractable: boolean,
     multiple: boolean,
     filters?: Record<string, any>
   ) => void;
+  enhancedOptionsDialogProps: EnhancedOptionsDialogOpts | null;
   isEnhancedOptionsDialogOpen: boolean;
   closeEnhancedOptionsDialog: () => void;
-  updateEnhancedOptionsSelectedItems: <T extends CollectionElement | CollectionPopulatedElement>(
-    newSelectedItems: T[]
-  ) => void;
-  enhancedOptionsDialogProps: {
-    componentType: CollectionName;
-    EnhancedComponent: React.ComponentType<any>;
-    title: string;
-    selectedItems: (CollectionElement | CollectionPopulatedElement)[];
-    onSelect: (selectedItems: CollectionElement | CollectionPopulatedElement) => void;
-    isInteractable: boolean;
-    multiple: boolean;
-    filters?: Record<string, any>;
-  } | null;
   enhancedOptionsDialogZIndex: number;
 
   // Flowchart Dialog
@@ -174,16 +167,7 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
   const [enhancedOptionsDialogOpenedAt, setEnhancedOptionsDialogOpenedAt] = useState<number | null>(null);
 
   // Add enhanced options dialog state
-  const [enhancedOptionsDialogProps, setEnhancedOptionsDialogProps] = useState<{
-    componentType: CollectionName;
-    EnhancedComponent: React.ComponentType<any>;
-    title: string;
-    selectedItems: (CollectionElement | CollectionPopulatedElement)[];
-    onSelect: (selectedItems: CollectionElement | CollectionPopulatedElement) => void;
-    isInteractable: boolean;
-    multiple: boolean;
-    filters?: Record<string, any>;
-  } | null>(null);
+  const [enhancedOptionsDialogProps, setEnhancedOptionsDialogProps] = useState<EnhancedOptionsDialogOpts | null>(null);
   const [isEnhancedOptionsDialogOpen, setIsEnhancedOptionsDialogOpen] = useState(false);
 
 
@@ -329,19 +313,15 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
     componentType: CollectionName,
     EnhancedComponent: React.ComponentType<any>,
     title: string,
-    selectedItems: T[],
     onSelect: (selectedItem: T) => void,
-    isInteractable: boolean,
     multiple: boolean,
-    filters?: Record<string, any>
+    filters?: Record<string, any>,
   ) => {
     setEnhancedOptionsDialogProps({
       componentType,
       EnhancedComponent,
       title,
-      selectedItems,
       onSelect: onSelect as (selectedItems: CollectionElement | CollectionPopulatedElement) => void,
-      isInteractable,
       multiple,
       filters
     });
@@ -349,17 +329,6 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
     setEnhancedOptionsDialogOpenedAt(Date.now());
   }, []);
 
-  const updateEnhancedOptionsSelectedItems = useCallback(<T extends CollectionElement | CollectionPopulatedElement>(
-    newSelectedItems: T[]
-  ) => {
-    setEnhancedOptionsDialogProps(prev => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        selectedItems: newSelectedItems
-      };
-    });
-  }, []);
   const selectTaskFlowchartItem = useCallback((item: PopulatedTask) => {
     setSelectedTaskFlowchartItem(item);
     setIsTaskFlowchartDialogOpen(true);
@@ -458,7 +427,6 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
         selectDialog,
         selectedComponentType,
         selectedEnhancedView,
-        updateEnhancedOptionsSelectedItems,
         selectedItems,
         onSelectCallback,
         selectDialogTitle,

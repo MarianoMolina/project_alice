@@ -37,7 +37,6 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     const { fetchPopulatedItem } = useApi();
     const [taskType, setTaskType] = useState<TaskType>(item?.task_type || TaskType.PromptAgentTask);
     const [form, setForm] = useState<Partial<PopulatedTask>>(item as PopulatedTask || getDefaultTaskForm(taskType));
-    const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
     const isEditMode = mode === 'edit' || mode === 'create';
@@ -107,17 +106,13 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
         }
     }, [item, handleDelete]);
 
-    const handleAccordionToggle = useCallback((accordion: string | null) => {
-        setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
-    }, []);
-
     const handlePromptSelect = useCallback(async (selectedIds: Prompt[]) => {
         if (selectedIds.length > 0) {
             setForm(prevForm => ({ ...prevForm, templates: { ...form.templates, task_template: selectedIds[0] } }));
         } else {
             setForm(prevForm => ({ ...prevForm, templates: { ...form.templates, task_template: null } }));
         }
-    }, [fetchPopulatedItem, form.templates]);
+    }, [form.templates]);
 
     const handleOutputPromptSelect = useCallback(async (selectedIds: Prompt[]) => {
         if (selectedIds.length > 0) {
@@ -125,7 +120,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
         } else {
             setForm(prevForm => ({ ...prevForm, templates: { ...prevForm.templates, output_template: null } }));
         }
-    }, [fetchPopulatedItem]);
+    }, []);
 
     const handleAgentSelect = useCallback(async (selectedIds: AliceAgent[]) => {
         if (selectedIds.length > 0) {
@@ -133,7 +128,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
         } else {
             setForm(prevForm => ({ ...prevForm, agent: null }));
         }
-    }, [fetchPopulatedItem]);
+    }, []);
 
     const handleTaskSelect = useCallback(async (selectedIds: PopulatedTask[]) => {
         const tasksObject = selectedIds.reduce((acc, task) => {
@@ -141,7 +136,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             return acc;
         }, {} as Record<string, PopulatedTask>);
         setForm(prevForm => ({ ...prevForm, tasks: tasksObject }));
-    }, [fetchPopulatedItem]);
+    }, []);
 
     const memoizedPromptSelect = useMemo(() => (
         <EnhancedSelect<Prompt>
@@ -154,7 +149,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             description='The prompt template that will be used to structure the task input. Used in Agent tasks like PromptAgentTask'
             showCreateButton={true}
         />
-    ), [form?.templates?.task_template, isEditMode, activeAccordion, handleAccordionToggle, handlePromptSelect]);
+    ), [form?.templates?.task_template, isEditMode, handlePromptSelect]);
 
     const memoizedOutputPromptSelect = useMemo(() => (
         <EnhancedSelect<Prompt>
@@ -167,7 +162,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             description='The prompt template that will be used to structure the task output. Can be used in any task type.'
             showCreateButton={true}
         />
-    ), [form?.templates?.output_template, isEditMode, activeAccordion, handleAccordionToggle, handleOutputPromptSelect]);
+    ), [form?.templates?.output_template, isEditMode, handleOutputPromptSelect]);
 
     const memoizedCodePromptSelect = useMemo(() => (
         <EnhancedSelect<Prompt>
@@ -180,7 +175,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             description='This prompt can be used to pass extra code blocks during execution. Important when developing a snippet that depends on another piece of code. Ensure the code is in a proper code block.'
             showCreateButton={true}
         />
-    ), [form?.templates?.code_template, isEditMode, activeAccordion, handleAccordionToggle, handleOutputPromptSelect]);
+    ), [form?.templates?.code_template, isEditMode, handleOutputPromptSelect]);
 
     const memoizedAgentSelect = useMemo(() => (
         <EnhancedSelect<AliceAgent>
@@ -193,7 +188,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             description='The agent responsible for this task. Used in Agent tasks like PromptAgentTask, ImageGenerationTaks, CodeGenerationTask and CheckTask, amongst others. The models this agent has will be used when executing the task.'
             showCreateButton={true}
         />
-    ), [form?.agent, isEditMode, activeAccordion, handleAccordionToggle, handleAgentSelect]);
+    ), [form?.agent, isEditMode, handleAgentSelect]);
 
     const memoizedTaskSelect = useMemo(() => (
         <EnhancedSelect<PopulatedTask>
@@ -207,7 +202,7 @@ const TaskFlexibleView: React.FC<TaskComponentProps> = ({
             description='The tasks that will be executed, if the task type is Workflow. Otherwise, these tasks are passed to agents as tools'
             showCreateButton={true}
         />
-    ), [form?.tasks, isEditMode, activeAccordion, handleAccordionToggle, handleTaskSelect]);
+    ), [form?.tasks, isEditMode, handleTaskSelect]);
     const memoizedUserCheckpointManager = useMemo(() => (
         <UserCheckpointManager
             userCheckpoints={form.user_checkpoints || {}}

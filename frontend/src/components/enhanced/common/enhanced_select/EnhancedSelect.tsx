@@ -6,6 +6,7 @@ import useStyles from './EnhancedSelectStyles';
 import { CollectionName, CollectionType, CollectionElementString, collectionNameToElementString, collectionNameToEnhancedComponent } from '../../../../types/CollectionTypes';
 import theme from '../../../../Theme';
 import BorderedContainer from '../inputs/BorderContainer';
+import Logger from '../../../../utils/Logger';
 
 interface EnhancedSelectProps<T extends CollectionType[CollectionName]> {
   componentType: CollectionName;
@@ -36,45 +37,47 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
   filters
 }: EnhancedSelectProps<T>) {
   const classes = useStyles();
-  const { selectFlexibleItem, selectCardItem, selectEnhancedOptions, updateEnhancedOptionsSelectedItems } = useDialog();
+  const { selectFlexibleItem, selectCardItem, selectEnhancedOptions } = useDialog();
+  const [ items, setItems ] = React.useState<T[]>(selectedItems);
   const collectionElementString = collectionNameToElementString[componentType] as CollectionElementString;
   const elementEnhanced = collectionNameToEnhancedComponent[componentType];
+
+  const localOnSelect = useCallback((selectedItems: T[]) => {
+    setItems(selectedItems);
+    onSelect(selectedItems);
+  }, [onSelect]);
 
   const handleOpenOptions = useCallback(() => {
     selectEnhancedOptions(
       componentType,
       elementEnhanced,
       label,
-      selectedItems,
       (selectedItem: T) => {
+        Logger.info('EnhancedSelect - handleOpenOptions - selected item:', selectedItem, items);
         if (multiple) {
           // For multiple selection, merge with existing items
-          const uniqueItems = [...selectedItems];
+          const uniqueItems = [...items];
           if (!uniqueItems.some(item => item._id === selectedItem._id)) {
               uniqueItems.push(selectedItem);
           }
-          updateEnhancedOptionsSelectedItems(uniqueItems);
-          onSelect(uniqueItems);
+          localOnSelect(uniqueItems);
         } else {
-          updateEnhancedOptionsSelectedItems([selectedItem]);
-          onSelect([selectedItem]);
+          localOnSelect([selectedItem]);
         }
       },
-      isInteractable,
       multiple,
-      filters
     );
-  }, [componentType, elementEnhanced, label, selectedItems, onSelect, isInteractable, multiple, filters, selectEnhancedOptions, updateEnhancedOptionsSelectedItems]);
+  }, [componentType, elementEnhanced, label, localOnSelect, multiple, selectEnhancedOptions, items]);
 
   const handleCreate = useCallback(() => {
     selectFlexibleItem(collectionElementString, 'create');
   }, [selectFlexibleItem, collectionElementString]);
 
   const handleDelete = useCallback((itemToDelete: T) => {
-    const updatedItems = selectedItems
+    const updatedItems = items
       .filter(item => item._id !== itemToDelete._id)
-    onSelect(updatedItems);
-  }, [selectedItems, onSelect]);
+    localOnSelect(updatedItems);
+  }, [items, localOnSelect]);
 
   const commonProps = useMemo(() => ({
     items: null,
@@ -113,7 +116,7 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
             alignItems: 'center',
             minHeight: '40px'
           }}>
-            {selectedItems?.map(renderSelectedItem)}{selectedItems.length === 0 && 'None'}
+            {items?.map(renderSelectedItem)}{items.length === 0 && 'None'}
           </Box>
 
           <Box sx={{

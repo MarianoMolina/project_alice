@@ -23,7 +23,6 @@ from workflow.util import (
     MessageApiFormat,
 )
 
-
 class GeminiLLMEngine(LLMEngine):
 
     async def generate_api_response(

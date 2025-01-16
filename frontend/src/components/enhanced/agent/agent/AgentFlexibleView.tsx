@@ -11,7 +11,6 @@ import { AliceModel, ModelType } from '../../../../types/ModelTypes';
 import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import PromptShortListView from '../../prompt/prompt/PromptShortListView';
 import ModelShortListView from '../../model/model/ModelShortListView';
-import { useApi } from '../../../../contexts/ApiContext';
 import { useDialog } from '../../../../contexts/DialogContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import { TextInput } from '../../common/inputs/TextInput';
@@ -35,9 +34,7 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     handleSave,
     handleDelete,
 }) => {
-    const { fetchPopulatedItem } = useApi();
     const { selectCardItem } = useDialog();
-    const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [form, setForm] = useState<Partial<AliceAgent>>(item || getDefaultAgentForm());
     const [isSaving, setIsSaving] = useState(false);
 
@@ -83,14 +80,10 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             }
         }
         setForm(prevForm => ({ ...prevForm, models: updatedModels }));
-    }, [fetchPopulatedItem]);
+    }, []);
 
     const handlePromptChange = useCallback(async (prompts: Prompt[]) => {
         setForm(prevForm => ({ ...prevForm, system_message: prompts[0] }));
-    }, [fetchPopulatedItem]);
-
-    const handleAccordionToggle = useCallback((accordion: string | null) => {
-        setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
     }, []);
 
     // Convert enums to selection options
@@ -108,7 +101,7 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             label="Select System Message"
             description='The system message that the agent will use to respond to the user.'
         />
-    ), [form.system_message, handlePromptChange, isEditMode, activeAccordion, handleAccordionToggle, selectCardItem]);
+    ), [form.system_message, handlePromptChange, isEditMode, selectCardItem]);
 
     const memoizedModelSelect = useMemo(() => (
         <EnhancedSelect<AliceModel>
@@ -121,7 +114,7 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             description='The models that the agent will use to respond to the user. Can have one model per model type.'
             label="Select Models"
         />
-    ), [form.models, handleModelChange, isEditMode, activeAccordion, handleAccordionToggle, selectCardItem]);
+    ), [form.models, handleModelChange, isEditMode, selectCardItem]);
 
     return (
         <GenericFlexibleView

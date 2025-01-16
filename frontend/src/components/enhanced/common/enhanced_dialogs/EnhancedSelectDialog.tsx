@@ -21,21 +21,17 @@ const EnhancedSelectDialog = () => {
     selectCardItem
   } = useDialog();
 
-  // Early return if required props are missing
-  if (!selectedComponentType || !selectedEnhancedView || !selectDialogTitle || !onSelectCallback) {
-    return null;
-  }
-
+  // Move all hooks to the top level
   const handleInteraction = useCallback(async (item: CollectionElement | CollectionPopulatedElement) => {
+    if (!selectedComponentType || !onSelectCallback) return;
+
     try {
       Logger.debug('EnhancedSelectDialog - handleInteraction', { item });
-      // For multiple selection, we might want to accumulate items instead of just using the last one
+      
       if (selectDialogMultiple) {
-        // TODO: Implement multiple selection logic
         Logger.warn('Multiple selection not yet implemented');
       }
       
-      // Fetch the full item data if needed
       const selectedItem = item._id 
         ? await fetchItem(selectedComponentType, item._id) as CollectionElement
         : item;
@@ -48,10 +44,13 @@ const EnhancedSelectDialog = () => {
   }, [selectedComponentType, selectDialogMultiple, onSelectCallback, closeSelectDialog, fetchItem]);
 
   const handleView = useCallback((item: CollectionElement | CollectionPopulatedElement) => {
+    if (!selectedComponentType) return;
     selectCardItem(selectedComponentType as CollectionElementString, item._id!);
   }, [selectCardItem, selectedComponentType]);
 
   const memoizedContent = useMemo(() => {
+    if (!selectedEnhancedView) return null;
+
     const EnhancedComponent = selectedEnhancedView;
     return (
       <EnhancedComponent
@@ -65,6 +64,11 @@ const EnhancedSelectDialog = () => {
       />
     );
   }, [selectedEnhancedView, handleInteraction, handleView, selectDialogFilters, selectedItems]);
+
+  // Early return after all hooks
+  if (!selectedComponentType || !selectedEnhancedView || !selectDialogTitle || !onSelectCallback) {
+    return null;
+  }
 
   return (
     <Dialog

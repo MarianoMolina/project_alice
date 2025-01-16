@@ -35,7 +35,6 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     const { user } = useAuth();
     const { fetchPopulatedItem } = useApi();
     const [form, setForm] = useState<Partial<PopulatedAliceChat>>(item as PopulatedAliceChat || getDefaultChatForm());
-    const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -129,25 +128,21 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
         }
     }, [item, handleDelete]);
 
-    const handleAccordionToggle = useCallback((accordion: string | null) => {
-        setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
-    }, []);
-
     const handleAgentChange = useCallback(async (selectedIds: AliceAgent[]) => {
         if (selectedIds.length > 0) {
             setForm(prevForm => ({ ...prevForm, alice_agent: selectedIds[0] }));
         } else {
             setForm(prevForm => ({ ...prevForm, alice_agent: undefined }));
         }
-    }, [fetchPopulatedItem]);
+    }, []);
 
     const handleFunctionsChange = useCallback(async (selectedIds: PopulatedTask[]) => {
         setForm(prevForm => ({ ...prevForm, agent_tools: selectedIds }));
-    }, [fetchPopulatedItem]);
+    }, []);
 
     const handleRetrievalFunctionsChange = useCallback(async (selectedIds: PopulatedTask[]) => {
         setForm(prevForm => ({ ...prevForm, retrieval_tools: selectedIds }));
-    }, [fetchPopulatedItem]);
+    }, []);
 
     const handleToolCallCheckpointChange = useCallback(async (selectedIds: UserCheckpoint[]) => {
         if (selectedIds.length > 0) {
@@ -172,7 +167,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                 };
             });
         }
-    }, [fetchPopulatedItem]);
+    }, []);
 
     const handleCodeExecCheckpointChange = useCallback(async (selectedIds: UserCheckpoint[]) => {
         if (selectedIds.length > 0) {
@@ -197,7 +192,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                 };
             });
         }
-    }, [fetchPopulatedItem]);
+    }, []);
 
     const memoizedAgentSelect = useMemo(() => (
         <EnhancedSelect<AliceAgent>
@@ -211,7 +206,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             showCreateButton={true}
         />
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    ), [form.alice_agent, handleAgentChange, isEditMode, activeAccordion, handleAccordionToggle]);
+    ), [form.alice_agent, handleAgentChange, isEditMode]);
 
     const memoizedTaskSelect = useMemo(() => (
         <EnhancedSelect<PopulatedTask>
@@ -226,7 +221,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             showCreateButton={true}
         />
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    ), [form.agent_tools, handleFunctionsChange, isEditMode, activeAccordion, handleAccordionToggle]);
+    ), [form.agent_tools, handleFunctionsChange, isEditMode]);
 
     const memoizedRetrievalTaskSelect = useMemo(() => (
         <EnhancedSelect<PopulatedTask>
@@ -241,7 +236,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             showCreateButton={true}
         />
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    ), [form.agent_tools, handleRetrievalFunctionsChange, isEditMode, activeAccordion, handleAccordionToggle]);
+    ), [form.agent_tools, handleRetrievalFunctionsChange, isEditMode]);
 
     const memoizedToolCallCheckpointSelect = useMemo(() => (
         <EnhancedSelect<UserCheckpoint>
@@ -254,7 +249,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             description='This checkpoint will be used when the agent calls a tool if their permission level is 2.'
             showCreateButton={true}
         />
-    ), [form.default_user_checkpoints, handleToolCallCheckpointChange, isEditMode, activeAccordion, handleAccordionToggle]);
+    ), [form.default_user_checkpoints, handleToolCallCheckpointChange, isEditMode]);
 
     const memoizedCodeExecCheckpointSelect = useMemo(() => (
         <EnhancedSelect<UserCheckpoint>
@@ -267,7 +262,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
             description='This checkpoint will be used when the agent executes code and their permission level = 2.'
             showCreateButton={true}
         />
-    ), [form.default_user_checkpoints, handleCodeExecCheckpointChange, isEditMode, activeAccordion, handleAccordionToggle]);
+    ), [form.default_user_checkpoints, handleCodeExecCheckpointChange, isEditMode]);
 
     return (
         <GenericFlexibleView

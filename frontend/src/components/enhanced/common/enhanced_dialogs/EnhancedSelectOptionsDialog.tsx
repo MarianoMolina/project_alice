@@ -33,7 +33,7 @@ const EnhancedSelectOptionsDialog = () => {
 
   const memoizedContent = useMemo(() => {
     if (!enhancedOptionsDialogProps) return null;
-    const { EnhancedComponent, isInteractable, filters, selectedItems } = enhancedOptionsDialogProps;
+    const { EnhancedComponent, filters } = enhancedOptionsDialogProps;
     
     return (
       <EnhancedComponent
@@ -41,9 +41,8 @@ const EnhancedSelectOptionsDialog = () => {
         fetchAll={true}
         onInteraction={handleInteraction}
         onView={handleView}
-        isInteractable={isInteractable}
+        isInteractable={true}
         filters={filters}
-        selectedItems={selectedItems}
       />
     );
   }, [enhancedOptionsDialogProps, handleInteraction, handleView]);

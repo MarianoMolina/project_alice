@@ -5,7 +5,6 @@ import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import ModelShortListView from '../../model/model/ModelShortListView';
 import { AliceModel } from '../../../../types/ModelTypes';
 import { APIConfig } from '../../../../types/ApiConfigTypes';
-import { useApi } from '../../../../contexts/ApiContext';
 import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
 import Logger from '../../../../utils/Logger';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
@@ -21,9 +20,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
     handleSave,
     handleDelete,
 }) => {
-    const { fetchPopulatedItem } = useApi();
     const [availableApiTypes, setAvailableApiTypes] = useState<ApiType[]>([]);
-    const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
     const [form, setForm] = useState<Partial<API>>(() => item || getDefaultApiForm());
     const [isSaving, setIsSaving] = useState(false);
     
@@ -61,10 +58,6 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
             handleDelete(item);
         }
     }, [item, handleDelete]);
-
-    const handleAccordionToggle = useCallback((accordion: string | null) => {
-        setActiveAccordion(prevAccordion => prevAccordion === accordion ? null : accordion);
-    }, []);
 
     const updateAvailableApiTypes = useCallback((apiName: ApiName | undefined) => {
         Logger.debug('updateAvailableApiTypes', apiName);
@@ -104,7 +97,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
         } else {
             setForm(prevForm => ({ ...prevForm, api_config: undefined }));
         }
-    }, [fetchPopulatedItem]);
+    }, []);
 
     const handleDefaultModelChange = useCallback(async (models: AliceModel[]) => {
         if (models.length > 0) {
@@ -112,7 +105,7 @@ const ApiFlexibleView: React.FC<ApiComponentProps> = ({
         } else {
             setForm(prevForm => ({ ...prevForm, default_model: undefined }));
         }
-    }, [fetchPopulatedItem]);
+    }, []);
 
     const apiOptions = Object.values(ApiName).map((name) => ({
         value: name,
