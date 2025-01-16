@@ -7,10 +7,15 @@ import { useApi } from './ApiContext';
 import Logger from '../utils/Logger';
 import { globalEventEmitter } from '../utils/EventEmitter';
 import { fetchPopulatedItem } from '../services/api';
+import { PopulatedChatThread } from '../types/ChatThreadTypes';
 
 interface ChatContextType {
     messages: PopulatedMessage[];
     setMessages: React.Dispatch<React.SetStateAction<PopulatedMessage[]>>;
+    setCurrentThread: React.Dispatch<React.SetStateAction<PopulatedChatThread | null>>;
+    currentThread: PopulatedChatThread | null;
+    threads: PopulatedChatThread[];
+    setThreads: React.Dispatch<React.SetStateAction<PopulatedChatThread[]>>;
     pastChats: AliceChat[];
     setPastChats: React.Dispatch<React.SetStateAction<AliceChat[]>>;
     currentChatId: string | null;
@@ -18,7 +23,7 @@ interface ChatContextType {
     isGenerating: boolean;
     setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>;
     handleSelectChat: (chatId: string) => Promise<void>;
-    handleSendMessage: (currentChatId: string, message: PopulatedMessage) => Promise<void>;
+    handleSendMessage: (currentChatId: string, threadId:string, message: PopulatedMessage) => Promise<void>;
     generateResponse: () => Promise<void>;
     handleRegenerateResponse: () => Promise<void>;
     fetchChats: () => Promise<void>;
@@ -39,6 +44,8 @@ interface ChatProviderProps {
 export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     const { fetchItem, updateItem, sendMessage, generateChatResponse } = useApi();
     const [messages, setMessages] = useState<PopulatedMessage[]>([]);
+    const [threads, setThreads] = useState<PopulatedChatThread[]>([]);
+    const [currentThread, setCurrentThread] = useState<PopulatedChatThread | null>(null);
     const [pastChats, setPastChats] = useState<AliceChat[]>([]);
     const [currentChatId, setCurrentChatId] = useState<string | null>(null);
     const [isGenerating, setIsGenerating] = useState<boolean>(false);
@@ -94,16 +101,22 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         }
     }, []);
 
-    const fetchCurrentChat = useCallback(async () => {
-        if (!currentChatId) return;
+    const handleSelectChat = async (chatId: string) => {
         try {
-            const chatData = await fetchChatById(currentChatId)
+            const chatData = await fetchChatById(chatId);
             setCurrentChat(chatData);
             setMessages(chatData.messages);
+            setCurrentChatId(chatId);
+            setThreads(chatData.threads || []);
         } catch (error) {
-            Logger.error('Error fetching current chat:', error);
+            Logger.error('Error fetching chat:', error);
         }
-    }, [currentChatId, fetchChatById]);
+    };
+
+    const fetchCurrentChat = useCallback(async () => {
+        if (!currentChatId) return;
+        return handleSelectChat(currentChatId);
+    }, [currentChatId, handleSelectChat]);
     
     useEffect(() => {
         globalEventEmitter.on('created:chats', fetchChats);
@@ -115,24 +128,13 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         };
     }, [currentChatId, fetchChats, fetchCurrentChat]);
 
-
-    const handleSelectChat = async (chatId: string) => {
-        try {
-            const chatData = await fetchChatById(chatId);
-            setCurrentChat(chatData);
-            setMessages(chatData.messages);
-            setCurrentChatId(chatId);
-        } catch (error) {
-            Logger.error('Error fetching chat:', error);
-        }
-    };
-
-    const handleSendMessage = async (currentChatId: string, message: PopulatedMessage) => {
+    const handleSendMessage = async (currentChatId: string, threadId: string, message: PopulatedMessage) => {
         try {
             Logger.debug('Sending message:', message);
             setMessages(prevMessages => [...prevMessages, message]);
-            const updatedChat = await sendMessage(currentChatId, message);
-            setMessages(updatedChat.messages);
+            const updatedChatThread = await sendMessage(currentChatId, threadId, message);
+            setMessages(updatedChatThread.messages);
+            setCurrentThread(updatedChatThread);
             await generateResponse();
         } catch (error) {
             Logger.error('Error sending message or generating response:', error);
@@ -191,6 +193,10 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     const value: ChatContextType = {
         messages,
         setMessages,
+        threads,
+        setThreads,
+        currentThread,
+        setCurrentThread,
         pastChats,
         setPastChats,
         currentChatId,

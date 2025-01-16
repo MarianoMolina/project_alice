@@ -35,11 +35,12 @@ import EnhancedCodeExecution from '../components/enhanced/code_execution/code_ex
 import EnhancedAPIConfig from '../components/enhanced/api_config/api_config/EnhancedAPIConfig';
 import { EntityReference, PopulatedEntityReference } from './EntityReferenceTypes';
 import EnhancedEntityReference from '../components/enhanced/entity_reference/entity_reference/EnhancedEntityReference';
+import { ChatThread, PopulatedChatThread } from './ChatThreadTypes';
 
-export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' | 'userinteractions' | 'usercheckpoints' | 'dataclusters' | 'embeddingchunks' | 'toolcalls' | 'codeexecutions' | 'apiconfigs' | 'entityreferences';
-export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType | UserInteraction | UserCheckpoint | DataCluster | EmbeddingChunk | ToolCall | CodeExecution | APIConfig | EntityReference;
-export type CollectionPopulatedElement = AliceAgent | PopulatedAliceChat | AliceModel | PopulatedTask | Prompt | PopulatedTaskResponse | User | ParameterDefinition | API | User | PopulatedFileReference | PopulatedMessage | PopulatedUserInteraction | UserCheckpoint | PopulatedDataCluster | EmbeddingChunk | PopulatedToolCall | PopulatedCodeExecution | APIConfig | PopulatedEntityReference;
-export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API' | 'User' | 'File' | 'Message' | 'UserInteraction' | 'UserCheckpoint' | 'DataCluster' | 'EmbeddingChunk' | 'ToolCall' | 'CodeExecution' | 'APIConfig' | 'EntityReference';
+export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' | 'userinteractions' | 'usercheckpoints' | 'dataclusters' | 'embeddingchunks' | 'toolcalls' | 'codeexecutions' | 'apiconfigs' | 'entityreferences' | 'chatthreads';
+export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType | UserInteraction | UserCheckpoint | DataCluster | EmbeddingChunk | ToolCall | CodeExecution | APIConfig | EntityReference | ChatThread;
+export type CollectionPopulatedElement = AliceAgent | PopulatedAliceChat | AliceModel | PopulatedTask | Prompt | PopulatedTaskResponse | User | ParameterDefinition | API | User | PopulatedFileReference | PopulatedMessage | PopulatedUserInteraction | UserCheckpoint | PopulatedDataCluster | EmbeddingChunk | PopulatedToolCall | PopulatedCodeExecution | APIConfig | PopulatedEntityReference | PopulatedChatThread;
+export type CollectionElementString = 'Agent' | 'Model' | 'Parameter' | 'Prompt' | 'Task' | 'TaskResponse' | 'Chat' | 'API' | 'User' | 'File' | 'Message' | 'UserInteraction' | 'UserCheckpoint' | 'DataCluster' | 'EmbeddingChunk' | 'ToolCall' | 'CodeExecution' | 'APIConfig' | 'EntityReference' | 'ChatThread';
 
 export type CollectionType = {
     agents: AliceAgent;
@@ -61,6 +62,7 @@ export type CollectionType = {
     codeexecutions: CodeExecution;
     apiconfigs: APIConfig;
     entityreferences: EntityReference;
+    chatthreads: ChatThread;
 };
 export type CollectionPopulatedType = {
     agents: AliceAgent;
@@ -82,6 +84,7 @@ export type CollectionPopulatedType = {
     codeexecutions: PopulatedCodeExecution;
     apiconfigs: APIConfig;
     entityreferences: PopulatedEntityReference;
+    chatthreads: PopulatedChatThread;
 };
 export type ElementTypeMap = {
     Agent: AliceAgent;
@@ -103,6 +106,7 @@ export type ElementTypeMap = {
     CodeExecution: CodeExecution;
     APIConfig: APIConfig;
     EntityReference: EntityReference;
+    ChatThread: ChatThread;
 }
 
 export type CollectionTypeString = {
@@ -125,6 +129,7 @@ export type CollectionTypeString = {
     codeexecutions: 'CodeExecution';
     apiconfigs: 'APIConfig';
     entityreferences: 'EntityReference';
+    chatthreads: 'ChatThread';
 };
 
 export const collectionNameToElementString: Record<CollectionName, CollectionElementString> = {
@@ -147,6 +152,7 @@ export const collectionNameToElementString: Record<CollectionName, CollectionEle
     codeexecutions: 'CodeExecution',
     apiconfigs: 'APIConfig',
     entityreferences: 'EntityReference',
+    chatthreads: 'ChatThread',
 };
 
 export const collectionNameToEnhancedComponent: Record<CollectionName, React.ComponentType<any>> = {
@@ -169,6 +175,7 @@ export const collectionNameToEnhancedComponent: Record<CollectionName, React.Com
     codeexecutions: EnhancedCodeExecution,
     apiconfigs: EnhancedAPIConfig,
     entityreferences: EnhancedEntityReference,
+    chatthreads: EnhancedChat,
 };
 
 // Create a runtime mapping object
@@ -192,6 +199,7 @@ export const collectionTypeMapping: Record<string, CollectionElementString> = {
     CodeExecution: 'CodeExecution',
     APIConfig: 'APIConfig',
     EntityReference: 'EntityReference',
+    ChatThread: 'ChatThread',
 };
 export function getCollectionNameFromElement(elementString: CollectionElementString): CollectionName {
     const entry = Object.entries(collectionNameToElementString).find(
@@ -224,6 +232,7 @@ export interface HandleClickProps {
     handleCodeExecutionClick?: (codeExecutionId: string, item?: PopulatedCodeExecution) => void;
     handleAPIConfigClick?: (apiConfigId: string, item?: APIConfig) => void;
     handleEntityReferenceClick?: (entityReferenceId: string, item?: PopulatedEntityReference) => void;
+    handleChatThreadClick?: (chatThreadId: string, item?: PopulatedChatThread) => void;
 }
 export interface EnhancedComponentProps<T extends CollectionElement | CollectionPopulatedElement> extends HandleClickProps {
     items: T[] | null;

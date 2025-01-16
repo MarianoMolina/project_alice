@@ -12,10 +12,12 @@ from .api_utils import ApiName, ApiType, ModelType, ModelApis, API_CONFIG_TYPES,
 from .tool_calls import ToolCall, ToolCallConfig
 from .code import CodeBlock, CodeOutput, CodeExecution, get_run_commands
 from .entity_reference import EntityReference, ReferenceCategory, ImageReference
+from .threads import ChatThread
 from .parameters import ParameterDefinition, FunctionConfig, FunctionParameters, ToolFunction, ensure_tool_function
 from .base_models import EntityType, FileType, ContentType, TasksEndCodeRouting, EmbeddingChunk, Embeddable, BaseDataStructure, MetadataDict, CostDict, UsageDict
 # Rebuild all models
 MessageDict.model_rebuild()
+ChatThread.model_rebuild()
 FileReference.model_rebuild()
 FileContentReference.model_rebuild()
 TaskResponse.model_rebuild()
@@ -51,4 +53,4 @@ __all__ = ['FileReference', 'ContentType', 'FileType', 'FileContentReference', '
            'ToolFunction', 'ensure_tool_function', 'EntityType', 'ModelApis', 'FileOutput', 'References', 'complete_inner_execution_history', 'Embeddable', 'convert_message_dict_to_api_format',
            'AliceModel', 'Prompt', 'BaseDataStructure', 'DataCluster', 'InteractionOwnerType', 'InteractionOwner', 'MessageGenerators', 'RoleTypes', 'CodeBlock',
            'CodeOutput', 'CodeExecution', 'API_CONFIG_TYPES', 'API_CAPABILITIES', 'EntityReference', 'ReferenceCategory', 'ImageReference', 'get_reference_object', 'references_model_map', 
-           'MetadataDict', 'CostDict', 'UsageDict']
+           'MetadataDict', 'CostDict', 'UsageDict', 'ChatThread']

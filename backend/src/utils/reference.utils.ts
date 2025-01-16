@@ -10,6 +10,7 @@ import { createEmbeddingChunk, updateEmbeddingChunk } from './embeddingChunk.uti
 import { createToolCall, updateToolCall } from './toolCall.utils';
 import { createCodeExecution, updateCodeExecution } from './codeExecution.utils';
 import { createEntityReference, updateEntityReference } from './entityReference.utils';
+import { createChatThread, updateChatThread } from './thread.utils';
 
 // Add interface for owner information
 interface OwnerInfo {
@@ -31,6 +32,10 @@ const referenceUtilsMap: Record<keyof References, ReferenceUtils> = {
   messages: {
     create: createMessage,
     update: updateMessage
+  },
+  threads: {
+    create: createChatThread,
+    update: updateChatThread
   },
   files: {
     create: storeFileReference,

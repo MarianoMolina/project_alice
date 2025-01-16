@@ -8,6 +8,8 @@ import { IMessageDocument } from '../interfaces/message.interface';
 import { createDataCluster, updateDataCluster } from './data_cluster';
 import { DataCluster } from '../models/reference.model';
 import { PopulationService } from './population.utils';
+import { createChatThread, updateChatThread } from './thread.utils';
+import { IChatThread } from '../interfaces/thread.interface';
 
 const popService = new PopulationService()
 
@@ -176,11 +178,33 @@ export async function updateChat(
         } else {
             messageIds = originalChat.messages as Types.ObjectId[];
         }
-
-        // Rest of the update chat function remains the same...
-
         chatData.messages = messageIds;
-        chatData.updated_by = userId ? new Types.ObjectId(userId) : undefined;
+        // Create threads if any
+        let threadIds: Types.ObjectId[] = [];
+        if (chatData.threads && Array.isArray(chatData.threads) && chatData.threads.length > 0) {
+            for (const thread of chatData.threads) {
+                // If thread is a string, it's an ID
+                if (typeof thread === 'string') {
+                    threadIds.push(new Types.ObjectId(thread));
+                } else if (thread._id) {
+                    // Update existing thread
+                    const updatedThread = await updateChatThread(thread._id.toString(), thread as IChatThread, userId);
+                    if (!updatedThread) {
+                        throw new Error('Failed to update thread');
+                    }
+                    threadIds.push(updatedThread._id);
+                } else {
+                    // Create new thread
+                    const newThread = await createChatThread(thread as IChatThread, userId);
+                    if (!newThread) {
+                        throw new Error('Failed to create thread');
+                    }
+                    threadIds.push(newThread._id);
+                }
+            }
+        }
+        chatData.threads = threadIds;
+        chatData.updated_by = new Types.ObjectId(userId);
         chatData.updatedAt = new Date();
 
         return await AliceChat.findByIdAndUpdate(
@@ -196,6 +220,7 @@ export async function updateChat(
 
 export async function createMessageInChat(
     chatId: string,
+    threadId: string,
     messageData: Partial<IMessageDocument>,
     userId: string
 ): Promise<IAliceChatDocument | null> {
@@ -220,6 +245,9 @@ export async function createMessageInChat(
         if (!messageDoc) {
             throw new Error('Failed to process message');
         }
+        // Find the thread in the chat and add the message ID
+        // If it doesnt exist, create a new thread
+
 
         // Update the chat by adding the message ID
         const updatedChat = await AliceChat.findByIdAndUpdate(

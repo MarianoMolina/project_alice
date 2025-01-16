@@ -9,6 +9,7 @@ import { requestFileTranscript } from './workflowApi';
 import { ApiName } from '../types/ApiTypes';
 import { ApiConfigType } from '../utils/ApiUtils';
 import Logger from '../utils/Logger';
+import { PopulatedChatThread } from '../types/ChatThreadTypes';
 
 export interface LMStudioModel {
   id: string;
@@ -228,7 +229,7 @@ export const updateMessageInChat = async (chatId: string, updatedMessage: Messag
   }
 };
 
-export const sendMessage = async (chatId: string, message: PopulatedMessage): Promise<PopulatedAliceChat> => {
+export const sendMessage = async (chatId: string, threadId: string, message: PopulatedMessage): Promise<PopulatedChatThread> => {
   try {
     Logger.debug('Sending message to chatId:', chatId);
 
@@ -251,7 +252,7 @@ export const sendMessage = async (chatId: string, message: PopulatedMessage): Pr
       }
     }
 
-    const response = await dbAxiosInstance.patch(`/chats/${chatId}/add_message`, { message });
+    const response = await dbAxiosInstance.patch(`/chats/${chatId}/add_message`, { threadId, message });
     Logger.debug('Received response:', response.data);
     return convertToPopulatedAliceChat(response.data.chat);
   } catch (error) {

@@ -3,7 +3,7 @@ import {
     Box,
     Alert,
 } from '@mui/material';
-import { ChatComponentProps, getDefaultChatForm, CheckpointType, PopulatedAliceChat } from '../../../../types/ChatTypes';
+import { ChatComponentProps, getDefaultChatForm, CheckpointType, PopulatedAliceChat, AliceChat } from '../../../../types/ChatTypes';
 import { PopulatedDataCluster } from '../../../../types/DataClusterTypes';
 import { AliceAgent } from '../../../../types/AgentTypes';
 import { PopulatedTask } from '../../../../types/TaskTypes';
@@ -87,7 +87,7 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
         }
     }, [isSaving, handleSave]);
 
-    const handleFieldChange = useCallback((field: keyof AliceAgent, value: any) => {
+    const handleFieldChange = useCallback((field: keyof AliceChat, value: any) => {
         setForm(prevForm => ({ ...prevForm, [field]: value }));
     }, []);
 

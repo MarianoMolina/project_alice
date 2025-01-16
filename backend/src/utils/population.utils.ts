@@ -2,9 +2,12 @@ import mongoose, { Model, Document, Types } from 'mongoose';
 import { Embeddable } from '../interfaces/embeddingChunk.interface';
 import { DataClusterHolder, References } from '../interfaces/references.interface';
 import Logger from './logger';
+import { ChatThread } from '../models/thread.model';
+import { IChatThreadDocument } from '../interfaces/thread.interface';
 
 export const ReferenceTypeModelMap: Record<keyof References, string> = {
     messages: 'Message',
+    threads: 'ChatThread',
     files: 'FileReference',
     task_responses: 'TaskResult',
     entity_references: 'EntityReference',
@@ -20,7 +23,7 @@ export interface PopulationConfig {
     hasReferences: boolean;
     isDataCluster: boolean;
     hasTasks: boolean;
-    hasMessages: boolean;
+    hasThreads: boolean;
     referencePath?: string[];
     taskPath?: string[];
 }
@@ -31,7 +34,7 @@ export const defaultPopulationConfig: PopulationConfig = {
     isDataCluster: false,
     hasReferences: false,
     hasTasks: false,
-    hasMessages: false,
+    hasThreads: false,
 };
 
 export const ReferencePopulationConfig: PopulationConfig = {
@@ -43,6 +46,10 @@ export const ModelPopulationMap: Record<string, PopulationConfig> = {
     'CodeExecution': ReferencePopulationConfig,
     'EntityReference': ReferencePopulationConfig,
     'FileReference': ReferencePopulationConfig,
+    'ChatThread': {
+        ...defaultPopulationConfig,
+        hasReferences: true,
+    },
     'Message': {
         ...ReferencePopulationConfig,
         hasReferences: true,
@@ -64,7 +71,7 @@ export const ModelPopulationMap: Record<string, PopulationConfig> = {
         hasDataCluster: true,
         hasTasks: true,
         taskPath: ['agent_tools', 'retrieval_tools'],
-        hasMessages: true,
+        hasThreads: true,
     },
     'DataCluster': {
         ...defaultPopulationConfig,
@@ -137,7 +144,7 @@ export class PopulationService {
         if (config.hasTasks && this.hasTasks(doc, config)) {
             populatedObj = await this.populateTasks(populatedObj, config, userId);
         }
-        if (config.hasMessages && this.hasMessages(doc)) {
+        if (config.hasThreads && this.hasThreads(doc)) {
             Logger.debug('Will populate messages:', {
                 modelName: model.modelName,
                 id,
@@ -145,7 +152,7 @@ export class PopulationService {
                 // Check for references safely
                 hasDirectRefs: doc.toJSON().hasOwnProperty('references')
             });
-            populatedObj = await this.populateMessages(populatedObj, userId);
+            populatedObj = await this.populateThreads(populatedObj, userId);
             Logger.debug('After messages population:', {
                 modelName: model.modelName,
                 id,
@@ -168,12 +175,12 @@ export class PopulationService {
         );
     }
 
-    private hasMessages(doc: Document): boolean {
+    private hasThreads(doc: Document): boolean {
         Logger.debug('Checking for messages in doc:', doc);
         Logger.debug('Messages:', 'messages' in doc, 'messages' in doc && Array.isArray(doc.messages));
         return (
-            'messages' in doc &&
-            Array.isArray(doc.messages)
+            'threads' in doc &&
+            Array.isArray(doc.threads)
         );
     }
 
@@ -186,7 +193,7 @@ export class PopulationService {
 
     private isReferencesObject(obj: any): obj is References {
         if (!obj || typeof obj !== 'object') return false;
-        
+
         // Check if the object has any of the reference type keys
         const referenceKeys = Object.keys(ReferenceTypeModelMap);
         return referenceKeys.some(key => key in obj);
@@ -287,48 +294,58 @@ export class PopulationService {
         return false;
     }
 
-    private async populateMessages(
+    private async populateThreads(
         obj: any,
         userId: string | Types.ObjectId
     ): Promise<any> {
-        Logger.debug(`[Starting populateMessages`, { objId: obj._id, messageCount: obj.messages?.length });
-    
-        if (!obj.messages || !Array.isArray(obj.messages)) {
+        Logger.debug(`[Starting populateThreads`, { objId: obj._id, messageCount: obj.messages?.length });
+
+        if (!obj.threads || !Array.isArray(obj.threads) || obj.threads.length === 0) {
             Logger.debug(`[No messages to populate`, { objId: obj._id });
             return obj;
         }
-    
-        const MessageModel = mongoose.model('Message');
         try {
-            const populatedMessages = await Promise.all(
-                obj.messages.map(async (messageId: string | Types.ObjectId, index: number) => {
-                    Logger.debug(`[Populating message ${index}`, { messageId });
-                    try {
-                        const populatedMessage = await this.findAndPopulate(
-                            MessageModel,
-                            messageId,
-                            userId
-                        );
-                        Logger.debug(`[Message ${index} populated`, { messageId, populated: !!populatedMessage });
-                        return populatedMessage || messageId;
-                    } catch (error) {
-                        Logger.error(`[Error populating message ${index}`, { messageId, error });
-                        return messageId;
-                    }
-                })
-            );
-    
-            Logger.debug(`[Finished populating messages`, { 
-                objId: obj._id, 
-                populatedCount: populatedMessages.filter(m => typeof m !== 'string').length 
-            });
-    
+            let threads: IChatThreadDocument[] = [];
+            for (const threadId of obj.threads) {
+                const thread = await ChatThread.findById(threadId);
+                if (thread) {
+                    threads.push(thread)
+                }
+            }
+
+            const MessageModel = mongoose.model('Message');
+            for (const thread of threads) {
+                const populatedMessages = await Promise.all(
+                    obj.messages.map(async (messageId: string | Types.ObjectId, index: number) => {
+                        Logger.debug(`[Populating message ${index}`, { messageId });
+                        try {
+                            const populatedMessage = await this.findAndPopulate(
+                                MessageModel,
+                                messageId,
+                                userId
+                            );
+                            Logger.debug(`[Message ${index} populated`, { messageId, populated: !!populatedMessage });
+                            return populatedMessage || messageId;
+                        } catch (error) {
+                            Logger.error(`[Error populating message ${index}`, { messageId, error });
+                            return messageId;
+                        }
+                    })
+                );
+
+                Logger.debug(`[Finished populating messages`, {
+                    objId: obj._id,
+                    populatedCount: populatedMessages.filter(m => typeof m !== 'string').length
+                });
+                thread.messages = populatedMessages;
+            }
+            
             return {
                 ...obj,
-                messages: populatedMessages
+                threads
             };
         } catch (error) {
-            Logger.error(`[Error in populateMessages`, { objId: obj._id, error });
+            Logger.error(`[Error in populateThreads`, { objId: obj._id, error });
             return obj;
         }
     }
@@ -362,7 +379,7 @@ export class PopulationService {
                 obj.data_cluster,
                 userId
             );
-            
+
             if (!dataCluster) {
                 Logger.warn('Data cluster not found:', {
                     dataClusterId: obj.data_cluster,

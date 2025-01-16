@@ -7,7 +7,7 @@ from workflow.core.data_structures import (
     UserInteraction, UserCheckpoint, Prompt, User, 
     BaseDataStructure, DataCluster, InteractionOwner,
     InteractionOwnerType, MessageGenerators, RoleTypes,
-    TaskResponse, CodeExecution, References
+    TaskResponse, CodeExecution, ChatThread
 )
 from workflow.core.agent import AliceAgent
 from workflow.core.api import APIManager
@@ -46,6 +46,7 @@ class AliceChat(BaseDataStructure):
     id: Optional[str] = Field(default=None, description="The unique ID of the chat conversation", alias="_id")
     name: str = Field("New Chat", description="The name of the chat conversation")
     messages: List[MessageDict] = Field(default_factory=list, description="List of messages in the chat conversation")
+    threads: List[ChatThread] = Field(default_factory=list, description="List of chat threads")
     alice_agent: AliceAgent = Field(
         default=AliceAgent(
             name="Alice",
@@ -69,6 +70,55 @@ class AliceChat(BaseDataStructure):
         default=None,
         description="Associated data cluster"
     )
+    
+    @model_validator(mode='before')
+    @classmethod
+    def initialize_threads(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Initialize chat threads before model creation.
+        
+        This validator:
+        1. Ensures thread list is properly initialized
+        2. Converts dictionary items to appropriate thread instances
+        
+        Args:
+            values: Dictionary of field values to validate
+            
+        Returns:
+            Dict[str, Any]: Updated values dictionary with properly initialized threads
+            
+        Raises:
+            ValueError: If thread conversion fails
+        """
+        # Initialize empty list if not present
+        threads = values.get('threads', [])
+        
+        # Ensure we have a list
+        if not isinstance(threads, list):
+            threads = []
+            
+        # Process threads
+        processed_threads = []
+        for thread in threads:
+            if isinstance(thread, dict):
+                try:
+                    processed_thread = ChatThread(**thread)
+                    processed_threads.append(processed_thread)
+                except Exception as e:
+                    LOGGER.error(f"Failed to create chat thread: {str(e)}")
+                    raise ValueError(f"Failed to create chat thread: {str(e)}")
+            elif isinstance(thread, ChatThread):
+                processed_threads.append(thread)
+            else:
+                LOGGER.error(f"Invalid chat thread type: {type(thread)}")
+                raise ValueError(f"Invalid chat thread type: {type(thread)}")
+
+        # Update values with processed threads
+        values['threads'] = processed_threads
+        
+        LOGGER.debug(f"Initialized threads: {processed_threads}")
+        
+        return values
 
     @model_validator(mode='before')
     @classmethod
@@ -160,6 +210,7 @@ class AliceChat(BaseDataStructure):
         fields_to_exclude = {
             'messages', 
             'agent_tools', 
+            'threads',
             'retrieval_tools', 
             'alice_agent', 
             'data_cluster',
@@ -175,6 +226,11 @@ class AliceChat(BaseDataStructure):
             data['messages'] = [
                 msg.model_dump(*args, **kwargs) if isinstance(msg, BaseModel) else msg 
                 for msg in self.messages
+            ]
+        if self.threads:
+            data['threads'] = [
+                thread.model_dump(*args, **kwargs) if isinstance(thread, BaseModel) else thread
+                for thread in self.threads
             ]
         
         if self.agent_tools:

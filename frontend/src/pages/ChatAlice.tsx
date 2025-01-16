@@ -15,7 +15,6 @@ import { useDialog } from '../contexts/DialogContext';
 import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
 import EnhancedMessage from '../components/enhanced/message/message/EnhancedMessage';
 import Logger from '../utils/Logger';
-import ChatMessagesFullView from '../components/enhanced/chat/chat/ChatMessagesFullView';
 import ChatShortListView from '../components/enhanced/chat/chat/ChatShortListView';
 import ChatCardView from '../components/enhanced/chat/chat/ChatCardView';
 import { LlmProvider } from '../types/ApiTypes';
@@ -24,6 +23,9 @@ import EnhancedEntityReference from '../components/enhanced/entity_reference/ent
 import { collectionElementIcons } from '../utils/CollectionUtils';
 import EnhancedToolCall from '../components/enhanced/tool_calls/tool_calls/EnhancedToolCall';
 import EnhancedCodeExecution from '../components/enhanced/code_execution/code_execution/EnhancedCodeExecution';
+import { PopulatedChatThread } from '../types/ChatThreadTypes';
+import ChatThreadFullView from '../components/enhanced/chat_thread/chat_thread/ChatThreadFullView';
+import ChatThreadShortListView from '../components/enhanced/chat_thread/chat_thread/ChatThreadShortListView';
 
 const ChatAlice: React.FC = () => {
   const classes = useStyles();
@@ -31,6 +33,8 @@ const ChatAlice: React.FC = () => {
     pastChats,
     currentChatId,
     handleSelectChat,
+    currentThread,
+    setCurrentThread,
     currentChat,
     addTaskToChat,
     isTaskInChat,
@@ -50,6 +54,17 @@ const ChatAlice: React.FC = () => {
     setActiveTab('Current Chat');
     setIsExpanded(false)
   }, [handleSelectChat]);
+
+  const selectThread = useCallback(async (thread: PopulatedChatThread) => {
+    Logger.debug('Selected thread:', thread);
+    if (!thread._id) return;
+    const isThreadInCurrentChat = currentChat?.threads?.some(t => t._id === thread._id);
+    if (!isThreadInCurrentChat) {
+      Logger.error('Selected thread is not in current chat.');
+      return;
+    }
+    setCurrentThread(thread);
+  }, [setCurrentThread]);
 
   const handleCreateNew = useCallback(() => {
     selectFlexibleItem('Chat', 'create');
@@ -103,6 +118,7 @@ const ChatAlice: React.FC = () => {
   const tabs = [
     { name: 'Select Chat', icon: collectionElementIcons.Chat, group: 'Chat' },
     { name: 'Current Chat', icon: Info, disabled: !currentChatId, group: 'Info' },
+    { name: 'Threads', icon: collectionElementIcons.ChatThread, disabled: !currentChatId, group: 'Info' },
     { name: 'Add Tools', icon: collectionElementIcons.Task, disabled: !currentChatId, group: 'Info' },
     { name: 'Add File Reference', icon: collectionElementIcons.File, disabled: !currentChatId, group: 'Ref' },
     { name: 'Add Message Reference', icon: collectionElementIcons.Message, disabled: !currentChatId, group: 'Ref' },
@@ -146,6 +162,17 @@ const ChatAlice: React.FC = () => {
                     onView={(chat) => selectCardItem('Chat', chat?._id)}
                     onInteraction={selectChatId}
                     item={null} mode={'view'}
+                    onChange={() => null}
+                    handleSave={async () => { }}
+                  />
+                );
+              case 'Threads':
+                return (
+                  <ChatThreadShortListView
+                    items={currentChat?.threads || []}
+                    item={currentThread}
+                    mode={'view'}
+                    onView={(thread) => thread._id && selectCardItem('ChatThread', thread._id)}
                     onChange={() => null}
                     handleSave={async () => { }}
                   />
@@ -254,8 +281,8 @@ const ChatAlice: React.FC = () => {
       />
       <Box className={classes.chatAliceMain}>
         <Box className={classes.chatAliceMessages}>
-          {currentChat ? (
-            <ChatMessagesFullView />
+          {currentThread ? (
+            <ChatThreadFullView />
           ) : (
             <PlaceholderSkeleton
               mode="chat"

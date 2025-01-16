@@ -2,7 +2,8 @@
 import { 
     Message, Build, Code, Assignment, AttachFile, Description,
     Feedback, PersonOutline, Diversity2, Functions, QuestionAnswer,
-    Api, Settings, Category, LiveHelp
+    Api, Settings, Category, LiveHelp,
+    Chat
   } from "@mui/icons-material";
   import { AIAssistantIcon, APIConfigIcon } from "./CustomIcons";
   import { SvgIconComponent } from "@mui/icons-material";
@@ -10,6 +11,7 @@ import { CollectionElementString } from "../types/CollectionTypes";
 
 export const collectionElementIcons: Record<CollectionElementString, SvgIconComponent> = {
     Message: Message,
+    ChatThread: QuestionAnswer,
     ToolCall: Build,
     CodeExecution: Code,
     TaskResponse: Assignment,
@@ -20,7 +22,7 @@ export const collectionElementIcons: Record<CollectionElementString, SvgIconComp
     DataCluster: Diversity2,
     Agent: AIAssistantIcon as SvgIconComponent,
     Task: Functions,
-    Chat: QuestionAnswer,
+    Chat: Chat,
     API: Api,
     APIConfig: APIConfigIcon as SvgIconComponent,
     Model: Category,

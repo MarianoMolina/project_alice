@@ -4,6 +4,7 @@ import { BaseDatabaseObject, convertToBaseDatabaseObject, EnhancedComponentProps
 import { convertToPopulatedMessage, PopulatedMessage } from './MessageTypes';
 import { convertToUserCheckpoint, UserCheckpoint } from './UserCheckpointTypes';
 import { convertToPopulatedDataCluster, PopulatedDataCluster } from './DataClusterTypes';
+import { ChatThread, convertToChatThread, PopulatedChatThread } from './ChatThreadTypes';
 
 export enum CheckpointType {
     TOOL_CALL = "tool_call",
@@ -15,10 +16,10 @@ export type RequiredCheckpoints = {
     [CheckpointType.TOOL_CALL]: UserCheckpoint;
     [CheckpointType.CODE_EXECUTION]: UserCheckpoint;
 };
-
 export interface AliceChat extends BaseDatabaseObject {
     name: string;
     messages: string[];
+    threads?: ChatThread[];
     alice_agent: AliceAgent;
     agent_tools?: string[];
     retrieval_tools?: string[];
@@ -29,6 +30,7 @@ export interface AliceChat extends BaseDatabaseObject {
 // Create a type for all fields that need different types in PopulatedAliceChat
 type PopulatedFields = {
     messages: PopulatedMessage[];
+    threads?: PopulatedChatThread[];
     agent_tools?: PopulatedTask[];
     retrieval_tools?: PopulatedTask[];
     data_cluster?: PopulatedDataCluster;
@@ -36,6 +38,14 @@ type PopulatedFields = {
 
 // Populated interface that extends base and overrides specific fields
 export interface PopulatedAliceChat extends Omit<AliceChat, keyof PopulatedFields>, PopulatedFields {}
+
+export const convertToPopulatedChatThread = (data: any): PopulatedChatThread => {
+    return {
+        ...convertToBaseDatabaseObject(data),
+        name: data?.name || '',
+        messages: (data?.messages || []).map(convertToPopulatedMessage),
+    };
+}
 
 export const convertToAliceChat = (data: any): AliceChat => {
     const defaultCheckpoints: RequiredCheckpoints = {
@@ -47,6 +57,7 @@ export const convertToAliceChat = (data: any): AliceChat => {
         ...convertToBaseDatabaseObject(data),
         name: data?.name || '',
         messages: data?.messages || [],
+        threads: (data?.threads || []).map(convertToChatThread),
         alice_agent: convertToAliceAgent(data?.alice_agent),
         agent_tools: data?.agent_tools || [],
         retrieval_tools: data?.retrieval_tools || [],
@@ -64,6 +75,7 @@ export const convertToPopulatedAliceChat = (data: any): PopulatedAliceChat => {
         ...convertToBaseDatabaseObject(data),
         name: data?.name || '',
         messages: (data?.messages || []).map(convertToPopulatedMessage),
+        threads: (data?.threads || []).map(convertToPopulatedChatThread),
         alice_agent: convertToAliceAgent(data?.alice_agent),
         agent_tools: (data?.agent_tools || []).map(convertToPopulatedTask),
         default_user_checkpoints: defaultCheckpoints,
@@ -75,6 +87,7 @@ export const convertPopulatedToAliceChat = (populatedChat: PopulatedAliceChat): 
     return {
         ...populatedChat,
         messages: populatedChat.messages.map(message => message._id || ''),
+        threads: populatedChat.threads?.map(thread => ({ ...thread, messages: thread.messages.map(message => message._id || '') })) || [],
         agent_tools: populatedChat.agent_tools?.map(task => task._id || ''),
         retrieval_tools: populatedChat.retrieval_tools?.map(task => task._id || ''),
         data_cluster: populatedChat.data_cluster?._id || '',
@@ -87,6 +100,7 @@ export interface ChatComponentProps extends EnhancedComponentProps<AliceChat | P
 export const getDefaultChatForm = (): Partial<PopulatedAliceChat> => ({
     name: '',
     messages: [],
+    threads: [],
     alice_agent: undefined,
     agent_tools: [],
     retrieval_tools: [],

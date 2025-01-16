@@ -25,6 +25,7 @@ import ToggleBox from '../components/ui/sidetab_header/ToggleBox';
 import EnhancedEntityReference from '../components/enhanced/entity_reference/entity_reference/EnhancedEntityReference';
 import { collectionElementIcons } from '../utils/CollectionUtils';
 import { useApi } from '../contexts/ApiContext';
+import EnhancedChatThread from '../components/enhanced/chat_thread/chat_thread/EnhancedChat';
 
 const ReferencesPage: React.FC = () => {
     const classes = useStyles();
@@ -41,6 +42,7 @@ const ReferencesPage: React.FC = () => {
     const tabs = [
         // Msg Group
         { name: 'Message' as CollectionElementString, icon: collectionElementIcons.Message, group: 'Msg' },
+        { name: 'ChatThread' as CollectionElementString, icon: collectionElementIcons.ChatThread, group: 'Msg' },
         { name: 'ToolCall' as CollectionElementString, icon: collectionElementIcons.ToolCall, group: 'Msg' },
         { name: 'CodeExecution' as CollectionElementString, icon: collectionElementIcons.CodeExecution, group: 'Msg' },
 
@@ -141,6 +143,8 @@ const ReferencesPage: React.FC = () => {
                                 return <EnhancedCodeExecution {...commonListProps} />;
                             case 'ToolCall':
                                 return <EnhancedToolCall {...commonListProps} />;
+                            case 'ChatThread':
+                                return <EnhancedChatThread {...commonListProps} />;
                             case 'EntityReference':
                                 return <EnhancedEntityReference {...commonListProps} />;
                             default:
@@ -184,6 +188,8 @@ const ReferencesPage: React.FC = () => {
                 return <EnhancedCodeExecution {...commonProps} />;
             case 'ToolCall':
                 return <EnhancedToolCall {...commonProps} />;
+            case 'ChatThread':
+                return <EnhancedChatThread {...commonProps} />;
             case 'EntityReference':
                 return <EnhancedEntityReference {...commonProps} />;
             default:

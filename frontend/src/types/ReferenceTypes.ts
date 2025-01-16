@@ -1,4 +1,6 @@
 import Logger from "../utils/Logger";
+import { ChatThread, PopulatedChatThread } from "./ChatThreadTypes";
+import { convertToPopulatedChatThread } from "./ChatTypes";
 import { CodeExecution, convertToPopulatedCodeExecution, PopulatedCodeExecution } from "./CodeExecutionTypes";
 import { convertToEmbeddingChunk, EmbeddingChunk } from "./EmbeddingChunkTypes";
 import { convertToPopulatedEntityReference, EntityReference, PopulatedEntityReference } from "./EntityReferenceTypes";
@@ -11,6 +13,7 @@ import { convertToPopulatedUserInteraction, PopulatedUserInteraction, UserIntera
 export type ReferenceType =
   | MessageType | PopulatedMessage
   | FileReference | PopulatedFileReference
+  | ChatThread | PopulatedChatThread
   | FileContentReference
   | TaskResponse | PopulatedTaskResponse
   | EntityReference | PopulatedEntityReference
@@ -22,6 +25,7 @@ export type ReferenceType =
 
 export enum OutputType {
   MESSAGE = "message",
+  THREAD = "thread",
   FILE = "file",
   TASK_RESPONSE = "task_response",
   USER_INTERACTION = "user_interaction",
@@ -33,6 +37,7 @@ export enum OutputType {
 
 export interface References {
   messages?: string[];
+  threads?: string[];
   files?: string[];
   task_responses?: string[];
   user_interactions?: string[];
@@ -45,6 +50,7 @@ export interface References {
 // Define the populated types
 type PopulatedFields = {
   messages?: PopulatedMessage[];
+  threads?: PopulatedChatThread[];
   files?: PopulatedFileReference[];
   task_responses?: PopulatedTaskResponse[];
   user_interactions?: PopulatedUserInteraction[];
@@ -60,6 +66,7 @@ export interface PopulatedReferences extends Omit<References, keyof PopulatedFie
 export const convertToReferences = (data: any): References => {
   return {
     messages: data?.messages || [],
+    threads: data?.threads || [],
     files: data?.files || [],
     task_responses: data?.task_responses || [],
     user_interactions: data?.user_interactions || [],
@@ -73,6 +80,7 @@ export const convertToReferences = (data: any): References => {
 export const convertToPopulatedReferences = (data: any): PopulatedReferences => {
   return {
     messages: data?.messages ? data.messages.map((message: any) => convertToPopulatedMessage(message)) : [],
+    threads: data?.threads ? data.threads.map((thread: any) => convertToPopulatedChatThread(thread)) : [],
     files: data?.files ? data.files.map((file: any) => convertToPopulatedFileReference(file)) : [],
     task_responses: data?.task_responses ? data.task_responses.map((task_response: any) => convertToPopulatedTaskResponse(task_response)) : [],
     user_interactions: data?.user_interactions ? data.user_interactions.map((user_interaction: any) => convertToPopulatedUserInteraction(user_interaction)) : [],
@@ -87,6 +95,7 @@ export function hasAnyReferences(references: References): boolean {
   Logger.debug("Checking references:", references);
   return (
     (references.messages?.length ?? 0) > 0 ||
+    (references.threads?.length ?? 0) > 0 ||
     (references.files?.length ?? 0) > 0 ||
     (references.task_responses?.length ?? 0) > 0 ||
     (references.user_interactions?.length ?? 0) > 0 ||
@@ -100,6 +109,7 @@ export function hasAnyReferences(references: References): boolean {
 export function howManyReferences(references: References): number {
   return (
     (references.messages?.length ?? 0) +
+    (references.threads?.length ?? 0) +
     (references.files?.length ?? 0) +
     (references.task_responses?.length ?? 0) +
     (references.user_interactions?.length ?? 0) +

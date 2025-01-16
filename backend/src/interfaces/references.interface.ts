@@ -8,9 +8,11 @@ import { IUserDocument } from './user.interface';
 import { IToolCallDocument } from './toolCall.interface';
 import { ICodeExecutionDocument } from './codeExecution.interface';
 import { IEntityReferenceDocument } from './entityReference.interface';
+import { IChatThreadDocument } from './thread.interface';
 
 export interface References {
     messages?: Types.ObjectId[] | IMessageDocument[];
+    threads?: Types.ObjectId[] | IChatThreadDocument[];
     files?: Types.ObjectId[] | IFileReferenceDocument[];
     task_responses?: Types.ObjectId[] | ITaskResultDocument[];
     entity_references?: Types.ObjectId[] | IEntityReferenceDocument[];
