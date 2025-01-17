@@ -1,6 +1,6 @@
 import React from 'react';
 import { ToolCallComponentProps, ToolCall } from '../../../../types/ToolCallTypes';
-import EnhancedTableView from '../../common/enhanced_component/TableView';
+import EnhancedTableView from '../../../common/enhanced_component/TableView';
 
 const ToolCallTableView: React.FC<ToolCallComponentProps> = ({
   items,

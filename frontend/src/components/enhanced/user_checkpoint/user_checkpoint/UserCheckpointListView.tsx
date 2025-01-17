@@ -1,7 +1,7 @@
 import React from 'react';
 import { UserCheckpoint, UserCheckpointComponentProps } from '../../../../types/UserCheckpointTypes';
 import { Typography } from '@mui/material';
-import EnhancedListView from '../../common/enhanced_component/ListView';
+import EnhancedListView from '../../../common/enhanced_component/ListView';
 
 const UserCheckpointListView: React.FC<UserCheckpointComponentProps> = ({
     items,

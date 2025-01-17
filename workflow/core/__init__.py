@@ -7,11 +7,11 @@ from .tasks import (
 from .api import APIManager, API, APIConfig
 from .data_structures import (
     AliceModel, Prompt, ApiType, ApiName, ModelConfig, MessageDict, TaskResponse, User, UserRoles, FileReference, FileType, 
-    FileContentReference, generate_file_content_reference, ModelType, ParameterDefinition, FunctionParameters, DataCluster
+    FileContentReference, generate_file_content_reference, ModelType, ParameterDefinition, FunctionParameters, DataCluster, ChatThread
 )
 __all__ = ['AliceTask', 'Workflow', 'AliceAgent', 'AliceModel', 'PromptAgentTask', 'APITask', 'FileType', 'RetrievalTask',
         'Workflow', 'CodeGenerationLLMTask', 'CodeExecutionLLMTask', 'CheckTask', 'Prompt', 'AliceChat', 'DataCluster',
         'ParameterDefinition', 'FunctionParameters', 'APIManager', 'API', 'ApiType', 'ApiName', 'ModelConfig', 
         'MessageDict', 'TaskResponse', 'User', 'UserRoles', 'FileReference', 'available_task_types', 'RetrievalTask'
-        'FileType', 'FileContentReference', 'generate_file_content_reference', 'ModelType', 'EmbeddingTask', 
+        'FileType', 'FileContentReference', 'generate_file_content_reference', 'ModelType', 'EmbeddingTask', 'ChatThread', 'APIConfig',
         'TextToSpeechTask', 'GenerateImageTask','WebScrapeBeautifulSoupTask', 'EmbeddingTask']

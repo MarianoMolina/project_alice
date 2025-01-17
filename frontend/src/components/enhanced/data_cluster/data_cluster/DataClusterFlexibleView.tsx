@@ -3,7 +3,7 @@ import {
     Typography,
 } from '@mui/material';
 import { DataClusterComponentProps, getDefaultDataClusterForm, PopulatedDataCluster } from '../../../../types/DataClusterTypes';
-import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
+import GenericFlexibleView from '../../../common/enhanced_component/FlexibleView';
 import Logger from '../../../../utils/Logger';
 import DataClusterManager from '../data_cluster_manager/DataClusterManager';
 

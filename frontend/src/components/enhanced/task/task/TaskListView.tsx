@@ -1,9 +1,10 @@
 import React from 'react';
-import { AliceTask, TaskComponentProps, taskDescriptions } from '../../../../types/TaskTypes';
+import { AliceTask, TaskComponentProps } from '../../../../types/TaskTypes';
 import { IconButton, Tooltip, Typography } from '@mui/material';
-import EnhancedListView from '../../common/enhanced_component/ListView';
+import EnhancedListView from '../../../common/enhanced_component/ListView';
 import { Functions } from '@mui/icons-material';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
+import { taskDescriptions } from '../../../../utils/TaskUtilts';
 
 const TaskListView: React.FC<TaskComponentProps> = ({
     items,

@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { ParameterComponentProps, ParameterDefinition, ParameterTypes, getDefaultParameterForm } from '../../../../types/ParameterTypes';
-import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import { SelectInput } from '../../common/inputs/SelectInput';
-import { TextInput } from '../../common/inputs/TextInput';
+import GenericFlexibleView from '../../../common/enhanced_component/FlexibleView';
+import { SelectInput } from '../../../common/inputs/SelectInput';
+import { TextInput } from '../../../common/inputs/TextInput';
 
 const ParameterFlexibleView: React.FC<ParameterComponentProps> = ({
     item,

@@ -3,9 +3,9 @@ import {
     Alert,
 } from '@mui/material';
 import { ToolCallComponentProps, ToolCall, getDefaultToolCallForm, ToolCallConfig, PopulatedToolCall } from '../../../../types/ToolCallTypes';
-import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
+import GenericFlexibleView from '../../../common/enhanced_component/FlexibleView';
 import useStyles from '../ToolCallStyles';
-import { TextInput } from '../../common/inputs/TextInput';
+import { TextInput } from '../../../common/inputs/TextInput';
 import { useNotification } from '../../../../contexts/NotificationContext';
 
 const ToolCallFlexibleView: React.FC<ToolCallComponentProps> = ({

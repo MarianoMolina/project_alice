@@ -5,7 +5,7 @@ import PromptTableView from './PromptTableView';
 import PromptCardView from './PromptCardView';
 import PromptShortListView from './PromptShortListView';
 import { Prompt } from '../../../../types/PromptTypes';
-import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import BaseDbElement, { BaseDbElementProps } from '../../../common/enhanced_component/BaseDbElement';
 import { PromptComponentProps } from '../../../../types/PromptTypes';
 import Logger from '../../../../utils/Logger';
 

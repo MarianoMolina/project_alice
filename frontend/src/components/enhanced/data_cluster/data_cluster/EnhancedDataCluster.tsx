@@ -4,7 +4,7 @@ import DataClusterTableView from './DataClusterTableView';
 import DataClusterCardView from './DataClusterCardView';
 import DataClusterShortListView from './DataClusterShortListView';
 import { DataCluster, DataClusterComponentProps, PopulatedDataCluster } from '../../../../types/DataClusterTypes';
-import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import BaseDbElement, { BaseDbElementProps } from '../../../common/enhanced_component/BaseDbElement';
 import DataClusterFlexibleView from './DataClusterFlexibleView';
 import Logger from '../../../../utils/Logger';
 

@@ -4,13 +4,13 @@ import {
 } from '@mui/material';
 import { APIConfigComponentProps, APIConfig, getDefaultAPIConfigForm, HealthStatus } from '../../../../types/ApiConfigTypes';
 import { ApiName } from '../../../../types/ApiTypes';
-import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
+import GenericFlexibleView from '../../../common/enhanced_component/FlexibleView';
 import { API_BASE_URLS, apiNameIcons } from '../../../../utils/ApiUtils';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
-import { TextInput } from '../../common/inputs/TextInput';
-import { SelectInput } from '../../common/inputs/SelectInput';
-import { IconSelectInput } from '../../common/inputs/IconSelectInput';
-import TitleBox from '../../common/inputs/TitleBox';
+import { TextInput } from '../../../common/inputs/TextInput';
+import { SelectInput } from '../../../common/inputs/SelectInput';
+import { IconSelectInput } from '../../../common/inputs/IconSelectInput';
+import TitleBox from '../../../common/inputs/TitleBox';
 import Logger from '../../../../utils/Logger';
 
 const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({

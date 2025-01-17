@@ -10,10 +10,10 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { UserCheckpoint } from '../../../types/UserCheckpointTypes';
-import EnhancedSelect from '../common/enhanced_select/EnhancedSelect';
+import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import UserCheckpointShortListView from './user_checkpoint/UserCheckpointShortListView';
-import { SelectInput } from '../common/inputs/SelectInput';
-import TitleBox from '../common/inputs/TitleBox';
+import { SelectInput } from '../../common/inputs/SelectInput';
+import TitleBox from '../../common/inputs/TitleBox';
 import { CollectionName, CollectionPopulatedType } from '../../../types/CollectionTypes';
 
 interface UserCheckpointManagerProps {

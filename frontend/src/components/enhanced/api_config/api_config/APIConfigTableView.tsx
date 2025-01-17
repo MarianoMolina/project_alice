@@ -1,6 +1,6 @@
 import React from 'react';
 import { APIConfigComponentProps, APIConfig } from '../../../../types/ApiConfigTypes';
-import EnhancedTableView from '../../common/enhanced_component/TableView';
+import EnhancedTableView from '../../../common/enhanced_component/TableView';
 
 const APIConfigTableView: React.FC<APIConfigComponentProps> = ({
   items,

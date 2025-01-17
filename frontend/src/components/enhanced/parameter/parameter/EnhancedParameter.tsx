@@ -5,7 +5,7 @@ import ParameterTableView from './ParameterTableView';
 import ParameterCardView from './ParameterCardView';
 import ParameterShortListView from './ParameterShortListView';
 import { ParameterDefinition } from '../../../../types/ParameterTypes';
-import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import BaseDbElement, { BaseDbElementProps } from '../../../common/enhanced_component/BaseDbElement';
 import { ParameterComponentProps } from '../../../../types/ParameterTypes';
 
 type BaseParameterMode = BaseDbElementProps<ParameterDefinition>['mode'];

@@ -8,15 +8,15 @@ import {
 } from '../../../../types/AgentTypes';
 import { Prompt } from '../../../../types/PromptTypes';
 import { AliceModel, ModelType } from '../../../../types/ModelTypes';
-import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
+import EnhancedSelect from '../../../common/enhanced_select/EnhancedSelect';
 import PromptShortListView from '../../prompt/prompt/PromptShortListView';
 import ModelShortListView from '../../model/model/ModelShortListView';
 import { useDialog } from '../../../../contexts/DialogContext';
-import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import { TextInput } from '../../common/inputs/TextInput';
-import { SelectInput } from '../../common/inputs/SelectInput';
-import { NumericInput } from '../../common/inputs/NumericInput';
-import TitleBox from '../../common/inputs/TitleBox';
+import GenericFlexibleView from '../../../common/enhanced_component/FlexibleView';
+import { TextInput } from '../../../common/inputs/TextInput';
+import { SelectInput } from '../../../common/inputs/SelectInput';
+import { NumericInput } from '../../../common/inputs/NumericInput';
+import TitleBox from '../../../common/inputs/TitleBox';
 
 // Helper to convert enum to selection options
 const enumToOptions = (enumObj: Record<string, string | number>) =>
@@ -101,7 +101,7 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             label="Select System Message"
             description='The system message that the agent will use to respond to the user.'
         />
-    ), [form.system_message, handlePromptChange, isEditMode, selectCardItem]);
+    ), [form.system_message, handlePromptChange, isEditMode]);
 
     const memoizedModelSelect = useMemo(() => (
         <EnhancedSelect<AliceModel>
@@ -114,7 +114,7 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
             description='The models that the agent will use to respond to the user. Can have one model per model type.'
             label="Select Models"
         />
-    ), [form.models, handleModelChange, isEditMode, selectCardItem]);
+    ), [form.models, handleModelChange, isEditMode]);
 
     return (
         <GenericFlexibleView

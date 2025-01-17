@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import { Language, DataObject, QueryBuilder } from '@mui/icons-material';
 import { DataClusterComponentProps, PopulatedDataCluster } from '../../../../types/DataClusterTypes';
-import CommonCardView from '../../common/enhanced_component/CardView';
+import CommonCardView from '../../../common/enhanced_component/CardView';
 import ReferenceChip from '../ReferenceChip';
 import ReferencesViewer from '../ReferencesViewer';
 import { PopulatedReferences } from '../../../../types/ReferenceTypes';

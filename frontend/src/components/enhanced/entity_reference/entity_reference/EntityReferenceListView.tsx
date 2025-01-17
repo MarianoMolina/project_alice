@@ -1,7 +1,7 @@
 import React from 'react';
 import { EntityReference, EntityReferenceComponentProps } from '../../../../types/EntityReferenceTypes';
 import { Box, IconButton, Tooltip, Typography } from '@mui/material';
-import EnhancedListView from '../../common/enhanced_component/ListView';
+import EnhancedListView from '../../../common/enhanced_component/ListView';
 import { Source } from '@mui/icons-material';
 import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
 import { apiTypeIcons } from '../../../../utils/ApiUtils';

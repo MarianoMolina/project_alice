@@ -7,7 +7,7 @@ import {
     ListItemText,
 } from '@mui/material';
 import { ApiComponentProps, ApiName, ApiType, ModelApiType } from '../../../../types/ApiTypes';
-import CommonCardView from '../../common/enhanced_component/CardView';
+import CommonCardView from '../../../common/enhanced_component/CardView';
 import { Api, Category, PowerSettingsNew, QueryBuilder, Settings } from '@mui/icons-material';
 import { useDialog } from '../../../../contexts/DialogContext';
 import { apiNameIcons, apiTypeIcons } from '../../../../utils/ApiUtils';

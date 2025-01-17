@@ -1,6 +1,6 @@
 import React from 'react';
 import { EmbeddingChunk, EmbeddingChunkComponentProps } from '../../../../types/EmbeddingChunkTypes';
-import EnhancedTableView from '../../common/enhanced_component/TableView';
+import EnhancedTableView from '../../../common/enhanced_component/TableView';
 
 const EmbeddingChunkTableView: React.FC<EmbeddingChunkComponentProps> = ({
   items,

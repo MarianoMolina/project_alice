@@ -1,6 +1,6 @@
 import React from 'react';
 import { EmbeddingChunk, EmbeddingChunkComponentProps } from '../../../../types/EmbeddingChunkTypes';
-import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
+import EnhancedShortListView from '../../../common/enhanced_component/ShortListView';
 
 const EmbeddingChunkShortListView: React.FC<EmbeddingChunkComponentProps> = ({
     items,

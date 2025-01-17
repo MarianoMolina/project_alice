@@ -15,6 +15,7 @@ class TaskExecutionRequest(BaseModel):
 
 class ChatResponseRequest(BaseModel):
     chat_id: str
+    thread_id: str
 
 class ChatResumeRequest(BaseModel):
     """Request model for resuming a chat interaction."""

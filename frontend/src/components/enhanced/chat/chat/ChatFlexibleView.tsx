@@ -8,21 +8,21 @@ import { PopulatedDataCluster } from '../../../../types/DataClusterTypes';
 import { AliceAgent } from '../../../../types/AgentTypes';
 import { PopulatedTask } from '../../../../types/TaskTypes';
 import { UserCheckpoint } from '../../../../types/UserCheckpointTypes';
-import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
+import EnhancedSelect from '../../../common/enhanced_select/EnhancedSelect';
 import AgentShortListView from '../../agent/agent/AgentShortListView';
 import TaskShortListView from '../../task/task/TaskShortListView';
-import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
+import GenericFlexibleView from '../../../common/enhanced_component/FlexibleView';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 import UserCheckpointShortListView from '../../user_checkpoint/user_checkpoint/UserCheckpointShortListView';
-import TitleBox from '../../common/inputs/TitleBox';
-import { TextInput } from '../../common/inputs/TextInput';
+import TitleBox from '../../../common/inputs/TitleBox';
+import { TextInput } from '../../../common/inputs/TextInput';
 import { useAuth } from '../../../../contexts/AuthContext';
 import { useDialog } from '../../../../contexts/DialogContext';
 import Logger from '../../../../utils/Logger';
-import MessageListView from '../../message/message/MessageListView';
-import { MessageType } from '../../../../types/MessageTypes';
 import { useApi } from '../../../../contexts/ApiContext';
 import ApiValidationManager from '../../api/ApiValidationManager';
+import ChatThreadListView from '../../chat_thread/chat_thread/ChatThreadListView';
+import { PopulatedChatThread } from '../../../../types/ChatThreadTypes';
 
 const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     item,
@@ -307,15 +307,15 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                 onDataClusterChange={(dataCluster) => setForm(prevForm => ({ ...prevForm, data_cluster: dataCluster }))}
                 flatten={false}
             />
-            {form.messages && form.messages.length > 0 && (
-                <TitleBox title="Messages" >
+            {form.threads && form.threads.length > 0 && (
+                <TitleBox title="Threads" >
                     <Box mt={2}>
-                        {form.messages.map((message, index) => (
-                            <MessageListView
-                                key={`message-${index}${message}`}
-                                item={message as MessageType}
+                        {form.threads.map((chatThread, index) => (
+                            <ChatThreadListView
+                                key={`chatThread-${index}${chatThread}`}
+                                item={chatThread as PopulatedChatThread}
                                 mode={'view'}
-                                onView={(message) => selectCardItem && selectCardItem('Message', message._id ?? '', message)}
+                                onView={(chatThread) => selectCardItem && selectCardItem('ChatThread', chatThread._id ?? '', chatThread as PopulatedChatThread)}
                                 handleSave={async () => { }}
                                 items={null}
                                 onChange={() => { }}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Typography, Box, Tooltip, IconButton } from '@mui/material';
 import { API, ApiComponentProps } from '../../../../types/ApiTypes';
-import EnhancedListView from '../../common/enhanced_component/ListView';
+import EnhancedListView from '../../../common/enhanced_component/ListView';
 import { CheckCircle, Cancel, Api } from '@mui/icons-material';
 import { apiNameIcons, apiTypeIcons } from '../../../../utils/ApiUtils';
 import { formatStringWithSpaces } from '../../../../utils/StyleUtils';

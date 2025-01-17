@@ -1,6 +1,6 @@
 import React from 'react';
 import { ParameterDefinition, ParameterComponentProps } from '../../../../types/ParameterTypes';
-import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
+import EnhancedShortListView from '../../../common/enhanced_component/ShortListView';
 
 const ParameterShortListView: React.FC<ParameterComponentProps> = ({
     items,

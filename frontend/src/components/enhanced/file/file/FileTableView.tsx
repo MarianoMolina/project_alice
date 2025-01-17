@@ -1,6 +1,6 @@
 import React from 'react';
 import { FileReference, FileComponentProps } from '../../../../types/FileTypes';
-import EnhancedTableView from '../../common/enhanced_component/TableView';
+import EnhancedTableView from '../../../common/enhanced_component/TableView';
 import {  getFileSize } from '../../../../utils/FileUtils';
 
 const FileTableView: React.FC<FileComponentProps> = ({

@@ -1,5 +1,5 @@
 import React from 'react';
-import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import BaseDbElement, { BaseDbElementProps } from '../../../common/enhanced_component/BaseDbElement';
 import { ChatThread, ChatThreadComponentProps, PopulatedChatThread } from '../../../../types/ChatThreadTypes';
 import ChatThreadShortListView from './ChatThreadShortListView';
 import ChatThreadListView from './ChatThreadListView';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { TaskComponentProps, AliceTask } from '../../../../types/TaskTypes';
-import EnhancedTableView, { Column } from '../../common/enhanced_component/TableView';
+import EnhancedTableView, { Column } from '../../../common/enhanced_component/TableView';
 import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
 
 const TaskTableView: React.FC<TaskComponentProps> = ({

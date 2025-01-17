@@ -42,6 +42,7 @@ export async function createMessage(
     }
 
     messageData.created_by = new Types.ObjectId(userId);
+    messageData.updated_by = new Types.ObjectId(userId);
     messageData.createdAt = new Date();
     messageData.updatedAt = new Date();
 

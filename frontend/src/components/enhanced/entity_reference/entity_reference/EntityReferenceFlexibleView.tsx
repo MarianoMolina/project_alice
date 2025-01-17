@@ -8,14 +8,14 @@ import {
 } from '@mui/material';
 import { Close, Add } from '@mui/icons-material';
 import { getDefaultEntityReferenceForm, EntityReferenceComponentProps, ReferenceCategoryType, ImageReference, PopulatedEntityReference } from '../../../../types/EntityReferenceTypes';
-import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
+import GenericFlexibleView from '../../../common/enhanced_component/FlexibleView';
 import useStyles from '../EntityReferenceStyles';
 import { referenceCategoryToIcon } from '../../../../utils/EntityReferenceUtils';
 import { apiTypeIcons } from '../../../../utils/ApiUtils';
-import { TextInput } from '../../common/inputs/TextInput';
+import { TextInput } from '../../../common/inputs/TextInput';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 import { ApiType } from '../../../../types/ApiTypes';
-import { IconSelectInput } from '../../common/inputs/IconSelectInput';
+import { IconSelectInput } from '../../../common/inputs/IconSelectInput';
 
 const EntityReferenceFlexibleView: React.FC<EntityReferenceComponentProps> = ({
     item,

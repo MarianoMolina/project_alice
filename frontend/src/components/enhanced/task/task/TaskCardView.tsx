@@ -8,9 +8,9 @@ import {
     IconButton,
 } from '@mui/material';
 import { Category, Description, Functions, Person, ApiRounded, Settings, Logout, AttachFile, Api, QueryBuilder, Replay, ContactMail, Cyclone, Visibility } from '@mui/icons-material';
-import { PopulatedTask, TaskComponentProps, taskDescriptions } from '../../../../types/TaskTypes';
+import { PopulatedTask, TaskComponentProps } from '../../../../types/TaskTypes';
 import useStyles from '../TaskStyles';
-import CommonCardView from '../../common/enhanced_component/CardView';
+import CommonCardView from '../../../common/enhanced_component/CardView';
 import { useDialog } from '../../../../contexts/DialogContext';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 import { hasAnyReferences, References } from '../../../../types/ReferenceTypes';
@@ -20,6 +20,7 @@ import { ApiType } from '../../../../types/ApiTypes';
 import { PopulatedDataCluster } from '../../../../types/DataClusterTypes';
 import { APIConfigIcon, LogicFlowIcon } from '../../../../utils/CustomIcons';
 import ApiValidationManager from '../../api/ApiValidationManager';
+import { taskDescriptions } from '../../../../utils/TaskUtilts';
 
 interface ChipItem {
     _id?: string;

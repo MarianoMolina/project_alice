@@ -19,7 +19,7 @@ import {
 } from '@mui/icons-material';
 import { ModelComponentProps } from '../../../../types/ModelTypes';
 import useStyles from '../ModelStyles';
-import CommonCardView from '../../common/enhanced_component/CardView';
+import CommonCardView from '../../../common/enhanced_component/CardView';
 import { apiNameIcons, modelTypeIcons } from '../../../../utils/ApiUtils';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 

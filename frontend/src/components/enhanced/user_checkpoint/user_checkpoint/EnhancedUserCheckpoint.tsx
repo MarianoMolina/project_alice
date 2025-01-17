@@ -4,7 +4,7 @@ import UserCheckpointTableView from './UserCheckpointTableView';
 import UserCheckpointCardView from './UserCheckpointCardView';
 import UserCheckpointShortListView from './UserCheckpointShortListView';
 import { UserCheckpoint } from '../../../../types/UserCheckpointTypes';
-import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import BaseDbElement, { BaseDbElementProps } from '../../../common/enhanced_component/BaseDbElement';
 import { UserCheckpointComponentProps } from '../../../../types/UserCheckpointTypes';
 import UserCheckpointFlexibleView from './UserCheckpointFlexibleView';
 

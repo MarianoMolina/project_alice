@@ -17,3 +17,4 @@ import './embeddingChunk.model';
 import './toolCall.model';
 import './codeExecution.model';
 import './apiConfig.model';
+import './thread.model';

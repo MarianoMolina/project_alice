@@ -2,30 +2,30 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
     Box,
 } from '@mui/material';
-import { AliceTask, getDefaultTaskForm, PopulatedTask, TaskComponentProps, TaskType } from '../../../../types/TaskTypes';
+import { AliceTask, PopulatedTask, TaskComponentProps, TaskType } from '../../../../types/TaskTypes';
 import { ApiType } from '../../../../types/ApiTypes';
 import { Prompt } from '../../../../types/PromptTypes';
 import { AliceAgent } from '../../../../types/AgentTypes';
-import { taskDescriptions } from '../../../../types/TaskTypes';
-import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
+import EnhancedSelect from '../../../common/enhanced_select/EnhancedSelect';
 import PromptShortListView from '../../prompt/prompt/PromptShortListView';
 import AgentShortListView from '../../agent/agent/AgentShortListView';
 import TaskShortListView from './TaskShortListView';
-import TaskEndCodeRoutingBuilder from '../../common/task_end_code_routing/TaskEndCodeRoutingBuilder';
-import FunctionDefinitionBuilder from '../../common/function_select/FunctionDefinitionBuilder';
-import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import TaskFlowchart from '../../common/task_flowchart/FlowChart';
-import ExitCodeManager from '../../common/exit_code_manager/ExitCodeManager';
+import TaskEndCodeRoutingBuilder from '../../../common/task_end_code_routing/TaskEndCodeRoutingBuilder';
+import FunctionDefinitionBuilder from '../../../common/function_select/FunctionDefinitionBuilder';
+import GenericFlexibleView from '../../../common/enhanced_component/FlexibleView';
+import TaskFlowchart from '../../../common/task_flowchart/FlowChart';
+import ExitCodeManager from '../../../common/exit_code_manager/ExitCodeManager';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
-import { TextInput } from '../../common/inputs/TextInput';
-import { NumericInput } from '../../common/inputs/NumericInput';
-import { BooleanInput } from '../../common/inputs/BooleanInput';
-import { SelectInput } from '../../common/inputs/SelectInput';
+import { TextInput } from '../../../common/inputs/TextInput';
+import { NumericInput } from '../../../common/inputs/NumericInput';
+import { BooleanInput } from '../../../common/inputs/BooleanInput';
+import { SelectInput } from '../../../common/inputs/SelectInput';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 import { useApi } from '../../../../contexts/ApiContext';
-import TitleBox from '../../common/inputs/TitleBox';
+import TitleBox from '../../../common/inputs/TitleBox';
 import ApiValidationManager from '../../api/ApiValidationManager';
 import UserCheckpointManager from '../../user_checkpoint/UserCheckpointManager';
+import { getDefaultTaskForm, taskDescriptions } from '../../../../utils/TaskUtilts';
 
 const TaskFlexibleView: React.FC<TaskComponentProps> = ({
     item,

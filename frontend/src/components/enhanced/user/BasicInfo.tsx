@@ -44,7 +44,6 @@ export const BasicInfo: React.FC<BasicInfoProps> = ({
         });
     };
 
-    Logger.info('BasicInfo', { editedUser, isEditing, isAdmin });
 
     return (
         <Grid container spacing={2}>

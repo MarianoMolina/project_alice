@@ -2,7 +2,7 @@ import React from 'react';
 import { Typography } from '@mui/material';
 import { Category, TypeSpecimen, Description, Foundation } from '@mui/icons-material';
 import { ParameterComponentProps } from '../../../../types/ParameterTypes';
-import CommonCardView from '../../common/enhanced_component/CardView';
+import CommonCardView from '../../../common/enhanced_component/CardView';
 
 const ParameterCardView: React.FC<ParameterComponentProps> = ({ item }) => {
 

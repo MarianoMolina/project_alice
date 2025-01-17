@@ -1,6 +1,6 @@
 import React from 'react';
 import { AliceChat, ChatComponentProps } from '../../../../types/ChatTypes';
-import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
+import EnhancedShortListView from '../../../common/enhanced_component/ShortListView';
 
 const ChatShortListView: React.FC<ChatComponentProps> = ({
     items,
@@ -9,7 +9,7 @@ const ChatShortListView: React.FC<ChatComponentProps> = ({
     onView,
 }) => {
     const getPrimaryText = (chat: AliceChat) => chat.name;
-    const getSecondaryText = (chat: AliceChat) => `${chat.alice_agent?.name || 'N/A'} - Msg: ${chat.messages.length || 0}`;
+    const getSecondaryText = (chat: AliceChat) => `${chat.alice_agent?.name || 'N/A'} - Threads: ${chat.threads?.length || 0}`;
 
     return (
         <EnhancedShortListView<AliceChat>

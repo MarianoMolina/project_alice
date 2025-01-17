@@ -140,10 +140,10 @@ export const requestFileTranscript = async (
     }
 };
 
-export const generateChatResponse = async (chatId: string): Promise<boolean> => {
+export const generateChatResponse = async (chatId: string, threadId: string): Promise<boolean> => {
     try {
-        Logger.debug('Generating chat response for chatId:', chatId);
-        const response = await taskAxiosInstance.post(`/chat_response`, { chat_id: chatId });
+        Logger.debug('Generating chat response for chatId:', chatId, threadId);
+        const response = await taskAxiosInstance.post(`/chat_response`, { chat_id: chatId, thread_id: threadId });
 
         // The response now contains a task_id
         const taskId: string = response.data.task_id;

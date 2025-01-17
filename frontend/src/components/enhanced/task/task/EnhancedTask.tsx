@@ -1,7 +1,7 @@
 import React from 'react';
 import { AliceChat } from '../../../../types/ChatTypes';
 import { AliceTask, PopulatedTask, TaskComponentProps } from '../../../../types/TaskTypes';
-import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import BaseDbElement, { BaseDbElementProps } from '../../../common/enhanced_component/BaseDbElement';
 import TaskCardView from './TaskCardView';
 import TaskListView from './TaskListView';
 import TaskTableView from './TaskTableView';

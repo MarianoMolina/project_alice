@@ -1,7 +1,7 @@
 import React from 'react';
 import { Typography } from '@mui/material';
 import { MessageType, MessageComponentProps } from '../../../../types/MessageTypes';
-import EnhancedListView from '../../common/enhanced_component/ListView';
+import EnhancedListView from '../../../common/enhanced_component/ListView';
 
 const MessageListView: React.FC<MessageComponentProps> = ({
     items,

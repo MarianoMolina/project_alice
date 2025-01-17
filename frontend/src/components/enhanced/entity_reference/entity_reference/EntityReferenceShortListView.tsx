@@ -1,6 +1,6 @@
 import React from 'react';
 import { EntityReference, EntityReferenceComponentProps } from '../../../../types/EntityReferenceTypes';
-import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
+import EnhancedShortListView from '../../../common/enhanced_component/ShortListView';
 
 const EntityReferenceShortListView: React.FC<EntityReferenceComponentProps> = ({
     items,

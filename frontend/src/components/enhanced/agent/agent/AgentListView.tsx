@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, IconButton, Tooltip } from '@mui/material';
 import { AliceAgent, AgentComponentProps } from '../../../../types/AgentTypes';
-import EnhancedListView from '../../common/enhanced_component/ListView';
+import EnhancedListView from '../../../common/enhanced_component/ListView';
 import { apiNameIcons } from '../../../../utils/ApiUtils';
 import { Api } from '@mui/icons-material';
 import { PermissionIcon } from '../PermissionIcons';

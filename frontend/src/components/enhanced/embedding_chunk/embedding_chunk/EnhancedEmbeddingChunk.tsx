@@ -4,7 +4,7 @@ import EmbeddingChunkTableView from './EmbeddingChunkTableView';
 import EmbeddingChunkCardView from './EmbeddingChunkCardView';
 import EmbeddingChunkShortListView from './EmbeddingChunkShortListView';
 import { EmbeddingChunk, EmbeddingChunkComponentProps } from '../../../../types/EmbeddingChunkTypes';
-import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import BaseDbElement, { BaseDbElementProps } from '../../../common/enhanced_component/BaseDbElement';
 
 type BaseEmbeddingChunkMode = BaseDbElementProps<EmbeddingChunk>['mode'];
 type ExtendedEmbeddingChunkMode = 'list' | 'shortList' | 'card' | 'table';

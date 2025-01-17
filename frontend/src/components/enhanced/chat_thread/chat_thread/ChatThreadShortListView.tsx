@@ -1,5 +1,5 @@
 import React from 'react';
-import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
+import EnhancedShortListView from '../../../common/enhanced_component/ShortListView';
 import { ChatThread, ChatThreadComponentProps } from '../../../../types/ChatThreadTypes';
 
 const ChatThreadShortListView: React.FC<ChatThreadComponentProps> = ({

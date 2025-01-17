@@ -1,7 +1,7 @@
 import React from 'react';
 import { UserInteraction, UserInteractionComponentProps } from '../../../../types/UserInteractionTypes';
 import { Typography } from '@mui/material';
-import EnhancedListView from '../../common/enhanced_component/ListView';
+import EnhancedListView from '../../../common/enhanced_component/ListView';
 
 const UserInteractionListView: React.FC<UserInteractionComponentProps> = ({
     items,

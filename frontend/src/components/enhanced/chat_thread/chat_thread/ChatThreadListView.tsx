@@ -1,6 +1,6 @@
 import React from 'react';
 import { Typography } from '@mui/material';
-import EnhancedListView from '../../common/enhanced_component/ListView';
+import EnhancedListView from '../../../common/enhanced_component/ListView';
 import Logger from '../../../../utils/Logger';
 import { ChatThread, ChatThreadComponentProps } from '../../../../types/ChatThreadTypes';
 

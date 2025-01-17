@@ -6,7 +6,7 @@ import {
 import { Language, QueryBuilder, DataObject, Functions, QuestionAnswer } from '@mui/icons-material';
 import { PopulatedUserInteraction, UserInteractionComponentProps } from '../../../../types/UserInteractionTypes';
 import { useApi } from '../../../../contexts/ApiContext';
-import CommonCardView from '../../common/enhanced_component/CardView';
+import CommonCardView from '../../../common/enhanced_component/CardView';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import Logger from '../../../../utils/Logger';
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { AgentComponentProps, AliceAgent } from '../../../../types/AgentTypes';
-import EnhancedTableView from '../../common/enhanced_component/TableView';
+import EnhancedTableView from '../../../common/enhanced_component/TableView';
 
 const AgentTableView: React.FC<AgentComponentProps> = ({
   items,

@@ -145,7 +145,7 @@ export class PopulationService {
             populatedObj = await this.populateTasks(populatedObj, config, userId);
         }
         if (config.hasThreads && this.hasThreads(doc)) {
-            Logger.debug('Will populate messages:', {
+            Logger.debug('Will populate threads:', {
                 modelName: model.modelName,
                 id,
                 refPath: config.referencePath,
@@ -207,7 +207,7 @@ export class PopulationService {
         });
 
         if (this.isReferencesObject(doc)) {
-            Logger.debug('Document is a References object, skipping population');
+            Logger.debug('Document is a References object');
             return true;
         }
 
@@ -300,46 +300,23 @@ export class PopulationService {
     ): Promise<any> {
         Logger.debug(`[Starting populateThreads`, { objId: obj._id, messageCount: obj.messages?.length });
 
-        if (!obj.threads || !Array.isArray(obj.threads) || obj.threads.length === 0) {
-            Logger.debug(`[No messages to populate`, { objId: obj._id });
-            return obj;
-        }
         try {
+            if (!obj.threads || !Array.isArray(obj.threads) || obj.threads.length === 0) {
+                Logger.debug(`[No threads to populate`, { objId: obj._id });
+                return obj;
+            }
             let threads: IChatThreadDocument[] = [];
             for (const threadId of obj.threads) {
-                const thread = await ChatThread.findById(threadId);
+                const thread = await this.findAndPopulate(
+                    ChatThread,
+                    threadId,
+                    userId
+                )
                 if (thread) {
                     threads.push(thread)
                 }
             }
 
-            const MessageModel = mongoose.model('Message');
-            for (const thread of threads) {
-                const populatedMessages = await Promise.all(
-                    obj.messages.map(async (messageId: string | Types.ObjectId, index: number) => {
-                        Logger.debug(`[Populating message ${index}`, { messageId });
-                        try {
-                            const populatedMessage = await this.findAndPopulate(
-                                MessageModel,
-                                messageId,
-                                userId
-                            );
-                            Logger.debug(`[Message ${index} populated`, { messageId, populated: !!populatedMessage });
-                            return populatedMessage || messageId;
-                        } catch (error) {
-                            Logger.error(`[Error populating message ${index}`, { messageId, error });
-                            return messageId;
-                        }
-                    })
-                );
-
-                Logger.debug(`[Finished populating messages`, {
-                    objId: obj._id,
-                    populatedCount: populatedMessages.filter(m => typeof m !== 'string').length
-                });
-                thread.messages = populatedMessages;
-            }
-            
             return {
                 ...obj,
                 threads
@@ -419,9 +396,12 @@ export class PopulationService {
         config: PopulationConfig,
         userId: string | Types.ObjectId
     ): Promise<any> {
+        let populatedObj = { ...obj };
+
         if ('references' in obj && obj.references) {
-            obj.references = await this.populateReferencesObject(obj.references, userId);
+            populatedObj.references = await this.populateReferencesObject(obj.references, userId);
         }
+
         if (config.referencePath) {
             for (const path of config.referencePath) {
                 const pathParts = path.split('.');
@@ -429,12 +409,10 @@ export class PopulationService {
                 let parent = null;
                 let lastPart = '';
 
-                // Track the parent as we traverse
                 for (let i = 0; i < pathParts.length; i++) {
                     const part = pathParts[i];
 
                     if (Array.isArray(current) && i === pathParts.length - 1) {
-                        // Update the parent's reference to the array
                         parent[lastPart] = await Promise.all(
                             current.map(async (item) => {
                                 if (item[part]) {
@@ -452,10 +430,8 @@ export class PopulationService {
                     if (!current || !current[part]) break;
 
                     if (i === pathParts.length - 1) {
-                        // Update the parent's reference
                         parent[lastPart] = await this.populateReferencesObject(current[part], userId);
                     } else {
-                        // Track parent before moving deeper
                         parent = current;
                         lastPart = part;
                         current = current[part];
@@ -463,11 +439,17 @@ export class PopulationService {
                 }
             }
         }
+
         if (this.isReferencesObject(obj)) {
-            obj = await this.populateReferencesObject(obj, userId);
+            const populatedRefs = await this.populateReferencesObject(obj, userId);
+            (Object.keys(ReferenceTypeModelMap) as Array<keyof References>).forEach(key => {
+                if (populatedRefs[key]) {
+                    populatedObj[key] = populatedRefs[key];
+                }
+            });
         }
 
-        return obj;
+        return populatedObj;
     }
     private async populateTasks(
         obj: any,
@@ -534,6 +516,7 @@ export class PopulationService {
 
     private async populateReferencesObject(references: References, userId: string | Types.ObjectId): Promise<References> {
         const populatedRefs: References = {};
+        Logger.debug('Starting populateReferencesObject:', { userId, references });
 
         for (const [refType, modelName] of Object.entries(ReferenceTypeModelMap)) {
             if (references[refType as keyof References]) {

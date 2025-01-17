@@ -43,6 +43,7 @@ import { useAuth } from './AuthContext';
 import { ApiName } from '../types/ApiTypes';
 import { ApiConfigType, initializeApiConfigMap } from '../utils/ApiUtils';
 import { AxiosError } from 'axios';
+import { PopulatedChatThread } from '../types/ChatThreadTypes';
 
 interface ApiContextType {
     fetchItem: typeof apiFetchItem;
@@ -233,9 +234,9 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     }, [addNotification, selectCardItem]);
 
-    const generateChatResponse = useCallback(async (chatId: string): Promise<boolean> => {
+    const generateChatResponse = useCallback(async (chatId: string, threadId: string): Promise<boolean> => {
         try {
-            const result = await apiGenerateChatResponse(chatId);
+            const result = await apiGenerateChatResponse(chatId, threadId);
             if (result) {
                 addNotification('Chat response generated successfully', 'success');
                 const updatedChat = await apiFetchPopulatedItem('chats', chatId) as PopulatedAliceChat;
@@ -250,9 +251,9 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     }, [addNotification]);
 
-    const sendMessage = useCallback(async (chatId: string, message: PopulatedMessage): Promise<PopulatedAliceChat> => {
+    const sendMessage = useCallback(async (chatId: string, threadId: string, message: PopulatedMessage): Promise<PopulatedChatThread> => {
         try {
-            const result = await apiSendMessage(chatId, message);
+            const result = await apiSendMessage(chatId, threadId, message);
             addNotification('Message sent successfully', 'success');
             emitEvent('created', 'messages', message);
             emitEvent('updated', 'chats', result);

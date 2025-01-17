@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { CodeExecutionComponentProps, CodeExecution, getDefaultCodeExecutionForm, LANGUAGES, CodeBlock, CodeOutput, PopulatedCodeExecution } from '../../../../types/CodeExecutionTypes';
-import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import { SelectInput } from '../../common/inputs/SelectInput';
+import GenericFlexibleView from '../../../common/enhanced_component/FlexibleView';
+import { SelectInput } from '../../../common/inputs/SelectInput';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
-import { TextInput } from '../../common/inputs/TextInput';
-import { NumericInput } from '../../common/inputs/NumericInput';
+import { TextInput } from '../../../common/inputs/TextInput';
+import { NumericInput } from '../../../common/inputs/NumericInput';
 
 const CodeExecutionFlexibleView: React.FC<CodeExecutionComponentProps> = ({
     item,

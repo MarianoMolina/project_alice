@@ -14,14 +14,14 @@ import {
     Timer
 } from '@mui/icons-material';
 import { FileComponentProps, FileContentReference, FileReference, FileType, getDefaultFileForm, PopulatedFileReference } from '../../../../types/FileTypes';
-import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
+import GenericFlexibleView from '../../../common/enhanced_component/FlexibleView';
 import Transcript from '../Transcript';
 import { createFileContentReference, getFileSize, selectFile } from '../../../../utils/FileUtils';
 import { useApi } from '../../../../contexts/ApiContext';
 import { useNotification } from '../../../../contexts/NotificationContext';
 import Logger from '../../../../utils/Logger';
 import { useDialog } from '../../../../contexts/DialogContext';
-import { TextInput } from '../../common/inputs/TextInput';
+import { TextInput } from '../../../common/inputs/TextInput';
 import FileContentView from '../FileContentView';
 
 const FileFlexibleView: React.FC<FileComponentProps> = ({

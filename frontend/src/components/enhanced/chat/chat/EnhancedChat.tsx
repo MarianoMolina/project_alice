@@ -5,7 +5,7 @@ import ChatListView from './ChatListView';
 import ChatTableView from './ChatTableView';
 import ChatCardView from './ChatCardView';
 import ChatShortListView from './ChatShortListView';
-import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import BaseDbElement, { BaseDbElementProps } from '../../../common/enhanced_component/BaseDbElement';
 
 type BaseChatMode = BaseDbElementProps<PopulatedAliceChat>['mode'];
 type ExtendedChatMode = 'list' | 'shortList' | 'card' | 'full' | 'table';

@@ -1,25 +1,17 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
     Alert,
     Box,
 } from '@mui/material';
-import { getDefaultChatForm, CheckpointType } from '../../../../types/ChatTypes';
+import { getDefaultChatForm } from '../../../../types/ChatTypes';
 import { AliceAgent } from '../../../../types/AgentTypes';
-import { PopulatedTask } from '../../../../types/TaskTypes';
-import { UserCheckpoint } from '../../../../types/UserCheckpointTypes';
-import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
-import AgentShortListView from '../../agent/agent/AgentShortListView';
-import TaskShortListView from '../../task/task/TaskShortListView';
-import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import UserCheckpointShortListView from '../../user_checkpoint/user_checkpoint/UserCheckpointShortListView';
-import TitleBox from '../../common/inputs/TitleBox';
-import { TextInput } from '../../common/inputs/TextInput';
-import { useAuth } from '../../../../contexts/AuthContext';
+import GenericFlexibleView from '../../../common/enhanced_component/FlexibleView';
+import TitleBox from '../../../common/inputs/TitleBox';
+import { TextInput } from '../../../common/inputs/TextInput';
 import { useDialog } from '../../../../contexts/DialogContext';
 import Logger from '../../../../utils/Logger';
 import MessageListView from '../../message/message/MessageListView';
 import { MessageType } from '../../../../types/MessageTypes';
-import { useApi } from '../../../../contexts/ApiContext';
 import ApiValidationManager from '../../api/ApiValidationManager';
 import { ChatThreadComponentProps, PopulatedChatThread } from '../../../../types/ChatThreadTypes';
 
@@ -36,8 +28,8 @@ const ChatThreadFlexibleView: React.FC<ChatThreadComponentProps> = ({
     const [validationError, setValidationError] = useState<string | null>(null);
 
     const isEditMode = mode === 'edit' || mode === 'create';
-    const title = mode === 'create' ? 'Create New Chat' : mode === 'edit' ? 'Edit Chat' : 'Chat Details';
-    const saveButtonText = form._id ? 'Update Chat' : 'Create Chat';
+    const title = mode === 'create' ? 'Create New Thread' : mode === 'edit' ? 'Edit Thread' : 'Thread Details';
+    const saveButtonText = form._id ? 'Update Thread' : 'Create Thread';
 
     Logger.debug('ChatFlexibleView', { item, mode });
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { MessageComponentProps, MessageType } from '../../../../types/MessageTypes';
-import EnhancedTableView from '../../common/enhanced_component/TableView';
+import EnhancedTableView from '../../../common/enhanced_component/TableView';
 
 const MessageTableView: React.FC<MessageComponentProps> = ({
   items,

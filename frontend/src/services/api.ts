@@ -1,5 +1,4 @@
 import { dbAxiosInstance, dbAxiosInstanceLMS } from './axiosInstance';
-import { convertToPopulatedAliceChat, PopulatedAliceChat } from '../types/ChatTypes';
 import { MessageType, PopulatedMessage } from '../types/MessageTypes';
 import { CollectionName, CollectionPopulatedType, CollectionType } from '../types/CollectionTypes';
 import { FileReference, FileContentReference } from '../types/FileTypes';
@@ -9,7 +8,7 @@ import { requestFileTranscript } from './workflowApi';
 import { ApiName } from '../types/ApiTypes';
 import { ApiConfigType } from '../utils/ApiUtils';
 import Logger from '../utils/Logger';
-import { PopulatedChatThread } from '../types/ChatThreadTypes';
+import { convertToPopulatedChatThread, PopulatedChatThread } from '../types/ChatThreadTypes';
 
 export interface LMStudioModel {
   id: string;
@@ -96,7 +95,6 @@ export const fetchPopulatedItem = async <T extends CollectionName>(
   collectionName = collectionName.toLowerCase() as T;
   Logger.debug("fetchPopulatedItem", collectionName, itemId);
   try {
-    // For chats, use the populated endpoint, otherwise use regular endpoint
     const url = itemId ?
       `/${collectionName}/${itemId}/populated` :
       `/${collectionName}`;
@@ -254,7 +252,7 @@ export const sendMessage = async (chatId: string, threadId: string, message: Pop
 
     const response = await dbAxiosInstance.patch(`/chats/${chatId}/add_message`, { threadId, message });
     Logger.debug('Received response:', response.data);
-    return convertToPopulatedAliceChat(response.data.chat);
+    return convertToPopulatedChatThread(response.data.thread);
   } catch (error) {
     Logger.error('Error sending message:', error);
     throw error;

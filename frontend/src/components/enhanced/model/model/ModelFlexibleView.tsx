@@ -4,12 +4,12 @@ import { AliceModel, getDefaultModelForm, ModelComponentProps, ModelType, ModelC
 import { ApiName } from '../../../../types/ApiTypes';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 import { apiNameIcons, modelTypeIcons } from '../../../../utils/ApiUtils';
-import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import BorderedBox from '../../common/inputs/TitleBox';
-import { TextInput } from '../../common/inputs/TextInput';
-import { NumericInput } from '../../common/inputs/NumericInput';
-import { BooleanInput } from '../../common/inputs/BooleanInput';
-import { IconSelectInput } from '../../common/inputs/IconSelectInput';
+import GenericFlexibleView from '../../../common/enhanced_component/FlexibleView';
+import BorderedBox from '../../../common/inputs/TitleBox';
+import { TextInput } from '../../../common/inputs/TextInput';
+import { NumericInput } from '../../../common/inputs/NumericInput';
+import { BooleanInput } from '../../../common/inputs/BooleanInput';
+import { IconSelectInput } from '../../../common/inputs/IconSelectInput';
 
 const ModelFlexibleView: React.FC<ModelComponentProps> = ({
     item,

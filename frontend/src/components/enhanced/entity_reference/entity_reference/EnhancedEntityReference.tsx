@@ -5,7 +5,7 @@ import EntityReferenceTableView from './EntityReferenceTableView';
 import EntityReferenceCardView from './EntityReferenceCardView';
 import EntityReferenceShortListView from './EntityReferenceShortListView';
 import { EntityReference, PopulatedEntityReference } from '../../../../types/EntityReferenceTypes';
-import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import BaseDbElement, { BaseDbElementProps } from '../../../common/enhanced_component/BaseDbElement';
 import { EntityReferenceComponentProps } from '../../../../types/EntityReferenceTypes';
 
 type BaseEntityReferenceMode = BaseDbElementProps<EntityReference>['mode'];

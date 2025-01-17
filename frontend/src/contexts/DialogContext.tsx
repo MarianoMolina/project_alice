@@ -4,13 +4,13 @@ import { Prompt } from '../types/PromptTypes';
 import { ApiProvider } from './ApiContext';
 import { PopulatedTask } from '../types/TaskTypes';
 import Logger from '../utils/Logger';
-import EnhancedCardDialog from '../components/enhanced/common/enhanced_dialogs/EnhancedCardDialog';
-import EnhancedFlexibleDialog from '../components/enhanced/common/enhanced_dialogs/EnhancedFlexibleDialog';
-import PromptParsedDialog from '../components/enhanced/common/enhanced_dialogs/PromptParsedDialog';
-import EnhancedSelectDialog from '../components/enhanced/common/enhanced_dialogs/EnhancedSelectDialog';
+import EnhancedCardDialog from '../components/common/enhanced_dialogs/EnhancedCardDialog';
+import EnhancedFlexibleDialog from '../components/common/enhanced_dialogs/EnhancedFlexibleDialog';
+import PromptParsedDialog from '../components/common/enhanced_dialogs/PromptParsedDialog';
+import EnhancedSelectDialog from '../components/common/enhanced_dialogs/EnhancedSelectDialog';
 import DialogComponent from '../components/ui/dialog/DialogCustom';
-import FlowChartDialog from '../components/enhanced/common/enhanced_dialogs/TaskFlowchartDialog';
-import EnhancedSelectOptionsDialog from '../components/enhanced/common/enhanced_dialogs/EnhancedSelectOptionsDialog';
+import FlowChartDialog from '../components/common/enhanced_dialogs/TaskFlowchartDialog';
+import EnhancedSelectOptionsDialog from '../components/common/enhanced_dialogs/EnhancedSelectOptionsDialog';
 
 // Message Dialog Types
 interface DialogButton {

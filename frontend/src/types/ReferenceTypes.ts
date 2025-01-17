@@ -1,6 +1,5 @@
 import Logger from "../utils/Logger";
-import { ChatThread, PopulatedChatThread } from "./ChatThreadTypes";
-import { convertToPopulatedChatThread } from "./ChatTypes";
+import { ChatThread, convertToPopulatedChatThread, PopulatedChatThread } from "./ChatThreadTypes";
 import { CodeExecution, convertToPopulatedCodeExecution, PopulatedCodeExecution } from "./CodeExecutionTypes";
 import { convertToEmbeddingChunk, EmbeddingChunk } from "./EmbeddingChunkTypes";
 import { convertToPopulatedEntityReference, EntityReference, PopulatedEntityReference } from "./EntityReferenceTypes";

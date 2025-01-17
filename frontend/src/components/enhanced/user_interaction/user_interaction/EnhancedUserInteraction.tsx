@@ -4,7 +4,7 @@ import UserInteractionTableView from './UserInteractionTableView';
 import UserInteractionCardView from './UserInteractionCardView';
 import UserInteractionShortListView from './UserInteractionShortListView';
 import { PopulatedUserInteraction, UserInteraction } from '../../../../types/UserInteractionTypes';
-import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import BaseDbElement, { BaseDbElementProps } from '../../../common/enhanced_component/BaseDbElement';
 import { UserInteractionComponentProps } from '../../../../types/UserInteractionTypes';
 
 type BaseUserInteractionMode = BaseDbElementProps<UserInteraction>['mode'];

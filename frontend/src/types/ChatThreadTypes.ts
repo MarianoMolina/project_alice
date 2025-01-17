@@ -1,5 +1,5 @@
 import { BaseDatabaseObject, convertToBaseDatabaseObject, EnhancedComponentProps } from './CollectionTypes';
-import { PopulatedMessage } from './MessageTypes';
+import { convertToPopulatedMessage, PopulatedMessage } from './MessageTypes';
 
 export interface ChatThread extends BaseDatabaseObject {
     name?: string;
@@ -18,6 +18,13 @@ export const convertToChatThread = (data: any): ChatThread => {
     };
 }
 
+export const convertToPopulatedChatThread = (data: any): PopulatedChatThread => {
+    return {
+        ...convertToBaseDatabaseObject(data),
+        name: data?.name || '',
+        messages: (data?.messages || []).map(convertToPopulatedMessage),
+    };
+}
 export interface ChatThreadComponentProps extends EnhancedComponentProps<ChatThread | PopulatedChatThread> {
 }
 

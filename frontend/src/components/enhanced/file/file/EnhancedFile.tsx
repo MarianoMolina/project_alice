@@ -5,7 +5,7 @@ import FileTableView from './FileTableView';
 import FileCardView from './FileCardView';
 import FileShortListView from './FileShortListView';
 import { FileReference, PopulatedFileReference } from '../../../../types/FileTypes';
-import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import BaseDbElement, { BaseDbElementProps } from '../../../common/enhanced_component/BaseDbElement';
 import { FileComponentProps } from '../../../../types/FileTypes';
 
 type BaseFileMode = BaseDbElementProps<FileReference>['mode'];

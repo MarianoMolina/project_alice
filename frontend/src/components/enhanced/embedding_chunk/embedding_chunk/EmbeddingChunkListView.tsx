@@ -1,7 +1,7 @@
 import React from 'react';
 import { EmbeddingChunk, EmbeddingChunkComponentProps } from '../../../../types/EmbeddingChunkTypes';
 import { Typography } from '@mui/material';
-import EnhancedListView from '../../common/enhanced_component/ListView';
+import EnhancedListView from '../../../common/enhanced_component/ListView';
 
 const EmbeddingChunkListView: React.FC<EmbeddingChunkComponentProps> = ({
     items,

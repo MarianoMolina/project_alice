@@ -1,7 +1,7 @@
 import React from 'react';
 import { TaskResponse, TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
 import { Chip, Typography } from '@mui/material';
-import EnhancedListView from '../../common/enhanced_component/ListView';
+import EnhancedListView from '../../../common/enhanced_component/ListView';
 
 const TaskResponseListView: React.FC<TaskResponseComponentProps> = ({
     items,

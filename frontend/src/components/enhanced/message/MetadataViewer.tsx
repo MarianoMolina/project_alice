@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { CodeBlock } from '../../ui/markdown/CodeBlock';
-import CreationMetadataViewer from '../common/metadata_viewer/CreationMetadataViewer';
+import CreationMetadataViewer from '../../common/metadata_viewer/CreationMetadataViewer';
 import { MessageCreationMetadata } from '../../../types/CollectionTypes';
 
 interface MessageMetadataViewerProps {

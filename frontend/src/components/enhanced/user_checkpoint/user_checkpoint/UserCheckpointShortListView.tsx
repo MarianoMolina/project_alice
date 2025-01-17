@@ -1,6 +1,6 @@
 import React from 'react';
 import { UserCheckpoint, UserCheckpointComponentProps } from '../../../../types/UserCheckpointTypes';
-import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
+import EnhancedShortListView from '../../../common/enhanced_component/ShortListView';
 
 const UserCheckpointShortListView: React.FC<UserCheckpointComponentProps> = ({
     items,

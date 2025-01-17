@@ -2,12 +2,12 @@ import React, { useState, useCallback, useEffect } from 'react';
 import {
     Box
 } from '@mui/material';
-import FunctionDefinitionBuilder from '../../common/function_select/FunctionDefinitionBuilder';
+import FunctionDefinitionBuilder from '../../../common/function_select/FunctionDefinitionBuilder';
 import { PromptComponentProps, Prompt, getDefaultPromptForm } from '../../../../types/PromptTypes';
-import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
-import { TextInput } from '../../common/inputs/TextInput';
-import { BooleanInput } from '../../common/inputs/BooleanInput';
-import { NumericInput } from '../../common/inputs/NumericInput';
+import GenericFlexibleView from '../../../common/enhanced_component/FlexibleView';
+import { TextInput } from '../../../common/inputs/TextInput';
+import { BooleanInput } from '../../../common/inputs/BooleanInput';
+import { NumericInput } from '../../../common/inputs/NumericInput';
 
 const PromptFlexibleView: React.FC<PromptComponentProps> = ({
     item,

@@ -5,7 +5,7 @@ import APIConfigTableView from './APIConfigTableView';
 import APIConfigCardView from './APIConfigCardView';
 import APIConfigShortListView from './APIConfigShortListView';
 import { APIConfig, APIConfigComponentProps } from '../../../../types/ApiConfigTypes';
-import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import BaseDbElement, { BaseDbElementProps } from '../../../common/enhanced_component/BaseDbElement';
 import ApiConfigTooltipView from './ApiConfigTooltipView';
 
 type BaseAPIConfigMode = BaseDbElementProps<APIConfig>['mode'];

@@ -28,7 +28,6 @@ changeHistorySchema.methods.apiRepresentation = function (this: IChangeHistoryDo
 // AliceChat schema
 const aliceChatSchema = new Schema<IAliceChatDocument, IAliceChatModel>({
   name: { type: String, default: "New Chat", description: "Name of the chat" },
-  messages: [{ type: Schema.Types.ObjectId, ref: 'Message' }],
   threads: [{ type: Schema.Types.ObjectId, ref: 'ChatThread', default: [], description: "List of chat threads" }],
   changeHistory: [{ type: changeHistorySchema, default: [], description: "List of changes in the chat conversation" }],
   alice_agent: { type: Schema.Types.ObjectId, ref: 'Agent', required: true, description: "The Alice agent object", autopopulate: true },
@@ -62,7 +61,6 @@ const aliceChatSchema = new Schema<IAliceChatDocument, IAliceChatModel>({
 aliceChatSchema.methods.apiRepresentation = function (this: IAliceChatDocument) {
   return {
     id: this._id,
-    messages: this.messages.map((message) => message._id || message),
     threads: this.threads?.map((thread) => thread._id || thread) || [],
     changeHistory: this.changeHistory.map((change) => change.apiRepresentation()),
     alice_agent: this.alice_agent ? (this.alice_agent._id || this.alice_agent) : null,
@@ -88,7 +86,6 @@ function ensureObjectIdForSave(
   if (this.data_cluster) this.data_cluster = getObjectId(this.data_cluster, { ...context, field: 'data_cluster' });
   if (this.agent_tools) this.agent_tools = getObjectIdForList(this.agent_tools, { ...context, field: 'agent_tools' });
   if (this.retrieval_tools) this.retrieval_tools = getObjectIdForList(this.retrieval_tools, { ...context, field: 'retrieval_tools' });
-  if (this.messages) this.messages = getObjectIdForList(this.messages, { ...context, field: 'messages' });
   if (this.threads) this.threads = getObjectIdForList(this.threads, { ...context, field: 'threads' });
   if (this.default_user_checkpoints) {
     this.default_user_checkpoints = getObjectIdForMap(this.default_user_checkpoints, { ...context, field: 'default_user_checkpoints' });
@@ -109,7 +106,6 @@ function ensureObjectIdForUpdate(
   if (update.data_cluster) update.data_cluster = getObjectId(update.data_cluster, { ...context, field: 'data_cluster' });
   if (update.agent_tools) update.agent_tools = getObjectIdForList(update.agent_tools, { ...context, field: 'agent_tools' });
   if (update.retrieval_tools) update.retrieval_tools = getObjectIdForList(update.retrieval_tools, { ...context, field: 'retrieval_tools' });
-  if (update.messages) update.messages = getObjectIdForList(update.messages, { ...context, field: 'messages' });
   if (update.threads) update.threads = getObjectIdForList(update.threads, { ...context, field: 'threads' });
   if (update.default_user_checkpoints) {
     update.default_user_checkpoints = getObjectIdForMap(update.default_user_checkpoints, { ...context, field: 'default_user_checkpoints' });

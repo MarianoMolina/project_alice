@@ -7,7 +7,7 @@ import { UserCheckpoint } from '../../../types/UserCheckpointTypes';
 import { CheckpointType } from '../../../types/ChatTypes';
 import { PopulatedDataCluster } from '../../../types/DataClusterTypes';
 import { useApi } from '../../../contexts/ApiContext';
-import EnhancedSelect from '../../enhanced/common/enhanced_select/EnhancedSelect';
+import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
 import AgentShortListView from '../../enhanced/agent/agent/AgentShortListView';
 import TaskShortListView from '../../enhanced/task/task/TaskShortListView';
 import UserCheckpointShortListView from '../../enhanced/user_checkpoint/user_checkpoint/UserCheckpointShortListView';

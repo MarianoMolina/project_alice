@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useEffect } from 'react';
 
-import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
+import GenericFlexibleView from '../../../common/enhanced_component/FlexibleView';
 import Logger from '../../../../utils/Logger';
-import { TextInput } from '../../common/inputs/TextInput';
+import { TextInput } from '../../../common/inputs/TextInput';
 import { getDefaultUserCheckpointForm, UserCheckpoint, UserCheckpointComponentProps } from '../../../../types/UserCheckpointTypes';
-import ExitCodeManager from '../../common/exit_code_manager/ExitCodeManager';
+import ExitCodeManager from '../../../common/exit_code_manager/ExitCodeManager';
 
 const UserCheckpointFlexibleView: React.FC<UserCheckpointComponentProps> = ({
     item,

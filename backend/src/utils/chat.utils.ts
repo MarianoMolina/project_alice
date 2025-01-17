@@ -10,6 +10,7 @@ import { DataCluster } from '../models/reference.model';
 import { PopulationService } from './population.utils';
 import { createChatThread, updateChatThread } from './thread.utils';
 import { IChatThread } from '../interfaces/thread.interface';
+import { ChatThread } from '../models/thread.model';
 
 const popService = new PopulationService()
 
@@ -24,10 +25,6 @@ export async function createChat(
             Logger.warn(`Removing _id from chatData: ${chatData._id}`);
             delete chatData._id;
         }
-
-        // Store messages temporarily and remove from initial save
-        const messages = chatData.messages;
-        delete chatData.messages;
 
         // Handle data cluster first
         if (chatData.data_cluster) {
@@ -62,6 +59,28 @@ export async function createChat(
             }
         }
 
+        if (chatData.threads && Array.isArray(chatData.threads) && chatData.threads.length > 0) {
+            chatData.threads = await Promise.all(
+                chatData.threads.map(async (thread) => {
+                    if (typeof thread === 'string') {
+                        return new Types.ObjectId(thread);
+                    } else if (thread._id) {
+                        const updatedThread = await updateChatThread(thread._id.toString(), thread as IChatThread, userId);
+                        if (!updatedThread) {
+                            throw new Error('Failed to update thread');
+                        }
+                        return updatedThread._id;
+                    } else {
+                        const newThread = await createChatThread(thread as IChatThread, userId);
+                        if (!newThread) {
+                            throw new Error('Failed to create thread');
+                        }
+                        return newThread._id;
+                    }
+                })
+            );
+        }
+
         // Set created_by and timestamps
         chatData.created_by = userId ? new Types.ObjectId(userId) : undefined;
         chatData.updated_by = userId ? new Types.ObjectId(userId) : undefined;
@@ -73,52 +92,6 @@ export async function createChat(
         const chat = new AliceChat(chatData);
         await chat.save();
         Logger.debug(`Initial chat created with ID: ${chat._id}`);
-
-        // If we had messages, process them with the new chat ID
-        const messageIds: Types.ObjectId[] = [];
-        if (messages && Array.isArray(messages)) {
-            Logger.debug(`Processing ${messages.length} messages for chat ${chat._id}`);
-            for (const msg of messages) {
-                try {
-                    let messageDoc: IMessageDocument | null;
-                    if (typeof msg === 'string' || msg instanceof Types.ObjectId) {
-                        messageIds.push(new Types.ObjectId(msg));
-                        continue;
-                    }
-
-                    if (msg._id) {
-                        messageDoc = await updateMessage(
-                            msg._id.toString(),
-                            msg,
-                            userId,
-                            chat._id.toString()
-                        );
-                    } else {
-                        messageDoc = await createMessage(
-                            msg,
-                            userId,
-                            chat._id.toString()
-                        );
-                    }
-
-                    if (!messageDoc) {
-                        throw new Error('Failed to process message');
-                    }
-                    messageIds.push(messageDoc._id);
-                } catch (error) {
-                    Logger.error('Error processing message:', error);
-                    throw error;
-                }
-            }
-
-            // Update chat with processed message IDs
-            Logger.debug('Updating chat with processed message IDs');
-            return await AliceChat.findByIdAndUpdate(
-                chat._id,
-                { messages: messageIds },
-                { new: true }
-            );
-        }
 
         return chat;
     } catch (error) {
@@ -148,38 +121,6 @@ export async function updateChat(
         checkAndUpdateChanges(originalChat, chatData, changeHistoryData, 'alice_agent');
         checkArrayChangesAndUpdate(originalChat, chatData, changeHistoryData, 'agent_tools');
 
-        // Handle messages
-        let messageIds: Types.ObjectId[] = [];
-        if (chatData.messages && Array.isArray(chatData.messages)) {
-            for (const msg of chatData.messages) {
-                if (msg instanceof Types.ObjectId || typeof msg === 'string') {
-                    messageIds.push(new Types.ObjectId(msg));
-                } else if (msg._id) {
-                    const updatedMessage = await updateMessage(
-                        msg._id.toString(),
-                        msg,
-                        userId,
-                        chatId
-                    );
-                    if (updatedMessage) {
-                        messageIds.push(updatedMessage._id);
-                    } else {
-                        throw new Error('Failed to update message');
-                    }
-                } else {
-                    const newMessage = await createMessage(msg, userId, chatId);
-                    if (newMessage) {
-                        messageIds.push(newMessage._id);
-                    } else {
-                        throw new Error('Failed to create message');
-                    }
-                }
-            }
-        } else {
-            messageIds = originalChat.messages as Types.ObjectId[];
-        }
-        chatData.messages = messageIds;
-        // Create threads if any
         let threadIds: Types.ObjectId[] = [];
         if (chatData.threads && Array.isArray(chatData.threads) && chatData.threads.length > 0) {
             for (const thread of chatData.threads) {
@@ -204,7 +145,7 @@ export async function updateChat(
             }
         }
         chatData.threads = threadIds;
-        chatData.updated_by = new Types.ObjectId(userId);
+        chatData.updated_by = userId ? new Types.ObjectId(userId) : undefined;
         chatData.updatedAt = new Date();
 
         return await AliceChat.findByIdAndUpdate(
@@ -219,11 +160,11 @@ export async function updateChat(
 }
 
 export async function createMessageInChat(
+    userId: string,
     chatId: string,
-    threadId: string,
     messageData: Partial<IMessageDocument>,
-    userId: string
-): Promise<IAliceChatDocument | null> {
+    threadId?: string,
+): Promise<IChatThread | null> {
     try {
         Logger.debug(`createMessageInChat called for chat ${chatId}`);
 
@@ -245,28 +186,51 @@ export async function createMessageInChat(
         if (!messageDoc) {
             throw new Error('Failed to process message');
         }
-        // Find the thread in the chat and add the message ID
-        // If it doesnt exist, create a new thread
-
-
-        // Update the chat by adding the message ID
-        const updatedChat = await AliceChat.findByIdAndUpdate(
-            chatId,
-            {
-                $push: { messages: messageDoc._id },
-                $set: { updated_by: new Types.ObjectId(userId) }
-            },
-            { new: true }
-        );
-
-        if (!updatedChat) {
-            throw new Error('Chat not found or failed to update');
+        let thread: IChatThread | null;
+        let threadIdFinal: Types.ObjectId | null = null;
+        if (threadId) {
+            threadIdFinal = new Types.ObjectId(threadId);
+            // Since the thread exists, I will just update it with its new message
+            thread = await ChatThread.findByIdAndUpdate(
+                threadId,
+                {
+                    $push: { 'messages': messageDoc._id },
+                    $set: { updated_by: new Types.ObjectId(userId) },
+                },
+                { new: true }
+            );
+        } else {
+            // Create a new thread and add the message to it
+            // Add the message to the chat
+            const newId = new Types.ObjectId();
+            threadIdFinal = newId;
+            const chatThread = new ChatThread({
+                _id: newId,
+                messages: [messageDoc._id],
+                created_by: userId,
+                updated_by: userId,
+            });
+            chatThread.save();
+            thread = chatThread;
+            // Update the chat by adding the message ID
+            await AliceChat.findByIdAndUpdate(
+                chatId,
+                {
+                    $push: { threads: chatThread._id },
+                    $set: { updated_by: new Types.ObjectId(userId) }
+                },
+                { new: true }
+            );
         }
-        const populatedChat = await popService.findAndPopulate(AliceChat, chatId, userId);
+        if (!thread) {
+            throw new Error('Failed to update chat thread');
+        }
+
+        const populatedChatThread = await popService.findAndPopulate(ChatThread, threadIdFinal, userId);
 
         Logger.debug(`Message ${messageDoc._id} added to chat ${chatId}`);
 
-        return populatedChat;
+        return populatedChatThread;
     } catch (error) {
         Logger.error('Error in createMessageInChat:', error);
         return null;

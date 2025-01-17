@@ -1,6 +1,6 @@
 import React from 'react';
 import { UserInteraction, UserInteractionComponentProps } from '../../../../types/UserInteractionTypes';
-import EnhancedTableView from '../../common/enhanced_component/TableView';
+import EnhancedTableView from '../../../common/enhanced_component/TableView';
 
 const UserInteractionTableView: React.FC<UserInteractionComponentProps> = ({
   items,

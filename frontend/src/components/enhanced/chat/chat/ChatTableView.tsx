@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChatComponentProps, AliceChat } from '../../../../types/ChatTypes';
-import EnhancedTableView, { Column } from '../../common/enhanced_component/TableView';
+import EnhancedTableView, { Column } from '../../../common/enhanced_component/TableView';
 
 const ChatTableView: React.FC<ChatComponentProps> = ({
   items,
@@ -23,7 +23,7 @@ const ChatTableView: React.FC<ChatComponentProps> = ({
     },
     {
       header: 'Msg Count',
-      render: (chat: AliceChat) => chat.messages.length || 0,
+      render: (chat: AliceChat) => chat.threads?.length || 0,
       sortKey: 'messages.length'
     }
   ];

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ToolCall, ToolCallComponentProps } from '../../../../types/ToolCallTypes';
-import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
+import EnhancedShortListView from '../../../common/enhanced_component/ShortListView';
 
 const ToolCallShortListView: React.FC<ToolCallComponentProps> = ({
     items,

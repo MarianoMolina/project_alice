@@ -1,16 +1,16 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { ApiComponentProps, API, ApiType, ApiName, getDefaultApiForm } from '../../../../types/ApiTypes';
 import { API_CAPABILITIES, apiNameIcons, apiTypeIcons, isModelApiType } from '../../../../utils/ApiUtils';
-import EnhancedSelect from '../../common/enhanced_select/EnhancedSelect';
+import EnhancedSelect from '../../../common/enhanced_select/EnhancedSelect';
 import ModelShortListView from '../../model/model/ModelShortListView';
 import { AliceModel } from '../../../../types/ModelTypes';
 import { APIConfig } from '../../../../types/ApiConfigTypes';
-import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
+import GenericFlexibleView from '../../../common/enhanced_component/FlexibleView';
 import Logger from '../../../../utils/Logger';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
-import { TextInput } from '../../common/inputs/TextInput';
-import { BooleanInput } from '../../common/inputs/BooleanInput';
-import { IconSelectInput } from '../../common/inputs/IconSelectInput';
+import { TextInput } from '../../../common/inputs/TextInput';
+import { BooleanInput } from '../../../common/inputs/BooleanInput';
+import { IconSelectInput } from '../../../common/inputs/IconSelectInput';
 import APIConfigShortListView from '../../api_config/api_config/APIConfigShortListView';
 
 const ApiFlexibleView: React.FC<ApiComponentProps> = ({

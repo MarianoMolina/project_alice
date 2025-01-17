@@ -14,7 +14,7 @@ import { PopulatedTaskResponse, TaskResponseComponentProps } from '../../../../t
 import { CommandLineLog } from '../../../ui/markdown/CommandLog';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import { styled } from '@mui/material/styles';
-import CommonCardView from '../../common/enhanced_component/CardView';
+import CommonCardView from '../../../common/enhanced_component/CardView';
 import { AccessTime, CheckCircle, Error, Warning, Output, Code, BugReport, DataObject, Analytics, Terminal, Functions } from '@mui/icons-material';
 import AliceMarkdown from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Prompt, PromptComponentProps } from '../../../../types/PromptTypes';
 import { Typography } from '@mui/material';
-import EnhancedListView from '../../common/enhanced_component/ListView';
+import EnhancedListView from '../../../common/enhanced_component/ListView';
 
 const PromptListView: React.FC<PromptComponentProps> = ({
     items,

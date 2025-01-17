@@ -10,7 +10,7 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { CodeBlock } from '../../ui/markdown/CodeBlock';
 import { aggregateTaskMetadata, TaskUsageMetrics } from '../../../types/TaskResponseTypes';
-import CreationMetadataViewer from '../common/metadata_viewer/CreationMetadataViewer';
+import CreationMetadataViewer from '../../common/metadata_viewer/CreationMetadataViewer';
 
 interface TaskResponseMetadataViewerProps {
     usageMetrics: TaskUsageMetrics;

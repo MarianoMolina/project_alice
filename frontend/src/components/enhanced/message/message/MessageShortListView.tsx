@@ -1,6 +1,6 @@
 import React from 'react';
 import { MessageComponentProps, MessageType } from '../../../../types/MessageTypes';
-import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
+import EnhancedShortListView from '../../../common/enhanced_component/ShortListView';
 
 const MessageShortListView: React.FC<MessageComponentProps> = ({
     items,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { DataCluster, DataClusterComponentProps } from '../../../../types/DataClusterTypes';
-import EnhancedTableView from '../../common/enhanced_component/TableView';
+import EnhancedTableView from '../../../common/enhanced_component/TableView';
 import { howManyReferences } from '../../../../types/ReferenceTypes';
 
 const DataClusterTableView: React.FC<DataClusterComponentProps> = ({

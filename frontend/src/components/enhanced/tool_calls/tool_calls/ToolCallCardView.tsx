@@ -2,7 +2,7 @@ import React from 'react';
 import { Typography } from '@mui/material';
 import { Category, TypeSpecimen, Description, DataObject } from '@mui/icons-material';
 import { PopulatedToolCall, ToolCallComponentProps } from '../../../../types/ToolCallTypes';
-import CommonCardView from '../../common/enhanced_component/CardView';
+import CommonCardView from '../../../common/enhanced_component/CardView';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';

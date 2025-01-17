@@ -22,6 +22,7 @@ interface ChatContextType {
     setCurrentChatId: React.Dispatch<React.SetStateAction<string | null>>;
     isGenerating: boolean;
     setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>;
+    handleSelectThread: (threadId: string) => Promise<void>;
     handleSelectChat: (chatId: string) => Promise<void>;
     handleSendMessage: (currentChatId: string, threadId:string, message: PopulatedMessage) => Promise<void>;
     generateResponse: () => Promise<void>;
@@ -93,6 +94,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     const fetchChatById = useCallback(async (chatId: string): Promise<PopulatedAliceChat> => {
         try {
             const chatData = await fetchPopulatedItem('chats', chatId) as PopulatedAliceChat;
+            // TODO: Update past chats with the updated object
             Logger.debug('Fetched chat by id:', chatData);
             return chatData;
         } catch (error) {
@@ -101,22 +103,54 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         }
     }, []);
 
-    const handleSelectChat = async (chatId: string) => {
+    const handleSelectChat = useCallback(async (chatId: string) => {
         try {
             const chatData = await fetchChatById(chatId);
+            Logger.info('Selected chat:', chatId, chatData);
+            resetChat(true);
             setCurrentChat(chatData);
-            setMessages(chatData.messages);
             setCurrentChatId(chatId);
             setThreads(chatData.threads || []);
         } catch (error) {
             Logger.error('Error fetching chat:', error);
         }
-    };
+    }, [fetchChatById]);
+
+    const resetChat = (resetThread: boolean = false, resetChat: boolean = false) => {
+        setMessages([]);
+        setIsGenerating(false);
+        if (resetThread) {
+            setCurrentThread(null);
+        }
+        if (resetChat) {
+            setCurrentChat(null);
+            setCurrentChatId(null);
+            setThreads([]);
+        }
+    }
+
+    const handleSelectThread = async (threadId: string) => {
+        try {
+            const thread = await fetchPopulatedItem('chatthreads', threadId) as PopulatedChatThread;
+            const updatedChat = { ...currentChat!, threads: currentChat?.threads?.map(t => t._id === threadId ? thread : t) };
+            resetChat();
+            setMessages(thread.messages);
+            setCurrentChat(updatedChat)
+            setCurrentThread(thread);
+        } catch (error) {
+            Logger.error('Error fetching thread:', error);
+        }
+    }
 
     const fetchCurrentChat = useCallback(async () => {
         if (!currentChatId) return;
         return handleSelectChat(currentChatId);
     }, [currentChatId, handleSelectChat]);
+
+    const fetchCurrentThread = useCallback(async () => {
+        if (!currentThread?._id) return;
+        return handleSelectThread(currentThread._id);
+    }, [currentThread, handleSelectThread]);
     
     useEffect(() => {
         globalEventEmitter.on('created:chats', fetchChats);
@@ -135,6 +169,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             const updatedChatThread = await sendMessage(currentChatId, threadId, message);
             setMessages(updatedChatThread.messages);
             setCurrentThread(updatedChatThread);
+            // TODO: Update threads with the updated thread
             await generateResponse();
         } catch (error) {
             Logger.error('Error sending message or generating response:', error);
@@ -142,12 +177,14 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     };
 
     const generateResponse = async () => {
-        if (!currentChatId) return;
+        if (!currentChatId || !currentThread || !currentThread._id) return;
         setIsGenerating(true);
         try {
-            const response = await generateChatResponse(currentChatId);
+            // TODO: WORKFLOW SHOULD BE RETURNING A POPULATED MESSAGE, but its currently returning a non populated version
+            // so we need to retrieve the entire thread again
+            const response = await generateChatResponse(currentChatId, currentThread._id);
             if (response) {
-                await fetchCurrentChat();
+                await fetchCurrentThread();
             }
         } catch (error) {
             Logger.error('Error generating response:', error);
@@ -163,7 +200,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             newMessages.pop();
         }
         try {
-            await updateItem("chats", currentChatId, { messages: newMessages });
+            await updateItem("chatthreads", currentThread?._id!, { messages: newMessages });
             setMessages(newMessages);
             await generateResponse();
         } catch (error) {
@@ -205,6 +242,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         setIsGenerating,
         handleSelectChat,
         handleSendMessage,
+        handleSelectThread,
         generateResponse,
         handleRegenerateResponse,
         fetchChats,

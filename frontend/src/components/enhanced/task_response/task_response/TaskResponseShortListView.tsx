@@ -1,5 +1,5 @@
 import React from 'react';
-import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
+import EnhancedShortListView from '../../../common/enhanced_component/ShortListView';
 import { TaskResponse, TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
 
 const TaskResponseShortListView: React.FC<TaskResponseComponentProps> = ({

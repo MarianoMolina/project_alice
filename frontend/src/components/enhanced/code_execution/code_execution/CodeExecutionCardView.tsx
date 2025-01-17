@@ -2,7 +2,7 @@ import React from 'react';
 import { Typography } from '@mui/material';
 import { Category, TypeSpecimen, Description, QueryBuilder, DataObjectRounded } from '@mui/icons-material';
 import { CodeExecutionComponentProps, PopulatedCodeExecution } from '../../../../types/CodeExecutionTypes';
-import CommonCardView from '../../common/enhanced_component/CardView';
+import CommonCardView from '../../../common/enhanced_component/CardView';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';
 import ContentStats from '../../../ui/markdown/ContentStats';

@@ -1,7 +1,6 @@
 import { Response, Router } from 'express';
 import { IAliceChatDocument } from '../interfaces/chat.interface';
 import AliceChat from '../models/chat.model';
-import { Types } from 'mongoose';
 import { IMessageDocument } from '../interfaces/message.interface';
 import auth from '../middleware/auth.middleware';
 import { AuthRequest } from '../interfaces/auth.interface';
@@ -9,9 +8,6 @@ import { createRoutes } from '../utils/routeGenerator';
 import { createChat, createMessageInChat, updateChat } from '../utils/chat.utils';
 import Logger from '../utils/logger';
 import rateLimiterMiddleware from '../middleware/rateLimiter.middleware';
-import { createMessage, updateMessage } from '../utils/message.utils';
-import { IChatThreadDocument } from '../interfaces/thread.interface';
-import { ChatThread } from '../models/thread.model';
 
 // Create a router using routeGenerator for common CRUD routes
 const chatRoutes = createRoutes<IAliceChatDocument, 'AliceChat'>(AliceChat, 'AliceChat', {
@@ -35,61 +31,12 @@ customRouter.patch('/:chatId/add_message', async (req: AuthRequest, res: Respons
     if (!userId) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
-    // Remove the _id field if it exists and is not a valid ObjectId
-    if (message._id && !Types.ObjectId.isValid(message._id)) {
-      delete message._id;
-      Logger.info('Removed invalid _id from message');
+    if (!chatId || !message) {
+      return res.status(400).json({ message: 'Chat ID and message are required' });
     }
-    const chatData = await AliceChat.findById(chatId);
-    if (!chatData) {
-      Logger.error(`Chat not found: ${chatId}`);
-      return res.status(404).json({ message: 'Chat not found' });
-    }
-    Logger.debug('Message object before creating in chat', { message });
-    let messageDoc
-    if (message._id) {
-      Logger.debug(`Updating existing message with ID: ${message._id}`);
-      messageDoc = await updateMessage(
-        message._id.toString(),
-        message,
-        userId,
-        chatId
-      );
-    } else {
-      Logger.debug('Creating new message');
-      messageDoc = await createMessage(message, userId, chatId);
-    }
-    if (!messageDoc) {
-      Logger.error('Error creating message');
-      return res.status(500).json({ message: 'Error creating message' });
-    }
-    let chatThread: IChatThreadDocument
-    if (!threadId) {
-      // New thread 
-      // Instantiate new thread
-      chatThread = new ChatThread({
-        _id: new Types.ObjectId(),
-        messages: [messageDoc._id],
-      });
-      // Add new thread to chat threads and save
-      chatData.threads?.push(chatThread._id as any);
-      await chatData.save();
-    } else {
-      const existingThread = chatData.threads?.find((thread) => thread._id.toString() === threadId);
-      if (!existingThread) {
-        Logger.error(`Thread not found: ${threadId}`);
-        return res.status(404).json({ message: 'Thread not found' });
-      }
-      chatThread = existingThread as IChatThreadDocument;
-      chatThread.messages.push(messageDoc._id as any);
-      await chatThread.save();
-    }
+    const response = createMessageInChat(userId, chatId, message, threadId);
 
-    Logger.debug('Message added successfully', {
-      chatId,
-      messageId: messageDoc._id,
-    });
-    res.status(200).json({ message: 'Message added successfully', thread: chatThread });
+    res.status(200).json({ message: 'Message added successfully', thread: response });
   } catch (error) {
     Logger.error('Error in add_message route:', {
       error: (error as Error).message,

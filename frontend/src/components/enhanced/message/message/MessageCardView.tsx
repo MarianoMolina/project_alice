@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import { Person, AttachFile, TextSnippet, Engineering, PersonPin, DataObject, QueryBuilder } from '@mui/icons-material';
 import { MessageComponentProps, PopulatedMessage } from '../../../../types/MessageTypes';
-import CommonCardView from '../../common/enhanced_component/CardView';
+import CommonCardView from '../../../common/enhanced_component/CardView';
 import { hasAnyReferences, References } from '../../../../types/ReferenceTypes';
 import AliceMarkdown, { CustomBlockType } from '../../../ui/markdown/alice_markdown/AliceMarkdown';
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';

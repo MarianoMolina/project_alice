@@ -1,7 +1,7 @@
 import React from 'react';
 import { CodeExecution, CodeExecutionComponentProps } from '../../../../types/CodeExecutionTypes';
 import { Typography } from '@mui/material';
-import EnhancedListView from '../../common/enhanced_component/ListView';
+import EnhancedListView from '../../../common/enhanced_component/ListView';
 
 const CodeExecutionListView: React.FC<CodeExecutionComponentProps> = ({
     items,

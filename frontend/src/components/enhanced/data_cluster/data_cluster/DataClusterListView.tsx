@@ -1,7 +1,7 @@
 import React from 'react';
 import { DataCluster, DataClusterComponentProps } from '../../../../types/DataClusterTypes';
 import { Typography } from '@mui/material';
-import EnhancedListView from '../../common/enhanced_component/ListView';
+import EnhancedListView from '../../../common/enhanced_component/ListView';
 import { howManyReferences } from '../../../../types/ReferenceTypes';
 
 const DataClusterListView: React.FC<DataClusterComponentProps> = ({

@@ -1,6 +1,6 @@
 import React from 'react';
 import { CodeExecution, CodeExecutionComponentProps } from '../../../../types/CodeExecutionTypes';
-import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
+import EnhancedShortListView from '../../../common/enhanced_component/ShortListView';
 
 const CodeExecutionShortListView: React.FC<CodeExecutionComponentProps> = ({
     items,

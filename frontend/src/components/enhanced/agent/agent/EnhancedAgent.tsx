@@ -5,7 +5,7 @@ import AgentTableView from './AgentTableView';
 import AgentCardView from './AgentCardView';
 import AgentShortListView from './AgentShortListView';
 import { AliceAgent } from '../../../../types/AgentTypes';
-import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import BaseDbElement, { BaseDbElementProps } from '../../../common/enhanced_component/BaseDbElement';
 import { AgentComponentProps } from '../../../../types/AgentTypes';
 
 type BaseAgentMode = BaseDbElementProps<AliceAgent>['mode'];

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Prompt, PromptComponentProps } from '../../../../types/PromptTypes';
-import EnhancedTableView from '../../common/enhanced_component/TableView';
+import EnhancedTableView from '../../../common/enhanced_component/TableView';
 
 const PromptTableView: React.FC<PromptComponentProps> = ({
   items,

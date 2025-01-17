@@ -1,5 +1,5 @@
 import React from 'react';
-import EnhancedTableView, { Column } from '../../common/enhanced_component/TableView';
+import EnhancedTableView, { Column } from '../../../common/enhanced_component/TableView';
 import { ChatThread, ChatThreadComponentProps } from '../../../../types/ChatThreadTypes';
 
 const ChatThreadTableView: React.FC<ChatThreadComponentProps> = ({

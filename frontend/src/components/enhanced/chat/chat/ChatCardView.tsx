@@ -10,14 +10,13 @@ import {
 import { Person, Functions, Message as MessageIcon, AttachFile, QueryBuilder, ContactMail } from '@mui/icons-material';
 import { ChatComponentProps, PopulatedAliceChat } from '../../../../types/ChatTypes';
 import { hasAnyReferences, References } from '../../../../types/ReferenceTypes';
-import CommonCardView from '../../common/enhanced_component/CardView';
+import CommonCardView from '../../../common/enhanced_component/CardView';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
 import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
 import { useDialog } from '../../../../contexts/DialogContext';
-import { MessageType } from '../../../../types/MessageTypes';
-import MessageShortListView from '../../message/message/MessageShortListView';
 import ApiValidationManager from '../../api/ApiValidationManager';
 import theme from '../../../../Theme';
+import ManageReferenceList from '../../../common/referecence_list_manager/ManageReferenceList';
 
 const ChatCardView: React.FC<ChatComponentProps> = ({
   item,
@@ -76,22 +75,14 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
     },
     {
       icon: <MessageIcon />,
-      primary_text: "Messages",
+      primary_text: "Threads",
       secondary_text: (
-        <Box>
-          <Typography variant="body2">Total: {populatedItem.messages.length}</Typography>
-          {populatedItem.messages.map((message, index) => (
-            <MessageShortListView
-              key={`message-${index}${message}`}
-              item={message as MessageType}
-              mode={'view'}
-              onView={(message) => selectCardItem && selectCardItem('Message', message._id ?? '', message)}
-              handleSave={async () => { }}
-              items={null}
-              onChange={() => { }}
-            />
-          ))}
-        </Box>
+        <ManageReferenceList
+          collectionType="chatthreads"
+          elementIds={populatedItem.threads?.map(thread => thread._id!) || []}
+          onListChange={() => null}
+          isEditable={false}
+        />
       )
     },
     {
@@ -117,7 +108,7 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
                   key={nodeName}
                   label={`${nodeName}`}
                   onClick={() => selectCardItem && checkpoint._id && selectCardItem('UserCheckpoint', checkpoint._id, checkpoint)}
-                  sx={{margin:`${theme.spacing(0.25)} !important`}}
+                  sx={{ margin: `${theme.spacing(0.25)} !important` }}
                 />
               )
             ))}

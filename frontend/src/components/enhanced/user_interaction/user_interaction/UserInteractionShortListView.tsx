@@ -1,6 +1,6 @@
 import React from 'react';
 import { UserInteraction, UserInteractionComponentProps } from '../../../../types/UserInteractionTypes';
-import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
+import EnhancedShortListView from '../../../common/enhanced_component/ShortListView';
 
 const UserInteractionShortListView: React.FC<UserInteractionComponentProps> = ({
     items,

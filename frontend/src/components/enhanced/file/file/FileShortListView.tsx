@@ -1,6 +1,6 @@
 import React from 'react';
 import { FileReference, FileComponentProps } from '../../../../types/FileTypes';
-import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
+import EnhancedShortListView from '../../../common/enhanced_component/ShortListView';
 import { getFileSize } from '../../../../utils/FileUtils';
 
 const FileShortListView: React.FC<FileComponentProps> = ({

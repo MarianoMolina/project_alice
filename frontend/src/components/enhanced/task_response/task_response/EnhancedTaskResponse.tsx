@@ -3,7 +3,7 @@ import TaskResponseListView from './TaskResponseListView';
 import TaskResponseTableView from './TaskResponseTableView';
 import TaskResponseCardView from './TaskResponseCardView';
 import { PopulatedTaskResponse, TaskResponse } from '../../../../types/TaskResponseTypes';
-import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import BaseDbElement, { BaseDbElementProps } from '../../../common/enhanced_component/BaseDbElement';
 import { TaskResponseComponentProps } from '../../../../types/TaskResponseTypes';
 import TaskResponseShortListView from './TaskResponseShortListView';
 

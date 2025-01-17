@@ -1,6 +1,6 @@
 import React from 'react';
 import { AliceModel, ModelComponentProps } from '../../../../types/ModelTypes';
-import EnhancedTableView from '../../common/enhanced_component/TableView';
+import EnhancedTableView from '../../../common/enhanced_component/TableView';
 
 const ModelTableView: React.FC<ModelComponentProps> = ({
   items,

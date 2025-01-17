@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { taskDescriptions, TaskType } from '../../../types/TaskTypes';
+import { TaskType } from '../../../types/TaskTypes';
 import { BentoGrid, BentoGridItem } from '../../ui/aceternity/BentoGrid';
 import AliceMarkdown from '../../ui/markdown/alice_markdown/AliceMarkdown';
 import { CodeBlock } from '../../ui/markdown/CodeBlock';
@@ -18,6 +18,7 @@ import { ArrowBack } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import Logger from '../../../utils/Logger';
 import { cn } from '../../../utils/cn';
+import { taskDescriptions } from '../../../utils/TaskUtilts';
 
 
 interface TaskCapabilitiesDialogProps {
@@ -69,7 +70,6 @@ const TaskCapabilitiesDialog: React.FC<TaskCapabilitiesDialogProps> = ({
   const itemClass = cn(
     currentTaskType ? 'md:col-span-4' : 'md:col-span-2'
   );
-  Logger.info('itemClass:', itemClass);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>

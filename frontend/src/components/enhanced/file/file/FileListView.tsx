@@ -1,7 +1,7 @@
 import React from 'react';
 import { FileReference, FileComponentProps } from '../../../../types/FileTypes';
 import { Typography } from '@mui/material';
-import EnhancedListView from '../../common/enhanced_component/ListView';
+import EnhancedListView from '../../../common/enhanced_component/ListView';
 import { getFileSize } from '../../../../utils/FileUtils';
 
 const FileListView: React.FC<FileComponentProps> = ({

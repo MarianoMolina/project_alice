@@ -1,6 +1,6 @@
 import React from 'react';
 import { UserCheckpoint, UserCheckpointComponentProps } from '../../../../types/UserCheckpointTypes';
-import EnhancedTableView from '../../common/enhanced_component/TableView';
+import EnhancedTableView from '../../../common/enhanced_component/TableView';
 
 const UserCheckpointTableView: React.FC<UserCheckpointComponentProps> = ({
   items,

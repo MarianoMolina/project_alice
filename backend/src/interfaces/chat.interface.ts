@@ -1,5 +1,4 @@
 import { Model, Types, Document } from 'mongoose';
-import { IMessageDocument } from './message.interface';
 import { ITaskDocument } from './task.interface';
 import { IAgentDocument } from './agent.interface';
 import { IUserDocument } from './user.interface';
@@ -24,7 +23,6 @@ export interface IChangeHistoryDocument extends IChangeHistory, Document {
 // AliceChat interfaces
 export interface IAliceChat extends DataClusterHolder {
     name: string;
-    messages: Types.ObjectId[] | IMessageDocument[];
     threads?: Types.ObjectId[] | IChatThreadDocument[];
     changeHistory: IChangeHistoryDocument[];
     alice_agent: Types.ObjectId | IAgentDocument;

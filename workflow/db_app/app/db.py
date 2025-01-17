@@ -4,7 +4,7 @@ from bson import ObjectId
 from typing import Dict, Any, Optional, Literal, Union
 from pydantic import BaseModel, Field, ConfigDict
 from workflow.core.tasks import available_task_types
-from workflow.core import AliceChat, AliceTask, API, MessageDict, FileReference, FileContentReference
+from workflow.core import AliceChat, AliceTask, API, MessageDict, FileReference, FileContentReference, ChatThread
 from workflow.util.const import BACKEND_PORT, DOCKER_HOST, WORKFLOW_SERVICE_KEY
 from workflow.core.data_structures import EntityType
 from workflow.util import LOGGER
@@ -181,7 +181,7 @@ class BackendAPI(BaseModel):
         return self.task_types[task["task_type"]](**task)
     
     async def get_chat(self, chat_id: str) -> AliceChat:
-        url = f"{self.base_url}/chats/{chat_id}/populated"
+        url = f"{self.base_url}/chats/{chat_id}"
         headers = self._get_headers()
         
         async with aiohttp.ClientSession() as session:
@@ -194,11 +194,26 @@ class BackendAPI(BaseModel):
             except aiohttp.ClientError as e:
                 LOGGER.error(f"Error retrieving chats: {e}")
                 return {}
-    
-    async def store_chat_message(self, chat_id: str, message: MessageDict) -> AliceChat:
+            
+    async def get_chat_thread(self, thread_id: str) -> AliceChat:
+        url = f"{self.base_url}/chatthreads/{thread_id}/populated"
+        headers = self._get_headers()
+        
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(url, headers=headers) as response:
+                    response.raise_for_status()
+                    thread = await response.json()
+                    thread = await self.preprocess_data(thread)
+                    return ChatThread(**thread)
+            except aiohttp.ClientError as e:
+                LOGGER.error(f"Error retrieving chats: {e}")
+                return {}
+
+    async def store_chat_message(self, chat_id: str, thread_id: str, message: MessageDict) -> AliceChat:
         url = f"{self.base_url}/chats/{chat_id}/add_message"
         headers = self._get_headers()
-        data = {"message": message.model_dump(by_alias=True) if message else {}}
+        data = {"message": message.model_dump(by_alias=True), "threadId": thread_id}
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.patch(url, json=data, headers=headers) as response:

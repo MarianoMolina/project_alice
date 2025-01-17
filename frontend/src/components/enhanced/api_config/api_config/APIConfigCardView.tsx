@@ -2,7 +2,7 @@ import React from 'react';
 import { Typography } from '@mui/material';
 import { Category, Description, HealthAndSafety, DataObject, QueryBuilder } from '@mui/icons-material';
 import { APIConfigComponentProps } from '../../../../types/ApiConfigTypes';
-import CommonCardView from '../../common/enhanced_component/CardView';
+import CommonCardView from '../../../common/enhanced_component/CardView';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 import { ApiName } from '../../../../types/ApiTypes';
 import { apiNameIcons } from '../../../../utils/ApiUtils';

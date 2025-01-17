@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { Category, LibraryBooks, Code, ChatBubbleOutline, BadgeOutlined, QueryBuilder } from '@mui/icons-material';
 import { AgentComponentProps, mapCodePermission, mapToolPermission } from '../../../../types/AgentTypes';
-import CommonCardView from '../../common/enhanced_component/CardView';
+import CommonCardView from '../../../common/enhanced_component/CardView';
 import { useDialog } from '../../../../contexts/DialogContext';
 import { PermissionIcon } from '../PermissionIcons';
 import { modelTypeIcons } from '../../../../utils/ApiUtils';

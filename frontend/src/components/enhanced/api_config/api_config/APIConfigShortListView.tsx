@@ -1,6 +1,6 @@
 import React from 'react';
 import { APIConfig, APIConfigComponentProps } from '../../../../types/ApiConfigTypes';
-import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
+import EnhancedShortListView from '../../../common/enhanced_component/ShortListView';
 import { formatStringWithSpaces } from '../../../../utils/StyleUtils';
 
 const APIConfigShortListView: React.FC<APIConfigComponentProps> = ({

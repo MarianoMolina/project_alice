@@ -1,6 +1,6 @@
 import React from 'react';
 import { EntityReference, EntityReferenceComponentProps } from '../../../../types/EntityReferenceTypes';
-import EnhancedTableView from '../../common/enhanced_component/TableView';
+import EnhancedTableView from '../../../common/enhanced_component/TableView';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';
 
 const EntityReferenceTableView: React.FC<EntityReferenceComponentProps> = ({

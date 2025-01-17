@@ -1,5 +1,5 @@
 import React from 'react';
-import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import BaseDbElement, { BaseDbElementProps } from '../../../common/enhanced_component/BaseDbElement';
 import { PopulatedToolCall, ToolCall, ToolCallComponentProps } from '../../../../types/ToolCallTypes';
 import ToolCallFlexibleView from './ToolCallFlexibleView';
 import ToolCallListView from './ToolCallListView';

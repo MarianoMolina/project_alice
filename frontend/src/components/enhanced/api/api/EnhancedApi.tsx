@@ -5,7 +5,7 @@ import ApiTableView from './ApiTableView';
 import ApiCardView from './ApiCardView';
 import APIShortListView from './ApiShortListView';
 import { API } from '../../../../types/ApiTypes';
-import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import BaseDbElement, { BaseDbElementProps } from '../../../common/enhanced_component/BaseDbElement';
 import { ApiComponentProps } from '../../../../types/ApiTypes';
 
 type BaseApiMode = BaseDbElementProps<API>['mode'];

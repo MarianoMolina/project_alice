@@ -1,7 +1,7 @@
 import React from 'react';
 import { AliceModel, ModelComponentProps } from '../../../../types/ModelTypes';
 import { IconButton, Tooltip, Typography } from '@mui/material';
-import EnhancedListView from '../../common/enhanced_component/ListView';
+import EnhancedListView from '../../../common/enhanced_component/ListView';
 import { Api } from '@mui/icons-material';
 import { apiNameIcons, modelTypeIcons } from '../../../../utils/ApiUtils';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';

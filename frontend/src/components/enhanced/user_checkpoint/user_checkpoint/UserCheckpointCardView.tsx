@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 import { Language, Description, QueryBuilder, DataObject } from '@mui/icons-material';
 import { UserCheckpointComponentProps } from '../../../../types/UserCheckpointTypes';
-import CommonCardView from '../../common/enhanced_component/CardView';
+import CommonCardView from '../../../common/enhanced_component/CardView';
 import { CodeBlock } from '../../../ui/markdown/CodeBlock';
 
 const UserCheckpointCardView: React.FC<UserCheckpointComponentProps> = ({

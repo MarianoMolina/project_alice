@@ -5,7 +5,7 @@ import CodeExecutionTableView from './CodeExecutionTableView';
 import CodeExecutionCardView from './CodeExecutionCardView';
 import CodeExecutionShortListView from './CodeExecutionShortListView';
 import { CodeExecution, PopulatedCodeExecution } from '../../../../types/CodeExecutionTypes';
-import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import BaseDbElement, { BaseDbElementProps } from '../../../common/enhanced_component/BaseDbElement';
 import { CodeExecutionComponentProps } from '../../../../types/CodeExecutionTypes';
 
 type BaseCodeExecutionMode = BaseDbElementProps<CodeExecution>['mode'];

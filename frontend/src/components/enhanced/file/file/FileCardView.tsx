@@ -1,7 +1,7 @@
 import React from 'react';
 import { Stack, Typography } from '@mui/material';
 import { FileComponentProps, PopulatedFileReference } from '../../../../types/FileTypes';
-import CommonCardView from '../../common/enhanced_component/CardView';
+import CommonCardView from '../../../common/enhanced_component/CardView';
 import { CalendarToday, AccessTime, TextSnippet, AttachFile, QueryBuilder, DataObject } from '@mui/icons-material';
 import { getFileSize } from '../../../../utils/FileUtils';
 import EmbeddingChunkViewer from '../../embedding_chunk/embedding_chunk/EmbeddingChunkViewer';

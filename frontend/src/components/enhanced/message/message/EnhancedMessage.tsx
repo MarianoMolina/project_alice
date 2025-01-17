@@ -6,7 +6,7 @@ import MessageCardView from './MessageCardView';
 import MessageFullView from './MessageFullView';
 import MessageShortListView from './MessageShortListView';
 import { MessageType, PopulatedMessage } from '../../../../types/MessageTypes';
-import BaseDbElement, { BaseDbElementProps } from '../../common/enhanced_component/BaseDbElement';
+import BaseDbElement, { BaseDbElementProps } from '../../../common/enhanced_component/BaseDbElement';
 import { MessageComponentProps } from '../../../../types/MessageTypes';
 
 type BaseMessageMode = BaseDbElementProps<MessageType>['mode'];

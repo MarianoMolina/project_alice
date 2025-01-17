@@ -21,6 +21,7 @@ import ToolCall from '../models/toolCall.model';
 import CodeExecution from '../models/codeExecution.model';
 import APIConfig from '../models/apiConfig.model';
 import { WORKFLOW_HOST, WORKFLOW_PORT_DOCKER } from './const';
+import { ChatThread } from '../models/thread.model';
 
 export async function purgeAndReinitialize(userId: string, token: string): Promise<void> {
   Logger.info('Purging data for userId:', userId);
@@ -65,7 +66,7 @@ export async function purgeAndReinitialize(userId: string, token: string): Promi
       Agent, API, Chat, Model, Prompt, Task, TaskResult, 
       ParameterDefinition, Message, UserCheckpoint, UserInteraction, 
       FileReference, EmbeddingChunk, DataCluster, EntityReference, 
-      ToolCall, CodeExecution, APIConfig
+      ToolCall, CodeExecution, APIConfig, ChatThread
     ];
 
     for (const ModelClass of models) {

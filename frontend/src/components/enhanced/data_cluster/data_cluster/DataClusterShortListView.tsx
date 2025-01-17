@@ -1,6 +1,6 @@
 import React from 'react';
 import { DataCluster, DataClusterComponentProps } from '../../../../types/DataClusterTypes';
-import EnhancedShortListView from '../../common/enhanced_component/ShortListView';
+import EnhancedShortListView from '../../../common/enhanced_component/ShortListView';
 import { howManyReferences } from '../../../../types/ReferenceTypes';
 
 const DataClusterShortListView: React.FC<DataClusterComponentProps> = ({

@@ -1,9 +1,9 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { ContentType, MessageComponentProps, MessageGenerators, MessageType, PopulatedMessage, RoleType, getDefaultMessageForm } from '../../../../types/MessageTypes';
-import GenericFlexibleView from '../../common/enhanced_component/FlexibleView';
+import GenericFlexibleView from '../../../common/enhanced_component/FlexibleView';
 import DataClusterManager from '../../data_cluster/data_cluster_manager/DataClusterManager';
-import { TextInput } from '../../common/inputs/TextInput';
-import { SelectInput } from '../../common/inputs/SelectInput';
+import { TextInput } from '../../../common/inputs/TextInput';
+import { SelectInput } from '../../../common/inputs/SelectInput';
 
 const MessageFlexibleView: React.FC<MessageComponentProps> = ({
     item,
