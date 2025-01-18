@@ -90,6 +90,7 @@ export class PopulationService {
         model: Model<T>,
         id: string | Types.ObjectId,
         userId: string | Types.ObjectId,
+        customPopulationConfig?: PopulationConfig
     ): Promise<T | null> {
         const memoKey = `${model.modelName}-${id}`;
         Logger.debug('Starting findAndPopulate:', {
@@ -97,7 +98,7 @@ export class PopulationService {
             id,
             memoKey: `${model.modelName}-${id}`
         });
-        const config = ModelPopulationMap[model.modelName];
+        const config = customPopulationConfig || ModelPopulationMap[model.modelName];
         Logger.debug('Population config:', {
             modelName: model.modelName,
             config

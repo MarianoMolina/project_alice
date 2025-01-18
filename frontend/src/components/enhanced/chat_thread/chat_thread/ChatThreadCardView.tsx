@@ -9,6 +9,7 @@ import { useDialog } from '../../../../contexts/DialogContext';
 import { MessageType } from '../../../../types/MessageTypes';
 import MessageShortListView from '../../message/message/MessageShortListView';
 import { ChatThreadComponentProps, PopulatedChatThread } from '../../../../types/ChatThreadTypes';
+import ManageReferenceList from '../../../common/referecence_list_manager/ManageReferenceList';
 
 const ChatThreadCardView: React.FC<ChatThreadComponentProps> = ({
   item,
@@ -26,20 +27,12 @@ const ChatThreadCardView: React.FC<ChatThreadComponentProps> = ({
       icon: <MessageIcon />,
       primary_text: "Messages",
       secondary_text: (
-        <Box>
-          <Typography variant="body2">Total: {populatedItem.messages.length}</Typography>
-          {populatedItem.messages.map((message, index) => (
-            <MessageShortListView
-              key={`message-${index}${message}`}
-              item={message as MessageType}
-              mode={'view'}
-              onView={(message) => selectCardItem && selectCardItem('Message', message._id ?? '', message)}
-              handleSave={async () => { }}
-              items={null}
-              onChange={() => { }}
-            />
-          ))}
-        </Box>
+        <ManageReferenceList
+          collectionType="messages"
+          elementIds={populatedItem.messages?.map(msg => msg._id!) || []}
+          onListChange={() => null}
+          isEditable={false}
+        />
       )
     },
     {

@@ -35,7 +35,11 @@ export interface ChatInputRef {
 const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ }, ref) => {
   const { addNotification } = useNotification();
   const { uploadFileContentReference } = useApi();
-  const { handleSendMessage, currentChatId, chatContextCharacterCount, maxContext, isGenerating, generateResponse, handleRegenerateResponse, lastMessageRole, currentThread } = useChat();
+  const {
+    handleSendMessage, currentChatId, chatContextCharacterCount, 
+    maxContext, isGenerating, generateResponse, error,
+    handleRegenerateResponse, lastMessageRole, currentThread
+  } = useChat();
   const [newMessage, setNewMessage] = useState<PopulatedMessage>(getDefaultMessageForm());
 
   const tokenEst = Math.floor(chatContextCharacterCount / 3)
@@ -133,7 +137,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ }, ref) => {
       setNewMessage(getDefaultMessageForm());
     }
   };
-  
+
   const renderReferenceChips = () => {
     const chips: JSX.Element[] = [];
 
@@ -229,6 +233,13 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ }, ref) => {
             gap: 1,
             flexShrink: 0
           }}>
+            {error && (
+              <Tooltip title={error.message}>
+                <Typography variant="caption" color="error">
+                  Error: {error.name}{error.cause ? ` - Cause: ${error.cause}` : ''}
+                </Typography>
+              </Tooltip>
+            )}
             <ActionButton
               isGenerating={isGenerating}
               role={lastMessageRole ? lastMessageRole as RoleType : undefined}

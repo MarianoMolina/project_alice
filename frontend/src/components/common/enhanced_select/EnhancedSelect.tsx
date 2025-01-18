@@ -44,7 +44,6 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
   Logger.info('EnhancedSelect - selected items:', items, selectedItems);
 
   const localOnSelect = useCallback((selectedItems: T[]) => {
-    Logger.info('EnhancedSelect - localOnSelect - selected items:', selectedItems, items);
     setItems(selectedItems);
     onSelect(selectedItems);
   }, [onSelect]);
@@ -70,7 +69,7 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
       },
       multiple,
     );
-  }, [componentType, elementEnhanced, label, multiple, onSelect, selectEnhancedOptions]);
+  }, [componentType, elementEnhanced, label, multiple, onSelect, selectEnhancedOptions, localOnSelect]);
 
   const handleCreate = useCallback(() => {
     selectFlexibleItem(collectionElementString, 'create');

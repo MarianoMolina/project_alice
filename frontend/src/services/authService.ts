@@ -59,9 +59,9 @@ export const initializeUserDatabase = async (): Promise<String> => {
 
 export const handleGoogleOAuth = async (credential: string): Promise<LoginResponse> => {
   try {
-    Logger.info('Starting Google OAuth authentication');
+    Logger.debug('Starting Google OAuth authentication');
     const response = await dbAxiosInstance.post<LoginResponse>('/users/oauth/google', { credential });
-    Logger.info('OAuth authentication response:', response.data);
+    Logger.debug('OAuth authentication response:', response.data);
     return response.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {

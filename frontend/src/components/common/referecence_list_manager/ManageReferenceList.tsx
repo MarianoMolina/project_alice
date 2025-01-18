@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Box, IconButton, Typography } from '@mui/material';
 import { Add, Delete } from '@mui/icons-material';
-import { CollectionElement, CollectionName, collectionNameToEnhancedComponent } from '../../../types/CollectionTypes';
+import { CollectionElement, CollectionName, collectionNameToElementString, collectionNameToEnhancedComponent } from '../../../types/CollectionTypes';
 import { useApi } from '../../../contexts/ApiContext';
+import Logger from '../../../utils/Logger';
+import { useDialog } from '../../../contexts/DialogContext';
 
 interface ManageReferenceListProps<T extends CollectionElement> {
     collectionType: CollectionName;
@@ -22,6 +24,8 @@ function ManageReferenceList<T extends CollectionElement>({
     const { fetchItem } = useApi();
     const [elements, setElements] = useState<T[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+
+    const { selectCardItem } = useDialog();
 
     // Get the appropriate enhanced component for this collection type
     const EnhancedComponent = collectionNameToEnhancedComponent[collectionType];
@@ -61,7 +65,7 @@ function ManageReferenceList<T extends CollectionElement>({
     if (isLoading) {
         return <Typography>Loading...</Typography>;
     }
-
+    Logger.info('EnhancedSelect - selected items:', EnhancedComponent, elements);
     return (
         <Box sx={{ width: '100%' }}>
             <Box sx={{ 
@@ -91,16 +95,21 @@ function ManageReferenceList<T extends CollectionElement>({
                         sx={{ 
                             display: 'flex',
                             alignItems: 'center',
-                            gap: 1
                         }}
                     >
                         <Box sx={{ flexGrow: 1 }}>
                             <EnhancedComponent
-                                item={element}
+                                itemId={element._id}
                                 items={null}
                                 mode="shortList"
                                 onChange={() => {}}
                                 handleSave={async () => {}}
+                                onView = {(item: any) => {
+                                    Logger.debug('Viewing item:', item);
+                                    if (item._id) {
+                                        selectCardItem(collectionNameToElementString[collectionType], item._id);
+                                    }
+                                }}
                             />
                         </Box>
                         {isEditable && (

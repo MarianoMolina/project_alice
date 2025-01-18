@@ -36,6 +36,7 @@ import EnhancedAPIConfig from '../components/enhanced/api_config/api_config/Enha
 import { EntityReference, PopulatedEntityReference } from './EntityReferenceTypes';
 import EnhancedEntityReference from '../components/enhanced/entity_reference/entity_reference/EnhancedEntityReference';
 import { ChatThread, PopulatedChatThread } from './ChatThreadTypes';
+import EnhancedChatThread from '../components/enhanced/chat_thread/chat_thread/EnhancedChat';
 
 export type CollectionName = 'agents' | 'chats' | 'models' | 'tasks' | 'prompts' | 'taskresults' | 'users' | 'parameters' | 'apis' | 'files' | 'messages' | 'userinteractions' | 'usercheckpoints' | 'dataclusters' | 'embeddingchunks' | 'toolcalls' | 'codeexecutions' | 'apiconfigs' | 'entityreferences' | 'chatthreads';
 export type CollectionElement = AliceAgent | AliceChat | AliceModel | AliceTask | Prompt | TaskResponse | User | ParameterDefinition | API | User | FileReference | MessageType | UserInteraction | UserCheckpoint | DataCluster | EmbeddingChunk | ToolCall | CodeExecution | APIConfig | EntityReference | ChatThread;
@@ -175,7 +176,7 @@ export const collectionNameToEnhancedComponent: Record<CollectionName, React.Com
     codeexecutions: EnhancedCodeExecution,
     apiconfigs: EnhancedAPIConfig,
     entityreferences: EnhancedEntityReference,
-    chatthreads: EnhancedChat,
+    chatthreads: EnhancedChatThread,
 };
 
 // Create a runtime mapping object

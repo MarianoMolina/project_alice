@@ -181,15 +181,18 @@ class BackendAPI(BaseModel):
         return self.task_types[task["task_type"]](**task)
     
     async def get_chat(self, chat_id: str) -> AliceChat:
-        url = f"{self.base_url}/chats/{chat_id}"
-        headers = self._get_headers()
+        # Retrieves populated chats but without threads
+        url = f"{self.base_url}/workflow/chat_without_threads/{chat_id}"
+        headers = self._get_headers_workflow()
         
         async with aiohttp.ClientSession() as session:
             try:
                 async with session.get(url, headers=headers) as response:
                     response.raise_for_status()
-                    chat = await response.json()
-                    chat = await self.preprocess_data(chat)
+                    chat_response = await response.json()
+                    chat_data = chat_response['chat']
+                    del chat_data['threads']
+                    chat = await self.preprocess_data(chat_response['chat'])
                     return AliceChat(**chat)
             except aiohttp.ClientError as e:
                 LOGGER.error(f"Error retrieving chats: {e}")

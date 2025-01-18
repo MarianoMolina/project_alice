@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { Box, SelectChangeEvent } from '@mui/material';
-import { Add, Info, } from '@mui/icons-material';
+import { Add, HourglassBottom, Info, } from '@mui/icons-material';
 import { AliceTask, PopulatedTask } from '../types/TaskTypes';
 import { AliceChat, PopulatedAliceChat } from '../types/ChatTypes';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
@@ -8,7 +8,6 @@ import { useChat } from '../contexts/ChatContext';
 import { useDialog } from '../contexts/DialogContext';
 import { LlmProvider } from '../types/ApiTypes';
 import { collectionElementIcons } from '../utils/CollectionUtils';
-import { ChatThread, PopulatedChatThread } from '../types/ChatThreadTypes';
 import EnhancedTask from '../components/enhanced/task/task/EnhancedTask';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
 import EnhancedFile from '../components/enhanced/file/file/EnhancedFile';
@@ -36,6 +35,7 @@ const ChatAlice: React.FC = () => {
     currentChat,
     addTaskToChat,
     isTaskInChat,
+    loading,
   } = useChat();
   const { selectCardItem, selectFlexibleItem } = useDialog();
 
@@ -102,17 +102,19 @@ const ChatAlice: React.FC = () => {
     ];
   }, [activeTab, handleCreateNew]);
 
-  const tabs = [
-    { name: 'Select Chat', icon: collectionElementIcons.Chat, group: 'Chat' },
-    { name: 'Current Chat', icon: Info, disabled: !currentChatId, group: 'Info' },
-    { name: 'Add Tools', icon: collectionElementIcons.Task, disabled: !currentChatId, group: 'Info' },
-    { name: 'Add File Reference', icon: collectionElementIcons.File, disabled: !currentChatId, group: 'Ref' },
-    { name: 'Add Message Reference', icon: collectionElementIcons.Message, disabled: !currentChatId, group: 'Ref' },
-    { name: 'Add Task Results', icon: collectionElementIcons.TaskResponse, disabled: !currentChatId, group: 'Ref' },
-    { name: 'Add Entity Reference', icon: collectionElementIcons.EntityReference, disabled: !currentChatId, group: 'Ref' },
-    { name: 'Add Tool Call', icon: collectionElementIcons.ToolCall, disabled: !currentChatId, group: 'Ref' },
-    { name: 'Add Code Execution', icon: collectionElementIcons.CodeExecution, disabled: !currentChatId, group: 'Ref' },
-  ];
+  const tabs = useMemo(() => {
+    return [
+      { name: 'Select Chat', icon: collectionElementIcons.Chat, group: 'Chat' },
+      { name: 'Current Chat', icon: loading ? HourglassBottom : Info, disabled: !currentChatId, group: 'Info' },
+      { name: 'Add Tools', icon: collectionElementIcons.Task, disabled: !currentChatId, group: 'Info' },
+      { name: 'Add File Reference', icon: collectionElementIcons.File, disabled: !currentChatId, group: 'Ref' },
+      { name: 'Add Message Reference', icon: collectionElementIcons.Message, disabled: !currentChatId, group: 'Ref' },
+      { name: 'Add Task Results', icon: collectionElementIcons.TaskResponse, disabled: !currentChatId, group: 'Ref' },
+      { name: 'Add Entity Reference', icon: collectionElementIcons.EntityReference, disabled: !currentChatId, group: 'Ref' },
+      { name: 'Add Tool Call', icon: collectionElementIcons.ToolCall, disabled: !currentChatId, group: 'Ref' },
+      { name: 'Add Code Execution', icon: collectionElementIcons.CodeExecution, disabled: !currentChatId, group: 'Ref' },
+    ]
+  }, [loading, currentChatId]);
 
   const renderSidebarContent = useCallback((tabName: string) => {
     const handleProps = {
@@ -153,7 +155,7 @@ const ChatAlice: React.FC = () => {
                   />
                 );
               case 'Current Chat':
-                return <ActiveChatDetails onThreadSelected={()=> setIsExpanded(false)}/>;
+                return <ActiveChatDetails onThreadSelected={() => setIsExpanded(false)} />;
               case 'Add Tools':
                 return (
                   <EnhancedTask

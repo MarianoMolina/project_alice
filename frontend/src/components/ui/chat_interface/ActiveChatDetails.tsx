@@ -8,7 +8,8 @@ import {
   IconButton,
 } from '@mui/material';
 import {
-  ExpandMore as ExpandMoreIcon,
+  OpenInFull as OpenInFullIcon,
+  UnfoldLess as UnfoldLessIcon,
   Add as AddIcon,
   PlaylistAdd as PlaylistAddIcon,
 } from '@mui/icons-material';
@@ -19,15 +20,21 @@ import ChatCardView from '../../enhanced/chat/chat/ChatCardView';
 import { ChatThread, PopulatedChatThread } from '../../../types/ChatThreadTypes';
 import CreateThreadInChat from './CreateThreadInChat';
 import Logger from '../../../utils/Logger';
+import theme from '../../../Theme';
+import EnhancedChatThread from '../../enhanced/chat_thread/chat_thread/EnhancedChat';
 
 interface ActiveChatDetailsProps {
   onThreadSelected?: (thread: ChatThread) => void;
 }
 
-const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({onThreadSelected}) => {
+enum ChatDetailAccordions {
+  THREADS = 'threads',
+  DETAILS = 'details'
+}
+
+const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({ onThreadSelected }) => {
   const {
     currentChat,
-    currentThread,
     handleSelectThread,
     threads
   } = useChat();
@@ -37,17 +44,22 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({onThreadSelected})
     selectEnhancedOptions,
   } = useDialog();
 
-  const [expanded, setExpanded] = useState<'threads' | 'details'>('threads');
+  const [expanded, setExpanded] = useState<ChatDetailAccordions>(ChatDetailAccordions.THREADS);
   const [isCreatingThread, setIsCreatingThread] = useState(false);
 
-  const handleAccordionChange = useCallback((panel: 'threads' | 'details') => (
+  const handleAccordionChange = useCallback((panel: ChatDetailAccordions) => (
     _event: React.SyntheticEvent,
     isExpanded: boolean
   ) => {
-    setExpanded(isExpanded ? panel : 'threads');
-  },
-    []
-  );
+    if (expanded === panel) {
+      // If clicking the open accordion, switch to the other one
+      setExpanded(panel === ChatDetailAccordions.THREADS ? ChatDetailAccordions.DETAILS : ChatDetailAccordions.THREADS);
+    } else {
+      // If clicking the closed accordion, open it
+      setExpanded(panel);
+    }
+  }, [expanded]);
+
 
   const handleThreadSelect = useCallback(async (thread: PopulatedChatThread | ChatThread) => {
     if (!thread._id) return;
@@ -56,13 +68,15 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({onThreadSelected})
   }, [handleSelectThread, onThreadSelected]);
 
   const handleCreateThread = useCallback(() => {
+    // TODO: Implement creating new thread
     setIsCreatingThread(true);
   }, []);
 
   const handleAddExistingThread = useCallback(() => {
+    // TODO: This should add to current chat and then select
     selectEnhancedOptions(
       'chatthreads',
-      ChatThreadShortListView,
+      EnhancedChatThread,
       'Select Thread to Add',
       (thread: PopulatedChatThread) => {
         if (thread._id) {
@@ -85,20 +99,26 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({onThreadSelected})
   return (
     <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Accordion
-        expanded={expanded === 'threads'}
-        onChange={handleAccordionChange('threads')}
+        expanded={expanded === ChatDetailAccordions.THREADS}
+        onChange={handleAccordionChange(ChatDetailAccordions.THREADS)}
         sx={{
-          flex: expanded === 'threads' ? 1 : 'none',
+          flex: expanded === ChatDetailAccordions.THREADS ? 1 : 'none',
+          borderRadius: '0 !important',
+          background: 'none !important',
           display: 'flex',
           margin: '0 !important',
-          flexDirection: 'column'
+          flexDirection: 'column',
         }}
       >
         <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
+          expandIcon={expanded === ChatDetailAccordions.THREADS ? 
+            <UnfoldLessIcon /> : 
+            <OpenInFullIcon />
+          }
           sx={{
-            borderBottom: 1,
-            borderColor: 'divider',
+            background: expanded === ChatDetailAccordions.THREADS ? theme.palette.primary.main : 'transparent',
+            minHeight: '0 !important',
+            height: '56px'
           }}
         >
           <Box sx={{
@@ -109,28 +129,30 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({onThreadSelected})
             pr: 2
           }}>
             <Typography>Select Thread</Typography>
-            <Box>
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCreateThread();
-                }}
-                title="Create New Thread"
-              >
-                <AddIcon />
-              </IconButton>
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleAddExistingThread();
-                }}
-                title="Add Existing Thread"
-              >
-                <PlaylistAddIcon />
-              </IconButton>
-            </Box>
+            {expanded === ChatDetailAccordions.THREADS && (
+              <Box>
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCreateThread();
+                  }}
+                  title="Create New Thread"
+                >
+                  <AddIcon />
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddExistingThread();
+                  }}
+                  title="Add Existing Thread"
+                >
+                  <PlaylistAddIcon />
+                </IconButton>
+              </Box>
+            )}
           </Box>
         </AccordionSummary>
         <AccordionDetails sx={{
@@ -151,20 +173,26 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({onThreadSelected})
       </Accordion>
 
       <Accordion
-        expanded={expanded === 'details'}
-        onChange={handleAccordionChange('details')}
+        expanded={expanded === ChatDetailAccordions.DETAILS}
+        onChange={handleAccordionChange(ChatDetailAccordions.DETAILS)}
         sx={{
-          flex: expanded === 'details' ? 1 : 'none',
+          flex: expanded === ChatDetailAccordions.DETAILS ? 1 : 'none',
+          borderRadius: '0 !important',
           margin: '0 !important',
+          background: 'none !important',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
         }}
       >
         <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
+          expandIcon={expanded === ChatDetailAccordions.DETAILS ? 
+            <UnfoldLessIcon /> : 
+            <OpenInFullIcon />
+          }
           sx={{
-            borderBottom: 1,
-            borderColor: 'divider'
+            background: expanded === ChatDetailAccordions.DETAILS ? theme.palette.primary.main : 'transparent',
+            minHeight: '0 !important',
+            height: '56px'
           }}
         >
           <Typography>Chat Details</Typography>

@@ -36,7 +36,8 @@ async def chat_response(
     if enqueue:
         LOGGER.info(f'Enqueuing chat response for chat_id: {request.chat_id}')
         task_data = {
-            "chat_id": request.chat_id
+            "chat_id": request.chat_id,
+            "thread_id": request.thread_id
         }
         enqueued_task_id = await queue_manager.enqueue_request(
             endpoint=f"/chat_response",
