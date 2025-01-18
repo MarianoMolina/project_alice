@@ -13,6 +13,7 @@ type EnhancedUserInteractionMode = BaseUserInteractionMode | ExtendedUserInterac
 
 interface EnhancedUserInteractionProps extends Omit<UserInteractionComponentProps, 'items' | 'item' | 'onChange' | 'handleSave' | 'mode'> {
   mode: EnhancedUserInteractionMode;
+  item?: Partial<UserInteraction | PopulatedUserInteraction> | null;
   itemId?: string;
   fetchAll: boolean;
   onSave?: (savedItem: UserInteraction | PopulatedUserInteraction) => void;

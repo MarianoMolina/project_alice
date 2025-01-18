@@ -1,22 +1,21 @@
 import React, { useCallback, useMemo, useState, memo } from 'react';
-import { Box, Typography, List, Accordion, AccordionSummary, AccordionDetails, SelectChangeEvent, CircularProgress, IconButton } from '@mui/material';
-import { Add, Functions, Assignment, ExpandMore, Info } from '@mui/icons-material';
+import { Box, Typography, SelectChangeEvent, CircularProgress } from '@mui/material';
+import { Add, Functions, Assignment } from '@mui/icons-material';
 import { TASK_SIDEBAR_WIDTH, SIDEBAR_COLLAPSED_WIDTH } from '../utils/Constants';
 import { AliceTask, PopulatedTask, TaskType } from '../types/TaskTypes';
-import { APIConfig } from '../types/ApiConfigTypes';
 import { CollectionElementString } from '../types/CollectionTypes';
 import VerticalMenuSidebar from '../components/ui/vertical_menu/VerticalMenuSidebar';
 import EnhancedTaskResponse from '../components/enhanced/task_response/task_response/EnhancedTaskResponse';
 import PlaceholderSkeleton from '../components/ui/placeholder_skeleton/PlaceholderSkeleton';
 import TaskListView from '../components/enhanced/task/task/TaskListView';
 import FilterSelect from '../components/ui/sidetab_header/FilterSelect';
-import EnhancedAPIConfig from '../components/enhanced/api_config/api_config/EnhancedAPIConfig';
-import TaskExecuteView from '../components/enhanced/task/task/TaskExecuteView';
-import TaskResponseListView from '../components/enhanced/task_response/task_response/TaskResponseListView';
 import { useDialog } from '../contexts/DialogContext';
 import { RecentExecution, useTask } from '../contexts/TaskContext';
 import useStyles from '../styles/StartTaskStyles';
-import APICapabilitiesDialog from '../components/enhanced/api/ApiCapabilitiesDialog';
+import { APIStatusSection } from '../components/ui/task_interface/ApiStatus';
+import { RecentExecutionsSection } from '../components/ui/task_interface/RecentExecutions';
+import TaskExecuteView from '../components/ui/task_interface/TaskExecuteView';
+
 const TaskLoadingState = memo(() => {
     const classes = useStyles();
 
@@ -29,6 +28,7 @@ const TaskLoadingState = memo(() => {
         </Box>
     );
 });
+
 interface MemoizedSidebarProps {
     actions: Array<{
         name: string;
@@ -92,18 +92,6 @@ interface TaskExecuteProps {
     onExecute: () => Promise<void>;
 }
 
-interface TaskResponseProps {
-    execution: RecentExecution;
-    onView: () => void;
-    onInteraction?: () => void;
-}
-
-interface RecentExecutionsSectionProps {
-    recentExecutions: RecentExecution[];
-    selectedTask: PopulatedTask | null;
-    onExecutionView: (execution: RecentExecution) => void;
-    onExecutionInteraction: (execution: RecentExecution) => void;
-}
 
 // Memoized components with proper types
 const MemoizedFilterSelect = memo(({ title, currentSelection, options, handleSelectionChange }: FilterSelectProps) => (
@@ -130,104 +118,9 @@ const MemoizedTaskListView = memo(({ items, onView, onInteraction }: TaskListPro
 const MemoizedTaskExecuteView = memo(({ item, onExecute }: TaskExecuteProps) => (
     <TaskExecuteView
         item={item}
-        items={null}
-        onChange={() => null}
-        mode="view"
-        handleSave={async () => { }}
         onExecute={onExecute}
     />
 ));
-
-const MemoizedTaskResponseListView = memo(({ execution, onView, onInteraction }: TaskResponseProps) => (
-    <TaskResponseListView
-        item={execution.result}
-        items={null}
-        mode="view"
-        onChange={() => null}
-        handleSave={async () => { }}
-        onView={onView}
-        onInteraction={onInteraction}
-    />
-));
-
-const APIStatusSection = memo(() => {
-    const classes = useStyles();
-    const { selectCardItem } = useDialog();
-    const [showCapabilities, setShowCapabilities] = useState(false);
-
-    const handleApiConfigInteraction = useCallback((apiConfig: APIConfig) => {
-        if (apiConfig._id) selectCardItem('APIConfig', apiConfig._id);
-    }, [selectCardItem]);
-
-    return (
-        <Box className={classes.apiStatusContainer}>
-            <Typography variant="h6" className={classes.sectionTitle}>
-                API Status
-                <IconButton>
-                    <Info onClick={() => setShowCapabilities(true)} />
-                </IconButton>
-            </Typography>
-            <Box className={classes.apiTooltipContainer}>
-                <EnhancedAPIConfig
-                    mode="tooltip"
-                    fetchAll={true}
-                    onInteraction={handleApiConfigInteraction}
-                />
-            </Box>
-
-            <APICapabilitiesDialog
-                open={showCapabilities}
-                onClose={() => setShowCapabilities(false)}
-            />
-        </Box >
-    );
-});
-
-const RecentExecutionsSection = memo(({
-    recentExecutions,
-    selectedTask,
-    onExecutionView,
-    onExecutionInteraction
-}: RecentExecutionsSectionProps) => {
-    const classes = useStyles();
-
-    return (
-        <Accordion
-            className={classes.recentExecutionsAccordion}
-            defaultExpanded
-            classes={{
-                root: classes.accordionRoot,
-            }}
-        >
-            <AccordionSummary
-                expandIcon={<ExpandMore />}
-                aria-controls="recent-executions-content"
-                id="recent-executions-header"
-                className={classes.recentExecutionsAccordionSummary}
-            >
-                <Typography variant="h6" className={classes.sectionTitle}>Recent Executions</Typography>
-            </AccordionSummary>
-            <AccordionDetails className={classes.recentExecutionsAccordionDetails}>
-                <Box component="div">
-                    <List className={classes.recentExecutionsList}>
-                        {recentExecutions.map((execution, index) => (
-                            <MemoizedTaskResponseListView
-                                key={index}
-                                execution={execution}
-                                onView={() => onExecutionView(execution)}
-                                onInteraction={
-                                    selectedTask && execution.taskId === selectedTask._id
-                                        ? () => onExecutionInteraction(execution)
-                                        : undefined
-                                }
-                            />
-                        ))}
-                    </List>
-                </Box>
-            </AccordionDetails>
-        </Accordion>
-    );
-});
 
 const StartTask: React.FC = () => {
     const classes = useStyles();

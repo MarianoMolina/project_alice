@@ -6,6 +6,7 @@ const useStyles = makeStyles((theme: Theme) => ({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
+        background: 'none !important',
     },
     cardContent: {
         maxHeight: '100%',

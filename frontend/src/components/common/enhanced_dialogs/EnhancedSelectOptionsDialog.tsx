@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box } from '@mui/material';
 import { CollectionElement, CollectionElementString } from '../../../types/CollectionTypes';
 import { useDialog } from '../../../contexts/DialogContext';
+import Logger from '../../../utils/Logger';
 
 const EnhancedSelectOptionsDialog = () => {
   const {
@@ -26,6 +27,7 @@ const EnhancedSelectOptionsDialog = () => {
   }, [enhancedOptionsDialogProps, closeEnhancedOptionsDialog]);
 
   const handleView = useCallback((item: CollectionElement) => {
+    Logger.info('Viewing item:', item);
     if (!enhancedOptionsDialogProps) return;
     const { componentType } = enhancedOptionsDialogProps;
     selectCardItem(componentType as CollectionElementString, item._id!);

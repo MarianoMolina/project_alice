@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Typography,
   ListItemButton,
@@ -28,6 +28,17 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
   }
 
   const populatedItem = item as PopulatedAliceChat
+
+  const memoizedThreadList = useMemo(() => {
+    return (
+      <ManageReferenceList
+        collectionType="chatthreads"
+        elementIds={populatedItem.threads?.map(thread => thread._id!) || []}
+        onListChange={() => null}
+        isEditable={false}
+      />
+    );
+  }, [populatedItem.threads]);
 
   const listItems = [
     {
@@ -76,14 +87,7 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
     {
       icon: <MessageIcon />,
       primary_text: "Threads",
-      secondary_text: (
-        <ManageReferenceList
-          collectionType="chatthreads"
-          elementIds={populatedItem.threads?.map(thread => thread._id!) || []}
-          onListChange={() => null}
-          isEditable={false}
-        />
-      )
+      secondary_text: (memoizedThreadList)
     },
     {
       icon: <AttachFile />,

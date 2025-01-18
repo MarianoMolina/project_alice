@@ -41,20 +41,21 @@ import { PopulatedCodeExecution } from '../../../types/CodeExecutionTypes';
 import { APIConfig } from '../../../types/ApiConfigTypes';
 
 const EnhancedFlexibleDialog: React.FC = () => {
-  const { 
-    selectedFlexibleItem, 
-    selectedFlexibleItemType, 
+  const {
+    selectedFlexibleItem,
+    selectedFlexibleItemType,
     selectCardItem,
-    flexibleDialogMode, 
-    closeFlexibleDialog, 
+    flexibleDialogMode,
+    closeFlexibleDialog,
     isFlexibleDialogOpen,
     flexibleDialogZIndex,
+    onFlexibleDialogSave
   } = useDialog();
 
   const renderDialogContent = () => {
     if (!selectedFlexibleItemType || !flexibleDialogMode || !isFlexibleDialogOpen) return null;
     Logger.debug('renderDialogContent', selectedFlexibleItemType, flexibleDialogMode, selectedFlexibleItem);
-    
+
     const handleProps = {
       handleAgentClick: (id: string, item?: AliceAgent) => selectCardItem('Agent', id, item),
       handleTaskClick: (id: string, item?: PopulatedTask) => selectCardItem('Task', id, item),
@@ -78,9 +79,21 @@ const EnhancedFlexibleDialog: React.FC = () => {
     const commonProps = {
       mode: flexibleDialogMode as ComponentMode,
       fetchAll: false,
-      onSave: async () => {
-        closeFlexibleDialog();
-        return Promise.resolve();
+      onSave: async (savedItem: any) => {
+
+        Logger.debug('EnhancedFlexibleDialog onSave called with:', savedItem);
+        try {
+          if (savedItem && onFlexibleDialogSave) {
+
+            Logger.debug('Executing onFlexibleDialogSave with:', savedItem);
+            await onFlexibleDialogSave(savedItem);
+          }
+          closeFlexibleDialog();
+          return savedItem;
+        } catch (error) {
+          Logger.error('Error in flexible dialog onSave:', error);
+          throw error;
+        }
       },
       onDelete: async () => closeFlexibleDialog(),
       ...handleProps,
@@ -158,7 +171,7 @@ const EnhancedFlexibleDialog: React.FC = () => {
         case 'UserCheckpoint':
           return <EnhancedUserCheckpoint {...commonProps} item={selectedFlexibleItem as CollectionPopulatedType['usercheckpoints']} />;
         case 'UserInteraction':
-          return <EnhancedUserInteraction {...commonProps} />;
+          return <EnhancedUserInteraction {...commonProps} item={selectedFlexibleItem as CollectionPopulatedType['userinteractions']} />;
         case 'EmbeddingChunk':
           return <EnhancedEmbeddingChunk {...commonProps} item={selectedFlexibleItem as CollectionPopulatedType['embeddingchunks']} />;
         case 'DataCluster':

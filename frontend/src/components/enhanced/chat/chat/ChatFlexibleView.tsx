@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
-    Box,
     Alert,
 } from '@mui/material';
 import { ChatComponentProps, getDefaultChatForm, CheckpointType, PopulatedAliceChat, AliceChat } from '../../../../types/ChatTypes';
@@ -17,12 +16,11 @@ import UserCheckpointShortListView from '../../user_checkpoint/user_checkpoint/U
 import TitleBox from '../../../common/inputs/TitleBox';
 import { TextInput } from '../../../common/inputs/TextInput';
 import { useAuth } from '../../../../contexts/AuthContext';
-import { useDialog } from '../../../../contexts/DialogContext';
 import Logger from '../../../../utils/Logger';
 import { useApi } from '../../../../contexts/ApiContext';
 import ApiValidationManager from '../../api/ApiValidationManager';
-import ChatThreadListView from '../../chat_thread/chat_thread/ChatThreadListView';
 import { PopulatedChatThread } from '../../../../types/ChatThreadTypes';
+import ManageReferenceList from '../../../common/referecence_list_manager/ManageReferenceList';
 
 const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     item,
@@ -31,7 +29,6 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     handleSave,
     handleDelete,
 }) => {
-    const { selectCardItem } = useDialog();
     const { user } = useAuth();
     const { fetchPopulatedItem } = useApi();
     const [form, setForm] = useState<Partial<PopulatedAliceChat>>(item as PopulatedAliceChat || getDefaultChatForm());
@@ -194,6 +191,50 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
         }
     }, []);
 
+    const handleThreadChange = useCallback(async (threadIds: string[]) => {
+        try {
+            // Get the current threads from the form
+            const currentThreads = form.threads || [];
+            
+            // Create a map of current thread IDs to their populated objects
+            const currentThreadMap = new Map(
+                currentThreads.map(thread => [thread._id, thread])
+            );
+            
+            // Initialize array for new thread list
+            const updatedThreads: PopulatedChatThread[] = [];
+            
+            // Process each thread ID
+            for (const threadId of threadIds) {
+                // If we already have the populated thread, use it
+                if (currentThreadMap.has(threadId)) {
+                    updatedThreads.push(currentThreadMap.get(threadId)!);
+                } else {
+                    // Fetch the new thread's populated data
+                    try {
+                        const populatedThread = await fetchPopulatedItem('chatthreads', threadId) as PopulatedChatThread;
+                        if (populatedThread) {
+                            updatedThreads.push(populatedThread);
+                        }
+                    } catch (error) {
+                        Logger.error('Error fetching thread', { threadId, error });
+                        // Continue with other threads even if one fails
+                        continue;
+                    }
+                }
+            }
+            
+            // Update the form with the new thread list
+            setForm(prevForm => ({
+                ...prevForm,
+                threads: updatedThreads
+            }));
+            
+        } catch (error) {
+            Logger.error('Error in handleThreadChange', { error });
+        }
+    }, [form.threads, fetchPopulatedItem]);
+
     const memoizedAgentSelect = useMemo(() => (
         <EnhancedSelect<AliceAgent>
             componentType="agents"
@@ -264,6 +305,25 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
         />
     ), [form.default_user_checkpoints, handleCodeExecCheckpointChange, isEditMode]);
 
+    const memoizedThreadSelect = useMemo(() => (
+        
+        <ManageReferenceList
+        collectionType="chatthreads"
+        elementIds={form.threads?.map(thread => thread._id!) || []}
+        onListChange={handleThreadChange}
+        isEditable={true}
+    />
+    ), [form.threads, handleThreadChange]);
+
+    const memoizedDatacluster = useMemo(() => (
+        <DataClusterManager
+            dataCluster={form.data_cluster}
+            isEditable={true}
+            onDataClusterChange={(dataCluster) => setForm(prevForm => ({ ...prevForm, data_cluster: dataCluster }))}
+            flatten={false}
+        />
+    ), [form.data_cluster]);
+
     return (
         <GenericFlexibleView
             elementType='Chat'
@@ -301,27 +361,10 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                 {memoizedToolCallCheckpointSelect}
                 {memoizedCodeExecCheckpointSelect}
             </TitleBox>
-            <DataClusterManager
-                dataCluster={form.data_cluster}
-                isEditable={true}
-                onDataClusterChange={(dataCluster) => setForm(prevForm => ({ ...prevForm, data_cluster: dataCluster }))}
-                flatten={false}
-            />
+            {memoizedDatacluster}
             {form.threads && form.threads.length > 0 && (
                 <TitleBox title="Threads" >
-                    <Box mt={2}>
-                        {form.threads.map((chatThread, index) => (
-                            <ChatThreadListView
-                                key={`chatThread-${index}${chatThread}`}
-                                item={chatThread as PopulatedChatThread}
-                                mode={'view'}
-                                onView={(chatThread) => selectCardItem && selectCardItem('ChatThread', chatThread._id ?? '', chatThread as PopulatedChatThread)}
-                                handleSave={async () => { }}
-                                items={null}
-                                onChange={() => { }}
-                            />
-                        ))}
-                    </Box>
+                    {memoizedThreadSelect}
                 </TitleBox>
             )}
             {form._id && (

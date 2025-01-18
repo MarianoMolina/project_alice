@@ -1,13 +1,10 @@
 import React from 'react';
 import {
   Typography,
-  Box,
 } from '@mui/material';
 import { Message as MessageIcon, QueryBuilder } from '@mui/icons-material';
 import CommonCardView from '../../../common/enhanced_component/CardView';
 import { useDialog } from '../../../../contexts/DialogContext';
-import { MessageType } from '../../../../types/MessageTypes';
-import MessageShortListView from '../../message/message/MessageShortListView';
 import { ChatThreadComponentProps, PopulatedChatThread } from '../../../../types/ChatThreadTypes';
 import ManageReferenceList from '../../../common/referecence_list_manager/ManageReferenceList';
 

@@ -248,7 +248,6 @@ export interface EnhancedComponentProps<T extends CollectionElement | Collection
     showHeaders?: boolean
 }
 
-
 export interface CostDict {
     input_cost?: number;
     output_cost?: number;
@@ -292,7 +291,7 @@ type PopulatedFields = {
 
 // Create the populated interface
 export interface PopulatedEmbeddable extends Omit<Embeddable, keyof PopulatedFields>, PopulatedFields {}
-
+export type SavedItemCallback<T extends CollectionElement | CollectionPopulatedElement> = (savedItem: T) => void | Promise<void>;
 // Generic converters that work with any type extending the base interfaces
 export const convertToBasicDBObj = <T extends Partial<BasicDBObj>>(data: T): BasicDBObj => ({
     _id: data._id,

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
-import { CollectionElementString, CollectionElement, CollectionName, CollectionPopulatedElement } from '../types/CollectionTypes';
+import { CollectionElementString, CollectionElement, CollectionName, CollectionPopulatedElement, SavedItemCallback } from '../types/CollectionTypes';
 import { Prompt } from '../types/PromptTypes';
 import { ApiProvider } from './ApiContext';
 import { PopulatedTask } from '../types/TaskTypes';
@@ -50,13 +50,23 @@ interface DialogContextType {
   cardDialogZIndex: number;
 
   // Flexible Dialog
-  selectFlexibleItem: (itemType: CollectionElementString, mode: 'create' | 'edit', itemId?: string, item?: CollectionPopulatedElement) => void;
+  selectFlexibleItem: (
+    itemType: CollectionElementString,
+    mode: 'create' | 'edit',
+    itemId?: string,
+    item?: CollectionPopulatedElement,
+    onSave?: SavedItemCallback<CollectionPopulatedElement | CollectionElement>
+  ) => void;
   selectedFlexibleItem: CollectionPopulatedElement | null;
   selectedFlexibleItemType: CollectionElementString | null;
   flexibleDialogMode: 'create' | 'edit' | null;
   isFlexibleDialogOpen: boolean;
   closeFlexibleDialog: () => void;
   flexibleDialogZIndex: number;
+  onFlexibleDialogSave?: SavedItemCallback<CollectionElement | CollectionPopulatedElement>;
+  setOnFlexibleDialogSave: <T extends CollectionElement | CollectionPopulatedElement>(
+    callback: SavedItemCallback<T> | undefined
+  ) => void;
 
   // Prompt Parsed Dialog
   selectPromptParsedDialog: (
@@ -143,7 +153,9 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
   const [selectedFlexibleItemType, setSelectedFlexibleItemType] = useState<CollectionElementString | null>(null);
   const [flexibleDialogMode, setFlexibleDialogMode] = useState<'create' | 'edit' | null>(null);
   const [isFlexibleDialogOpen, setIsFlexibleDialogOpen] = useState(false);
-
+  const [onFlexibleDialogSave, setOnFlexibleDialogSaveState] = useState<
+    SavedItemCallback<CollectionElement | CollectionPopulatedElement> | undefined
+  >(undefined);
   // Prompt Dialog State
   const [selectedPromptItem, setSelectedPromptItem] = useState<Prompt | undefined>(undefined);
   const [selectedSystemPromptItem, setSelectedSystemPromptItem] = useState<Prompt | undefined>(undefined);
@@ -244,14 +256,22 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
     setCardDialogOpenedAt(Date.now());
   }, []);
 
-  const selectFlexibleItem = useCallback((
+  const setOnFlexibleDialogSave = useCallback(<T extends CollectionElement | CollectionPopulatedElement>(
+    callback: SavedItemCallback<T> | undefined
+  ) => {
+    setOnFlexibleDialogSaveState(callback as SavedItemCallback<CollectionElement | CollectionPopulatedElement>);
+  }, []);
+
+  const selectFlexibleItem = useCallback(<T extends CollectionPopulatedElement>(
     itemType: CollectionElementString,
     mode: 'create' | 'edit',
     itemId?: string,
-    item?: CollectionPopulatedElement
+    item?: T,
+    onSave?: SavedItemCallback<T>
   ) => {
     setSelectedFlexibleItemType(itemType);
     setFlexibleDialogMode(mode);
+    setOnFlexibleDialogSave(onSave);
     if (mode === 'edit') {
       if (item) {
         setSelectedFlexibleItem(item);
@@ -348,6 +368,7 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
     setFlexibleDialogMode(null);
     setIsFlexibleDialogOpen(false);
     setFlexibleDialogOpenedAt(null);
+    setOnFlexibleDialogSave(undefined);
   }, []);
 
   const closePromptDialog = useCallback(() => {
@@ -410,6 +431,8 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
         isFlexibleDialogOpen,
         closeFlexibleDialog,
         flexibleDialogZIndex,
+        onFlexibleDialogSave,
+        setOnFlexibleDialogSave,
 
         // Prompt Parsed Dialog
         selectPromptParsedDialog,

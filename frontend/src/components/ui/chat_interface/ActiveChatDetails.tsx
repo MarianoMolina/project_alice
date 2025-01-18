@@ -12,6 +12,8 @@ import {
   UnfoldLess as UnfoldLessIcon,
   Add as AddIcon,
   PlaylistAdd as PlaylistAddIcon,
+  QuestionAnswer,
+  Info,
 } from '@mui/icons-material';
 import { useChat } from '../../../contexts/ChatContext';
 import { useDialog } from '../../../contexts/DialogContext';
@@ -22,6 +24,7 @@ import CreateThreadInChat from './CreateThreadInChat';
 import Logger from '../../../utils/Logger';
 import theme from '../../../Theme';
 import EnhancedChatThread from '../../enhanced/chat_thread/chat_thread/EnhancedChat';
+import { fetchPopulatedItem } from '../../../services/api';
 
 interface ActiveChatDetailsProps {
   onThreadSelected?: (thread: ChatThread) => void;
@@ -36,10 +39,12 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({ onThreadSelected 
   const {
     currentChat,
     handleSelectThread,
+    setThreads,
     threads
   } = useChat();
 
   const {
+    selectFlexibleItem,
     selectCardItem,
     selectEnhancedOptions,
   } = useDialog();
@@ -60,20 +65,36 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({ onThreadSelected 
     }
   }, [expanded]);
 
-
   const handleThreadSelect = useCallback(async (thread: PopulatedChatThread | ChatThread) => {
     if (!thread._id) return;
     await handleSelectThread(thread._id);
     onThreadSelected && onThreadSelected(thread as ChatThread);
   }, [handleSelectThread, onThreadSelected]);
 
+  const localOnSaveNew = useCallback(async (newItem: any) => {
+    if (!newItem || !newItem._id) {
+      Logger.warn('ManageReferenceList: Received invalid item in localOnSaveNew:', newItem);
+      return;
+    }
+    const threadPopulated = await fetchPopulatedItem('chatthreads', newItem._id) as PopulatedChatThread;
+    setThreads(prevThreads => prevThreads ? [...prevThreads, threadPopulated] : [threadPopulated]);
+    setIsCreatingThread(false);
+    // Needs to update the chat with the new thread
+  }, [setThreads]);
+
   const handleCreateThread = useCallback(() => {
-    // TODO: Implement creating new thread
     setIsCreatingThread(true);
-  }, []);
+    Logger.debug('active chat deatails handleCreateNew called');
+    selectFlexibleItem(
+      'ChatThread',
+      'create',
+      undefined,
+      undefined,
+      localOnSaveNew
+    );
+  }, [selectFlexibleItem]);
 
   const handleAddExistingThread = useCallback(() => {
-    // TODO: This should add to current chat and then select
     selectEnhancedOptions(
       'chatthreads',
       EnhancedChatThread,
@@ -85,6 +106,7 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({ onThreadSelected 
       },
       false
     );
+    // Needs to update the chat with the new thread
   }, [selectEnhancedOptions, handleSelectThread]);
 
   const handleViewThread = useCallback((thread: PopulatedChatThread | ChatThread) => {
@@ -111,8 +133,8 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({ onThreadSelected 
         }}
       >
         <AccordionSummary
-          expandIcon={expanded === ChatDetailAccordions.THREADS ? 
-            <UnfoldLessIcon /> : 
+          expandIcon={expanded === ChatDetailAccordions.THREADS ?
+            <UnfoldLessIcon /> :
             <OpenInFullIcon />
           }
           sx={{
@@ -128,7 +150,7 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({ onThreadSelected 
             width: '100%',
             pr: 2
           }}>
-            <Typography>Select Thread</Typography>
+            <Typography><QuestionAnswer /> Select Thread</Typography>
             {expanded === ChatDetailAccordions.THREADS && (
               <Box>
                 <IconButton
@@ -185,8 +207,8 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({ onThreadSelected 
         }}
       >
         <AccordionSummary
-          expandIcon={expanded === ChatDetailAccordions.DETAILS ? 
-            <UnfoldLessIcon /> : 
+          expandIcon={expanded === ChatDetailAccordions.DETAILS ?
+            <UnfoldLessIcon /> :
             <OpenInFullIcon />
           }
           sx={{
@@ -195,7 +217,7 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({ onThreadSelected 
             height: '56px'
           }}
         >
-          <Typography>Chat Details</Typography>
+          <Typography><Info /> Chat Details</Typography>
         </AccordionSummary>
         <AccordionDetails sx={{
           flex: 1,
