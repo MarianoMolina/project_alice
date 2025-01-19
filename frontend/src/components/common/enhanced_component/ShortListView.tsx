@@ -18,7 +18,7 @@ const ListItemStyled = styled(ListItem)(({ theme }) => ({
     padding: theme.spacing(1, 1),
     transition: 'transform 0.1s ease-in-out !important',
     '&:hover': {
-      transform: 'translateY(-1px)',
+        transform: 'translateY(-1px)',
     },
 }));
 
@@ -87,18 +87,14 @@ function EnhancedShortListItem<T>({
             </ContentBox>
             <ButtonBox>
                 {onView && (
-                    <Tooltip title="View Item">
-                        <IconButtonCustom size="small" onClick={() => onView(item)}>
-                            <Visibility />
-                        </IconButtonCustom>
-                    </Tooltip>
+                    <IconButtonCustom size="small" onClick={() => onView(item)} title="View Item">
+                        <Visibility />
+                    </IconButtonCustom>
                 )}
                 {onInteraction && (
-                    <Tooltip title="Select Item">
-                        <IconButtonCustom size="small" onClick={() => onInteraction(item)}>
-                            <PlayArrow />
-                        </IconButtonCustom>
-                    </Tooltip>
+                    <IconButtonCustom size="small" onClick={() => onInteraction(item)} title="Select Item">
+                        <PlayArrow />
+                    </IconButtonCustom>
                 )}
             </ButtonBox>
         </ListItemStyled>

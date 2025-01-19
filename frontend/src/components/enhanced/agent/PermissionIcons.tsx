@@ -1,6 +1,6 @@
 import { Build, Code } from "@mui/icons-material";
 import { CodePermission, ToolPermission } from "../../../types/AgentTypes";
-import { IconButton, Tooltip } from "@mui/material";
+import { IconButton } from "@mui/material";
 
 const getPermissionColor = (level: number): string => {
     switch (level) {
@@ -25,10 +25,8 @@ export const PermissionIcon: React.FC<{
     const permissionLabel = getEnumKeyFromValue(enumObj, permission);
 
     return (
-        <Tooltip title={`${type === 'tool' ? 'Tool' : 'Code'} Permission: ${permissionLabel}`}>
-            <IconButton size="small">
-                <Icon sx={{ color: getPermissionColor(permission) }} />
-            </IconButton>
-        </Tooltip>
+        <IconButton size="small" title={`${type === 'tool' ? 'Tool' : 'Code'} Permission: ${permissionLabel}`}>
+            <Icon sx={{ color: getPermissionColor(permission) }} />
+        </IconButton>
     );
 };

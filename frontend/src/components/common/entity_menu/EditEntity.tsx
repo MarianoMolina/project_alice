@@ -55,10 +55,8 @@ export function EditEntity<T extends CollectionName>({
 
   // For standalone button usage, wrap in IconButton and Tooltip
   return (
-    <Tooltip title={tooltipText || defaultTooltip}>
-      <StyledIconButton onClick={handleEdit} size="small">
-        <EditIcon />
-      </StyledIconButton>
-    </Tooltip>
+    <StyledIconButton onClick={handleEdit} size="small" title={tooltipText || defaultTooltip}>
+      <EditIcon />
+    </StyledIconButton>
   );
 }

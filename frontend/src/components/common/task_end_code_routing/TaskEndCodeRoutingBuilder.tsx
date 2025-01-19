@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useState, useRef } from 'react';
-import { Box, Typography, Select, MenuItem, Alert, IconButton, Tooltip, FormControl } from '@mui/material';
+import { Box, Typography, Select, MenuItem, Alert, IconButton, FormControl } from '@mui/material';
 import { PopulatedTask, RouteMap, TasksEndCodeRouting, TaskType } from '../../../types/TaskTypes';
 import RouteMapView from './RouteMapView';
 import useStyles from './RoutingStyles';
@@ -169,8 +169,8 @@ const TaskEndCodeRoutingBuilder: React.FC<TaskEndCodeRoutingBuilderProps> = ({
 
   // Render a task card with consistent styling
   const renderTaskCard = (nodeName: string, routeMap: RouteMap) => (
-    <Box 
-      key={nodeName} 
+    <Box
+      key={nodeName}
       className={classes.taskCard}
       sx={{ maxWidth: isWideLayout ? 'none' : '500px' }}
     >
@@ -184,20 +184,19 @@ const TaskEndCodeRoutingBuilder: React.FC<TaskEndCodeRoutingBuilderProps> = ({
           {formatCamelCaseString(nodeName)}
         </Typography>
         {!isViewMode && (
-          <Tooltip title="Remove node">
-            <IconButton
-              size="small"
-              onClick={() => handleNodeRemove(nodeName)}
-              sx={{
-                color: 'error.main',
-                '&:hover': {
-                  backgroundColor: 'error.light',
-                }
-              }}
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+          <IconButton
+            title="Remove node"
+            size="small"
+            onClick={() => handleNodeRemove(nodeName)}
+            sx={{
+              color: 'error.main',
+              '&:hover': {
+                backgroundColor: 'error.light',
+              }
+            }}
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
         )}
       </Box>
       <RouteMapView
@@ -241,13 +240,13 @@ const TaskEndCodeRoutingBuilder: React.FC<TaskEndCodeRoutingBuilderProps> = ({
         )}
 
         {/* Responsive Grid Layout for Task Cards */}
-        <Box 
+        <Box
           className={classes.routingContainer}
           sx={{
             gridTemplateColumns: isWideLayout ? 'repeat(2, 1fr)' : '1fr',
           }}
         >
-          {Object.entries(routing).map(([nodeName, routeMap]) => 
+          {Object.entries(routing).map(([nodeName, routeMap]) =>
             renderTaskCard(nodeName, routeMap)
           )}
         </Box>

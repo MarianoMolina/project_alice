@@ -1,4 +1,4 @@
-import { IconButton, Tooltip, Box, Typography } from '@mui/material';
+import { IconButton, Box, Typography } from '@mui/material';
 import { styled } from '@mui/system';
 import { Delete } from '@mui/icons-material';
 import { CollectionName, collectionNameToElementString } from '../../../types/CollectionTypes';
@@ -47,10 +47,8 @@ export function DeleteEntity<T extends CollectionName>({
   }
 
   return (
-    <Tooltip title={tooltipText || defaultTooltip}>
-      <StyledIconButton onClick={handleDelete} size="small">
-        <Delete />
-      </StyledIconButton>
-    </Tooltip>
+    <StyledIconButton onClick={handleDelete} size="small" title={tooltipText || defaultTooltip}>
+      <Delete />
+    </StyledIconButton>
   );
 }

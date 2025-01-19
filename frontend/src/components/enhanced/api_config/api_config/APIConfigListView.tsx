@@ -1,6 +1,6 @@
 import React from 'react';
 import { APIConfig, APIConfigComponentProps } from '../../../../types/ApiConfigTypes';
-import { Box, IconButton, Tooltip, Typography } from '@mui/material';
+import { Box, IconButton, Typography } from '@mui/material';
 import EnhancedListView from '../../../common/enhanced_component/ListView';
 import { Api, CheckCircle, Error, Warning } from '@mui/icons-material';
 import { apiNameIcons } from '../../../../utils/ApiUtils';
@@ -15,11 +15,9 @@ const APIConfigListView: React.FC<APIConfigComponentProps> = ({
     const getPrimaryText = (apiConfig: APIConfig) => apiConfig.name;
     const getSecondaryText = (apiConfig: APIConfig) => (
         <Box display="flex" alignItems="center">
-            <Tooltip title={`API name: ${formatStringWithSpaces(apiConfig.api_name)}`}>
-                <IconButton size="small">
-                    {apiNameIcons[apiConfig.api_name] || <Api />}
-                </IconButton>
-            </Tooltip>
+            <IconButton size="small" title={`API name: ${formatStringWithSpaces(apiConfig.api_name)}`}>
+                {apiNameIcons[apiConfig.api_name] || <Api />}
+            </IconButton>
             {getHealthIcon(apiConfig.health_status)}
             <Typography component="span" variant="body2" color="textSecondary" sx={{ ml: 1 }}>
                 {apiConfig.health_status}

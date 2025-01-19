@@ -23,9 +23,6 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
 }) => {
 
   const { selectCardItem } = useDialog();
-  if (!item) {
-    return <Typography>No chat data available.</Typography>;
-  }
 
   const populatedItem = item as PopulatedAliceChat
 
@@ -39,6 +36,10 @@ const ChatCardView: React.FC<ChatComponentProps> = ({
       />
     );
   }, [populatedItem.threads]);
+  
+  if (!item) {
+    return <Typography>No chat data available.</Typography>;
+  }
 
   const listItems = [
     {

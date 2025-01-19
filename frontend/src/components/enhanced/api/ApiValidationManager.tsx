@@ -8,7 +8,6 @@ import {
   CircularProgress,
   Alert,
   IconButton,
-  Tooltip,
   Box,
   Typography,
   List,
@@ -185,11 +184,9 @@ export default function ApiValidationManager({
         ) : (
           <>
             {getStatusIcon()}
-            <Tooltip title="Refresh validation">
-              <IconButton onClick={handleValidation} size="small">
-                <RefreshIcon sx={{ fontSize: 20 }} />
-              </IconButton>
-            </Tooltip>
+            <IconButton onClick={handleValidation} size="small" title="Refresh validation">
+              <RefreshIcon sx={{ fontSize: 20 }} />
+            </IconButton>
             {validationResult && (
               <Button
                 variant="text"

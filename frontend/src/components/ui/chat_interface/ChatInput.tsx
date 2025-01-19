@@ -36,7 +36,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ }, ref) => {
   const { addNotification } = useNotification();
   const { uploadFileContentReference } = useApi();
   const {
-    handleSendMessage, currentChatId, chatContextCharacterCount, 
+    handleSendMessage, currentChatId, chatContextCharacterCount,
     maxContext, isGenerating, generateResponse, error,
     handleRegenerateResponse, lastMessageRole, currentThread
   } = useChat();
@@ -248,21 +248,18 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ }, ref) => {
             />
 
             {/* Action Buttons */}
-            <Tooltip title="Upload an image, video, sound or text file">
-              <span>
-                <IconButton
-                  onClick={handleAddFile}
-                  disabled={!currentChatId}
-                  size="medium"
-                  sx={{
-                    width: '40px',
-                    height: '40px',
-                  }}
-                >
-                  <AttachFile />
-                </IconButton>
-              </span>
-            </Tooltip>
+            <IconButton
+              onClick={handleAddFile}
+              disabled={!currentChatId}
+              size="medium"
+              title="Upload an image, video, sound or text file"
+              sx={{
+                width: '40px',
+                height: '40px',
+              }}
+            >
+              <AttachFile />
+            </IconButton>
 
             {/* Context Percentage */}
             <Tooltip title={`Est. context used: ${tokenEst} / ${maxContext}`}>
@@ -273,28 +270,24 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ }, ref) => {
                 {percentageToken}
               </Typography>
             </Tooltip>
-
-            <Tooltip title="Send message">
-              <span>
-                <IconButton
-                  onClick={handleSend}
-                  disabled={!showSendButton}
-                  size="medium"
-                  color="primary"
-                  sx={{
-                    width: '40px',
-                    height: '40px',
-                    backgroundColor: showSendButton ? 'primary.main' : 'transparent',
-                    color: showSendButton ? 'white' : 'inherit',
-                    '&:hover': {
-                      backgroundColor: showSendButton ? 'primary.dark' : 'transparent',
-                    },
-                  }}
-                >
-                  <Send />
-                </IconButton>
-              </span>
-            </Tooltip>
+            <IconButton
+              onClick={handleSend}
+              disabled={!showSendButton}
+              size="medium"
+              color="primary"
+              title="Send message"
+              sx={{
+                width: '40px',
+                height: '40px',
+                backgroundColor: showSendButton ? 'primary.main' : 'transparent',
+                color: showSendButton ? 'white' : 'inherit',
+                '&:hover': {
+                  backgroundColor: showSendButton ? 'primary.dark' : 'transparent',
+                },
+              }}
+            >
+              <Send />
+            </IconButton>
           </Box>
         </Box>
       </Box>

@@ -8,7 +8,6 @@ import {
   TableRow,
   Paper,
   IconButton,
-  Tooltip,
   TableSortLabel,
 } from '@mui/material';
 import { Visibility, ChevronRight } from '@mui/icons-material';
@@ -99,18 +98,14 @@ function EnhancedTableView<T>({
         })}
         <StyledTableCell>
           {onView && (
-            <Tooltip title={viewTooltip}>
-              <IconButton onClick={() => onView(itemToRender)}>
+              <IconButton onClick={() => onView(itemToRender)} title={viewTooltip}>
                 <Visibility />
               </IconButton>
-            </Tooltip>
           )}
           {onInteraction && (
-            <Tooltip title={interactionTooltip}>
-              <IconButton onClick={() => onInteraction(itemToRender)}>
+              <IconButton onClick={() => onInteraction(itemToRender)} title={interactionTooltip}>
                 <ChevronRight />
               </IconButton>
-            </Tooltip>
           )}
         </StyledTableCell>
       </TableRow>

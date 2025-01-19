@@ -48,37 +48,34 @@ const TaskHeader = memo(({
             <Typography variant="h6">{formatCamelCaseString(taskName)}</Typography>
             <Box>
                 {taskTemplate && (
-                    <Tooltip title="View task template with current inputs">
-                        <IconButton
-                            color="default"
-                            onClick={onViewPrompt}
-                            size="small"
-                            aria-label="view task template"
-                        >
-                            <DataObject />
-                        </IconButton>
-                    </Tooltip>
+                    <IconButton
+                        color="default"
+                        onClick={onViewPrompt}
+                        size="small"
+                        title="View task template with current inputs"
+                        aria-label="view task template"
+                    >
+                        <DataObject />
+                    </IconButton>
                 )}
-                <Tooltip title="View task flowchart">
                     <IconButton
                         color="default"
                         onClick={onViewFlow}
+                        title="View task flowchart"
                         size="small"
                         aria-label="view task flowchart"
                     >
                         <LogicFlowIcon />
                     </IconButton>
-                </Tooltip>
-                <Tooltip title="View task details">
                     <IconButton
                         color="default"
+                        title="View task details"
                         onClick={onViewTask}
                         size="small"
                         aria-label="view task details"
                     >
                         <Visibility />
                     </IconButton>
-                </Tooltip>
                 <Tooltip title="View task execution history">
                     <IconButton
                         color="default"

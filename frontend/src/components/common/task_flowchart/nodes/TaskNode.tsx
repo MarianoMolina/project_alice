@@ -72,25 +72,24 @@ const TaskNode: React.FC<NodeProps<TaskNodeData>> = ({
         >
           {formatCamelCaseString(data.task_name)}
         </Typography>
-        <Tooltip title="View task template with inputs">
+        <IconButton
+          size="small"
+          title="View task template with inputs"
+          onClick={handleViewPrompt}
+          sx={{
+            color: theme.palette.primary.dark,
+            flexShrink: 0,
+            '&:hover': {
+              color: theme.palette.primary.main,
+              backgroundColor: theme.palette.action.hover,
+            }
+          }}
+        >
+          <DataObject fontSize="small" />
+        </IconButton>
           <IconButton
             size="small"
-            onClick={handleViewPrompt}
-            sx={{
-              color: theme.palette.primary.dark,
-              flexShrink: 0,
-              '&:hover': {
-                color: theme.palette.primary.main,
-                backgroundColor: theme.palette.action.hover,
-              }
-            }}
-          >
-            <DataObject fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="View task details">
-          <IconButton
-            size="small"
+            title="View task details"
             onClick={handleViewTask}
             sx={{
               color: theme.palette.primary.dark,
@@ -103,7 +102,6 @@ const TaskNode: React.FC<NodeProps<TaskNodeData>> = ({
           >
             <VisibilityIcon fontSize="small" />
           </IconButton>
-        </Tooltip>
       </Box>
       <Accordion
         sx={{

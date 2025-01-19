@@ -17,7 +17,7 @@ export const NavigationButton: React.FC<NavigationButtonProps> = ({
   className = ''
 }) => {
   const location = useLocation();
-  
+
   const isActive = (path: string): boolean => {
     if (path.endsWith('/')) {
       return location.pathname.startsWith(path);
@@ -27,7 +27,7 @@ export const NavigationButton: React.FC<NavigationButtonProps> = ({
 
   if (isMobile) {
     return (
-      <ListItem 
+      <ListItem
         button
         onClick={() => onClick(section.path)}
         selected={isActive(section.path)}
@@ -41,14 +41,13 @@ export const NavigationButton: React.FC<NavigationButtonProps> = ({
   }
 
   return (
-    <Tooltip title={section.title}>
-      <IconButton
-        color="inherit"
-        onClick={() => onClick(section.path)}
-        className={`${isActive(section.path) ? 'active' : ''} ${className}`}
-      >
-        <section.icon />
-      </IconButton>
-    </Tooltip>
+    <IconButton
+      color="inherit"
+      title={section.title}
+      onClick={() => onClick(section.path)}
+      className={`${isActive(section.path) ? 'active' : ''} ${className}`}
+    >
+      <section.icon />
+    </IconButton>
   );
 };

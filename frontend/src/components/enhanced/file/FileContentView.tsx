@@ -88,20 +88,19 @@ const FileContentView: React.FC<FileComponentProps> = ({ item }) => {
       </Box>
     );
   }
-  
+
   return (
     <Box className="relative">
       {/* Download button */}
       <Box className="absolute top-2 right-2 z-10">
-        <Tooltip title="Download file">
-          <IconButton
-            onClick={handleDownload}
-            size="small"
-            className="bg-white bg-opacity-75 hover:bg-opacity-100"
-          >
-            <DownloadIcon />
-          </IconButton>
-        </Tooltip>
+        <IconButton
+          onClick={handleDownload}
+          size="small"
+          title="Download file"
+          className="bg-white bg-opacity-75 hover:bg-opacity-100"
+        >
+          <DownloadIcon />
+        </IconButton>
       </Box>
 
       {/* Content */}

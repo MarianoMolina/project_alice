@@ -134,18 +134,14 @@ function EnhancedListItemComponent<T>({
         </Box>
         <Box className={classes.buttonBox}>
           {onView && (
-            <Tooltip title={viewTooltip}>
-              <IconButton size="small" onClick={handleView}>
-                <Visibility />
-              </IconButton>
-            </Tooltip>
+            <IconButton size="small" onClick={handleView} title={viewTooltip}>
+              <Visibility />
+            </IconButton>
           )}
           {onInteraction && (
-            <Tooltip title={interactionTooltip}>
-              <IconButton size="small" onClick={handleInteraction}>
-                <ChevronRight />
-              </IconButton>
-            </Tooltip>
+            <IconButton size="small" onClick={handleInteraction} title={interactionTooltip}>
+              <ChevronRight />
+            </IconButton>
           )}
         </Box>
       </ListItem>

@@ -4,7 +4,6 @@ import {
   Typography,
   IconButton,
   CircularProgress,
-  Tooltip
 } from '@mui/material';
 import {
   ZoomIn as ZoomInIcon,
@@ -39,7 +38,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
       try {
         const pdf = await pdfjs.getDocument(url).promise;
         let fullText = '';
-        
+
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           const content = await page.getTextContent();
@@ -48,7 +47,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
             .join(' ');
           fullText += pageText + '\n';
         }
-        
+
         setStrContent(fullText);
       } catch (err) {
         Logger.error('Error extracting PDF text:', err);
@@ -88,47 +87,43 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
         {/* PDF Controls - Only show when document is loaded */}
         {!isLoading && numPages > 0 && (
           <Box className="absolute top-2 right-2 z-10 flex gap-2">
-            <Tooltip title="Previous page">
-              <IconButton
-                onClick={() => setPageNumber(prev => Math.max(prev - 1, 1))}
-                disabled={pageNumber <= 1}
-                size="small"
-                className="bg-white bg-opacity-75 hover:bg-opacity-100"
-              >
-                <NavigateBefore />
-              </IconButton>
-            </Tooltip>
+            <IconButton
+              onClick={() => setPageNumber(prev => Math.max(prev - 1, 1))}
+              disabled={pageNumber <= 1}
+              size="small"
+              title="Previous page"
+              className="bg-white bg-opacity-75 hover:bg-opacity-100"
+            >
+              <NavigateBefore />
+            </IconButton>
             <Typography className="bg-white bg-opacity-75 px-2 py-1 rounded">
               {pageNumber} / {numPages}
             </Typography>
-            <Tooltip title="Next page">
-              <IconButton
-                onClick={() => setPageNumber(prev => Math.min(prev + 1, numPages))}
-                disabled={pageNumber >= numPages}
-                size="small"
-                className="bg-white bg-opacity-75 hover:bg-opacity-100"
-              >
-                <NavigateNext />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Zoom out">
-              <IconButton
-                onClick={() => setScale(prev => Math.max(prev - 0.2, 0.4))}
-                size="small"
-                className="bg-white bg-opacity-75 hover:bg-opacity-100"
-              >
-                <ZoomOutIcon />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Zoom in">
-              <IconButton
-                onClick={() => setScale(prev => Math.min(prev + 0.2, 2.0))}
-                size="small"
-                className="bg-white bg-opacity-75 hover:bg-opacity-100"
-              >
-                <ZoomInIcon />
-              </IconButton>
-            </Tooltip>
+            <IconButton
+              onClick={() => setPageNumber(prev => Math.min(prev + 1, numPages))}
+              disabled={pageNumber >= numPages}
+              size="small"
+              title="Next page"
+              className="bg-white bg-opacity-75 hover:bg-opacity-100"
+            >
+              <NavigateNext />
+            </IconButton>
+            <IconButton
+              onClick={() => setScale(prev => Math.max(prev - 0.2, 0.4))}
+              size="small"
+              title="Zoom out"
+              className="bg-white bg-opacity-75 hover:bg-opacity-100"
+            >
+              <ZoomOutIcon />
+            </IconButton>
+            <IconButton
+              onClick={() => setScale(prev => Math.min(prev + 0.2, 2.0))}
+              size="small"
+              title="Zoom in"
+              className="bg-white bg-opacity-75 hover:bg-opacity-100"
+            >
+              <ZoomInIcon />
+            </IconButton>
           </Box>
         )}
 

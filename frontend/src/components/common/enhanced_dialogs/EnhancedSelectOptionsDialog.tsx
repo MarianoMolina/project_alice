@@ -3,6 +3,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box } from '
 import { CollectionElement, CollectionElementString } from '../../../types/CollectionTypes';
 import { useDialog } from '../../../contexts/DialogContext';
 import Logger from '../../../utils/Logger';
+// TODO: FOR SOME REASON THE CARD DIALOG ISNT DISPLAYING
 
 const EnhancedSelectOptionsDialog = () => {
   const {

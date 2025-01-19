@@ -316,7 +316,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             if (threadIds.includes(threadId)) return Logger.warn('Thread already in chat');
             // Add thread
             setLoading(true);
-            const nonPopChat = await addThreadToChat(currentChatId, threadId);
+            await addThreadToChat(currentChatId, threadId);
             const thread = await fetchPopulatedItem('chatthreads', threadId) as PopulatedChatThread;
             const updatedChat = { ...currentChat, threads: currentChat?.threads?.map(t => t._id === threadId ? thread : t) };
             setCurrentChat(updatedChat)
@@ -336,7 +336,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         if (!currentChatId || !currentChat) return;
         try {
             setLoading(true);
-            const nonPopChat = await removeThreadFromChat(currentChatId, threadId);
+            await removeThreadFromChat(currentChatId, threadId);
             const updatedChat = { ...currentChat, threads: currentChat?.threads?.filter(t => t._id !== threadId) };
             setCurrentChat(updatedChat)
             setCurrentThread(null);

@@ -33,7 +33,11 @@ import { useApi } from '../../../contexts/ApiContext';
 import { CollectionName, CollectionPopulatedType, CollectionType } from '../../../types/CollectionTypes';
 import Logger from '../../../utils/Logger';
 import { globalEventEmitter } from '../../../utils/EventEmitter';
-
+export interface FilterDefinition<T> {
+  field: keyof T;
+  value: any;
+  operator?: 'equals' | 'contains' | 'greaterThan' | 'lessThan' | 'between' | 'in';
+}
 export interface BaseDbElementProps<T extends CollectionType[CollectionName] | CollectionPopulatedType[CollectionName]> {
   /**
    * The name of the collection in the database
@@ -95,6 +99,10 @@ export interface BaseDbElementProps<T extends CollectionType[CollectionName] | C
     handleSave: () => Promise<void>,
     onDelete: (deletedItem: T) => Promise<void>,
   ) => React.ReactNode;
+  /**
+   * Optional array of filters to apply to the fetched data
+   */
+  filters?: FilterDefinition<T>[];
 }
 
 function BaseDbElement<T extends CollectionType[CollectionName] | CollectionPopulatedType[CollectionName]>({
@@ -108,24 +116,56 @@ function BaseDbElement<T extends CollectionType[CollectionName] | CollectionPopu
   onSave,
   onDelete,
   render,
+  filters = []
 }: BaseDbElementProps<T>) {
   const [items, setItems] = useState<T[] | null>(null);
+  const [filteredItems, setFilteredItems] = useState<T[] | null>(null);
   const [item, setItem] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const { fetchItem, createItem, updateItem, deleteItem, fetchPopulatedItem } = useApi();
+  const applyFilters = useCallback((data: T[], filters: FilterDefinition<T>[]) => {
+    return data.filter(item => {
+      return filters.every(filter => {
+        const fieldValue = item[filter.field];
+        const filterValue = filter.value;
+
+        switch (filter.operator) {
+          case 'contains':
+            return String(fieldValue).toLowerCase().includes(String(filterValue).toLowerCase());
+          case 'greaterThan':
+            return fieldValue > filterValue;
+          case 'lessThan':
+            return fieldValue < filterValue;
+          case 'between':
+            return Array.isArray(filterValue) && 
+                   fieldValue >= filterValue[0] && 
+                   fieldValue <= filterValue[1];
+          case 'in':
+            return Array.isArray(filterValue) && 
+                   filterValue.includes(fieldValue);
+          case 'equals':
+          default:
+            return fieldValue === filterValue;
+        }
+      });
+    });
+  }, []);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       if (fetchAll) {
         const data = await fetchItem(collectionName);
-        setItems(data as T[]);
+        const typedData = data as T[];
+        setItems(typedData);
+        // Apply filters to the fetched data
+        const filtered = applyFilters(typedData, filters);
+        setFilteredItems(filtered);
       } else if (itemId && mode !== 'create') {
         const data = await fetchPopulatedItem(collectionName, itemId);
         setItem(data as T);
-        Logger.info('BaseDbElement fetchData', { data });
       } else if (mode === 'create') {
         setItem(partialItem as T || {} as T);
       }
@@ -136,7 +176,16 @@ function BaseDbElement<T extends CollectionType[CollectionName] | CollectionPopu
     } finally {
       setLoading(false);
     }
-  }, [collectionName, itemId, mode, fetchAll, fetchItem, partialItem, fetchPopulatedItem]);
+  }, [collectionName, itemId, mode, fetchAll, fetchItem, partialItem, fetchPopulatedItem, filters, applyFilters]);
+
+  useEffect(() => {
+    if (items && filters.length > 0) {
+      const filtered = applyFilters(items, filters);
+      setFilteredItems(filtered);
+    } else if (items) {
+      setFilteredItems(items);
+    }
+  }, [items, filters, applyFilters]);
 
   useEffect(() => {
     fetchData();
@@ -176,7 +225,7 @@ function BaseDbElement<T extends CollectionType[CollectionName] | CollectionPopu
       });
     };
   }, [collectionName, itemId, fetchAll, fetchData]);
-  
+
   // Memoize handlers to prevent unnecessary re-renders
   const handleChange = useCallback(
     (newItem: Partial<T>) => {
@@ -219,7 +268,7 @@ function BaseDbElement<T extends CollectionType[CollectionName] | CollectionPopu
       setLoading(true);
       setItem(null);
       setError(null);
-      Logger.debug('BaseDBElement handleDelete', { item , onDelete});
+      Logger.debug('BaseDBElement handleDelete', { item, onDelete });
       if (onDelete) {
         onDelete(item as T);
       }
@@ -240,16 +289,16 @@ function BaseDbElement<T extends CollectionType[CollectionName] | CollectionPopu
   // Memoize content to prevent unnecessary re-renders
   const content = useMemo(
     () => render(
-      items, 
-      item, 
-      handleChange, 
-      mode, 
-      handleSave, 
+      fetchAll ? filteredItems : null,
+      item,
+      handleChange,
+      mode,
+      handleSave,
       handleDelete
-    ), [items, item, handleChange, mode, handleSave, render, handleDelete]);
+    ), [fetchAll, filteredItems, item, handleChange, mode, handleSave, render, handleDelete]);
 
   if (loading) {
-    return <CircularProgress size={70} sx={{display:'flex', margin:'20px auto'}}/>;
+    return <CircularProgress size={70} sx={{ display: 'flex', margin: '20px auto' }} />;
   }
 
   if (error) {

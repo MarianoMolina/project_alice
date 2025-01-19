@@ -1,4 +1,4 @@
-import { IconButton, Tooltip, Box, Typography } from '@mui/material';
+import { IconButton, Box, Typography } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import { styled } from '@mui/system';
 import { CollectionName, collectionNameToElementString, CollectionPopulatedType } from '../../../types/CollectionTypes';
@@ -63,10 +63,8 @@ export function DownloadEntity<T extends CollectionName>({
 
   // For standalone button usage, wrap in IconButton and Tooltip
   return (
-    <Tooltip title={tooltipText || defaultTooltip}>
-      <StyledIconButton onClick={handleDownload} size="small">
-        <DownloadIcon />
-      </StyledIconButton>
-    </Tooltip>
+    <StyledIconButton onClick={handleDownload} size="small" title={tooltipText || defaultTooltip}>
+      <DownloadIcon />
+    </StyledIconButton>
   );
 }

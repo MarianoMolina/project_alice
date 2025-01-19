@@ -203,6 +203,7 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({ onThreadSelected 
                 size="small"
                 sx={{ ml: 1 }}
                 onClick={() => thread._id && handleThreadRemove(thread._id)}
+                title="Remove Thread"
               >
                 <Delete />
               </IconButton>

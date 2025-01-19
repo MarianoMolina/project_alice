@@ -1,10 +1,9 @@
 import React, { useMemo, useState, memo, useCallback } from 'react';
 import {
     Card, CardContent, IconButton, CircularProgress,
-    Typography, Alert, Box, Button, Dialog, DialogContent, Tooltip,
-} from '@mui/material';
+    Typography, Alert, Box, Button, Dialog, DialogContent} from '@mui/material';
 import { DataObject, Visibility, History } from '@mui/icons-material';
-import { AliceTask, PopulatedTask, TaskComponentProps } from '../../../types/TaskTypes';
+import { AliceTask, PopulatedTask } from '../../../types/TaskTypes';
 import { formatCamelCaseString } from '../../../utils/StyleUtils';
 import { useDialog } from '../../../contexts/DialogContext';
 import { useTask } from '../../../contexts/TaskContext';
@@ -48,47 +47,43 @@ const TaskHeader = memo(({
             <Typography variant="h6">{formatCamelCaseString(taskName)}</Typography>
             <Box>
                 {taskTemplate && (
-                    <Tooltip title="View task template with current inputs">
-                        <IconButton
-                            color="default"
-                            onClick={onViewPrompt}
-                            size="small"
-                            aria-label="view task template"
-                        >
-                            <DataObject />
-                        </IconButton>
-                    </Tooltip>
+                    <IconButton
+                        color="default"
+                        onClick={onViewPrompt}
+                        title="View task template with current inputs"
+                        size="small"
+                        aria-label="view task template"
+                    >
+                        <DataObject />
+                    </IconButton>
                 )}
-                <Tooltip title="View task flowchart">
-                    <IconButton
-                        color="default"
-                        onClick={onViewFlow}
-                        size="small"
-                        aria-label="view task flowchart"
-                    >
-                        <LogicFlowIcon />
-                    </IconButton>
-                </Tooltip>
-                <Tooltip title="View task details">
-                    <IconButton
-                        color="default"
-                        onClick={onViewTask}
-                        size="small"
-                        aria-label="view task details"
-                    >
-                        <Visibility />
-                    </IconButton>
-                </Tooltip>
-                <Tooltip title="View task execution history">
-                    <IconButton
-                        color="default"
-                        onClick={onViewResults}
-                        size="small"
-                        aria-label="view task results"
-                    >
-                        <History />
-                    </IconButton>
-                </Tooltip>
+                <IconButton
+                    color="default"
+                    title="View task flowchart"
+                    onClick={onViewFlow}
+                    size="small"
+                    aria-label="view task flowchart"
+                >
+                    <LogicFlowIcon />
+                </IconButton>
+                <IconButton
+                    color="default"
+                    title="View task details"
+                    onClick={onViewTask}
+                    size="small"
+                    aria-label="view task details"
+                >
+                    <Visibility />
+                </IconButton>
+                <IconButton
+                    color="default"
+                    onClick={onViewResults}
+                    title="View task execution history"
+                    size="small"
+                    aria-label="view task results"
+                >
+                    <History />
+                </IconButton>
             </Box>
         </Box>
     );

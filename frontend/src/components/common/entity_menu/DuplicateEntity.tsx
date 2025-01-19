@@ -61,7 +61,7 @@ export function DuplicateEntity<T extends CollectionName>({
 
   // Rest of the component remains the same
   const defaultTooltip = `Duplicate ${collectionNameToElementString[itemType]}`;
-  
+
   const content = (
     <ActionBox onClick={handleDuplicate}>
       <FileCopy fontSize="small" />
@@ -76,10 +76,8 @@ export function DuplicateEntity<T extends CollectionName>({
   }
 
   return (
-    <Tooltip title={tooltipText || defaultTooltip}>
-      <StyledIconButton onClick={handleDuplicate} size="small">
-        <FileCopy />
-      </StyledIconButton>
-    </Tooltip>
+    <StyledIconButton onClick={handleDuplicate} size="small" title={tooltipText || defaultTooltip}>
+      <FileCopy />
+    </StyledIconButton>
   );
 }

@@ -21,7 +21,7 @@ function ManageReferenceList<T extends CollectionElement>({
     isEditable = true,
     title
 }: ManageReferenceListProps<T>) {
-    const { fetchItem, addThreadToChat, removeThreadFromChat } = useApi();
+    const { fetchItem } = useApi();
     const [elements, setElements] = useState<T[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 

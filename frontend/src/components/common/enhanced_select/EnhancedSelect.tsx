@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { Box, IconButton, Chip, Tooltip, FormControl, InputLabel } from '@mui/material';
+import { Box, IconButton, Chip, FormControl, InputLabel } from '@mui/material';
 import { Edit, Add, Info } from '@mui/icons-material';
 import { useDialog } from '../../../contexts/DialogContext';
 import useStyles from './EnhancedSelectStyles';
@@ -129,37 +129,29 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
             padding: '4px'
           }}>
             {description && (
-              <Tooltip title={description}>
-                <IconButton size="small">
-                  <Info fontSize="small" />
-                </IconButton>
-              </Tooltip>
+              <IconButton size="small" title={description}>
+                <Info fontSize="small" />
+              </IconButton>
             )}
-            <Tooltip title={isInteractable ? 'Select Items' : ''}>
-              <span>
-                <IconButton
-                  onClick={handleOpenOptions}
-                  disabled={!isInteractable}
-                  size="small"
-                  className={classes.editButton}
-                >
-                  <Edit fontSize="small" />
-                </IconButton>
-              </span>
-            </Tooltip>
+            <IconButton
+              onClick={handleOpenOptions}
+              disabled={!isInteractable}
+              size="small"
+              className={classes.editButton}
+              title={isInteractable ? 'Select Items' : ''}
+            >
+              <Edit fontSize="small" />
+            </IconButton>
             {showCreateButton && (
-              <Tooltip title={isInteractable ? 'Create New' : ''}>
-                <span>
-                  <IconButton
-                    onClick={handleCreate}
-                    disabled={!isInteractable}
-                    size="small"
-                    className={classes.createButton}
-                  >
-                    <Add fontSize="small" />
-                  </IconButton>
-                </span>
-              </Tooltip>
+              <IconButton
+                onClick={handleCreate}
+                disabled={!isInteractable}
+                size="small"
+                className={classes.createButton}
+                title={isInteractable ? 'Create New' : ''}
+              >
+                <Add fontSize="small" />
+              </IconButton>
             )}
           </Box>
         </Box>

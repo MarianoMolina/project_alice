@@ -4,7 +4,7 @@ import CustomMarkdown from '../CustomMarkdown';
 import { AliceDocumentBlockComponent } from './AliceDocumentBlock';
 import { AnalysisBlockComponent } from './AnalysisBlock';
 import { ReactElement } from 'react-markdown/lib/react-markdown';
-import { Box, IconButton, Tooltip } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useNotification } from '../../../../contexts/NotificationContext';
 import useStyles from '../MarkdownStyles';
@@ -32,8 +32,8 @@ interface AliceMarkdownProps {
     role?: RoleType;
 }
 
-const AliceMarkdown: FC<AliceMarkdownProps> = ({ 
-    children, 
+const AliceMarkdown: FC<AliceMarkdownProps> = ({
+    children,
     className,
     enabledBlocks = [],
     showCopyButton = false,
@@ -41,7 +41,7 @@ const AliceMarkdown: FC<AliceMarkdownProps> = ({
 }): ReactElement => {
     const classes = useStyles();
     const { addNotification } = useNotification();
-    
+
     // Get role-based class name
     const getRoleClassName = () => {
         switch (role) {
@@ -56,7 +56,7 @@ const AliceMarkdown: FC<AliceMarkdownProps> = ({
                 return classes.assistantMessage;
         }
     };
-    
+
     const blocks = React.useMemo((): BaseBlock[] => {
         if (enabledBlocks.length > 0) {
             return parseMarkdownBlocks(children, enabledBlocks);
@@ -72,7 +72,7 @@ const AliceMarkdown: FC<AliceMarkdownProps> = ({
         const normalizedBlockType = blockType.replace('CustomBlock', '');
         return enabledBlocks.some(type => type === normalizedBlockType);
     };
-    
+
     const handleCopy = () => {
         const cleanContent = children.replace(/<\/?[^>]+(>|$)/g, '');
         navigator.clipboard.writeText(cleanContent).then(() => {
@@ -91,8 +91,8 @@ const AliceMarkdown: FC<AliceMarkdownProps> = ({
                 </CustomMarkdown>
             );
         }
-        
-        if (isBlockEnabled(CustomBlockType.ALICE_DOCUMENT) && 
+
+        if (isBlockEnabled(CustomBlockType.ALICE_DOCUMENT) &&
             block.type === 'aliceDocumentCustomBlock') {
             return (
                 <AliceDocumentBlockComponent
@@ -108,8 +108,8 @@ const AliceMarkdown: FC<AliceMarkdownProps> = ({
                 />
             );
         }
-        
-        if (isBlockEnabled(CustomBlockType.ANALYSIS) && 
+
+        if (isBlockEnabled(CustomBlockType.ANALYSIS) &&
             block.type === 'analysisCustomBlock') {
             return (
                 <AnalysisBlockComponent
@@ -125,7 +125,7 @@ const AliceMarkdown: FC<AliceMarkdownProps> = ({
                 />
             );
         }
-        
+
         return null;
     };
     Logger.debug('[Markdown:AliceMarkdown] Blocks to render:', blocks);
@@ -138,18 +138,17 @@ const AliceMarkdown: FC<AliceMarkdownProps> = ({
             )}>
                 {blocks.map(renderBlock)}
             </div>
-            
+
             {showCopyButton && (
                 <Box className="absolute top-2 right-2 z-10">
-                    <Tooltip title="Copy content">
-                        <IconButton
-                            onClick={handleCopy}
-                            size="small"
-                            className="bg-white/10 hover:bg-white/20"
-                        >
-                            <ContentCopyIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
+                    <IconButton
+                        onClick={handleCopy}
+                        title="Copy content"
+                        size="small"
+                        className="bg-white/10 hover:bg-white/20"
+                    >
+                        <ContentCopyIcon fontSize="small" />
+                    </IconButton>
                 </Box>
             )}
         </Box>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Box, Tooltip, IconButton } from '@mui/material';
+import { Typography, Box, IconButton } from '@mui/material';
 import { API, ApiComponentProps } from '../../../../types/ApiTypes';
 import EnhancedListView from '../../../common/enhanced_component/ListView';
 import { CheckCircle, Cancel, Api } from '@mui/icons-material';
@@ -16,16 +16,12 @@ const ApiListView: React.FC<ApiComponentProps> = ({
 
     const getSecondaryText = (api: API) => (
         <Box display="flex" alignItems="center">
-            <Tooltip title={`API name: ${formatStringWithSpaces(api.api_name)}`}>
-                <IconButton size="small">
-                    {apiNameIcons[api.api_name] || <Api />}
-                </IconButton>
-            </Tooltip>
-            <Tooltip title={`API type: ${formatStringWithSpaces(api.api_type)}`}>
-                <IconButton size="small">
-                    {apiTypeIcons[api.api_type] || <Api />}
-                </IconButton>
-            </Tooltip>
+            <IconButton size="small" title={`API name: ${formatStringWithSpaces(api.api_name)}`}>
+                {apiNameIcons[api.api_name] || <Api />}
+            </IconButton>
+            <IconButton size="small" title={`API type: ${formatStringWithSpaces(api.api_type)}`}>
+                {apiTypeIcons[api.api_type] || <Api />}
+            </IconButton>
             {api.is_active ? (
                 <CheckCircle fontSize="small" color="success" />
             ) : (

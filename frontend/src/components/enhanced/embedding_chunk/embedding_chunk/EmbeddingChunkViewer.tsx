@@ -6,7 +6,6 @@ import {
   Chip,
   Stack,
   IconButton,
-  Tooltip
 } from '@mui/material';
 import {
   ContentCopy as CopyIcon,
@@ -42,25 +41,22 @@ const EmbeddingChunkViewer: React.FC<EmbeddingChunkComponentProps> = ({ item }) 
               <ContentStats content={item.text_content} />
             </Stack>
             <Box className="flex items-center gap-2">
-
-              <Tooltip title="View embedding">
-                <IconButton
-                  size="small"
-                  className="text-gray-600 hover:text-gray-800"
-                  onClick={() => selectCardItem("EmbeddingChunk", item._id)}
-                >
-                  <Visibility fontSize="small" />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Copy vector data">
-                <IconButton
-                  onClick={handleCopyVector}
-                  size="small"
-                  className="text-gray-600 hover:text-gray-800"
-                >
-                  <CopyIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
+              <IconButton
+                size="small"
+                title="View embedding"
+                className="text-gray-600 hover:text-gray-800"
+                onClick={() => selectCardItem("EmbeddingChunk", item._id)}
+              >
+                <Visibility fontSize="small" />
+              </IconButton>
+              <IconButton
+                onClick={handleCopyVector}
+                size="small"
+                title="Copy vector data"
+                className="text-gray-600 hover:text-gray-800"
+              >
+                <CopyIcon fontSize="small" />
+              </IconButton>
             </Box>
           </Box>
 

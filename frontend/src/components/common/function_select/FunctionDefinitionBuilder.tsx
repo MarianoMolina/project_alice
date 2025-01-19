@@ -11,7 +11,6 @@ import {
     Alert,
     Grid,
     IconButton,
-    Tooltip,
     Button,
     FormControl,
     InputLabel,
@@ -166,7 +165,7 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
                             {activeParameters.filter(param => param.isActive).length > 0 ? (
                                 <List>
                                     {activeParameters.filter(param => param.isActive).map((param) => (
-                                        <ListItem 
+                                        <ListItem
                                             key={param._id}
                                             sx={{
                                                 flexDirection: isSmallScreen ? 'column' : 'row',
@@ -184,9 +183,9 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
                                                 margin="normal"
                                                 disabled={isViewOnly}
                                             />
-                                            <Box 
-                                                sx={{ 
-                                                    display: 'flex', 
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: isSmallScreen ? 'space-between' : 'flex-end',
                                                     width: isSmallScreen ? '100%' : 'auto',
@@ -212,15 +211,14 @@ const FunctionDefinitionBuilder: React.FC<FunctionDefinitionBuilderProps> = ({
                                                         <Visibility />
                                                     </IconButton>
                                                     {!isViewOnly && (
-                                                        <Tooltip title="Deactivate">
-                                                            <IconButton
-                                                                edge="end"
-                                                                aria-label="deactivate"
-                                                                onClick={() => handleParameterToggle(param._id!)}
-                                                            >
-                                                                <CloseIcon />
-                                                            </IconButton>
-                                                        </Tooltip>
+                                                        <IconButton
+                                                            edge="end"
+                                                            aria-label="deactivate"
+                                                            onClick={() => handleParameterToggle(param._id!)}
+                                                            title="Deactivate"
+                                                        >
+                                                            <CloseIcon />
+                                                        </IconButton>
                                                     )}
                                                 </Box>
                                             </Box>

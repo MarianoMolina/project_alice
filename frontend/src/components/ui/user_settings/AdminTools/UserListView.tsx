@@ -11,7 +11,6 @@ import {
   DialogActions,
   Button,
   Typography,
-  Tooltip,
 } from '@mui/material';
 import { Person, Warning, SystemUpdate } from '@mui/icons-material';
 import { ApiName } from '../../../../types/ApiTypes';
@@ -79,24 +78,22 @@ export const UserListView: React.FC<UserListViewProps> = ({
               secondary={user.role}
             />
             <ListItemSecondaryAction>
-              <Tooltip title="View user details">
-                <IconButton
-                  edge="end"
-                  onClick={() => handleViewUser(user)}
-                  disabled={isUpdating}
-                >
-                  <Person />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Update user's API Configs with the Admin API key map">
-                <IconButton
-                  edge="end"
-                  onClick={() => handleUpdateClick(user)}
-                  disabled={isUpdating}
-                >
-                  <SystemUpdate />
-                </IconButton>
-              </Tooltip>
+              <IconButton
+                edge="end"
+                title="View user details"
+                onClick={() => handleViewUser(user)}
+                disabled={isUpdating}
+              >
+                <Person />
+              </IconButton>
+              <IconButton
+                edge="end"
+                title="Update user's API Configs with the Admin API key map"
+                onClick={() => handleUpdateClick(user)}
+                disabled={isUpdating}
+              >
+                <SystemUpdate />
+              </IconButton>
             </ListItemSecondaryAction>
           </ListItem>
         ))}

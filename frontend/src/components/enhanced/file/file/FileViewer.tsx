@@ -7,7 +7,6 @@ import {
   Chip,
   IconButton,
   CircularProgress,
-  Tooltip
 } from '@mui/material';
 import {
   InsertDriveFile as FileIcon,
@@ -31,7 +30,7 @@ const FileViewer: React.FC<FileComponentProps> = ({ item }) => {
   const handleDownload = async () => {
     try {
       if (!item?._id) return;
-      
+
       const blob = await retrieveFile(item._id);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -96,10 +95,10 @@ const FileViewer: React.FC<FileComponentProps> = ({ item }) => {
     switch (item.type) {
       case FileType.IMAGE:
         return (
-          <Box className="flex justify-center items-center overflow-hidden rounded" 
-               sx={{ maxHeight: '200px' }}>
-            <img 
-              src={content} 
+          <Box className="flex justify-center items-center overflow-hidden rounded"
+            sx={{ maxHeight: '200px' }}>
+            <img
+              src={content}
               alt={item.filename}
               className="object-contain w-full h-full"
             />
@@ -114,7 +113,7 @@ const FileViewer: React.FC<FileComponentProps> = ({ item }) => {
       case FileType.VIDEO:
         return (
           <Box className="flex justify-center items-center rounded overflow-hidden"
-               sx={{ maxHeight: '200px' }}>
+            sx={{ maxHeight: '200px' }}>
             <video controls src={content} className="w-full h-full object-contain" />
           </Box>
         );
@@ -122,7 +121,7 @@ const FileViewer: React.FC<FileComponentProps> = ({ item }) => {
         return (
           <Box className="p-4 bg-gray-50 rounded">
             <Typography variant="body2" className="font-mono break-all line-clamp-3">
-              {content && content.startsWith('data:') 
+              {content && content.startsWith('data:')
                 ? atob(content.split(',')[1]).substring(0, 200) + '...'
                 : content.substring(0, 200) + '...'}
             </Typography>
@@ -160,24 +159,22 @@ const FileViewer: React.FC<FileComponentProps> = ({ item }) => {
               </Stack>
             </Stack>
             <Stack direction="row" spacing={1}>
-              <Tooltip title="Download file">
-                <IconButton
-                  onClick={handleDownload}
-                  size="small"
-                  className="text-gray-600"
-                >
-                  <Download />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="View details">
-                <IconButton
-                  onClick={handleViewDetails}
-                  size="small"
-                  className="text-gray-600"
-                >
-                  <VisibilityIcon />
-                </IconButton>
-              </Tooltip>
+              <IconButton
+                onClick={handleDownload}
+                size="small"
+                title="Download file"
+                className="text-gray-600"
+              >
+                <Download />
+              </IconButton>
+              <IconButton
+                onClick={handleViewDetails}
+                size="small"
+                title="View details"
+                className="text-gray-600"
+              >
+                <VisibilityIcon />
+              </IconButton>
             </Stack>
           </Box>
 
@@ -186,7 +183,7 @@ const FileViewer: React.FC<FileComponentProps> = ({ item }) => {
 
           {/* Timestamp */}
           <Typography variant="caption" className="text-gray-500">
-            Last accessed: {item.last_accessed 
+            Last accessed: {item.last_accessed
               ? new Date(item.last_accessed).toLocaleString()
               : 'Never'}
           </Typography>

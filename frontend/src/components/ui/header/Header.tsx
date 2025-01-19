@@ -4,7 +4,6 @@ import {
   Toolbar,
   IconButton,
   Box,
-  Tooltip,
   Button,
   useMediaQuery,
   useTheme,
@@ -71,7 +70,7 @@ const Header: React.FC = () => {
             onClick={handleNavigation}
           />
         </Box>
-        
+
         {isAuthenticated && !isMobile && (
           <Box className={classes.centerSection}>
             {[1, 2, 3].map((groupIndex) => (
@@ -92,17 +91,16 @@ const Header: React.FC = () => {
           {isAuthenticated ? (
             <>
               {!isMobile && (
-                <Tooltip title="Account settings">
-                  <IconButton
-                    onClick={(e) => setUserMenuAnchor(e.currentTarget)}
-                    size="small"
-                    sx={{ ml: 2 }}
-                  >
-                    <Avatar sx={{ width: 32, height: 32 }}>
-                      {user?.email?.[0].toUpperCase()}
-                    </Avatar>
-                  </IconButton>
-                </Tooltip>
+                <IconButton
+                  title="Account settings"
+                  onClick={(e) => setUserMenuAnchor(e.currentTarget)}
+                  size="small"
+                  sx={{ ml: 2 }}
+                >
+                  <Avatar sx={{ width: 32, height: 32 }}>
+                    {user?.email?.[0].toUpperCase()}
+                  </Avatar>
+                </IconButton>
               )}
               {isMobile ? (
                 <IconButton
@@ -113,20 +111,16 @@ const Header: React.FC = () => {
                   <MenuIcon />
                 </IconButton>
               ) : (
-                <Tooltip title="GitHub Repository">
-                  <IconButton color="inherit" onClick={handleGitHubClick}>
-                    <GitHubIcon />
-                  </IconButton>
-                </Tooltip>
+                <IconButton color="inherit" onClick={handleGitHubClick} title="GitHub Repository">
+                  <GitHubIcon />
+                </IconButton>
               )}
             </>
           ) : (
             <>
-            <Tooltip title="GitHub Repository">
-              <IconButton color="inherit" onClick={handleGitHubClick}>
+              <IconButton color="inherit" onClick={handleGitHubClick} title="GitHub Repository">
                 <GitHubIcon />
               </IconButton>
-            </Tooltip>
               <Button color="inherit" onClick={() => handleNavigation('/login')}>
                 Login
               </Button>

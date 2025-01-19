@@ -15,11 +15,9 @@ const TaskListView: React.FC<TaskComponentProps> = ({
     const getPrimaryText = (task: AliceTask) => task.task_name;
     const getSecondaryText = (task: AliceTask) => (
         <>
-            <Tooltip title={formatCamelCaseString(task.task_type)}>
-                <IconButton size="small">
-                    {taskDescriptions[task.task_type].icon || <Functions />}
-                </IconButton>
-            </Tooltip>
+            <IconButton size="small" title={formatCamelCaseString(task.task_type)}>
+                {taskDescriptions[task.task_type].icon || <Functions />}
+            </IconButton>
             <Typography component="span" variant="body2" color="textPrimary">
                 {task.task_description || 'N/A'}
             </Typography>

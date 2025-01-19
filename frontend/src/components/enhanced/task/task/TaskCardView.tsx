@@ -101,11 +101,9 @@ const TaskCardView: React.FC<TaskComponentProps> = ({
             secondary_text: item.required_apis && item.required_apis.length > 0 ? (
                 <Box>
                     {item.required_apis.map((api: ApiType) => (
-                        <Tooltip key={api} title={formatStringWithSpaces(api)}>
-                            <IconButton size="small">
-                                {apiTypeIcons[api] || <Api />}
-                            </IconButton>
-                        </Tooltip>
+                        <IconButton size="small" title={formatStringWithSpaces(api)}>
+                            {apiTypeIcons[api] || <Api />}
+                        </IconButton>
                     ))}
                 </Box>
             ) : "No required APIs"

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { BaseTaskData } from '../../utils/FlowChartUtils';
-import { Accordion, AccordionDetails, AccordionSummary, Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Box, IconButton, Stack, Typography } from '@mui/material';
 import { DataObject, ExpandMore } from '@mui/icons-material';
 import { ApiType } from '../../../../../types/ApiTypes';
 import theme from '../../../../../Theme';
@@ -49,22 +49,21 @@ export const NodeContentArea: React.FC<NodeContentAreaProps> = ({ data, nodeConf
                     {formatCamelCaseString(data.task_name)}
                 </Typography>
                 {taskTemplate && (
-                    <Tooltip title="View task template with inputs">
-                        <IconButton
-                            size="small"
-                            onClick={handleViewPrompt}
-                            sx={{
-                                color: theme.palette.primary.dark,
-                                flexShrink: 0,
-                                '&:hover': {
-                                    color: theme.palette.primary.main,
-                                    backgroundColor: theme.palette.action.hover,
-                                }
-                            }}
-                        >
-                            <DataObject fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
+                    <IconButton
+                        size="small"
+                        title="View task template with inputs"
+                        onClick={handleViewPrompt}
+                        sx={{
+                            color: theme.palette.primary.dark,
+                            flexShrink: 0,
+                            '&:hover': {
+                                color: theme.palette.primary.main,
+                                backgroundColor: theme.palette.action.hover,
+                            }
+                        }}
+                    >
+                        <DataObject fontSize="small" />
+                    </IconButton>
                 )}
             </Box>
 
