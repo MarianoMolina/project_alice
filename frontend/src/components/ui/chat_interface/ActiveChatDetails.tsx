@@ -14,17 +14,16 @@ import {
   PlaylistAdd as PlaylistAddIcon,
   QuestionAnswer,
   Info,
+  Delete,
 } from '@mui/icons-material';
 import { useChat } from '../../../contexts/ChatContext';
 import { useDialog } from '../../../contexts/DialogContext';
 import ChatThreadShortListView from '../../enhanced/chat_thread/chat_thread/ChatThreadShortListView';
 import ChatCardView from '../../enhanced/chat/chat/ChatCardView';
 import { ChatThread, PopulatedChatThread } from '../../../types/ChatThreadTypes';
-import CreateThreadInChat from './CreateThreadInChat';
 import Logger from '../../../utils/Logger';
 import theme from '../../../Theme';
 import EnhancedChatThread from '../../enhanced/chat_thread/chat_thread/EnhancedChat';
-import { fetchPopulatedItem } from '../../../services/api';
 
 interface ActiveChatDetailsProps {
   onThreadSelected?: (thread: ChatThread) => void;
@@ -40,7 +39,9 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({ onThreadSelected 
     currentChat,
     handleSelectThread,
     setThreads,
-    threads
+    threads,
+    addThread,
+    removeThread
   } = useChat();
 
   const {
@@ -50,7 +51,6 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({ onThreadSelected 
   } = useDialog();
 
   const [expanded, setExpanded] = useState<ChatDetailAccordions>(ChatDetailAccordions.THREADS);
-  const [isCreatingThread, setIsCreatingThread] = useState(false);
 
   const handleAccordionChange = useCallback((panel: ChatDetailAccordions) => (
     _event: React.SyntheticEvent,
@@ -65,6 +65,10 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({ onThreadSelected 
     }
   }, [expanded]);
 
+  const handleThreadRemove = useCallback(async (threadId: string) => {
+    await removeThread(threadId);
+  }, [removeThread]);
+
   const handleThreadSelect = useCallback(async (thread: PopulatedChatThread | ChatThread) => {
     if (!thread._id) return;
     await handleSelectThread(thread._id);
@@ -76,14 +80,11 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({ onThreadSelected 
       Logger.warn('ManageReferenceList: Received invalid item in localOnSaveNew:', newItem);
       return;
     }
-    const threadPopulated = await fetchPopulatedItem('chatthreads', newItem._id) as PopulatedChatThread;
-    setThreads(prevThreads => prevThreads ? [...prevThreads, threadPopulated] : [threadPopulated]);
-    setIsCreatingThread(false);
+    await addThread(newItem._id);
     // Needs to update the chat with the new thread
   }, [setThreads]);
 
   const handleCreateThread = useCallback(() => {
-    setIsCreatingThread(true);
     Logger.debug('active chat deatails handleCreateNew called');
     selectFlexibleItem(
       'ChatThread',
@@ -182,15 +183,31 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({ onThreadSelected 
           overflow: 'auto',
           padding: 0
         }}>
-          <ChatThreadShortListView
-            items={threads || []}
-            item={null}
-            mode="view"
-            onView={handleViewThread}
-            onInteraction={handleThreadSelect}
-            onChange={() => null}
-            handleSave={async () => { }}
-          />
+          {(threads || []).map((thread) => (
+            <Box key={thread._id} sx={{
+              display: 'flex',
+              alignItems: 'center',
+            }}>
+              <Box sx={{ flexGrow: 1 }}>
+                <ChatThreadShortListView
+                  items={[]}
+                  item={thread}
+                  mode="view"
+                  onView={handleViewThread}
+                  onInteraction={handleThreadSelect}
+                  onChange={() => null}
+                  handleSave={async () => { }}
+                />
+              </Box>
+              <IconButton
+                size="small"
+                sx={{ ml: 1 }}
+                onClick={() => thread._id && handleThreadRemove(thread._id)}
+              >
+                <Delete />
+              </IconButton>
+            </Box>
+          ))}
         </AccordionDetails>
       </Accordion>
 
@@ -233,10 +250,6 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({ onThreadSelected 
           />
         </AccordionDetails>
       </Accordion>
-      <CreateThreadInChat
-        open={isCreatingThread}
-        onClose={() => setIsCreatingThread(false)}
-      />
     </Box>
   );
 };

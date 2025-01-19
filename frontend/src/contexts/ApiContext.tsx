@@ -17,6 +17,8 @@ import {
     applyApiConfigToUser as apiApplyApiConfigToUser,
     updateAdminApiKeyMap as apiUpdateAdminApiKeyMap,
     getAdminApiConfigMap as apiGetAdminApiConfigMap,
+    addThreadToChat as apiAddThreadToChat,
+    removeThreadFromChat as apiRemoveThreadFromChat,
 } from '../services/api';
 import {
     executeTask as apiExecuteTask,
@@ -60,6 +62,8 @@ interface ApiContextType {
     updateMessageInChat: typeof apiUpdateMessageInChat;
     resumeTask: typeof apiResumeTask;
     resumeChat: typeof apiResumeChat;
+    addThreadToChat: typeof apiAddThreadToChat;
+    removeThreadFromChat: typeof apiRemoveThreadFromChat;
     fetchLMStudioModels: typeof apiFetchLMStudioModels;
     unloadLMStudioModel: typeof apiUnloadLMStudioModel;
     checkWorkflowHealth: typeof apiCheckWorkflowHealth;
@@ -260,6 +264,30 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             return result;
         } catch (error) {
             addNotification('Error sending message', 'error');
+            throw error;
+        }
+    }, [addNotification]);
+
+    const addThreadToChat = useCallback(async (chatId: string, threadId: string): Promise<AliceChat> => {
+        try {
+            const result = await apiAddThreadToChat(chatId, threadId);
+            addNotification('Thread added to chat successfully', 'success');
+            emitEvent('updated', 'chats', result);
+            return result;
+        } catch (error) {
+            addNotification('Error adding thread to chat', 'error');
+            throw error;
+        }
+    }, [addNotification]);
+
+    const removeThreadFromChat = useCallback(async (chatId: string, threadId: string): Promise<AliceChat> => {
+        try {
+            const result = await apiRemoveThreadFromChat(chatId, threadId);
+            addNotification('Thread removed from chat successfully', 'success');
+            emitEvent('updated', 'chats', result);
+            return result;
+        } catch (error) {
+            addNotification('Error removing thread from chat', 'error');
             throw error;
         }
     }, [addNotification]);
@@ -507,6 +535,8 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         updateUserInteraction,
         updateMessageInChat,
         resumeChat,
+        addThreadToChat,
+        removeThreadFromChat,
         fetchLMStudioModels,
         unloadLMStudioModel,
         checkWorkflowHealth,

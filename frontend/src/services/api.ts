@@ -259,6 +259,34 @@ export const sendMessage = async (chatId: string, threadId: string, message: Pop
   }
 };
 
+export const addThreadToChat = async (
+  chatId: string,
+  threadId: string
+): Promise<CollectionType['chats']> => {
+  try {
+    Logger.debug('Adding thread to chat:', chatId, threadId);
+    const response = await dbAxiosInstance.patch(`/chats/${chatId}/add_thread`, { threadId });
+    return converters['chats'](response.data.chat) as CollectionType['chats'];
+  } catch (error) {
+    Logger.error('Error adding thread to chat:', error);
+    throw error;
+  }
+};
+
+export const removeThreadFromChat = async (
+  chatId: string,
+  threadId: string
+): Promise<CollectionType['chats']> => {
+  try {
+    Logger.debug('Removing thread from chat:', chatId, threadId);
+    const response = await dbAxiosInstance.patch(`/chats/${chatId}/remove_thread`, { threadId });
+    return converters['chats'](response.data.chat) as CollectionType['chats'];
+  } catch (error) {
+    Logger.error('Error removing thread from chat:', error);
+    throw error;
+  }
+};
+
 export const getAdminApiConfigMap = async (
   mapName: string = 'upgrade_admin_api_key_map'
 ): Promise<ApiConfigType> => {

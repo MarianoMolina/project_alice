@@ -40,6 +40,8 @@ import { PopulatedToolCall } from '../../../types/ToolCallTypes';
 import { PopulatedCodeExecution } from '../../../types/CodeExecutionTypes';
 import { APIConfig } from '../../../types/ApiConfigTypes';
 
+// TODO: OnFlexibleDialogSave IS STILL BUGGY
+
 const EnhancedFlexibleDialog: React.FC = () => {
   const {
     selectedFlexibleItem,
@@ -84,7 +86,6 @@ const EnhancedFlexibleDialog: React.FC = () => {
         Logger.debug('EnhancedFlexibleDialog onSave called with:', savedItem);
         try {
           if (savedItem && onFlexibleDialogSave) {
-
             Logger.debug('Executing onFlexibleDialogSave with:', savedItem);
             await onFlexibleDialogSave(savedItem);
           }

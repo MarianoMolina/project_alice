@@ -10,17 +10,18 @@ import { fetchPopulatedItem } from '../services/api';
 import { PopulatedChatThread } from '../types/ChatThreadTypes';
 
 interface ChatContextType {
+    // Current object
+    currentChat: PopulatedAliceChat | null;
+    pastChats: (AliceChat | PopulatedAliceChat)[];
+    threads: PopulatedChatThread[];
+    currentThread: PopulatedChatThread | null;
     messages: PopulatedMessage[];
+    currentChatId: string | null;
     setMessages: React.Dispatch<React.SetStateAction<PopulatedMessage[]>>;
     setCurrentThread: React.Dispatch<React.SetStateAction<PopulatedChatThread | null>>;
-    currentThread: PopulatedChatThread | null;
-    threads: PopulatedChatThread[];
     setThreads: React.Dispatch<React.SetStateAction<PopulatedChatThread[]>>;
-    pastChats: (AliceChat | PopulatedAliceChat)[];
     setPastChats: React.Dispatch<React.SetStateAction<(AliceChat | PopulatedAliceChat)[]>>;
-    currentChatId: string | null;
     setCurrentChatId: React.Dispatch<React.SetStateAction<string | null>>;
-    isGenerating: boolean;
     setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>;
     handleSelectThread: (threadId: string) => Promise<void>;
     handleSelectChat: (chatId: string) => Promise<void>;
@@ -28,9 +29,11 @@ interface ChatContextType {
     generateResponse: () => Promise<void>;
     handleRegenerateResponse: () => Promise<void>;
     fetchChats: () => Promise<void>;
-    currentChat: PopulatedAliceChat | null;
     addTaskToChat: (taskId: string) => Promise<void>;
+    addThread: (threadId: string) => Promise<void>;
+    removeThread: (threadId: string) => Promise<void>;
     isTaskInChat: (taskId: string) => boolean;
+    isGenerating: boolean;
     lastMessageRole: string | undefined;
     chatContextCharacterCount: number;
     maxContext: number;
@@ -45,7 +48,7 @@ interface ChatProviderProps {
 }
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
-    const { fetchItem, updateItem, sendMessage, generateChatResponse } = useApi();
+    const { fetchItem, updateItem, sendMessage, generateChatResponse, addThreadToChat, removeThreadFromChat } = useApi();
     const [messages, setMessages] = useState<PopulatedMessage[]>([]);
     const [threads, setThreads] = useState<PopulatedChatThread[]>([]);
     const [currentThread, setCurrentThread] = useState<PopulatedChatThread | null>(null);
@@ -95,14 +98,14 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
     useEffect(() => {
         let isActive = true;
-    
+
         if (user) {
             const fetchData = async () => {
                 setLoading(true);
                 try {
                     if (!isActive) return;
                     const chats = await fetchItem('chats') as AliceChat[];
-                    if (isActive) { 
+                    if (isActive) {
                         setPastChats(chats);
                         setError(null);
                     }
@@ -119,7 +122,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             };
             fetchData();
         }
-    
+
         return () => {
             isActive = false;  // Cleanup flag when component unmounts
         };
@@ -149,7 +152,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             setLoading(true);
             const chatData = await fetchChatById(chatId);
             Logger.info('Selected chat:', chatId, chatData);
-            resetChat({resetThread: true});
+            resetChat({ resetThread: true });
             setCurrentChat(chatData);
             setCurrentChatId(chatId);
             setThreads(chatData.threads || []);
@@ -176,39 +179,27 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         }
     }
 
-    const handleSelectThread = useCallback(async (threadId: string) => {
-        try {
-            if (!currentChat) return Logger.error('No current chat selected');
-            setLoading(true);
-            const thread = await fetchPopulatedItem('chatthreads', threadId) as PopulatedChatThread;
-            const updatedChat = { ...currentChat, threads: currentChat?.threads?.map(t => t._id === threadId ? thread : t) };
-            resetChat();
-            setMessages(thread.messages);
-            setCurrentChat(updatedChat)
-            setCurrentThread(thread);
-            setPastChats(prevChats =>
-                prevChats.map(chat => chat._id === currentChatId ? updatedChat : chat)
-            );
-            setThreads(prevThreads =>
-                prevThreads.map(t => t._id === threadId ? thread : t)
-            );
-        } catch (error) {
-            Logger.error('Error fetching thread:', error);
-            setError(error as Error);
-        } finally {
-            setLoading(false);
-        }
-    }, [currentChat, currentChatId]);
-
     const fetchCurrentChat = useCallback(async () => {
         if (!currentChatId) return;
         return handleSelectChat(currentChatId);
     }, [currentChatId, handleSelectChat]);
 
     const fetchCurrentThread = useCallback(async () => {
-        if (!currentThread?._id) return;
-        return handleSelectThread(currentThread._id);
-    }, [currentThread, handleSelectThread]);
+        try {
+            if (!currentThread?._id) return;
+            setLoading(true);
+            const thread = await fetchPopulatedItem('chatthreads', currentThread._id) as PopulatedChatThread;
+            resetChat();
+            setMessages(thread.messages);
+            setCurrentThread(thread);
+            return handleSelectThread(currentThread._id);
+        } catch (error) {
+            Logger.error('Error fetching thread:', error);
+            setError(error as Error);
+        } finally {
+            setLoading(false);
+        }
+    }, [currentThread]);
 
     useEffect(() => {
         globalEventEmitter.on('created:chats', fetchChats);
@@ -235,7 +226,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             await generateResponse();
         } catch (error) {
             // Remove optimistically added message if it doesn't have an ID (meaning it failed to send)
-            setMessages(prevMessages => 
+            setMessages(prevMessages =>
                 prevMessages.filter(msg => msg._id !== undefined)
             );
             setError(error as Error);
@@ -302,6 +293,61 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         }
     };
 
+    const handleSelectThread = useCallback(async (threadId: string) => {
+        try {
+            if (!currentChat || !currentChatId) return Logger.error('No current chat selected');
+            const thread = threads.find(t => t._id === threadId);
+            if (!thread) return Logger.error('Thread not found in chat');
+            setMessages(thread.messages);
+            setCurrentThread(thread);
+        } catch (error) {
+            Logger.error('Error fetching thread:', error);
+            setError(error as Error);
+        } finally {
+            setLoading(false);
+        }
+    }, [currentChat, currentChatId]);
+
+    const addThread = useCallback(async (threadId: string) => {
+        if (!currentChatId || !currentChat) return Logger.error('No current chat selected');
+        try {
+            // Check if valid
+            const threadIds = threads.map(thread => thread._id);
+            if (threadIds.includes(threadId)) return Logger.warn('Thread already in chat');
+            // Add thread
+            setLoading(true);
+            const nonPopChat = await addThreadToChat(currentChatId, threadId);
+            const thread = await fetchPopulatedItem('chatthreads', threadId) as PopulatedChatThread;
+            const updatedChat = { ...currentChat, threads: currentChat?.threads?.map(t => t._id === threadId ? thread : t) };
+            setCurrentChat(updatedChat)
+            setPastChats(prevChats =>
+                prevChats.map(chat => chat._id === currentChatId ? updatedChat : chat)
+            );
+            setThreads([...threads, thread]);
+        } catch (error) {
+            setError(error as Error);
+            Logger.error('Error adding thread to chat:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [currentChat, currentChatId, threads]);
+
+    const removeThread = useCallback(async (threadId: string) => {
+        if (!currentChatId || !currentChat) return;
+        try {
+            setLoading(true);
+            const nonPopChat = await removeThreadFromChat(currentChatId, threadId);
+            const updatedChat = { ...currentChat, threads: currentChat?.threads?.filter(t => t._id !== threadId) };
+            setCurrentChat(updatedChat)
+            setCurrentThread(null);
+        } catch (error) {
+            setError(error as Error);
+            Logger.error('Error removing thread from chat:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [currentChat, currentChatId]);
+
     const value: ChatContextType = {
         messages,
         setMessages,
@@ -313,6 +359,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         setPastChats,
         currentChatId,
         setCurrentChatId,
+        addThread,
+        removeThread,
         isGenerating,
         setIsGenerating,
         handleSelectChat,
