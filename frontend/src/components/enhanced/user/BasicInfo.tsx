@@ -11,7 +11,6 @@ import {
 } from '@mui/material';
 import { User, UserRole, UserTier, defaultUserStats } from '../../../types/UserTypes';
 import { FIELD_CONFIG } from './UserDetail';
-import Logger from '../../../utils/Logger';
 
 interface BasicInfoProps {
     editedUser: User;

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import { CollectionElementString, CollectionElement, CollectionName, CollectionPopulatedElement, SavedItemCallback } from '../types/CollectionTypes';
 import { Prompt } from '../types/PromptTypes';
 import { ApiProvider } from './ApiContext';
@@ -262,6 +262,15 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
     setOnFlexibleDialogSaveState(callback as SavedItemCallback<CollectionElement | CollectionPopulatedElement>);
   }, []);
 
+  useEffect(() => {
+    Logger.info('onFlexibleDialogSave changed:', {
+      value: onFlexibleDialogSave,
+      type: typeof onFlexibleDialogSave,
+      isPromise: onFlexibleDialogSave instanceof Promise,
+      hasCallThenCatch: onFlexibleDialogSave && 'then' in onFlexibleDialogSave && 'catch' in onFlexibleDialogSave
+    });
+  }, [onFlexibleDialogSave]);
+
   const selectFlexibleItem = useCallback(<T extends CollectionPopulatedElement>(
     itemType: CollectionElementString,
     mode: 'create' | 'edit',
@@ -269,9 +278,14 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
     item?: T,
     onSave?: SavedItemCallback<T>
   ) => {
+    Logger.info('DialogContext selectFlexibleItem called with onSave:', onSave);
     setSelectedFlexibleItemType(itemType);
     setFlexibleDialogMode(mode);
-    setOnFlexibleDialogSave(onSave);
+    if (onSave) {
+      const wrappedCallback: SavedItemCallback<CollectionPopulatedElement | CollectionElement> = 
+        (savedItem) => onSave(savedItem as T);
+      setOnFlexibleDialogSaveState(() => wrappedCallback);
+    }
     if (mode === 'edit') {
       if (item) {
         setSelectedFlexibleItem(item);
@@ -329,6 +343,7 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
     setIsSelectDialogOpen(true);
     setSelectDialogOpenedAt(Date.now());
   }, []);
+  
   const selectEnhancedOptions = useCallback(<T extends CollectionElement | CollectionPopulatedElement>(
     componentType: CollectionName,
     EnhancedComponent: React.ComponentType<any>,
@@ -369,7 +384,7 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
     setIsFlexibleDialogOpen(false);
     setFlexibleDialogOpenedAt(null);
     setOnFlexibleDialogSave(undefined);
-  }, []);
+  }, [setOnFlexibleDialogSave]);
 
   const closePromptDialog = useCallback(() => {
     setSelectedPromptItem(undefined);

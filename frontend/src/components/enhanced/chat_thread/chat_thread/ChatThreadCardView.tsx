@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Typography,
 } from '@mui/material';
@@ -11,24 +11,28 @@ const ChatThreadCardView: React.FC<ChatThreadComponentProps> = ({
   item,
 }) => {
 
-  if (!item) {
+  const populatedItem = item ? item as PopulatedChatThread : null;
+
+  const memoizedThreadList = useMemo(() => {
+    return (
+      <ManageReferenceList
+        collectionType="messages"
+        elementIds={populatedItem?.messages?.map(thread => thread._id!) || []}
+        onListChange={() => null}
+        isEditable={false}
+      />
+    );
+  }, [populatedItem?.messages]);
+
+  if (!item || !populatedItem) {
     return <Typography>No chat data available.</Typography>;
   }
-
-  const populatedItem = item as PopulatedChatThread
 
   const listItems = [
     {
       icon: <MessageIcon />,
       primary_text: "Messages",
-      secondary_text: (
-        <ManageReferenceList
-          collectionType="messages"
-          elementIds={populatedItem.messages?.map(msg => msg._id!) || []}
-          onListChange={() => null}
-          isEditable={false}
-        />
-      )
+      secondary_text: memoizedThreadList
     },
     {
       icon: <QueryBuilder />,

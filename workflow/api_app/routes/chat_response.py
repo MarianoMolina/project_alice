@@ -69,7 +69,7 @@ async def chat_response(
                 LOGGER.warning(f'API Warning: {api_check_result["warnings"]}')
 
             chat_data.messages = thread_data.messages
-
+            # TODO: Add current time to the available data
             responses = await chat_data.generate_response(api_manager, user_data=db_app.user_data.get('user_obj'))
 
             LOGGER.debug(f'Responses: {responses}')

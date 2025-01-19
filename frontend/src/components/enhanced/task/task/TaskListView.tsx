@@ -1,6 +1,6 @@
 import React from 'react';
 import { AliceTask, TaskComponentProps } from '../../../../types/TaskTypes';
-import { IconButton, Tooltip, Typography } from '@mui/material';
+import { IconButton, Typography } from '@mui/material';
 import EnhancedListView from '../../../common/enhanced_component/ListView';
 import { Functions } from '@mui/icons-material';
 import { formatCamelCaseString } from '../../../../utils/StyleUtils';

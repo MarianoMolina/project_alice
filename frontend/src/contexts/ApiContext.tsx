@@ -136,6 +136,31 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     }, [addNotification]);
 
+
+    const fetchItem = useCallback(async <T extends CollectionName>(
+        collectionName: T,
+        itemId?: string | null
+    ): Promise<CollectionType[T] | CollectionType[T][]> => {
+        try {
+            return await apiFetchItem(collectionName, itemId);
+        } catch (error) {
+            addNotification(`Error fetching ${collectionName}`, 'error');
+            throw error;
+        }
+    }, [addNotification]);
+
+    const fetchPopulatedItem = useCallback(async <T extends CollectionName>(
+        collectionName: T,
+        itemId?: string | null
+    ): Promise<CollectionPopulatedType[T] | CollectionPopulatedType[T][]> => {
+        try {
+            return await apiFetchPopulatedItem(collectionName, itemId);
+        } catch (error) {
+            addNotification(`Error fetching ${collectionName}`, 'error');
+            throw error;
+        }
+    }, [addNotification]);
+
     const createItem = useCallback(async <T extends CollectionName>(
         collectionName: T,
         itemData: Partial<CollectionType[T]>
@@ -519,7 +544,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }, [addNotification]);
 
     const value: ApiContextType = {
-        fetchItem: apiFetchItem,
+        fetchItem,
         createItem,
         updateItem,
         deleteItem,
@@ -541,7 +566,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         unloadLMStudioModel,
         checkWorkflowHealth,
         checkWorkflowUserHealth,
-        fetchPopulatedItem: apiFetchPopulatedItem,
+        fetchPopulatedItem,
         validateChatApis: apiValidateChatApis,
         validateTaskApis: apiValidateTaskApis,
         applyApiConfigToUser,

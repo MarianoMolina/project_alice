@@ -160,9 +160,6 @@ function BaseDbElement<T extends CollectionType[CollectionName] | CollectionPopu
         const data = await fetchItem(collectionName);
         const typedData = data as T[];
         setItems(typedData);
-        // Apply filters to the fetched data
-        const filtered = applyFilters(typedData, filters);
-        setFilteredItems(filtered);
       } else if (itemId && mode !== 'create') {
         const data = await fetchPopulatedItem(collectionName, itemId);
         setItem(data as T);
@@ -176,9 +173,10 @@ function BaseDbElement<T extends CollectionType[CollectionName] | CollectionPopu
     } finally {
       setLoading(false);
     }
-  }, [collectionName, itemId, mode, fetchAll, fetchItem, partialItem, fetchPopulatedItem, filters, applyFilters]);
+  }, [collectionName, itemId, mode, fetchAll, fetchItem, partialItem, fetchPopulatedItem]);
 
   useEffect(() => {
+    Logger.debug('BaseDbElement useEffect', { items, filters });
     if (items && filters.length > 0) {
       const filtered = applyFilters(items, filters);
       setFilteredItems(filtered);
@@ -188,6 +186,7 @@ function BaseDbElement<T extends CollectionType[CollectionName] | CollectionPopu
   }, [items, filters, applyFilters]);
 
   useEffect(() => {
+    Logger.info('BaseDbElement fetchdata useEffect', { collectionName, itemId, fetchAll });
     fetchData();
 
     // Subscribe to events
@@ -295,7 +294,7 @@ function BaseDbElement<T extends CollectionType[CollectionName] | CollectionPopu
       mode,
       handleSave,
       handleDelete
-    ), [fetchAll, filteredItems, item, handleChange, mode, handleSave, render, handleDelete]);
+    ), [fetchAll, filteredItems, item, handleChange, mode, handleSave, handleDelete, render]);
 
   if (loading) {
     return <CircularProgress size={70} sx={{ display: 'flex', margin: '20px auto' }} />;

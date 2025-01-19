@@ -55,6 +55,11 @@ function ManageReferenceList<T extends CollectionElement>({
         onListChange(newIds);
     }, [elementIds, onListChange]);
 
+    const handleSelectItem = useCallback(async (itemId: string) => {
+        const newIds = [...elementIds, itemId];
+        onListChange(newIds);
+    }, [elementIds, onListChange]);
+
     const handleAddExisting = useCallback(() => {
         selectEnhancedOptions(
             collectionType,
@@ -67,12 +72,7 @@ function ManageReferenceList<T extends CollectionElement>({
             },
             false
         );
-    }, [selectEnhancedOptions]);
-
-    const handleSelectItem = useCallback(async (itemId: string) => {
-        const newIds = [...elementIds, itemId];
-        onListChange(newIds);
-    }, [elementIds, onListChange]);
+    }, [selectEnhancedOptions, collectionType, collectionTypeString, handleSelectItem]);
 
     const localOnSaveNew = useCallback((newItem: any) => {
         if (!newItem || !newItem._id) {

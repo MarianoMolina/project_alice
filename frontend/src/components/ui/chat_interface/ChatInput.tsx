@@ -18,9 +18,6 @@ import { PopulatedUserInteraction, UserInteraction } from '../../../types/UserIn
 import { useChat } from '../../../contexts/ChatContext';
 import ActionButton from './ChatActionButton';
 
-interface ChatInputProps {
-}
-
 export interface ChatInputRef {
   addFileReference: (file: PopulatedFileReference | FileReference) => void;
   addTaskResponse: (taskResponse: PopulatedTaskResponse | TaskResponse) => void;
@@ -32,7 +29,7 @@ export interface ChatInputRef {
   addUserInteractionReference: (userInteraction: PopulatedUserInteraction | UserInteraction) => void;
 }
 
-const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ }, ref) => {
+const ChatInput = forwardRef<ChatInputRef>((_, ref) => {
   const { addNotification } = useNotification();
   const { uploadFileContentReference } = useApi();
   const {

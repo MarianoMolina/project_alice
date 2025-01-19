@@ -1,4 +1,4 @@
-import { IconButton, Tooltip, Box, Typography } from '@mui/material';
+import { IconButton, Box, Typography } from '@mui/material';
 import { styled } from '@mui/system';
 import { BaseDatabaseObject, CollectionName, CollectionPopulatedType, collectionNameToElementString } from '../../../types/CollectionTypes';
 import { useDialog } from '../../../contexts/DialogContext';

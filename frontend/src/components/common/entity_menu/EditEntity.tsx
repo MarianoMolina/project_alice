@@ -1,4 +1,4 @@
-import { IconButton, Tooltip, Box, Typography } from '@mui/material';
+import { IconButton, Box, Typography } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { styled } from '@mui/system';
 import { CollectionName, CollectionPopulatedType, collectionNameToElementString } from '../../../types/CollectionTypes';
@@ -48,12 +48,10 @@ export function EditEntity<T extends CollectionName>({
     </ActionBox>
   );
 
-  // If we're showing the label (likely in a menu), don't wrap in IconButton/Tooltip
   if (showLabel) {
     return content;
   }
 
-  // For standalone button usage, wrap in IconButton and Tooltip
   return (
     <StyledIconButton onClick={handleEdit} size="small" title={tooltipText || defaultTooltip}>
       <EditIcon />

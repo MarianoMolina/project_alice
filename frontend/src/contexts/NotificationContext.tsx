@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
 import NotificationComponent from '../components/ui/notification/Notification';
 
 type NotificationType = 'info' | 'success' | 'warning' | 'error';
@@ -38,11 +38,11 @@ interface NotificationProviderProps {
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const addNotification = (message: string, type: NotificationType = 'info', duration = 5000, action?: NotificationAction) => {
+  const addNotification = useCallback((message: string, type: NotificationType = 'info', duration = 5000, action?: NotificationAction) => {
     const id = Date.now();
     setNotifications(prev => [...prev, { id, message, type, action }]);
     setTimeout(() => removeNotification(id), duration);
-  };
+  }, []);
 
   const removeNotification = (id: number) => {
     setNotifications(prev => prev.filter(notif => notif.id !== id));

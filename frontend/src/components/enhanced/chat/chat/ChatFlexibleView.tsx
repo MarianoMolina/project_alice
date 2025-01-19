@@ -195,15 +195,15 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
         try {
             // Get the current threads from the form
             const currentThreads = form.threads || [];
-            
+
             // Create a map of current thread IDs to their populated objects
             const currentThreadMap = new Map(
                 currentThreads.map(thread => [thread._id, thread])
             );
-            
+
             // Initialize array for new thread list
             const updatedThreads: PopulatedChatThread[] = [];
-            
+
             // Process each thread ID
             for (const threadId of threadIds) {
                 // If we already have the populated thread, use it
@@ -223,13 +223,13 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                     }
                 }
             }
-            
+
             // Update the form with the new thread list
             setForm(prevForm => ({
                 ...prevForm,
                 threads: updatedThreads
             }));
-            
+
         } catch (error) {
             Logger.error('Error in handleThreadChange', { error });
         }
@@ -306,13 +306,13 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
     ), [form.default_user_checkpoints, handleCodeExecCheckpointChange, isEditMode]);
 
     const memoizedThreadSelect = useMemo(() => (
-        
+
         <ManageReferenceList
-        collectionType="chatthreads"
-        elementIds={form.threads?.map(thread => thread._id!) || []}
-        onListChange={handleThreadChange}
-        isEditable={true}
-    />
+            collectionType="chatthreads"
+            elementIds={form.threads?.map(thread => thread._id!) || []}
+            onListChange={handleThreadChange}
+            isEditable={true}
+        />
     ), [form.threads, handleThreadChange]);
 
     const memoizedDatacluster = useMemo(() => (
@@ -362,11 +362,9 @@ const ChatFlexibleView: React.FC<ChatComponentProps> = ({
                 {memoizedCodeExecCheckpointSelect}
             </TitleBox>
             {memoizedDatacluster}
-            {form.threads && form.threads.length > 0 && (
-                <TitleBox title="Threads" >
-                    {memoizedThreadSelect}
-                </TitleBox>
-            )}
+            <TitleBox title="Threads" >
+                {memoizedThreadSelect}
+            </TitleBox>
             {form._id && (
                 <TitleBox title="API validation" >
                     <ApiValidationManager chatId={form._id} />

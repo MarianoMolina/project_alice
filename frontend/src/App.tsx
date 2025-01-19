@@ -23,6 +23,7 @@ import theme from './Theme';
 import './assets/fonts/fonts.css';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
+import ChessComponent from './components/ui/chess/ChessComponent';
 
 const App: React.FC = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -75,6 +76,7 @@ const App: React.FC = () => {
                     <Route path="/start-task" element={<ProtectedRoute element={<CreateWorkflow />} />} />
                     <Route path="/structures" element={<ProtectedRoute element={<StructuresPage />} />} />
                     <Route path="/references" element={<ProtectedRoute element={<ReferencesPage />} />} />
+                    <Route path="/chess" element={<ChessComponent />} />
                     <Route
                       path="/user-settings"
                       element={

@@ -4,7 +4,6 @@ import {
   Typography,
   IconButton,
   CircularProgress,
-  Tooltip
 } from '@mui/material';
 import {
   Download as DownloadIcon

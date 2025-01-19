@@ -11,7 +11,6 @@ import { AliceModel, ModelType } from '../../../../types/ModelTypes';
 import EnhancedSelect from '../../../common/enhanced_select/EnhancedSelect';
 import PromptShortListView from '../../prompt/prompt/PromptShortListView';
 import ModelShortListView from '../../model/model/ModelShortListView';
-import { useDialog } from '../../../../contexts/DialogContext';
 import GenericFlexibleView from '../../../common/enhanced_component/FlexibleView';
 import { TextInput } from '../../../common/inputs/TextInput';
 import { SelectInput } from '../../../common/inputs/SelectInput';
@@ -34,7 +33,6 @@ const AgentFlexibleView: React.FC<AgentComponentProps> = ({
     handleSave,
     handleDelete,
 }) => {
-    const { selectCardItem } = useDialog();
     const [form, setForm] = useState<Partial<AliceAgent>>(item || getDefaultAgentForm());
     const [isSaving, setIsSaving] = useState(false);
 

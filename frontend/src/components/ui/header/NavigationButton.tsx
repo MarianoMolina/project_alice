@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconButton, Tooltip, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import { IconButton, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { SiteSection } from '../../../utils/SectionIcons';
 
