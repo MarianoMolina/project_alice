@@ -51,7 +51,6 @@ function ManageReferenceList<T extends CollectionElement>({
 
     const handleRemoveElement = useCallback((idToRemove: string) => {
         const newIds = elementIds.filter(id => id !== idToRemove);
-        Logger.info('Removing element:', idToRemove, newIds);
         onListChange(newIds);
     }, [elementIds, onListChange]);
 
@@ -139,7 +138,6 @@ function ManageReferenceList<T extends CollectionElement>({
         return <Typography>Loading...</Typography>;
     }
 
-    Logger.info('EnhancedSelect - selected items:', EnhancedComponent, elements);
     return (
         <Box sx={{ width: '100%' }}>
             <Box sx={{

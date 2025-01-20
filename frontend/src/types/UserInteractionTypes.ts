@@ -6,10 +6,26 @@ export enum InteractionOwnerType {
     CHAT = "chat"
 }
 
-export interface InteractionOwner {
+// Base interface for owner properties
+interface BaseOwner {
     type: InteractionOwnerType;
-    id: string;
 }
+
+// Task response owner interface
+interface TaskResponseOwner extends BaseOwner {
+    type: InteractionOwnerType.TASK_RESPONSE;
+    task_result_id: string;
+}
+
+// Chat owner interface
+interface ChatOwner extends BaseOwner {
+    type: InteractionOwnerType.CHAT;
+    chat_id: string;
+    thread_id: string;
+}
+
+// Union type for all possible owners
+export type InteractionOwner = TaskResponseOwner | ChatOwner;
 
 export interface UserResponse {
     selected_option: number;
@@ -25,42 +41,89 @@ export interface UserInteraction extends Embeddable {
 export interface PopulatedUserInteraction extends Omit<UserInteraction, keyof PopulatedEmbeddable>, PopulatedEmbeddable {
 
 }
-
 export const convertToUserInteraction = (data: any): UserInteraction => {
-    return {
+    const baseInteraction = {
         ...convertToEmbeddable(data),
-        owner: {
-            type: data?.owner?.type || InteractionOwnerType.TASK_RESPONSE,
-            id: data?.owner?.id || undefined
-        },
         user_checkpoint_id: data?.user_checkpoint_id || undefined,
         user_response: data?.user_response || undefined,
     };
+
+    // Handle owner based on type
+    if (data?.owner?.type === InteractionOwnerType.CHAT) {
+        return {
+            ...baseInteraction,
+            owner: {
+                type: InteractionOwnerType.CHAT,
+                chat_id: data?.owner?.chat_id || '',
+                thread_id: data?.owner?.thread_id || ''
+            }
+        };
+    } else {
+        // Default to TASK_RESPONSE if type is missing or different
+        return {
+            ...baseInteraction,
+            owner: {
+                type: InteractionOwnerType.TASK_RESPONSE,
+                task_result_id: data?.owner?.task_result_id || ''
+            }
+        };
+    }
+};
+export const convertToPopulatedUserInteraction = (data: any): PopulatedUserInteraction => {
+    const baseInteraction = {
+        ...convertToPopulatedEmbeddable(data),
+        user_checkpoint_id: data?.user_checkpoint_id || undefined,
+        user_response: data?.user_response || undefined,
+    };
+
+    // Handle owner based on type
+    if (data?.owner?.type === InteractionOwnerType.CHAT) {
+        return {
+            ...baseInteraction,
+            owner: {
+                type: InteractionOwnerType.CHAT,
+                chat_id: data?.owner?.chat_id || '',
+                thread_id: data?.owner?.thread_id || ''
+            }
+        };
+    } else {
+        // Default to TASK_RESPONSE if type is missing or different
+        return {
+            ...baseInteraction,
+            owner: {
+                type: InteractionOwnerType.TASK_RESPONSE,
+                task_result_id: data?.owner?.task_result_id || ''
+            }
+        };
+    }
 };
 
-export const convertToPopulatedUserInteraction = (data: any): PopulatedUserInteraction => {
-    return {
-        ...convertToPopulatedEmbeddable(data),
-        owner: {
-            type: data?.owner?.type || InteractionOwnerType.TASK_RESPONSE,
-            id: data?.owner?.id || undefined
-        },
-        user_checkpoint_id: data?.user_checkpoint_id || undefined,
-        user_response: data?.user_response || undefined,
-    };
-}
 
 export interface UserInteractionComponentProps extends EnhancedComponentProps<UserInteraction | PopulatedUserInteraction> {
 }
 
-export interface PopulatedUserInteractionComponentProps extends EnhancedComponentProps<PopulatedUserInteraction> {
-}
+export const getDefaultUserInteractionForm = (ownerType: InteractionOwnerType = InteractionOwnerType.TASK_RESPONSE): Partial<PopulatedUserInteraction> => {
+    const baseForm = {
+        user_checkpoint_id: undefined,
+        user_response: undefined,
+    };
 
-export const getDefaultUserInteractionForm = (): Partial<PopulatedUserInteraction> => ({
-    owner: {
-        type: InteractionOwnerType.TASK_RESPONSE,
-        id: ''
-    },
-    user_checkpoint_id: undefined,
-    user_response: undefined,
-});
+    if (ownerType === InteractionOwnerType.CHAT) {
+        return {
+            ...baseForm,
+            owner: {
+                type: InteractionOwnerType.CHAT,
+                chat_id: '',
+                thread_id: ''
+            }
+        };
+    } else {
+        return {
+            ...baseForm,
+            owner: {
+                type: InteractionOwnerType.TASK_RESPONSE,
+                task_result_id: ''
+            }
+        };
+    }
+};

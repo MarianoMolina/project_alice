@@ -28,7 +28,6 @@ const EnhancedSelectOptionsDialog = () => {
   }, [enhancedOptionsDialogProps, closeEnhancedOptionsDialog]);
 
   const handleView = useCallback((item: CollectionElement) => {
-    Logger.info('Viewing item:', item);
     if (!enhancedOptionsDialogProps) return;
     const { componentType } = enhancedOptionsDialogProps;
     selectCardItem(componentType as CollectionElementString, item._id!);

@@ -443,26 +443,26 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             const result = await updateItem('userinteractions', interactionId, itemData);
 
             // If there's a user response and a task_response_id, check if we need to resume the task
-            if (result.user_response && result.owner.type === 'task_response' && result.owner.id) {
-                const taskResponse = await apiFetchItem('taskresults', result.owner.id) as TaskResponse;
+            if (result.user_response && result.owner.type === 'task_response' && result.owner.task_result_id) {
+                const taskResponse = await apiFetchItem('taskresults', result.owner.task_result_id) as TaskResponse;
 
                 if (taskResponse.status === 'pending') {
                     Logger.debug('Associated task is pending, attempting to resume with user response');
-                    await resumeTask(result.owner.id);
+                    await resumeTask(result.owner.task_result_id);
 
                     // Additional notification for task resumption
                     addNotification('Associated task resumed', 'info', 5000, {
                         label: 'View Task',
-                        onClick: () => selectCardItem('TaskResponse', result.owner.id)
+                        onClick: () => selectCardItem('TaskResponse', (result.owner as any).task_result_id)
                     });
                 }
             }
-            if (result.user_response && result.owner.type === 'chat' && result.owner.id) {
+            if (result.user_response && result.owner.type === 'chat' && result.owner.chat_id && result.owner.thread_id) {
                 Logger.debug('Associated chat is pending, attempting to resume with user response');
                 await resumeChat(result);
                 addNotification('Associated chat resumed', 'info', 5000, {
                     label: 'View Chat',
-                    onClick: () => selectCardItem('Chat', result.owner.id)
+                    onClick: () => selectCardItem('Chat', (result.owner as any).chat_id)
                 });
             }
             return result;

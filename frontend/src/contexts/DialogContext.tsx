@@ -262,15 +262,6 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
     setOnFlexibleDialogSaveState(callback as SavedItemCallback<CollectionElement | CollectionPopulatedElement>);
   }, []);
 
-  useEffect(() => {
-    Logger.info('onFlexibleDialogSave changed:', {
-      value: onFlexibleDialogSave,
-      type: typeof onFlexibleDialogSave,
-      isPromise: onFlexibleDialogSave instanceof Promise,
-      hasCallThenCatch: onFlexibleDialogSave && 'then' in onFlexibleDialogSave && 'catch' in onFlexibleDialogSave
-    });
-  }, [onFlexibleDialogSave]);
-
   const selectFlexibleItem = useCallback(<T extends CollectionPopulatedElement>(
     itemType: CollectionElementString,
     mode: 'create' | 'edit',
@@ -278,7 +269,6 @@ export const DialogProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
     item?: T,
     onSave?: SavedItemCallback<T>
   ) => {
-    Logger.info('DialogContext selectFlexibleItem called with onSave:', onSave);
     setSelectedFlexibleItemType(itemType);
     setFlexibleDialogMode(mode);
     if (onSave) {

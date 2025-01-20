@@ -102,7 +102,7 @@ export async function applyApiConfigFromMap(
 
         // Filter API names if provided
         const targetApiNames = apiNames || Object.keys(selectedMap) as ApiName[];
-        Logger.info(`Applying API configurations for user ${userId} using map ${mapName} for APIs:`, targetApiNames);
+        Logger.debug(`Applying API configurations for user ${userId} using map ${mapName} for APIs:`, targetApiNames);
         // Create map of API configurations to apply
         const apiConfigMap: { [key: string]: any } = {};
         for (const apiName of targetApiNames) {

@@ -3,6 +3,7 @@ from workflow.api_app.util.utils import deep_api_check
 from workflow.api_app.util.dependencies import get_db_app, get_queue_manager
 from workflow.util import LOGGER
 from workflow.core.data_structures import UserInteraction, InteractionOwnerType
+from workflow.core import AliceChat, ChatThread
 from workflow.api_app.util.utils import ChatResumeRequest
 
 router = APIRouter()
@@ -66,14 +67,20 @@ async def chat_resume(
             LOGGER.error(error_msg)
             raise HTTPException(status_code=500, detail=error_msg)
 
-        chat_id = user_interaction.owner.id
+        chat_id = user_interaction.owner.chat_id
+        thread_id = user_interaction.owner.thread_id
 
         # Get chat data
-        chat_data = await db_app.get_chat(chat_id)
+        chat_data: AliceChat = await db_app.get_chat(chat_id)
         if not chat_data:
             raise HTTPException(status_code=404, detail="Chat not found")
-
         LOGGER.debug(f'Retrieved chat data: {chat_data}')
+
+        thread_data: ChatThread = await db_app.get_chat_thread(thread_id)
+        if not thread_data:
+            raise HTTPException(status_code=404, detail="Thread not found")
+        
+        chat_data.messages = thread_data.messages
 
         # Get API manager
         api_manager = await db_app.api_setter()

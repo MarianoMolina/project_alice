@@ -295,7 +295,7 @@ class AliceChat(BaseDataStructure):
                 return []
 
             # Verify this interaction belongs to this chat
-            if interaction.owner.type != InteractionOwnerType.CHAT or interaction.owner.id != self.id:
+            if interaction.owner.type != InteractionOwnerType.CHAT or interaction.owner.chat_id != self.id:
                 LOGGER.error("Interaction does not belong to this chat")
                 return []
 

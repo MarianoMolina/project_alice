@@ -23,11 +23,13 @@ const UserInteractionCardView: React.FC<UserInteractionComponentProps> = ({
         return <Typography>No User Interaction data available.</Typography>;
     }
 
+    const ownerId = item.owner && item.owner.type === 'task_response' ? item.owner.task_result_id : item.owner && item.owner.type === 'chat' ? item.owner.chat_id : null;
+
     const handleViewOwner = () => {
         if (item.owner && item.owner.type === 'task_response') {
-            selectCardItem('TaskResponse', item.owner.id as string);
+            selectCardItem('TaskResponse', item.owner.task_result_id as string);
         } else if (item.owner && item.owner.type === 'chat') {
-            selectCardItem('Chat', item.owner.id as string);
+            selectCardItem('Chat', item.owner.chat_id as string);
         }
     };
 
@@ -85,7 +87,7 @@ const UserInteractionCardView: React.FC<UserInteractionComponentProps> = ({
     const ownerType = item.owner?.type === 'task_response' ? 'Task Response' : item.owner?.type === 'chat' ? 'Chat' : 'Unknown';
     const ownerComponent = item.owner ? (
         <Typography variant="body1" onClick={handleViewOwner} style={{ cursor: 'pointer' }}>
-            {ownerType} - {item.owner.id}
+            {ownerType} - {ownerId}
         </Typography>
     ) : (
         <Typography variant="body1">No owner available</Typography>

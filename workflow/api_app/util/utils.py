@@ -13,14 +13,9 @@ class TaskExecutionRequest(BaseModel):
     taskId: str
     inputs: Dict[str, Any]
 
-class ChatResponseRequest(BaseModel):
-    chat_id: str
-    thread_id: str
-
 class ChatResumeRequest(BaseModel):
     """Request model for resuming a chat interaction."""
     interaction_id: str
-    thread_id: str
     
 class FileTranscriptRequest(BaseModel):
     file_id: str

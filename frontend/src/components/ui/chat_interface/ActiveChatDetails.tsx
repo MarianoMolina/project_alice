@@ -86,7 +86,6 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({ onThreadSelected 
   }, [addThread]);
 
   const handleCreateThread = useCallback(() => {
-    Logger.info('handleCreateThread: About to call selectFlexibleItem with callback:', localOnSaveNew);
     selectFlexibleItem(
       'ChatThread',
       'create',
@@ -112,7 +111,6 @@ const ActiveChatDetails: React.FC<ActiveChatDetailsProps> = ({ onThreadSelected 
   }, [selectEnhancedOptions, addThread]);
 
   const handleViewThread = useCallback((thread: PopulatedChatThread | ChatThread) => {
-    Logger.info('Viewing thread:', thread);
     if (thread._id) {
       selectCardItem('ChatThread', thread._id);
     }

@@ -15,7 +15,7 @@ import {
   CheckCircle as CheckIcon,
   PendingActions as PendingIcon,
 } from '@mui/icons-material';
-import { UserInteractionComponentProps } from '../../../../types/UserInteractionTypes';
+import { InteractionOwnerType, UserInteractionComponentProps } from '../../../../types/UserInteractionTypes';
 import CustomMarkdown from '../../../ui/markdown/CustomMarkdown';
 import { useDialog } from '../../../../contexts/DialogContext';
 import { useApi } from '../../../../contexts/ApiContext';
@@ -29,11 +29,13 @@ const UserInteractionViewer: React.FC<UserInteractionComponentProps> = ({ item }
   if (!interaction) return null;
 
   const handleViewOwner = () => {
-    if (interaction.owner?.id) {
-      selectCardItem(
-        interaction.owner.type === 'task_response' ? 'TaskResponse' : 'Chat',
-        interaction.owner.id
-      );
+    const owner = interaction.owner;
+    
+    if (owner.type === InteractionOwnerType.TASK_RESPONSE && owner.task_result_id) {
+      selectCardItem('TaskResponse', owner.task_result_id);
+    } else if (owner.type === InteractionOwnerType.CHAT && owner.chat_id) {
+      // Assuming you want to navigate to the specific chat and thread
+      selectCardItem('Chat', owner.chat_id);
     }
   };
 

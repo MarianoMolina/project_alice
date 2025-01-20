@@ -178,7 +178,7 @@ export class UserStatsManager {
                 { upsert: true }
             );
 
-            Logger.info('Incremented actions taken', {
+            Logger.debug('Incremented actions taken', {
                 userId,
                 success: true,
                 wasInitialized: result.upsertedCount > 0

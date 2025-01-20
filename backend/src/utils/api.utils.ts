@@ -119,20 +119,20 @@ export function validateApiData(data: any, api_name: ApiName): boolean {
         case ApiName.DEEPSEEK:
         case ApiName.CUSTOM:
             return (
-                typeof data.api_key === 'string' &&
+                (data.api_key === null || typeof data.api_key === 'string') &&
                 typeof data.base_url === 'string'
             );
 
         case ApiName.GOOGLE_SEARCH:
             return (
-                typeof data.api_key === 'string' &&
-                typeof data.cse_id === 'string'
+                (data.api_key === null || typeof data.api_key === 'string') &&
+                (data.cse_id === null || typeof data.cse_id === 'string')
             );
 
         case ApiName.REDDIT_SEARCH:
             return (
-                typeof data.client_id === 'string' &&
-                typeof data.client_secret === 'string'
+                (data.client_id === null || typeof data.client_id === 'string') &&
+                (data.client_secret === null || typeof data.client_secret === 'string')
             );
 
         case ApiName.WIKIPEDIA_SEARCH:
@@ -143,10 +143,10 @@ export function validateApiData(data: any, api_name: ApiName): boolean {
 
         case ApiName.EXA_SEARCH:
         case ApiName.GOOGLE_KNOWLEDGE_GRAPH:
-            return typeof data.api_key === 'string';
+            return (data.api_key === null || typeof data.api_key === 'string');
 
         case ApiName.WOLFRAM_ALPHA:
-            return typeof data.app_id === 'string';
+            return (data.app_id === null || typeof data.app_id === 'string');
 
         case ApiName.LM_STUDIO:
             return typeof data.base_url === 'string';

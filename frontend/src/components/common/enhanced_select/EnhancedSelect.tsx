@@ -41,7 +41,6 @@ function EnhancedSelect<T extends CollectionType[CollectionName]>({
   const [items, setItems] = React.useState<T[]>(selectedItems);
   const collectionElementString = collectionNameToElementString[componentType] as CollectionElementString;
   const elementEnhanced = collectionNameToEnhancedComponent[componentType];
-  Logger.info('EnhancedSelect - selected items:', items, selectedItems);
 
   const localOnSelect = useCallback((selectedItems: T[]) => {
     setItems(selectedItems);

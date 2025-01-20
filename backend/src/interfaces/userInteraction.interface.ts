@@ -4,6 +4,7 @@ import { IUserCheckpointDocument } from "./userCheckpoint.interface";
 import { ITaskResultDocument } from "./taskResult.interface";
 import { Embeddable } from "./embeddingChunk.interface";
 import { IAliceChatDocument } from "./chat.interface";
+import { IChatThreadDocument } from "./thread.interface";
 
 // Enum for interaction owner types
 export enum InteractionOwnerType {
@@ -11,11 +12,26 @@ export enum InteractionOwnerType {
     CHAT = "chat"
 }
 
-// Interface for the owner structure
-export interface InteractionOwner {
+// Base interface for owner properties
+interface BaseOwner {
     type: InteractionOwnerType;
-    id: Types.ObjectId | ITaskResultDocument | IAliceChatDocument;
 }
+
+// Task response owner interface
+interface TaskResponseOwner extends BaseOwner {
+    type: InteractionOwnerType.TASK_RESPONSE;
+    task_result_id: Types.ObjectId | ITaskResultDocument;
+}
+
+// Chat owner interface
+interface ChatOwner extends BaseOwner {
+    type: InteractionOwnerType.CHAT;
+    chat_id: Types.ObjectId | IAliceChatDocument;
+    thread_id: Types.ObjectId | IChatThreadDocument;
+}
+
+// Union type for all possible owners
+export type InteractionOwner = TaskResponseOwner | ChatOwner;
 
 // User response interface (unchanged)
 export interface UserResponse {

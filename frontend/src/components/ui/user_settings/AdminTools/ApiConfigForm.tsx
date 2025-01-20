@@ -25,7 +25,6 @@ export const AdminApiConfigForm: React.FC<AdminApiConfigFormProps> = ({
   initialEnabledApis,
   onSave,
 }) => {
-  Logger.info('AdminApiConfigForm rendered with initialConfig:', initialConfig);
   const [apiConfig, setApiConfig] = useState<ApiConfigType>(
     initialConfig || initializeApiConfigMap()
   );
@@ -33,7 +32,6 @@ export const AdminApiConfigForm: React.FC<AdminApiConfigFormProps> = ({
   // Add this useEffect to update local state when props change
   useEffect(() => {
     if (initialConfig) {
-      Logger.info('Updating apiConfig from new initialConfig:', initialConfig);
       setApiConfig(initialConfig);
     }
   }, [initialConfig]);

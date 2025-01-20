@@ -166,7 +166,7 @@ export const deleteItem = async <T extends CollectionName>(
 
 export const purgeAndReinitializeDatabase = async (): Promise<void> => {
   try {
-    Logger.info('Purging and reinitializing database');
+    Logger.debug('Purging and reinitializing database');
     const response = await dbAxiosInstance.post('/users/purge-and-reinitialize');
     Logger.debug('Database purged and reinitialized:', response.data.message);
   } catch (error) {
@@ -291,10 +291,10 @@ export const getAdminApiConfigMap = async (
   mapName: string = 'upgrade_admin_api_key_map'
 ): Promise<ApiConfigType> => {
   try {
-    Logger.info('Fetching admin API key map:', mapName);
+    Logger.debug('Fetching admin API key map:', mapName);
     const response = await dbAxiosInstance.get(`/users/api-config-map/${mapName}`);
-    Logger.info('Received admin API key map:', response.data);
-    Logger.info('Config:', response.data.configs);
+    Logger.debug('Received admin API key map:', response.data);
+    Logger.debug('Config:', response.data.configs);
     return response.data.configs;
   } catch (error) {
     Logger.error('Error fetching admin API key map:', error);

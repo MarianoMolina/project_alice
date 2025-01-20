@@ -186,7 +186,7 @@ function BaseDbElement<T extends CollectionType[CollectionName] | CollectionPopu
   }, [items, filters, applyFilters]);
 
   useEffect(() => {
-    Logger.info('BaseDbElement fetchdata useEffect', { collectionName, itemId, fetchAll });
+    Logger.debug('BaseDbElement fetchdata useEffect', { collectionName, itemId, fetchAll });
     fetchData();
 
     // Subscribe to events

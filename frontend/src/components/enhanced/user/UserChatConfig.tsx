@@ -69,7 +69,6 @@ export const ChatConfig: React.FC<ChatConfigProps> = ({
                     typeof editedUser.default_chat_config.data_cluster === 'string' ?
                         fetchPopulatedItem('dataclusters', editedUser.default_chat_config.data_cluster) : undefined
                     : undefined]);
-            Logger.info('ChatConfig', { agent, agentTools, retrievalTools, toolCallCheckpoint, codeExecCheckpoint, dataCluster });
             setPopulatedItems({
                 agent: agent as AliceAgent,
                 agentTools: agentTools as PopulatedTask[],

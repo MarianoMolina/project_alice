@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional, Any, Union
+from typing import Optional, Any, Union, Annotated
 from pydantic import BaseModel, Field, field_validator
 from workflow.core.data_structures.base_models import Embeddable
 from workflow.core.data_structures.user_checkpoint import UserCheckpoint
@@ -8,11 +8,34 @@ class InteractionOwnerType(str, Enum):
     TASK_RESPONSE = "task_response"
     CHAT = "chat"
 
-class InteractionOwner(BaseModel):
+class BaseOwner(BaseModel):
     type: InteractionOwnerType
-    id: str
 
-    @field_validator('id')
+    model_config = {'extra':'forbid'}
+
+class TaskResponseOwner(BaseOwner):
+    type: InteractionOwnerType = InteractionOwnerType.TASK_RESPONSE
+    task_result_id: str
+
+    @field_validator('task_result_id')
+    @classmethod
+    def validate_task_result_id(cls, value: Union[str, dict, Any]) -> str:
+        if isinstance(value, str):
+            return value
+        
+        if isinstance(value, dict):
+            id_value = value.get('_id') or value.get('id')
+            if id_value:
+                return str(id_value)
+        
+        raise ValueError("Could not extract task_result_id. Expected string or object with '_id' or 'id' field")
+    
+class ChatOwner(BaseOwner):
+    type: InteractionOwnerType = InteractionOwnerType.CHAT
+    chat_id: str
+    thread_id: str
+
+    @field_validator('chat_id', 'thread_id')
     @classmethod
     def validate_id(cls, value: Union[str, dict, Any]) -> str:
         if isinstance(value, str):
@@ -23,7 +46,9 @@ class InteractionOwner(BaseModel):
             if id_value:
                 return str(id_value)
         
-        raise ValueError("Could not extract ID from owner. Expected string or object with '_id' or 'id' field")
+        raise ValueError("Could not extract ID. Expected string or object with '_id' or 'id' field")
+
+InteractionOwner = Annotated[Union[TaskResponseOwner, ChatOwner], Field(discriminator='type')]
     
 class UserResponse(BaseModel):
     selected_option: int
@@ -50,7 +75,10 @@ class UserInteraction(Embeddable):
     def __str__(self) -> str:
         string = ''
         if self.owner:
-            string += f"Owner: {self.owner.type}:{self.owner.id}\n"
+            if isinstance(self.owner, ChatOwner):
+                string += f"Owner: {self.owner.type}:{self.owner.chat_id} (thread: {self.owner.thread_id})\n"
+            else:
+                string += f"Owner: {self.owner.type}:{self.owner.task_result_id}\n"
         string += f"UserCheckpointId: {self.user_checkpoint_id.id}\n"
         if self.user_response:
             string += f"UserResponse: \n{str(self.user_response)}"
@@ -62,3 +90,20 @@ class UserInteraction(Embeddable):
         data = super().model_dump(*args, **kwargs)
         data['user_checkpoint_id'] = self.user_checkpoint_id.model_dump(*args, **kwargs)
         return data
+    
+    @field_validator('owner')
+    @classmethod
+    def validate_owner(cls, value: Any) -> Optional[Union[TaskResponseOwner, ChatOwner]]:
+        if value is None:
+            return None
+            
+        if isinstance(value, (TaskResponseOwner, ChatOwner)):
+            return value
+            
+        if isinstance(value, dict):
+            owner_type = value.get('type')
+            if owner_type == InteractionOwnerType.CHAT:
+                return ChatOwner(**value)
+            return TaskResponseOwner(**value)
+            
+        raise ValueError("Invalid owner format")

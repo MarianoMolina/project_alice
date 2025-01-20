@@ -16,9 +16,26 @@ const userInteractionSchema = new Schema<IUserInteractionDocument, IUserInteract
             enum: Object.values(InteractionOwnerType),
             required: true
         },
-        id: {
+        task_result_id: {
             type: Schema.Types.ObjectId,
-            required: true
+            ref: 'TaskResult',
+            required: function(this: any) {
+                return this.owner?.type === InteractionOwnerType.TASK_RESPONSE;
+            }
+        },
+        chat_id: {
+            type: Schema.Types.ObjectId,
+            ref: 'AliceChat',
+            required: function(this: any) {
+                return this.owner?.type === InteractionOwnerType.CHAT;
+            }
+        },
+        thread_id: {
+            type: Schema.Types.ObjectId,
+            ref: 'ChatThread',
+            required: function(this: any) {
+                return this.owner?.type === InteractionOwnerType.CHAT;
+            }
         }
     },
     user_response: {
@@ -78,8 +95,14 @@ function ensureObjectId(
     if (this.user_checkpoint_id) {
         this.user_checkpoint_id = getObjectId(this.user_checkpoint_id, { ...context, field: 'user_checkpoint_id' });
     }
-    if (this.owner?.id) {
-        this.owner.id = getObjectId(this.owner.id, { ...context, field: 'owner.id' });
+    if ('task_result_id' in this.owner && this.owner?.task_result_id) {
+        this.owner.task_result_id = getObjectId(this.owner.task_result_id, { ...context, field: 'owner.task_result_id' });
+    }
+    if ('chat_id' in this.owner && this.owner?.chat_id) {
+        this.owner.chat_id = getObjectId(this.owner.chat_id, { ...context, field: 'owner.chat_id' });
+    }
+    if ('thread_id' in this.owner && this.owner?.thread_id) {
+        this.owner.thread_id = getObjectId(this.owner.thread_id, { ...context, field: 'owner.thread_id' });
     }
     if (this.embedding) this.embedding = getObjectIdForList(this.embedding, { ...context, field: 'embedding' });
     if (this.created_by) {

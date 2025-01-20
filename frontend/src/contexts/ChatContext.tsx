@@ -153,7 +153,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         try {
             setLoading(true);
             const chatData = await fetchChatById(chatId);
-            Logger.info('Selected chat:', chatId, chatData);
             resetChat({ resetThread: true });
             setCurrentChat(chatData);
             setCurrentChatId(chatId);
@@ -322,7 +321,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
                 addNotification('Thread already in chat', 'warning');
                 return Logger.warn('Thread already in chat');
             }
-            Logger.info('Adding thread to chat:', threadId);
             // Add thread
             setLoading(true);
             await addThreadToChat(currentChatId, threadId);

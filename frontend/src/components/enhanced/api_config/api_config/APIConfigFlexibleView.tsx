@@ -46,7 +46,6 @@ const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
                     base_url: API_BASE_URLS[defaultForm.api_name as ApiName] || '',
                 }
             }
-            Logger.info('Setting default form values:', defaultForm);
             setForm(defaultCompleteForm);
             onChange(defaultCompleteForm);
         }

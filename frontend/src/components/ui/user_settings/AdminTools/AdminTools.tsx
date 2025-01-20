@@ -42,7 +42,7 @@ export const AdminTools: React.FC = () => {
     // Load data based on selected map
     const loadData = useCallback(async (mapName: string) => {
         setUpdateLoading(true);
-        Logger.info('Starting data load for map:', mapName);
+        Logger.debug('Starting data load for map:', mapName);
         
         try {
             const [usersData, config] = await Promise.all([
@@ -50,16 +50,16 @@ export const AdminTools: React.FC = () => {
                 getAdminApiConfigMap(mapName)
             ]);
             
-            Logger.info('Users loaded:', usersData);
-            Logger.info('Config loaded:', config);
+            Logger.debug('Users loaded:', usersData);
+            Logger.debug('Config loaded:', config);
             
             setUsers(usersData);
             
             if (config) {
-                Logger.info('Setting config state:', config);
+                Logger.debug('Setting config state:', config);
                 setApiConfig(config);
                 const newEnabledApis = new Set(Object.keys(config) as ApiName[]);
-                Logger.info('Setting enabled APIs:', Array.from(newEnabledApis));
+                Logger.debug('Setting enabled APIs:', Array.from(newEnabledApis));
                 setEnabledApis(newEnabledApis);
             }
         } catch (error) {
@@ -67,7 +67,7 @@ export const AdminTools: React.FC = () => {
             addNotification('Failed to load data', 'error');
         } finally {
             setUpdateLoading(false);
-            Logger.info('Loading complete');
+            Logger.debug('Loading complete');
         }
     }, [fetchItem, addNotification, getAdminApiConfigMap]);
 

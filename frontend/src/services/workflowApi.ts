@@ -57,7 +57,7 @@ export const resumeChat = async (interaction: UserInteraction): Promise<AliceCha
         if (interaction.owner.type !== InteractionOwnerType.CHAT) {
             throw new Error(`Cannot resume interaction with owner type: ${interaction.owner.type}. Expected: ${InteractionOwnerType.CHAT}`);
         }
-        if (!interaction.owner.id) {
+        if (!interaction.owner.chat_id || !interaction.owner.thread_id) {
             throw new Error('Chat interaction does not have an owner ID');
         }
 
@@ -74,7 +74,7 @@ export const resumeChat = async (interaction: UserInteraction): Promise<AliceCha
         const updatedChat = await new Promise<AliceChat>((resolve, reject) => {
             setupWebSocketConnection(taskId, async (message: any) => {
                 if (message.status === 'completed') {
-                    const chatId = interaction.owner.id;
+                    const chatId = (interaction.owner as any).chat_id;
                     const updatedChatData = await fetchItem('chats', chatId) as AliceChat;
                     resolve(convertToAliceChat(updatedChatData));
                 } else if (message.status === 'failed') {
