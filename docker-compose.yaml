@@ -1,8 +1,6 @@
 services:
   frontend:
-    build:
-      context: .
-      dockerfile: frontend/Dockerfile.dev
+    image: ${REGISTRY_PATH}/frontend:latest
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT_DOCKER}"
     depends_on:
@@ -10,55 +8,53 @@ services:
         condition: service_healthy
       workflow:
         condition: service_healthy
-    volumes:
-      - ./frontend:/app:consistent
-      - /app/node_modules
-      - /app/dist
     environment:
+      NODE_ENV: ${NODE_ENV:-production}
       PORT: ${FRONTEND_PORT_DOCKER:-3000}
-    env_file:
-      - .env
+      CI: "true"
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.dev
+    image: ${REGISTRY_PATH}/backend:latest
     ports:
       - "${REACT_APP_BACKEND_PORT}:${BACKEND_PORT_DOCKER}"
+    env_file:
+      - .env
     depends_on:
       mongo:
         condition: service_started
       volume-init:
         condition: service_completed_successfully
-    env_file:
-      - .env
     volumes:
-      - ./backend:/app
-      - /app/node_modules
-      - /app/dist
       - logs:/app/logs
       - shared-uploads:/app/shared-uploads
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
+      NODE_ENV: ${NODE_ENV:-production}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://${REACT_APP_BACKEND_HOST:-backend}:${BACKEND_PORT_DOCKER}/api/health"]
+      test: ["CMD", "curl", "-f", "http://${REACT_APP_BACKEND_HOST:-localhost}:${BACKEND_PORT_DOCKER}/api/health"]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 10s
 
+  redis:
+    image: redis:6.0-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   workflow:
-    build:
-      context: ./workflow
-      dockerfile: Dockerfile.dev
+    image: ${REGISTRY_PATH}/workflow:latest
     env_file:
       - .env
     ports:
       - "${REACT_APP_WORKFLOW_PORT}:${WORKFLOW_PORT_DOCKER}"
     volumes:
-      - ./workflow:/app/workflow:consistent  
       - /var/run/docker.sock:/var/run/docker.sock
       - logs:/app/logs
       - shared-uploads:/app/shared-uploads:ro
@@ -75,45 +71,34 @@ services:
     environment:
       - PYTHONPATH=/app
       - REDIS_URL=redis://redis:6379/0
-      - WATCHDOG_POLLING=true
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://${REACT_APP_WORKFLOW_HOST:-workflow}:${WORKFLOW_PORT_DOCKER}/health"]
+      test: ["CMD", "curl", "-f", "http://${REACT_APP_WORKFLOW_HOST:-localhost}:${WORKFLOW_PORT_DOCKER}/health"]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 5s
 
-  redis:
-    image: redis:6.0-alpine
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
   volume-init:
-      image: busybox
-      attach: false
-      volumes:
-        - ${COMPOSE_PROJECT_DIR}/logs:/logs
-        - ${COMPOSE_PROJECT_DIR}/shared-uploads:/shared-uploads
-        - ${COMPOSE_PROJECT_DIR}/model_cache:/model_cache
-      command: |
-        sh -c "
-          echo 'Starting volume initialization' &&
-          ls -la / &&
-          echo 'Creating directories' &&
-          mkdir -p /logs /shared-uploads /model_cache &&
-          echo 'Setting permissions' &&
-          chmod -R 755 /logs /shared-uploads /model_cache &&
-          chown -R 1000:1000 /logs /shared-uploads /model_cache &&
-          echo 'Finished volume initialization' &&
-          ls -la /logs /shared-uploads /model_cache
-        "
+    image: busybox
+    attach: false
+    volumes:
+      - ${COMPOSE_PROJECT_DIR}/logs:/logs
+      - ${COMPOSE_PROJECT_DIR}/shared-uploads:/shared-uploads
+      - ${COMPOSE_PROJECT_DIR}/model_cache:/model_cache 
+    command: |
+      sh -c "
+        echo 'Starting volume initialization' &&
+        ls -la / &&
+        echo 'Creating directories' &&
+        mkdir -p /logs /shared-uploads /model_cache &&
+        echo 'Setting permissions' &&
+        chmod -R 755 /logs /shared-uploads /model_cache &&
+        chown -R 1000:1000 /logs /shared-uploads /model_cache &&
+        echo 'Finished volume initialization' &&
+        ls -la /logs /shared-uploads /model_cache 
+      "
 
   mongo:
     image: mongo:latest
@@ -124,24 +109,15 @@ services:
     attach: false
 
   python_image:
-    build:
-      context: .
-      dockerfile: workflow/Dockerfile.python
-    image: mypython:latest
+    image: ${REGISTRY_PATH}/mypython:latest
     command: ["bash"]
 
   bash_image:
-    build:
-      context: .
-      dockerfile: workflow/Dockerfile.bash
-    image: mybash:latest
+    image: ${REGISTRY_PATH}/mybash:latest
     command: ["bash"]
 
   javascript_image:
-    build:
-      context: .
-      dockerfile: workflow/Dockerfile.javascript
-    image: myjs:latest
+    image: ${REGISTRY_PATH}/myjs:latest
     command: ["bash"]
 
 volumes:

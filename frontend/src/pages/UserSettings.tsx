@@ -67,10 +67,6 @@ const UserSettings: React.FC<UserSettingsProps> = ({ setHasUnsavedChanges }) => 
         switch (activeTab) {
             case 'Personal information':
                 return (
-                    // <PersonalInformation
-                    //     userObject={userObject}
-                    //     setUserObject={setUserObject}
-                    // />
                     <UserDetail
                         user={userObject}
                         initialEditState={false}

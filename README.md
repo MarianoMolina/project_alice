@@ -1,7 +1,9 @@
 # Alice: Advanced Language Intelligence and Cognitive Engine
-*Version 0.3.10 (alpha)*
+*Version 0.3.11 (alpha)*
 
 ![Alice LOGO](/frontend/public/logo_alice.ico)
+
+[Live preview - ProjectAlice @ my personal domain](https://marianomolina.me)
 
 Alice is an agentic workflow framework that integrates task execution and intelligent chat capabilities. It provides a flexible environment for creating, managing, and deploying AI agents for various purposes, leveraging a microservices architecture with MongoDB for data persistence.
 
@@ -36,6 +38,15 @@ Alice is an agentic workflow framework that integrates task execution and intell
 > v0.3.10:
 > - BACKEND:
 >  - Added encryption to most reference objects. You will need to restart your DB if you update to this version. 
+
+> v0.3.11:
+> - THREADS:
+>  - Now chats have message threads, instead of messages, allowing a single chat to have any number of "threads" or conversations in it
+>  - Allows threads to be used in multiple chats, including back and forth: you start a chat, at some point you want to get input from a different agent/model/chat combo, so you add the thread to another chat and regenerate the answer (or ask a follow up request). 
+>  - Now you don't need to create a new chat to start a new conversation either -> just create a new thread and start from scratch
+> - ADMIN:
+>  - Implementend the first version of an Admin role and functions. First user in a local implementation is admin, and can manage other users. 
+>  - For now its mostly about being able to deploy API keys after the initial account creation. 
 
 > What's next? Planned developments for v0.4 (find detailed info below):
 > - Agent using computer
