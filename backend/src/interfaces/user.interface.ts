@@ -27,6 +27,7 @@ export interface IUserStats {
     log_in_successes: number;
     last_log_in_success: Date | null;
     actions_taken: number;
+    interested_in_premium?: boolean;
 }
 
 // Update the IUser interface

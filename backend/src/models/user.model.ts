@@ -39,6 +39,10 @@ const userStatsSchema = new Schema({
   actions_taken: {
     type: Number,
     default: 0
+  },
+  interested_in_premium: {
+    type: Boolean,
+    default: false
   }
 }, { _id: false });
 
@@ -57,7 +61,8 @@ const userSchema = new Schema<IUserDocument, IUserModel>({
       last_log_in_attempt: null,
       log_in_successes: 0,
       last_log_in_success: null,
-      actions_taken: 0
+      actions_taken: 0,
+      interested_in_premium: false
     })
   }
 }, {

@@ -16,6 +16,7 @@ import StructuredStorage from '../models/structuredStorage.model';
 import { StructureType } from '../interfaces/structuredStorage.interface';
 import { createUserWithRole, UserStatsManager } from '../utils/user.utils';
 import { ApiConfigType, ApiName } from '../utils/api.utils';
+import { UserTier } from '../interfaces/user.interface';
 
 const router: Router = express.Router();
 
@@ -393,5 +394,75 @@ router.get(
     }
   }
 );
+
+router.patch('/:id/stats', userSelfOrAdmin, async (req: AuthRequest, res: Response) => {
+  try {
+    const { user_tier, interested_in_premium } = req.body;
+    
+    // Validate user_tier if provided
+    if (user_tier !== undefined) {
+      // Only admins can update user tier
+      if (req.user?.role !== 'admin') {
+        return res.status(403).json({ message: 'Only administrators can update user tier' });
+      }
+      
+      if (!Object.values(UserTier).includes(user_tier)) {
+        return res.status(400).json({ 
+          message: 'Invalid user tier', 
+          validTiers: Object.values(UserTier)
+        });
+      }
+    }
+
+    // Validate interested_in_premium if provided
+    if (interested_in_premium !== undefined && typeof interested_in_premium !== 'boolean') {
+      return res.status(400).json({ 
+        message: 'interested_in_premium must be a boolean value'
+      });
+    }
+
+    // Build update object with only provided fields
+    const updateData: { [key: string]: any } = {};
+    
+    if (user_tier !== undefined) {
+      updateData['stats.user_tier'] = user_tier;
+    }
+    
+    if (interested_in_premium !== undefined) {
+      updateData['stats.interested_in_premium'] = interested_in_premium;
+    }
+
+    // If no valid fields to update
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ 
+        message: 'No valid fields to update'
+      });
+    }
+
+    // Update the user stats
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: updateData },
+      { 
+        new: true,
+        runValidators: true
+      }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Log the stats update
+    Logger.debug(`Updated stats for user ${user.email}:`, updateData);
+
+    res.json({
+      message: 'User stats updated successfully',
+      user: user.apiRepresentation()
+    });
+  } catch (error) {
+    handleErrors(res, error);
+  }
+});
 
 export default router;

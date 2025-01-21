@@ -9,6 +9,7 @@ import { ApiName } from '../types/ApiTypes';
 import { ApiConfigType } from '../utils/ApiUtils';
 import Logger from '../utils/Logger';
 import { convertToPopulatedChatThread, PopulatedChatThread } from '../types/ChatThreadTypes';
+import { User, UserTier } from '../types/UserTypes';
 
 export interface LMStudioModel {
   id: string;
@@ -88,6 +89,7 @@ export const fetchItem = async <T extends CollectionName>(
     throw error;
   }
 };
+
 export const fetchPopulatedItem = async <T extends CollectionName>(
   collectionName: T,
   itemId: string | null = null
@@ -332,6 +334,28 @@ export const updateAdminApiKeyMap = async (
     Logger.debug('Successfully updated admin API key map:', response.data);
   } catch (error) {
     Logger.error('Error updating admin API key map:', error);
+    throw error;
+  }
+}
+
+export interface UpdateUserStatsRequest {
+  user_tier?: UserTier;
+  interested_in_premium?: boolean;
+}
+
+export const updateUserStats = async (
+  userId: string,
+  updateData: UpdateUserStatsRequest
+): Promise<User> => {
+  try {
+    Logger.debug('Updating user stats:', JSON.stringify(updateData));
+    const response = await dbAxiosInstance.patch(
+      `/users/${userId}/stats`, 
+      updateData
+    );
+    return converters['users'](response.data.user) as CollectionType['users'];
+  } catch (error) {
+    Logger.error('Error updating user stats:', error);
     throw error;
   }
 }

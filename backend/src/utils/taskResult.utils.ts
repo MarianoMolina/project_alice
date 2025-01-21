@@ -75,7 +75,7 @@ async function processUserInteractionsInReferences(
         if (interaction && typeof interaction === 'object' && !interaction.owner) {
           interaction.owner =  {
             type: InteractionOwnerType.TASK_RESPONSE,
-            id: new Types.ObjectId(taskResultId)
+            task_result_id: new Types.ObjectId(taskResultId)
           }
         } else {
           Logger.warn(`Skipping invalid user interaction at ${path} - ${JSON.stringify(interaction)}`);

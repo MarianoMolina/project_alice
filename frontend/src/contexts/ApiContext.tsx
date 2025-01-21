@@ -19,6 +19,8 @@ import {
     getAdminApiConfigMap as apiGetAdminApiConfigMap,
     addThreadToChat as apiAddThreadToChat,
     removeThreadFromChat as apiRemoveThreadFromChat,
+    updateUserStats as apiUpdateUserStats,
+    UpdateUserStatsRequest,
 } from '../services/api';
 import {
     executeTask as apiExecuteTask,
@@ -46,6 +48,7 @@ import { ApiName } from '../types/ApiTypes';
 import { ApiConfigType, initializeApiConfigMap } from '../utils/ApiUtils';
 import { AxiosError } from 'axios';
 import { PopulatedChatThread } from '../types/ChatThreadTypes';
+import { User } from '../types/UserTypes';
 
 interface ApiContextType {
     fetchItem: typeof apiFetchItem;
@@ -74,6 +77,7 @@ interface ApiContextType {
     applyApiConfigToUser: typeof apiApplyApiConfigToUser;
     updateAdminApiKeyMap: typeof apiUpdateAdminApiKeyMap;
     getAdminApiConfigMap: typeof apiGetAdminApiConfigMap;
+    updateUserStats: typeof apiUpdateUserStats;
     updateUserInteraction: (
         interactionId: string,
         itemData: Partial<UserInteraction>
@@ -94,7 +98,7 @@ export const useApi = () => {
 export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { addNotification } = useNotification();
     const { selectCardItem, openDialog } = useDialog();
-    const { refreshUserData, isAdmin } = useAuth();
+    const { refreshUserData, isAdmin, storeUserData } = useAuth();
 
     const emitEvent = (eventType: string, collectionName: CollectionName, item: any) => {
         globalEventEmitter.emit(`${eventType}:${collectionName}`, item);
@@ -543,6 +547,19 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     }, [addNotification]);
 
+    const updateUserStats = useCallback(async (userId: string, updateData: UpdateUserStatsRequest): Promise<User> => {
+        try {
+            const userData = await apiUpdateUserStats(userId, updateData);
+            storeUserData(userData);
+            addNotification('User stats updated successfully', 'success');
+            return userData;
+        } catch (error) {
+            addNotification('Error updating user stats', 'error');
+            Logger.error('Error updating user stats:', error);
+            throw error;
+        }
+    }, [addNotification]);
+
     const value: ApiContextType = {
         fetchItem,
         createItem,
@@ -572,6 +589,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         applyApiConfigToUser,
         updateAdminApiKeyMap,
         getAdminApiConfigMap,
+        updateUserStats,
     };
 
     return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>;

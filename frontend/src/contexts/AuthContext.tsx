@@ -11,6 +11,7 @@ interface AuthContextProps {
   initializingDatabase: boolean;
   needsOnboarding: boolean;
   setNeedsOnboarding: (value: boolean) => void;
+  storeUserData: (userData: User) => void;
   user: User | null;
   refreshUserData: () => Promise<void>;
   loading: boolean;
@@ -65,14 +66,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userToSave = userData.user
       const token = userData.token
 
-      localStorage.setItem('user', JSON.stringify(userToSave));
-      if (token) localStorage.setItem('token', token);
-
-      setUser(userToSave);
-      if (userToSave.role === 'admin') setIsAdmin(true);
-      setIsAuthenticated(true);
+      if (userToSave) storeUserData(userToSave);
+      if (token) storeToken(token);
     } catch (error) {
       Logger.error('Error saving user data:', error);
+    }
+  }, []);
+
+  const storeToken = useCallback((token: string) => {
+    try {
+      localStorage.setItem('token', token);
+    } catch (error) {
+      Logger.error('Error storing token:', error);
+    }
+  }, []);
+
+  const storeUserData = useCallback((userData: User) => {
+    try {
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+      if (userData.role === 'admin') setIsAdmin(true);
+      setIsAuthenticated(true);
+    } catch (error) {
+      Logger.error('Error storing user data:', error);
     }
   }, []);
 
@@ -176,7 +192,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   return (
     <AuthContext.Provider value={{
       isAuthenticated, initializingDatabase, needsOnboarding, isAdmin,
-      setNeedsOnboarding,
+      setNeedsOnboarding, storeUserData,
       user, loading, login, loginAndNavigate, register, logout,
       getToken, updateUser, refreshUserData, loginWithGoogle
     }}>

@@ -12,7 +12,6 @@ import {
 import { Save } from '@mui/icons-material';
 import { API_CAPABILITIES, ApiConfigType, apiNameIcons, initializeApiConfigMap } from '../../../../utils/ApiUtils';
 import { ApiName } from '../../../../types/ApiTypes';
-import Logger from '../../../../utils/Logger';
 
 interface AdminApiConfigFormProps {
   initialConfig?: ApiConfigType;

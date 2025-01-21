@@ -29,6 +29,7 @@ export interface UserStats {
     log_in_successes: number;
     last_log_in_success: Date | null;
     actions_taken: number;
+    interested_in_premium?: boolean;
 }
 
 export enum UserRole {
@@ -42,6 +43,7 @@ export interface User extends BasicDBObj {
     role?: UserRole;
     default_chat_config?: UserDefaultChatConfig;
     stats?: UserStats;
+    creationMethod?: CreationMethod;
 }
 
 export const defaultUserStats = () => ({
@@ -50,7 +52,8 @@ export const defaultUserStats = () => ({
     last_log_in_attempt: null,
     log_in_successes: 0,
     last_log_in_success: null,
-    actions_taken: 0
+    actions_taken: 0, 
+    interested_in_premium: false
 })
 
 export const converToUserDefaultChatConfig = (data: any): UserDefaultChatConfig => {
@@ -70,6 +73,7 @@ export const convertToUser = (data: any): User => {
         email: data?.email || '',
         role: data?.role || 'user',
         default_chat_config: converToUserDefaultChatConfig(data?.default_chat_config),
-        stats: data?.stats || defaultUserStats()
+        stats: data?.stats || defaultUserStats(),
+        creationMethod: data?.creationMethod || 'password'
     };
 };

@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import { User, UserRole, UserTier, defaultUserStats } from '../../../types/UserTypes';
 import { FIELD_CONFIG } from './UserDetail';
+import { PremiumButton } from '../../ui/user_settings/misc/UpgradeInterest';
 
 interface BasicInfoProps {
     editedUser: User;
@@ -110,12 +111,15 @@ export const BasicInfo: React.FC<BasicInfoProps> = ({
                             </Select>
                         </FormControl>
                     ) : (
-                        <Chip
-                            label={editedUser.stats?.user_tier}
-                            size="small"
-                            color={editedUser.stats?.user_tier !== UserTier.FREE ? 'primary' : 'default'}
-                            sx={{ mt: 1 }}
-                        />
+                        <>
+                            <Chip
+                                label={editedUser.stats?.user_tier}
+                                size="small"
+                                color={editedUser.stats?.user_tier !== UserTier.FREE ? 'primary' : 'default'}
+                                sx={{ mt: 1 }}
+                            />
+                            <PremiumButton />
+                        </>
                     )}
                 </Grid>
             )}

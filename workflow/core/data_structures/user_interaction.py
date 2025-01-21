@@ -1,6 +1,6 @@
 from enum import Enum
-from typing import Optional, Any, Union, Annotated
-from pydantic import BaseModel, Field, field_validator
+from typing import Optional, Any, Union, Literal, Annotated
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from workflow.core.data_structures.base_models import Embeddable
 from workflow.core.data_structures.user_checkpoint import UserCheckpoint
 
@@ -9,12 +9,10 @@ class InteractionOwnerType(str, Enum):
     CHAT = "chat"
 
 class BaseOwner(BaseModel):
-    type: InteractionOwnerType
-
-    model_config = {'extra':'forbid'}
+    model_config = ConfigDict(extra='forbid')
 
 class TaskResponseOwner(BaseOwner):
-    type: InteractionOwnerType = InteractionOwnerType.TASK_RESPONSE
+    type: Literal[InteractionOwnerType.TASK_RESPONSE]
     task_result_id: str
 
     @field_validator('task_result_id')
@@ -29,9 +27,9 @@ class TaskResponseOwner(BaseOwner):
                 return str(id_value)
         
         raise ValueError("Could not extract task_result_id. Expected string or object with '_id' or 'id' field")
-    
+
 class ChatOwner(BaseOwner):
-    type: InteractionOwnerType = InteractionOwnerType.CHAT
+    type: Literal[InteractionOwnerType.CHAT]
     chat_id: str
     thread_id: str
 
@@ -49,7 +47,7 @@ class ChatOwner(BaseOwner):
         raise ValueError("Could not extract ID. Expected string or object with '_id' or 'id' field")
 
 InteractionOwner = Annotated[Union[TaskResponseOwner, ChatOwner], Field(discriminator='type')]
-    
+
 class UserResponse(BaseModel):
     selected_option: int
     user_feedback: Optional[str] = None
@@ -103,7 +101,14 @@ class UserInteraction(Embeddable):
         if isinstance(value, dict):
             owner_type = value.get('type')
             if owner_type == InteractionOwnerType.CHAT:
-                return ChatOwner(**value)
-            return TaskResponseOwner(**value)
+                return ChatOwner(
+                    type=InteractionOwnerType.CHAT,
+                    chat_id=value.get('chat_id'),
+                    thread_id=value.get('thread_id')
+                )
+            return TaskResponseOwner(
+                type=InteractionOwnerType.TASK_RESPONSE,
+                task_result_id=value.get('task_result_id') or value.get('id')
+            )
             
         raise ValueError("Invalid owner format")

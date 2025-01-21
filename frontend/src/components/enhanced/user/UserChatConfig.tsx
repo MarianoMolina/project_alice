@@ -16,7 +16,6 @@ import { AIAgentIcon } from '../../../utils/CustomIcons';
 import { Build, Search, Security } from '@mui/icons-material';
 import { formatStringWithSpaces } from '../../../utils/StyleUtils';
 import { useDialog } from '../../../contexts/DialogContext';
-import Logger from '../../../utils/Logger';
 
 interface ChatConfigProps {
     editedUser: User;

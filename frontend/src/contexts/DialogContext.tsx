@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { CollectionElementString, CollectionElement, CollectionName, CollectionPopulatedElement, SavedItemCallback } from '../types/CollectionTypes';
 import { Prompt } from '../types/PromptTypes';
 import { ApiProvider } from './ApiContext';

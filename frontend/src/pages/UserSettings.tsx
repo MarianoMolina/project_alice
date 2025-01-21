@@ -9,7 +9,7 @@ import ApiConfigurations from '../components/ui/user_settings/ApiConfigurations'
 import UserToken from '../components/ui/user_settings/UserToken';
 import DangerZone from '../components/ui/user_settings/DangerZone';
 import LMStudioStatus from '../components/ui/user_settings/LMStudioStatus';
-import {AdminTools} from '../components/ui/user_settings/AdminTools/AdminTools';
+import {AdminTools} from '../components/ui/user_settings/admin_tools/AdminTools';
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
 import { useApi } from '../contexts/ApiContext';
 import { useAuth } from '../contexts/AuthContext';

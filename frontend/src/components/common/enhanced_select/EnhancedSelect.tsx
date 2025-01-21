@@ -6,7 +6,6 @@ import useStyles from './EnhancedSelectStyles';
 import { CollectionName, CollectionType, CollectionElementString, collectionNameToElementString, collectionNameToEnhancedComponent } from '../../../types/CollectionTypes';
 import theme from '../../../Theme';
 import BorderedContainer from '../inputs/BorderContainer';
-import Logger from '../../../utils/Logger';
 
 interface EnhancedSelectProps<T extends CollectionType[CollectionName]> {
   componentType: CollectionName;
