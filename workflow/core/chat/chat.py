@@ -259,7 +259,7 @@ class AliceChat(BaseDataStructure):
 
         return data
 
-    async def generate_response(self, api_manager: APIManager, new_message: Optional[str] = None, user_data: Optional[User] = None) -> List[MessageDict]:
+    async def generate_response(self, api_manager: APIManager, new_message: Optional[str] = None, user_data: Optional[User] = None, current_time: Optional[str] = None) -> List[MessageDict]:
         """Main entry point for generating responses in the chat."""
         try:               
             # Add new message if provided
@@ -271,7 +271,7 @@ class AliceChat(BaseDataStructure):
                 ))
 
             # Start new chat turn sequence
-            return await self._execute_chat_turns(api_manager, user_data)
+            return await self._execute_chat_turns(api_manager, user_data, current_time)
             
         except Exception as e:
             error_msg = f"Error in chat generate_response: {str(e)}\n{get_traceback()}"
@@ -347,14 +347,14 @@ class AliceChat(BaseDataStructure):
 
         return None
 
-    async def _execute_chat_turns(self, api_manager: APIManager, user_data: Optional[User] = None) -> List[MessageDict]:
+    async def _execute_chat_turns(self, api_manager: APIManager, user_data: Optional[User] = None, current_time: Optional[str] = None) -> List[MessageDict]:
         """Execute a sequence of chat turns until completion or max turns reached."""
         all_generated_messages = []
         turn_count = 0
         
         while turn_count < self.alice_agent.max_consecutive_auto_reply:
             try:
-                turn_message = await self._execute_single_turn(api_manager, all_generated_messages, user_data)
+                turn_message = await self._execute_single_turn(api_manager, all_generated_messages, user_data, current_time)
                 
                 if not turn_message:
                     break
@@ -379,7 +379,7 @@ class AliceChat(BaseDataStructure):
 
         return all_generated_messages
 
-    async def _execute_single_turn(self, api_manager: APIManager, previous_messages: List[MessageDict], user_data: Optional[User] = None) -> MessageDict:
+    async def _execute_single_turn(self, api_manager: APIManager, previous_messages: List[MessageDict], user_data: Optional[User] = None, current_time: Optional[str] = None) -> MessageDict:
         """Execute a single turn of the conversation (LLM -> tools -> code)."""
         try:
             # Generate LLM response first
@@ -387,7 +387,8 @@ class AliceChat(BaseDataStructure):
                 api_manager,
                 self.messages + previous_messages,
                 self._get_available_tool_functions(api_manager),
-                user_data=user_data
+                user_data=user_data,
+                current_time=current_time
             )
             
             # If LLM generation failed, raise the exception

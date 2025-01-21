@@ -229,11 +229,12 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
     const handleSendMessage = async (currentChatId: string, threadId: string, message: PopulatedMessage) => {
         try {
-            Logger.debug('Sending message:', message);
+            Logger.info('Sending message:', message);
             // Add message optimistically
             setMessages(prevMessages => [...prevMessages, message]);
             setLoading(true);
             const updatedChatThread = await sendMessage(currentChatId, threadId, message);
+            Logger.info('Sent message:', updatedChatThread);
             setMessages(updatedChatThread.messages);
             setCurrentThread(updatedChatThread);
             setThreads(prevThreads =>

@@ -2,9 +2,12 @@ import { Box, IconButton, Typography } from "@mui/material";
 import { CollectionName, CollectionPopulatedType } from "../../../types/CollectionTypes";
 import EntityActionsMenu from "../entity_menu/EntityActionsMenu";
 import useStyles from "./EnhancedStyles";
-import TaskCapabilitiesDialog from "../../enhanced/task/TaskTypeDialog";
+import TaskCapabilitiesDialog from "../../enhanced/task/task_dialog/TaskTypeDialog";
 import { useState } from "react";
 import { Info } from "@mui/icons-material";
+import AgentOverviewDialog from "../../enhanced/agent/agent_dialog/AgentDescriptionDialog";
+import ChatDescriptionDialog from "../../enhanced/chat/chat_dialog/ChatDescriptionDialog";
+import APICapabilitiesDialog from "../../enhanced/api/api_dialog/ApiCapabilitiesDialog";
 
 interface CardTitleProps<T extends CollectionName> {
     title: string;
@@ -31,6 +34,9 @@ const CardTitle = <T extends CollectionName>({
 }: CardTitleProps<T>) => {
     const classes = useStyles();
     const [showTaskDetails, setShowTaskDetails] = useState(false);
+    const [showAgentOverview, setShowAgentOverview] = useState(false);
+    const [showChatDescription, setShowChatDescription] = useState(false);
+    const [showAPICapabilities, setShowAPICapabilities] = useState(false);
     const selectedTaskType = item && 'task_type' in item ? item.task_type : undefined;
 
     return (
@@ -45,9 +51,23 @@ const CardTitle = <T extends CollectionName>({
                 <Typography variant="h5" className={classes.title}>
                     {title}
                     {elementType && elementType === 'Task' && selectedTaskType && (
-
-                        <IconButton>
-                            <Info onClick={() => setShowTaskDetails(true)} />
+                        <IconButton onClick={() => setShowTaskDetails(true)}>
+                            <Info />
+                        </IconButton>
+                    )}
+                    {elementType && elementType === 'Agent' && (
+                        <IconButton onClick={() => setShowAgentOverview(true)} >
+                            <Info/>
+                        </IconButton>
+                    )}
+                    {elementType && elementType === 'Chat' && (
+                        <IconButton onClick={() => setShowChatDescription(true)} >
+                            <Info/>
+                        </IconButton>
+                    )}
+                    {elementType && elementType === 'API' && (
+                        <IconButton onClick={() => setShowAPICapabilities(true)} >
+                            <Info/>
                         </IconButton>
                     )}
                 </Typography>
@@ -61,6 +81,18 @@ const CardTitle = <T extends CollectionName>({
                 open={showTaskDetails}
                 onClose={() => setShowTaskDetails(false)}
                 taskType={selectedTaskType}
+            />
+            <AgentOverviewDialog
+                open={showAgentOverview}
+                onClose={() => setShowAgentOverview(false)}
+            />
+            <ChatDescriptionDialog
+                open={showChatDescription}
+                onClose={() => setShowChatDescription(false)}
+            />
+            <APICapabilitiesDialog
+                open={showAPICapabilities}
+                onClose={() => setShowAPICapabilities(false)}
             />
         </Box>
 

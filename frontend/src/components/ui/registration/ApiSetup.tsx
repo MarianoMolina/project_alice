@@ -3,7 +3,7 @@ import { Box, Typography, Button, Alert, Paper } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import ApiConfigTooltipView from '../../enhanced/api_config/api_config/ApiConfigTooltipView';
 import { APIConfig } from '../../../types/ApiConfigTypes';
-import APICapabilitiesDialog from '../../enhanced/api/ApiCapabilitiesDialog';
+import APICapabilitiesDialog from '../../enhanced/api/api_dialog/ApiCapabilitiesDialog';
 
 interface ApiSetupProps {
   apis: APIConfig[];

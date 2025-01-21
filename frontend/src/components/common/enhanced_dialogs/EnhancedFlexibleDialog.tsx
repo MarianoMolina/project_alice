@@ -82,17 +82,12 @@ const EnhancedFlexibleDialog: React.FC = () => {
       mode: flexibleDialogMode as ComponentMode,
       fetchAll: false,
       onSave: async (savedItem: any) => {
-        Logger.debug('EnhancedFlexibleDialog: onSave called with:', { 
-          savedItem,
-          onFlexibleDialogSave,
-          typeofCallback: typeof onFlexibleDialogSave 
-        });
         try {
+          closeFlexibleDialog();
           if (savedItem && onFlexibleDialogSave) {
             Logger.debug('Executing onFlexibleDialogSave with:', savedItem);
             await onFlexibleDialogSave(savedItem);
           }
-          closeFlexibleDialog();
           return savedItem;
         } catch (error) {
           Logger.error('Error in flexible dialog onSave:', error);

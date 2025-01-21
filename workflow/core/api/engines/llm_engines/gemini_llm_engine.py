@@ -1,6 +1,6 @@
 import google.generativeai as genai
 from google.generativeai.types import GenerateContentResponse
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from workflow.core.api.engines.llm_engines.llm_engine import LLMEngine
 from workflow.core.data_structures import (
     MessageDict,
@@ -86,12 +86,7 @@ class GeminiLLMEngine(LLMEngine):
             # Prepare the chat history (all messages except the last one)
             history = []
             for message in messages[:-1]:
-                role = (
-                    "model"
-                    if message["role"] == RoleTypes.ASSISTANT
-                    else message["role"]
-                )
-                history.append({"role": role, "parts": message["content"]})
+                history.append(convert_message_to_gemini_format(message))
 
             # Get the last message as the new input
             new_message = (
@@ -173,3 +168,60 @@ class GeminiLLMEngine(LLMEngine):
         except Exception as e:
             LOGGER.error(f"Error in Gemini API call: {str(e)}")
             raise
+
+def convert_gemini_role(role: str) -> str:
+    """Convert our role types to Gemini's expected roles"""
+    if role == RoleTypes.ASSISTANT:
+        return "model"
+    elif role == RoleTypes.TOOL:
+        return "model"  # Tool responses are treated as model responses
+    return role
+
+def convert_message_to_gemini_format(message: MessageApiFormat) -> Dict[str, Any]:
+    role = convert_gemini_role(message["role"])
+    content = message.get("content", "")
+    
+    # Base message structure
+    gemini_message = {
+        "role": role,
+        "parts": []
+    }
+    
+    # Handle regular content
+    if content:
+        gemini_message["parts"].append(content)
+        
+    # Handle tool calls if present
+    tool_calls = message.get("tool_calls", [])
+    if tool_calls:
+        for tool_call in tool_calls:
+            if tool_call.get("type") == "function":
+                function_data = tool_call["function"]
+                gemini_message["parts"].append({
+                    "function_call": {
+                        "name": function_data["name"],
+                        "args": function_data["arguments"]
+                    }
+                })
+    return gemini_message
+
+def convert_to_gemini_format(messages: List[MessageApiFormat]) -> List[Dict[str, Any]]:
+    """
+    Convert messages from MessageApiFormat to Gemini's expected message format.
+    
+    Args:
+        messages: List of messages in MessageApiFormat
+        
+    Returns:
+        List of messages in Gemini's format with proper role mapping and content structure
+        
+    Note:
+        Gemini expects:
+        - role to be either 'user' or 'model'
+        - content in a 'parts' list
+        - tool calls and responses in specific format
+    """
+    gemini_messages = []
+    for message in messages:
+        gemini_messages.append(convert_message_to_gemini_format(message))
+    return gemini_messages

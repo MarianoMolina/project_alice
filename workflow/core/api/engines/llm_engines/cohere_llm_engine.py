@@ -22,6 +22,11 @@ from workflow.util import (
     MessageApiFormat,
 )
 
+def convert_cohere_role(role: RoleTypes) -> str:
+    if role == RoleTypes.ASSISTANT:
+        return "Chatbot"
+    else:
+        return role.upper()
 
 class CohereLLMEngine(LLMEngine):
     async def generate_api_response(
@@ -45,8 +50,7 @@ class CohereLLMEngine(LLMEngine):
             if system:
                 cohere_messages.append({"role": "SYSTEM", "message": system})
             for message in messages:
-                role = message["role"].upper()
-                cohere_messages.append({"role": role, "message": message["content"]})
+                cohere_messages.append({"role": convert_cohere_role(message["role"]), "message": message["content"]})
 
             estimated_tokens = est_messages_token_count(
                 messages, tools

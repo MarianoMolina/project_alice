@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from workflow.api_app.util.utils import deep_api_check, ChatResponseRequest
+from workflow.api_app.util.utils import deep_api_check, ChatResponseRequest, get_current_time_str
 from workflow.api_app.util.dependencies import get_db_app, get_queue_manager
 from workflow.core import AliceChat, ChatThread
 from workflow.util import LOGGER
@@ -70,7 +70,9 @@ async def chat_response(
 
             chat_data.messages = thread_data.messages
             # TODO: Add current time to the available data
-            responses = await chat_data.generate_response(api_manager, user_data=db_app.user_data.get('user_obj'))
+            user_obj = db_app.get_user_object()
+            current_time = get_current_time_str()
+            responses = await chat_data.generate_response(api_manager, user_data=user_obj.model_dump(exclude=["id", "_id"]), current_time=current_time)
 
             LOGGER.debug(f'Responses: {responses}')
 

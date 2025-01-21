@@ -3,7 +3,7 @@ import useStyles from '../../../styles/StartTaskStyles';
 import { Box, IconButton, Typography } from "@mui/material";
 import { Info } from "@mui/icons-material";
 import EnhancedAPIConfig from "../../enhanced/api_config/api_config/EnhancedAPIConfig";
-import APICapabilitiesDialog from "../../enhanced/api/ApiCapabilitiesDialog";
+import APICapabilitiesDialog from "../../enhanced/api/api_dialog/ApiCapabilitiesDialog";
 import { useDialog } from "../../../contexts/DialogContext";
 import { APIConfig } from "../../../types/ApiConfigTypes";
 

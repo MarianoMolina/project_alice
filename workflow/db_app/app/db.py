@@ -4,7 +4,7 @@ from bson import ObjectId
 from typing import Dict, Any, Optional, Literal, Union
 from pydantic import BaseModel, Field, ConfigDict
 from workflow.core.tasks import available_task_types
-from workflow.core import AliceChat, AliceTask, API, MessageDict, FileReference, FileContentReference, ChatThread
+from workflow.core import AliceChat, AliceTask, API, MessageDict, FileReference, FileContentReference, ChatThread, User
 from workflow.util.const import BACKEND_PORT, DOCKER_HOST, WORKFLOW_SERVICE_KEY
 from workflow.core.data_structures import EntityType
 from workflow.util import LOGGER
@@ -357,6 +357,18 @@ class BackendAPI(BaseModel):
         except aiohttp.ClientError as e:
             LOGGER.error(f"Error storing messages: {e}")
             return None
+        
+    def get_user_object(self) -> Optional[User]:
+        user_obj = self.user_data.get('user_obj')
+        if user_obj:
+            try:
+                user = User(**user_obj)
+            except Exception as e:
+                LOGGER.error(f'Error creating User object: {e}', exc_info=True)
+                user = None
+        else:
+            user = None
+        return user
 
 def token_validation_middleware(api: BackendAPI):
     def middleware(request) -> dict[str, Any]:

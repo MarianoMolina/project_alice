@@ -26,7 +26,7 @@ import {
 } from '@mui/icons-material';
 import { useApi } from '../../../contexts/ApiContext';
 import { hasValidationWarnings } from '../../../utils/ApiUtils';
-import APICapabilitiesDialog from './ApiCapabilitiesDialog';
+import APICapabilitiesDialog from './api_dialog/ApiCapabilitiesDialog';
 
 interface ApiValidationManagerProps {
   chatId?: string;
@@ -228,8 +228,8 @@ export default function ApiValidationManager({
       >
         <DialogTitle>
           API Validation Report
-          <IconButton>
-            <Info onClick={() => setShowCapabilities(true)} />
+          <IconButton onClick={() => setShowCapabilities(true)} >
+            <Info/>
           </IconButton>
         </DialogTitle>
         <DialogContent>
