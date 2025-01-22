@@ -558,7 +558,7 @@ export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             Logger.error('Error updating user stats:', error);
             throw error;
         }
-    }, [addNotification]);
+    }, [addNotification, storeUserData]);
 
     const value: ApiContextType = {
         fetchItem,

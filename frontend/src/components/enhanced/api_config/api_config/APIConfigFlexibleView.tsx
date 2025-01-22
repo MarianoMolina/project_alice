@@ -11,7 +11,6 @@ import { TextInput } from '../../../common/inputs/TextInput';
 import { SelectInput } from '../../../common/inputs/SelectInput';
 import { IconSelectInput } from '../../../common/inputs/IconSelectInput';
 import TitleBox from '../../../common/inputs/TitleBox';
-import Logger from '../../../../utils/Logger';
 
 const APIConfigFlexibleView: React.FC<APIConfigComponentProps> = ({
     item,

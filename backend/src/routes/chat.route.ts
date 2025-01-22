@@ -35,9 +35,9 @@ customRouter.patch('/:chatId/add_message', async (req: AuthRequest, res: Respons
     if (!chatId || !message) {
       return res.status(400).json({ message: 'Chat ID and message are required' });
     }
-    const response = createMessageInChat(userId, chatId, message, threadId);
+    const populatedThread = await createMessageInChat(userId, chatId, message, threadId);
 
-    res.status(200).json({ message: 'Message added successfully', thread: response });
+    res.status(200).json({ message: 'Message added successfully', thread: populatedThread });
   } catch (error) {
     Logger.error('Error in add_message route:', {
       error: (error as Error).message,

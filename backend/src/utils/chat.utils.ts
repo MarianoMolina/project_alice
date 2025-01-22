@@ -9,7 +9,7 @@ import { createDataCluster, updateDataCluster } from './data_cluster';
 import { DataCluster } from '../models/reference.model';
 import { PopulationService } from './population.utils';
 import { createChatThread, updateChatThread } from './thread.utils';
-import { IChatThread } from '../interfaces/thread.interface';
+import { IChatThread, IChatThreadDocument } from '../interfaces/thread.interface';
 import { ChatThread } from '../models/thread.model';
 
 const popService = new PopulationService()
@@ -164,7 +164,7 @@ export async function createMessageInChat(
     chatId: string,
     messageData: Partial<IMessageDocument>,
     threadId?: string,
-): Promise<IChatThread | null> {
+): Promise<IChatThreadDocument | null> {
     try {
         Logger.debug(`createMessageInChat called for chat ${chatId}`);
 
@@ -228,7 +228,7 @@ export async function createMessageInChat(
 
         const populatedChatThread = await popService.findAndPopulate(ChatThread, threadIdFinal, userId);
 
-        Logger.debug(`Message ${messageDoc._id} added to chat ${chatId}`);
+        Logger.info(`Message ${messageDoc._id} added to chat ${chatId} - ${Object.keys(populatedChatThread || {}).length}`);
 
         return populatedChatThread;
     } catch (error) {

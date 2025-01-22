@@ -61,18 +61,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return localStorage.getItem('token');
   }, []);
 
-  const saveUserData = useCallback((userData: LoginResponse) => {
-    try {
-      const userToSave = userData.user
-      const token = userData.token
-
-      if (userToSave) storeUserData(userToSave);
-      if (token) storeToken(token);
-    } catch (error) {
-      Logger.error('Error saving user data:', error);
-    }
-  }, []);
-
   const storeToken = useCallback((token: string) => {
     try {
       localStorage.setItem('token', token);
@@ -91,6 +79,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       Logger.error('Error storing user data:', error);
     }
   }, []);
+
+  const saveUserData = useCallback((userData: LoginResponse) => {
+    try {
+      const userToSave = userData.user
+      const token = userData.token
+
+      if (userToSave) storeUserData(userToSave);
+      if (token) storeToken(token);
+    } catch (error) {
+      Logger.error('Error saving user data:', error);
+    }
+  }, [storeToken, storeUserData]);
 
   const refreshUserData = useCallback(async () => {
     try {

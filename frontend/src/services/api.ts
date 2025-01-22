@@ -231,7 +231,7 @@ export const updateMessageInChat = async (chatId: string, updatedMessage: Messag
 
 export const sendMessage = async (chatId: string, threadId: string, message: PopulatedMessage): Promise<PopulatedChatThread> => {
   try {
-    Logger.debug('Sending message to chatId:', chatId);
+    Logger.info('Sending message to chatId:', chatId);
 
     // Check if the message contains file references
     if (message.references && message.references.files && message.references.files.length > 0) {
@@ -253,7 +253,7 @@ export const sendMessage = async (chatId: string, threadId: string, message: Pop
     }
 
     const response = await dbAxiosInstance.patch(`/chats/${chatId}/add_message`, { threadId, message });
-    Logger.debug('Received response:', response.data);
+    Logger.info('Received response:', response.data);
     return convertToPopulatedChatThread(response.data.thread);
   } catch (error) {
     Logger.error('Error sending message:', error);

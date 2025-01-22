@@ -5,7 +5,7 @@ import { PopulatedMessage } from '../types/MessageTypes';
 import { useAuth } from './AuthContext';
 import { useApi } from './ApiContext';
 import Logger from '../utils/Logger';
-import { globalEventEmitter } from '../utils/EventEmitter';
+// import { globalEventEmitter } from '../utils/EventEmitter';
 import { fetchPopulatedItem } from '../services/api';
 import { PopulatedChatThread } from '../types/ChatThreadTypes';
 import { useNotification } from './NotificationContext';
@@ -16,9 +16,7 @@ interface ChatContextType {
     pastChats: (AliceChat | PopulatedAliceChat)[];
     threads: PopulatedChatThread[];
     currentThread: PopulatedChatThread | null;
-    messages: PopulatedMessage[];
     currentChatId: string | null;
-    setMessages: React.Dispatch<React.SetStateAction<PopulatedMessage[]>>;
     setCurrentThread: React.Dispatch<React.SetStateAction<PopulatedChatThread | null>>;
     setThreads: React.Dispatch<React.SetStateAction<PopulatedChatThread[]>>;
     setPastChats: React.Dispatch<React.SetStateAction<(AliceChat | PopulatedAliceChat)[]>>;
@@ -50,7 +48,6 @@ interface ChatProviderProps {
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     const { fetchItem, updateItem, sendMessage, generateChatResponse, addThreadToChat, removeThreadFromChat } = useApi();
-    const [messages, setMessages] = useState<PopulatedMessage[]>([]);
     const [threads, setThreads] = useState<PopulatedChatThread[]>([]);
     const [currentThread, setCurrentThread] = useState<PopulatedChatThread | null>(null);
     const [pastChats, setPastChats] = useState<(AliceChat | PopulatedAliceChat)[]>([]);
@@ -77,15 +74,15 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
     const chatMessageCharacterCount = useMemo(() => {
         let size = 0;
-        messages.forEach((message) => {
+        currentThread?.messages.forEach((message) => {
             size += message.content.length;
         });
         return size
-    }, [messages])
+    }, [currentThread?.messages])
 
     const lastMessageRole = useMemo(() => {
-        return messages.length > 0 ? messages[messages.length - 1].role : undefined
-    }, [messages])
+        return currentThread?.messages && currentThread?.messages.length > 0 ? currentThread?.messages[currentThread?.messages.length - 1].role : undefined
+    }, [currentThread?.messages])
 
     const chatContextCharacterCount = useMemo(() => {
         if (!currentChat?.alice_agent) return chatMessageCharacterCount;
@@ -153,6 +150,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         try {
             setLoading(true);
             const chatData = await fetchChatById(chatId);
+            Logger.info('Select data resetting thread')
             resetChat({ resetThread: true });
             setCurrentChat(chatData);
             setCurrentChatId(chatId);
@@ -166,11 +164,11 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     }, [fetchChatById]);
 
     const resetChat = ({ resetThread = false, resetAll = false }: { resetThread?: boolean; resetAll?: boolean } = {}) => {
-        setMessages([]);
         setIsGenerating(false);
         setError(null);
         setLoading(false);
         if (resetThread) {
+            Logger.info('Resetting current thread');
             setCurrentThread(null);
         }
         if (resetAll) {
@@ -180,17 +178,11 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         }
     }
 
-    const fetchCurrentChat = useCallback(async () => {
-        if (!currentChatId) return;
-        return handleSelectChat(currentChatId);
-    }, [currentChatId, handleSelectChat]);
-
     const handleSelectThread = useCallback(async (threadId: string) => {
         try {
             if (!currentChat || !currentChatId) return Logger.error('No current chat selected');
             const thread = threads.find(t => t._id === threadId);
             if (!thread) return Logger.error('Thread not found in chat');
-            setMessages(thread.messages);
             setCurrentThread(thread);
         } catch (error) {
             Logger.error('Error fetching thread:', error);
@@ -203,39 +195,39 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     const fetchCurrentThread = useCallback(async () => {
         try {
             if (!currentThread?._id) return;
-            setLoading(true);
             const thread = await fetchPopulatedItem('chatthreads', currentThread._id) as PopulatedChatThread;
+            Logger.info('fetchCurrentThread resetting thread')
             resetChat();
-            setMessages(thread.messages);
             setCurrentThread(thread);
-            return handleSelectThread(currentThread._id);
         } catch (error) {
             Logger.error('Error fetching thread:', error);
             setError(error as Error);
-        } finally {
-            setLoading(false);
         }
-    }, [currentThread, handleSelectThread]);
+    }, [currentThread]);
 
-    useEffect(() => {
-        globalEventEmitter.on('created:chats', fetchChats);
-        globalEventEmitter.on('updated:chats', fetchCurrentChat);
+    // const fetchCurrentChat = useCallback(async () => {
+    //     if (!currentChatId) return;
+    //     return handleSelectChat(currentChatId);
+    // }, [currentChatId, handleSelectChat]);
 
-        return () => {
-            globalEventEmitter.off('created:chats', fetchChats);
-            globalEventEmitter.off('updated:chats', fetchCurrentChat);
-        };
-    }, [currentChatId, fetchChats, fetchCurrentChat]);
+    // useEffect(() => {
+    //     globalEventEmitter.on('created:chats', fetchChats);
+    //     globalEventEmitter.on('updated:chats', fetchCurrentChat);
+
+    //     return () => {
+    //         globalEventEmitter.off('created:chats', fetchChats);
+    //         globalEventEmitter.off('updated:chats', fetchCurrentChat);
+    //     };
+    // }, [currentChatId, fetchChats, fetchCurrentChat]);
 
     const handleSendMessage = async (currentChatId: string, threadId: string, message: PopulatedMessage) => {
         try {
             Logger.info('Sending message:', message);
             // Add message optimistically
-            setMessages(prevMessages => [...prevMessages, message]);
+            setCurrentThread(prevThread => prevThread ? { ...prevThread, messages: [...prevThread.messages, message] } : null);
             setLoading(true);
             const updatedChatThread = await sendMessage(currentChatId, threadId, message);
             Logger.info('Sent message:', updatedChatThread);
-            setMessages(updatedChatThread.messages);
             setCurrentThread(updatedChatThread);
             setThreads(prevThreads =>
                 prevThreads.map(thread => thread._id === threadId ? updatedChatThread : thread)
@@ -243,9 +235,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             await generateResponse();
         } catch (error) {
             // Remove optimistically added message if it doesn't have an ID (meaning it failed to send)
-            setMessages(prevMessages =>
-                prevMessages.filter(msg => msg._id !== undefined)
-            );
+            setCurrentThread(prevThread => prevThread ? { ...prevThread, messages: prevThread.messages.filter(m => m._id) } : null);
             setError(error as Error);
             Logger.error('Error sending message or generating response:', error);
         } finally {
@@ -256,6 +246,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     const generateResponse = async () => {
         if (!currentChatId || !currentThread || !currentThread._id) return;
         setIsGenerating(true);
+        setLoading(true);
         try {
             // TODO: WORKFLOW SHOULD BE RETURNING A POPULATED MESSAGE, but its currently returning a non populated version
             // so we need to retrieve the entire thread again
@@ -267,28 +258,30 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             Logger.error('Error generating response:', error);
             setError(error as Error);
         } finally {
+            setLoading(false);
             setIsGenerating(false);
         }
     };
 
     const handleRegenerateResponse = async () => {
         if (!currentChatId || !currentThread?._id) return;
-        let newMessages = [...messages];
+        let newMessages = [...currentThread.messages];
         while (newMessages.length > 0 && newMessages[newMessages.length - 1].role !== 'user') {
             newMessages.pop();
         }
         try {
+            setLoading(true)
             await updateItem("chatthreads", currentThread?._id!, { messages: newMessages });
-            setMessages(newMessages);
-            setIsGenerating(true);
+            setCurrentThread(prevThread => prevThread ? { ...prevThread, messages: newMessages } : null);
             await generateResponse();
         } catch (error) {
             setError(error as Error);
             Logger.error('Error regenerating response:', error);
         } finally {
-            setIsGenerating(false);
+            setLoading(false);
         }
     };
+
     const isTaskInChat = (taskId: string): boolean => {
         return currentChat?.agent_tools?.some(task => task._id === taskId) || false;
     };
@@ -347,18 +340,18 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
             await removeThreadFromChat(currentChatId, threadId);
             const updatedChat = { ...currentChat, threads: currentChat?.threads?.filter(t => t._id !== threadId) };
             setCurrentChat(updatedChat)
-            setCurrentThread(null);
+            if (currentThread?._id === threadId) {
+                setCurrentThread(null);
+            }
         } catch (error) {
             setError(error as Error);
             Logger.error('Error removing thread from chat:', error);
         } finally {
             setLoading(false);
         }
-    }, [currentChat, currentChatId, removeThreadFromChat]);
+    }, [currentChat, currentChatId, removeThreadFromChat, currentThread?._id]);
 
     const value: ChatContextType = {
-        messages,
-        setMessages,
         threads,
         setThreads,
         currentThread,
