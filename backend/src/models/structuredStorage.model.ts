@@ -34,18 +34,29 @@ const structuredStorageSchema = new Schema<IStructuredStorageDocument>({
         required: true,
         validate: [{
             validator: function (this: IStructuredStorageDocument, value: unknown): boolean {
+                // Guard against undefined this.type
+                if (!this || !this.type) {
+                    return true; // We'll validate in the setter instead
+                }
                 const validatorFn = structureValidators[this.type];
+                if (!validatorFn) {
+                    return false;
+                }
                 return validatorFn(value);
             },
             message: 'Invalid data structure for the specified type'
         }],
         set: function(this: IStructuredStorageDocument & {type: StructureType}, data: unknown) {
             if (!data) return data;
-            // Now properly typed
-            const validatorFn = structureValidators[this.type];
-            if (!validatorFn(data)) {
-                throw new Error('Invalid data structure for the specified type');
+            
+            // For new documents
+            if (this && this.type) {
+                const validatorFn = structureValidators[this.type];
+                if (!validatorFn || !validatorFn(data)) {
+                    throw new Error('Invalid data structure for the specified type');
+                }
             }
+            
             const stringData = typeof data === 'string' ? data : JSON.stringify(data);
             return EncryptionService.getInstance().encrypt(stringData);
         },

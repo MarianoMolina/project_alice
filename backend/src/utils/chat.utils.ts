@@ -228,7 +228,7 @@ export async function createMessageInChat(
 
         const populatedChatThread = await popService.findAndPopulate(ChatThread, threadIdFinal, userId);
 
-        Logger.info(`Message ${messageDoc._id} added to chat ${chatId} - ${Object.keys(populatedChatThread || {}).length}`);
+        Logger.debug(`Message ${messageDoc._id} added to chat ${chatId} - ${Object.keys(populatedChatThread || {}).length}`);
 
         return populatedChatThread;
     } catch (error) {

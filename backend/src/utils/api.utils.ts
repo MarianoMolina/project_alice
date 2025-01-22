@@ -105,8 +105,8 @@ export type ApiConfigType = {
 };
 
 export function validateApiData(data: any, api_name: ApiName): boolean {
-    Logger.debug(`Validating API data for ${api_name}`);
-    Logger.debug(data);
+    Logger.info(`Validating API data for ${api_name}`);
+    Logger.info(data);
     switch (api_name) {
         case ApiName.OPENAI:
         case ApiName.ANTHROPIC:
